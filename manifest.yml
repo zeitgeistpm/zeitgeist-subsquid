@@ -1,0 +1,22 @@
+version: '3.0'
+description: Test manifest
+repository: https://github.com/
+hydraVersion: "4"
+
+typegen:
+  metadata:
+    source: wss://kusama-rpc.polkadot.io/
+  events:
+    - balances.Transfer
+  calls:
+    - timestamp.set
+  outDir: chain
+
+mappings:
+  mappingsModule: mappings
+  eventHandlers:
+    - event: balances.Transfer
+      handler: balancesTransfer
+  extrinsicHandlers:
+  preBlockHooks:
+  postBlockHooks:
