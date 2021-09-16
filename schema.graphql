@@ -1,14 +1,70 @@
-type Account @entity {
-  "Account address"
-  id: ID!
-  wallet: String!
-  balance: BigInt!
-  historicalBalances: [HistoricalBalance!] @derivedFrom(field: "account")
+" All transfers "
+type Transfer @entity {
+  from: Bytes!
+  to: Bytes!
+  value: BigInt!
+  comment: String @fulltext(query: "commentSearch")
+  block: Int!
+  tip: BigInt!
+  timestamp: BigInt!
+  insertedAt: DateTime!
 }
 
-type HistoricalBalance @entity {
-  id: ID!
-  account: Account!
-  balance: BigInt!
+" Tracks block timestamps "
+type BlockTimestamp @entity {
+  blockNumber: Int!
   timestamp: BigInt!
+}
+
+type Block @variant {
+  value: String!
+}
+
+type Timestamp @variant {
+  value: String!
+}
+
+union MarketEnd = Block | Timestamp
+
+type Categorical @variant {
+  categories: Int!
+}
+
+type MarketCreated @variant {
+  lowerBound: BigInt!
+  upperBound: BigInt!
+}
+
+union MarketType = Categorical | Scalar
+
+type Scalar @variant {
+  lowerBound: BigInt!
+  upperBound: BigInt!
+}
+
+type Market @entity {
+  marketId: Int!
+  creator: String!
+  creation: String!
+  oracle: String!
+  end: MarketEnd!
+  metadata: String!
+  marketType: MarketType!
+  block: Int!
+}
+
+type CategoricalMarket @entity {
+  oracle: String!
+  end: BigInt!
+  creation: String!
+  categories: BigInt!
+  block: Int!
+}
+
+type ScalarMarket @entity {
+  oracle: String!
+  end: BigInt!
+  creation: String!
+  outcomeRange: [BigInt]!
+  block: Int!
 }

@@ -1,22 +1,45 @@
 version: '3.0'
 description: Test manifest
 repository: https://github.com/
-hydraVersion: "4"
-
+hydraVersion: "3"
+dataSource:
+  kind: substrate 
+  chain: zeitgeistpm
+entities:
+  - mappings/lib/generated/**/*.model.js
 typegen:
   metadata:
-    source: wss://kusama-rpc.polkadot.io/
+    source: ws://127.0.0.1:9944
+    blockHash: '0xbf43c0738771cb6d10cba987f84f27de7397f670a21ee6553d15326980a6063a'
   events:
     - balances.Transfer
+    - predictionMarkets.MarketCreated
   calls:
     - timestamp.set
-  outDir: chain
-
+    - predictionMarkets.createCategoricalMarket
+    - predictionMarkets.createScalarMarket
+  outDir: ./mappings/generated/types
+  customTypes: 
+    lib: '@zeitgeistpm/types/dist/interfaces'
+    typedefsLoc: typedefs.json 
 mappings:
-  mappingsModule: mappings
+  mappingsModule: mappings/lib/mappings
+  imports:
+    - mappings/lib/mappings/generated/types
+  range: '[0, )' # process all blocks from genesis
   eventHandlers:
-    - event: balances.Transfer
+    - event: balances.Transfer 
       handler: balancesTransfer
+    - event: predictionMarkets.MarketCreated
+      handler: predictionMarketCreated
   extrinsicHandlers:
-  preBlockHooks:
+    # infer defaults
+    - extrinsic: timestamp.set 
+      handler: timestampCall
+    - extrinsic: predictionMarkets.createCategoricalMarket 
+      handler: predictionMarketsCreateCategoricalMarket 
+    - extrinsic: predictionMarkets.createScalarMarket 
+      handler: predictionMarketsCreateScalarMarket 
+  preBlockHooks: 
   postBlockHooks:
+  

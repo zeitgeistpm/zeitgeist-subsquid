@@ -1,21 +1,13 @@
-import { BaseModel, NumericField, Model, ManyToOne, StringField, JSONField } from '@subsquid/warthog';
+import { BaseModel, IntField, NumericField, Model, StringField, JSONField } from '@subsquid/warthog';
 
 import BN from 'bn.js';
-
-import { Account } from '../account/account.model';
 
 import * as jsonTypes from '../jsonfields/jsonfields.model';
 
 @Model({ api: {} })
-export class HistoricalBalance extends BaseModel {
-  @ManyToOne(() => Account, (param: Account) => param.historicalBalances, {
-    skipGraphQLField: true,
-
-    modelName: 'HistoricalBalance',
-    relModelName: 'Account',
-    propertyName: 'account',
-  })
-  account!: Account;
+export class CategoricalMarket extends BaseModel {
+  @StringField({})
+  oracle!: string;
 
   @NumericField({
     transformer: {
@@ -24,7 +16,10 @@ export class HistoricalBalance extends BaseModel {
         dbValue !== undefined && dbValue !== null && dbValue.length > 0 ? new BN(dbValue, 10) : undefined,
     },
   })
-  balance!: BN;
+  end!: BN;
+
+  @StringField({})
+  creation!: string;
 
   @NumericField({
     transformer: {
@@ -33,9 +28,12 @@ export class HistoricalBalance extends BaseModel {
         dbValue !== undefined && dbValue !== null && dbValue.length > 0 ? new BN(dbValue, 10) : undefined,
     },
   })
-  timestamp!: BN;
+  categories!: BN;
 
-  constructor(init?: Partial<HistoricalBalance>) {
+  @IntField({})
+  block!: number;
+
+  constructor(init?: Partial<CategoricalMarket>) {
     super();
     Object.assign(this, init);
   }

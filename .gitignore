@@ -1,1 +1,5 @@
 /node_modules
+/mappings/generated
+/mappings/lib
+/mappings/node_modules
+*.log
