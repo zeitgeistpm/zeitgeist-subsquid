@@ -26,9 +26,9 @@ export namespace PredictionMarkets {
         createTypeUnsafe<MarketIdOf & Codec>(typeRegistry, "MarketIdOf", [
           this.ctx.params[0].value,
         ]),
-        createTypeUnsafe<Market & Codec>(typeRegistry, "Market", [
+        (createTypeUnsafe<Market & Codec>(typeRegistry, "Market", [
           this.ctx.params[1].value,
-        ]),
+        ]) as any) as Market,
         createTypeUnsafe<AccountId & Codec>(typeRegistry, "AccountId", [
           this.ctx.params[2].value,
         ]),
