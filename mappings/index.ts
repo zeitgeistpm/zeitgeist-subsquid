@@ -1,45 +1,23 @@
 import BN from 'bn.js'
-import { DatabaseManager, EventContext, StoreContext } from '@subsquid/hydra-common'
-import { Account, HistoricalBalance } from '../generated/model'
-import { Balances } from '../chain'
+import { DatabaseManager, EventContext, StoreContext, ExtrinsicContext } from '@subsquid/hydra-common'
+import { CategoricalMarket } from '../generated/model'
+import { PredictionMarkets } from '../chain'
 
-
-export async function balancesTransfer({
+export async function predictionMarketCreated ({
   store,
   event,
   block,
   extrinsic,
-}: EventContext & StoreContext): Promise<void> {
-
-  const [from, to, value] = new Balances.TransferEvent(event).params
-  const tip = extrinsic ? new BN(extrinsic.tip.toString(10)) : new BN(0)
-
-  const fromAcc = await getOrCreate(store, Account, from.toHex())
-  fromAcc.wallet = from.toHuman()
-  fromAcc.balance = fromAcc.balance || new BN(0)
-  fromAcc.balance = fromAcc.balance.sub(value)
-  fromAcc.balance = fromAcc.balance.sub(tip)
-  await store.save(fromAcc)
-
-  const toAcc = await getOrCreate(store, Account, to.toHex())
-  toAcc.wallet = to.toHuman()
-  toAcc.balance = toAcc.balance || new BN(0)
-  toAcc.balance = toAcc.balance.add(value)
-  await store.save(toAcc)
-
-  const hbFrom = new HistoricalBalance()
-  hbFrom.account = fromAcc;
-  hbFrom.balance = fromAcc.balance;
-  hbFrom.timestamp = new BN(block.timestamp)
-  await store.save(hbFrom)
-
-  const hbTo = new HistoricalBalance()
-  hbTo.account = toAcc;
-  hbTo.balance = toAcc.balance;
-  hbTo.timestamp = new BN(block.timestamp)
-  await store.save(hbTo)
+}: EventContext & StoreContext) {
+  const categoricalMarket = new CategoricalMarket()
+  const market = new PredictionMarkets.MarketCreatedEvent(event).params
+  categoricalMarket.oracle = " "
+  categoricalMarket.creation = " "
+  categoricalMarket.categories = new BN(3)
+  categoricalMarket.block = block.height
+  console.log(`Saving categorical market: ${JSON.stringify(categoricalMarket, null, 2)}`)
+  await store.save<CategoricalMarket>(categoricalMarket)
 }
-
 
 async function getOrCreate<T extends {id: string}>(
   store: DatabaseManager,

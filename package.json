@@ -1,5 +1,5 @@
 {
-  "name": "hydra-template",
+  "name": "zeitgeist-subsquid",
   "private": "true",
   "version": "0.0.0",
   "description": "GraphQL server and Substrate indexer. Generated with ♥ by Hydra-CLI",
@@ -19,8 +19,9 @@
     "query-node:start": "ts-node --type-check ./generated/server/index.ts"
   },
   "dependencies": {
-    "@subsquid/hydra-cli": "4.1.0",
-    "@subsquid/hydra-processor": "4.1.0",
-    "@subsquid/hydra-typegen": "4.1.0"
+    "@subsquid/hydra-cli": "4.2.0-alpha.0",
+    "@subsquid/hydra-processor": "4.2.0-alpha.0",
+    "@subsquid/hydra-typegen": "4.2.0-alpha.0",
+    "@zeitgeistpm/types": "^0.2.10"
   }
 }
