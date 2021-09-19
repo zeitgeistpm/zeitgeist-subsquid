@@ -26,26 +26,6 @@ services:
       - WS_PROVIDER_ENDPOINT_URI=ws://172.17.0.1:9944
     volumes:
       - ./types.json:/hydra/packages/hydra-indexer/types.json
-
-    # # If your chain uses custom types you need to provide those
-    # # as detailed here - https://polkadot.js.org/docs/api/start/types.extend
-    # #
-    # # Json files below are passed verbatim to ApiPromise.create() from @polkadot/api.
-    # # Use any combination of those
-    #
-    #   - TYPES_JSON=types.json
-    #   - TYPES_ALIAS=typesAlias.json
-    #   - SPEC_TYPES=typesSpec.json
-    #   - CHAIN_TYPES=typesChain.json
-    #   - BUNDLE_TYPES=typesBundle.json
-    #
-    # volumes:
-    #   - ../types.json:/hydra/packages/hydra-indexer/types.json
-    #   - ../typesAlias.json:/hydra/packages/hydra-indexer/typesAlias.json
-    #   - ../typesSpec.json:/hydra/packages/hydra-indexer/typesSpec.json
-    #   - ../typesChain.json:/hydra/packages/hydra-indexer/typesChain.json
-    #   - ../typesBundle.json:/hydra/packages/hydra-indexer/typesBundle.json
-
     depends_on:
       - db
       - redis
