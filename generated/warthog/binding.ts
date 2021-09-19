@@ -95,8 +95,12 @@ export type MarketOrderByInput =   'createdAt_ASC' |
   'creation_DESC' |
   'oracle_ASC' |
   'oracle_DESC' |
-  'metadata_ASC' |
-  'metadata_DESC' |
+  'status_ASC' |
+  'status_DESC' |
+  'report_ASC' |
+  'report_DESC' |
+  'resolvedOutcome_ASC' |
+  'resolvedOutcome_DESC' |
   'block_ASC' |
   'block_DESC'
 
@@ -291,9 +295,12 @@ export interface MarketCreateInput {
   creator: String
   creation: String
   oracle: String
-  end: JSONObject
-  metadata: String
   marketType: JSONObject
+  period: JSONObject
+  status: String
+  report?: String | null
+  resolvedOutcome?: String | null
+  mdm: JSONObject
   block: Float
 }
 
@@ -302,9 +309,12 @@ export interface MarketUpdateInput {
   creator?: String | null
   creation?: String | null
   oracle?: String | null
-  end?: JSONObject | null
-  metadata?: String | null
   marketType?: JSONObject | null
+  period?: JSONObject | null
+  status?: String | null
+  report?: String | null
+  resolvedOutcome?: String | null
+  mdm?: JSONObject | null
   block?: Float | null
 }
 
@@ -354,13 +364,24 @@ export interface MarketWhereInput {
   oracle_startsWith?: String | null
   oracle_endsWith?: String | null
   oracle_in?: String[] | String | null
-  end_json?: JSONObject | null
-  metadata_eq?: String | null
-  metadata_contains?: String | null
-  metadata_startsWith?: String | null
-  metadata_endsWith?: String | null
-  metadata_in?: String[] | String | null
   marketType_json?: JSONObject | null
+  period_json?: JSONObject | null
+  status_eq?: String | null
+  status_contains?: String | null
+  status_startsWith?: String | null
+  status_endsWith?: String | null
+  status_in?: String[] | String | null
+  report_eq?: String | null
+  report_contains?: String | null
+  report_startsWith?: String | null
+  report_endsWith?: String | null
+  report_in?: String[] | String | null
+  resolvedOutcome_eq?: String | null
+  resolvedOutcome_contains?: String | null
+  resolvedOutcome_startsWith?: String | null
+  resolvedOutcome_endsWith?: String | null
+  resolvedOutcome_in?: String[] | String | null
+  mdm_json?: JSONObject | null
   block_eq?: Int | null
   block_gt?: Int | null
   block_gte?: Int | null
@@ -557,6 +578,10 @@ export interface DeleteResponse {
   id: ID_Output
 }
 
+export interface Authorized {
+  value?: String | null
+}
+
 export interface BaseModel extends BaseGraphQLObject {
   id: ID_Output
   createdAt: DateTime
@@ -612,7 +637,7 @@ export interface BlockTimestampEdge {
 }
 
 export interface Categorical {
-  categories: Int
+  value: String
 }
 
 export interface CategoricalMarket extends BaseGraphQLObject {
@@ -648,6 +673,10 @@ export interface CommentSearchFTSOutput {
   highlight: String
 }
 
+export interface Court {
+  value?: Boolean | null
+}
+
 export interface Hello {
   greeting: String
 }
@@ -665,9 +694,12 @@ export interface Market extends BaseGraphQLObject {
   creator: String
   creation: String
   oracle: String
-  end: MarketEnd
-  metadata: String
   marketType: MarketType
+  period: MarketPeriod
+  status: String
+  report?: String | null
+  resolvedOutcome?: String | null
+  mdm: MarketDisputeMechanism
   block: Int
 }
 
@@ -702,8 +734,7 @@ export interface ProcessorState {
 }
 
 export interface Scalar {
-  lowerBound: Float
-  upperBound: Float
+  value: String
 }
 
 export interface ScalarMarket extends BaseGraphQLObject {
@@ -731,6 +762,10 @@ export interface ScalarMarketConnection {
 export interface ScalarMarketEdge {
   node: ScalarMarket
   cursor: String
+}
+
+export interface SimpleDisputes {
+  value?: Boolean | null
 }
 
 export interface StandardDeleteResponse {
@@ -834,6 +869,8 @@ export type String = string
 
 export type CommentSearchSearchResult = Transfer
 
-export type MarketEnd = Block | Timestamp
+export type MarketDisputeMechanism = Authorized | Court | SimpleDisputes
+
+export type MarketPeriod = Block | Timestamp
 
 export type MarketType = Categorical | Scalar

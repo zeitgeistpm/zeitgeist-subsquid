@@ -1,3 +1,7 @@
+type Authorized {
+  value: String
+}
+
 interface BaseGraphQLObject {
   id: ID!
   createdAt: DateTime!
@@ -159,7 +163,7 @@ input BlockTimestampWhereUniqueInput {
 scalar Bytes
 
 type Categorical {
-  categories: Int!
+  value: String!
 }
 
 type CategoricalMarket implements BaseGraphQLObject {
@@ -283,6 +287,10 @@ type CommentSearchFTSOutput {
 
 union CommentSearchSearchResult = Transfer
 
+type Court {
+  value: Boolean
+}
+
 """
 The javascript `Date` as string. Type represents date and time as the ISO Date string.
 """
@@ -314,9 +322,12 @@ type Market implements BaseGraphQLObject {
   creator: String!
   creation: String!
   oracle: String!
-  end: MarketEnd!
-  metadata: String!
   marketType: MarketType!
+  period: MarketPeriod!
+  status: String!
+  report: String
+  resolvedOutcome: String
+  mdm: MarketDisputeMechanism!
   block: Int!
 }
 
@@ -336,18 +347,21 @@ input MarketCreateInput {
   creator: String!
   creation: String!
   oracle: String!
-  end: JSONObject!
-  metadata: String!
   marketType: JSONObject!
+  period: JSONObject!
+  status: String!
+  report: String
+  resolvedOutcome: String
+  mdm: JSONObject!
   block: Float!
 }
+
+union MarketDisputeMechanism = Authorized | Court | SimpleDisputes
 
 type MarketEdge {
   node: Market!
   cursor: String!
 }
-
-union MarketEnd = Block | Timestamp
 
 enum MarketOrderByInput {
   createdAt_ASC
@@ -364,11 +378,17 @@ enum MarketOrderByInput {
   creation_DESC
   oracle_ASC
   oracle_DESC
-  metadata_ASC
-  metadata_DESC
+  status_ASC
+  status_DESC
+  report_ASC
+  report_DESC
+  resolvedOutcome_ASC
+  resolvedOutcome_DESC
   block_ASC
   block_DESC
 }
+
+union MarketPeriod = Block | Timestamp
 
 union MarketType = Categorical | Scalar
 
@@ -377,9 +397,12 @@ input MarketUpdateInput {
   creator: String
   creation: String
   oracle: String
-  end: JSONObject
-  metadata: String
   marketType: JSONObject
+  period: JSONObject
+  status: String
+  report: String
+  resolvedOutcome: String
+  mdm: JSONObject
   block: Float
 }
 
@@ -429,13 +452,24 @@ input MarketWhereInput {
   oracle_startsWith: String
   oracle_endsWith: String
   oracle_in: [String!]
-  end_json: JSONObject
-  metadata_eq: String
-  metadata_contains: String
-  metadata_startsWith: String
-  metadata_endsWith: String
-  metadata_in: [String!]
   marketType_json: JSONObject
+  period_json: JSONObject
+  status_eq: String
+  status_contains: String
+  status_startsWith: String
+  status_endsWith: String
+  status_in: [String!]
+  report_eq: String
+  report_contains: String
+  report_startsWith: String
+  report_endsWith: String
+  report_in: [String!]
+  resolvedOutcome_eq: String
+  resolvedOutcome_contains: String
+  resolvedOutcome_startsWith: String
+  resolvedOutcome_endsWith: String
+  resolvedOutcome_in: [String!]
+  mdm_json: JSONObject
   block_eq: Int
   block_gt: Int
   block_gte: Int
@@ -485,8 +519,7 @@ type Query {
 }
 
 type Scalar {
-  lowerBound: Float!
-  upperBound: Float!
+  value: String!
 }
 
 type ScalarMarket implements BaseGraphQLObject {
@@ -605,6 +638,10 @@ input ScalarMarketWhereInput {
 
 input ScalarMarketWhereUniqueInput {
   id: ID!
+}
+
+type SimpleDisputes {
+  value: Boolean
 }
 
 type StandardDeleteResponse {

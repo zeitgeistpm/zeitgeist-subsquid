@@ -470,8 +470,14 @@ export enum MarketOrderByEnum {
   oracle_ASC = "oracle_ASC",
   oracle_DESC = "oracle_DESC",
 
-  metadata_ASC = "metadata_ASC",
-  metadata_DESC = "metadata_DESC",
+  status_ASC = "status_ASC",
+  status_DESC = "status_DESC",
+
+  report_ASC = "report_ASC",
+  report_DESC = "report_DESC",
+
+  resolvedOutcome_ASC = "resolvedOutcome_ASC",
+  resolvedOutcome_DESC = "resolvedOutcome_DESC",
 
   block_ASC = "block_ASC",
   block_DESC = "block_DESC",
@@ -619,25 +625,58 @@ export class MarketWhereInput {
   oracle_in?: string[];
 
   @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
-  end_json?: JsonObject;
-
-  @TypeGraphQLField({ nullable: true })
-  metadata_eq?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  metadata_contains?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  metadata_startsWith?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  metadata_endsWith?: string;
-
-  @TypeGraphQLField(() => [String], { nullable: true })
-  metadata_in?: string[];
+  marketType_json?: JsonObject;
 
   @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
-  marketType_json?: JsonObject;
+  period_json?: JsonObject;
+
+  @TypeGraphQLField({ nullable: true })
+  status_eq?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  status_contains?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  status_startsWith?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  status_endsWith?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  status_in?: string[];
+
+  @TypeGraphQLField({ nullable: true })
+  report_eq?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  report_contains?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  report_startsWith?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  report_endsWith?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  report_in?: string[];
+
+  @TypeGraphQLField({ nullable: true })
+  resolvedOutcome_eq?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  resolvedOutcome_contains?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  resolvedOutcome_startsWith?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  resolvedOutcome_endsWith?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  resolvedOutcome_in?: string[];
+
+  @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
+  mdm_json?: JsonObject;
 
   @TypeGraphQLField(() => Int, { nullable: true })
   block_eq?: number;
@@ -685,13 +724,22 @@ export class MarketCreateInput {
   oracle!: string;
 
   @TypeGraphQLField(() => GraphQLJSONObject)
-  end!: JsonObject;
-
-  @TypeGraphQLField()
-  metadata!: string;
+  marketType!: JsonObject;
 
   @TypeGraphQLField(() => GraphQLJSONObject)
-  marketType!: JsonObject;
+  period!: JsonObject;
+
+  @TypeGraphQLField()
+  status!: string;
+
+  @TypeGraphQLField({ nullable: true })
+  report?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  resolvedOutcome?: string;
+
+  @TypeGraphQLField(() => GraphQLJSONObject)
+  mdm!: JsonObject;
 
   @TypeGraphQLField()
   block!: number;
@@ -712,13 +760,22 @@ export class MarketUpdateInput {
   oracle?: string;
 
   @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
-  end?: JsonObject;
-
-  @TypeGraphQLField({ nullable: true })
-  metadata?: string;
+  marketType?: JsonObject;
 
   @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
-  marketType?: JsonObject;
+  period?: JsonObject;
+
+  @TypeGraphQLField({ nullable: true })
+  status?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  report?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  resolvedOutcome?: string;
+
+  @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
+  mdm?: JsonObject;
 
   @TypeGraphQLField({ nullable: true })
   block?: number;

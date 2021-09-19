@@ -24,32 +24,48 @@ type Timestamp @variant {
   value: String!
 }
 
-union MarketEnd = Block | Timestamp
+union MarketPeriod = Block | Timestamp
 
 type Categorical @variant {
-  categories: Int!
+  value: String!
 }
+
+type Scalar @variant {
+  value: String!
+}
+
+union MarketType = Categorical | Scalar
 
 type MarketCreated @variant {
   lowerBound: BigInt!
   upperBound: BigInt!
 }
 
-union MarketType = Categorical | Scalar
-
-type Scalar @variant {
-  lowerBound: BigInt!
-  upperBound: BigInt!
+type Authorized @variant {
+  value: String
 }
+
+type Court @variant {
+  value: Boolean
+}
+
+type SimpleDisputes @variant {
+  value: Boolean
+}
+
+union MarketDisputeMechanism = Authorized | Court | SimpleDisputes
 
 type Market @entity {
   marketId: Int!
   creator: String!
   creation: String!
   oracle: String!
-  end: MarketEnd!
-  metadata: String!
   marketType: MarketType!
+  period: MarketPeriod!
+  status: String!
+  report: String
+  resolvedOutcome: String
+  mdm: MarketDisputeMechanism!
   block: Int!
 }
 

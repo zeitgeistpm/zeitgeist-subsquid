@@ -21,6 +21,15 @@ import { ObjectType, Field, createUnionType } from 'type-graphql';
 import { getRepository, In } from 'typeorm';
 
 @ObjectType()
+export class Authorized {
+  public isTypeOf: string = 'Authorized';
+
+  @Field(() => String, {
+    nullable: true,
+  })
+  value?: string;
+}
+@ObjectType()
 export class Block {
   public isTypeOf: string = 'Block';
 
@@ -31,8 +40,17 @@ export class Block {
 export class Categorical {
   public isTypeOf: string = 'Categorical';
 
-  @Field(() => Int!, {})
-  categories!: number;
+  @Field(() => String!, {})
+  value!: string;
+}
+@ObjectType()
+export class Court {
+  public isTypeOf: string = 'Court';
+
+  @Field(() => Boolean, {
+    nullable: true,
+  })
+  value?: boolean;
 }
 @ObjectType()
 export class MarketCreated {
@@ -48,11 +66,17 @@ export class MarketCreated {
 export class Scalar {
   public isTypeOf: string = 'Scalar';
 
-  @Field(() => Float!, {})
-  lowerBound!: BN;
+  @Field(() => String!, {})
+  value!: string;
+}
+@ObjectType()
+export class SimpleDisputes {
+  public isTypeOf: string = 'SimpleDisputes';
 
-  @Field(() => Float!, {})
-  upperBound!: BN;
+  @Field(() => Boolean, {
+    nullable: true,
+  })
+  value?: boolean;
 }
 @ObjectType()
 export class Timestamp {
@@ -62,13 +86,18 @@ export class Timestamp {
   value!: string;
 }
 
-export const MarketEnd = createUnionType({
-  name: 'MarketEnd',
+export const MarketPeriod = createUnionType({
+  name: 'MarketPeriod',
   types: () => [Block, Timestamp],
   resolveType: (value) => (value.isTypeOf ? value.isTypeOf : undefined),
 });
 export const MarketType = createUnionType({
   name: 'MarketType',
   types: () => [Categorical, Scalar],
+  resolveType: (value) => (value.isTypeOf ? value.isTypeOf : undefined),
+});
+export const MarketDisputeMechanism = createUnionType({
+  name: 'MarketDisputeMechanism',
+  types: () => [Authorized, Court, SimpleDisputes],
   resolveType: (value) => (value.isTypeOf ? value.isTypeOf : undefined),
 });
