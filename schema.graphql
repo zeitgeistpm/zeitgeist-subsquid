@@ -55,7 +55,6 @@ type Market @entity {
 
 type CategoricalMarket @entity {
   oracle: String!
-  end: BigInt!
   creation: String!
   categories: BigInt!
   block: Int!

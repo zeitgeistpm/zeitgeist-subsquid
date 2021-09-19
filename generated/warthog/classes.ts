@@ -230,9 +230,6 @@ export enum CategoricalMarketOrderByEnum {
   oracle_ASC = "oracle_ASC",
   oracle_DESC = "oracle_DESC",
 
-  end_ASC = "end_ASC",
-  end_DESC = "end_DESC",
-
   creation_ASC = "creation_ASC",
   creation_DESC = "creation_DESC",
 
@@ -336,24 +333,6 @@ export class CategoricalMarketWhereInput {
   @TypeGraphQLField(() => [String], { nullable: true })
   oracle_in?: string[];
 
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  end_eq?: string;
-
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  end_gt?: string;
-
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  end_gte?: string;
-
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  end_lt?: string;
-
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  end_lte?: string;
-
-  @TypeGraphQLField(() => [BigInt], { nullable: true })
-  end_in?: string[];
-
   @TypeGraphQLField({ nullable: true })
   creation_eq?: string;
 
@@ -424,9 +403,6 @@ export class CategoricalMarketCreateInput {
   oracle!: string;
 
   @TypeGraphQLField()
-  end!: string;
-
-  @TypeGraphQLField()
   creation!: string;
 
   @TypeGraphQLField()
@@ -440,9 +416,6 @@ export class CategoricalMarketCreateInput {
 export class CategoricalMarketUpdateInput {
   @TypeGraphQLField({ nullable: true })
   oracle?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  end?: string;
 
   @TypeGraphQLField({ nullable: true })
   creation?: string;
