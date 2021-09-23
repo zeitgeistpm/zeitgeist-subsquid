@@ -1,5 +1,6 @@
+import BN from 'bn.js'
 import { DatabaseManager, EventContext, StoreContext } from '@subsquid/hydra-common'
-import { Authorized, Block, Categorical, Court, Market, Scalar, SimpleDisputes, Timestamp } from '../generated/model'
+import { Authorized, Block, Categorical, Court, Market, MarketData, Scalar, SimpleDisputes, Timestamp } from '../generated/model'
 import { PredictionMarkets } from '../chain'
 
 export async function predictionMarketCreated ({
@@ -9,12 +10,8 @@ export async function predictionMarketCreated ({
   extrinsic,
 }: EventContext & StoreContext) {
   const newMarket = new Market()
+  var newData = new MarketData()
   const [marketIdOf, market, accountId] = new PredictionMarkets.MarketCreatedEvent(event).params
-
-  newMarket.marketId = marketIdOf.toNumber()
-  newMarket.creator = market.creator.toString()
-  newMarket.creation = market.creation.toString()
-  newMarket.oracle = market.oracle.toString()
 
   if (market.market_type.isCategorical) {
     const categorical = new Categorical()
@@ -29,37 +26,47 @@ export async function predictionMarketCreated ({
   if (market.period.isBlock) {
     const block = new Block()
     block.value = market.period.asBlock.toString()
-    newMarket.period = block
+    newData.period = block
   } else {
     const timestamp = new Timestamp()
     timestamp.value = market.period.asTimestamp.toString()
-    newMarket.period = timestamp
+    newData.period = timestamp
   }
 
-  newMarket.status = market.status.toString()
   if (market.report !== null) {
-    newMarket.report = market.report.toString()
+    newData.report = market.report.toString()
   }
 
   if (market.resolved_outcome !== null) {
-    newMarket.resolvedOutcome = market.resolved_outcome.toString()
+    newData.resolvedOutcome = market.resolved_outcome.toString()
   }
 
   if (market.mdm.isAuthorized) {
     const authorized = new Authorized()
     authorized.value = market.mdm.asAuthorized.toString()
-    newMarket.mdm = authorized
+    newData.mdm = authorized
   } else if (market.mdm.isCourt) {
     const court = new Court()
     court.value = market.mdm.isCourt
-    newMarket.mdm = court
+    newData.mdm = court
   } else {
     const simpleDisputes = new SimpleDisputes()
     simpleDisputes.value = market.mdm.isSimpleDisputes
-    newMarket.mdm = simpleDisputes
+    newData.mdm = simpleDisputes
   }
 
-  newMarket.block = block.height
+  newData.id = marketIdOf.toString()
+  newData.status = market.status.toString()
+  newData.blockNumber = block.height
+  newData.timestamp = new BN(block.timestamp)
+
+  await store.save<MarketData>(newData)
+
+  newMarket.marketId = marketIdOf.toNumber()
+  newMarket.creator = market.creator.toString()
+  newMarket.creation = market.creation.toString()
+  newMarket.oracle = market.oracle.toString()
+  newMarket.marketData = newData
 
   console.log(`Saving market: ${JSON.stringify(newMarket, null, 2)}`)
   await store.save<Market>(newMarket)
