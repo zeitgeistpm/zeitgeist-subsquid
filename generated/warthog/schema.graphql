@@ -166,118 +166,6 @@ type Categorical {
   value: String!
 }
 
-type CategoricalMarket implements BaseGraphQLObject {
-  id: ID!
-  createdAt: DateTime!
-  createdById: String!
-  updatedAt: DateTime
-  updatedById: String
-  deletedAt: DateTime
-  deletedById: String
-  version: Int!
-  oracle: String!
-  creation: String!
-  categories: BigInt!
-  block: Int!
-}
-
-type CategoricalMarketConnection {
-  totalCount: Int!
-  edges: [CategoricalMarketEdge!]!
-  pageInfo: PageInfo!
-}
-
-input CategoricalMarketCreateInput {
-  oracle: String!
-  creation: String!
-  categories: String!
-  block: Float!
-}
-
-type CategoricalMarketEdge {
-  node: CategoricalMarket!
-  cursor: String!
-}
-
-enum CategoricalMarketOrderByInput {
-  createdAt_ASC
-  createdAt_DESC
-  updatedAt_ASC
-  updatedAt_DESC
-  deletedAt_ASC
-  deletedAt_DESC
-  oracle_ASC
-  oracle_DESC
-  creation_ASC
-  creation_DESC
-  categories_ASC
-  categories_DESC
-  block_ASC
-  block_DESC
-}
-
-input CategoricalMarketUpdateInput {
-  oracle: String
-  creation: String
-  categories: String
-  block: Float
-}
-
-input CategoricalMarketWhereInput {
-  id_eq: ID
-  id_in: [ID!]
-  createdAt_eq: DateTime
-  createdAt_lt: DateTime
-  createdAt_lte: DateTime
-  createdAt_gt: DateTime
-  createdAt_gte: DateTime
-  createdById_eq: ID
-  createdById_in: [ID!]
-  updatedAt_eq: DateTime
-  updatedAt_lt: DateTime
-  updatedAt_lte: DateTime
-  updatedAt_gt: DateTime
-  updatedAt_gte: DateTime
-  updatedById_eq: ID
-  updatedById_in: [ID!]
-  deletedAt_all: Boolean
-  deletedAt_eq: DateTime
-  deletedAt_lt: DateTime
-  deletedAt_lte: DateTime
-  deletedAt_gt: DateTime
-  deletedAt_gte: DateTime
-  deletedById_eq: ID
-  deletedById_in: [ID!]
-  oracle_eq: String
-  oracle_contains: String
-  oracle_startsWith: String
-  oracle_endsWith: String
-  oracle_in: [String!]
-  creation_eq: String
-  creation_contains: String
-  creation_startsWith: String
-  creation_endsWith: String
-  creation_in: [String!]
-  categories_eq: BigInt
-  categories_gt: BigInt
-  categories_gte: BigInt
-  categories_lt: BigInt
-  categories_lte: BigInt
-  categories_in: [BigInt!]
-  block_eq: Int
-  block_gt: Int
-  block_gte: Int
-  block_lt: Int
-  block_lte: Int
-  block_in: [Int!]
-  AND: [CategoricalMarketWhereInput!]
-  OR: [CategoricalMarketWhereInput!]
-}
-
-input CategoricalMarketWhereUniqueInput {
-  id: ID!
-}
-
 type CommentSearchFTSOutput {
   item: CommentSearchSearchResult!
   rank: Float!
@@ -323,12 +211,8 @@ type Market implements BaseGraphQLObject {
   creation: String!
   oracle: String!
   marketType: MarketType!
-  period: MarketPeriod!
-  status: String!
-  report: String
-  resolvedOutcome: String
-  mdm: MarketDisputeMechanism!
-  block: Int!
+  marketData: MarketData!
+  marketDataId: String!
 }
 
 type MarketConnection {
@@ -337,23 +221,147 @@ type MarketConnection {
   pageInfo: PageInfo!
 }
 
-type MarketCreated {
-  lowerBound: Float!
-  upperBound: Float!
-}
-
 input MarketCreateInput {
   marketId: Float!
   creator: String!
   creation: String!
   oracle: String!
   marketType: JSONObject!
+  marketData: ID!
+}
+
+type MarketData implements BaseGraphQLObject {
+  id: ID!
+  createdAt: DateTime!
+  createdById: String!
+  updatedAt: DateTime
+  updatedById: String
+  deletedAt: DateTime
+  deletedById: String
+  version: Int!
+  period: MarketPeriod!
+  status: String!
+  report: String
+  resolvedOutcome: String
+  mdm: MarketDisputeMechanism!
+  blockNumber: Int!
+  timestamp: BigInt!
+  marketmarketData: [Market!]
+}
+
+type MarketDataConnection {
+  totalCount: Int!
+  edges: [MarketDataEdge!]!
+  pageInfo: PageInfo!
+}
+
+input MarketDataCreateInput {
   period: JSONObject!
   status: String!
   report: String
   resolvedOutcome: String
   mdm: JSONObject!
-  block: Float!
+  blockNumber: Float!
+  timestamp: String!
+}
+
+type MarketDataEdge {
+  node: MarketData!
+  cursor: String!
+}
+
+enum MarketDataOrderByInput {
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  deletedAt_ASC
+  deletedAt_DESC
+  status_ASC
+  status_DESC
+  report_ASC
+  report_DESC
+  resolvedOutcome_ASC
+  resolvedOutcome_DESC
+  blockNumber_ASC
+  blockNumber_DESC
+  timestamp_ASC
+  timestamp_DESC
+}
+
+input MarketDataUpdateInput {
+  period: JSONObject
+  status: String
+  report: String
+  resolvedOutcome: String
+  mdm: JSONObject
+  blockNumber: Float
+  timestamp: String
+}
+
+input MarketDataWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  period_json: JSONObject
+  status_eq: String
+  status_contains: String
+  status_startsWith: String
+  status_endsWith: String
+  status_in: [String!]
+  report_eq: String
+  report_contains: String
+  report_startsWith: String
+  report_endsWith: String
+  report_in: [String!]
+  resolvedOutcome_eq: String
+  resolvedOutcome_contains: String
+  resolvedOutcome_startsWith: String
+  resolvedOutcome_endsWith: String
+  resolvedOutcome_in: [String!]
+  mdm_json: JSONObject
+  blockNumber_eq: Int
+  blockNumber_gt: Int
+  blockNumber_gte: Int
+  blockNumber_lt: Int
+  blockNumber_lte: Int
+  blockNumber_in: [Int!]
+  timestamp_eq: BigInt
+  timestamp_gt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lt: BigInt
+  timestamp_lte: BigInt
+  timestamp_in: [BigInt!]
+  marketmarketData_none: MarketWhereInput
+  marketmarketData_some: MarketWhereInput
+  marketmarketData_every: MarketWhereInput
+  AND: [MarketDataWhereInput!]
+  OR: [MarketDataWhereInput!]
+}
+
+input MarketDataWhereUniqueInput {
+  id: ID!
 }
 
 union MarketDisputeMechanism = Authorized | Court | SimpleDisputes
@@ -378,14 +386,8 @@ enum MarketOrderByInput {
   creation_DESC
   oracle_ASC
   oracle_DESC
-  status_ASC
-  status_DESC
-  report_ASC
-  report_DESC
-  resolvedOutcome_ASC
-  resolvedOutcome_DESC
-  block_ASC
-  block_DESC
+  marketData_ASC
+  marketData_DESC
 }
 
 union MarketPeriod = Block | Timestamp
@@ -398,12 +400,7 @@ input MarketUpdateInput {
   creation: String
   oracle: String
   marketType: JSONObject
-  period: JSONObject
-  status: String
-  report: String
-  resolvedOutcome: String
-  mdm: JSONObject
-  block: Float
+  marketData: ID
 }
 
 input MarketWhereInput {
@@ -453,29 +450,7 @@ input MarketWhereInput {
   oracle_endsWith: String
   oracle_in: [String!]
   marketType_json: JSONObject
-  period_json: JSONObject
-  status_eq: String
-  status_contains: String
-  status_startsWith: String
-  status_endsWith: String
-  status_in: [String!]
-  report_eq: String
-  report_contains: String
-  report_startsWith: String
-  report_endsWith: String
-  report_in: [String!]
-  resolvedOutcome_eq: String
-  resolvedOutcome_contains: String
-  resolvedOutcome_startsWith: String
-  resolvedOutcome_endsWith: String
-  resolvedOutcome_in: [String!]
-  mdm_json: JSONObject
-  block_eq: Int
-  block_gt: Int
-  block_gte: Int
-  block_lt: Int
-  block_lte: Int
-  block_in: [Int!]
+  marketData: MarketDataWhereInput
   AND: [MarketWhereInput!]
   OR: [MarketWhereInput!]
 }
@@ -502,16 +477,13 @@ type Query {
   blockTimestamps(offset: Int, limit: Int = 50, where: BlockTimestampWhereInput, orderBy: [BlockTimestampOrderByInput!]): [BlockTimestamp!]!
   blockTimestampByUniqueInput(where: BlockTimestampWhereUniqueInput!): BlockTimestamp
   blockTimestampsConnection(first: Int, after: String, last: Int, before: String, where: BlockTimestampWhereInput, orderBy: [BlockTimestampOrderByInput!]): BlockTimestampConnection!
-  categoricalMarkets(offset: Int, limit: Int = 50, where: CategoricalMarketWhereInput, orderBy: [CategoricalMarketOrderByInput!]): [CategoricalMarket!]!
-  categoricalMarketByUniqueInput(where: CategoricalMarketWhereUniqueInput!): CategoricalMarket
-  categoricalMarketsConnection(first: Int, after: String, last: Int, before: String, where: CategoricalMarketWhereInput, orderBy: [CategoricalMarketOrderByInput!]): CategoricalMarketConnection!
+  marketData(offset: Int, limit: Int = 50, where: MarketDataWhereInput, orderBy: [MarketDataOrderByInput!]): [MarketData!]!
+  marketDataByUniqueInput(where: MarketDataWhereUniqueInput!): MarketData
+  marketDataConnection(first: Int, after: String, last: Int, before: String, where: MarketDataWhereInput, orderBy: [MarketDataOrderByInput!]): MarketDataConnection!
   markets(offset: Int, limit: Int = 50, where: MarketWhereInput, orderBy: [MarketOrderByInput!]): [Market!]!
   marketByUniqueInput(where: MarketWhereUniqueInput!): Market
   marketsConnection(first: Int, after: String, last: Int, before: String, where: MarketWhereInput, orderBy: [MarketOrderByInput!]): MarketConnection!
   commentSearch(whereTransfer: TransferWhereInput, skip: Int = 0, limit: Int = 5, text: String!): [CommentSearchFTSOutput!]!
-  scalarMarkets(offset: Int, limit: Int = 50, where: ScalarMarketWhereInput, orderBy: [ScalarMarketOrderByInput!]): [ScalarMarket!]!
-  scalarMarketByUniqueInput(where: ScalarMarketWhereUniqueInput!): ScalarMarket
-  scalarMarketsConnection(first: Int, after: String, last: Int, before: String, where: ScalarMarketWhereInput, orderBy: [ScalarMarketOrderByInput!]): ScalarMarketConnection!
   transfers(offset: Int, limit: Int = 50, where: TransferWhereInput, orderBy: [TransferOrderByInput!]): [Transfer!]!
   transferByUniqueInput(where: TransferWhereUniqueInput!): Transfer
   transfersConnection(first: Int, after: String, last: Int, before: String, where: TransferWhereInput, orderBy: [TransferOrderByInput!]): TransferConnection!
@@ -520,124 +492,6 @@ type Query {
 
 type Scalar {
   value: String!
-}
-
-type ScalarMarket implements BaseGraphQLObject {
-  id: ID!
-  createdAt: DateTime!
-  createdById: String!
-  updatedAt: DateTime
-  updatedById: String
-  deletedAt: DateTime
-  deletedById: String
-  version: Int!
-  oracle: String!
-  end: BigInt!
-  creation: String!
-  outcomeRange: [BigInt!]!
-  block: Int!
-}
-
-type ScalarMarketConnection {
-  totalCount: Int!
-  edges: [ScalarMarketEdge!]!
-  pageInfo: PageInfo!
-}
-
-input ScalarMarketCreateInput {
-  oracle: String!
-  end: String!
-  creation: String!
-  outcomeRange: [BigInt!]!
-  block: Float!
-}
-
-type ScalarMarketEdge {
-  node: ScalarMarket!
-  cursor: String!
-}
-
-enum ScalarMarketOrderByInput {
-  createdAt_ASC
-  createdAt_DESC
-  updatedAt_ASC
-  updatedAt_DESC
-  deletedAt_ASC
-  deletedAt_DESC
-  oracle_ASC
-  oracle_DESC
-  end_ASC
-  end_DESC
-  creation_ASC
-  creation_DESC
-  block_ASC
-  block_DESC
-}
-
-input ScalarMarketUpdateInput {
-  oracle: String
-  end: String
-  creation: String
-  outcomeRange: [BigInt!]
-  block: Float
-}
-
-input ScalarMarketWhereInput {
-  id_eq: ID
-  id_in: [ID!]
-  createdAt_eq: DateTime
-  createdAt_lt: DateTime
-  createdAt_lte: DateTime
-  createdAt_gt: DateTime
-  createdAt_gte: DateTime
-  createdById_eq: ID
-  createdById_in: [ID!]
-  updatedAt_eq: DateTime
-  updatedAt_lt: DateTime
-  updatedAt_lte: DateTime
-  updatedAt_gt: DateTime
-  updatedAt_gte: DateTime
-  updatedById_eq: ID
-  updatedById_in: [ID!]
-  deletedAt_all: Boolean
-  deletedAt_eq: DateTime
-  deletedAt_lt: DateTime
-  deletedAt_lte: DateTime
-  deletedAt_gt: DateTime
-  deletedAt_gte: DateTime
-  deletedById_eq: ID
-  deletedById_in: [ID!]
-  oracle_eq: String
-  oracle_contains: String
-  oracle_startsWith: String
-  oracle_endsWith: String
-  oracle_in: [String!]
-  end_eq: BigInt
-  end_gt: BigInt
-  end_gte: BigInt
-  end_lt: BigInt
-  end_lte: BigInt
-  end_in: [BigInt!]
-  creation_eq: String
-  creation_contains: String
-  creation_startsWith: String
-  creation_endsWith: String
-  creation_in: [String!]
-  outcomeRange_containsAll: [BigInt!]
-  outcomeRange_containsNone: [BigInt!]
-  outcomeRange_containsAny: [BigInt!]
-  block_eq: Int
-  block_gt: Int
-  block_gte: Int
-  block_lt: Int
-  block_lte: Int
-  block_in: [Int!]
-  AND: [ScalarMarketWhereInput!]
-  OR: [ScalarMarketWhereInput!]
-}
-
-input ScalarMarketWhereUniqueInput {
-  id: ID!
 }
 
 type SimpleDisputes {

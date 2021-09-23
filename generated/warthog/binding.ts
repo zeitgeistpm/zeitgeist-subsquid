@@ -9,16 +9,13 @@ export interface Query {
     blockTimestamps: <T = Array<BlockTimestamp>>(args: { offset?: Int | null, limit?: Int | null, where?: BlockTimestampWhereInput | null, orderBy?: Array<BlockTimestampOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     blockTimestampByUniqueInput: <T = BlockTimestamp | null>(args: { where: BlockTimestampWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
     blockTimestampsConnection: <T = BlockTimestampConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: BlockTimestampWhereInput | null, orderBy?: Array<BlockTimestampOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
-    categoricalMarkets: <T = Array<CategoricalMarket>>(args: { offset?: Int | null, limit?: Int | null, where?: CategoricalMarketWhereInput | null, orderBy?: Array<CategoricalMarketOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
-    categoricalMarketByUniqueInput: <T = CategoricalMarket | null>(args: { where: CategoricalMarketWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
-    categoricalMarketsConnection: <T = CategoricalMarketConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: CategoricalMarketWhereInput | null, orderBy?: Array<CategoricalMarketOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
+    marketData: <T = Array<MarketData>>(args: { offset?: Int | null, limit?: Int | null, where?: MarketDataWhereInput | null, orderBy?: Array<MarketDataOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
+    marketDataByUniqueInput: <T = MarketData | null>(args: { where: MarketDataWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
+    marketDataConnection: <T = MarketDataConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: MarketDataWhereInput | null, orderBy?: Array<MarketDataOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     markets: <T = Array<Market>>(args: { offset?: Int | null, limit?: Int | null, where?: MarketWhereInput | null, orderBy?: Array<MarketOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     marketByUniqueInput: <T = Market | null>(args: { where: MarketWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
     marketsConnection: <T = MarketConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: MarketWhereInput | null, orderBy?: Array<MarketOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     commentSearch: <T = Array<CommentSearchFTSOutput>>(args: { whereTransfer?: TransferWhereInput | null, skip?: Int | null, limit?: Int | null, text: String }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
-    scalarMarkets: <T = Array<ScalarMarket>>(args: { offset?: Int | null, limit?: Int | null, where?: ScalarMarketWhereInput | null, orderBy?: Array<ScalarMarketOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
-    scalarMarketByUniqueInput: <T = ScalarMarket | null>(args: { where: ScalarMarketWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
-    scalarMarketsConnection: <T = ScalarMarketConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: ScalarMarketWhereInput | null, orderBy?: Array<ScalarMarketOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     transfers: <T = Array<Transfer>>(args: { offset?: Int | null, limit?: Int | null, where?: TransferWhereInput | null, orderBy?: Array<TransferOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     transferByUniqueInput: <T = Transfer | null>(args: { where: TransferWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
     transfersConnection: <T = TransferConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: TransferWhereInput | null, orderBy?: Array<TransferOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
@@ -66,20 +63,22 @@ export type BlockTimestampOrderByInput =   'createdAt_ASC' |
   'timestamp_ASC' |
   'timestamp_DESC'
 
-export type CategoricalMarketOrderByInput =   'createdAt_ASC' |
+export type MarketDataOrderByInput =   'createdAt_ASC' |
   'createdAt_DESC' |
   'updatedAt_ASC' |
   'updatedAt_DESC' |
   'deletedAt_ASC' |
   'deletedAt_DESC' |
-  'oracle_ASC' |
-  'oracle_DESC' |
-  'creation_ASC' |
-  'creation_DESC' |
-  'categories_ASC' |
-  'categories_DESC' |
-  'block_ASC' |
-  'block_DESC'
+  'status_ASC' |
+  'status_DESC' |
+  'report_ASC' |
+  'report_DESC' |
+  'resolvedOutcome_ASC' |
+  'resolvedOutcome_DESC' |
+  'blockNumber_ASC' |
+  'blockNumber_DESC' |
+  'timestamp_ASC' |
+  'timestamp_DESC'
 
 export type MarketOrderByInput =   'createdAt_ASC' |
   'createdAt_DESC' |
@@ -95,29 +94,8 @@ export type MarketOrderByInput =   'createdAt_ASC' |
   'creation_DESC' |
   'oracle_ASC' |
   'oracle_DESC' |
-  'status_ASC' |
-  'status_DESC' |
-  'report_ASC' |
-  'report_DESC' |
-  'resolvedOutcome_ASC' |
-  'resolvedOutcome_DESC' |
-  'block_ASC' |
-  'block_DESC'
-
-export type ScalarMarketOrderByInput =   'createdAt_ASC' |
-  'createdAt_DESC' |
-  'updatedAt_ASC' |
-  'updatedAt_DESC' |
-  'deletedAt_ASC' |
-  'deletedAt_DESC' |
-  'oracle_ASC' |
-  'oracle_DESC' |
-  'end_ASC' |
-  'end_DESC' |
-  'creation_ASC' |
-  'creation_DESC' |
-  'block_ASC' |
-  'block_DESC'
+  'marketData_ASC' |
+  'marketData_DESC'
 
 export type TransferOrderByInput =   'createdAt_ASC' |
   'createdAt_DESC' |
@@ -221,21 +199,36 @@ export interface BlockTimestampWhereUniqueInput {
   id: ID_Output
 }
 
-export interface CategoricalMarketCreateInput {
-  oracle: String
+export interface MarketCreateInput {
+  marketId: Float
+  creator: String
   creation: String
-  categories: String
-  block: Float
+  oracle: String
+  marketType: JSONObject
+  marketData: ID_Output
 }
 
-export interface CategoricalMarketUpdateInput {
-  oracle?: String | null
-  creation?: String | null
-  categories?: String | null
-  block?: Float | null
+export interface MarketDataCreateInput {
+  period: JSONObject
+  status: String
+  report?: String | null
+  resolvedOutcome?: String | null
+  mdm: JSONObject
+  blockNumber: Float
+  timestamp: String
 }
 
-export interface CategoricalMarketWhereInput {
+export interface MarketDataUpdateInput {
+  period?: JSONObject | null
+  status?: String | null
+  report?: String | null
+  resolvedOutcome?: String | null
+  mdm?: JSONObject | null
+  blockNumber?: Float | null
+  timestamp?: String | null
+}
+
+export interface MarketDataWhereInput {
   id_eq?: ID_Input | null
   id_in?: ID_Output[] | ID_Output | null
   createdAt_eq?: DateTime | null
@@ -260,48 +253,44 @@ export interface CategoricalMarketWhereInput {
   deletedAt_gte?: DateTime | null
   deletedById_eq?: ID_Input | null
   deletedById_in?: ID_Output[] | ID_Output | null
-  oracle_eq?: String | null
-  oracle_contains?: String | null
-  oracle_startsWith?: String | null
-  oracle_endsWith?: String | null
-  oracle_in?: String[] | String | null
-  creation_eq?: String | null
-  creation_contains?: String | null
-  creation_startsWith?: String | null
-  creation_endsWith?: String | null
-  creation_in?: String[] | String | null
-  categories_eq?: BigInt | null
-  categories_gt?: BigInt | null
-  categories_gte?: BigInt | null
-  categories_lt?: BigInt | null
-  categories_lte?: BigInt | null
-  categories_in?: BigInt[] | BigInt | null
-  block_eq?: Int | null
-  block_gt?: Int | null
-  block_gte?: Int | null
-  block_lt?: Int | null
-  block_lte?: Int | null
-  block_in?: Int[] | Int | null
-  AND?: CategoricalMarketWhereInput[] | CategoricalMarketWhereInput | null
-  OR?: CategoricalMarketWhereInput[] | CategoricalMarketWhereInput | null
+  period_json?: JSONObject | null
+  status_eq?: String | null
+  status_contains?: String | null
+  status_startsWith?: String | null
+  status_endsWith?: String | null
+  status_in?: String[] | String | null
+  report_eq?: String | null
+  report_contains?: String | null
+  report_startsWith?: String | null
+  report_endsWith?: String | null
+  report_in?: String[] | String | null
+  resolvedOutcome_eq?: String | null
+  resolvedOutcome_contains?: String | null
+  resolvedOutcome_startsWith?: String | null
+  resolvedOutcome_endsWith?: String | null
+  resolvedOutcome_in?: String[] | String | null
+  mdm_json?: JSONObject | null
+  blockNumber_eq?: Int | null
+  blockNumber_gt?: Int | null
+  blockNumber_gte?: Int | null
+  blockNumber_lt?: Int | null
+  blockNumber_lte?: Int | null
+  blockNumber_in?: Int[] | Int | null
+  timestamp_eq?: BigInt | null
+  timestamp_gt?: BigInt | null
+  timestamp_gte?: BigInt | null
+  timestamp_lt?: BigInt | null
+  timestamp_lte?: BigInt | null
+  timestamp_in?: BigInt[] | BigInt | null
+  marketmarketData_none?: MarketWhereInput | null
+  marketmarketData_some?: MarketWhereInput | null
+  marketmarketData_every?: MarketWhereInput | null
+  AND?: MarketDataWhereInput[] | MarketDataWhereInput | null
+  OR?: MarketDataWhereInput[] | MarketDataWhereInput | null
 }
 
-export interface CategoricalMarketWhereUniqueInput {
+export interface MarketDataWhereUniqueInput {
   id: ID_Output
-}
-
-export interface MarketCreateInput {
-  marketId: Float
-  creator: String
-  creation: String
-  oracle: String
-  marketType: JSONObject
-  period: JSONObject
-  status: String
-  report?: String | null
-  resolvedOutcome?: String | null
-  mdm: JSONObject
-  block: Float
 }
 
 export interface MarketUpdateInput {
@@ -310,12 +299,7 @@ export interface MarketUpdateInput {
   creation?: String | null
   oracle?: String | null
   marketType?: JSONObject | null
-  period?: JSONObject | null
-  status?: String | null
-  report?: String | null
-  resolvedOutcome?: String | null
-  mdm?: JSONObject | null
-  block?: Float | null
+  marketData?: ID_Input | null
 }
 
 export interface MarketWhereInput {
@@ -365,108 +349,12 @@ export interface MarketWhereInput {
   oracle_endsWith?: String | null
   oracle_in?: String[] | String | null
   marketType_json?: JSONObject | null
-  period_json?: JSONObject | null
-  status_eq?: String | null
-  status_contains?: String | null
-  status_startsWith?: String | null
-  status_endsWith?: String | null
-  status_in?: String[] | String | null
-  report_eq?: String | null
-  report_contains?: String | null
-  report_startsWith?: String | null
-  report_endsWith?: String | null
-  report_in?: String[] | String | null
-  resolvedOutcome_eq?: String | null
-  resolvedOutcome_contains?: String | null
-  resolvedOutcome_startsWith?: String | null
-  resolvedOutcome_endsWith?: String | null
-  resolvedOutcome_in?: String[] | String | null
-  mdm_json?: JSONObject | null
-  block_eq?: Int | null
-  block_gt?: Int | null
-  block_gte?: Int | null
-  block_lt?: Int | null
-  block_lte?: Int | null
-  block_in?: Int[] | Int | null
+  marketData?: MarketDataWhereInput | null
   AND?: MarketWhereInput[] | MarketWhereInput | null
   OR?: MarketWhereInput[] | MarketWhereInput | null
 }
 
 export interface MarketWhereUniqueInput {
-  id: ID_Output
-}
-
-export interface ScalarMarketCreateInput {
-  oracle: String
-  end: String
-  creation: String
-  outcomeRange: Array<BigInt>
-  block: Float
-}
-
-export interface ScalarMarketUpdateInput {
-  oracle?: String | null
-  end?: String | null
-  creation?: String | null
-  outcomeRange?: BigInt[] | BigInt | null
-  block?: Float | null
-}
-
-export interface ScalarMarketWhereInput {
-  id_eq?: ID_Input | null
-  id_in?: ID_Output[] | ID_Output | null
-  createdAt_eq?: DateTime | null
-  createdAt_lt?: DateTime | null
-  createdAt_lte?: DateTime | null
-  createdAt_gt?: DateTime | null
-  createdAt_gte?: DateTime | null
-  createdById_eq?: ID_Input | null
-  createdById_in?: ID_Output[] | ID_Output | null
-  updatedAt_eq?: DateTime | null
-  updatedAt_lt?: DateTime | null
-  updatedAt_lte?: DateTime | null
-  updatedAt_gt?: DateTime | null
-  updatedAt_gte?: DateTime | null
-  updatedById_eq?: ID_Input | null
-  updatedById_in?: ID_Output[] | ID_Output | null
-  deletedAt_all?: Boolean | null
-  deletedAt_eq?: DateTime | null
-  deletedAt_lt?: DateTime | null
-  deletedAt_lte?: DateTime | null
-  deletedAt_gt?: DateTime | null
-  deletedAt_gte?: DateTime | null
-  deletedById_eq?: ID_Input | null
-  deletedById_in?: ID_Output[] | ID_Output | null
-  oracle_eq?: String | null
-  oracle_contains?: String | null
-  oracle_startsWith?: String | null
-  oracle_endsWith?: String | null
-  oracle_in?: String[] | String | null
-  end_eq?: BigInt | null
-  end_gt?: BigInt | null
-  end_gte?: BigInt | null
-  end_lt?: BigInt | null
-  end_lte?: BigInt | null
-  end_in?: BigInt[] | BigInt | null
-  creation_eq?: String | null
-  creation_contains?: String | null
-  creation_startsWith?: String | null
-  creation_endsWith?: String | null
-  creation_in?: String[] | String | null
-  outcomeRange_containsAll?: BigInt[] | BigInt | null
-  outcomeRange_containsNone?: BigInt[] | BigInt | null
-  outcomeRange_containsAny?: BigInt[] | BigInt | null
-  block_eq?: Int | null
-  block_gt?: Int | null
-  block_gte?: Int | null
-  block_lt?: Int | null
-  block_lte?: Int | null
-  block_in?: Int[] | Int | null
-  AND?: ScalarMarketWhereInput[] | ScalarMarketWhereInput | null
-  OR?: ScalarMarketWhereInput[] | ScalarMarketWhereInput | null
-}
-
-export interface ScalarMarketWhereUniqueInput {
   id: ID_Output
 }
 
@@ -640,32 +528,6 @@ export interface Categorical {
   value: String
 }
 
-export interface CategoricalMarket extends BaseGraphQLObject {
-  id: ID_Output
-  createdAt: DateTime
-  createdById: String
-  updatedAt?: DateTime | null
-  updatedById?: String | null
-  deletedAt?: DateTime | null
-  deletedById?: String | null
-  version: Int
-  oracle: String
-  creation: String
-  categories: BigInt
-  block: Int
-}
-
-export interface CategoricalMarketConnection {
-  totalCount: Int
-  edges: Array<CategoricalMarketEdge>
-  pageInfo: PageInfo
-}
-
-export interface CategoricalMarketEdge {
-  node: CategoricalMarket
-  cursor: String
-}
-
 export interface CommentSearchFTSOutput {
   item: CommentSearchSearchResult
   rank: Float
@@ -695,12 +557,8 @@ export interface Market extends BaseGraphQLObject {
   creation: String
   oracle: String
   marketType: MarketType
-  period: MarketPeriod
-  status: String
-  report?: String | null
-  resolvedOutcome?: String | null
-  mdm: MarketDisputeMechanism
-  block: Int
+  marketData: MarketData
+  marketDataId: String
 }
 
 export interface MarketConnection {
@@ -709,9 +567,34 @@ export interface MarketConnection {
   pageInfo: PageInfo
 }
 
-export interface MarketCreated {
-  lowerBound: Float
-  upperBound: Float
+export interface MarketData extends BaseGraphQLObject {
+  id: ID_Output
+  createdAt: DateTime
+  createdById: String
+  updatedAt?: DateTime | null
+  updatedById?: String | null
+  deletedAt?: DateTime | null
+  deletedById?: String | null
+  version: Int
+  period: MarketPeriod
+  status: String
+  report?: String | null
+  resolvedOutcome?: String | null
+  mdm: MarketDisputeMechanism
+  blockNumber: Int
+  timestamp: BigInt
+  marketmarketData?: Array<Market> | null
+}
+
+export interface MarketDataConnection {
+  totalCount: Int
+  edges: Array<MarketDataEdge>
+  pageInfo: PageInfo
+}
+
+export interface MarketDataEdge {
+  node: MarketData
+  cursor: String
 }
 
 export interface MarketEdge {
@@ -735,33 +618,6 @@ export interface ProcessorState {
 
 export interface Scalar {
   value: String
-}
-
-export interface ScalarMarket extends BaseGraphQLObject {
-  id: ID_Output
-  createdAt: DateTime
-  createdById: String
-  updatedAt?: DateTime | null
-  updatedById?: String | null
-  deletedAt?: DateTime | null
-  deletedById?: String | null
-  version: Int
-  oracle: String
-  end: BigInt
-  creation: String
-  outcomeRange: Array<BigInt>
-  block: Int
-}
-
-export interface ScalarMarketConnection {
-  totalCount: Int
-  edges: Array<ScalarMarketEdge>
-  pageInfo: PageInfo
-}
-
-export interface ScalarMarketEdge {
-  node: ScalarMarket
-  cursor: String
 }
 
 export interface SimpleDisputes {

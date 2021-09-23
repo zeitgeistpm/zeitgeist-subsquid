@@ -36,11 +36,6 @@ type Scalar @variant {
 
 union MarketType = Categorical | Scalar
 
-type MarketCreated @variant {
-  lowerBound: BigInt!
-  upperBound: BigInt!
-}
-
 type Authorized @variant {
   value: String
 }
@@ -56,30 +51,20 @@ type SimpleDisputes @variant {
 union MarketDisputeMechanism = Authorized | Court | SimpleDisputes
 
 type Market @entity {
-  marketId: Int!
+  marketId: Int! 
   creator: String!
   creation: String!
   oracle: String!
   marketType: MarketType!
+  marketData: MarketData!
+}
+
+type MarketData @entity {
   period: MarketPeriod!
   status: String!
   report: String
   resolvedOutcome: String
   mdm: MarketDisputeMechanism!
-  block: Int!
-}
-
-type CategoricalMarket @entity {
-  oracle: String!
-  creation: String!
-  categories: BigInt!
-  block: Int!
-}
-
-type ScalarMarket @entity {
-  oracle: String!
-  end: BigInt!
-  creation: String!
-  outcomeRange: [BigInt]!
-  block: Int!
+  blockNumber: Int!
+  timestamp: BigInt!
 }

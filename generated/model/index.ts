@@ -1,11 +1,9 @@
 import { BlockTimestamp } from '../modules/block-timestamp/block-timestamp.model';
 export { BlockTimestamp };
-import { CategoricalMarket } from '../modules/categorical-market/categorical-market.model';
-export { CategoricalMarket };
 import { Market } from '../modules/market/market.model';
 export { Market };
-import { ScalarMarket } from '../modules/scalar-market/scalar-market.model';
-export { ScalarMarket };
+import { MarketData } from '../modules/market-data/market-data.model';
+export { MarketData };
 import { Transfer } from '../modules/transfer/transfer.model';
 export { Transfer };
 
@@ -17,8 +15,6 @@ import { Categorical } from '../modules/variants/variants.model';
 export { Categorical };
 import { Court } from '../modules/variants/variants.model';
 export { Court };
-import { MarketCreated } from '../modules/variants/variants.model';
-export { MarketCreated };
 import { Scalar } from '../modules/variants/variants.model';
 export { Scalar };
 import { SimpleDisputes } from '../modules/variants/variants.model';

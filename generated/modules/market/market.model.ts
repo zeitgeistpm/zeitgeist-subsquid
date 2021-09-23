@@ -1,12 +1,12 @@
-import { BaseModel, IntField, Model, StringField, JSONField } from '@subsquid/warthog';
+import { BaseModel, IntField, Model, ManyToOne, StringField, JSONField } from '@subsquid/warthog';
 
 import { Column } from 'typeorm';
 import { Field } from 'type-graphql';
 import { WarthogField } from '@subsquid/warthog';
 
 import { MarketType } from '../variants/variants.model';
-import { MarketPeriod } from '../variants/variants.model';
-import { MarketDisputeMechanism } from '../variants/variants.model';
+
+import { MarketData } from '../market-data/market-data.model';
 
 import * as jsonTypes from '../jsonfields/jsonfields.model';
 
@@ -29,31 +29,14 @@ export class Market extends BaseModel {
   @Field((type) => MarketType, {})
   marketType!: typeof MarketType;
 
-  @Column('jsonb')
-  @WarthogField('json')
-  @Field((type) => MarketPeriod, {})
-  period!: typeof MarketPeriod;
+  @ManyToOne(() => MarketData, (param: MarketData) => param.marketmarketData, {
+    skipGraphQLField: true,
 
-  @StringField({})
-  status!: string;
-
-  @StringField({
-    nullable: true,
+    modelName: 'Market',
+    relModelName: 'MarketData',
+    propertyName: 'marketData',
   })
-  report?: string;
-
-  @StringField({
-    nullable: true,
-  })
-  resolvedOutcome?: string;
-
-  @Column('jsonb')
-  @WarthogField('json')
-  @Field((type) => MarketDisputeMechanism, {})
-  mdm!: typeof MarketDisputeMechanism;
-
-  @IntField({})
-  block!: number;
+  marketData!: MarketData;
 
   constructor(init?: Partial<Market>) {
     super();

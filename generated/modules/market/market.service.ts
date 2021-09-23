@@ -7,8 +7,16 @@ import { Market } from './market.model';
 
 import { MarketWhereArgs, MarketWhereInput } from '../../warthog';
 
+import { MarketData } from '../market-data/market-data.model';
+import { MarketDataService } from '../market-data/market-data.service';
+import { getConnection, getRepository, In, Not } from 'typeorm';
+import _ from 'lodash';
+
 @Service('MarketService')
 export class MarketService extends HydraBaseService<Market> {
+  @Inject('MarketDataService')
+  public readonly marketDataService!: MarketDataService;
+
   constructor(@InjectRepository(Market) protected readonly repository: Repository<Market>) {
     super(Market, repository);
   }
@@ -45,9 +53,24 @@ export class MarketService extends HydraBaseService<Market> {
   ): SelectQueryBuilder<Market> {
     const where = <MarketWhereInput>(_where || {});
 
+    // remove relation filters to enable warthog query builders
+    const { marketData } = where;
+    delete where.marketData;
+
     let mainQuery = this.buildFindQueryWithParams(<any>where, orderBy, undefined, fields, 'main').take(undefined); // remove LIMIT
 
     let parameters = mainQuery.getParameters();
+
+    if (marketData) {
+      // OTO or MTO
+      const marketDataQuery = this.marketDataService
+        .buildFindQueryWithParams(<any>marketData, undefined, undefined, ['id'], 'marketData')
+        .take(undefined); // remove the default LIMIT
+
+      mainQuery = mainQuery.andWhere(`"market"."market_data_id" IN (${marketDataQuery.getQuery()})`);
+
+      parameters = { ...parameters, ...marketDataQuery.getParameters() };
+    }
 
     mainQuery = mainQuery.setParameters(parameters);
 

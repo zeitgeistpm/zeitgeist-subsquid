@@ -53,16 +53,6 @@ export class Court {
   value?: boolean;
 }
 @ObjectType()
-export class MarketCreated {
-  public isTypeOf: string = 'MarketCreated';
-
-  @Field(() => Float!, {})
-  lowerBound!: BN;
-
-  @Field(() => Float!, {})
-  upperBound!: BN;
-}
-@ObjectType()
 export class Scalar {
   public isTypeOf: string = 'Scalar';
 
