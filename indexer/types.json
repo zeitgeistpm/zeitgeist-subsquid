@@ -24,14 +24,35 @@
   },
   "AuthorId": "AccountId",
   "BlockNumber": "u64",
+  "Bond": {
+    "owner": "AccountId",
+    "amount": "Balance"
+  },
   "CategoryIndex": "u16",
+  "CollatorSnapshot": {
+    "bond": "Balance",
+    "nominators": "Vec<Bond>",
+    "total": "Balance"
+  },
   "CommonPoolEventParams": {
     "pool_id": "u128",
     "who": "AccountId"
   },
+  "Currency": "Asset",
   "CurrencyId": "Asset",
   "CurrencyIdOf": "Asset",
+  "ExitQ": {
+    "candidates": "Vec<AccountId>",
+    "nominators_leaving": "Vec<AccountId>",
+    "candidate_schedule": "Vec<(AccountId, RoundIndex)>",
+    "nominator_schedule": "Vec<(AccountId, Option<AccountId>, RoundIndex)>"
+  },
   "Index": "u64",
+  "InflationInfo": {
+    "expect": "RangeBalance",
+    "annual": "RangePerbill",
+    "round": "RangePerbill"
+  },
   "Lookup": "MultiAddress",
   "Market": {
     "creator": "AccountId",
@@ -41,6 +62,7 @@
     "metadata": "Vec<u8>",
     "market_type": "MarketType",
     "period": "MarketPeriod",
+    "scoring_rule": "ScoringRule",
     "status": "MarketStatus",
     "report": "Option<Report>",
     "resolved_outcome": "Option<Outcome>",
@@ -55,11 +77,11 @@
   "MarketDispute": {
     "at": "BlockNumber",
     "by": "AccountId",
-    "outcome": "Outcome"
+    "outcome": "OutcomeReport"
   },
   "MarketDisputeMechanism": {
     "_enum": {
-      "Authorized": "BlockNumber",
+      "Authorized": "AccountId",
       "Court": null,
       "SimpleDisputes": null
     }
@@ -78,6 +100,8 @@
       "Active",
       "Suspended",
       "Closed",
+      "CollectingSubsidy",
+      "InsufficientSubsidy",
       "Reported",
       "Disputed",
       "Resolved"
@@ -100,7 +124,7 @@
     "side": "OrderSide",
     "maker": "AccountId",
     "taker": "Option<AccountId>",
-    "share_id": "Hash",
+    "asset": "Asset",
     "total": "Balance",
     "price": "Balance",
     "filled": "Balance"
@@ -111,18 +135,48 @@
       "Ask"
     ]
   },
-  "Outcome": {
+  "OrderedSet": "Vec<Bond>",
+  "RangeBalance": {
+    "min": "Balance",
+    "ideal": "Balance",
+    "max": "Balance"
+  },
+  "RangePerbill": {
+    "min": "Perbill",
+    "ideal": "Perbill",
+    "max": "Perbill"
+  },
+  "RelayChainAccountId": "AccountId32",
+  "RewardInfo": {
+    "total_reward": "Balance",
+    "claimed_reward": "Balance"
+  },
+  "ScoringRule": {
+    "_enum": [
+      "CPMM",
+      "RikiddoSigmoidFeeMarketEma"
+    ]
+  },
+  "OutcomeReport": {
     "_enum": {
       "Categorical": "u16",
       "Scalar": "u128"
     }
   },
+  "ParachainBondConfig": {
+    "account": "AccountId",
+    "percent": "Percent"
+  },
   "Pool": {
     "assets": "Vec<Asset>",
+    "base_asset": "Option<Asset>",
+    "market_id": "MarketId",
     "pool_status": "PoolStatus",
-    "swap_fee": "Balance",
-    "total_weight": "u128",
-    "weights": "BTreeMap<Asset, u128>"
+    "scoring_rule": "ScoringRule",
+    "swap_fee": "Option<Balance>",
+    "total_subsidy": "Option<Balance>",
+    "total_weight": "Option<u128>",
+    "weights": "Option<BTreeMap<Asset, u128>>"
   },
   "PoolAssetEvent": {
     "bound": "Balance",
@@ -138,6 +192,7 @@
   "PoolStatus": {
     "_enum": {
       "Active": null,
+      "CollectingSubsidy": null,
       "Stale": null
     }
   },
@@ -148,7 +203,12 @@
   "Report": {
     "at": "BlockNumber",
     "by": "AccountId",
-    "outcome": "Outcome"
+    "outcome": "OutcomeReport"
+  },
+  "RoundInfo": {
+    "current": "RoundIndex",
+    "first": "BlockNumber",
+    "length": "u32"
   },
   "RoundIndex": "u32",
   "ScalarPosition": {
@@ -158,6 +218,10 @@
     ]
   },
   "SerdeWrapper": "Balance",
+  "SubsidyUntil": {
+    "market_id": "MarketId",
+    "period": "MarketPeriod"
+  },
   "SwapEvent": {
     "asset_amount_in": "Balance",
     "asset_amount_out": "Balance",
@@ -169,5 +233,6 @@
     "free": "Balance",
     "reserved": "Balance",
     "frozen": "Balance"
-  }
+  },
+  "VestingBlockNumber": "u32"
 }
