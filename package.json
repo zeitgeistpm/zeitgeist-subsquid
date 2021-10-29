@@ -9,6 +9,7 @@
     "typegen": "hydra-typegen typegen manifest.yml",
     "codegen": "hydra-cli codegen",
     "db:create": "hydra-cli db:create",
+    "db:up": "docker-compose up -d db",
     "db:drop": "hydra-cli db:drop",
     "db:create-migration": "hydra-cli db:create-migration",
     "db:migrate": "hydra-cli db:migrate",
