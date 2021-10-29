@@ -3,22 +3,22 @@ import { Repository, SelectQueryBuilder } from 'typeorm';
 import { InjectRepository } from 'typeorm-typedi-extensions';
 import { WhereInput, HydraBaseService } from '@subsquid/warthog';
 
-import { HistoricalBalance } from './historical-balance.model';
+import { Market } from './market.model';
 
-import { HistoricalBalanceWhereArgs, HistoricalBalanceWhereInput } from '../../warthog';
+import { MarketWhereArgs, MarketWhereInput } from '../../warthog';
 
-import { Account } from '../account/account.model';
-import { AccountService } from '../account/account.service';
+import { MarketData } from '../market-data/market-data.model';
+import { MarketDataService } from '../market-data/market-data.service';
 import { getConnection, getRepository, In, Not } from 'typeorm';
 import _ from 'lodash';
 
-@Service('HistoricalBalanceService')
-export class HistoricalBalanceService extends HydraBaseService<HistoricalBalance> {
-  @Inject('AccountService')
-  public readonly accountService!: AccountService;
+@Service('MarketService')
+export class MarketService extends HydraBaseService<Market> {
+  @Inject('MarketDataService')
+  public readonly marketDataService!: MarketDataService;
 
-  constructor(@InjectRepository(HistoricalBalance) protected readonly repository: Repository<HistoricalBalance>) {
-    super(HistoricalBalance, repository);
+  constructor(@InjectRepository(Market) protected readonly repository: Repository<Market>) {
+    super(Market, repository);
   }
 
   async find<W extends WhereInput>(
@@ -27,8 +27,11 @@ export class HistoricalBalanceService extends HydraBaseService<HistoricalBalance
     limit?: number,
     offset?: number,
     fields?: string[]
-  ): Promise<HistoricalBalance[]> {
-    return this.findWithRelations<W>(where, orderBy, limit, offset, fields);
+  ): Promise<Market[]> {
+    let records = await this.findWithRelations<W>(where, orderBy, limit, offset, fields);
+    if (records.length) {
+    }
+    return records;
   }
 
   findWithRelations<W extends WhereInput>(
@@ -37,7 +40,7 @@ export class HistoricalBalanceService extends HydraBaseService<HistoricalBalance
     limit?: number,
     offset?: number,
     fields?: string[]
-  ): Promise<HistoricalBalance[]> {
+  ): Promise<Market[]> {
     return this.buildFindWithRelationsQuery(_where, orderBy, limit, offset, fields).getMany();
   }
 
@@ -47,26 +50,26 @@ export class HistoricalBalanceService extends HydraBaseService<HistoricalBalance
     limit?: number,
     offset?: number,
     fields?: string[]
-  ): SelectQueryBuilder<HistoricalBalance> {
-    const where = <HistoricalBalanceWhereInput>(_where || {});
+  ): SelectQueryBuilder<Market> {
+    const where = <MarketWhereInput>(_where || {});
 
     // remove relation filters to enable warthog query builders
-    const { account } = where;
-    delete where.account;
+    const { marketData } = where;
+    delete where.marketData;
 
     let mainQuery = this.buildFindQueryWithParams(<any>where, orderBy, undefined, fields, 'main').take(undefined); // remove LIMIT
 
     let parameters = mainQuery.getParameters();
 
-    if (account) {
+    if (marketData) {
       // OTO or MTO
-      const accountQuery = this.accountService
-        .buildFindQueryWithParams(<any>account, undefined, undefined, ['id'], 'account')
+      const marketDataQuery = this.marketDataService
+        .buildFindQueryWithParams(<any>marketData, undefined, undefined, ['id'], 'marketData')
         .take(undefined); // remove the default LIMIT
 
-      mainQuery = mainQuery.andWhere(`"historicalbalance"."account_id" IN (${accountQuery.getQuery()})`);
+      mainQuery = mainQuery.andWhere(`"market"."market_data_id" IN (${marketDataQuery.getQuery()})`);
 
-      parameters = { ...parameters, ...accountQuery.getParameters() };
+      parameters = { ...parameters, ...marketDataQuery.getParameters() };
     }
 
     mainQuery = mainQuery.setParameters(parameters);

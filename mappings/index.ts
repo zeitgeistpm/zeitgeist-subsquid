@@ -1,45 +1,76 @@
 import BN from 'bn.js'
 import { DatabaseManager, EventContext, StoreContext } from '@subsquid/hydra-common'
-import { Account, HistoricalBalance } from '../generated/model'
-import { Balances } from '../chain'
+import { Authorized, Block, Categorical, Court, Market, MarketData, Scalar, SimpleDisputes, Timestamp } from '../generated/model'
+import { PredictionMarkets } from '../chain'
 
-
-export async function balancesTransfer({
+export async function predictionMarketCreated ({
   store,
   event,
   block,
   extrinsic,
-}: EventContext & StoreContext): Promise<void> {
+}: EventContext & StoreContext) {
+  const newMarket = new Market()
+  var newData = new MarketData()
+  const [marketIdOf, market, accountId] = new PredictionMarkets.MarketCreatedEvent(event).params
 
-  const [from, to, value] = new Balances.TransferEvent(event).params
-  const tip = extrinsic ? new BN(extrinsic.tip.toString(10)) : new BN(0)
+  if (market.market_type.isCategorical) {
+    const categorical = new Categorical()
+    categorical.value = market.market_type.asCategorical.toString()
+    newMarket.marketType = categorical
+  } else {
+    const scalar = new Scalar()
+    scalar.value = market.market_type.asScalar.toString()
+    newMarket.marketType = scalar
+  }
 
-  const fromAcc = await getOrCreate(store, Account, from.toHex())
-  fromAcc.wallet = from.toHuman()
-  fromAcc.balance = fromAcc.balance || new BN(0)
-  fromAcc.balance = fromAcc.balance.sub(value)
-  fromAcc.balance = fromAcc.balance.sub(tip)
-  await store.save(fromAcc)
+  if (market.period.isBlock) {
+    const block = new Block()
+    block.value = market.period.asBlock.toString()
+    newData.period = block
+  } else {
+    const timestamp = new Timestamp()
+    timestamp.value = market.period.asTimestamp.toString()
+    newData.period = timestamp
+  }
 
-  const toAcc = await getOrCreate(store, Account, to.toHex())
-  toAcc.wallet = to.toHuman()
-  toAcc.balance = toAcc.balance || new BN(0)
-  toAcc.balance = toAcc.balance.add(value)
-  await store.save(toAcc)
+  if (market.report !== null) {
+    newData.report = market.report.toString()
+  }
 
-  const hbFrom = new HistoricalBalance()
-  hbFrom.account = fromAcc;
-  hbFrom.balance = fromAcc.balance;
-  hbFrom.timestamp = new BN(block.timestamp)
-  await store.save(hbFrom)
+  if (market.resolved_outcome !== null) {
+    newData.resolvedOutcome = market.resolved_outcome.toString()
+  }
 
-  const hbTo = new HistoricalBalance()
-  hbTo.account = toAcc;
-  hbTo.balance = toAcc.balance;
-  hbTo.timestamp = new BN(block.timestamp)
-  await store.save(hbTo)
+  if (market.mdm.isAuthorized) {
+    const authorized = new Authorized()
+    authorized.value = market.mdm.asAuthorized.toString()
+    newData.mdm = authorized
+  } else if (market.mdm.isCourt) {
+    const court = new Court()
+    court.value = market.mdm.isCourt
+    newData.mdm = court
+  } else {
+    const simpleDisputes = new SimpleDisputes()
+    simpleDisputes.value = market.mdm.isSimpleDisputes
+    newData.mdm = simpleDisputes
+  }
+
+  newData.id = marketIdOf.toString()
+  newData.status = market.status.toString()
+  newData.blockNumber = block.height
+  newData.timestamp = new BN(block.timestamp)
+
+  await store.save<MarketData>(newData)
+
+  newMarket.marketId = marketIdOf.toNumber()
+  newMarket.creator = market.creator.toString()
+  newMarket.creation = market.creation.toString()
+  newMarket.oracle = market.oracle.toString()
+  newMarket.marketData = newData
+
+  console.log(`Saving market: ${JSON.stringify(newMarket, null, 2)}`)
+  await store.save<Market>(newMarket)
 }
-
 
 async function getOrCreate<T extends {id: string}>(
   store: DatabaseManager,

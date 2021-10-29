@@ -1,96 +1,5 @@
-type Account implements BaseGraphQLObject {
-  id: ID!
-  createdAt: DateTime!
-  createdById: String!
-  updatedAt: DateTime
-  updatedById: String
-  deletedAt: DateTime
-  deletedById: String
-  version: Int!
-  wallet: String!
-  balance: BigInt!
-  historicalBalances: [HistoricalBalance!]!
-}
-
-type AccountConnection {
-  totalCount: Int!
-  edges: [AccountEdge!]!
-  pageInfo: PageInfo!
-}
-
-input AccountCreateInput {
-  wallet: String!
-  balance: String!
-}
-
-type AccountEdge {
-  node: Account!
-  cursor: String!
-}
-
-enum AccountOrderByInput {
-  createdAt_ASC
-  createdAt_DESC
-  updatedAt_ASC
-  updatedAt_DESC
-  deletedAt_ASC
-  deletedAt_DESC
-  wallet_ASC
-  wallet_DESC
-  balance_ASC
-  balance_DESC
-}
-
-input AccountUpdateInput {
-  wallet: String
-  balance: String
-}
-
-input AccountWhereInput {
-  id_eq: ID
-  id_in: [ID!]
-  createdAt_eq: DateTime
-  createdAt_lt: DateTime
-  createdAt_lte: DateTime
-  createdAt_gt: DateTime
-  createdAt_gte: DateTime
-  createdById_eq: ID
-  createdById_in: [ID!]
-  updatedAt_eq: DateTime
-  updatedAt_lt: DateTime
-  updatedAt_lte: DateTime
-  updatedAt_gt: DateTime
-  updatedAt_gte: DateTime
-  updatedById_eq: ID
-  updatedById_in: [ID!]
-  deletedAt_all: Boolean
-  deletedAt_eq: DateTime
-  deletedAt_lt: DateTime
-  deletedAt_lte: DateTime
-  deletedAt_gt: DateTime
-  deletedAt_gte: DateTime
-  deletedById_eq: ID
-  deletedById_in: [ID!]
-  wallet_eq: String
-  wallet_contains: String
-  wallet_startsWith: String
-  wallet_endsWith: String
-  wallet_in: [String!]
-  balance_eq: BigInt
-  balance_gt: BigInt
-  balance_gte: BigInt
-  balance_lt: BigInt
-  balance_lte: BigInt
-  balance_in: [BigInt!]
-  historicalBalances_none: HistoricalBalanceWhereInput
-  historicalBalances_some: HistoricalBalanceWhereInput
-  historicalBalances_every: HistoricalBalanceWhereInput
-  AND: [AccountWhereInput!]
-  OR: [AccountWhereInput!]
-}
-
-input AccountWhereUniqueInput {
-  id: ID!
+type Authorized {
+  value: String
 }
 
 interface BaseGraphQLObject {
@@ -153,20 +62,12 @@ input BaseWhereInput {
 """GraphQL representation of BigInt"""
 scalar BigInt
 
-"""
-The javascript `Date` as string. Type represents date and time as the ISO Date string.
-"""
-scalar DateTime
-
-interface DeleteResponse {
-  id: ID!
+type Block {
+  value: String!
 }
 
-type Hello {
-  greeting: String!
-}
-
-type HistoricalBalance implements BaseGraphQLObject {
+""" Tracks block timestamps """
+type BlockTimestamp implements BaseGraphQLObject {
   id: ID!
   createdAt: DateTime!
   createdById: String!
@@ -175,51 +76,45 @@ type HistoricalBalance implements BaseGraphQLObject {
   deletedAt: DateTime
   deletedById: String
   version: Int!
-  account: Account!
-  accountId: String!
-  balance: BigInt!
+  blockNumber: Int!
   timestamp: BigInt!
 }
 
-type HistoricalBalanceConnection {
+type BlockTimestampConnection {
   totalCount: Int!
-  edges: [HistoricalBalanceEdge!]!
+  edges: [BlockTimestampEdge!]!
   pageInfo: PageInfo!
 }
 
-input HistoricalBalanceCreateInput {
-  account: ID!
-  balance: String!
+input BlockTimestampCreateInput {
+  blockNumber: Float!
   timestamp: String!
 }
 
-type HistoricalBalanceEdge {
-  node: HistoricalBalance!
+type BlockTimestampEdge {
+  node: BlockTimestamp!
   cursor: String!
 }
 
-enum HistoricalBalanceOrderByInput {
+enum BlockTimestampOrderByInput {
   createdAt_ASC
   createdAt_DESC
   updatedAt_ASC
   updatedAt_DESC
   deletedAt_ASC
   deletedAt_DESC
-  account_ASC
-  account_DESC
-  balance_ASC
-  balance_DESC
+  blockNumber_ASC
+  blockNumber_DESC
   timestamp_ASC
   timestamp_DESC
 }
 
-input HistoricalBalanceUpdateInput {
-  account: ID
-  balance: String
+input BlockTimestampUpdateInput {
+  blockNumber: Float
   timestamp: String
 }
 
-input HistoricalBalanceWhereInput {
+input BlockTimestampWhereInput {
   id_eq: ID
   id_in: [ID!]
   createdAt_eq: DateTime
@@ -244,24 +139,323 @@ input HistoricalBalanceWhereInput {
   deletedAt_gte: DateTime
   deletedById_eq: ID
   deletedById_in: [ID!]
-  balance_eq: BigInt
-  balance_gt: BigInt
-  balance_gte: BigInt
-  balance_lt: BigInt
-  balance_lte: BigInt
-  balance_in: [BigInt!]
+  blockNumber_eq: Int
+  blockNumber_gt: Int
+  blockNumber_gte: Int
+  blockNumber_lt: Int
+  blockNumber_lte: Int
+  blockNumber_in: [Int!]
   timestamp_eq: BigInt
   timestamp_gt: BigInt
   timestamp_gte: BigInt
   timestamp_lt: BigInt
   timestamp_lte: BigInt
   timestamp_in: [BigInt!]
-  account: AccountWhereInput
-  AND: [HistoricalBalanceWhereInput!]
-  OR: [HistoricalBalanceWhereInput!]
+  AND: [BlockTimestampWhereInput!]
+  OR: [BlockTimestampWhereInput!]
 }
 
-input HistoricalBalanceWhereUniqueInput {
+input BlockTimestampWhereUniqueInput {
+  id: ID!
+}
+
+"""GraphQL representation of Bytes"""
+scalar Bytes
+
+type Categorical {
+  value: String!
+}
+
+type CommentSearchFTSOutput {
+  item: CommentSearchSearchResult!
+  rank: Float!
+  isTypeOf: String!
+  highlight: String!
+}
+
+union CommentSearchSearchResult = Transfer
+
+type Court {
+  value: Boolean
+}
+
+"""
+The javascript `Date` as string. Type represents date and time as the ISO Date string.
+"""
+scalar DateTime
+
+interface DeleteResponse {
+  id: ID!
+}
+
+type Hello {
+  greeting: String!
+}
+
+"""
+The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSONObject
+
+type Market implements BaseGraphQLObject {
+  id: ID!
+  createdAt: DateTime!
+  createdById: String!
+  updatedAt: DateTime
+  updatedById: String
+  deletedAt: DateTime
+  deletedById: String
+  version: Int!
+  marketId: Int!
+  creator: String!
+  creation: String!
+  oracle: String!
+  marketType: MarketType!
+  marketData: MarketData!
+  marketDataId: String!
+}
+
+type MarketConnection {
+  totalCount: Int!
+  edges: [MarketEdge!]!
+  pageInfo: PageInfo!
+}
+
+input MarketCreateInput {
+  marketId: Float!
+  creator: String!
+  creation: String!
+  oracle: String!
+  marketType: JSONObject!
+  marketData: ID!
+}
+
+type MarketData implements BaseGraphQLObject {
+  id: ID!
+  createdAt: DateTime!
+  createdById: String!
+  updatedAt: DateTime
+  updatedById: String
+  deletedAt: DateTime
+  deletedById: String
+  version: Int!
+  period: MarketPeriod!
+  status: String!
+  report: String
+  resolvedOutcome: String
+  mdm: MarketDisputeMechanism!
+  blockNumber: Int!
+  timestamp: BigInt!
+  marketmarketData: [Market!]
+}
+
+type MarketDataConnection {
+  totalCount: Int!
+  edges: [MarketDataEdge!]!
+  pageInfo: PageInfo!
+}
+
+input MarketDataCreateInput {
+  period: JSONObject!
+  status: String!
+  report: String
+  resolvedOutcome: String
+  mdm: JSONObject!
+  blockNumber: Float!
+  timestamp: String!
+}
+
+type MarketDataEdge {
+  node: MarketData!
+  cursor: String!
+}
+
+enum MarketDataOrderByInput {
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  deletedAt_ASC
+  deletedAt_DESC
+  status_ASC
+  status_DESC
+  report_ASC
+  report_DESC
+  resolvedOutcome_ASC
+  resolvedOutcome_DESC
+  blockNumber_ASC
+  blockNumber_DESC
+  timestamp_ASC
+  timestamp_DESC
+}
+
+input MarketDataUpdateInput {
+  period: JSONObject
+  status: String
+  report: String
+  resolvedOutcome: String
+  mdm: JSONObject
+  blockNumber: Float
+  timestamp: String
+}
+
+input MarketDataWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  period_json: JSONObject
+  status_eq: String
+  status_contains: String
+  status_startsWith: String
+  status_endsWith: String
+  status_in: [String!]
+  report_eq: String
+  report_contains: String
+  report_startsWith: String
+  report_endsWith: String
+  report_in: [String!]
+  resolvedOutcome_eq: String
+  resolvedOutcome_contains: String
+  resolvedOutcome_startsWith: String
+  resolvedOutcome_endsWith: String
+  resolvedOutcome_in: [String!]
+  mdm_json: JSONObject
+  blockNumber_eq: Int
+  blockNumber_gt: Int
+  blockNumber_gte: Int
+  blockNumber_lt: Int
+  blockNumber_lte: Int
+  blockNumber_in: [Int!]
+  timestamp_eq: BigInt
+  timestamp_gt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lt: BigInt
+  timestamp_lte: BigInt
+  timestamp_in: [BigInt!]
+  marketmarketData_none: MarketWhereInput
+  marketmarketData_some: MarketWhereInput
+  marketmarketData_every: MarketWhereInput
+  AND: [MarketDataWhereInput!]
+  OR: [MarketDataWhereInput!]
+}
+
+input MarketDataWhereUniqueInput {
+  id: ID!
+}
+
+union MarketDisputeMechanism = Authorized | Court | SimpleDisputes
+
+type MarketEdge {
+  node: Market!
+  cursor: String!
+}
+
+enum MarketOrderByInput {
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  deletedAt_ASC
+  deletedAt_DESC
+  marketId_ASC
+  marketId_DESC
+  creator_ASC
+  creator_DESC
+  creation_ASC
+  creation_DESC
+  oracle_ASC
+  oracle_DESC
+  marketData_ASC
+  marketData_DESC
+}
+
+union MarketPeriod = Block | Timestamp
+
+union MarketType = Categorical | Scalar
+
+input MarketUpdateInput {
+  marketId: Float
+  creator: String
+  creation: String
+  oracle: String
+  marketType: JSONObject
+  marketData: ID
+}
+
+input MarketWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  marketId_eq: Int
+  marketId_gt: Int
+  marketId_gte: Int
+  marketId_lt: Int
+  marketId_lte: Int
+  marketId_in: [Int!]
+  creator_eq: String
+  creator_contains: String
+  creator_startsWith: String
+  creator_endsWith: String
+  creator_in: [String!]
+  creation_eq: String
+  creation_contains: String
+  creation_startsWith: String
+  creation_endsWith: String
+  creation_in: [String!]
+  oracle_eq: String
+  oracle_contains: String
+  oracle_startsWith: String
+  oracle_endsWith: String
+  oracle_in: [String!]
+  marketType_json: JSONObject
+  marketData: MarketDataWhereInput
+  AND: [MarketWhereInput!]
+  OR: [MarketWhereInput!]
+}
+
+input MarketWhereUniqueInput {
   id: ID!
 }
 
@@ -280,13 +474,28 @@ type ProcessorState {
 }
 
 type Query {
-  accounts(offset: Int, limit: Int = 50, where: AccountWhereInput, orderBy: [AccountOrderByInput!]): [Account!]!
-  accountByUniqueInput(where: AccountWhereUniqueInput!): Account
-  accountsConnection(first: Int, after: String, last: Int, before: String, where: AccountWhereInput, orderBy: [AccountOrderByInput!]): AccountConnection!
-  historicalBalances(offset: Int, limit: Int = 50, where: HistoricalBalanceWhereInput, orderBy: [HistoricalBalanceOrderByInput!]): [HistoricalBalance!]!
-  historicalBalanceByUniqueInput(where: HistoricalBalanceWhereUniqueInput!): HistoricalBalance
-  historicalBalancesConnection(first: Int, after: String, last: Int, before: String, where: HistoricalBalanceWhereInput, orderBy: [HistoricalBalanceOrderByInput!]): HistoricalBalanceConnection!
+  blockTimestamps(offset: Int, limit: Int = 50, where: BlockTimestampWhereInput, orderBy: [BlockTimestampOrderByInput!]): [BlockTimestamp!]!
+  blockTimestampByUniqueInput(where: BlockTimestampWhereUniqueInput!): BlockTimestamp
+  blockTimestampsConnection(first: Int, after: String, last: Int, before: String, where: BlockTimestampWhereInput, orderBy: [BlockTimestampOrderByInput!]): BlockTimestampConnection!
+  marketData(offset: Int, limit: Int = 50, where: MarketDataWhereInput, orderBy: [MarketDataOrderByInput!]): [MarketData!]!
+  marketDataByUniqueInput(where: MarketDataWhereUniqueInput!): MarketData
+  marketDataConnection(first: Int, after: String, last: Int, before: String, where: MarketDataWhereInput, orderBy: [MarketDataOrderByInput!]): MarketDataConnection!
+  markets(offset: Int, limit: Int = 50, where: MarketWhereInput, orderBy: [MarketOrderByInput!]): [Market!]!
+  marketByUniqueInput(where: MarketWhereUniqueInput!): Market
+  marketsConnection(first: Int, after: String, last: Int, before: String, where: MarketWhereInput, orderBy: [MarketOrderByInput!]): MarketConnection!
+  commentSearch(whereTransfer: TransferWhereInput, skip: Int = 0, limit: Int = 5, text: String!): [CommentSearchFTSOutput!]!
+  transfers(offset: Int, limit: Int = 50, where: TransferWhereInput, orderBy: [TransferOrderByInput!]): [Transfer!]!
+  transferByUniqueInput(where: TransferWhereUniqueInput!): Transfer
+  transfersConnection(first: Int, after: String, last: Int, before: String, where: TransferWhereInput, orderBy: [TransferOrderByInput!]): TransferConnection!
   hello: Hello!
+}
+
+type Scalar {
+  value: String!
+}
+
+type SimpleDisputes {
+  value: Boolean
 }
 
 type StandardDeleteResponse {
@@ -295,4 +504,157 @@ type StandardDeleteResponse {
 
 type Subscription {
   stateSubscription: ProcessorState!
+}
+
+type Timestamp {
+  value: String!
+}
+
+""" All transfers """
+type Transfer implements BaseGraphQLObject {
+  id: ID!
+  createdAt: DateTime!
+  createdById: String!
+  updatedAt: DateTime
+  updatedById: String
+  deletedAt: DateTime
+  deletedById: String
+  version: Int!
+  from: Bytes!
+  to: Bytes!
+  value: BigInt!
+  comment: String
+  block: Int!
+  tip: BigInt!
+  timestamp: BigInt!
+  insertedAt: DateTime!
+}
+
+type TransferConnection {
+  totalCount: Int!
+  edges: [TransferEdge!]!
+  pageInfo: PageInfo!
+}
+
+input TransferCreateInput {
+  from: String!
+  to: String!
+  value: String!
+  comment: String
+  block: Float!
+  tip: String!
+  timestamp: String!
+  insertedAt: DateTime!
+}
+
+type TransferEdge {
+  node: Transfer!
+  cursor: String!
+}
+
+enum TransferOrderByInput {
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  deletedAt_ASC
+  deletedAt_DESC
+  from_ASC
+  from_DESC
+  to_ASC
+  to_DESC
+  value_ASC
+  value_DESC
+  comment_ASC
+  comment_DESC
+  block_ASC
+  block_DESC
+  tip_ASC
+  tip_DESC
+  timestamp_ASC
+  timestamp_DESC
+  insertedAt_ASC
+  insertedAt_DESC
+}
+
+input TransferUpdateInput {
+  from: String
+  to: String
+  value: String
+  comment: String
+  block: Float
+  tip: String
+  timestamp: String
+  insertedAt: DateTime
+}
+
+input TransferWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  from_eq: Bytes
+  from_in: [Bytes!]
+  to_eq: Bytes
+  to_in: [Bytes!]
+  value_eq: BigInt
+  value_gt: BigInt
+  value_gte: BigInt
+  value_lt: BigInt
+  value_lte: BigInt
+  value_in: [BigInt!]
+  comment_eq: String
+  comment_contains: String
+  comment_startsWith: String
+  comment_endsWith: String
+  comment_in: [String!]
+  block_eq: Int
+  block_gt: Int
+  block_gte: Int
+  block_lt: Int
+  block_lte: Int
+  block_in: [Int!]
+  tip_eq: BigInt
+  tip_gt: BigInt
+  tip_gte: BigInt
+  tip_lt: BigInt
+  tip_lte: BigInt
+  tip_in: [BigInt!]
+  timestamp_eq: BigInt
+  timestamp_gt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lt: BigInt
+  timestamp_lte: BigInt
+  timestamp_in: [BigInt!]
+  insertedAt_eq: DateTime
+  insertedAt_lt: DateTime
+  insertedAt_lte: DateTime
+  insertedAt_gt: DateTime
+  insertedAt_gte: DateTime
+  AND: [TransferWhereInput!]
+  OR: [TransferWhereInput!]
+}
+
+input TransferWhereUniqueInput {
+  id: ID!
 }

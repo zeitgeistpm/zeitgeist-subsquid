@@ -4,19 +4,19 @@ repository: https://github.com/
 hydraVersion: "4"
 
 typegen:
+  customTypes: 
+    lib: '@zeitgeistpm/types/dist/interfaces'
+    typedefsLoc: ./indexer/types.json
   metadata:
-    source: wss://kusama-rpc.polkadot.io/
+    source: ws://127.0.0.1:9944
   events:
-    - balances.Transfer
-  calls:
-    - timestamp.set
+    - predictionMarkets.MarketCreated
   outDir: chain
-
+  
 mappings:
   mappingsModule: mappings
   eventHandlers:
-    - event: balances.Transfer
-      handler: balancesTransfer
-  extrinsicHandlers:
+    - event: predictionMarkets.MarketCreated
+      handler: predictionMarketCreated
   preBlockHooks:
   postBlockHooks:

@@ -27,39 +27,39 @@ import {
 } from '@subsquid/warthog';
 
 import {
-  AccountCreateInput,
-  AccountCreateManyArgs,
-  AccountUpdateArgs,
-  AccountWhereArgs,
-  AccountWhereInput,
-  AccountWhereUniqueInput,
-  AccountOrderByEnum,
+  MarketCreateInput,
+  MarketCreateManyArgs,
+  MarketUpdateArgs,
+  MarketWhereArgs,
+  MarketWhereInput,
+  MarketWhereUniqueInput,
+  MarketOrderByEnum,
 } from '../../warthog';
 
-import { Account } from './account.model';
-import { AccountService } from './account.service';
+import { Market } from './market.model';
+import { MarketService } from './market.service';
 
-import { HistoricalBalance } from '../historical-balance/historical-balance.model';
-import { HistoricalBalanceService } from '../historical-balance/historical-balance.service';
+import { MarketData } from '../market-data/market-data.model';
+import { MarketDataService } from '../market-data/market-data.service';
 import { getConnection, getRepository, In, Not } from 'typeorm';
 import _ from 'lodash';
 
 @ObjectType()
-export class AccountEdge {
-  @Field(() => Account, { nullable: false })
-  node!: Account;
+export class MarketEdge {
+  @Field(() => Market, { nullable: false })
+  node!: Market;
 
   @Field(() => String, { nullable: false })
   cursor!: string;
 }
 
 @ObjectType()
-export class AccountConnection {
+export class MarketConnection {
   @Field(() => Int, { nullable: false })
   totalCount!: number;
 
-  @Field(() => [AccountEdge], { nullable: false })
-  edges!: AccountEdge[];
+  @Field(() => [MarketEdge], { nullable: false })
+  edges!: MarketEdge[];
 
   @Field(() => PageInfo, { nullable: false })
   pageInfo!: PageInfo;
@@ -83,40 +83,40 @@ export class ConnectionPageInputOptions {
 }
 
 @ArgsType()
-export class AccountConnectionWhereArgs extends ConnectionPageInputOptions {
-  @Field(() => AccountWhereInput, { nullable: true })
-  where?: AccountWhereInput;
+export class MarketConnectionWhereArgs extends ConnectionPageInputOptions {
+  @Field(() => MarketWhereInput, { nullable: true })
+  where?: MarketWhereInput;
 
-  @Field(() => AccountOrderByEnum, { nullable: true })
-  orderBy?: [AccountOrderByEnum];
+  @Field(() => MarketOrderByEnum, { nullable: true })
+  orderBy?: [MarketOrderByEnum];
 }
 
-@Resolver(Account)
-export class AccountResolver {
-  constructor(@Inject('AccountService') public readonly service: AccountService) {}
+@Resolver(Market)
+export class MarketResolver {
+  constructor(@Inject('MarketService') public readonly service: MarketService) {}
 
-  @Query(() => [Account])
-  async accounts(
-    @Args() { where, orderBy, limit, offset }: AccountWhereArgs,
+  @Query(() => [Market])
+  async markets(
+    @Args() { where, orderBy, limit, offset }: MarketWhereArgs,
     @Fields() fields: string[]
-  ): Promise<Account[]> {
-    return this.service.find<AccountWhereInput>(where, orderBy, limit, offset, fields);
+  ): Promise<Market[]> {
+    return this.service.find<MarketWhereInput>(where, orderBy, limit, offset, fields);
   }
 
-  @Query(() => Account, { nullable: true })
-  async accountByUniqueInput(
-    @Arg('where') where: AccountWhereUniqueInput,
+  @Query(() => Market, { nullable: true })
+  async marketByUniqueInput(
+    @Arg('where') where: MarketWhereUniqueInput,
     @Fields() fields: string[]
-  ): Promise<Account | null> {
+  ): Promise<Market | null> {
     const result = await this.service.find(where, undefined, 1, 0, fields);
     return result && result.length >= 1 ? result[0] : null;
   }
 
-  @Query(() => AccountConnection)
-  async accountsConnection(
-    @Args() { where, orderBy, ...pageOptions }: AccountConnectionWhereArgs,
+  @Query(() => MarketConnection)
+  async marketsConnection(
+    @Args() { where, orderBy, ...pageOptions }: MarketConnectionWhereArgs,
     @Info() info: any
-  ): Promise<AccountConnection> {
+  ): Promise<MarketConnection> {
     const rawFields = graphqlFields(info, {}, { excludedFields: ['__typename'] });
 
     let result: any = {
@@ -130,18 +130,18 @@ export class AccountResolver {
     // If the related database table does not have any records then an error is thrown to the client
     // by warthog
     try {
-      result = await this.service.findConnection<AccountWhereInput>(where, orderBy, pageOptions, rawFields);
+      result = await this.service.findConnection<MarketWhereInput>(where, orderBy, pageOptions, rawFields);
     } catch (err: any) {
       console.log(err);
       // TODO: should continue to return this on `Error: Items is empty` or throw the error
       if (!(err.message as string).includes('Items is empty')) throw err;
     }
 
-    return result as Promise<AccountConnection>;
+    return result as Promise<MarketConnection>;
   }
 
-  @FieldResolver(() => HistoricalBalance)
-  async historicalBalances(@Root() r: Account, @Ctx() ctx: BaseContext): Promise<HistoricalBalance[] | null> {
-    return ctx.dataLoader.loaders.Account.historicalBalances.load(r);
+  @FieldResolver(() => MarketData)
+  async marketData(@Root() r: Market, @Ctx() ctx: BaseContext): Promise<MarketData | null> {
+    return ctx.dataLoader.loaders.Market.marketData.load(r);
   }
 }
