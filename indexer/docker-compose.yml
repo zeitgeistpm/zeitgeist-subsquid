@@ -24,6 +24,7 @@ services:
       - BLOCK_HEIGHT=0 # starting block height
       - TYPES_JSON=types.json
       - WS_PROVIDER_ENDPOINT_URI=wss://bsr.zeitgeist.pm
+      - DEBUG=hydra-indexer:*
     volumes:
       - ./types.json:/hydra/packages/hydra-indexer/types.json
     depends_on:
