@@ -22,7 +22,7 @@ services:
     env_file:
       - .env
     environment:
-      - INDEXER_ENDPOINT_URL=http://172.17.0.1:4010/v1/graphql
+      - INDEXER_ENDPOINT_URL=https://indexer.zeitgeist.pm/v1/graphql
       - DB_HOST=db
       - POLL_INTERVAL_MS=300
       - DEBUG=hydra-processor:*
