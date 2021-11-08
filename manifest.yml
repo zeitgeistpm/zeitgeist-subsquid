@@ -19,5 +19,7 @@ mappings:
   eventHandlers:
     - event: predictionMarkets.MarketCreated
       handler: predictionMarketCreated
+    - event: swaps.PoolCreate
+      handler: swapPoolCreated
   preBlockHooks:
   postBlockHooks:

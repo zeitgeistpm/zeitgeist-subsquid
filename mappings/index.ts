@@ -1,7 +1,7 @@
 import BN from 'bn.js'
 import { DatabaseManager, EventContext, StoreContext } from '@subsquid/hydra-common'
-import { Authorized, Block, Categorical, Court, Market, MarketData, Scalar, SimpleDisputes, Timestamp } from '../generated/model'
-import { PredictionMarkets } from '../chain'
+import { Authorized, Block, Categorical, Court, Market, MarketData, Pool, Scalar, SimpleDisputes, Timestamp } from '../generated/model'
+import { PredictionMarkets, Swaps } from '../chain'
 
 export async function predictionMarketCreated ({
   store,
@@ -70,6 +70,29 @@ export async function predictionMarketCreated ({
 
   console.log(`Saving market: ${JSON.stringify(newMarket, null, 2)}`)
   await store.save<Market>(newMarket)
+}
+
+export async function swapPoolCreated ({
+  store,
+  event,
+  block,
+  extrinsic,
+}: EventContext & StoreContext) {
+  const newPool = new Pool()
+  const [cpep, pool] = new Swaps.PoolCreateEvent(event).params
+  newPool.poolId = cpep.pool_id.toNumber();
+  newPool.baseAsset = pool.base_asset.toString();
+  newPool.marketId = pool.market_id;
+  newPool.poolStatus = pool.pool_status.toString();
+  newPool.scoringRule = pool.scoring_rule;
+  newPool.swapFee = pool.swap_fee.toString();
+  newPool.totalSubsidy = pool.total_subsidy.toString();
+  newPool.totalWeight = pool.total_weight.toString();
+  newPool.blockNumber = block.height
+  newPool.timestamp = new BN(block.timestamp)
+
+  console.log(`Saving pool: ${JSON.stringify(newPool, null, 2)}`)
+  await store.save<Pool>(newPool)
 }
 
 async function getOrCreate<T extends {id: string}>(
