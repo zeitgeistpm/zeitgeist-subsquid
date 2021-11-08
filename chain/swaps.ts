@@ -29,9 +29,9 @@ export namespace Swaps {
           "CommonPoolEventParams",
           [this.ctx.params[0].value]
         ),
-        createTypeUnsafe<Pool & Codec>(typeRegistry, "Pool", [
+        createTypeUnsafe<Pool & Codec>(typeRegistry, "Pool", this.removeWeights([
           this.ctx.params[1].value,
-        ]),
+        ])),
       ];
     }
 
@@ -46,6 +46,13 @@ export namespace Swaps {
         }
       });
       return valid;
+    }
+
+    removeWeights(arg: any[]): any[] {
+      if (arg[0].weights) {
+        arg[0].weights = null;
+      }
+      return arg;
     }
   }
 }
