@@ -4,6 +4,8 @@ import { Market } from '../modules/market/market.model';
 export { Market };
 import { MarketData } from '../modules/market-data/market-data.model';
 export { MarketData };
+import { Pool } from '../modules/pool/pool.model';
+export { Pool };
 import { Transfer } from '../modules/transfer/transfer.model';
 export { Transfer };
 

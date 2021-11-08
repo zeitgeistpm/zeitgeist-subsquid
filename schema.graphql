@@ -68,3 +68,16 @@ type MarketData @entity {
   blockNumber: Int!
   timestamp: BigInt!
 }
+
+type Pool @entity {
+  poolId: Int!
+  baseAsset: String!
+  marketId: Int!
+  poolStatus: String!
+  scoringRule: String!
+  swapFee: String!
+  totalSubsidy: String!
+  totalWeight: String!
+  blockNumber: Int!
+  timestamp: BigInt!
+}
