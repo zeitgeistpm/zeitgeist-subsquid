@@ -11,6 +11,7 @@ typegen:
     source: ws://127.0.0.1:9944
   events:
     - predictionMarkets.MarketCreated
+    - swaps.PoolCreate
   outDir: chain
   
 mappings:

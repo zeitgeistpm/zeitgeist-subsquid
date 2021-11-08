@@ -10,3 +10,4 @@ typeRegistry.register(
 export { typeRegistry };
 
 export * from "./prediction-markets";
+export * from "./swaps";
