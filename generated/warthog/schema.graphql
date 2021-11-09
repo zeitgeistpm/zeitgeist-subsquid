@@ -466,6 +466,180 @@ type PageInfo {
   endCursor: String
 }
 
+type Pool implements BaseGraphQLObject {
+  id: ID!
+  createdAt: DateTime!
+  createdById: String!
+  updatedAt: DateTime
+  updatedById: String
+  deletedAt: DateTime
+  deletedById: String
+  version: Int!
+  poolId: Int!
+  baseAsset: String!
+  marketId: Int!
+  poolStatus: String!
+  scoringRule: String!
+  swapFee: String!
+  totalSubsidy: String!
+  totalWeight: String!
+  blockNumber: Int!
+  timestamp: BigInt!
+}
+
+type PoolConnection {
+  totalCount: Int!
+  edges: [PoolEdge!]!
+  pageInfo: PageInfo!
+}
+
+input PoolCreateInput {
+  poolId: Float!
+  baseAsset: String!
+  marketId: Float!
+  poolStatus: String!
+  scoringRule: String!
+  swapFee: String!
+  totalSubsidy: String!
+  totalWeight: String!
+  blockNumber: Float!
+  timestamp: String!
+}
+
+type PoolEdge {
+  node: Pool!
+  cursor: String!
+}
+
+enum PoolOrderByInput {
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  deletedAt_ASC
+  deletedAt_DESC
+  poolId_ASC
+  poolId_DESC
+  baseAsset_ASC
+  baseAsset_DESC
+  marketId_ASC
+  marketId_DESC
+  poolStatus_ASC
+  poolStatus_DESC
+  scoringRule_ASC
+  scoringRule_DESC
+  swapFee_ASC
+  swapFee_DESC
+  totalSubsidy_ASC
+  totalSubsidy_DESC
+  totalWeight_ASC
+  totalWeight_DESC
+  blockNumber_ASC
+  blockNumber_DESC
+  timestamp_ASC
+  timestamp_DESC
+}
+
+input PoolUpdateInput {
+  poolId: Float
+  baseAsset: String
+  marketId: Float
+  poolStatus: String
+  scoringRule: String
+  swapFee: String
+  totalSubsidy: String
+  totalWeight: String
+  blockNumber: Float
+  timestamp: String
+}
+
+input PoolWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  poolId_eq: Int
+  poolId_gt: Int
+  poolId_gte: Int
+  poolId_lt: Int
+  poolId_lte: Int
+  poolId_in: [Int!]
+  baseAsset_eq: String
+  baseAsset_contains: String
+  baseAsset_startsWith: String
+  baseAsset_endsWith: String
+  baseAsset_in: [String!]
+  marketId_eq: Int
+  marketId_gt: Int
+  marketId_gte: Int
+  marketId_lt: Int
+  marketId_lte: Int
+  marketId_in: [Int!]
+  poolStatus_eq: String
+  poolStatus_contains: String
+  poolStatus_startsWith: String
+  poolStatus_endsWith: String
+  poolStatus_in: [String!]
+  scoringRule_eq: String
+  scoringRule_contains: String
+  scoringRule_startsWith: String
+  scoringRule_endsWith: String
+  scoringRule_in: [String!]
+  swapFee_eq: String
+  swapFee_contains: String
+  swapFee_startsWith: String
+  swapFee_endsWith: String
+  swapFee_in: [String!]
+  totalSubsidy_eq: String
+  totalSubsidy_contains: String
+  totalSubsidy_startsWith: String
+  totalSubsidy_endsWith: String
+  totalSubsidy_in: [String!]
+  totalWeight_eq: String
+  totalWeight_contains: String
+  totalWeight_startsWith: String
+  totalWeight_endsWith: String
+  totalWeight_in: [String!]
+  blockNumber_eq: Int
+  blockNumber_gt: Int
+  blockNumber_gte: Int
+  blockNumber_lt: Int
+  blockNumber_lte: Int
+  blockNumber_in: [Int!]
+  timestamp_eq: BigInt
+  timestamp_gt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lt: BigInt
+  timestamp_lte: BigInt
+  timestamp_in: [BigInt!]
+  AND: [PoolWhereInput!]
+  OR: [PoolWhereInput!]
+}
+
+input PoolWhereUniqueInput {
+  id: ID!
+}
+
 type ProcessorState {
   lastCompleteBlock: Float!
   lastProcessedEvent: String!
@@ -483,6 +657,9 @@ type Query {
   markets(offset: Int, limit: Int = 50, where: MarketWhereInput, orderBy: [MarketOrderByInput!]): [Market!]!
   marketByUniqueInput(where: MarketWhereUniqueInput!): Market
   marketsConnection(first: Int, after: String, last: Int, before: String, where: MarketWhereInput, orderBy: [MarketOrderByInput!]): MarketConnection!
+  pools(offset: Int, limit: Int = 50, where: PoolWhereInput, orderBy: [PoolOrderByInput!]): [Pool!]!
+  poolByUniqueInput(where: PoolWhereUniqueInput!): Pool
+  poolsConnection(first: Int, after: String, last: Int, before: String, where: PoolWhereInput, orderBy: [PoolOrderByInput!]): PoolConnection!
   commentSearch(whereTransfer: TransferWhereInput, skip: Int = 0, limit: Int = 5, text: String!): [CommentSearchFTSOutput!]!
   transfers(offset: Int, limit: Int = 50, where: TransferWhereInput, orderBy: [TransferOrderByInput!]): [Transfer!]!
   transferByUniqueInput(where: TransferWhereUniqueInput!): Transfer

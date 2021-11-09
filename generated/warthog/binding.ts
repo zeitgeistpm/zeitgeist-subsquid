@@ -15,6 +15,9 @@ export interface Query {
     markets: <T = Array<Market>>(args: { offset?: Int | null, limit?: Int | null, where?: MarketWhereInput | null, orderBy?: Array<MarketOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     marketByUniqueInput: <T = Market | null>(args: { where: MarketWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
     marketsConnection: <T = MarketConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: MarketWhereInput | null, orderBy?: Array<MarketOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
+    pools: <T = Array<Pool>>(args: { offset?: Int | null, limit?: Int | null, where?: PoolWhereInput | null, orderBy?: Array<PoolOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
+    poolByUniqueInput: <T = Pool | null>(args: { where: PoolWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
+    poolsConnection: <T = PoolConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: PoolWhereInput | null, orderBy?: Array<PoolOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     commentSearch: <T = Array<CommentSearchFTSOutput>>(args: { whereTransfer?: TransferWhereInput | null, skip?: Int | null, limit?: Int | null, text: String }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     transfers: <T = Array<Transfer>>(args: { offset?: Int | null, limit?: Int | null, where?: TransferWhereInput | null, orderBy?: Array<TransferOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     transferByUniqueInput: <T = Transfer | null>(args: { where: TransferWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
@@ -96,6 +99,33 @@ export type MarketOrderByInput =   'createdAt_ASC' |
   'oracle_DESC' |
   'marketData_ASC' |
   'marketData_DESC'
+
+export type PoolOrderByInput =   'createdAt_ASC' |
+  'createdAt_DESC' |
+  'updatedAt_ASC' |
+  'updatedAt_DESC' |
+  'deletedAt_ASC' |
+  'deletedAt_DESC' |
+  'poolId_ASC' |
+  'poolId_DESC' |
+  'baseAsset_ASC' |
+  'baseAsset_DESC' |
+  'marketId_ASC' |
+  'marketId_DESC' |
+  'poolStatus_ASC' |
+  'poolStatus_DESC' |
+  'scoringRule_ASC' |
+  'scoringRule_DESC' |
+  'swapFee_ASC' |
+  'swapFee_DESC' |
+  'totalSubsidy_ASC' |
+  'totalSubsidy_DESC' |
+  'totalWeight_ASC' |
+  'totalWeight_DESC' |
+  'blockNumber_ASC' |
+  'blockNumber_DESC' |
+  'timestamp_ASC' |
+  'timestamp_DESC'
 
 export type TransferOrderByInput =   'createdAt_ASC' |
   'createdAt_DESC' |
@@ -358,6 +388,119 @@ export interface MarketWhereUniqueInput {
   id: ID_Output
 }
 
+export interface PoolCreateInput {
+  poolId: Float
+  baseAsset: String
+  marketId: Float
+  poolStatus: String
+  scoringRule: String
+  swapFee: String
+  totalSubsidy: String
+  totalWeight: String
+  blockNumber: Float
+  timestamp: String
+}
+
+export interface PoolUpdateInput {
+  poolId?: Float | null
+  baseAsset?: String | null
+  marketId?: Float | null
+  poolStatus?: String | null
+  scoringRule?: String | null
+  swapFee?: String | null
+  totalSubsidy?: String | null
+  totalWeight?: String | null
+  blockNumber?: Float | null
+  timestamp?: String | null
+}
+
+export interface PoolWhereInput {
+  id_eq?: ID_Input | null
+  id_in?: ID_Output[] | ID_Output | null
+  createdAt_eq?: DateTime | null
+  createdAt_lt?: DateTime | null
+  createdAt_lte?: DateTime | null
+  createdAt_gt?: DateTime | null
+  createdAt_gte?: DateTime | null
+  createdById_eq?: ID_Input | null
+  createdById_in?: ID_Output[] | ID_Output | null
+  updatedAt_eq?: DateTime | null
+  updatedAt_lt?: DateTime | null
+  updatedAt_lte?: DateTime | null
+  updatedAt_gt?: DateTime | null
+  updatedAt_gte?: DateTime | null
+  updatedById_eq?: ID_Input | null
+  updatedById_in?: ID_Output[] | ID_Output | null
+  deletedAt_all?: Boolean | null
+  deletedAt_eq?: DateTime | null
+  deletedAt_lt?: DateTime | null
+  deletedAt_lte?: DateTime | null
+  deletedAt_gt?: DateTime | null
+  deletedAt_gte?: DateTime | null
+  deletedById_eq?: ID_Input | null
+  deletedById_in?: ID_Output[] | ID_Output | null
+  poolId_eq?: Int | null
+  poolId_gt?: Int | null
+  poolId_gte?: Int | null
+  poolId_lt?: Int | null
+  poolId_lte?: Int | null
+  poolId_in?: Int[] | Int | null
+  baseAsset_eq?: String | null
+  baseAsset_contains?: String | null
+  baseAsset_startsWith?: String | null
+  baseAsset_endsWith?: String | null
+  baseAsset_in?: String[] | String | null
+  marketId_eq?: Int | null
+  marketId_gt?: Int | null
+  marketId_gte?: Int | null
+  marketId_lt?: Int | null
+  marketId_lte?: Int | null
+  marketId_in?: Int[] | Int | null
+  poolStatus_eq?: String | null
+  poolStatus_contains?: String | null
+  poolStatus_startsWith?: String | null
+  poolStatus_endsWith?: String | null
+  poolStatus_in?: String[] | String | null
+  scoringRule_eq?: String | null
+  scoringRule_contains?: String | null
+  scoringRule_startsWith?: String | null
+  scoringRule_endsWith?: String | null
+  scoringRule_in?: String[] | String | null
+  swapFee_eq?: String | null
+  swapFee_contains?: String | null
+  swapFee_startsWith?: String | null
+  swapFee_endsWith?: String | null
+  swapFee_in?: String[] | String | null
+  totalSubsidy_eq?: String | null
+  totalSubsidy_contains?: String | null
+  totalSubsidy_startsWith?: String | null
+  totalSubsidy_endsWith?: String | null
+  totalSubsidy_in?: String[] | String | null
+  totalWeight_eq?: String | null
+  totalWeight_contains?: String | null
+  totalWeight_startsWith?: String | null
+  totalWeight_endsWith?: String | null
+  totalWeight_in?: String[] | String | null
+  blockNumber_eq?: Int | null
+  blockNumber_gt?: Int | null
+  blockNumber_gte?: Int | null
+  blockNumber_lt?: Int | null
+  blockNumber_lte?: Int | null
+  blockNumber_in?: Int[] | Int | null
+  timestamp_eq?: BigInt | null
+  timestamp_gt?: BigInt | null
+  timestamp_gte?: BigInt | null
+  timestamp_lt?: BigInt | null
+  timestamp_lte?: BigInt | null
+  timestamp_in?: BigInt[] | BigInt | null
+  AND?: PoolWhereInput[] | PoolWhereInput | null
+  OR?: PoolWhereInput[] | PoolWhereInput | null
+}
+
+export interface PoolWhereUniqueInput {
+  id: ID_Output
+}
+
 export interface TransferCreateInput {
   from: String
   to: String
@@ -607,6 +750,38 @@ export interface PageInfo {
   hasPreviousPage: Boolean
   startCursor?: String | null
   endCursor?: String | null
+}
+
+export interface Pool extends BaseGraphQLObject {
+  id: ID_Output
+  createdAt: DateTime
+  createdById: String
+  updatedAt?: DateTime | null
+  updatedById?: String | null
+  deletedAt?: DateTime | null
+  deletedById?: String | null
+  version: Int
+  poolId: Int
+  baseAsset: String
+  marketId: Int
+  poolStatus: String
+  scoringRule: String
+  swapFee: String
+  totalSubsidy: String
+  totalWeight: String
+  blockNumber: Int
+  timestamp: BigInt
+}
+
+export interface PoolConnection {
+  totalCount: Int
+  edges: Array<PoolEdge>
+  pageInfo: PageInfo
+}
+
+export interface PoolEdge {
+  node: Pool
+  cursor: String
 }
 
 export interface ProcessorState {

@@ -8,7 +8,7 @@ import { AccountId } from "@polkadot/types/interfaces";
 
 export namespace PredictionMarkets {
   /**
-   *  A market has been created [market_id, creator]
+   *  A market has been created \[market_id, creator\]
    *
    *  Event parameters: [MarketIdOf<T>, Market<T::AccountId, T::BlockNumber, MomentOf<T>>, <T as frame_system::Config>::AccountId, ]
    */
@@ -26,9 +26,9 @@ export namespace PredictionMarkets {
         createTypeUnsafe<MarketIdOf & Codec>(typeRegistry, "MarketIdOf", [
           this.ctx.params[0].value,
         ]),
-        (createTypeUnsafe<Market & Codec>(typeRegistry, "Market", [
+        createTypeUnsafe<Market & Codec>(typeRegistry, "Market", [
           this.ctx.params[1].value,
-        ]) as any) as Market,
+        ]),
         createTypeUnsafe<AccountId & Codec>(typeRegistry, "AccountId", [
           this.ctx.params[2].value,
         ]),
