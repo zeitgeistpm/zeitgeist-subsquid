@@ -97,6 +97,12 @@ export type MarketOrderByInput =   'createdAt_ASC' |
   'creation_DESC' |
   'oracle_ASC' |
   'oracle_DESC' |
+  'slug_ASC' |
+  'slug_DESC' |
+  'question_ASC' |
+  'question_DESC' |
+  'description_ASC' |
+  'description_DESC' |
   'marketData_ASC' |
   'marketData_DESC'
 
@@ -235,6 +241,9 @@ export interface MarketCreateInput {
   creation: String
   oracle: String
   marketType: JSONObject
+  slug?: String | null
+  question?: String | null
+  description?: String | null
   marketData: ID_Output
 }
 
@@ -329,6 +338,9 @@ export interface MarketUpdateInput {
   creation?: String | null
   oracle?: String | null
   marketType?: JSONObject | null
+  slug?: String | null
+  question?: String | null
+  description?: String | null
   marketData?: ID_Input | null
 }
 
@@ -379,6 +391,21 @@ export interface MarketWhereInput {
   oracle_endsWith?: String | null
   oracle_in?: String[] | String | null
   marketType_json?: JSONObject | null
+  slug_eq?: String | null
+  slug_contains?: String | null
+  slug_startsWith?: String | null
+  slug_endsWith?: String | null
+  slug_in?: String[] | String | null
+  question_eq?: String | null
+  question_contains?: String | null
+  question_startsWith?: String | null
+  question_endsWith?: String | null
+  question_in?: String[] | String | null
+  description_eq?: String | null
+  description_contains?: String | null
+  description_startsWith?: String | null
+  description_endsWith?: String | null
+  description_in?: String[] | String | null
   marketData?: MarketDataWhereInput | null
   AND?: MarketWhereInput[] | MarketWhereInput | null
   OR?: MarketWhereInput[] | MarketWhereInput | null
@@ -700,6 +727,9 @@ export interface Market extends BaseGraphQLObject {
   creation: String
   oracle: String
   marketType: MarketType
+  slug?: String | null
+  question?: String | null
+  description?: String | null
   marketData: MarketData
   marketDataId: String
 }

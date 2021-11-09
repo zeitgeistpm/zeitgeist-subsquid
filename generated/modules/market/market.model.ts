@@ -29,6 +29,21 @@ export class Market extends BaseModel {
   @Field((type) => MarketType, {})
   marketType!: typeof MarketType;
 
+  @StringField({
+    nullable: true,
+  })
+  slug?: string;
+
+  @StringField({
+    nullable: true,
+  })
+  question?: string;
+
+  @StringField({
+    nullable: true,
+  })
+  description?: string;
+
   @ManyToOne(() => MarketData, (param: MarketData) => param.marketmarketData, {
     skipGraphQLField: true,
 

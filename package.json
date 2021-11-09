@@ -24,6 +24,13 @@
     "@subsquid/hydra-processor": "4.2.0-alpha.0",
     "@subsquid/hydra-typegen": "4.2.0-alpha.0",
     "@zeitgeistpm/types": "^0.3.5",
-    "tslib": "^2.0.0"
+    "tslib": "^2.0.0",
+    "ipfs-http-client": "^49.0.4",
+    "it-all": "^1.0.4",
+    "uint8arrays": "^2.1.4"
+  },
+  "devDependencies": {
+    "ts-node": "^9.0.0",
+    "typescript": "4.3.4"
   }
 }

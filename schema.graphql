@@ -56,6 +56,9 @@ type Market @entity {
   creation: String!
   oracle: String!
   marketType: MarketType!
+  slug: String
+  question: String
+  description: String
   marketData: MarketData!
 }
 

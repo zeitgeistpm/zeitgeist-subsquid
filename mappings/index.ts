@@ -2,6 +2,7 @@ import BN from 'bn.js'
 import { DatabaseManager, EventContext, StoreContext } from '@subsquid/hydra-common'
 import { Authorized, Block, Categorical, Court, Market, MarketData, Pool, Scalar, SimpleDisputes, Timestamp } from '../generated/model'
 import { PredictionMarkets, Swaps } from '../chain'
+import IPFS from './util'
 
 export async function predictionMarketCreated ({
   store,
@@ -12,6 +13,13 @@ export async function predictionMarketCreated ({
   const newMarket = new Market()
   var newData = new MarketData()
   const [marketIdOf, market, accountId] = new PredictionMarkets.MarketCreatedEvent(event).params
+
+  const metadata = await decodeMarketMetadata(market.metadata.toString())
+  if (metadata) {
+    newMarket.slug = metadata.slug
+    newMarket.question = metadata.question
+    newMarket.description = metadata.description
+  }
 
   if (market.market_type.isCategorical) {
     const categorical = new Categorical()
@@ -95,6 +103,21 @@ export async function swapPoolCreated ({
   await store.save<Pool>(newPool)
 }
 
+async function decodeMarketMetadata(
+  metadata: string,
+): Promise<DecodedMarketMetadata|undefined> {
+
+  try {
+    if (metadata) {
+      const ipfs = new IPFS();
+      const raw = await ipfs.read(metadata);
+      return raw ? JSON.parse(raw) as DecodedMarketMetadata: undefined
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 async function getOrCreate<T extends {id: string}>(
   store: DatabaseManager,
   entityConstructor: EntityConstructor<T>,
@@ -113,7 +136,12 @@ async function getOrCreate<T extends {id: string}>(
   return e
 }
 
-
 type EntityConstructor<T> = {
   new (...args: any[]): T
 }
+
+type DecodedMarketMetadata = {
+  slug: string;
+  question: string;
+  description: string;
+};
