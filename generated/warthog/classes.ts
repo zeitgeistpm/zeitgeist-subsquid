@@ -239,6 +239,15 @@ export enum MarketOrderByEnum {
   oracle_ASC = "oracle_ASC",
   oracle_DESC = "oracle_DESC",
 
+  slug_ASC = "slug_ASC",
+  slug_DESC = "slug_DESC",
+
+  question_ASC = "question_ASC",
+  question_DESC = "question_DESC",
+
+  description_ASC = "description_ASC",
+  description_DESC = "description_DESC",
+
   marketData_ASC = "marketData_ASC",
   marketData_DESC = "marketData_DESC",
 }
@@ -387,6 +396,51 @@ export class MarketWhereInput {
   @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
   marketType_json?: JsonObject;
 
+  @TypeGraphQLField({ nullable: true })
+  slug_eq?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  slug_contains?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  slug_startsWith?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  slug_endsWith?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  slug_in?: string[];
+
+  @TypeGraphQLField({ nullable: true })
+  question_eq?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  question_contains?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  question_startsWith?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  question_endsWith?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  question_in?: string[];
+
+  @TypeGraphQLField({ nullable: true })
+  description_eq?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  description_contains?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  description_startsWith?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  description_endsWith?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  description_in?: string[];
+
   @TypeGraphQLField(() => MarketDataWhereInput, { nullable: true })
   marketData?: MarketDataWhereInput;
 
@@ -420,6 +474,15 @@ export class MarketCreateInput {
   @TypeGraphQLField(() => GraphQLJSONObject)
   marketType!: JsonObject;
 
+  @TypeGraphQLField({ nullable: true })
+  slug?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  question?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  description?: string;
+
   @TypeGraphQLField(() => ID)
   marketData!: string;
 }
@@ -440,6 +503,15 @@ export class MarketUpdateInput {
 
   @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
   marketType?: JsonObject;
+
+  @TypeGraphQLField({ nullable: true })
+  slug?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  question?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  description?: string;
 
   @TypeGraphQLField(() => ID, { nullable: true })
   marketData?: string;

@@ -211,6 +211,9 @@ type Market implements BaseGraphQLObject {
   creation: String!
   oracle: String!
   marketType: MarketType!
+  slug: String
+  question: String
+  description: String
   marketData: MarketData!
   marketDataId: String!
 }
@@ -227,6 +230,9 @@ input MarketCreateInput {
   creation: String!
   oracle: String!
   marketType: JSONObject!
+  slug: String
+  question: String
+  description: String
   marketData: ID!
 }
 
@@ -386,6 +392,12 @@ enum MarketOrderByInput {
   creation_DESC
   oracle_ASC
   oracle_DESC
+  slug_ASC
+  slug_DESC
+  question_ASC
+  question_DESC
+  description_ASC
+  description_DESC
   marketData_ASC
   marketData_DESC
 }
@@ -400,6 +412,9 @@ input MarketUpdateInput {
   creation: String
   oracle: String
   marketType: JSONObject
+  slug: String
+  question: String
+  description: String
   marketData: ID
 }
 
@@ -450,6 +465,21 @@ input MarketWhereInput {
   oracle_endsWith: String
   oracle_in: [String!]
   marketType_json: JSONObject
+  slug_eq: String
+  slug_contains: String
+  slug_startsWith: String
+  slug_endsWith: String
+  slug_in: [String!]
+  question_eq: String
+  question_contains: String
+  question_startsWith: String
+  question_endsWith: String
+  question_in: [String!]
+  description_eq: String
+  description_contains: String
+  description_startsWith: String
+  description_endsWith: String
+  description_in: [String!]
   marketData: MarketDataWhereInput
   AND: [MarketWhereInput!]
   OR: [MarketWhereInput!]
