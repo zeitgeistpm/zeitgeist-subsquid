@@ -1,6 +1,6 @@
 import BN from 'bn.js'
 import { DatabaseManager, EventContext, StoreContext } from '@subsquid/hydra-common'
-import { Authorized, Block, Categorical, Court, Market, MarketData, Pool, Scalar, SimpleDisputes, Timestamp } from '../generated/model'
+import { Authorized, Block, Categorical, Court, Market, MarketHistory, Pool, Scalar, SimpleDisputes, Timestamp } from '../generated/model'
 import { PredictionMarkets, Swaps } from '../chain'
 import IPFS from './util'
 
@@ -10,9 +10,14 @@ export async function predictionMarketCreated ({
   block,
   extrinsic,
 }: EventContext & StoreContext) {
-  const newMarket = new Market()
-  var newData = new MarketData()
+  
   const [marketIdOf, market, accountId] = new PredictionMarkets.MarketCreatedEvent(event).params
+
+  const newMarket = new Market()
+  newMarket.marketId = marketIdOf.toNumber()
+  newMarket.creator = market.creator.toString()
+  newMarket.creation = market.creation.toString()
+  newMarket.oracle = market.oracle.toString()
 
   const metadata = await decodeMarketMetadata(market.metadata.toString())
   if (metadata) {
@@ -34,50 +39,50 @@ export async function predictionMarketCreated ({
   if (market.period.isBlock) {
     const block = new Block()
     block.value = market.period.asBlock.toString()
-    newData.period = block
+    newMarket.period = block
   } else {
     const timestamp = new Timestamp()
     timestamp.value = market.period.asTimestamp.toString()
-    newData.period = timestamp
+    newMarket.period = timestamp
   }
 
+  newMarket.scoringRule = market.scoring_rule.toString()
+  newMarket.status = market.status.toString()
+  
   if (market.report !== null) {
-    newData.report = market.report.toString()
+    newMarket.report = market.report.toString()
   }
-
   if (market.resolved_outcome !== null) {
-    newData.resolvedOutcome = market.resolved_outcome.toString()
+    newMarket.resolvedOutcome = market.resolved_outcome.toString()
   }
 
   if (market.mdm.isAuthorized) {
     const authorized = new Authorized()
     authorized.value = market.mdm.asAuthorized.toString()
-    newData.mdm = authorized
+    newMarket.mdm = authorized
   } else if (market.mdm.isCourt) {
     const court = new Court()
     court.value = market.mdm.isCourt
-    newData.mdm = court
+    newMarket.mdm = court
   } else {
     const simpleDisputes = new SimpleDisputes()
     simpleDisputes.value = market.mdm.isSimpleDisputes
-    newData.mdm = simpleDisputes
+    newMarket.mdm = simpleDisputes
   }
-
-  newData.id = marketIdOf.toString()
-  newData.status = market.status.toString()
-  newData.blockNumber = block.height
-  newData.timestamp = new BN(block.timestamp)
-
-  await store.save<MarketData>(newData)
-
-  newMarket.marketId = marketIdOf.toNumber()
-  newMarket.creator = market.creator.toString()
-  newMarket.creation = market.creation.toString()
-  newMarket.oracle = market.oracle.toString()
-  newMarket.marketData = newData
 
   console.log(`Saving market: ${JSON.stringify(newMarket, null, 2)}`)
   await store.save<Market>(newMarket)
+
+  const newHistory = new MarketHistory()
+  newHistory.market = newMarket
+  newHistory.status = market.status.toString()
+  newHistory.report = newMarket.report
+  newHistory.resolvedOutcome = newMarket.resolvedOutcome
+  newHistory.blockNumber = block.height
+  newHistory.timestamp = new BN(block.timestamp)
+
+  console.log(`Saving market history: ${JSON.stringify(newHistory, null, 2)}`)
+  await store.save<MarketHistory>(newHistory)
 }
 
 export async function swapPoolCreated ({
