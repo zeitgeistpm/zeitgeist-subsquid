@@ -28,7 +28,7 @@ import { BlockTimestamp } from "../modules/block-timestamp/block-timestamp.model
 // @ts-ignore
 import { Market } from "../modules/market/market.model";
 // @ts-ignore
-import { MarketData } from "../modules/market-data/market-data.model";
+import { MarketHistory } from "../modules/market-history/market-history.model";
 // @ts-ignore
 import { Pool } from "../modules/pool/pool.model";
 // @ts-ignore
@@ -248,8 +248,17 @@ export enum MarketOrderByEnum {
   description_ASC = "description_ASC",
   description_DESC = "description_DESC",
 
-  marketData_ASC = "marketData_ASC",
-  marketData_DESC = "marketData_DESC",
+  scoringRule_ASC = "scoringRule_ASC",
+  scoringRule_DESC = "scoringRule_DESC",
+
+  status_ASC = "status_ASC",
+  status_DESC = "status_DESC",
+
+  report_ASC = "report_ASC",
+  report_DESC = "report_DESC",
+
+  resolvedOutcome_ASC = "resolvedOutcome_ASC",
+  resolvedOutcome_DESC = "resolvedOutcome_DESC",
 }
 
 registerEnumType(MarketOrderByEnum, {
@@ -393,9 +402,6 @@ export class MarketWhereInput {
   @TypeGraphQLField(() => [String], { nullable: true })
   oracle_in?: string[];
 
-  @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
-  marketType_json?: JsonObject;
-
   @TypeGraphQLField({ nullable: true })
   slug_eq?: string;
 
@@ -441,8 +447,83 @@ export class MarketWhereInput {
   @TypeGraphQLField(() => [String], { nullable: true })
   description_in?: string[];
 
-  @TypeGraphQLField(() => MarketDataWhereInput, { nullable: true })
-  marketData?: MarketDataWhereInput;
+  @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
+  marketType_json?: JsonObject;
+
+  @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
+  period_json?: JsonObject;
+
+  @TypeGraphQLField({ nullable: true })
+  scoringRule_eq?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  scoringRule_contains?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  scoringRule_startsWith?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  scoringRule_endsWith?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  scoringRule_in?: string[];
+
+  @TypeGraphQLField({ nullable: true })
+  status_eq?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  status_contains?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  status_startsWith?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  status_endsWith?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  status_in?: string[];
+
+  @TypeGraphQLField({ nullable: true })
+  report_eq?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  report_contains?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  report_startsWith?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  report_endsWith?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  report_in?: string[];
+
+  @TypeGraphQLField({ nullable: true })
+  resolvedOutcome_eq?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  resolvedOutcome_contains?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  resolvedOutcome_startsWith?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  resolvedOutcome_endsWith?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  resolvedOutcome_in?: string[];
+
+  @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
+  mdm_json?: JsonObject;
+
+  @TypeGraphQLField(() => MarketHistoryWhereInput, { nullable: true })
+  marketHistory_none?: MarketHistoryWhereInput;
+
+  @TypeGraphQLField(() => MarketHistoryWhereInput, { nullable: true })
+  marketHistory_some?: MarketHistoryWhereInput;
+
+  @TypeGraphQLField(() => MarketHistoryWhereInput, { nullable: true })
+  marketHistory_every?: MarketHistoryWhereInput;
 
   @TypeGraphQLField(() => MarketWhereInput, { nullable: true })
   AND?: [MarketWhereInput];
@@ -471,9 +552,6 @@ export class MarketCreateInput {
   @TypeGraphQLField()
   oracle!: string;
 
-  @TypeGraphQLField(() => GraphQLJSONObject)
-  marketType!: JsonObject;
-
   @TypeGraphQLField({ nullable: true })
   slug?: string;
 
@@ -483,8 +561,26 @@ export class MarketCreateInput {
   @TypeGraphQLField({ nullable: true })
   description?: string;
 
-  @TypeGraphQLField(() => ID)
-  marketData!: string;
+  @TypeGraphQLField(() => GraphQLJSONObject)
+  marketType!: JsonObject;
+
+  @TypeGraphQLField(() => GraphQLJSONObject)
+  period!: JsonObject;
+
+  @TypeGraphQLField()
+  scoringRule!: string;
+
+  @TypeGraphQLField()
+  status!: string;
+
+  @TypeGraphQLField()
+  report!: string;
+
+  @TypeGraphQLField()
+  resolvedOutcome!: string;
+
+  @TypeGraphQLField(() => GraphQLJSONObject)
+  mdm!: JsonObject;
 }
 
 @TypeGraphQLInputType()
@@ -501,9 +597,6 @@ export class MarketUpdateInput {
   @TypeGraphQLField({ nullable: true })
   oracle?: string;
 
-  @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
-  marketType?: JsonObject;
-
   @TypeGraphQLField({ nullable: true })
   slug?: string;
 
@@ -513,8 +606,26 @@ export class MarketUpdateInput {
   @TypeGraphQLField({ nullable: true })
   description?: string;
 
-  @TypeGraphQLField(() => ID, { nullable: true })
-  marketData?: string;
+  @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
+  marketType?: JsonObject;
+
+  @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
+  period?: JsonObject;
+
+  @TypeGraphQLField({ nullable: true })
+  scoringRule?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  status?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  report?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  resolvedOutcome?: string;
+
+  @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
+  mdm?: JsonObject;
 }
 
 @ArgsType()
@@ -538,7 +649,7 @@ export class MarketUpdateArgs {
   @TypeGraphQLField() where!: MarketWhereUniqueInput;
 }
 
-export enum MarketDataOrderByEnum {
+export enum MarketHistoryOrderByEnum {
   createdAt_ASC = "createdAt_ASC",
   createdAt_DESC = "createdAt_DESC",
 
@@ -547,6 +658,9 @@ export enum MarketDataOrderByEnum {
 
   deletedAt_ASC = "deletedAt_ASC",
   deletedAt_DESC = "deletedAt_DESC",
+
+  market_ASC = "market_ASC",
+  market_DESC = "market_DESC",
 
   status_ASC = "status_ASC",
   status_DESC = "status_DESC",
@@ -564,12 +678,12 @@ export enum MarketDataOrderByEnum {
   timestamp_DESC = "timestamp_DESC",
 }
 
-registerEnumType(MarketDataOrderByEnum, {
-  name: "MarketDataOrderByInput",
+registerEnumType(MarketHistoryOrderByEnum, {
+  name: "MarketHistoryOrderByInput",
 });
 
 @TypeGraphQLInputType()
-export class MarketDataWhereInput {
+export class MarketHistoryWhereInput {
   @TypeGraphQLField(() => ID, { nullable: true })
   id_eq?: string;
 
@@ -642,9 +756,6 @@ export class MarketDataWhereInput {
   @TypeGraphQLField(() => [ID], { nullable: true })
   deletedById_in?: string[];
 
-  @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
-  period_json?: JsonObject;
-
   @TypeGraphQLField({ nullable: true })
   status_eq?: string;
 
@@ -690,9 +801,6 @@ export class MarketDataWhereInput {
   @TypeGraphQLField(() => [String], { nullable: true })
   resolvedOutcome_in?: string[];
 
-  @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
-  mdm_json?: JsonObject;
-
   @TypeGraphQLField(() => Int, { nullable: true })
   blockNumber_eq?: number;
 
@@ -730,55 +838,25 @@ export class MarketDataWhereInput {
   timestamp_in?: string[];
 
   @TypeGraphQLField(() => MarketWhereInput, { nullable: true })
-  marketmarketData_none?: MarketWhereInput;
+  market?: MarketWhereInput;
 
-  @TypeGraphQLField(() => MarketWhereInput, { nullable: true })
-  marketmarketData_some?: MarketWhereInput;
+  @TypeGraphQLField(() => MarketHistoryWhereInput, { nullable: true })
+  AND?: [MarketHistoryWhereInput];
 
-  @TypeGraphQLField(() => MarketWhereInput, { nullable: true })
-  marketmarketData_every?: MarketWhereInput;
-
-  @TypeGraphQLField(() => MarketDataWhereInput, { nullable: true })
-  AND?: [MarketDataWhereInput];
-
-  @TypeGraphQLField(() => MarketDataWhereInput, { nullable: true })
-  OR?: [MarketDataWhereInput];
+  @TypeGraphQLField(() => MarketHistoryWhereInput, { nullable: true })
+  OR?: [MarketHistoryWhereInput];
 }
 
 @TypeGraphQLInputType()
-export class MarketDataWhereUniqueInput {
+export class MarketHistoryWhereUniqueInput {
   @TypeGraphQLField(() => ID)
   id?: string;
 }
 
 @TypeGraphQLInputType()
-export class MarketDataCreateInput {
-  @TypeGraphQLField(() => GraphQLJSONObject)
-  period!: JsonObject;
-
-  @TypeGraphQLField()
-  status!: string;
-
-  @TypeGraphQLField({ nullable: true })
-  report?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  resolvedOutcome?: string;
-
-  @TypeGraphQLField(() => GraphQLJSONObject)
-  mdm!: JsonObject;
-
-  @TypeGraphQLField()
-  blockNumber!: number;
-
-  @TypeGraphQLField()
-  timestamp!: string;
-}
-
-@TypeGraphQLInputType()
-export class MarketDataUpdateInput {
-  @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
-  period?: JsonObject;
+export class MarketHistoryCreateInput {
+  @TypeGraphQLField(() => ID)
+  market!: string;
 
   @TypeGraphQLField({ nullable: true })
   status?: string;
@@ -789,8 +867,26 @@ export class MarketDataUpdateInput {
   @TypeGraphQLField({ nullable: true })
   resolvedOutcome?: string;
 
-  @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
-  mdm?: JsonObject;
+  @TypeGraphQLField()
+  blockNumber!: number;
+
+  @TypeGraphQLField()
+  timestamp!: string;
+}
+
+@TypeGraphQLInputType()
+export class MarketHistoryUpdateInput {
+  @TypeGraphQLField(() => ID, { nullable: true })
+  market?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  status?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  report?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  resolvedOutcome?: string;
 
   @TypeGraphQLField({ nullable: true })
   blockNumber?: number;
@@ -800,24 +896,24 @@ export class MarketDataUpdateInput {
 }
 
 @ArgsType()
-export class MarketDataWhereArgs extends PaginationArgs {
-  @TypeGraphQLField(() => MarketDataWhereInput, { nullable: true })
-  where?: MarketDataWhereInput;
+export class MarketHistoryWhereArgs extends PaginationArgs {
+  @TypeGraphQLField(() => MarketHistoryWhereInput, { nullable: true })
+  where?: MarketHistoryWhereInput;
 
-  @TypeGraphQLField(() => MarketDataOrderByEnum, { nullable: true })
-  orderBy?: MarketDataOrderByEnum[];
+  @TypeGraphQLField(() => MarketHistoryOrderByEnum, { nullable: true })
+  orderBy?: MarketHistoryOrderByEnum[];
 }
 
 @ArgsType()
-export class MarketDataCreateManyArgs {
-  @TypeGraphQLField(() => [MarketDataCreateInput])
-  data!: MarketDataCreateInput[];
+export class MarketHistoryCreateManyArgs {
+  @TypeGraphQLField(() => [MarketHistoryCreateInput])
+  data!: MarketHistoryCreateInput[];
 }
 
 @ArgsType()
-export class MarketDataUpdateArgs {
-  @TypeGraphQLField() data!: MarketDataUpdateInput;
-  @TypeGraphQLField() where!: MarketDataWhereUniqueInput;
+export class MarketHistoryUpdateArgs {
+  @TypeGraphQLField() data!: MarketHistoryUpdateInput;
+  @TypeGraphQLField() where!: MarketHistoryWhereUniqueInput;
 }
 
 export enum PoolOrderByEnum {

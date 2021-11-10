@@ -39,8 +39,8 @@ import {
 import { Market } from './market.model';
 import { MarketService } from './market.service';
 
-import { MarketData } from '../market-data/market-data.model';
-import { MarketDataService } from '../market-data/market-data.service';
+import { MarketHistory } from '../market-history/market-history.model';
+import { MarketHistoryService } from '../market-history/market-history.service';
 import { getConnection, getRepository, In, Not } from 'typeorm';
 import _ from 'lodash';
 
@@ -140,8 +140,8 @@ export class MarketResolver {
     return result as Promise<MarketConnection>;
   }
 
-  @FieldResolver(() => MarketData)
-  async marketData(@Root() r: Market, @Ctx() ctx: BaseContext): Promise<MarketData | null> {
-    return ctx.dataLoader.loaders.Market.marketData.load(r);
+  @FieldResolver(() => MarketHistory)
+  async marketHistory(@Root() r: Market, @Ctx() ctx: BaseContext): Promise<MarketHistory[] | null> {
+    return ctx.dataLoader.loaders.Market.marketHistory.load(r);
   }
 }
