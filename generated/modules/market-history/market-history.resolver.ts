@@ -27,17 +27,17 @@ import {
 } from '@subsquid/warthog';
 
 import {
-  MarketDataCreateInput,
-  MarketDataCreateManyArgs,
-  MarketDataUpdateArgs,
-  MarketDataWhereArgs,
-  MarketDataWhereInput,
-  MarketDataWhereUniqueInput,
-  MarketDataOrderByEnum,
+  MarketHistoryCreateInput,
+  MarketHistoryCreateManyArgs,
+  MarketHistoryUpdateArgs,
+  MarketHistoryWhereArgs,
+  MarketHistoryWhereInput,
+  MarketHistoryWhereUniqueInput,
+  MarketHistoryOrderByEnum,
 } from '../../warthog';
 
-import { MarketData } from './market-data.model';
-import { MarketDataService } from './market-data.service';
+import { MarketHistory } from './market-history.model';
+import { MarketHistoryService } from './market-history.service';
 
 import { Market } from '../market/market.model';
 import { MarketService } from '../market/market.service';
@@ -45,21 +45,21 @@ import { getConnection, getRepository, In, Not } from 'typeorm';
 import _ from 'lodash';
 
 @ObjectType()
-export class MarketDataEdge {
-  @Field(() => MarketData, { nullable: false })
-  node!: MarketData;
+export class MarketHistoryEdge {
+  @Field(() => MarketHistory, { nullable: false })
+  node!: MarketHistory;
 
   @Field(() => String, { nullable: false })
   cursor!: string;
 }
 
 @ObjectType()
-export class MarketDataConnection {
+export class MarketHistoryConnection {
   @Field(() => Int, { nullable: false })
   totalCount!: number;
 
-  @Field(() => [MarketDataEdge], { nullable: false })
-  edges!: MarketDataEdge[];
+  @Field(() => [MarketHistoryEdge], { nullable: false })
+  edges!: MarketHistoryEdge[];
 
   @Field(() => PageInfo, { nullable: false })
   pageInfo!: PageInfo;
@@ -83,40 +83,40 @@ export class ConnectionPageInputOptions {
 }
 
 @ArgsType()
-export class MarketDataConnectionWhereArgs extends ConnectionPageInputOptions {
-  @Field(() => MarketDataWhereInput, { nullable: true })
-  where?: MarketDataWhereInput;
+export class MarketHistoryConnectionWhereArgs extends ConnectionPageInputOptions {
+  @Field(() => MarketHistoryWhereInput, { nullable: true })
+  where?: MarketHistoryWhereInput;
 
-  @Field(() => MarketDataOrderByEnum, { nullable: true })
-  orderBy?: [MarketDataOrderByEnum];
+  @Field(() => MarketHistoryOrderByEnum, { nullable: true })
+  orderBy?: [MarketHistoryOrderByEnum];
 }
 
-@Resolver(MarketData)
-export class MarketDataResolver {
-  constructor(@Inject('MarketDataService') public readonly service: MarketDataService) {}
+@Resolver(MarketHistory)
+export class MarketHistoryResolver {
+  constructor(@Inject('MarketHistoryService') public readonly service: MarketHistoryService) {}
 
-  @Query(() => [MarketData])
-  async marketData(
-    @Args() { where, orderBy, limit, offset }: MarketDataWhereArgs,
+  @Query(() => [MarketHistory])
+  async marketHistories(
+    @Args() { where, orderBy, limit, offset }: MarketHistoryWhereArgs,
     @Fields() fields: string[]
-  ): Promise<MarketData[]> {
-    return this.service.find<MarketDataWhereInput>(where, orderBy, limit, offset, fields);
+  ): Promise<MarketHistory[]> {
+    return this.service.find<MarketHistoryWhereInput>(where, orderBy, limit, offset, fields);
   }
 
-  @Query(() => MarketData, { nullable: true })
-  async marketDataByUniqueInput(
-    @Arg('where') where: MarketDataWhereUniqueInput,
+  @Query(() => MarketHistory, { nullable: true })
+  async marketHistoryByUniqueInput(
+    @Arg('where') where: MarketHistoryWhereUniqueInput,
     @Fields() fields: string[]
-  ): Promise<MarketData | null> {
+  ): Promise<MarketHistory | null> {
     const result = await this.service.find(where, undefined, 1, 0, fields);
     return result && result.length >= 1 ? result[0] : null;
   }
 
-  @Query(() => MarketDataConnection)
-  async marketDataConnection(
-    @Args() { where, orderBy, ...pageOptions }: MarketDataConnectionWhereArgs,
+  @Query(() => MarketHistoryConnection)
+  async marketHistoriesConnection(
+    @Args() { where, orderBy, ...pageOptions }: MarketHistoryConnectionWhereArgs,
     @Info() info: any
-  ): Promise<MarketDataConnection> {
+  ): Promise<MarketHistoryConnection> {
     const rawFields = graphqlFields(info, {}, { excludedFields: ['__typename'] });
 
     let result: any = {
@@ -130,18 +130,18 @@ export class MarketDataResolver {
     // If the related database table does not have any records then an error is thrown to the client
     // by warthog
     try {
-      result = await this.service.findConnection<MarketDataWhereInput>(where, orderBy, pageOptions, rawFields);
+      result = await this.service.findConnection<MarketHistoryWhereInput>(where, orderBy, pageOptions, rawFields);
     } catch (err: any) {
       console.log(err);
       // TODO: should continue to return this on `Error: Items is empty` or throw the error
       if (!(err.message as string).includes('Items is empty')) throw err;
     }
 
-    return result as Promise<MarketDataConnection>;
+    return result as Promise<MarketHistoryConnection>;
   }
 
   @FieldResolver(() => Market)
-  async marketmarketData(@Root() r: MarketData, @Ctx() ctx: BaseContext): Promise<Market[] | null> {
-    return ctx.dataLoader.loaders.MarketData.marketmarketData.load(r);
+  async market(@Root() r: MarketHistory, @Ctx() ctx: BaseContext): Promise<Market | null> {
+    return ctx.dataLoader.loaders.MarketHistory.market.load(r);
   }
 }

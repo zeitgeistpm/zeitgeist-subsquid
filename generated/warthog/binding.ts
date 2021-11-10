@@ -9,9 +9,9 @@ export interface Query {
     blockTimestamps: <T = Array<BlockTimestamp>>(args: { offset?: Int | null, limit?: Int | null, where?: BlockTimestampWhereInput | null, orderBy?: Array<BlockTimestampOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     blockTimestampByUniqueInput: <T = BlockTimestamp | null>(args: { where: BlockTimestampWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
     blockTimestampsConnection: <T = BlockTimestampConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: BlockTimestampWhereInput | null, orderBy?: Array<BlockTimestampOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
-    marketData: <T = Array<MarketData>>(args: { offset?: Int | null, limit?: Int | null, where?: MarketDataWhereInput | null, orderBy?: Array<MarketDataOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
-    marketDataByUniqueInput: <T = MarketData | null>(args: { where: MarketDataWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
-    marketDataConnection: <T = MarketDataConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: MarketDataWhereInput | null, orderBy?: Array<MarketDataOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
+    marketHistories: <T = Array<MarketHistory>>(args: { offset?: Int | null, limit?: Int | null, where?: MarketHistoryWhereInput | null, orderBy?: Array<MarketHistoryOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
+    marketHistoryByUniqueInput: <T = MarketHistory | null>(args: { where: MarketHistoryWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
+    marketHistoriesConnection: <T = MarketHistoryConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: MarketHistoryWhereInput | null, orderBy?: Array<MarketHistoryOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     markets: <T = Array<Market>>(args: { offset?: Int | null, limit?: Int | null, where?: MarketWhereInput | null, orderBy?: Array<MarketOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     marketByUniqueInput: <T = Market | null>(args: { where: MarketWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
     marketsConnection: <T = MarketConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: MarketWhereInput | null, orderBy?: Array<MarketOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
@@ -66,12 +66,14 @@ export type BlockTimestampOrderByInput =   'createdAt_ASC' |
   'timestamp_ASC' |
   'timestamp_DESC'
 
-export type MarketDataOrderByInput =   'createdAt_ASC' |
+export type MarketHistoryOrderByInput =   'createdAt_ASC' |
   'createdAt_DESC' |
   'updatedAt_ASC' |
   'updatedAt_DESC' |
   'deletedAt_ASC' |
   'deletedAt_DESC' |
+  'market_ASC' |
+  'market_DESC' |
   'status_ASC' |
   'status_DESC' |
   'report_ASC' |
@@ -103,8 +105,14 @@ export type MarketOrderByInput =   'createdAt_ASC' |
   'question_DESC' |
   'description_ASC' |
   'description_DESC' |
-  'marketData_ASC' |
-  'marketData_DESC'
+  'scoringRule_ASC' |
+  'scoringRule_DESC' |
+  'status_ASC' |
+  'status_DESC' |
+  'report_ASC' |
+  'report_DESC' |
+  'resolvedOutcome_ASC' |
+  'resolvedOutcome_DESC'
 
 export type PoolOrderByInput =   'createdAt_ASC' |
   'createdAt_DESC' |
@@ -240,34 +248,37 @@ export interface MarketCreateInput {
   creator: String
   creation: String
   oracle: String
-  marketType: JSONObject
   slug?: String | null
   question?: String | null
   description?: String | null
-  marketData: ID_Output
+  marketType: JSONObject
+  period: JSONObject
+  scoringRule: String
+  status: String
+  report: String
+  resolvedOutcome: String
+  mdm: JSONObject
 }
 
-export interface MarketDataCreateInput {
-  period: JSONObject
-  status: String
+export interface MarketHistoryCreateInput {
+  market: ID_Output
+  status?: String | null
   report?: String | null
   resolvedOutcome?: String | null
-  mdm: JSONObject
   blockNumber: Float
   timestamp: String
 }
 
-export interface MarketDataUpdateInput {
-  period?: JSONObject | null
+export interface MarketHistoryUpdateInput {
+  market?: ID_Input | null
   status?: String | null
   report?: String | null
   resolvedOutcome?: String | null
-  mdm?: JSONObject | null
   blockNumber?: Float | null
   timestamp?: String | null
 }
 
-export interface MarketDataWhereInput {
+export interface MarketHistoryWhereInput {
   id_eq?: ID_Input | null
   id_in?: ID_Output[] | ID_Output | null
   createdAt_eq?: DateTime | null
@@ -292,7 +303,6 @@ export interface MarketDataWhereInput {
   deletedAt_gte?: DateTime | null
   deletedById_eq?: ID_Input | null
   deletedById_in?: ID_Output[] | ID_Output | null
-  period_json?: JSONObject | null
   status_eq?: String | null
   status_contains?: String | null
   status_startsWith?: String | null
@@ -308,7 +318,6 @@ export interface MarketDataWhereInput {
   resolvedOutcome_startsWith?: String | null
   resolvedOutcome_endsWith?: String | null
   resolvedOutcome_in?: String[] | String | null
-  mdm_json?: JSONObject | null
   blockNumber_eq?: Int | null
   blockNumber_gt?: Int | null
   blockNumber_gte?: Int | null
@@ -321,14 +330,12 @@ export interface MarketDataWhereInput {
   timestamp_lt?: BigInt | null
   timestamp_lte?: BigInt | null
   timestamp_in?: BigInt[] | BigInt | null
-  marketmarketData_none?: MarketWhereInput | null
-  marketmarketData_some?: MarketWhereInput | null
-  marketmarketData_every?: MarketWhereInput | null
-  AND?: MarketDataWhereInput[] | MarketDataWhereInput | null
-  OR?: MarketDataWhereInput[] | MarketDataWhereInput | null
+  market?: MarketWhereInput | null
+  AND?: MarketHistoryWhereInput[] | MarketHistoryWhereInput | null
+  OR?: MarketHistoryWhereInput[] | MarketHistoryWhereInput | null
 }
 
-export interface MarketDataWhereUniqueInput {
+export interface MarketHistoryWhereUniqueInput {
   id: ID_Output
 }
 
@@ -337,11 +344,16 @@ export interface MarketUpdateInput {
   creator?: String | null
   creation?: String | null
   oracle?: String | null
-  marketType?: JSONObject | null
   slug?: String | null
   question?: String | null
   description?: String | null
-  marketData?: ID_Input | null
+  marketType?: JSONObject | null
+  period?: JSONObject | null
+  scoringRule?: String | null
+  status?: String | null
+  report?: String | null
+  resolvedOutcome?: String | null
+  mdm?: JSONObject | null
 }
 
 export interface MarketWhereInput {
@@ -390,7 +402,6 @@ export interface MarketWhereInput {
   oracle_startsWith?: String | null
   oracle_endsWith?: String | null
   oracle_in?: String[] | String | null
-  marketType_json?: JSONObject | null
   slug_eq?: String | null
   slug_contains?: String | null
   slug_startsWith?: String | null
@@ -406,7 +417,32 @@ export interface MarketWhereInput {
   description_startsWith?: String | null
   description_endsWith?: String | null
   description_in?: String[] | String | null
-  marketData?: MarketDataWhereInput | null
+  marketType_json?: JSONObject | null
+  period_json?: JSONObject | null
+  scoringRule_eq?: String | null
+  scoringRule_contains?: String | null
+  scoringRule_startsWith?: String | null
+  scoringRule_endsWith?: String | null
+  scoringRule_in?: String[] | String | null
+  status_eq?: String | null
+  status_contains?: String | null
+  status_startsWith?: String | null
+  status_endsWith?: String | null
+  status_in?: String[] | String | null
+  report_eq?: String | null
+  report_contains?: String | null
+  report_startsWith?: String | null
+  report_endsWith?: String | null
+  report_in?: String[] | String | null
+  resolvedOutcome_eq?: String | null
+  resolvedOutcome_contains?: String | null
+  resolvedOutcome_startsWith?: String | null
+  resolvedOutcome_endsWith?: String | null
+  resolvedOutcome_in?: String[] | String | null
+  mdm_json?: JSONObject | null
+  marketHistory_none?: MarketHistoryWhereInput | null
+  marketHistory_some?: MarketHistoryWhereInput | null
+  marketHistory_every?: MarketHistoryWhereInput | null
   AND?: MarketWhereInput[] | MarketWhereInput | null
   OR?: MarketWhereInput[] | MarketWhereInput | null
 }
@@ -726,12 +762,17 @@ export interface Market extends BaseGraphQLObject {
   creator: String
   creation: String
   oracle: String
-  marketType: MarketType
   slug?: String | null
   question?: String | null
   description?: String | null
-  marketData: MarketData
-  marketDataId: String
+  marketType: MarketType
+  period: MarketPeriod
+  scoringRule: String
+  status: String
+  report: String
+  resolvedOutcome: String
+  mdm: MarketDisputeMechanism
+  marketHistory?: Array<MarketHistory> | null
 }
 
 export interface MarketConnection {
@@ -740,7 +781,12 @@ export interface MarketConnection {
   pageInfo: PageInfo
 }
 
-export interface MarketData extends BaseGraphQLObject {
+export interface MarketEdge {
+  node: Market
+  cursor: String
+}
+
+export interface MarketHistory extends BaseGraphQLObject {
   id: ID_Output
   createdAt: DateTime
   createdById: String
@@ -749,29 +795,23 @@ export interface MarketData extends BaseGraphQLObject {
   deletedAt?: DateTime | null
   deletedById?: String | null
   version: Int
-  period: MarketPeriod
-  status: String
+  market: Market
+  marketId: String
+  status?: String | null
   report?: String | null
   resolvedOutcome?: String | null
-  mdm: MarketDisputeMechanism
   blockNumber: Int
   timestamp: BigInt
-  marketmarketData?: Array<Market> | null
 }
 
-export interface MarketDataConnection {
+export interface MarketHistoryConnection {
   totalCount: Int
-  edges: Array<MarketDataEdge>
+  edges: Array<MarketHistoryEdge>
   pageInfo: PageInfo
 }
 
-export interface MarketDataEdge {
-  node: MarketData
-  cursor: String
-}
-
-export interface MarketEdge {
-  node: Market
+export interface MarketHistoryEdge {
+  node: MarketHistory
   cursor: String
 }
 

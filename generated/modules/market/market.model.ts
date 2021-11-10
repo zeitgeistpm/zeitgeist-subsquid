@@ -1,12 +1,14 @@
-import { BaseModel, IntField, Model, ManyToOne, StringField, JSONField } from '@subsquid/warthog';
+import { BaseModel, IntField, Model, OneToMany, StringField, JSONField } from '@subsquid/warthog';
 
 import { Column } from 'typeorm';
 import { Field } from 'type-graphql';
 import { WarthogField } from '@subsquid/warthog';
 
 import { MarketType } from '../variants/variants.model';
+import { MarketPeriod } from '../variants/variants.model';
+import { MarketDisputeMechanism } from '../variants/variants.model';
 
-import { MarketData } from '../market-data/market-data.model';
+import { MarketHistory } from '../market-history/market-history.model';
 
 import * as jsonTypes from '../jsonfields/jsonfields.model';
 
@@ -24,11 +26,6 @@ export class Market extends BaseModel {
   @StringField({})
   oracle!: string;
 
-  @Column('jsonb')
-  @WarthogField('json')
-  @Field((type) => MarketType, {})
-  marketType!: typeof MarketType;
-
   @StringField({
     nullable: true,
   })
@@ -44,14 +41,40 @@ export class Market extends BaseModel {
   })
   description?: string;
 
-  @ManyToOne(() => MarketData, (param: MarketData) => param.marketmarketData, {
-    skipGraphQLField: true,
+  @Column('jsonb')
+  @WarthogField('json')
+  @Field((type) => MarketType, {})
+  marketType!: typeof MarketType;
 
+  @Column('jsonb')
+  @WarthogField('json')
+  @Field((type) => MarketPeriod, {})
+  period!: typeof MarketPeriod;
+
+  @StringField({})
+  scoringRule!: string;
+
+  @StringField({})
+  status!: string;
+
+  @StringField({})
+  report!: string;
+
+  @StringField({})
+  resolvedOutcome!: string;
+
+  @Column('jsonb')
+  @WarthogField('json')
+  @Field((type) => MarketDisputeMechanism, {})
+  mdm!: typeof MarketDisputeMechanism;
+
+  @OneToMany(() => MarketHistory, (param: MarketHistory) => param.market, {
+    nullable: true,
     modelName: 'Market',
-    relModelName: 'MarketData',
-    propertyName: 'marketData',
+    relModelName: 'MarketHistory',
+    propertyName: 'marketHistory',
   })
-  marketData!: MarketData;
+  marketHistory?: MarketHistory[];
 
   constructor(init?: Partial<Market>) {
     super();

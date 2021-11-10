@@ -210,12 +210,17 @@ type Market implements BaseGraphQLObject {
   creator: String!
   creation: String!
   oracle: String!
-  marketType: MarketType!
   slug: String
   question: String
   description: String
-  marketData: MarketData!
-  marketDataId: String!
+  marketType: MarketType!
+  period: MarketPeriod!
+  scoringRule: String!
+  status: String!
+  report: String!
+  resolvedOutcome: String!
+  mdm: MarketDisputeMechanism!
+  marketHistory: [MarketHistory!]
 }
 
 type MarketConnection {
@@ -229,14 +234,26 @@ input MarketCreateInput {
   creator: String!
   creation: String!
   oracle: String!
-  marketType: JSONObject!
   slug: String
   question: String
   description: String
-  marketData: ID!
+  marketType: JSONObject!
+  period: JSONObject!
+  scoringRule: String!
+  status: String!
+  report: String!
+  resolvedOutcome: String!
+  mdm: JSONObject!
 }
 
-type MarketData implements BaseGraphQLObject {
+union MarketDisputeMechanism = Authorized | Court | SimpleDisputes
+
+type MarketEdge {
+  node: Market!
+  cursor: String!
+}
+
+type MarketHistory implements BaseGraphQLObject {
   id: ID!
   createdAt: DateTime!
   createdById: String!
@@ -245,44 +262,44 @@ type MarketData implements BaseGraphQLObject {
   deletedAt: DateTime
   deletedById: String
   version: Int!
-  period: MarketPeriod!
-  status: String!
+  market: Market!
+  marketId: String!
+  status: String
   report: String
   resolvedOutcome: String
-  mdm: MarketDisputeMechanism!
   blockNumber: Int!
   timestamp: BigInt!
-  marketmarketData: [Market!]
 }
 
-type MarketDataConnection {
+type MarketHistoryConnection {
   totalCount: Int!
-  edges: [MarketDataEdge!]!
+  edges: [MarketHistoryEdge!]!
   pageInfo: PageInfo!
 }
 
-input MarketDataCreateInput {
-  period: JSONObject!
-  status: String!
+input MarketHistoryCreateInput {
+  market: ID!
+  status: String
   report: String
   resolvedOutcome: String
-  mdm: JSONObject!
   blockNumber: Float!
   timestamp: String!
 }
 
-type MarketDataEdge {
-  node: MarketData!
+type MarketHistoryEdge {
+  node: MarketHistory!
   cursor: String!
 }
 
-enum MarketDataOrderByInput {
+enum MarketHistoryOrderByInput {
   createdAt_ASC
   createdAt_DESC
   updatedAt_ASC
   updatedAt_DESC
   deletedAt_ASC
   deletedAt_DESC
+  market_ASC
+  market_DESC
   status_ASC
   status_DESC
   report_ASC
@@ -295,17 +312,16 @@ enum MarketDataOrderByInput {
   timestamp_DESC
 }
 
-input MarketDataUpdateInput {
-  period: JSONObject
+input MarketHistoryUpdateInput {
+  market: ID
   status: String
   report: String
   resolvedOutcome: String
-  mdm: JSONObject
   blockNumber: Float
   timestamp: String
 }
 
-input MarketDataWhereInput {
+input MarketHistoryWhereInput {
   id_eq: ID
   id_in: [ID!]
   createdAt_eq: DateTime
@@ -330,7 +346,6 @@ input MarketDataWhereInput {
   deletedAt_gte: DateTime
   deletedById_eq: ID
   deletedById_in: [ID!]
-  period_json: JSONObject
   status_eq: String
   status_contains: String
   status_startsWith: String
@@ -346,7 +361,6 @@ input MarketDataWhereInput {
   resolvedOutcome_startsWith: String
   resolvedOutcome_endsWith: String
   resolvedOutcome_in: [String!]
-  mdm_json: JSONObject
   blockNumber_eq: Int
   blockNumber_gt: Int
   blockNumber_gte: Int
@@ -359,22 +373,13 @@ input MarketDataWhereInput {
   timestamp_lt: BigInt
   timestamp_lte: BigInt
   timestamp_in: [BigInt!]
-  marketmarketData_none: MarketWhereInput
-  marketmarketData_some: MarketWhereInput
-  marketmarketData_every: MarketWhereInput
-  AND: [MarketDataWhereInput!]
-  OR: [MarketDataWhereInput!]
+  market: MarketWhereInput
+  AND: [MarketHistoryWhereInput!]
+  OR: [MarketHistoryWhereInput!]
 }
 
-input MarketDataWhereUniqueInput {
+input MarketHistoryWhereUniqueInput {
   id: ID!
-}
-
-union MarketDisputeMechanism = Authorized | Court | SimpleDisputes
-
-type MarketEdge {
-  node: Market!
-  cursor: String!
 }
 
 enum MarketOrderByInput {
@@ -398,8 +403,14 @@ enum MarketOrderByInput {
   question_DESC
   description_ASC
   description_DESC
-  marketData_ASC
-  marketData_DESC
+  scoringRule_ASC
+  scoringRule_DESC
+  status_ASC
+  status_DESC
+  report_ASC
+  report_DESC
+  resolvedOutcome_ASC
+  resolvedOutcome_DESC
 }
 
 union MarketPeriod = Block | Timestamp
@@ -411,11 +422,16 @@ input MarketUpdateInput {
   creator: String
   creation: String
   oracle: String
-  marketType: JSONObject
   slug: String
   question: String
   description: String
-  marketData: ID
+  marketType: JSONObject
+  period: JSONObject
+  scoringRule: String
+  status: String
+  report: String
+  resolvedOutcome: String
+  mdm: JSONObject
 }
 
 input MarketWhereInput {
@@ -464,7 +480,6 @@ input MarketWhereInput {
   oracle_startsWith: String
   oracle_endsWith: String
   oracle_in: [String!]
-  marketType_json: JSONObject
   slug_eq: String
   slug_contains: String
   slug_startsWith: String
@@ -480,7 +495,32 @@ input MarketWhereInput {
   description_startsWith: String
   description_endsWith: String
   description_in: [String!]
-  marketData: MarketDataWhereInput
+  marketType_json: JSONObject
+  period_json: JSONObject
+  scoringRule_eq: String
+  scoringRule_contains: String
+  scoringRule_startsWith: String
+  scoringRule_endsWith: String
+  scoringRule_in: [String!]
+  status_eq: String
+  status_contains: String
+  status_startsWith: String
+  status_endsWith: String
+  status_in: [String!]
+  report_eq: String
+  report_contains: String
+  report_startsWith: String
+  report_endsWith: String
+  report_in: [String!]
+  resolvedOutcome_eq: String
+  resolvedOutcome_contains: String
+  resolvedOutcome_startsWith: String
+  resolvedOutcome_endsWith: String
+  resolvedOutcome_in: [String!]
+  mdm_json: JSONObject
+  marketHistory_none: MarketHistoryWhereInput
+  marketHistory_some: MarketHistoryWhereInput
+  marketHistory_every: MarketHistoryWhereInput
   AND: [MarketWhereInput!]
   OR: [MarketWhereInput!]
 }
@@ -681,9 +721,9 @@ type Query {
   blockTimestamps(offset: Int, limit: Int = 50, where: BlockTimestampWhereInput, orderBy: [BlockTimestampOrderByInput!]): [BlockTimestamp!]!
   blockTimestampByUniqueInput(where: BlockTimestampWhereUniqueInput!): BlockTimestamp
   blockTimestampsConnection(first: Int, after: String, last: Int, before: String, where: BlockTimestampWhereInput, orderBy: [BlockTimestampOrderByInput!]): BlockTimestampConnection!
-  marketData(offset: Int, limit: Int = 50, where: MarketDataWhereInput, orderBy: [MarketDataOrderByInput!]): [MarketData!]!
-  marketDataByUniqueInput(where: MarketDataWhereUniqueInput!): MarketData
-  marketDataConnection(first: Int, after: String, last: Int, before: String, where: MarketDataWhereInput, orderBy: [MarketDataOrderByInput!]): MarketDataConnection!
+  marketHistories(offset: Int, limit: Int = 50, where: MarketHistoryWhereInput, orderBy: [MarketHistoryOrderByInput!]): [MarketHistory!]!
+  marketHistoryByUniqueInput(where: MarketHistoryWhereUniqueInput!): MarketHistory
+  marketHistoriesConnection(first: Int, after: String, last: Int, before: String, where: MarketHistoryWhereInput, orderBy: [MarketHistoryOrderByInput!]): MarketHistoryConnection!
   markets(offset: Int, limit: Int = 50, where: MarketWhereInput, orderBy: [MarketOrderByInput!]): [Market!]!
   marketByUniqueInput(where: MarketWhereUniqueInput!): Market
   marketsConnection(first: Int, after: String, last: Int, before: String, where: MarketWhereInput, orderBy: [MarketOrderByInput!]): MarketConnection!
