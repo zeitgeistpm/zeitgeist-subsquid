@@ -217,8 +217,8 @@ type Market implements BaseGraphQLObject {
   period: MarketPeriod!
   scoringRule: String!
   status: String!
-  report: String!
-  resolvedOutcome: String!
+  report: String
+  resolvedOutcome: String
   mdm: MarketDisputeMechanism!
   marketHistory: [MarketHistory!]
 }
@@ -241,8 +241,8 @@ input MarketCreateInput {
   period: JSONObject!
   scoringRule: String!
   status: String!
-  report: String!
-  resolvedOutcome: String!
+  report: String
+  resolvedOutcome: String
   mdm: JSONObject!
 }
 
@@ -251,6 +251,11 @@ union MarketDisputeMechanism = Authorized | Court | SimpleDisputes
 type MarketEdge {
   node: Market!
   cursor: String!
+}
+
+enum MarketEvent {
+  MarketCreated
+  MarketInsufficientSubsidy
 }
 
 type MarketHistory implements BaseGraphQLObject {
@@ -264,6 +269,7 @@ type MarketHistory implements BaseGraphQLObject {
   version: Int!
   market: Market!
   marketId: String!
+  event: MarketEvent!
   status: String
   report: String
   resolvedOutcome: String
@@ -279,6 +285,7 @@ type MarketHistoryConnection {
 
 input MarketHistoryCreateInput {
   market: ID!
+  event: MarketEvent!
   status: String
   report: String
   resolvedOutcome: String
@@ -300,6 +307,8 @@ enum MarketHistoryOrderByInput {
   deletedAt_DESC
   market_ASC
   market_DESC
+  event_ASC
+  event_DESC
   status_ASC
   status_DESC
   report_ASC
@@ -314,6 +323,7 @@ enum MarketHistoryOrderByInput {
 
 input MarketHistoryUpdateInput {
   market: ID
+  event: MarketEvent
   status: String
   report: String
   resolvedOutcome: String
@@ -346,6 +356,8 @@ input MarketHistoryWhereInput {
   deletedAt_gte: DateTime
   deletedById_eq: ID
   deletedById_in: [ID!]
+  event_eq: MarketEvent
+  event_in: [MarketEvent!]
   status_eq: String
   status_contains: String
   status_startsWith: String

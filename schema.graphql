@@ -50,6 +50,15 @@ type SimpleDisputes @variant {
 
 union MarketDisputeMechanism = Authorized | Court | SimpleDisputes
 
+enum MarketEvent {
+  MarketCreated,
+  MarketInsufficientSubsidy
+}
+
+enum MarketStatus {
+  InsufficientSubsidy
+}
+
 type Market @entity {
   marketId: Int! 
   creator: String!
@@ -62,14 +71,15 @@ type Market @entity {
   period: MarketPeriod!
   scoringRule: String!
   status: String!
-  report: String!
-  resolvedOutcome: String!
+  report: String
+  resolvedOutcome: String
   mdm: MarketDisputeMechanism!
   marketHistory: [MarketHistory] @derivedFrom(field: "market")
 }
 
 type MarketHistory @entity {
   market: Market!
+  event: MarketEvent!
   status: String
   report: String
   resolvedOutcome: String

@@ -57,11 +57,15 @@ export class Market extends BaseModel {
   @StringField({})
   status!: string;
 
-  @StringField({})
-  report!: string;
+  @StringField({
+    nullable: true,
+  })
+  report?: string;
 
-  @StringField({})
-  resolvedOutcome!: string;
+  @StringField({
+    nullable: true,
+  })
+  resolvedOutcome?: string;
 
   @Column('jsonb')
   @WarthogField('json')
