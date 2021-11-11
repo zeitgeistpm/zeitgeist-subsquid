@@ -9,6 +9,11 @@ export { Pool };
 import { Transfer } from '../modules/transfer/transfer.model';
 export { Transfer };
 
+import { MarketEvent } from '../modules/enums/enums';
+export { MarketEvent };
+import { MarketStatus } from '../modules/enums/enums';
+export { MarketStatus };
+
 import { Authorized } from '../modules/variants/variants.model';
 export { Authorized };
 import { Block } from '../modules/variants/variants.model';

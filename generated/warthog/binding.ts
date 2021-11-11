@@ -66,6 +66,9 @@ export type BlockTimestampOrderByInput =   'createdAt_ASC' |
   'timestamp_ASC' |
   'timestamp_DESC'
 
+export type MarketEvent =   'MarketCreated' |
+  'MarketInsufficientSubsidy'
+
 export type MarketHistoryOrderByInput =   'createdAt_ASC' |
   'createdAt_DESC' |
   'updatedAt_ASC' |
@@ -74,6 +77,8 @@ export type MarketHistoryOrderByInput =   'createdAt_ASC' |
   'deletedAt_DESC' |
   'market_ASC' |
   'market_DESC' |
+  'event_ASC' |
+  'event_DESC' |
   'status_ASC' |
   'status_DESC' |
   'report_ASC' |
@@ -255,13 +260,14 @@ export interface MarketCreateInput {
   period: JSONObject
   scoringRule: String
   status: String
-  report: String
-  resolvedOutcome: String
+  report?: String | null
+  resolvedOutcome?: String | null
   mdm: JSONObject
 }
 
 export interface MarketHistoryCreateInput {
   market: ID_Output
+  event: MarketEvent
   status?: String | null
   report?: String | null
   resolvedOutcome?: String | null
@@ -271,6 +277,7 @@ export interface MarketHistoryCreateInput {
 
 export interface MarketHistoryUpdateInput {
   market?: ID_Input | null
+  event?: MarketEvent | null
   status?: String | null
   report?: String | null
   resolvedOutcome?: String | null
@@ -303,6 +310,8 @@ export interface MarketHistoryWhereInput {
   deletedAt_gte?: DateTime | null
   deletedById_eq?: ID_Input | null
   deletedById_in?: ID_Output[] | ID_Output | null
+  event_eq?: MarketEvent | null
+  event_in?: MarketEvent[] | MarketEvent | null
   status_eq?: String | null
   status_contains?: String | null
   status_startsWith?: String | null
@@ -769,8 +778,8 @@ export interface Market extends BaseGraphQLObject {
   period: MarketPeriod
   scoringRule: String
   status: String
-  report: String
-  resolvedOutcome: String
+  report?: String | null
+  resolvedOutcome?: String | null
   mdm: MarketDisputeMechanism
   marketHistory?: Array<MarketHistory> | null
 }
@@ -797,6 +806,7 @@ export interface MarketHistory extends BaseGraphQLObject {
   version: Int
   market: Market
   marketId: String
+  event: MarketEvent
   status?: String | null
   report?: String | null
   resolvedOutcome?: String | null
