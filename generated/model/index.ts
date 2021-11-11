@@ -1,13 +1,9 @@
-import { BlockTimestamp } from '../modules/block-timestamp/block-timestamp.model';
-export { BlockTimestamp };
 import { Market } from '../modules/market/market.model';
 export { Market };
 import { MarketHistory } from '../modules/market-history/market-history.model';
 export { MarketHistory };
 import { Pool } from '../modules/pool/pool.model';
 export { Pool };
-import { Transfer } from '../modules/transfer/transfer.model';
-export { Transfer };
 
 import { MarketEvent } from '../modules/enums/enums';
 export { MarketEvent };
