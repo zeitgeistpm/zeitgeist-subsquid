@@ -1,21 +1,3 @@
-" All transfers "
-type Transfer @entity {
-  from: Bytes!
-  to: Bytes!
-  value: BigInt!
-  comment: String @fulltext(query: "commentSearch")
-  block: Int!
-  tip: BigInt!
-  timestamp: BigInt!
-  insertedAt: DateTime!
-}
-
-" Tracks block timestamps "
-type BlockTimestamp @entity {
-  blockNumber: Int!
-  timestamp: BigInt!
-}
-
 type Block @variant {
   value: String!
 }
