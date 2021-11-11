@@ -11,6 +11,7 @@ typegen:
     source: ws://127.0.0.1:9944
   events:
     - predictionMarkets.MarketCreated
+    - predictionMarkets.MarketInsufficientSubsidy
     - swaps.PoolCreate
   outDir: chain
   
@@ -19,6 +20,8 @@ mappings:
   eventHandlers:
     - event: predictionMarkets.MarketCreated
       handler: predictionMarketCreated
+    - event: predictionMarkets.MarketInsufficientSubsidy
+      handler: predictionMarketInsufficientSubsidy
     - event: swaps.PoolCreate
       handler: swapPoolCreated
   preBlockHooks:
