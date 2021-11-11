@@ -217,7 +217,7 @@ type Market implements BaseGraphQLObject {
   period: MarketPeriod!
   scoringRule: String!
   status: String!
-  report: String
+  report: MarketReport
   resolvedOutcome: String
   mdm: MarketDisputeMechanism!
   marketHistory: [MarketHistory!]
@@ -241,7 +241,7 @@ input MarketCreateInput {
   period: JSONObject!
   scoringRule: String!
   status: String!
-  report: String
+  report: MarketReportInput
   resolvedOutcome: String
   mdm: JSONObject!
 }
@@ -256,6 +256,7 @@ type MarketEdge {
 enum MarketEvent {
   MarketCreated
   MarketInsufficientSubsidy
+  MarketReported
 }
 
 type MarketHistory implements BaseGraphQLObject {
@@ -271,7 +272,7 @@ type MarketHistory implements BaseGraphQLObject {
   marketId: String!
   event: MarketEvent!
   status: String
-  report: String
+  report: MarketReport
   resolvedOutcome: String
   blockNumber: Int!
   timestamp: BigInt!
@@ -287,7 +288,7 @@ input MarketHistoryCreateInput {
   market: ID!
   event: MarketEvent!
   status: String
-  report: String
+  report: MarketReportInput
   resolvedOutcome: String
   blockNumber: Float!
   timestamp: String!
@@ -311,8 +312,6 @@ enum MarketHistoryOrderByInput {
   event_DESC
   status_ASC
   status_DESC
-  report_ASC
-  report_DESC
   resolvedOutcome_ASC
   resolvedOutcome_DESC
   blockNumber_ASC
@@ -325,7 +324,7 @@ input MarketHistoryUpdateInput {
   market: ID
   event: MarketEvent
   status: String
-  report: String
+  report: MarketReportInput
   resolvedOutcome: String
   blockNumber: Float
   timestamp: String
@@ -363,11 +362,7 @@ input MarketHistoryWhereInput {
   status_startsWith: String
   status_endsWith: String
   status_in: [String!]
-  report_eq: String
-  report_contains: String
-  report_startsWith: String
-  report_endsWith: String
-  report_in: [String!]
+  report_json: JSONObject
   resolvedOutcome_eq: String
   resolvedOutcome_contains: String
   resolvedOutcome_startsWith: String
@@ -419,13 +414,77 @@ enum MarketOrderByInput {
   scoringRule_DESC
   status_ASC
   status_DESC
-  report_ASC
-  report_DESC
   resolvedOutcome_ASC
   resolvedOutcome_DESC
 }
 
 union MarketPeriod = Block | Timestamp
+
+type MarketReport {
+  at: Int!
+  by: String!
+  outcome: OutcomeReport!
+}
+
+input MarketReportCreateInput {
+  at: Float!
+  by: String!
+}
+
+input MarketReportInput {
+  at: Int!
+  by: String!
+  outcome: OutcomeReportInput!
+}
+
+input MarketReportUpdateInput {
+  at: Float
+  by: String
+}
+
+input MarketReportWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  at_eq: Int
+  at_gt: Int
+  at_gte: Int
+  at_lt: Int
+  at_lte: Int
+  at_in: [Int!]
+  by_eq: String
+  by_contains: String
+  by_startsWith: String
+  by_endsWith: String
+  by_in: [String!]
+  AND: [MarketReportWhereInput!]
+  OR: [MarketReportWhereInput!]
+}
+
+input MarketReportWhereUniqueInput {
+  id: ID!
+}
 
 union MarketType = Categorical | Scalar
 
@@ -441,7 +500,7 @@ input MarketUpdateInput {
   period: JSONObject
   scoringRule: String
   status: String
-  report: String
+  report: MarketReportInput
   resolvedOutcome: String
   mdm: JSONObject
 }
@@ -519,11 +578,7 @@ input MarketWhereInput {
   status_startsWith: String
   status_endsWith: String
   status_in: [String!]
-  report_eq: String
-  report_contains: String
-  report_startsWith: String
-  report_endsWith: String
-  report_in: [String!]
+  report_json: JSONObject
   resolvedOutcome_eq: String
   resolvedOutcome_contains: String
   resolvedOutcome_startsWith: String
@@ -538,6 +593,71 @@ input MarketWhereInput {
 }
 
 input MarketWhereUniqueInput {
+  id: ID!
+}
+
+type OutcomeReport {
+  categorical: Int
+  scalar: Int
+}
+
+input OutcomeReportCreateInput {
+  categorical: Float
+  scalar: Float
+}
+
+input OutcomeReportInput {
+  categorical: Int
+  scalar: Int
+}
+
+input OutcomeReportUpdateInput {
+  categorical: Float
+  scalar: Float
+}
+
+input OutcomeReportWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  categorical_eq: Int
+  categorical_gt: Int
+  categorical_gte: Int
+  categorical_lt: Int
+  categorical_lte: Int
+  categorical_in: [Int!]
+  scalar_eq: Int
+  scalar_gt: Int
+  scalar_gte: Int
+  scalar_lt: Int
+  scalar_lte: Int
+  scalar_in: [Int!]
+  AND: [OutcomeReportWhereInput!]
+  OR: [OutcomeReportWhereInput!]
+}
+
+input OutcomeReportWhereUniqueInput {
   id: ID!
 }
 

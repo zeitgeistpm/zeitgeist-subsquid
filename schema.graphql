@@ -52,11 +52,24 @@ union MarketDisputeMechanism = Authorized | Court | SimpleDisputes
 
 enum MarketEvent {
   MarketCreated,
-  MarketInsufficientSubsidy
+  MarketInsufficientSubsidy,
+  MarketReported
 }
 
 enum MarketStatus {
-  InsufficientSubsidy
+  InsufficientSubsidy,
+  Reported
+}
+
+type OutcomeReport @jsonField {
+  Categorical: Int
+  Scalar: Int
+}
+
+type MarketReport @jsonField {
+  at: Int!
+  by: String!
+  outcome: OutcomeReport!
 }
 
 type Market @entity {
@@ -71,7 +84,7 @@ type Market @entity {
   period: MarketPeriod!
   scoringRule: String!
   status: String!
-  report: String
+  report: MarketReport
   resolvedOutcome: String
   mdm: MarketDisputeMechanism!
   marketHistory: [MarketHistory] @derivedFrom(field: "market")
@@ -81,7 +94,7 @@ type MarketHistory @entity {
   market: Market!
   event: MarketEvent!
   status: String
-  report: String
+  report: MarketReport
   resolvedOutcome: String
   blockNumber: Int!
   timestamp: BigInt!

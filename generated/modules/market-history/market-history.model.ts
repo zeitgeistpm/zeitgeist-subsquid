@@ -37,10 +37,8 @@ export class MarketHistory extends BaseModel {
   })
   status?: string;
 
-  @StringField({
-    nullable: true,
-  })
-  report?: string;
+  @JSONField({ filter: true, gqlFieldType: jsonTypes.MarketReport, nullable: true })
+  report?: jsonTypes.MarketReport;
 
   @StringField({
     nullable: true,
