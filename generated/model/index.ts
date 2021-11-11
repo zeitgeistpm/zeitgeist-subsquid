@@ -35,3 +35,8 @@ import { MarketType } from '../modules/variants/variants.model';
 export { MarketType };
 import { MarketDisputeMechanism } from '../modules/variants/variants.model';
 export { MarketDisputeMechanism };
+
+import { MarketReport } from '../modules/jsonfields/jsonfields.model';
+export { MarketReport };
+import { OutcomeReport } from '../modules/jsonfields/jsonfields.model';
+export { OutcomeReport };

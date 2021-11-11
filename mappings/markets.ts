@@ -1,9 +1,10 @@
 import BN from 'bn.js'
 import { EventContext, StoreContext } from '@subsquid/hydra-common'
-import { Authorized, Block, Categorical, Court, Market, MarketHistory, Scalar, SimpleDisputes, Timestamp } from '../generated/model'
+import { Authorized, Block, Categorical, Court, Market, MarketHistory, MarketReport, Scalar, SimpleDisputes, Timestamp } from '../generated/model'
 import { PredictionMarkets } from '../chain'
 import IPFS from './util'
 import { MarketEvent, MarketStatus } from '../generated/modules/enums/enums'
+import { OutcomeReport } from '../generated/model'
 
 export async function predictionMarketCreated({
     store,
@@ -99,6 +100,48 @@ export async function predictionMarketInsufficientSubsidy({
     newMH.market = savedMarket
     newMH.event = MarketEvent.MarketInsufficientSubsidy
     newMH.status = savedMarket.status
+    newMH.blockNumber = block.height
+    newMH.timestamp = new BN(block.timestamp)
+
+    console.log(`Saving market history: ${JSON.stringify(newMH, null, 2)}`)
+    await store.save<MarketHistory>(newMH)
+}
+
+export async function predictionMarketReported({
+    store,
+    event,
+    block,
+    extrinsic,
+}: EventContext & StoreContext) {
+
+    const [marketIdOf, outcomeReport] = new PredictionMarkets.MarketReportedEvent(event).params
+
+    const savedMarket = await store.get(Market, { where: { marketId: marketIdOf.toNumber() } })
+    if (!savedMarket) return
+
+    const ocr = new OutcomeReport()
+    if (outcomeReport.asCategorical) {
+        ocr.categorical = outcomeReport.asCategorical.toNumber()
+    } else if (outcomeReport.asScalar) {
+        ocr.scalar = outcomeReport.asScalar.toNumber()
+    }
+
+    const mr = new MarketReport()
+    mr.at = block.height
+    mr.by = savedMarket.oracle
+    mr.outcome = ocr
+
+    savedMarket.status = MarketStatus.Reported
+    savedMarket.report = mr
+
+    console.log(`Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
+    await store.save<Market>(savedMarket)
+
+    const newMH = new MarketHistory()
+    newMH.market = savedMarket
+    newMH.event = MarketEvent.MarketReported
+    newMH.status = savedMarket.status
+    newMH.report = savedMarket.report
     newMH.blockNumber = block.height
     newMH.timestamp = new BN(block.timestamp)
 

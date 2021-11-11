@@ -3,7 +3,11 @@ import { SubstrateEvent, SubstrateExtrinsic } from "@subsquid/hydra-common";
 import { Codec } from "@polkadot/types/types";
 import { typeRegistry } from ".";
 
-import { Market, MarketIdOf } from "@zeitgeistpm/types/dist/interfaces";
+import {
+  Market,
+  MarketIdOf,
+  OutcomeReport,
+} from "@zeitgeistpm/types/dist/interfaces";
 import { AccountId } from "@polkadot/types/interfaces";
 
 export namespace PredictionMarkets {
@@ -63,6 +67,41 @@ export namespace PredictionMarkets {
       return [
         createTypeUnsafe<MarketIdOf & Codec>(typeRegistry, "MarketIdOf", [
           this.ctx.params[0].value,
+        ]),
+      ];
+    }
+
+    validateParams(): boolean {
+      if (this.expectedParamTypes.length !== this.ctx.params.length) {
+        return false;
+      }
+      let valid = true;
+      this.expectedParamTypes.forEach((type, i) => {
+        if (type !== this.ctx.params[i].type) {
+          valid = false;
+        }
+      });
+      return valid;
+    }
+  }
+
+  /**
+   *  A market has been reported on \[market_id, reported_outcome\]
+   *
+   *  Event parameters: [MarketIdOf<T>, OutcomeReport, ]
+   */
+  export class MarketReportedEvent {
+    public readonly expectedParamTypes = ["MarketIdOf<T>", "OutcomeReport"];
+
+    constructor(public readonly ctx: SubstrateEvent) {}
+
+    get params(): [MarketIdOf, OutcomeReport] {
+      return [
+        createTypeUnsafe<MarketIdOf & Codec>(typeRegistry, "MarketIdOf", [
+          this.ctx.params[0].value,
+        ]),
+        createTypeUnsafe<OutcomeReport & Codec>(typeRegistry, "OutcomeReport", [
+          this.ctx.params[1].value,
         ]),
       ];
     }

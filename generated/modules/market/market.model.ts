@@ -57,10 +57,8 @@ export class Market extends BaseModel {
   @StringField({})
   status!: string;
 
-  @StringField({
-    nullable: true,
-  })
-  report?: string;
+  @JSONField({ filter: true, gqlFieldType: jsonTypes.MarketReport, nullable: true })
+  report?: jsonTypes.MarketReport;
 
   @StringField({
     nullable: true,

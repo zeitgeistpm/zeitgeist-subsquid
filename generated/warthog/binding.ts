@@ -67,7 +67,8 @@ export type BlockTimestampOrderByInput =   'createdAt_ASC' |
   'timestamp_DESC'
 
 export type MarketEvent =   'MarketCreated' |
-  'MarketInsufficientSubsidy'
+  'MarketInsufficientSubsidy' |
+  'MarketReported'
 
 export type MarketHistoryOrderByInput =   'createdAt_ASC' |
   'createdAt_DESC' |
@@ -81,8 +82,6 @@ export type MarketHistoryOrderByInput =   'createdAt_ASC' |
   'event_DESC' |
   'status_ASC' |
   'status_DESC' |
-  'report_ASC' |
-  'report_DESC' |
   'resolvedOutcome_ASC' |
   'resolvedOutcome_DESC' |
   'blockNumber_ASC' |
@@ -114,8 +113,6 @@ export type MarketOrderByInput =   'createdAt_ASC' |
   'scoringRule_DESC' |
   'status_ASC' |
   'status_DESC' |
-  'report_ASC' |
-  'report_DESC' |
   'resolvedOutcome_ASC' |
   'resolvedOutcome_DESC'
 
@@ -260,7 +257,7 @@ export interface MarketCreateInput {
   period: JSONObject
   scoringRule: String
   status: String
-  report?: String | null
+  report?: MarketReportInput | null
   resolvedOutcome?: String | null
   mdm: JSONObject
 }
@@ -269,7 +266,7 @@ export interface MarketHistoryCreateInput {
   market: ID_Output
   event: MarketEvent
   status?: String | null
-  report?: String | null
+  report?: MarketReportInput | null
   resolvedOutcome?: String | null
   blockNumber: Float
   timestamp: String
@@ -279,7 +276,7 @@ export interface MarketHistoryUpdateInput {
   market?: ID_Input | null
   event?: MarketEvent | null
   status?: String | null
-  report?: String | null
+  report?: MarketReportInput | null
   resolvedOutcome?: String | null
   blockNumber?: Float | null
   timestamp?: String | null
@@ -317,11 +314,7 @@ export interface MarketHistoryWhereInput {
   status_startsWith?: String | null
   status_endsWith?: String | null
   status_in?: String[] | String | null
-  report_eq?: String | null
-  report_contains?: String | null
-  report_startsWith?: String | null
-  report_endsWith?: String | null
-  report_in?: String[] | String | null
+  report_json?: JSONObject | null
   resolvedOutcome_eq?: String | null
   resolvedOutcome_contains?: String | null
   resolvedOutcome_startsWith?: String | null
@@ -348,6 +341,66 @@ export interface MarketHistoryWhereUniqueInput {
   id: ID_Output
 }
 
+export interface MarketReportCreateInput {
+  at: Float
+  by: String
+}
+
+export interface MarketReportInput {
+  at: Int
+  by: String
+  outcome: OutcomeReportInput
+}
+
+export interface MarketReportUpdateInput {
+  at?: Float | null
+  by?: String | null
+}
+
+export interface MarketReportWhereInput {
+  id_eq?: ID_Input | null
+  id_in?: ID_Output[] | ID_Output | null
+  createdAt_eq?: DateTime | null
+  createdAt_lt?: DateTime | null
+  createdAt_lte?: DateTime | null
+  createdAt_gt?: DateTime | null
+  createdAt_gte?: DateTime | null
+  createdById_eq?: ID_Input | null
+  createdById_in?: ID_Output[] | ID_Output | null
+  updatedAt_eq?: DateTime | null
+  updatedAt_lt?: DateTime | null
+  updatedAt_lte?: DateTime | null
+  updatedAt_gt?: DateTime | null
+  updatedAt_gte?: DateTime | null
+  updatedById_eq?: ID_Input | null
+  updatedById_in?: ID_Output[] | ID_Output | null
+  deletedAt_all?: Boolean | null
+  deletedAt_eq?: DateTime | null
+  deletedAt_lt?: DateTime | null
+  deletedAt_lte?: DateTime | null
+  deletedAt_gt?: DateTime | null
+  deletedAt_gte?: DateTime | null
+  deletedById_eq?: ID_Input | null
+  deletedById_in?: ID_Output[] | ID_Output | null
+  at_eq?: Int | null
+  at_gt?: Int | null
+  at_gte?: Int | null
+  at_lt?: Int | null
+  at_lte?: Int | null
+  at_in?: Int[] | Int | null
+  by_eq?: String | null
+  by_contains?: String | null
+  by_startsWith?: String | null
+  by_endsWith?: String | null
+  by_in?: String[] | String | null
+  AND?: MarketReportWhereInput[] | MarketReportWhereInput | null
+  OR?: MarketReportWhereInput[] | MarketReportWhereInput | null
+}
+
+export interface MarketReportWhereUniqueInput {
+  id: ID_Output
+}
+
 export interface MarketUpdateInput {
   marketId?: Float | null
   creator?: String | null
@@ -360,7 +413,7 @@ export interface MarketUpdateInput {
   period?: JSONObject | null
   scoringRule?: String | null
   status?: String | null
-  report?: String | null
+  report?: MarketReportInput | null
   resolvedOutcome?: String | null
   mdm?: JSONObject | null
 }
@@ -438,11 +491,7 @@ export interface MarketWhereInput {
   status_startsWith?: String | null
   status_endsWith?: String | null
   status_in?: String[] | String | null
-  report_eq?: String | null
-  report_contains?: String | null
-  report_startsWith?: String | null
-  report_endsWith?: String | null
-  report_in?: String[] | String | null
+  report_json?: JSONObject | null
   resolvedOutcome_eq?: String | null
   resolvedOutcome_contains?: String | null
   resolvedOutcome_startsWith?: String | null
@@ -457,6 +506,66 @@ export interface MarketWhereInput {
 }
 
 export interface MarketWhereUniqueInput {
+  id: ID_Output
+}
+
+export interface OutcomeReportCreateInput {
+  categorical?: Float | null
+  scalar?: Float | null
+}
+
+export interface OutcomeReportInput {
+  categorical?: Int | null
+  scalar?: Int | null
+}
+
+export interface OutcomeReportUpdateInput {
+  categorical?: Float | null
+  scalar?: Float | null
+}
+
+export interface OutcomeReportWhereInput {
+  id_eq?: ID_Input | null
+  id_in?: ID_Output[] | ID_Output | null
+  createdAt_eq?: DateTime | null
+  createdAt_lt?: DateTime | null
+  createdAt_lte?: DateTime | null
+  createdAt_gt?: DateTime | null
+  createdAt_gte?: DateTime | null
+  createdById_eq?: ID_Input | null
+  createdById_in?: ID_Output[] | ID_Output | null
+  updatedAt_eq?: DateTime | null
+  updatedAt_lt?: DateTime | null
+  updatedAt_lte?: DateTime | null
+  updatedAt_gt?: DateTime | null
+  updatedAt_gte?: DateTime | null
+  updatedById_eq?: ID_Input | null
+  updatedById_in?: ID_Output[] | ID_Output | null
+  deletedAt_all?: Boolean | null
+  deletedAt_eq?: DateTime | null
+  deletedAt_lt?: DateTime | null
+  deletedAt_lte?: DateTime | null
+  deletedAt_gt?: DateTime | null
+  deletedAt_gte?: DateTime | null
+  deletedById_eq?: ID_Input | null
+  deletedById_in?: ID_Output[] | ID_Output | null
+  categorical_eq?: Int | null
+  categorical_gt?: Int | null
+  categorical_gte?: Int | null
+  categorical_lt?: Int | null
+  categorical_lte?: Int | null
+  categorical_in?: Int[] | Int | null
+  scalar_eq?: Int | null
+  scalar_gt?: Int | null
+  scalar_gte?: Int | null
+  scalar_lt?: Int | null
+  scalar_lte?: Int | null
+  scalar_in?: Int[] | Int | null
+  AND?: OutcomeReportWhereInput[] | OutcomeReportWhereInput | null
+  OR?: OutcomeReportWhereInput[] | OutcomeReportWhereInput | null
+}
+
+export interface OutcomeReportWhereUniqueInput {
   id: ID_Output
 }
 
@@ -778,7 +887,7 @@ export interface Market extends BaseGraphQLObject {
   period: MarketPeriod
   scoringRule: String
   status: String
-  report?: String | null
+  report?: MarketReport | null
   resolvedOutcome?: String | null
   mdm: MarketDisputeMechanism
   marketHistory?: Array<MarketHistory> | null
@@ -808,7 +917,7 @@ export interface MarketHistory extends BaseGraphQLObject {
   marketId: String
   event: MarketEvent
   status?: String | null
-  report?: String | null
+  report?: MarketReport | null
   resolvedOutcome?: String | null
   blockNumber: Int
   timestamp: BigInt
@@ -823,6 +932,17 @@ export interface MarketHistoryConnection {
 export interface MarketHistoryEdge {
   node: MarketHistory
   cursor: String
+}
+
+export interface MarketReport {
+  at: Int
+  by: String
+  outcome: OutcomeReport
+}
+
+export interface OutcomeReport {
+  categorical?: Int | null
+  scalar?: Int | null
 }
 
 export interface PageInfo {
