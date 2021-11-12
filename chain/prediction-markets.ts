@@ -54,6 +54,44 @@ export namespace PredictionMarkets {
   }
 
   /**
+   *  A complete set of shares has been bought \[market_id, buyer\]
+   *
+   *  Event parameters: [MarketIdOf<T>, <T as frame_system::Config>::AccountId, ]
+   */
+  export class BoughtCompleteSetEvent {
+    public readonly expectedParamTypes = [
+      "MarketIdOf<T>",
+      "<T as frame_system::Config>::AccountId",
+    ];
+
+    constructor(public readonly ctx: SubstrateEvent) {}
+
+    get params(): [MarketIdOf, AccountId] {
+      return [
+        createTypeUnsafe<MarketIdOf & Codec>(typeRegistry, "MarketIdOf", [
+          this.ctx.params[0].value,
+        ]),
+        createTypeUnsafe<AccountId & Codec>(typeRegistry, "AccountId", [
+          this.ctx.params[1].value,
+        ]),
+      ];
+    }
+
+    validateParams(): boolean {
+      if (this.expectedParamTypes.length !== this.ctx.params.length) {
+        return false;
+      }
+      let valid = true;
+      this.expectedParamTypes.forEach((type, i) => {
+        if (type !== this.ctx.params[i].type) {
+          valid = false;
+        }
+      });
+      return valid;
+    }
+  }
+
+  /**
    * A market was discarded after failing to gather enough subsidy. \[market_id\]
    *
    *  Event parameters: [MarketIdOf<T>, ]

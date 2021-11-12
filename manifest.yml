@@ -11,6 +11,7 @@ typegen:
     source: ws://127.0.0.1:9944
   events:
     - predictionMarkets.MarketCreated
+    - predictionMarkets.BoughtCompleteSet
     - predictionMarkets.MarketInsufficientSubsidy
     - predictionMarkets.MarketReported
     - predictionMarkets.MarketDisputed
@@ -22,6 +23,8 @@ mappings:
   eventHandlers:
     - event: predictionMarkets.MarketCreated
       handler: predictionMarketCreated
+    - event: predictionMarkets.BoughtCompleteSet
+      handler: predictionMarketBoughtCompleteSet
     - event: predictionMarkets.MarketInsufficientSubsidy
       handler: predictionMarketInsufficientSubsidy
     - event: predictionMarkets.MarketReported
