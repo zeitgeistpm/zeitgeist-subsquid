@@ -1,22 +1,10 @@
-import {
-  BaseModel,
-  IntField,
-  NumericField,
-  Model,
-  ManyToOne,
-  EnumField,
-  StringField,
-  JSONField,
-} from '@subsquid/warthog';
+import { BaseModel, IntField, NumericField, Model, ManyToOne, StringField, JSONField } from '@subsquid/warthog';
 
 import BN from 'bn.js';
 
 import { Market } from '../market/market.model';
 
 import * as jsonTypes from '../jsonfields/jsonfields.model';
-
-import { MarketEvent } from '../enums/enums';
-export { MarketEvent };
 
 @Model({ api: {} })
 export class MarketHistory extends BaseModel {
@@ -29,8 +17,8 @@ export class MarketHistory extends BaseModel {
   })
   market!: Market;
 
-  @EnumField('MarketEvent', MarketEvent, {})
-  event!: MarketEvent;
+  @StringField({})
+  event!: string;
 
   @StringField({
     nullable: true,

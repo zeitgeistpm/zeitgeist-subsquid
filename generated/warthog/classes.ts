@@ -23,8 +23,6 @@ const { GraphQLJSONObject } = require('graphql-type-json');
 // @ts-ignore
 import { BaseWhereInput, JsonObject, PaginationArgs, DateOnlyString, DateTimeString, BigInt, Bytes } from '@subsquid/warthog';
 
-import { MarketEvent } from "../modules/market-history/market-history.model";
-
 // @ts-ignore
 import { MarketDisputeMechanism } from "../modules/jsonfields/jsonfields.model";
 // @ts-ignore
@@ -1466,11 +1464,20 @@ export class MarketHistoryWhereInput {
   @TypeGraphQLField(() => [ID], { nullable: true })
   deletedById_in?: string[];
 
-  @TypeGraphQLField(() => MarketEvent, { nullable: true })
-  event_eq?: MarketEvent;
+  @TypeGraphQLField({ nullable: true })
+  event_eq?: string;
 
-  @TypeGraphQLField(() => [MarketEvent], { nullable: true })
-  event_in?: MarketEvent[];
+  @TypeGraphQLField({ nullable: true })
+  event_contains?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  event_startsWith?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  event_endsWith?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  event_in?: string[];
 
   @TypeGraphQLField({ nullable: true })
   status_eq?: string;
@@ -1562,8 +1569,8 @@ export class MarketHistoryCreateInput {
   @TypeGraphQLField(() => ID)
   market!: string;
 
-  @TypeGraphQLField(() => MarketEvent)
-  event!: MarketEvent;
+  @TypeGraphQLField()
+  event!: string;
 
   @TypeGraphQLField({ nullable: true })
   status?: string;
@@ -1586,8 +1593,8 @@ export class MarketHistoryUpdateInput {
   @TypeGraphQLField(() => ID, { nullable: true })
   market?: string;
 
-  @TypeGraphQLField(() => MarketEvent, { nullable: true })
-  event?: MarketEvent;
+  @TypeGraphQLField({ nullable: true })
+  event?: string;
 
   @TypeGraphQLField({ nullable: true })
   status?: string;

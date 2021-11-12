@@ -47,10 +47,6 @@ export const Binding = makeBindingClass<BindingConstructor<Binding>>({ schema: s
  * Types
 */
 
-export type MarketEvent =   'MarketCreated' |
-  'MarketInsufficientSubsidy' |
-  'MarketReported'
-
 export type MarketHistoryOrderByInput =   'createdAt_ASC' |
   'createdAt_DESC' |
   'updatedAt_ASC' |
@@ -227,7 +223,7 @@ export interface MarketDisputeMechanismWhereUniqueInput {
 
 export interface MarketHistoryCreateInput {
   market: ID_Output
-  event: MarketEvent
+  event: String
   status?: String | null
   report?: MarketReportInput | null
   resolvedOutcome?: String | null
@@ -237,7 +233,7 @@ export interface MarketHistoryCreateInput {
 
 export interface MarketHistoryUpdateInput {
   market?: ID_Input | null
-  event?: MarketEvent | null
+  event?: String | null
   status?: String | null
   report?: MarketReportInput | null
   resolvedOutcome?: String | null
@@ -270,8 +266,11 @@ export interface MarketHistoryWhereInput {
   deletedAt_gte?: DateTime | null
   deletedById_eq?: ID_Input | null
   deletedById_in?: ID_Output[] | ID_Output | null
-  event_eq?: MarketEvent | null
-  event_in?: MarketEvent[] | MarketEvent | null
+  event_eq?: String | null
+  event_contains?: String | null
+  event_startsWith?: String | null
+  event_endsWith?: String | null
+  event_in?: String[] | String | null
   status_eq?: String | null
   status_contains?: String | null
   status_startsWith?: String | null
@@ -852,7 +851,7 @@ export interface MarketHistory extends BaseGraphQLObject {
   version: Int
   market: Market
   marketId: String
-  event: MarketEvent
+  event: String
   status?: String | null
   report?: MarketReport | null
   resolvedOutcome?: String | null
