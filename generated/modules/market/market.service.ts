@@ -28,10 +28,7 @@ export class MarketService extends HydraBaseService<Market> {
     offset?: number,
     fields?: string[]
   ): Promise<Market[]> {
-    let records = await this.findWithRelations<W>(where, orderBy, limit, offset, fields);
-    if (records.length) {
-    }
-    return records;
+    return this.findWithRelations<W>(where, orderBy, limit, offset, fields);
   }
 
   findWithRelations<W extends WhereInput>(

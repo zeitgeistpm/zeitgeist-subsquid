@@ -1,13 +1,5 @@
 import { BaseModel, IntField, Model, OneToMany, StringField, JSONField } from '@subsquid/warthog';
 
-import { Column } from 'typeorm';
-import { Field } from 'type-graphql';
-import { WarthogField } from '@subsquid/warthog';
-
-import { MarketType } from '../variants/variants.model';
-import { MarketPeriod } from '../variants/variants.model';
-import { MarketDisputeMechanism } from '../variants/variants.model';
-
 import { MarketHistory } from '../market-history/market-history.model';
 
 import * as jsonTypes from '../jsonfields/jsonfields.model';
@@ -41,15 +33,11 @@ export class Market extends BaseModel {
   })
   description?: string;
 
-  @Column('jsonb')
-  @WarthogField('json')
-  @Field((type) => MarketType, {})
-  marketType!: typeof MarketType;
+  @JSONField({ filter: true, gqlFieldType: jsonTypes.MarketType })
+  marketType!: jsonTypes.MarketType;
 
-  @Column('jsonb')
-  @WarthogField('json')
-  @Field((type) => MarketPeriod, {})
-  period!: typeof MarketPeriod;
+  @JSONField({ filter: true, gqlFieldType: jsonTypes.MarketPeriod })
+  period!: jsonTypes.MarketPeriod;
 
   @StringField({})
   scoringRule!: string;
@@ -65,10 +53,8 @@ export class Market extends BaseModel {
   })
   resolvedOutcome?: string;
 
-  @Column('jsonb')
-  @WarthogField('json')
-  @Field((type) => MarketDisputeMechanism, {})
-  mdm!: typeof MarketDisputeMechanism;
+  @JSONField({ filter: true, gqlFieldType: jsonTypes.MarketDisputeMechanism })
+  mdm!: jsonTypes.MarketDisputeMechanism;
 
   @OneToMany(() => MarketHistory, (param: MarketHistory) => param.market, {
     nullable: true,

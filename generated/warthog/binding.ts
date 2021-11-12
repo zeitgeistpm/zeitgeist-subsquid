@@ -156,13 +156,73 @@ export interface MarketCreateInput {
   slug?: String | null
   question?: String | null
   description?: String | null
-  marketType: JSONObject
-  period: JSONObject
+  marketType: MarketTypeInput
+  period: MarketPeriodInput
   scoringRule: String
   status: String
   report?: MarketReportInput | null
   resolvedOutcome?: String | null
-  mdm: JSONObject
+  mdm: MarketDisputeMechanismInput
+}
+
+export interface MarketDisputeMechanismCreateInput {
+  authorized?: String | null
+  court?: Boolean | null
+  simpleDisputes?: Boolean | null
+}
+
+export interface MarketDisputeMechanismInput {
+  authorized?: String | null
+  court?: Boolean | null
+  simpleDisputes?: Boolean | null
+}
+
+export interface MarketDisputeMechanismUpdateInput {
+  authorized?: String | null
+  court?: Boolean | null
+  simpleDisputes?: Boolean | null
+}
+
+export interface MarketDisputeMechanismWhereInput {
+  id_eq?: ID_Input | null
+  id_in?: ID_Output[] | ID_Output | null
+  createdAt_eq?: DateTime | null
+  createdAt_lt?: DateTime | null
+  createdAt_lte?: DateTime | null
+  createdAt_gt?: DateTime | null
+  createdAt_gte?: DateTime | null
+  createdById_eq?: ID_Input | null
+  createdById_in?: ID_Output[] | ID_Output | null
+  updatedAt_eq?: DateTime | null
+  updatedAt_lt?: DateTime | null
+  updatedAt_lte?: DateTime | null
+  updatedAt_gt?: DateTime | null
+  updatedAt_gte?: DateTime | null
+  updatedById_eq?: ID_Input | null
+  updatedById_in?: ID_Output[] | ID_Output | null
+  deletedAt_all?: Boolean | null
+  deletedAt_eq?: DateTime | null
+  deletedAt_lt?: DateTime | null
+  deletedAt_lte?: DateTime | null
+  deletedAt_gt?: DateTime | null
+  deletedAt_gte?: DateTime | null
+  deletedById_eq?: ID_Input | null
+  deletedById_in?: ID_Output[] | ID_Output | null
+  authorized_eq?: String | null
+  authorized_contains?: String | null
+  authorized_startsWith?: String | null
+  authorized_endsWith?: String | null
+  authorized_in?: String[] | String | null
+  court_eq?: Boolean | null
+  court_in?: Boolean[] | Boolean | null
+  simpleDisputes_eq?: Boolean | null
+  simpleDisputes_in?: Boolean[] | Boolean | null
+  AND?: MarketDisputeMechanismWhereInput[] | MarketDisputeMechanismWhereInput | null
+  OR?: MarketDisputeMechanismWhereInput[] | MarketDisputeMechanismWhereInput | null
+}
+
+export interface MarketDisputeMechanismWhereUniqueInput {
+  id: ID_Output
 }
 
 export interface MarketHistoryCreateInput {
@@ -244,6 +304,64 @@ export interface MarketHistoryWhereUniqueInput {
   id: ID_Output
 }
 
+export interface MarketPeriodCreateInput {
+  block?: String | null
+  timestamp?: String | null
+}
+
+export interface MarketPeriodInput {
+  block?: String | null
+  timestamp?: String | null
+}
+
+export interface MarketPeriodUpdateInput {
+  block?: String | null
+  timestamp?: String | null
+}
+
+export interface MarketPeriodWhereInput {
+  id_eq?: ID_Input | null
+  id_in?: ID_Output[] | ID_Output | null
+  createdAt_eq?: DateTime | null
+  createdAt_lt?: DateTime | null
+  createdAt_lte?: DateTime | null
+  createdAt_gt?: DateTime | null
+  createdAt_gte?: DateTime | null
+  createdById_eq?: ID_Input | null
+  createdById_in?: ID_Output[] | ID_Output | null
+  updatedAt_eq?: DateTime | null
+  updatedAt_lt?: DateTime | null
+  updatedAt_lte?: DateTime | null
+  updatedAt_gt?: DateTime | null
+  updatedAt_gte?: DateTime | null
+  updatedById_eq?: ID_Input | null
+  updatedById_in?: ID_Output[] | ID_Output | null
+  deletedAt_all?: Boolean | null
+  deletedAt_eq?: DateTime | null
+  deletedAt_lt?: DateTime | null
+  deletedAt_lte?: DateTime | null
+  deletedAt_gt?: DateTime | null
+  deletedAt_gte?: DateTime | null
+  deletedById_eq?: ID_Input | null
+  deletedById_in?: ID_Output[] | ID_Output | null
+  block_eq?: String | null
+  block_contains?: String | null
+  block_startsWith?: String | null
+  block_endsWith?: String | null
+  block_in?: String[] | String | null
+  timestamp_eq?: String | null
+  timestamp_contains?: String | null
+  timestamp_startsWith?: String | null
+  timestamp_endsWith?: String | null
+  timestamp_in?: String[] | String | null
+  AND?: MarketPeriodWhereInput[] | MarketPeriodWhereInput | null
+  OR?: MarketPeriodWhereInput[] | MarketPeriodWhereInput | null
+}
+
+export interface MarketPeriodWhereUniqueInput {
+  id: ID_Output
+}
+
 export interface MarketReportCreateInput {
   at: Float
   by: String
@@ -304,6 +422,64 @@ export interface MarketReportWhereUniqueInput {
   id: ID_Output
 }
 
+export interface MarketTypeCreateInput {
+  categorical?: String | null
+  scalar?: String | null
+}
+
+export interface MarketTypeInput {
+  categorical?: String | null
+  scalar?: String | null
+}
+
+export interface MarketTypeUpdateInput {
+  categorical?: String | null
+  scalar?: String | null
+}
+
+export interface MarketTypeWhereInput {
+  id_eq?: ID_Input | null
+  id_in?: ID_Output[] | ID_Output | null
+  createdAt_eq?: DateTime | null
+  createdAt_lt?: DateTime | null
+  createdAt_lte?: DateTime | null
+  createdAt_gt?: DateTime | null
+  createdAt_gte?: DateTime | null
+  createdById_eq?: ID_Input | null
+  createdById_in?: ID_Output[] | ID_Output | null
+  updatedAt_eq?: DateTime | null
+  updatedAt_lt?: DateTime | null
+  updatedAt_lte?: DateTime | null
+  updatedAt_gt?: DateTime | null
+  updatedAt_gte?: DateTime | null
+  updatedById_eq?: ID_Input | null
+  updatedById_in?: ID_Output[] | ID_Output | null
+  deletedAt_all?: Boolean | null
+  deletedAt_eq?: DateTime | null
+  deletedAt_lt?: DateTime | null
+  deletedAt_lte?: DateTime | null
+  deletedAt_gt?: DateTime | null
+  deletedAt_gte?: DateTime | null
+  deletedById_eq?: ID_Input | null
+  deletedById_in?: ID_Output[] | ID_Output | null
+  categorical_eq?: String | null
+  categorical_contains?: String | null
+  categorical_startsWith?: String | null
+  categorical_endsWith?: String | null
+  categorical_in?: String[] | String | null
+  scalar_eq?: String | null
+  scalar_contains?: String | null
+  scalar_startsWith?: String | null
+  scalar_endsWith?: String | null
+  scalar_in?: String[] | String | null
+  AND?: MarketTypeWhereInput[] | MarketTypeWhereInput | null
+  OR?: MarketTypeWhereInput[] | MarketTypeWhereInput | null
+}
+
+export interface MarketTypeWhereUniqueInput {
+  id: ID_Output
+}
+
 export interface MarketUpdateInput {
   marketId?: Float | null
   creator?: String | null
@@ -312,13 +488,13 @@ export interface MarketUpdateInput {
   slug?: String | null
   question?: String | null
   description?: String | null
-  marketType?: JSONObject | null
-  period?: JSONObject | null
+  marketType?: MarketTypeInput | null
+  period?: MarketPeriodInput | null
   scoringRule?: String | null
   status?: String | null
   report?: MarketReportInput | null
   resolvedOutcome?: String | null
-  mdm?: JSONObject | null
+  mdm?: MarketDisputeMechanismInput | null
 }
 
 export interface MarketWhereInput {
@@ -600,10 +776,6 @@ export interface DeleteResponse {
   id: ID_Output
 }
 
-export interface Authorized {
-  value?: String | null
-}
-
 export interface BaseModel extends BaseGraphQLObject {
   id: ID_Output
   createdAt: DateTime
@@ -624,18 +796,6 @@ export interface BaseModelUUID extends BaseGraphQLObject {
   deletedAt?: DateTime | null
   deletedById?: String | null
   version: Int
-}
-
-export interface Block {
-  value: String
-}
-
-export interface Categorical {
-  value: String
-}
-
-export interface Court {
-  value?: Boolean | null
 }
 
 export interface Market extends BaseGraphQLObject {
@@ -668,6 +828,12 @@ export interface MarketConnection {
   totalCount: Int
   edges: Array<MarketEdge>
   pageInfo: PageInfo
+}
+
+export interface MarketDisputeMechanism {
+  authorized?: String | null
+  court?: Boolean | null
+  simpleDisputes?: Boolean | null
 }
 
 export interface MarketEdge {
@@ -705,10 +871,20 @@ export interface MarketHistoryEdge {
   cursor: String
 }
 
+export interface MarketPeriod {
+  block?: String | null
+  timestamp?: String | null
+}
+
 export interface MarketReport {
   at: Int
   by: String
   outcome: OutcomeReport
+}
+
+export interface MarketType {
+  categorical?: String | null
+  scalar?: String | null
 }
 
 export interface OutcomeReport {
@@ -762,20 +938,8 @@ export interface ProcessorState {
   chainHead: Float
 }
 
-export interface Scalar {
-  value: String
-}
-
-export interface SimpleDisputes {
-  value?: Boolean | null
-}
-
 export interface StandardDeleteResponse {
   id: ID_Output
-}
-
-export interface Timestamp {
-  value: String
 }
 
 /*
@@ -829,9 +993,3 @@ The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](
 The `String` scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text.
 */
 export type String = string
-
-export type MarketDisputeMechanism = Authorized | Court | SimpleDisputes
-
-export type MarketPeriod = Block | Timestamp
-
-export type MarketType = Categorical | Scalar

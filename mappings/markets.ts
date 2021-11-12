@@ -1,10 +1,9 @@
 import BN from 'bn.js'
 import { EventContext, StoreContext } from '@subsquid/hydra-common'
-import { Authorized, Block, Categorical, Court, Market, MarketHistory, MarketReport, Scalar, SimpleDisputes, Timestamp } from '../generated/model'
+import { Market, MarketDisputeMechanism, MarketHistory, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../generated/model'
 import { PredictionMarkets } from '../chain'
 import IPFS from './util'
 import { MarketEvent, MarketStatus } from '../generated/modules/enums/enums'
-import { OutcomeReport } from '../generated/model'
 
 export async function predictionMarketCreated({
     store,
@@ -28,42 +27,34 @@ export async function predictionMarketCreated({
         newMarket.description = metadata.description
     }
 
+    const marketType = new MarketType()
     if (market.market_type.isCategorical) {
-        const categorical = new Categorical()
-        categorical.value = market.market_type.asCategorical.toString()
-        newMarket.marketType = categorical
-    } else {
-        const scalar = new Scalar()
-        scalar.value = market.market_type.asScalar.toString()
-        newMarket.marketType = scalar
+        marketType.categorical = market.market_type.asCategorical.toString()
+    } else if (market.market_type.isScalar) {
+        marketType.scalar = market.market_type.asScalar.toString()
     }
+    newMarket.marketType = marketType
 
+    const period = new MarketPeriod()
     if (market.period.isBlock) {
-        const block = new Block()
-        block.value = market.period.asBlock.toString()
-        newMarket.period = block
-    } else {
-        const timestamp = new Timestamp()
-        timestamp.value = market.period.asTimestamp.toString()
-        newMarket.period = timestamp
+        period.block = market.period.asBlock.toString()
+    } else if (market.period.isTimestamp) {
+        period.timestamp = market.period.asTimestamp.toString()
     }
+    newMarket.period = period
 
     newMarket.scoringRule = market.scoring_rule.toString()
     newMarket.status = market.status.toString()
 
+    const mdm = new MarketDisputeMechanism()
     if (market.mdm.isAuthorized) {
-        const authorized = new Authorized()
-        authorized.value = market.mdm.asAuthorized.toString()
-        newMarket.mdm = authorized
+        mdm.authorized = market.mdm.asAuthorized.toString()
     } else if (market.mdm.isCourt) {
-        const court = new Court()
-        court.value = market.mdm.isCourt
-        newMarket.mdm = court
-    } else {
-        const simpleDisputes = new SimpleDisputes()
-        simpleDisputes.value = market.mdm.isSimpleDisputes
-        newMarket.mdm = simpleDisputes
+        mdm.court = true
+    } else if (market.mdm.isSimpleDisputes) {
+        mdm.simpleDisputes = true
     }
+    newMarket.mdm = mdm
 
     console.log(`Saving market: ${JSON.stringify(newMarket, null, 2)}`)
     await store.save<Market>(newMarket)

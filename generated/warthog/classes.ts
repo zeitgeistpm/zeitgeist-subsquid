@@ -26,7 +26,13 @@ import { BaseWhereInput, JsonObject, PaginationArgs, DateOnlyString, DateTimeStr
 import { MarketEvent } from "../modules/market-history/market-history.model";
 
 // @ts-ignore
+import { MarketDisputeMechanism } from "../modules/jsonfields/jsonfields.model";
+// @ts-ignore
+import { MarketPeriod } from "../modules/jsonfields/jsonfields.model";
+// @ts-ignore
 import { MarketReport } from "../modules/jsonfields/jsonfields.model";
+// @ts-ignore
+import { MarketType } from "../modules/jsonfields/jsonfields.model";
 // @ts-ignore
 import { OutcomeReport } from "../modules/jsonfields/jsonfields.model";
 // @ts-ignore
@@ -35,6 +41,366 @@ import { Market } from "../modules/market/market.model";
 import { MarketHistory } from "../modules/market-history/market-history.model";
 // @ts-ignore
 import { Pool } from "../modules/pool/pool.model";
+
+export enum MarketDisputeMechanismOrderByEnum {
+  createdAt_ASC = "createdAt_ASC",
+  createdAt_DESC = "createdAt_DESC",
+
+  updatedAt_ASC = "updatedAt_ASC",
+  updatedAt_DESC = "updatedAt_DESC",
+
+  deletedAt_ASC = "deletedAt_ASC",
+  deletedAt_DESC = "deletedAt_DESC",
+
+  authorized_ASC = "authorized_ASC",
+  authorized_DESC = "authorized_DESC",
+
+  court_ASC = "court_ASC",
+  court_DESC = "court_DESC",
+
+  simpleDisputes_ASC = "simpleDisputes_ASC",
+  simpleDisputes_DESC = "simpleDisputes_DESC",
+}
+
+registerEnumType(MarketDisputeMechanismOrderByEnum, {
+  name: "MarketDisputeMechanismOrderByInput",
+});
+
+@TypeGraphQLInputType()
+export class MarketDisputeMechanismWhereInput {
+  @TypeGraphQLField(() => ID, { nullable: true })
+  id_eq?: string;
+
+  @TypeGraphQLField(() => [ID], { nullable: true })
+  id_in?: string[];
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_eq?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_lt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_lte?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_gt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_gte?: Date;
+
+  @TypeGraphQLField(() => ID, { nullable: true })
+  createdById_eq?: string;
+
+  @TypeGraphQLField(() => [ID], { nullable: true })
+  createdById_in?: string[];
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_eq?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_lt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_lte?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_gt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_gte?: Date;
+
+  @TypeGraphQLField(() => ID, { nullable: true })
+  updatedById_eq?: string;
+
+  @TypeGraphQLField(() => [ID], { nullable: true })
+  updatedById_in?: string[];
+
+  @TypeGraphQLField({ nullable: true })
+  deletedAt_all?: Boolean;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_eq?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_lt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_lte?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_gt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_gte?: Date;
+
+  @TypeGraphQLField(() => ID, { nullable: true })
+  deletedById_eq?: string;
+
+  @TypeGraphQLField(() => [ID], { nullable: true })
+  deletedById_in?: string[];
+
+  @TypeGraphQLField({ nullable: true })
+  authorized_eq?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  authorized_contains?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  authorized_startsWith?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  authorized_endsWith?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  authorized_in?: string[];
+
+  @TypeGraphQLField(() => Boolean, { nullable: true })
+  court_eq?: Boolean;
+
+  @TypeGraphQLField(() => [Boolean], { nullable: true })
+  court_in?: Boolean[];
+
+  @TypeGraphQLField(() => Boolean, { nullable: true })
+  simpleDisputes_eq?: Boolean;
+
+  @TypeGraphQLField(() => [Boolean], { nullable: true })
+  simpleDisputes_in?: Boolean[];
+
+  @TypeGraphQLField(() => MarketDisputeMechanismWhereInput, { nullable: true })
+  AND?: [MarketDisputeMechanismWhereInput];
+
+  @TypeGraphQLField(() => MarketDisputeMechanismWhereInput, { nullable: true })
+  OR?: [MarketDisputeMechanismWhereInput];
+}
+
+@TypeGraphQLInputType()
+export class MarketDisputeMechanismWhereUniqueInput {
+  @TypeGraphQLField(() => ID)
+  id?: string;
+}
+
+@TypeGraphQLInputType()
+export class MarketDisputeMechanismCreateInput {
+  @TypeGraphQLField({ nullable: true })
+  authorized?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  court?: boolean;
+
+  @TypeGraphQLField({ nullable: true })
+  simpleDisputes?: boolean;
+}
+
+@TypeGraphQLInputType()
+export class MarketDisputeMechanismUpdateInput {
+  @TypeGraphQLField({ nullable: true })
+  authorized?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  court?: boolean;
+
+  @TypeGraphQLField({ nullable: true })
+  simpleDisputes?: boolean;
+}
+
+@ArgsType()
+export class MarketDisputeMechanismWhereArgs extends PaginationArgs {
+  @TypeGraphQLField(() => MarketDisputeMechanismWhereInput, { nullable: true })
+  where?: MarketDisputeMechanismWhereInput;
+
+  @TypeGraphQLField(() => MarketDisputeMechanismOrderByEnum, { nullable: true })
+  orderBy?: MarketDisputeMechanismOrderByEnum[];
+}
+
+@ArgsType()
+export class MarketDisputeMechanismCreateManyArgs {
+  @TypeGraphQLField(() => [MarketDisputeMechanismCreateInput])
+  data!: MarketDisputeMechanismCreateInput[];
+}
+
+@ArgsType()
+export class MarketDisputeMechanismUpdateArgs {
+  @TypeGraphQLField() data!: MarketDisputeMechanismUpdateInput;
+  @TypeGraphQLField() where!: MarketDisputeMechanismWhereUniqueInput;
+}
+
+export enum MarketPeriodOrderByEnum {
+  createdAt_ASC = "createdAt_ASC",
+  createdAt_DESC = "createdAt_DESC",
+
+  updatedAt_ASC = "updatedAt_ASC",
+  updatedAt_DESC = "updatedAt_DESC",
+
+  deletedAt_ASC = "deletedAt_ASC",
+  deletedAt_DESC = "deletedAt_DESC",
+
+  block_ASC = "block_ASC",
+  block_DESC = "block_DESC",
+
+  timestamp_ASC = "timestamp_ASC",
+  timestamp_DESC = "timestamp_DESC",
+}
+
+registerEnumType(MarketPeriodOrderByEnum, {
+  name: "MarketPeriodOrderByInput",
+});
+
+@TypeGraphQLInputType()
+export class MarketPeriodWhereInput {
+  @TypeGraphQLField(() => ID, { nullable: true })
+  id_eq?: string;
+
+  @TypeGraphQLField(() => [ID], { nullable: true })
+  id_in?: string[];
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_eq?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_lt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_lte?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_gt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_gte?: Date;
+
+  @TypeGraphQLField(() => ID, { nullable: true })
+  createdById_eq?: string;
+
+  @TypeGraphQLField(() => [ID], { nullable: true })
+  createdById_in?: string[];
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_eq?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_lt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_lte?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_gt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_gte?: Date;
+
+  @TypeGraphQLField(() => ID, { nullable: true })
+  updatedById_eq?: string;
+
+  @TypeGraphQLField(() => [ID], { nullable: true })
+  updatedById_in?: string[];
+
+  @TypeGraphQLField({ nullable: true })
+  deletedAt_all?: Boolean;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_eq?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_lt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_lte?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_gt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_gte?: Date;
+
+  @TypeGraphQLField(() => ID, { nullable: true })
+  deletedById_eq?: string;
+
+  @TypeGraphQLField(() => [ID], { nullable: true })
+  deletedById_in?: string[];
+
+  @TypeGraphQLField({ nullable: true })
+  block_eq?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  block_contains?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  block_startsWith?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  block_endsWith?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  block_in?: string[];
+
+  @TypeGraphQLField({ nullable: true })
+  timestamp_eq?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  timestamp_contains?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  timestamp_startsWith?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  timestamp_endsWith?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  timestamp_in?: string[];
+
+  @TypeGraphQLField(() => MarketPeriodWhereInput, { nullable: true })
+  AND?: [MarketPeriodWhereInput];
+
+  @TypeGraphQLField(() => MarketPeriodWhereInput, { nullable: true })
+  OR?: [MarketPeriodWhereInput];
+}
+
+@TypeGraphQLInputType()
+export class MarketPeriodWhereUniqueInput {
+  @TypeGraphQLField(() => ID)
+  id?: string;
+}
+
+@TypeGraphQLInputType()
+export class MarketPeriodCreateInput {
+  @TypeGraphQLField({ nullable: true })
+  block?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  timestamp?: string;
+}
+
+@TypeGraphQLInputType()
+export class MarketPeriodUpdateInput {
+  @TypeGraphQLField({ nullable: true })
+  block?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  timestamp?: string;
+}
+
+@ArgsType()
+export class MarketPeriodWhereArgs extends PaginationArgs {
+  @TypeGraphQLField(() => MarketPeriodWhereInput, { nullable: true })
+  where?: MarketPeriodWhereInput;
+
+  @TypeGraphQLField(() => MarketPeriodOrderByEnum, { nullable: true })
+  orderBy?: MarketPeriodOrderByEnum[];
+}
+
+@ArgsType()
+export class MarketPeriodCreateManyArgs {
+  @TypeGraphQLField(() => [MarketPeriodCreateInput])
+  data!: MarketPeriodCreateInput[];
+}
+
+@ArgsType()
+export class MarketPeriodUpdateArgs {
+  @TypeGraphQLField() data!: MarketPeriodUpdateInput;
+  @TypeGraphQLField() where!: MarketPeriodWhereUniqueInput;
+}
 
 export enum MarketReportOrderByEnum {
   createdAt_ASC = "createdAt_ASC",
@@ -214,6 +580,183 @@ export class MarketReportCreateManyArgs {
 export class MarketReportUpdateArgs {
   @TypeGraphQLField() data!: MarketReportUpdateInput;
   @TypeGraphQLField() where!: MarketReportWhereUniqueInput;
+}
+
+export enum MarketTypeOrderByEnum {
+  createdAt_ASC = "createdAt_ASC",
+  createdAt_DESC = "createdAt_DESC",
+
+  updatedAt_ASC = "updatedAt_ASC",
+  updatedAt_DESC = "updatedAt_DESC",
+
+  deletedAt_ASC = "deletedAt_ASC",
+  deletedAt_DESC = "deletedAt_DESC",
+
+  categorical_ASC = "categorical_ASC",
+  categorical_DESC = "categorical_DESC",
+
+  scalar_ASC = "scalar_ASC",
+  scalar_DESC = "scalar_DESC",
+}
+
+registerEnumType(MarketTypeOrderByEnum, {
+  name: "MarketTypeOrderByInput",
+});
+
+@TypeGraphQLInputType()
+export class MarketTypeWhereInput {
+  @TypeGraphQLField(() => ID, { nullable: true })
+  id_eq?: string;
+
+  @TypeGraphQLField(() => [ID], { nullable: true })
+  id_in?: string[];
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_eq?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_lt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_lte?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_gt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_gte?: Date;
+
+  @TypeGraphQLField(() => ID, { nullable: true })
+  createdById_eq?: string;
+
+  @TypeGraphQLField(() => [ID], { nullable: true })
+  createdById_in?: string[];
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_eq?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_lt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_lte?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_gt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_gte?: Date;
+
+  @TypeGraphQLField(() => ID, { nullable: true })
+  updatedById_eq?: string;
+
+  @TypeGraphQLField(() => [ID], { nullable: true })
+  updatedById_in?: string[];
+
+  @TypeGraphQLField({ nullable: true })
+  deletedAt_all?: Boolean;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_eq?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_lt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_lte?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_gt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_gte?: Date;
+
+  @TypeGraphQLField(() => ID, { nullable: true })
+  deletedById_eq?: string;
+
+  @TypeGraphQLField(() => [ID], { nullable: true })
+  deletedById_in?: string[];
+
+  @TypeGraphQLField({ nullable: true })
+  categorical_eq?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  categorical_contains?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  categorical_startsWith?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  categorical_endsWith?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  categorical_in?: string[];
+
+  @TypeGraphQLField({ nullable: true })
+  scalar_eq?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  scalar_contains?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  scalar_startsWith?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  scalar_endsWith?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  scalar_in?: string[];
+
+  @TypeGraphQLField(() => MarketTypeWhereInput, { nullable: true })
+  AND?: [MarketTypeWhereInput];
+
+  @TypeGraphQLField(() => MarketTypeWhereInput, { nullable: true })
+  OR?: [MarketTypeWhereInput];
+}
+
+@TypeGraphQLInputType()
+export class MarketTypeWhereUniqueInput {
+  @TypeGraphQLField(() => ID)
+  id?: string;
+}
+
+@TypeGraphQLInputType()
+export class MarketTypeCreateInput {
+  @TypeGraphQLField({ nullable: true })
+  categorical?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  scalar?: string;
+}
+
+@TypeGraphQLInputType()
+export class MarketTypeUpdateInput {
+  @TypeGraphQLField({ nullable: true })
+  categorical?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  scalar?: string;
+}
+
+@ArgsType()
+export class MarketTypeWhereArgs extends PaginationArgs {
+  @TypeGraphQLField(() => MarketTypeWhereInput, { nullable: true })
+  where?: MarketTypeWhereInput;
+
+  @TypeGraphQLField(() => MarketTypeOrderByEnum, { nullable: true })
+  orderBy?: MarketTypeOrderByEnum[];
+}
+
+@ArgsType()
+export class MarketTypeCreateManyArgs {
+  @TypeGraphQLField(() => [MarketTypeCreateInput])
+  data!: MarketTypeCreateInput[];
+}
+
+@ArgsType()
+export class MarketTypeUpdateArgs {
+  @TypeGraphQLField() data!: MarketTypeUpdateInput;
+  @TypeGraphQLField() where!: MarketTypeWhereUniqueInput;
 }
 
 export enum OutcomeReportOrderByEnum {
@@ -728,11 +1271,11 @@ export class MarketCreateInput {
   @TypeGraphQLField({ nullable: true })
   description?: string;
 
-  @TypeGraphQLField(() => GraphQLJSONObject)
-  marketType!: JsonObject;
+  @TypeGraphQLField(() => MarketType)
+  marketType!: MarketType;
 
-  @TypeGraphQLField(() => GraphQLJSONObject)
-  period!: JsonObject;
+  @TypeGraphQLField(() => MarketPeriod)
+  period!: MarketPeriod;
 
   @TypeGraphQLField()
   scoringRule!: string;
@@ -746,8 +1289,8 @@ export class MarketCreateInput {
   @TypeGraphQLField({ nullable: true })
   resolvedOutcome?: string;
 
-  @TypeGraphQLField(() => GraphQLJSONObject)
-  mdm!: JsonObject;
+  @TypeGraphQLField(() => MarketDisputeMechanism)
+  mdm!: MarketDisputeMechanism;
 }
 
 @TypeGraphQLInputType()
@@ -773,11 +1316,11 @@ export class MarketUpdateInput {
   @TypeGraphQLField({ nullable: true })
   description?: string;
 
-  @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
-  marketType?: JsonObject;
+  @TypeGraphQLField(() => MarketType, { nullable: true })
+  marketType?: MarketType;
 
-  @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
-  period?: JsonObject;
+  @TypeGraphQLField(() => MarketPeriod, { nullable: true })
+  period?: MarketPeriod;
 
   @TypeGraphQLField({ nullable: true })
   scoringRule?: string;
@@ -791,8 +1334,8 @@ export class MarketUpdateInput {
   @TypeGraphQLField({ nullable: true })
   resolvedOutcome?: string;
 
-  @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
-  mdm?: JsonObject;
+  @TypeGraphQLField(() => MarketDisputeMechanism, { nullable: true })
+  mdm?: MarketDisputeMechanism;
 }
 
 @ArgsType()

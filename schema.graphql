@@ -1,59 +1,3 @@
-type Block @variant {
-  value: String!
-}
-
-type Timestamp @variant {
-  value: String!
-}
-
-union MarketPeriod = Block | Timestamp
-
-type Categorical @variant {
-  value: String!
-}
-
-type Scalar @variant {
-  value: String!
-}
-
-union MarketType = Categorical | Scalar
-
-type Authorized @variant {
-  value: String
-}
-
-type Court @variant {
-  value: Boolean
-}
-
-type SimpleDisputes @variant {
-  value: Boolean
-}
-
-union MarketDisputeMechanism = Authorized | Court | SimpleDisputes
-
-enum MarketEvent {
-  MarketCreated,
-  MarketInsufficientSubsidy,
-  MarketReported
-}
-
-enum MarketStatus {
-  InsufficientSubsidy,
-  Reported
-}
-
-type OutcomeReport @jsonField {
-  Categorical: Int
-  Scalar: Int
-}
-
-type MarketReport @jsonField {
-  at: Int!
-  by: String!
-  outcome: OutcomeReport!
-}
-
 type Market @entity {
   marketId: Int! 
   creator: String!
@@ -93,4 +37,42 @@ type Pool @entity {
   totalWeight: String!
   blockNumber: Int!
   timestamp: BigInt!
+}
+
+type MarketType @jsonField {
+  Categorical: String
+  Scalar: String
+}
+
+type MarketPeriod @jsonField {
+  Block: String
+  Timestamp: String
+}
+
+enum MarketStatus {
+  InsufficientSubsidy,
+  Reported
+}
+
+type MarketReport @jsonField {
+  at: Int!
+  by: String!
+  outcome: OutcomeReport!
+}
+
+type OutcomeReport @jsonField {
+  Categorical: Int
+  Scalar: Int
+}
+
+type MarketDisputeMechanism @jsonField {
+  Authorized: String
+  Court: Boolean
+  SimpleDisputes: Boolean
+}
+
+enum MarketEvent {
+  MarketCreated,
+  MarketInsufficientSubsidy,
+  MarketReported
 }
