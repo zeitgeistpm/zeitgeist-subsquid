@@ -5,8 +5,6 @@ export { MarketHistory };
 import { Pool } from '../modules/pool/pool.model';
 export { Pool };
 
-import { MarketEvent } from '../modules/enums/enums';
-export { MarketEvent };
 import { MarketStatus } from '../modules/enums/enums';
 export { MarketStatus };
 

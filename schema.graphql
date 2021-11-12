@@ -18,7 +18,7 @@ type Market @entity {
 
 type MarketHistory @entity {
   market: Market!
-  event: MarketEvent!
+  event: String!
   status: String
   report: MarketReport
   resolvedOutcome: String
@@ -51,7 +51,8 @@ type MarketPeriod @jsonField {
 
 enum MarketStatus {
   InsufficientSubsidy,
-  Reported
+  Reported,
+  Disputed
 }
 
 type MarketReport @jsonField {
@@ -69,10 +70,4 @@ type MarketDisputeMechanism @jsonField {
   Authorized: String
   Court: Boolean
   SimpleDisputes: Boolean
-}
-
-enum MarketEvent {
-  MarketCreated,
-  MarketInsufficientSubsidy,
-  MarketReported
 }
