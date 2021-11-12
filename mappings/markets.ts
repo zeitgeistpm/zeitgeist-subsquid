@@ -3,7 +3,7 @@ import { EventContext, StoreContext } from '@subsquid/hydra-common'
 import { Market, MarketDisputeMechanism, MarketHistory, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../generated/model'
 import { PredictionMarkets } from '../chain'
 import IPFS from './util'
-import { MarketEvent, MarketStatus } from '../generated/modules/enums/enums'
+import { MarketStatus } from '../generated/modules/enums/enums'
 
 export async function predictionMarketCreated({
     store,
@@ -61,7 +61,7 @@ export async function predictionMarketCreated({
 
     const newMH = new MarketHistory()
     newMH.market = newMarket
-    newMH.event = MarketEvent.MarketCreated
+    newMH.event = event.method
     newMH.status = newMarket.status
     newMH.blockNumber = block.height
     newMH.timestamp = new BN(block.timestamp)
@@ -89,7 +89,7 @@ export async function predictionMarketInsufficientSubsidy({
 
     const newMH = new MarketHistory()
     newMH.market = savedMarket
-    newMH.event = MarketEvent.MarketInsufficientSubsidy
+    newMH.event = event.method
     newMH.status = savedMarket.status
     newMH.blockNumber = block.height
     newMH.timestamp = new BN(block.timestamp)
@@ -130,9 +130,37 @@ export async function predictionMarketReported({
 
     const newMH = new MarketHistory()
     newMH.market = savedMarket
-    newMH.event = MarketEvent.MarketReported
+    newMH.event = event.method
     newMH.status = savedMarket.status
     newMH.report = savedMarket.report
+    newMH.blockNumber = block.height
+    newMH.timestamp = new BN(block.timestamp)
+
+    console.log(`Saving market history: ${JSON.stringify(newMH, null, 2)}`)
+    await store.save<MarketHistory>(newMH)
+}
+
+export async function predictionMarketDisputed({
+    store,
+    event,
+    block,
+    extrinsic,
+}: EventContext & StoreContext) {
+
+    const [marketIdOf, outcomeReport] = new PredictionMarkets.MarketDisputedEvent(event).params
+
+    const savedMarket = await store.get(Market, { where: { marketId: marketIdOf.toNumber() } })
+    if (!savedMarket) return
+
+    savedMarket.status = MarketStatus.Disputed
+
+    console.log(`Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
+    await store.save<Market>(savedMarket)
+
+    const newMH = new MarketHistory()
+    newMH.market = savedMarket
+    newMH.event = event.method
+    newMH.status = savedMarket.status
     newMH.blockNumber = block.height
     newMH.timestamp = new BN(block.timestamp)
 
