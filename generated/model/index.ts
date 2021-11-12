@@ -10,29 +10,13 @@ export { MarketEvent };
 import { MarketStatus } from '../modules/enums/enums';
 export { MarketStatus };
 
-import { Authorized } from '../modules/variants/variants.model';
-export { Authorized };
-import { Block } from '../modules/variants/variants.model';
-export { Block };
-import { Categorical } from '../modules/variants/variants.model';
-export { Categorical };
-import { Court } from '../modules/variants/variants.model';
-export { Court };
-import { Scalar } from '../modules/variants/variants.model';
-export { Scalar };
-import { SimpleDisputes } from '../modules/variants/variants.model';
-export { SimpleDisputes };
-import { Timestamp } from '../modules/variants/variants.model';
-export { Timestamp };
-
-import { MarketPeriod } from '../modules/variants/variants.model';
-export { MarketPeriod };
-import { MarketType } from '../modules/variants/variants.model';
-export { MarketType };
-import { MarketDisputeMechanism } from '../modules/variants/variants.model';
+import { MarketDisputeMechanism } from '../modules/jsonfields/jsonfields.model';
 export { MarketDisputeMechanism };
-
+import { MarketPeriod } from '../modules/jsonfields/jsonfields.model';
+export { MarketPeriod };
 import { MarketReport } from '../modules/jsonfields/jsonfields.model';
 export { MarketReport };
+import { MarketType } from '../modules/jsonfields/jsonfields.model';
+export { MarketType };
 import { OutcomeReport } from '../modules/jsonfields/jsonfields.model';
 export { OutcomeReport };

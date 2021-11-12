@@ -1,7 +1,3 @@
-type Authorized {
-  value: String
-}
-
 interface BaseGraphQLObject {
   id: ID!
   createdAt: DateTime!
@@ -62,18 +58,6 @@ input BaseWhereInput {
 """GraphQL representation of BigInt"""
 scalar BigInt
 
-type Block {
-  value: String!
-}
-
-type Categorical {
-  value: String!
-}
-
-type Court {
-  value: Boolean
-}
-
 """
 The javascript `Date` as string. Type represents date and time as the ISO Date string.
 """
@@ -128,16 +112,80 @@ input MarketCreateInput {
   slug: String
   question: String
   description: String
-  marketType: JSONObject!
-  period: JSONObject!
+  marketType: MarketTypeInput!
+  period: MarketPeriodInput!
   scoringRule: String!
   status: String!
   report: MarketReportInput
   resolvedOutcome: String
-  mdm: JSONObject!
+  mdm: MarketDisputeMechanismInput!
 }
 
-union MarketDisputeMechanism = Authorized | Court | SimpleDisputes
+type MarketDisputeMechanism {
+  authorized: String
+  court: Boolean
+  simpleDisputes: Boolean
+}
+
+input MarketDisputeMechanismCreateInput {
+  authorized: String
+  court: Boolean
+  simpleDisputes: Boolean
+}
+
+input MarketDisputeMechanismInput {
+  authorized: String
+  court: Boolean
+  simpleDisputes: Boolean
+}
+
+input MarketDisputeMechanismUpdateInput {
+  authorized: String
+  court: Boolean
+  simpleDisputes: Boolean
+}
+
+input MarketDisputeMechanismWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  authorized_eq: String
+  authorized_contains: String
+  authorized_startsWith: String
+  authorized_endsWith: String
+  authorized_in: [String!]
+  court_eq: Boolean
+  court_in: [Boolean!]
+  simpleDisputes_eq: Boolean
+  simpleDisputes_in: [Boolean!]
+  AND: [MarketDisputeMechanismWhereInput!]
+  OR: [MarketDisputeMechanismWhereInput!]
+}
+
+input MarketDisputeMechanismWhereUniqueInput {
+  id: ID!
+}
 
 type MarketEdge {
   node: Market!
@@ -309,7 +357,68 @@ enum MarketOrderByInput {
   resolvedOutcome_DESC
 }
 
-union MarketPeriod = Block | Timestamp
+type MarketPeriod {
+  block: String
+  timestamp: String
+}
+
+input MarketPeriodCreateInput {
+  block: String
+  timestamp: String
+}
+
+input MarketPeriodInput {
+  block: String
+  timestamp: String
+}
+
+input MarketPeriodUpdateInput {
+  block: String
+  timestamp: String
+}
+
+input MarketPeriodWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  block_eq: String
+  block_contains: String
+  block_startsWith: String
+  block_endsWith: String
+  block_in: [String!]
+  timestamp_eq: String
+  timestamp_contains: String
+  timestamp_startsWith: String
+  timestamp_endsWith: String
+  timestamp_in: [String!]
+  AND: [MarketPeriodWhereInput!]
+  OR: [MarketPeriodWhereInput!]
+}
+
+input MarketPeriodWhereUniqueInput {
+  id: ID!
+}
 
 type MarketReport {
   at: Int!
@@ -377,7 +486,68 @@ input MarketReportWhereUniqueInput {
   id: ID!
 }
 
-union MarketType = Categorical | Scalar
+type MarketType {
+  categorical: String
+  scalar: String
+}
+
+input MarketTypeCreateInput {
+  categorical: String
+  scalar: String
+}
+
+input MarketTypeInput {
+  categorical: String
+  scalar: String
+}
+
+input MarketTypeUpdateInput {
+  categorical: String
+  scalar: String
+}
+
+input MarketTypeWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  categorical_eq: String
+  categorical_contains: String
+  categorical_startsWith: String
+  categorical_endsWith: String
+  categorical_in: [String!]
+  scalar_eq: String
+  scalar_contains: String
+  scalar_startsWith: String
+  scalar_endsWith: String
+  scalar_in: [String!]
+  AND: [MarketTypeWhereInput!]
+  OR: [MarketTypeWhereInput!]
+}
+
+input MarketTypeWhereUniqueInput {
+  id: ID!
+}
 
 input MarketUpdateInput {
   marketId: Float
@@ -387,13 +557,13 @@ input MarketUpdateInput {
   slug: String
   question: String
   description: String
-  marketType: JSONObject
-  period: JSONObject
+  marketType: MarketTypeInput
+  period: MarketPeriodInput
   scoringRule: String
   status: String
   report: MarketReportInput
   resolvedOutcome: String
-  mdm: JSONObject
+  mdm: MarketDisputeMechanismInput
 }
 
 input MarketWhereInput {
@@ -752,22 +922,10 @@ type Query {
   poolsConnection(first: Int, after: String, last: Int, before: String, where: PoolWhereInput, orderBy: [PoolOrderByInput!]): PoolConnection!
 }
 
-type Scalar {
-  value: String!
-}
-
-type SimpleDisputes {
-  value: Boolean
-}
-
 type StandardDeleteResponse {
   id: ID!
 }
 
 type Subscription {
   stateSubscription: ProcessorState!
-}
-
-type Timestamp {
-  value: String!
 }
