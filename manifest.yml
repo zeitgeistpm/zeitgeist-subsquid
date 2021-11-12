@@ -10,11 +10,12 @@ typegen:
   metadata:
     source: ws://127.0.0.1:9944
   events:
-    - predictionMarkets.MarketCreated
     - predictionMarkets.BoughtCompleteSet
+    - predictionMarkets.MarketApproved
+    - predictionMarkets.MarketCreated
     - predictionMarkets.MarketInsufficientSubsidy
-    - predictionMarkets.MarketReported
     - predictionMarkets.MarketDisputed
+    - predictionMarkets.MarketReported
     - swaps.PoolCreate
   outDir: chain
   
