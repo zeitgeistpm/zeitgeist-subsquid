@@ -13,6 +13,7 @@ typegen:
     - predictionMarkets.BoughtCompleteSet
     - predictionMarkets.MarketApproved
     - predictionMarkets.MarketCreated
+    - predictionMarkets.MarketStartedWithSubsidy
     - predictionMarkets.MarketInsufficientSubsidy
     - predictionMarkets.MarketDisputed
     - predictionMarkets.MarketReported
@@ -28,6 +29,8 @@ mappings:
       handler: predictionMarketApproved
     - event: predictionMarkets.MarketCreated
       handler: predictionMarketCreated
+    - event: predictionMarkets.MarketStartedWithSubsidy
+      handler: predictionMarketStartedWithSubsidy
     - event: predictionMarkets.MarketInsufficientSubsidy
       handler: predictionMarketInsufficientSubsidy
     - event: predictionMarkets.MarketDisputed

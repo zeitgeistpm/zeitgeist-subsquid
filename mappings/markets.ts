@@ -120,6 +120,34 @@ export async function predictionMarketCreated({
     await store.save<MarketHistory>(newMH)
 }
 
+export async function predictionMarketStartedWithSubsidy({
+    store,
+    event,
+    block,
+    extrinsic,
+}: EventContext & StoreContext) {
+
+    const [marketIdOf] = new PredictionMarkets.MarketStartedWithSubsidyEvent(event).params
+
+    const savedMarket = await store.get(Market, { where: { marketId: marketIdOf.toNumber() } })
+    if (!savedMarket) return
+
+    savedMarket.status = MarketStatus.Active
+
+    console.log(`Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
+    await store.save<Market>(savedMarket)
+
+    const newMH = new MarketHistory()
+    newMH.market = savedMarket
+    newMH.event = event.method
+    newMH.status = savedMarket.status
+    newMH.blockNumber = block.height
+    newMH.timestamp = new BN(block.timestamp)
+
+    console.log(`Saving market history: ${JSON.stringify(newMH, null, 2)}`)
+    await store.save<MarketHistory>(newMH)
+}
+
 export async function predictionMarketInsufficientSubsidy({
     store,
     event,
