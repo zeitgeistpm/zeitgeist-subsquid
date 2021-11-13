@@ -22,16 +22,18 @@ typegen:
 mappings:
   mappingsModule: mappings
   eventHandlers:
-    - event: predictionMarkets.MarketCreated
-      handler: predictionMarketCreated
     - event: predictionMarkets.BoughtCompleteSet
       handler: predictionMarketBoughtCompleteSet
+    - event: predictionMarkets.MarketApproved
+      handler: predictionMarketApproved
+    - event: predictionMarkets.MarketCreated
+      handler: predictionMarketCreated
     - event: predictionMarkets.MarketInsufficientSubsidy
       handler: predictionMarketInsufficientSubsidy
-    - event: predictionMarkets.MarketReported
-      handler: predictionMarketReported
     - event: predictionMarkets.MarketDisputed
       handler: predictionMarketDisputed
+    - event: predictionMarkets.MarketReported
+      handler: predictionMarketReported
     - event: swaps.PoolCreate
       handler: swapPoolCreated
   preBlockHooks:
