@@ -246,6 +246,34 @@ export async function predictionMarketDisputed({
     await store.save<MarketHistory>(newMH)
 }
 
+export async function predictionMarketCancelled({
+    store,
+    event,
+    block,
+    extrinsic,
+}: EventContext & StoreContext) {
+
+    const [marketIdOf] = new PredictionMarkets.MarketCancelledEvent(event).params
+
+    const savedMarket = await store.get(Market, { where: { marketId: marketIdOf.toNumber() } })
+    if (!savedMarket) return
+
+    savedMarket.status = MarketStatus.Cancelled
+
+    console.log(`[${event.method}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
+    await store.save<Market>(savedMarket)
+
+    const newMH = new MarketHistory()
+    newMH.market = savedMarket
+    newMH.event = event.method
+    newMH.status = savedMarket.status
+    newMH.blockNumber = block.height
+    newMH.timestamp = new BN(block.timestamp)
+
+    console.log(`[${event.method}] Saving market history: ${JSON.stringify(newMH, null, 2)}`)
+    await store.save<MarketHistory>(newMH)
+}
+
 async function decodeMarketMetadata(
     metadata: string,
 ): Promise<DecodedMarketMetadata | undefined> {
