@@ -50,6 +50,8 @@ type MarketPeriod @jsonField {
 }
 
 enum MarketStatus {
+  Active,
+  CollectingSubsidy,
   InsufficientSubsidy,
   Reported,
   Disputed
