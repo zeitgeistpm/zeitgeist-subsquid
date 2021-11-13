@@ -23,7 +23,7 @@ export async function predictionMarketBoughtCompleteSet({
     newMH.blockNumber = block.height
     newMH.timestamp = new BN(block.timestamp)
 
-    console.log(`Saving market history: ${JSON.stringify(newMH, null, 2)}`)
+    console.log(`[${event.method}] Saving market history: ${JSON.stringify(newMH, null, 2)}`)
     await store.save<MarketHistory>(newMH)
 }
 
@@ -41,7 +41,7 @@ export async function predictionMarketApproved({
 
     savedMarket.status = savedMarket.scoringRule === "CPMM" ? MarketStatus.Active : MarketStatus.CollectingSubsidy
 
-    console.log(`Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
+    console.log(`[${event.method}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
     await store.save<Market>(savedMarket)
 
     const newMH = new MarketHistory()
@@ -51,7 +51,7 @@ export async function predictionMarketApproved({
     newMH.blockNumber = block.height
     newMH.timestamp = new BN(block.timestamp)
 
-    console.log(`Saving market history: ${JSON.stringify(newMH, null, 2)}`)
+    console.log(`[${event.method}] Saving market history: ${JSON.stringify(newMH, null, 2)}`)
     await store.save<MarketHistory>(newMH)
 }
 
@@ -106,7 +106,7 @@ export async function predictionMarketCreated({
     }
     newMarket.mdm = mdm
 
-    console.log(`Saving market: ${JSON.stringify(newMarket, null, 2)}`)
+    console.log(`[${event.method}] Saving market: ${JSON.stringify(newMarket, null, 2)}`)
     await store.save<Market>(newMarket)
 
     const newMH = new MarketHistory()
@@ -116,7 +116,7 @@ export async function predictionMarketCreated({
     newMH.blockNumber = block.height
     newMH.timestamp = new BN(block.timestamp)
 
-    console.log(`Saving market history: ${JSON.stringify(newMH, null, 2)}`)
+    console.log(`[${event.method}] Saving market history: ${JSON.stringify(newMH, null, 2)}`)
     await store.save<MarketHistory>(newMH)
 }
 
@@ -134,7 +134,7 @@ export async function predictionMarketStartedWithSubsidy({
 
     savedMarket.status = MarketStatus.Active
 
-    console.log(`Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
+    console.log(`[${event.method}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
     await store.save<Market>(savedMarket)
 
     const newMH = new MarketHistory()
@@ -144,7 +144,7 @@ export async function predictionMarketStartedWithSubsidy({
     newMH.blockNumber = block.height
     newMH.timestamp = new BN(block.timestamp)
 
-    console.log(`Saving market history: ${JSON.stringify(newMH, null, 2)}`)
+    console.log(`[${event.method}] Saving market history: ${JSON.stringify(newMH, null, 2)}`)
     await store.save<MarketHistory>(newMH)
 }
 
@@ -162,7 +162,7 @@ export async function predictionMarketInsufficientSubsidy({
 
     savedMarket.status = MarketStatus.InsufficientSubsidy
 
-    console.log(`Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
+    console.log(`[${event.method}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
     await store.save<Market>(savedMarket)
 
     const newMH = new MarketHistory()
@@ -172,7 +172,7 @@ export async function predictionMarketInsufficientSubsidy({
     newMH.blockNumber = block.height
     newMH.timestamp = new BN(block.timestamp)
 
-    console.log(`Saving market history: ${JSON.stringify(newMH, null, 2)}`)
+    console.log(`[${event.method}] Saving market history: ${JSON.stringify(newMH, null, 2)}`)
     await store.save<MarketHistory>(newMH)
 }
 
@@ -203,7 +203,7 @@ export async function predictionMarketReported({
     savedMarket.status = MarketStatus.Reported
     savedMarket.report = mr
 
-    console.log(`Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
+    console.log(`[${event.method}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
     await store.save<Market>(savedMarket)
 
     const newMH = new MarketHistory()
@@ -214,7 +214,7 @@ export async function predictionMarketReported({
     newMH.blockNumber = block.height
     newMH.timestamp = new BN(block.timestamp)
 
-    console.log(`Saving market history: ${JSON.stringify(newMH, null, 2)}`)
+    console.log(`[${event.method}] Saving market history: ${JSON.stringify(newMH, null, 2)}`)
     await store.save<MarketHistory>(newMH)
 }
 
@@ -232,7 +232,7 @@ export async function predictionMarketDisputed({
 
     savedMarket.status = MarketStatus.Disputed
 
-    console.log(`Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
+    console.log(`[${event.method}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
     await store.save<Market>(savedMarket)
 
     const newMH = new MarketHistory()
@@ -242,7 +242,7 @@ export async function predictionMarketDisputed({
     newMH.blockNumber = block.height
     newMH.timestamp = new BN(block.timestamp)
 
-    console.log(`Saving market history: ${JSON.stringify(newMH, null, 2)}`)
+    console.log(`[${event.method}] Saving market history: ${JSON.stringify(newMH, null, 2)}`)
     await store.save<MarketHistory>(newMH)
 }
 
