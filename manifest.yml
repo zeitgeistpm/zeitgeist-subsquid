@@ -16,6 +16,7 @@ typegen:
     - predictionMarkets.MarketStartedWithSubsidy
     - predictionMarkets.MarketInsufficientSubsidy
     - predictionMarkets.MarketDisputed
+    - predictionMarkets.MarketRejected
     - predictionMarkets.MarketReported
     - predictionMarkets.MarketCancelled
     - swaps.PoolCreate
@@ -36,6 +37,8 @@ mappings:
       handler: predictionMarketInsufficientSubsidy
     - event: predictionMarkets.MarketDisputed
       handler: predictionMarketDisputed
+    - event: predictionMarkets.MarketRejected
+      handler: predictionMarketRejected
     - event: predictionMarkets.MarketReported
       handler: predictionMarketReported
     - event: predictionMarkets.MarketCancelled
