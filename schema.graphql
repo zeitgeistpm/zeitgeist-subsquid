@@ -55,6 +55,7 @@ enum MarketStatus {
   InsufficientSubsidy,
   Reported,
   Disputed,
+  Rejected,
   Cancelled
 }
 

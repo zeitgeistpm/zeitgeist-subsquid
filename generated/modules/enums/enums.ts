@@ -4,5 +4,6 @@ export enum MarketStatus {
   InsufficientSubsidy = 'InsufficientSubsidy',
   Reported = 'Reported',
   Disputed = 'Disputed',
+  Rejected = 'Rejected',
   Cancelled = 'Cancelled',
 }
