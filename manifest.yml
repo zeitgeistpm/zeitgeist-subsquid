@@ -19,6 +19,7 @@ typegen:
     - predictionMarkets.MarketRejected
     - predictionMarkets.MarketReported
     - predictionMarkets.MarketCancelled
+    - predictionMarkets.SoldCompleteSet
     - swaps.PoolCreate
   outDir: chain
   
@@ -43,6 +44,8 @@ mappings:
       handler: predictionMarketReported
     - event: predictionMarkets.MarketCancelled
       handler: predictionMarketCancelled
+    - event: predictionMarkets.SoldCompleteSet
+      handler: predictionMarketSoldCompleteSet
     - event: swaps.PoolCreate
       handler: swapPoolCreated
   preBlockHooks:
