@@ -13,9 +13,11 @@ typegen:
     - predictionMarkets.BoughtCompleteSet
     - predictionMarkets.MarketApproved
     - predictionMarkets.MarketCreated
+    - predictionMarkets.MarketStartedWithSubsidy
     - predictionMarkets.MarketInsufficientSubsidy
     - predictionMarkets.MarketDisputed
     - predictionMarkets.MarketReported
+    - predictionMarkets.MarketCancelled
     - swaps.PoolCreate
   outDir: chain
   
@@ -28,12 +30,16 @@ mappings:
       handler: predictionMarketApproved
     - event: predictionMarkets.MarketCreated
       handler: predictionMarketCreated
+    - event: predictionMarkets.MarketStartedWithSubsidy
+      handler: predictionMarketStartedWithSubsidy
     - event: predictionMarkets.MarketInsufficientSubsidy
       handler: predictionMarketInsufficientSubsidy
     - event: predictionMarkets.MarketDisputed
       handler: predictionMarketDisputed
     - event: predictionMarkets.MarketReported
       handler: predictionMarketReported
+    - event: predictionMarkets.MarketCancelled
+      handler: predictionMarketCancelled
     - event: swaps.PoolCreate
       handler: swapPoolCreated
   preBlockHooks:

@@ -124,6 +124,38 @@ export namespace PredictionMarkets {
   }
 
   /**
+   *  A market was started after gathering enough subsidy. \[market_id\]
+   *
+   *  Event parameters: [MarketIdOf<T>, ]
+   */
+  export class MarketStartedWithSubsidyEvent {
+    public readonly expectedParamTypes = ["MarketIdOf<T>"];
+
+    constructor(public readonly ctx: SubstrateEvent) {}
+
+    get params(): [MarketIdOf] {
+      return [
+        createTypeUnsafe<MarketIdOf & Codec>(typeRegistry, "MarketIdOf", [
+          this.ctx.params[0].value,
+        ]),
+      ];
+    }
+
+    validateParams(): boolean {
+      if (this.expectedParamTypes.length !== this.ctx.params.length) {
+        return false;
+      }
+      let valid = true;
+      this.expectedParamTypes.forEach((type, i) => {
+        if (type !== this.ctx.params[i].type) {
+          valid = false;
+        }
+      });
+      return valid;
+    }
+  }
+
+  /**
    * A market was discarded after failing to gather enough subsidy. \[market_id\]
    *
    *  Event parameters: [MarketIdOf<T>, ]
@@ -207,6 +239,38 @@ export namespace PredictionMarkets {
         ]),
         createTypeUnsafe<OutcomeReport & Codec>(typeRegistry, "OutcomeReport", [
           this.ctx.params[1].value,
+        ]),
+      ];
+    }
+
+    validateParams(): boolean {
+      if (this.expectedParamTypes.length !== this.ctx.params.length) {
+        return false;
+      }
+      let valid = true;
+      this.expectedParamTypes.forEach((type, i) => {
+        if (type !== this.ctx.params[i].type) {
+          valid = false;
+        }
+      });
+      return valid;
+    }
+  }
+
+  /**
+   *  A pending market has been cancelled. \[market_id, creator\]
+   *
+   *  Event parameters: [MarketIdOf<T>, ]
+   */
+  export class MarketCancelledEvent {
+    public readonly expectedParamTypes = ["MarketIdOf<T>"];
+
+    constructor(public readonly ctx: SubstrateEvent) {}
+
+    get params(): [MarketIdOf] {
+      return [
+        createTypeUnsafe<MarketIdOf & Codec>(typeRegistry, "MarketIdOf", [
+          this.ctx.params[0].value,
         ]),
       ];
     }
