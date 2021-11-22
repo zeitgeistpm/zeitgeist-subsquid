@@ -23,6 +23,7 @@ typegen:
     - swaps.PoolCreate
     - tokens.Endowed
     - currency.Transferred
+    - currency.Deposited
   outDir: chain
   
 mappings:

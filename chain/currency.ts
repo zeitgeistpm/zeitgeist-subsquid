@@ -3,7 +3,7 @@ import { SubstrateEvent, SubstrateExtrinsic } from "@subsquid/hydra-common";
 import { Codec } from "@polkadot/types/types";
 import { typeRegistry } from ".";
 
-import { CurrencyIdOf } from "@zeitgeistpm/types/dist/interfaces";
+import { CurrencyId } from "@zeitgeistpm/types/dist/interfaces";
 import { AccountId, Balance } from "@polkadot/types/interfaces";
 
 export namespace Currency {
@@ -14,7 +14,7 @@ export namespace Currency {
    */
   export class TransferredEvent {
     public readonly expectedParamTypes = [
-      "CurrencyIdOf",
+      "CurrencyId",
       "AccountId",
       "AccountId",
       "Balance",
@@ -22,9 +22,9 @@ export namespace Currency {
 
     constructor(public readonly ctx: SubstrateEvent) {}
 
-    get params(): [CurrencyIdOf, AccountId, AccountId, Balance] {
+    get params(): [CurrencyId, AccountId, AccountId, Balance] {
       return [
-        createTypeUnsafe<CurrencyIdOf & Codec>(typeRegistry, "CurrencyIdOf", [
+        createTypeUnsafe<CurrencyId & Codec>(typeRegistry, "CurrencyId", [
           this.ctx.params[0].value,
         ]),
         createTypeUnsafe<AccountId & Codec>(typeRegistry, "AccountId", [
@@ -35,6 +35,44 @@ export namespace Currency {
         ]),
         createTypeUnsafe<Balance & Codec>(typeRegistry, "Balance", [
           this.ctx.params[3].value,
+        ]),
+      ];
+    }
+
+    validateParams(): boolean {
+      if (this.expectedParamTypes.length !== this.ctx.params.length) {
+        return false;
+      }
+      let valid = true;
+      this.expectedParamTypes.forEach((type, i) => {
+        if (type !== this.ctx.params[i].type) {
+          valid = false;
+        }
+      });
+      return valid;
+    }
+  }
+
+  /**
+   *  Deposit success. \[currency_id, who, amount\]
+   *
+   *  Event parameters: [Currency, AccountId, Balance, ]
+   */
+  export class DepositedEvent {
+    public readonly expectedParamTypes = ["CurrencyId", "AccountId", "Balance"];
+
+    constructor(public readonly ctx: SubstrateEvent) {}
+
+    get params(): [CurrencyId, AccountId, Balance] {
+      return [
+        createTypeUnsafe<CurrencyId & Codec>(typeRegistry, "CurrencyId", [
+          this.ctx.params[0].value,
+        ]),
+        createTypeUnsafe<AccountId & Codec>(typeRegistry, "AccountId", [
+          this.ctx.params[1].value,
+        ]),
+        createTypeUnsafe<Balance & Codec>(typeRegistry, "Balance", [
+          this.ctx.params[2].value,
         ]),
       ];
     }

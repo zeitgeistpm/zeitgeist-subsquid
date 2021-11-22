@@ -11,5 +11,5 @@ export { typeRegistry };
 
 export * from "./prediction-markets";
 export * from "./swaps";
-export * from "./currency";
 export * from "./tokens";
+export * from "./currency";
