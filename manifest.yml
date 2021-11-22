@@ -21,6 +21,7 @@ typegen:
     - predictionMarkets.MarketCancelled
     - predictionMarkets.SoldCompleteSet
     - swaps.PoolCreate
+    - currency.Transferred
   outDir: chain
   
 mappings:
@@ -48,5 +49,7 @@ mappings:
       handler: predictionMarketSoldCompleteSet
     - event: swaps.PoolCreate
       handler: swapPoolCreated
+    - event: currency.Transferred
+      handler: currencyTransferred
   preBlockHooks:
   postBlockHooks:
