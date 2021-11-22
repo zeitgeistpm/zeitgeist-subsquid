@@ -58,5 +58,7 @@ mappings:
       handler: currencyTransferred
     - event: currency.Deposited
       handler: currencyDeposited
+    - event: currency.Withdrawn
+      handler: currencyWithdrawn
   preBlockHooks:
   postBlockHooks:
