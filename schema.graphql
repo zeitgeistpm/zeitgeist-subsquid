@@ -1,3 +1,25 @@
+type Account @entity {
+  "Account address"
+  wallet: String!
+  assetBalances: [AssetBalance] @derivedFrom(field: "account")
+  historicalAssetBalances: [HistoricalAssetBalance] @derivedFrom(field: "account")
+}
+
+type AssetBalance @entity {
+  account: Account!
+  assetId: String!
+  balance: BigInt!
+}
+
+type HistoricalAssetBalance @entity {
+  account: Account!
+  event: String!
+  assetId: String!
+  balance: BigInt!
+  blockNumber: Int!
+  timestamp: BigInt!
+}
+
 type Market @entity {
   marketId: Int! 
   creator: String!
