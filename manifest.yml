@@ -50,6 +50,8 @@ mappings:
       handler: predictionMarketSoldCompleteSet
     - event: swaps.PoolCreate
       handler: swapPoolCreated
+    - event: tokens.Endowed
+      handler: tokensEndowed
     - event: currency.Transferred
       handler: currencyTransferred
   preBlockHooks:
