@@ -24,6 +24,7 @@ typegen:
     - tokens.Endowed
     - currency.Transferred
     - currency.Deposited
+    - currency.Withdrawn
   outDir: chain
   
 mappings:
