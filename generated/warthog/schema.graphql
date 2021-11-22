@@ -1,3 +1,191 @@
+type Account implements BaseGraphQLObject {
+  id: ID!
+  createdAt: DateTime!
+  createdById: String!
+  updatedAt: DateTime
+  updatedById: String
+  deletedAt: DateTime
+  deletedById: String
+  version: Int!
+
+  """Account address"""
+  wallet: String!
+  assetBalances: [AssetBalance!]
+  historicalAssetBalances: [HistoricalAssetBalance!]
+}
+
+type AccountConnection {
+  totalCount: Int!
+  edges: [AccountEdge!]!
+  pageInfo: PageInfo!
+}
+
+input AccountCreateInput {
+  wallet: String!
+}
+
+type AccountEdge {
+  node: Account!
+  cursor: String!
+}
+
+enum AccountOrderByInput {
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  deletedAt_ASC
+  deletedAt_DESC
+  wallet_ASC
+  wallet_DESC
+}
+
+input AccountUpdateInput {
+  wallet: String
+}
+
+input AccountWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  wallet_eq: String
+  wallet_contains: String
+  wallet_startsWith: String
+  wallet_endsWith: String
+  wallet_in: [String!]
+  assetBalances_none: AssetBalanceWhereInput
+  assetBalances_some: AssetBalanceWhereInput
+  assetBalances_every: AssetBalanceWhereInput
+  historicalAssetBalances_none: HistoricalAssetBalanceWhereInput
+  historicalAssetBalances_some: HistoricalAssetBalanceWhereInput
+  historicalAssetBalances_every: HistoricalAssetBalanceWhereInput
+  AND: [AccountWhereInput!]
+  OR: [AccountWhereInput!]
+}
+
+input AccountWhereUniqueInput {
+  id: ID!
+}
+
+type AssetBalance implements BaseGraphQLObject {
+  id: ID!
+  createdAt: DateTime!
+  createdById: String!
+  updatedAt: DateTime
+  updatedById: String
+  deletedAt: DateTime
+  deletedById: String
+  version: Int!
+  account: Account!
+  accountId: String!
+  assetId: String!
+  balance: BigInt!
+}
+
+type AssetBalanceConnection {
+  totalCount: Int!
+  edges: [AssetBalanceEdge!]!
+  pageInfo: PageInfo!
+}
+
+input AssetBalanceCreateInput {
+  account: ID!
+  assetId: String!
+  balance: String!
+}
+
+type AssetBalanceEdge {
+  node: AssetBalance!
+  cursor: String!
+}
+
+enum AssetBalanceOrderByInput {
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  deletedAt_ASC
+  deletedAt_DESC
+  account_ASC
+  account_DESC
+  assetId_ASC
+  assetId_DESC
+  balance_ASC
+  balance_DESC
+}
+
+input AssetBalanceUpdateInput {
+  account: ID
+  assetId: String
+  balance: String
+}
+
+input AssetBalanceWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  assetId_eq: String
+  assetId_contains: String
+  assetId_startsWith: String
+  assetId_endsWith: String
+  assetId_in: [String!]
+  balance_eq: BigInt
+  balance_gt: BigInt
+  balance_gte: BigInt
+  balance_lt: BigInt
+  balance_lte: BigInt
+  balance_in: [BigInt!]
+  account: AccountWhereInput
+  AND: [AssetBalanceWhereInput!]
+  OR: [AssetBalanceWhereInput!]
+}
+
+input AssetBalanceWhereUniqueInput {
+  id: ID!
+}
+
 interface BaseGraphQLObject {
   id: ID!
   createdAt: DateTime!
@@ -64,6 +252,136 @@ The javascript `Date` as string. Type represents date and time as the ISO Date s
 scalar DateTime
 
 interface DeleteResponse {
+  id: ID!
+}
+
+type HistoricalAssetBalance implements BaseGraphQLObject {
+  id: ID!
+  createdAt: DateTime!
+  createdById: String!
+  updatedAt: DateTime
+  updatedById: String
+  deletedAt: DateTime
+  deletedById: String
+  version: Int!
+  account: Account!
+  accountId: String!
+  event: String!
+  assetId: String!
+  balance: BigInt!
+  blockNumber: Int!
+  timestamp: BigInt!
+}
+
+type HistoricalAssetBalanceConnection {
+  totalCount: Int!
+  edges: [HistoricalAssetBalanceEdge!]!
+  pageInfo: PageInfo!
+}
+
+input HistoricalAssetBalanceCreateInput {
+  account: ID!
+  event: String!
+  assetId: String!
+  balance: String!
+  blockNumber: Float!
+  timestamp: String!
+}
+
+type HistoricalAssetBalanceEdge {
+  node: HistoricalAssetBalance!
+  cursor: String!
+}
+
+enum HistoricalAssetBalanceOrderByInput {
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  deletedAt_ASC
+  deletedAt_DESC
+  account_ASC
+  account_DESC
+  event_ASC
+  event_DESC
+  assetId_ASC
+  assetId_DESC
+  balance_ASC
+  balance_DESC
+  blockNumber_ASC
+  blockNumber_DESC
+  timestamp_ASC
+  timestamp_DESC
+}
+
+input HistoricalAssetBalanceUpdateInput {
+  account: ID
+  event: String
+  assetId: String
+  balance: String
+  blockNumber: Float
+  timestamp: String
+}
+
+input HistoricalAssetBalanceWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  event_eq: String
+  event_contains: String
+  event_startsWith: String
+  event_endsWith: String
+  event_in: [String!]
+  assetId_eq: String
+  assetId_contains: String
+  assetId_startsWith: String
+  assetId_endsWith: String
+  assetId_in: [String!]
+  balance_eq: BigInt
+  balance_gt: BigInt
+  balance_gte: BigInt
+  balance_lt: BigInt
+  balance_lte: BigInt
+  balance_in: [BigInt!]
+  blockNumber_eq: Int
+  blockNumber_gt: Int
+  blockNumber_gte: Int
+  blockNumber_lt: Int
+  blockNumber_lte: Int
+  blockNumber_in: [Int!]
+  timestamp_eq: BigInt
+  timestamp_gt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lt: BigInt
+  timestamp_lte: BigInt
+  timestamp_in: [BigInt!]
+  account: AccountWhereInput
+  AND: [HistoricalAssetBalanceWhereInput!]
+  OR: [HistoricalAssetBalanceWhereInput!]
+}
+
+input HistoricalAssetBalanceWhereUniqueInput {
   id: ID!
 }
 
@@ -908,6 +1226,15 @@ type ProcessorState {
 }
 
 type Query {
+  accounts(offset: Int, limit: Int = 50, where: AccountWhereInput, orderBy: [AccountOrderByInput!]): [Account!]!
+  accountByUniqueInput(where: AccountWhereUniqueInput!): Account
+  accountsConnection(first: Int, after: String, last: Int, before: String, where: AccountWhereInput, orderBy: [AccountOrderByInput!]): AccountConnection!
+  assetBalances(offset: Int, limit: Int = 50, where: AssetBalanceWhereInput, orderBy: [AssetBalanceOrderByInput!]): [AssetBalance!]!
+  assetBalanceByUniqueInput(where: AssetBalanceWhereUniqueInput!): AssetBalance
+  assetBalancesConnection(first: Int, after: String, last: Int, before: String, where: AssetBalanceWhereInput, orderBy: [AssetBalanceOrderByInput!]): AssetBalanceConnection!
+  historicalAssetBalances(offset: Int, limit: Int = 50, where: HistoricalAssetBalanceWhereInput, orderBy: [HistoricalAssetBalanceOrderByInput!]): [HistoricalAssetBalance!]!
+  historicalAssetBalanceByUniqueInput(where: HistoricalAssetBalanceWhereUniqueInput!): HistoricalAssetBalance
+  historicalAssetBalancesConnection(first: Int, after: String, last: Int, before: String, where: HistoricalAssetBalanceWhereInput, orderBy: [HistoricalAssetBalanceOrderByInput!]): HistoricalAssetBalanceConnection!
   marketHistories(offset: Int, limit: Int = 50, where: MarketHistoryWhereInput, orderBy: [MarketHistoryOrderByInput!]): [MarketHistory!]!
   marketHistoryByUniqueInput(where: MarketHistoryWhereUniqueInput!): MarketHistory
   marketHistoriesConnection(first: Int, after: String, last: Int, before: String, where: MarketHistoryWhereInput, orderBy: [MarketHistoryOrderByInput!]): MarketHistoryConnection!

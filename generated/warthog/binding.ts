@@ -6,6 +6,15 @@ import { IResolvers } from 'graphql-tools/dist/Interfaces'
 import * as schema from  './schema.graphql'
 
 export interface Query {
+    accounts: <T = Array<Account>>(args: { offset?: Int | null, limit?: Int | null, where?: AccountWhereInput | null, orderBy?: Array<AccountOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
+    accountByUniqueInput: <T = Account | null>(args: { where: AccountWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
+    accountsConnection: <T = AccountConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: AccountWhereInput | null, orderBy?: Array<AccountOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
+    assetBalances: <T = Array<AssetBalance>>(args: { offset?: Int | null, limit?: Int | null, where?: AssetBalanceWhereInput | null, orderBy?: Array<AssetBalanceOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
+    assetBalanceByUniqueInput: <T = AssetBalance | null>(args: { where: AssetBalanceWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
+    assetBalancesConnection: <T = AssetBalanceConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: AssetBalanceWhereInput | null, orderBy?: Array<AssetBalanceOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
+    historicalAssetBalances: <T = Array<HistoricalAssetBalance>>(args: { offset?: Int | null, limit?: Int | null, where?: HistoricalAssetBalanceWhereInput | null, orderBy?: Array<HistoricalAssetBalanceOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
+    historicalAssetBalanceByUniqueInput: <T = HistoricalAssetBalance | null>(args: { where: HistoricalAssetBalanceWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
+    historicalAssetBalancesConnection: <T = HistoricalAssetBalanceConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: HistoricalAssetBalanceWhereInput | null, orderBy?: Array<HistoricalAssetBalanceOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     marketHistories: <T = Array<MarketHistory>>(args: { offset?: Int | null, limit?: Int | null, where?: MarketHistoryWhereInput | null, orderBy?: Array<MarketHistoryOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     marketHistoryByUniqueInput: <T = MarketHistory | null>(args: { where: MarketHistoryWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
     marketHistoriesConnection: <T = MarketHistoryConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: MarketHistoryWhereInput | null, orderBy?: Array<MarketHistoryOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
@@ -46,6 +55,47 @@ export const Binding = makeBindingClass<BindingConstructor<Binding>>({ schema: s
 /**
  * Types
 */
+
+export type AccountOrderByInput =   'createdAt_ASC' |
+  'createdAt_DESC' |
+  'updatedAt_ASC' |
+  'updatedAt_DESC' |
+  'deletedAt_ASC' |
+  'deletedAt_DESC' |
+  'wallet_ASC' |
+  'wallet_DESC'
+
+export type AssetBalanceOrderByInput =   'createdAt_ASC' |
+  'createdAt_DESC' |
+  'updatedAt_ASC' |
+  'updatedAt_DESC' |
+  'deletedAt_ASC' |
+  'deletedAt_DESC' |
+  'account_ASC' |
+  'account_DESC' |
+  'assetId_ASC' |
+  'assetId_DESC' |
+  'balance_ASC' |
+  'balance_DESC'
+
+export type HistoricalAssetBalanceOrderByInput =   'createdAt_ASC' |
+  'createdAt_DESC' |
+  'updatedAt_ASC' |
+  'updatedAt_DESC' |
+  'deletedAt_ASC' |
+  'deletedAt_DESC' |
+  'account_ASC' |
+  'account_DESC' |
+  'event_ASC' |
+  'event_DESC' |
+  'assetId_ASC' |
+  'assetId_DESC' |
+  'balance_ASC' |
+  'balance_DESC' |
+  'blockNumber_ASC' |
+  'blockNumber_DESC' |
+  'timestamp_ASC' |
+  'timestamp_DESC'
 
 export type MarketHistoryOrderByInput =   'createdAt_ASC' |
   'createdAt_DESC' |
@@ -120,6 +170,115 @@ export type PoolOrderByInput =   'createdAt_ASC' |
   'timestamp_ASC' |
   'timestamp_DESC'
 
+export interface AccountCreateInput {
+  wallet: String
+}
+
+export interface AccountUpdateInput {
+  wallet?: String | null
+}
+
+export interface AccountWhereInput {
+  id_eq?: ID_Input | null
+  id_in?: ID_Output[] | ID_Output | null
+  createdAt_eq?: DateTime | null
+  createdAt_lt?: DateTime | null
+  createdAt_lte?: DateTime | null
+  createdAt_gt?: DateTime | null
+  createdAt_gte?: DateTime | null
+  createdById_eq?: ID_Input | null
+  createdById_in?: ID_Output[] | ID_Output | null
+  updatedAt_eq?: DateTime | null
+  updatedAt_lt?: DateTime | null
+  updatedAt_lte?: DateTime | null
+  updatedAt_gt?: DateTime | null
+  updatedAt_gte?: DateTime | null
+  updatedById_eq?: ID_Input | null
+  updatedById_in?: ID_Output[] | ID_Output | null
+  deletedAt_all?: Boolean | null
+  deletedAt_eq?: DateTime | null
+  deletedAt_lt?: DateTime | null
+  deletedAt_lte?: DateTime | null
+  deletedAt_gt?: DateTime | null
+  deletedAt_gte?: DateTime | null
+  deletedById_eq?: ID_Input | null
+  deletedById_in?: ID_Output[] | ID_Output | null
+  wallet_eq?: String | null
+  wallet_contains?: String | null
+  wallet_startsWith?: String | null
+  wallet_endsWith?: String | null
+  wallet_in?: String[] | String | null
+  assetBalances_none?: AssetBalanceWhereInput | null
+  assetBalances_some?: AssetBalanceWhereInput | null
+  assetBalances_every?: AssetBalanceWhereInput | null
+  historicalAssetBalances_none?: HistoricalAssetBalanceWhereInput | null
+  historicalAssetBalances_some?: HistoricalAssetBalanceWhereInput | null
+  historicalAssetBalances_every?: HistoricalAssetBalanceWhereInput | null
+  AND?: AccountWhereInput[] | AccountWhereInput | null
+  OR?: AccountWhereInput[] | AccountWhereInput | null
+}
+
+export interface AccountWhereUniqueInput {
+  id: ID_Output
+}
+
+export interface AssetBalanceCreateInput {
+  account: ID_Output
+  assetId: String
+  balance: String
+}
+
+export interface AssetBalanceUpdateInput {
+  account?: ID_Input | null
+  assetId?: String | null
+  balance?: String | null
+}
+
+export interface AssetBalanceWhereInput {
+  id_eq?: ID_Input | null
+  id_in?: ID_Output[] | ID_Output | null
+  createdAt_eq?: DateTime | null
+  createdAt_lt?: DateTime | null
+  createdAt_lte?: DateTime | null
+  createdAt_gt?: DateTime | null
+  createdAt_gte?: DateTime | null
+  createdById_eq?: ID_Input | null
+  createdById_in?: ID_Output[] | ID_Output | null
+  updatedAt_eq?: DateTime | null
+  updatedAt_lt?: DateTime | null
+  updatedAt_lte?: DateTime | null
+  updatedAt_gt?: DateTime | null
+  updatedAt_gte?: DateTime | null
+  updatedById_eq?: ID_Input | null
+  updatedById_in?: ID_Output[] | ID_Output | null
+  deletedAt_all?: Boolean | null
+  deletedAt_eq?: DateTime | null
+  deletedAt_lt?: DateTime | null
+  deletedAt_lte?: DateTime | null
+  deletedAt_gt?: DateTime | null
+  deletedAt_gte?: DateTime | null
+  deletedById_eq?: ID_Input | null
+  deletedById_in?: ID_Output[] | ID_Output | null
+  assetId_eq?: String | null
+  assetId_contains?: String | null
+  assetId_startsWith?: String | null
+  assetId_endsWith?: String | null
+  assetId_in?: String[] | String | null
+  balance_eq?: BigInt | null
+  balance_gt?: BigInt | null
+  balance_gte?: BigInt | null
+  balance_lt?: BigInt | null
+  balance_lte?: BigInt | null
+  balance_in?: BigInt[] | BigInt | null
+  account?: AccountWhereInput | null
+  AND?: AssetBalanceWhereInput[] | AssetBalanceWhereInput | null
+  OR?: AssetBalanceWhereInput[] | AssetBalanceWhereInput | null
+}
+
+export interface AssetBalanceWhereUniqueInput {
+  id: ID_Output
+}
+
 export interface BaseWhereInput {
   id_eq?: String | null
   id_in?: String[] | String | null
@@ -142,6 +301,86 @@ export interface BaseWhereInput {
   deletedAt_gt?: String | null
   deletedAt_gte?: String | null
   deletedById_eq?: String | null
+}
+
+export interface HistoricalAssetBalanceCreateInput {
+  account: ID_Output
+  event: String
+  assetId: String
+  balance: String
+  blockNumber: Float
+  timestamp: String
+}
+
+export interface HistoricalAssetBalanceUpdateInput {
+  account?: ID_Input | null
+  event?: String | null
+  assetId?: String | null
+  balance?: String | null
+  blockNumber?: Float | null
+  timestamp?: String | null
+}
+
+export interface HistoricalAssetBalanceWhereInput {
+  id_eq?: ID_Input | null
+  id_in?: ID_Output[] | ID_Output | null
+  createdAt_eq?: DateTime | null
+  createdAt_lt?: DateTime | null
+  createdAt_lte?: DateTime | null
+  createdAt_gt?: DateTime | null
+  createdAt_gte?: DateTime | null
+  createdById_eq?: ID_Input | null
+  createdById_in?: ID_Output[] | ID_Output | null
+  updatedAt_eq?: DateTime | null
+  updatedAt_lt?: DateTime | null
+  updatedAt_lte?: DateTime | null
+  updatedAt_gt?: DateTime | null
+  updatedAt_gte?: DateTime | null
+  updatedById_eq?: ID_Input | null
+  updatedById_in?: ID_Output[] | ID_Output | null
+  deletedAt_all?: Boolean | null
+  deletedAt_eq?: DateTime | null
+  deletedAt_lt?: DateTime | null
+  deletedAt_lte?: DateTime | null
+  deletedAt_gt?: DateTime | null
+  deletedAt_gte?: DateTime | null
+  deletedById_eq?: ID_Input | null
+  deletedById_in?: ID_Output[] | ID_Output | null
+  event_eq?: String | null
+  event_contains?: String | null
+  event_startsWith?: String | null
+  event_endsWith?: String | null
+  event_in?: String[] | String | null
+  assetId_eq?: String | null
+  assetId_contains?: String | null
+  assetId_startsWith?: String | null
+  assetId_endsWith?: String | null
+  assetId_in?: String[] | String | null
+  balance_eq?: BigInt | null
+  balance_gt?: BigInt | null
+  balance_gte?: BigInt | null
+  balance_lt?: BigInt | null
+  balance_lte?: BigInt | null
+  balance_in?: BigInt[] | BigInt | null
+  blockNumber_eq?: Int | null
+  blockNumber_gt?: Int | null
+  blockNumber_gte?: Int | null
+  blockNumber_lt?: Int | null
+  blockNumber_lte?: Int | null
+  blockNumber_in?: Int[] | Int | null
+  timestamp_eq?: BigInt | null
+  timestamp_gt?: BigInt | null
+  timestamp_gte?: BigInt | null
+  timestamp_lt?: BigInt | null
+  timestamp_lte?: BigInt | null
+  timestamp_in?: BigInt[] | BigInt | null
+  account?: AccountWhereInput | null
+  AND?: HistoricalAssetBalanceWhereInput[] | HistoricalAssetBalanceWhereInput | null
+  OR?: HistoricalAssetBalanceWhereInput[] | HistoricalAssetBalanceWhereInput | null
+}
+
+export interface HistoricalAssetBalanceWhereUniqueInput {
+  id: ID_Output
 }
 
 export interface MarketCreateInput {
@@ -775,6 +1014,57 @@ export interface DeleteResponse {
   id: ID_Output
 }
 
+export interface Account extends BaseGraphQLObject {
+  id: ID_Output
+  createdAt: DateTime
+  createdById: String
+  updatedAt?: DateTime | null
+  updatedById?: String | null
+  deletedAt?: DateTime | null
+  deletedById?: String | null
+  version: Int
+  wallet: String
+  assetBalances?: Array<AssetBalance> | null
+  historicalAssetBalances?: Array<HistoricalAssetBalance> | null
+}
+
+export interface AccountConnection {
+  totalCount: Int
+  edges: Array<AccountEdge>
+  pageInfo: PageInfo
+}
+
+export interface AccountEdge {
+  node: Account
+  cursor: String
+}
+
+export interface AssetBalance extends BaseGraphQLObject {
+  id: ID_Output
+  createdAt: DateTime
+  createdById: String
+  updatedAt?: DateTime | null
+  updatedById?: String | null
+  deletedAt?: DateTime | null
+  deletedById?: String | null
+  version: Int
+  account: Account
+  accountId: String
+  assetId: String
+  balance: BigInt
+}
+
+export interface AssetBalanceConnection {
+  totalCount: Int
+  edges: Array<AssetBalanceEdge>
+  pageInfo: PageInfo
+}
+
+export interface AssetBalanceEdge {
+  node: AssetBalance
+  cursor: String
+}
+
 export interface BaseModel extends BaseGraphQLObject {
   id: ID_Output
   createdAt: DateTime
@@ -795,6 +1085,35 @@ export interface BaseModelUUID extends BaseGraphQLObject {
   deletedAt?: DateTime | null
   deletedById?: String | null
   version: Int
+}
+
+export interface HistoricalAssetBalance extends BaseGraphQLObject {
+  id: ID_Output
+  createdAt: DateTime
+  createdById: String
+  updatedAt?: DateTime | null
+  updatedById?: String | null
+  deletedAt?: DateTime | null
+  deletedById?: String | null
+  version: Int
+  account: Account
+  accountId: String
+  event: String
+  assetId: String
+  balance: BigInt
+  blockNumber: Int
+  timestamp: BigInt
+}
+
+export interface HistoricalAssetBalanceConnection {
+  totalCount: Int
+  edges: Array<HistoricalAssetBalanceEdge>
+  pageInfo: PageInfo
+}
+
+export interface HistoricalAssetBalanceEdge {
+  node: HistoricalAssetBalance
+  cursor: String
 }
 
 export interface Market extends BaseGraphQLObject {
