@@ -21,6 +21,7 @@ typegen:
     - predictionMarkets.MarketCancelled
     - predictionMarkets.SoldCompleteSet
     - swaps.PoolCreate
+    - currency.Transferred
   outDir: chain
   
 mappings:
