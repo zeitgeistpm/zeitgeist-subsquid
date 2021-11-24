@@ -23,6 +23,8 @@ typegen:
     - swaps.PoolCreate
     - tokens.Endowed
     - currency.Transferred
+    - currency.Deposited
+    - currency.Withdrawn
   outDir: chain
   
 mappings:
@@ -54,5 +56,9 @@ mappings:
       handler: tokensEndowed
     - event: currency.Transferred
       handler: currencyTransferred
+    - event: currency.Deposited
+      handler: currencyDeposited
+    - event: currency.Withdrawn
+      handler: currencyWithdrawn
   preBlockHooks:
   postBlockHooks:
