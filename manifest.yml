@@ -23,6 +23,7 @@ typegen:
     - swaps.PoolCreate
     - balances.Endowed
     - balances.Transfer
+    - balances.BalanceSet
     - tokens.Endowed
     - currency.Transferred
     - currency.Deposited
