@@ -21,6 +21,8 @@ typegen:
     - predictionMarkets.MarketCancelled
     - predictionMarkets.SoldCompleteSet
     - swaps.PoolCreate
+    - balances.Endowed
+    - balances.Transfer
     - tokens.Endowed
     - currency.Transferred
     - currency.Deposited
