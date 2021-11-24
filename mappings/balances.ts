@@ -40,6 +40,7 @@ export async function balancesEndowed({
     hab.account = acc
     hab.event = event.method
     hab.assetId = ab.assetId
+    hab.amount = new BN(amount)
     hab.balance = ab.balance 
     hab.blockNumber = block.height
     hab.timestamp = new BN(block.timestamp)
@@ -82,7 +83,8 @@ export async function balancesTransfer({
     faHAB.account = fa
     faHAB.event = event.method
     faHAB.assetId = faAB.assetId
-    faHAB.balance = new BN(0 - amount.toNumber())
+    faHAB.amount = new BN(0 - amount.toNumber())
+    faHAB.balance = faAB.balance
     faHAB.blockNumber = block.height
     faHAB.timestamp = new BN(block.timestamp)
 
@@ -120,7 +122,8 @@ export async function balancesTransfer({
     taHAB.account = ta
     taHAB.event = event.method
     taHAB.assetId = taAB.assetId
-    taHAB.balance = new BN(amount)
+    taHAB.amount = new BN(amount)
+    taHAB.balance = taAB.balance
     taHAB.blockNumber = block.height
     taHAB.timestamp = new BN(block.timestamp)
 
@@ -168,7 +171,8 @@ export async function balancesBalanceSet({
     hab.account = acc
     hab.event = event.method
     hab.assetId = ab.assetId
-    hab.balance = new BN(famount)
+    hab.amount = new BN(famount)
+    hab.balance = ab.balance
     hab.blockNumber = block.height
     hab.timestamp = new BN(block.timestamp)
 
@@ -210,6 +214,7 @@ export async function tokensEndowed({
     hab.account = acc
     hab.event = event.method
     hab.assetId = ab.assetId
+    hab.amount = new BN(amount)
     hab.balance = ab.balance 
     hab.blockNumber = block.height
     hab.timestamp = new BN(block.timestamp)
@@ -253,7 +258,8 @@ export async function currencyTransferred({
     faHAB.account = fa
     faHAB.event = event.method
     faHAB.assetId = faAB.assetId
-    faHAB.balance = new BN(0 - amount.toNumber())
+    faHAB.amount = new BN(0 - amount.toNumber())
+    faHAB.balance = faAB.balance
     faHAB.blockNumber = block.height
     faHAB.timestamp = new BN(block.timestamp)
 
@@ -291,7 +297,8 @@ export async function currencyTransferred({
     taHAB.account = ta
     taHAB.event = event.method
     taHAB.assetId = taAB.assetId
-    taHAB.balance = new BN(amount)
+    taHAB.amount = new BN(amount)
+    taHAB.balance = taAB.balance
     taHAB.blockNumber = block.height
     taHAB.timestamp = new BN(block.timestamp)
 
@@ -339,7 +346,8 @@ export async function currencyDeposited({
     hab.account = acc
     hab.event = event.method
     hab.assetId = ab.assetId
-    hab.balance = new BN(amount)
+    hab.amount = new BN(amount)
+    hab.balance = ab.balance
     hab.blockNumber = block.height
     hab.timestamp = new BN(block.timestamp)
 
@@ -380,7 +388,8 @@ export async function currencyWithdrawn({
     hab.account = acc
     hab.event = event.method
     hab.assetId = ab.assetId
-    hab.balance = new BN(0 - amount.toNumber())
+    hab.amount = new BN(0 - amount.toNumber())
+    hab.balance = ab.balance
     hab.blockNumber = block.height
     hab.timestamp = new BN(block.timestamp)
 
