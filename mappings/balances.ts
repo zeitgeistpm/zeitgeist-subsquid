@@ -102,10 +102,19 @@ export async function balancesTransfer({
     if (!taAB) {
         return
     } else {
-        taAB.balance = taAB.balance.add(amount)
+        const hab = await store.get(HistoricalAssetBalance, { where: 
+            { account: ta, assetId: "Ztg", event: "Endowed", blockNumber: block.height } })
+        if (!hab) {
+            taAB.balance = taAB.balance.add(amount)
+            console.log(`[${event.method}] Saving asset balance: ${JSON.stringify(taAB, null, 2)}`)
+            await store.save<AssetBalance>(taAB)
+        } else {
+            hab.event = hab.event.concat(event.method)
+            console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
+            await store.save<HistoricalAssetBalance>(hab) 
+            return  
+        }
     }
-    console.log(`[${event.method}] Saving asset balance: ${JSON.stringify(taAB, null, 2)}`)
-    await store.save<AssetBalance>(taAB)
 
     const taHAB = new HistoricalAssetBalance()
     taHAB.account = ta
@@ -117,6 +126,54 @@ export async function balancesTransfer({
 
     console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(taHAB, null, 2)}`)
     await store.save<HistoricalAssetBalance>(taHAB)
+}
+
+export async function balancesBalanceSet({
+    store,
+    event,
+    block,
+    extrinsic,
+}: EventContext & StoreContext) {
+
+    const [accountId, famount, ramount] = new Balances.BalanceSetEvent(event).params
+    
+    var acc = await store.get(Account, { where: { wallet: accountId.toString() } })
+    if (!acc) {
+        acc = new Account()
+        acc.wallet = accountId.toString()
+
+        console.log(`[${event.method}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+        await store.save<Account>(acc)
+    }
+
+    const ab = await store.get(AssetBalance, { where: { account: acc, assetId: "Ztg" } })
+    if (!ab) {
+        return
+    } else {
+        const hab = await store.get(HistoricalAssetBalance, { where: 
+            { account: acc, assetId: "Ztg", event: "Endowed", blockNumber: block.height } })
+        if (!hab) {
+            ab.balance = new BN(famount)
+            console.log(`[${event.method}] Saving asset balance: ${JSON.stringify(ab, null, 2)}`)
+            await store.save<AssetBalance>(ab)
+        } else {
+            hab.event = hab.event.concat(event.method)
+            console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
+            await store.save<HistoricalAssetBalance>(hab) 
+            return  
+        }
+    }
+
+    const hab = new HistoricalAssetBalance()
+    hab.account = acc
+    hab.event = event.method
+    hab.assetId = ab.assetId
+    hab.balance = new BN(famount)
+    hab.blockNumber = block.height
+    hab.timestamp = new BN(block.timestamp)
+
+    console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
+    await store.save<HistoricalAssetBalance>(hab)
 }
 
 export async function tokensEndowed({
@@ -216,10 +273,19 @@ export async function currencyTransferred({
     if (!taAB) {
         return
     } else {
-        taAB.balance = taAB.balance.add(amount)
+        const hab = await store.get(HistoricalAssetBalance, { where: 
+            { account: ta, assetId: currencyId.toString(), event: "Endowed", blockNumber: block.height } })
+        if (!hab) {
+            taAB.balance = taAB.balance.add(amount)
+            console.log(`[${event.method}] Saving asset balance: ${JSON.stringify(taAB, null, 2)}`)
+            await store.save<AssetBalance>(taAB)
+        } else {
+            hab.event = hab.event.concat(event.method)
+            console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
+            await store.save<HistoricalAssetBalance>(hab) 
+            return  
+        }
     }
-    console.log(`[${event.method}] Saving asset balance: ${JSON.stringify(taAB, null, 2)}`)
-    await store.save<AssetBalance>(taAB)
 
     const taHAB = new HistoricalAssetBalance()
     taHAB.account = ta
@@ -255,10 +321,19 @@ export async function currencyDeposited({
     if (!ab) {
         return
     } else {
-        ab.balance = ab.balance.add(amount)
+        const hab = await store.get(HistoricalAssetBalance, { where: 
+            { account: acc, assetId: currencyId.toString(), event: "Endowed", blockNumber: block.height } })
+        if (!hab) {
+            ab.balance = ab.balance.add(amount)
+            console.log(`[${event.method}] Saving asset balance: ${JSON.stringify(ab, null, 2)}`)
+            await store.save<AssetBalance>(ab)
+        } else {
+            hab.event = hab.event.concat(event.method)
+            console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
+            await store.save<HistoricalAssetBalance>(hab) 
+            return  
+        }
     }
-    console.log(`[${event.method}] Saving asset balance: ${JSON.stringify(ab, null, 2)}`)
-    await store.save<AssetBalance>(ab)
 
     const hab = new HistoricalAssetBalance()
     hab.account = acc

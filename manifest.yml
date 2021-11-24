@@ -23,6 +23,7 @@ typegen:
     - swaps.PoolCreate
     - balances.Endowed
     - balances.Transfer
+    - balances.BalanceSet
     - tokens.Endowed
     - currency.Transferred
     - currency.Deposited
@@ -58,6 +59,8 @@ mappings:
       handler: balancesEndowed
     - event: balances.Transfer
       handler: balancesTransfer
+    - event: balances.BalanceSet
+      handler: balancesBalanceSet
     - event: tokens.Endowed
       handler: tokensEndowed
     - event: currency.Transferred
