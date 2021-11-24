@@ -257,6 +257,9 @@ export enum HistoricalAssetBalanceOrderByEnum {
   assetId_ASC = "assetId_ASC",
   assetId_DESC = "assetId_DESC",
 
+  amount_ASC = "amount_ASC",
+  amount_DESC = "amount_DESC",
+
   balance_ASC = "balance_ASC",
   balance_DESC = "balance_DESC",
 
@@ -376,6 +379,24 @@ export class HistoricalAssetBalanceWhereInput {
   assetId_in?: string[];
 
   @TypeGraphQLField(() => BigInt, { nullable: true })
+  amount_eq?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  amount_gt?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  amount_gte?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  amount_lt?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  amount_lte?: string;
+
+  @TypeGraphQLField(() => [BigInt], { nullable: true })
+  amount_in?: string[];
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
   balance_eq?: string;
 
   @TypeGraphQLField(() => BigInt, { nullable: true })
@@ -457,6 +478,9 @@ export class HistoricalAssetBalanceCreateInput {
   assetId!: string;
 
   @TypeGraphQLField()
+  amount!: string;
+
+  @TypeGraphQLField()
   balance!: string;
 
   @TypeGraphQLField()
@@ -476,6 +500,9 @@ export class HistoricalAssetBalanceUpdateInput {
 
   @TypeGraphQLField({ nullable: true })
   assetId?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  amount?: string;
 
   @TypeGraphQLField({ nullable: true })
   balance?: string;
