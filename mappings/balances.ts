@@ -49,6 +49,34 @@ export async function balancesEndowed({
     await store.save<HistoricalAssetBalance>(hab)
 }
 
+export async function balancesDustLost({
+    store,
+    event,
+    block,
+    extrinsic,
+}: EventContext & StoreContext) {
+
+    const [accountId, amount] = new Balances.DustLostEvent(event).params
+    
+    const acc = await store.get(Account, { where: { wallet: accountId.toString() } })
+    if (!acc) { return }
+
+    const ab = await store.get(AssetBalance, { where: { account: acc, assetId: "Ztg" } })
+    if (!ab) { return }
+
+    const hab = new HistoricalAssetBalance()
+    hab.account = acc
+    hab.event = event.method
+    hab.assetId = ab.assetId
+    hab.amount = new BN(amount)
+    hab.balance = ab.balance 
+    hab.blockNumber = block.height
+    hab.timestamp = new BN(block.timestamp)
+
+    console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
+    await store.save<HistoricalAssetBalance>(hab)
+}
+
 export async function balancesTransfer({
     store,
     event,

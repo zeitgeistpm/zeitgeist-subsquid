@@ -58,6 +58,8 @@ mappings:
       handler: swapPoolCreated
     - event: balances.Endowed
       handler: balancesEndowed
+    - event: balances.DustLost
+      handler: balancesDustLost
     - event: balances.Transfer
       handler: balancesTransfer
     - event: balances.BalanceSet
