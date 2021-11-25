@@ -97,7 +97,35 @@ export async function balancesTransfer({
 
     var faAB = await store.get(AssetBalance, { where: { account: fa, assetId: "Ztg" } })
     if (faAB) {
-        faAB.balance = faAB.balance.sub(amount)
+        const hab = await store.get(HistoricalAssetBalance, { where: 
+            { account: fa, assetId: "Ztg", event: "DustLost", blockNumber: block.height } })
+        if (hab) {
+            faAB.balance = faAB.balance.sub(amount)
+            console.log(`[${event.method}] Removing asset balance: ${JSON.stringify(faAB, null, 2)}`)
+            await store.remove<AssetBalance>(faAB)
+
+            const faHAB = new HistoricalAssetBalance()
+            faHAB.account = fa
+            faHAB.event = hab.event
+            faHAB.assetId = hab.assetId
+            faHAB.amount = hab.amount
+            faHAB.balance = new BN(0)
+            faHAB.blockNumber = block.height
+            faHAB.timestamp = new BN(block.timestamp)
+
+            hab.event = event.method
+            hab.amount = new BN(0 - amount.toNumber())
+            hab.balance = faAB.balance
+            console.log(`[${event.method}] Updating historical asset balance: ${JSON.stringify(hab, null, 2)}`)
+            await store.save<HistoricalAssetBalance>(hab)
+
+            console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(faHAB, null, 2)}`)
+            await store.save<HistoricalAssetBalance>(faHAB)
+            
+            return
+        } else {
+            faAB.balance = faAB.balance.sub(amount)
+        }
     } else {
         faAB = new AssetBalance()
         faAB.account = fa
