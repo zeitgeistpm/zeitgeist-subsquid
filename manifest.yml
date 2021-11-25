@@ -66,6 +66,10 @@ mappings:
       handler: balancesTransfer
     - event: balances.BalanceSet
       handler: balancesBalanceSet
+    - event: balances.Reserved
+      handler: balancesReserved
+    - event: balances.Unreserved
+      handler: balancesUnreserved
     - event: tokens.Endowed
       handler: tokensEndowed
     - event: currency.Transferred
