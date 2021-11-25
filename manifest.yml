@@ -25,6 +25,8 @@ typegen:
     - balances.DustLost
     - balances.Transfer
     - balances.BalanceSet
+    - balances.Reserved
+    - balances.Unreserved
     - tokens.Endowed
     - currency.Transferred
     - currency.Deposited

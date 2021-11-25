@@ -152,4 +152,74 @@ export namespace Balances {
       return valid;
     }
   }
+
+  /**
+   *  Some balance was reserved (moved from free to reserved). \[who, value\]
+   *
+   *  Event parameters: [AccountId, Balance, ]
+   */
+  export class ReservedEvent {
+    public readonly expectedParamTypes = ["AccountId", "Balance"];
+
+    constructor(public readonly ctx: SubstrateEvent) {}
+
+    get params(): [AccountId, Balance] {
+      return [
+        createTypeUnsafe<AccountId & Codec>(typeRegistry, "AccountId", [
+          this.ctx.params[0].value,
+        ]),
+        createTypeUnsafe<Balance & Codec>(typeRegistry, "Balance", [
+          this.ctx.params[1].value,
+        ]),
+      ];
+    }
+
+    validateParams(): boolean {
+      if (this.expectedParamTypes.length !== this.ctx.params.length) {
+        return false;
+      }
+      let valid = true;
+      this.expectedParamTypes.forEach((type, i) => {
+        if (type !== this.ctx.params[i].type) {
+          valid = false;
+        }
+      });
+      return valid;
+    }
+  }
+
+  /**
+   *  Some balance was unreserved (moved from reserved to free). \[who, value\]
+   *
+   *  Event parameters: [AccountId, Balance, ]
+   */
+  export class UnreservedEvent {
+    public readonly expectedParamTypes = ["AccountId", "Balance"];
+
+    constructor(public readonly ctx: SubstrateEvent) {}
+
+    get params(): [AccountId, Balance] {
+      return [
+        createTypeUnsafe<AccountId & Codec>(typeRegistry, "AccountId", [
+          this.ctx.params[0].value,
+        ]),
+        createTypeUnsafe<Balance & Codec>(typeRegistry, "Balance", [
+          this.ctx.params[1].value,
+        ]),
+      ];
+    }
+
+    validateParams(): boolean {
+      if (this.expectedParamTypes.length !== this.ctx.params.length) {
+        return false;
+      }
+      let valid = true;
+      this.expectedParamTypes.forEach((type, i) => {
+        if (type !== this.ctx.params[i].type) {
+          valid = false;
+        }
+      });
+      return valid;
+    }
+  }
 }
