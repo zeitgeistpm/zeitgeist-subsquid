@@ -30,6 +30,15 @@ export class HistoricalAssetBalance extends BaseModel {
         dbValue !== undefined && dbValue !== null && dbValue.length > 0 ? new BN(dbValue, 10) : undefined,
     },
   })
+  amount!: BN;
+
+  @NumericField({
+    transformer: {
+      to: (entityValue: BN) => (entityValue !== undefined ? entityValue.toString(10) : null),
+      from: (dbValue: string) =>
+        dbValue !== undefined && dbValue !== null && dbValue.length > 0 ? new BN(dbValue, 10) : undefined,
+    },
+  })
   balance!: BN;
 
   @IntField({})

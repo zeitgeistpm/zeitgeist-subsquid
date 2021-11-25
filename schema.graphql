@@ -15,6 +15,7 @@ type HistoricalAssetBalance @entity {
   account: Account!
   event: String!
   assetId: String!
+  amount: BigInt!
   balance: BigInt!
   blockNumber: Int!
   timestamp: BigInt!

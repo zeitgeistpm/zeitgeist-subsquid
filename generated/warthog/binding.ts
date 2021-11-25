@@ -90,6 +90,8 @@ export type HistoricalAssetBalanceOrderByInput =   'createdAt_ASC' |
   'event_DESC' |
   'assetId_ASC' |
   'assetId_DESC' |
+  'amount_ASC' |
+  'amount_DESC' |
   'balance_ASC' |
   'balance_DESC' |
   'blockNumber_ASC' |
@@ -307,6 +309,7 @@ export interface HistoricalAssetBalanceCreateInput {
   account: ID_Output
   event: String
   assetId: String
+  amount: String
   balance: String
   blockNumber: Float
   timestamp: String
@@ -316,6 +319,7 @@ export interface HistoricalAssetBalanceUpdateInput {
   account?: ID_Input | null
   event?: String | null
   assetId?: String | null
+  amount?: String | null
   balance?: String | null
   blockNumber?: Float | null
   timestamp?: String | null
@@ -356,6 +360,12 @@ export interface HistoricalAssetBalanceWhereInput {
   assetId_startsWith?: String | null
   assetId_endsWith?: String | null
   assetId_in?: String[] | String | null
+  amount_eq?: BigInt | null
+  amount_gt?: BigInt | null
+  amount_gte?: BigInt | null
+  amount_lt?: BigInt | null
+  amount_lte?: BigInt | null
+  amount_in?: BigInt[] | BigInt | null
   balance_eq?: BigInt | null
   balance_gt?: BigInt | null
   balance_gte?: BigInt | null
@@ -1100,6 +1110,7 @@ export interface HistoricalAssetBalance extends BaseGraphQLObject {
   accountId: String
   event: String
   assetId: String
+  amount: BigInt
   balance: BigInt
   blockNumber: Int
   timestamp: BigInt

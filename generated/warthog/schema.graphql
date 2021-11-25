@@ -268,6 +268,7 @@ type HistoricalAssetBalance implements BaseGraphQLObject {
   accountId: String!
   event: String!
   assetId: String!
+  amount: BigInt!
   balance: BigInt!
   blockNumber: Int!
   timestamp: BigInt!
@@ -283,6 +284,7 @@ input HistoricalAssetBalanceCreateInput {
   account: ID!
   event: String!
   assetId: String!
+  amount: String!
   balance: String!
   blockNumber: Float!
   timestamp: String!
@@ -306,6 +308,8 @@ enum HistoricalAssetBalanceOrderByInput {
   event_DESC
   assetId_ASC
   assetId_DESC
+  amount_ASC
+  amount_DESC
   balance_ASC
   balance_DESC
   blockNumber_ASC
@@ -318,6 +322,7 @@ input HistoricalAssetBalanceUpdateInput {
   account: ID
   event: String
   assetId: String
+  amount: String
   balance: String
   blockNumber: Float
   timestamp: String
@@ -358,6 +363,12 @@ input HistoricalAssetBalanceWhereInput {
   assetId_startsWith: String
   assetId_endsWith: String
   assetId_in: [String!]
+  amount_eq: BigInt
+  amount_gt: BigInt
+  amount_gte: BigInt
+  amount_lt: BigInt
+  amount_lte: BigInt
+  amount_in: [BigInt!]
   balance_eq: BigInt
   balance_gt: BigInt
   balance_gte: BigInt
