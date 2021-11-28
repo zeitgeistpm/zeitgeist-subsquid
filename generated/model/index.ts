@@ -4,6 +4,8 @@ import { AssetBalance } from '../modules/asset-balance/asset-balance.model';
 export { AssetBalance };
 import { HistoricalAssetBalance } from '../modules/historical-asset-balance/historical-asset-balance.model';
 export { HistoricalAssetBalance };
+import { HistoricalPool } from '../modules/historical-pool/historical-pool.model';
+export { HistoricalPool };
 import { Market } from '../modules/market/market.model';
 export { Market };
 import { MarketHistory } from '../modules/market-history/market-history.model';

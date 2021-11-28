@@ -396,6 +396,115 @@ input HistoricalAssetBalanceWhereUniqueInput {
   id: ID!
 }
 
+type HistoricalPool implements BaseGraphQLObject {
+  id: ID!
+  createdAt: DateTime!
+  createdById: String!
+  updatedAt: DateTime
+  updatedById: String
+  deletedAt: DateTime
+  deletedById: String
+  version: Int!
+  pool: Pool!
+  poolId: String!
+  event: String!
+  blockNumber: Int!
+  timestamp: BigInt!
+}
+
+type HistoricalPoolConnection {
+  totalCount: Int!
+  edges: [HistoricalPoolEdge!]!
+  pageInfo: PageInfo!
+}
+
+input HistoricalPoolCreateInput {
+  pool: ID!
+  event: String!
+  blockNumber: Float!
+  timestamp: String!
+}
+
+type HistoricalPoolEdge {
+  node: HistoricalPool!
+  cursor: String!
+}
+
+enum HistoricalPoolOrderByInput {
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  deletedAt_ASC
+  deletedAt_DESC
+  pool_ASC
+  pool_DESC
+  event_ASC
+  event_DESC
+  blockNumber_ASC
+  blockNumber_DESC
+  timestamp_ASC
+  timestamp_DESC
+}
+
+input HistoricalPoolUpdateInput {
+  pool: ID
+  event: String
+  blockNumber: Float
+  timestamp: String
+}
+
+input HistoricalPoolWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  event_eq: String
+  event_contains: String
+  event_startsWith: String
+  event_endsWith: String
+  event_in: [String!]
+  blockNumber_eq: Int
+  blockNumber_gt: Int
+  blockNumber_gte: Int
+  blockNumber_lt: Int
+  blockNumber_lte: Int
+  blockNumber_in: [Int!]
+  timestamp_eq: BigInt
+  timestamp_gt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lt: BigInt
+  timestamp_lte: BigInt
+  timestamp_in: [BigInt!]
+  pool: PoolWhereInput
+  AND: [HistoricalPoolWhereInput!]
+  OR: [HistoricalPoolWhereInput!]
+}
+
+input HistoricalPoolWhereUniqueInput {
+  id: ID!
+}
+
 """
 The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
@@ -1072,8 +1181,7 @@ type Pool implements BaseGraphQLObject {
   swapFee: String!
   totalSubsidy: String!
   totalWeight: String!
-  blockNumber: Int!
-  timestamp: BigInt!
+  historicalPool: [HistoricalPool!]
 }
 
 type PoolConnection {
@@ -1091,8 +1199,6 @@ input PoolCreateInput {
   swapFee: String!
   totalSubsidy: String!
   totalWeight: String!
-  blockNumber: Float!
-  timestamp: String!
 }
 
 type PoolEdge {
@@ -1123,10 +1229,6 @@ enum PoolOrderByInput {
   totalSubsidy_DESC
   totalWeight_ASC
   totalWeight_DESC
-  blockNumber_ASC
-  blockNumber_DESC
-  timestamp_ASC
-  timestamp_DESC
 }
 
 input PoolUpdateInput {
@@ -1138,8 +1240,6 @@ input PoolUpdateInput {
   swapFee: String
   totalSubsidy: String
   totalWeight: String
-  blockNumber: Float
-  timestamp: String
 }
 
 input PoolWhereInput {
@@ -1209,18 +1309,9 @@ input PoolWhereInput {
   totalWeight_startsWith: String
   totalWeight_endsWith: String
   totalWeight_in: [String!]
-  blockNumber_eq: Int
-  blockNumber_gt: Int
-  blockNumber_gte: Int
-  blockNumber_lt: Int
-  blockNumber_lte: Int
-  blockNumber_in: [Int!]
-  timestamp_eq: BigInt
-  timestamp_gt: BigInt
-  timestamp_gte: BigInt
-  timestamp_lt: BigInt
-  timestamp_lte: BigInt
-  timestamp_in: [BigInt!]
+  historicalPool_none: HistoricalPoolWhereInput
+  historicalPool_some: HistoricalPoolWhereInput
+  historicalPool_every: HistoricalPoolWhereInput
   AND: [PoolWhereInput!]
   OR: [PoolWhereInput!]
 }
@@ -1246,6 +1337,9 @@ type Query {
   historicalAssetBalances(offset: Int, limit: Int = 50, where: HistoricalAssetBalanceWhereInput, orderBy: [HistoricalAssetBalanceOrderByInput!]): [HistoricalAssetBalance!]!
   historicalAssetBalanceByUniqueInput(where: HistoricalAssetBalanceWhereUniqueInput!): HistoricalAssetBalance
   historicalAssetBalancesConnection(first: Int, after: String, last: Int, before: String, where: HistoricalAssetBalanceWhereInput, orderBy: [HistoricalAssetBalanceOrderByInput!]): HistoricalAssetBalanceConnection!
+  historicalPools(offset: Int, limit: Int = 50, where: HistoricalPoolWhereInput, orderBy: [HistoricalPoolOrderByInput!]): [HistoricalPool!]!
+  historicalPoolByUniqueInput(where: HistoricalPoolWhereUniqueInput!): HistoricalPool
+  historicalPoolsConnection(first: Int, after: String, last: Int, before: String, where: HistoricalPoolWhereInput, orderBy: [HistoricalPoolOrderByInput!]): HistoricalPoolConnection!
   marketHistories(offset: Int, limit: Int = 50, where: MarketHistoryWhereInput, orderBy: [MarketHistoryOrderByInput!]): [MarketHistory!]!
   marketHistoryByUniqueInput(where: MarketHistoryWhereUniqueInput!): MarketHistory
   marketHistoriesConnection(first: Int, after: String, last: Int, before: String, where: MarketHistoryWhereInput, orderBy: [MarketHistoryOrderByInput!]): MarketHistoryConnection!
