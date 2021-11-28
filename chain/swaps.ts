@@ -6,6 +6,7 @@ import { typeRegistry } from ".";
 import {
   CommonPoolEventParams,
   Pool,
+  SwapEvent,
 } from "@zeitgeistpm/types/dist/interfaces";
 
 export namespace Swaps {
@@ -53,6 +54,74 @@ export namespace Swaps {
         arg[0].weights = null;
       }
       return arg;
+    }
+  }
+
+  /**
+   *  An exact amount of an asset is entering the pool. \[SwapEvent\]
+   *
+   *  Event parameters: [SwapEvent<<T as frame_system::Config>::AccountId, BalanceOf<T>>, ]
+   */
+  export class SwapExactAmountInEvent {
+    public readonly expectedParamTypes = [
+      "SwapEvent<<T as frame_system::Config>::AccountId, BalanceOf<T>>",
+    ];
+
+    constructor(public readonly ctx: SubstrateEvent) {}
+
+    get params(): [SwapEvent] {
+      return [
+        createTypeUnsafe<SwapEvent & Codec>(typeRegistry, "SwapEvent", [
+          this.ctx.params[0].value,
+        ]),
+      ];
+    }
+
+    validateParams(): boolean {
+      if (this.expectedParamTypes.length !== this.ctx.params.length) {
+        return false;
+      }
+      let valid = true;
+      this.expectedParamTypes.forEach((type, i) => {
+        if (type !== this.ctx.params[i].type) {
+          valid = false;
+        }
+      });
+      return valid;
+    }
+  }
+
+  /**
+   *  An exact amount of an asset is leaving the pool. \[SwapEvent\]
+   *
+   *  Event parameters: [SwapEvent<<T as frame_system::Config>::AccountId, BalanceOf<T>>, ]
+   */
+  export class SwapExactAmountOutEvent {
+    public readonly expectedParamTypes = [
+      "SwapEvent<<T as frame_system::Config>::AccountId, BalanceOf<T>>",
+    ];
+
+    constructor(public readonly ctx: SubstrateEvent) {}
+
+    get params(): [SwapEvent] {
+      return [
+        createTypeUnsafe<SwapEvent & Codec>(typeRegistry, "SwapEvent", [
+          this.ctx.params[0].value,
+        ]),
+      ];
+    }
+
+    validateParams(): boolean {
+      if (this.expectedParamTypes.length !== this.ctx.params.length) {
+        return false;
+      }
+      let valid = true;
+      this.expectedParamTypes.forEach((type, i) => {
+        if (type !== this.ctx.params[i].type) {
+          valid = false;
+        }
+      });
+      return valid;
     }
   }
 }
