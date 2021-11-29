@@ -8,7 +8,7 @@ typegen:
     lib: '@zeitgeistpm/types/dist/interfaces'
     typedefsLoc: ./indexer/types.json
   metadata:
-    source: ws://127.0.0.1:9944
+    source: wss://bsr.zeitgeist.pm
   events:
     - predictionMarkets.BoughtCompleteSet
     - predictionMarkets.MarketApproved
@@ -21,6 +21,8 @@ typegen:
     - predictionMarkets.MarketCancelled
     - predictionMarkets.SoldCompleteSet
     - swaps.PoolCreate
+    - swaps.SwapExactAmountIn
+    - swaps.SwapExactAmountOut
     - balances.Endowed
     - balances.DustLost
     - balances.Transfer
@@ -58,6 +60,10 @@ mappings:
       handler: predictionMarketSoldCompleteSet
     - event: swaps.PoolCreate
       handler: swapPoolCreated
+    - event: swaps.SwapExactAmountIn
+      handler: swapExactAmountIn
+    - event: swaps.SwapExactAmountOut
+      handler: swapExactAmountOut
     - event: balances.Endowed
       handler: balancesEndowed
     - event: balances.DustLost

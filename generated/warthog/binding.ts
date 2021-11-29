@@ -15,6 +15,9 @@ export interface Query {
     historicalAssetBalances: <T = Array<HistoricalAssetBalance>>(args: { offset?: Int | null, limit?: Int | null, where?: HistoricalAssetBalanceWhereInput | null, orderBy?: Array<HistoricalAssetBalanceOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     historicalAssetBalanceByUniqueInput: <T = HistoricalAssetBalance | null>(args: { where: HistoricalAssetBalanceWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
     historicalAssetBalancesConnection: <T = HistoricalAssetBalanceConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: HistoricalAssetBalanceWhereInput | null, orderBy?: Array<HistoricalAssetBalanceOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
+    historicalPools: <T = Array<HistoricalPool>>(args: { offset?: Int | null, limit?: Int | null, where?: HistoricalPoolWhereInput | null, orderBy?: Array<HistoricalPoolOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
+    historicalPoolByUniqueInput: <T = HistoricalPool | null>(args: { where: HistoricalPoolWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
+    historicalPoolsConnection: <T = HistoricalPoolConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: HistoricalPoolWhereInput | null, orderBy?: Array<HistoricalPoolOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     marketHistories: <T = Array<MarketHistory>>(args: { offset?: Int | null, limit?: Int | null, where?: MarketHistoryWhereInput | null, orderBy?: Array<MarketHistoryOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     marketHistoryByUniqueInput: <T = MarketHistory | null>(args: { where: MarketHistoryWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
     marketHistoriesConnection: <T = MarketHistoryConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: MarketHistoryWhereInput | null, orderBy?: Array<MarketHistoryOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
@@ -99,6 +102,21 @@ export type HistoricalAssetBalanceOrderByInput =   'createdAt_ASC' |
   'timestamp_ASC' |
   'timestamp_DESC'
 
+export type HistoricalPoolOrderByInput =   'createdAt_ASC' |
+  'createdAt_DESC' |
+  'updatedAt_ASC' |
+  'updatedAt_DESC' |
+  'deletedAt_ASC' |
+  'deletedAt_DESC' |
+  'pool_ASC' |
+  'pool_DESC' |
+  'event_ASC' |
+  'event_DESC' |
+  'blockNumber_ASC' |
+  'blockNumber_DESC' |
+  'timestamp_ASC' |
+  'timestamp_DESC'
+
 export type MarketHistoryOrderByInput =   'createdAt_ASC' |
   'createdAt_DESC' |
   'updatedAt_ASC' |
@@ -166,11 +184,7 @@ export type PoolOrderByInput =   'createdAt_ASC' |
   'totalSubsidy_ASC' |
   'totalSubsidy_DESC' |
   'totalWeight_ASC' |
-  'totalWeight_DESC' |
-  'blockNumber_ASC' |
-  'blockNumber_DESC' |
-  'timestamp_ASC' |
-  'timestamp_DESC'
+  'totalWeight_DESC'
 
 export interface AccountCreateInput {
   wallet: String
@@ -390,6 +404,71 @@ export interface HistoricalAssetBalanceWhereInput {
 }
 
 export interface HistoricalAssetBalanceWhereUniqueInput {
+  id: ID_Output
+}
+
+export interface HistoricalPoolCreateInput {
+  pool: ID_Output
+  event: String
+  blockNumber: Float
+  timestamp: String
+}
+
+export interface HistoricalPoolUpdateInput {
+  pool?: ID_Input | null
+  event?: String | null
+  blockNumber?: Float | null
+  timestamp?: String | null
+}
+
+export interface HistoricalPoolWhereInput {
+  id_eq?: ID_Input | null
+  id_in?: ID_Output[] | ID_Output | null
+  createdAt_eq?: DateTime | null
+  createdAt_lt?: DateTime | null
+  createdAt_lte?: DateTime | null
+  createdAt_gt?: DateTime | null
+  createdAt_gte?: DateTime | null
+  createdById_eq?: ID_Input | null
+  createdById_in?: ID_Output[] | ID_Output | null
+  updatedAt_eq?: DateTime | null
+  updatedAt_lt?: DateTime | null
+  updatedAt_lte?: DateTime | null
+  updatedAt_gt?: DateTime | null
+  updatedAt_gte?: DateTime | null
+  updatedById_eq?: ID_Input | null
+  updatedById_in?: ID_Output[] | ID_Output | null
+  deletedAt_all?: Boolean | null
+  deletedAt_eq?: DateTime | null
+  deletedAt_lt?: DateTime | null
+  deletedAt_lte?: DateTime | null
+  deletedAt_gt?: DateTime | null
+  deletedAt_gte?: DateTime | null
+  deletedById_eq?: ID_Input | null
+  deletedById_in?: ID_Output[] | ID_Output | null
+  event_eq?: String | null
+  event_contains?: String | null
+  event_startsWith?: String | null
+  event_endsWith?: String | null
+  event_in?: String[] | String | null
+  blockNumber_eq?: Int | null
+  blockNumber_gt?: Int | null
+  blockNumber_gte?: Int | null
+  blockNumber_lt?: Int | null
+  blockNumber_lte?: Int | null
+  blockNumber_in?: Int[] | Int | null
+  timestamp_eq?: BigInt | null
+  timestamp_gt?: BigInt | null
+  timestamp_gte?: BigInt | null
+  timestamp_lt?: BigInt | null
+  timestamp_lte?: BigInt | null
+  timestamp_in?: BigInt[] | BigInt | null
+  pool?: PoolWhereInput | null
+  AND?: HistoricalPoolWhereInput[] | HistoricalPoolWhereInput | null
+  OR?: HistoricalPoolWhereInput[] | HistoricalPoolWhereInput | null
+}
+
+export interface HistoricalPoolWhereUniqueInput {
   id: ID_Output
 }
 
@@ -905,8 +984,6 @@ export interface PoolCreateInput {
   swapFee: String
   totalSubsidy: String
   totalWeight: String
-  blockNumber: Float
-  timestamp: String
 }
 
 export interface PoolUpdateInput {
@@ -918,8 +995,6 @@ export interface PoolUpdateInput {
   swapFee?: String | null
   totalSubsidy?: String | null
   totalWeight?: String | null
-  blockNumber?: Float | null
-  timestamp?: String | null
 }
 
 export interface PoolWhereInput {
@@ -989,18 +1064,9 @@ export interface PoolWhereInput {
   totalWeight_startsWith?: String | null
   totalWeight_endsWith?: String | null
   totalWeight_in?: String[] | String | null
-  blockNumber_eq?: Int | null
-  blockNumber_gt?: Int | null
-  blockNumber_gte?: Int | null
-  blockNumber_lt?: Int | null
-  blockNumber_lte?: Int | null
-  blockNumber_in?: Int[] | Int | null
-  timestamp_eq?: BigInt | null
-  timestamp_gt?: BigInt | null
-  timestamp_gte?: BigInt | null
-  timestamp_lt?: BigInt | null
-  timestamp_lte?: BigInt | null
-  timestamp_in?: BigInt[] | BigInt | null
+  historicalPool_none?: HistoricalPoolWhereInput | null
+  historicalPool_some?: HistoricalPoolWhereInput | null
+  historicalPool_every?: HistoricalPoolWhereInput | null
   AND?: PoolWhereInput[] | PoolWhereInput | null
   OR?: PoolWhereInput[] | PoolWhereInput | null
 }
@@ -1127,6 +1193,33 @@ export interface HistoricalAssetBalanceEdge {
   cursor: String
 }
 
+export interface HistoricalPool extends BaseGraphQLObject {
+  id: ID_Output
+  createdAt: DateTime
+  createdById: String
+  updatedAt?: DateTime | null
+  updatedById?: String | null
+  deletedAt?: DateTime | null
+  deletedById?: String | null
+  version: Int
+  pool: Pool
+  poolId: String
+  event: String
+  blockNumber: Int
+  timestamp: BigInt
+}
+
+export interface HistoricalPoolConnection {
+  totalCount: Int
+  edges: Array<HistoricalPoolEdge>
+  pageInfo: PageInfo
+}
+
+export interface HistoricalPoolEdge {
+  node: HistoricalPool
+  cursor: String
+}
+
 export interface Market extends BaseGraphQLObject {
   id: ID_Output
   createdAt: DateTime
@@ -1245,8 +1338,7 @@ export interface Pool extends BaseGraphQLObject {
   swapFee: String
   totalSubsidy: String
   totalWeight: String
-  blockNumber: Int
-  timestamp: BigInt
+  historicalPool?: Array<HistoricalPool> | null
 }
 
 export interface PoolConnection {
