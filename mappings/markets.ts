@@ -4,6 +4,7 @@ import { Market, MarketDisputeMechanism, MarketHistory, MarketPeriod, MarketRepo
 import { PredictionMarkets } from '../chain'
 import IPFS from './util'
 import { MarketStatus } from '../generated/modules/enums/enums'
+import { CategoryMetadata } from '../generated/modules/category-metadata/category-metadata.model'
 
 export async function predictionMarketBoughtCompleteSet({
     store,
@@ -108,6 +109,20 @@ export async function predictionMarketCreated({
 
     console.log(`[${event.method}] Saving market: ${JSON.stringify(newMarket, null, 2)}`)
     await store.save<Market>(newMarket)
+
+    if (metadata && metadata.categories) {
+        for (let i = 0; i < metadata.categories.length; i++) {
+            const newCM = new CategoryMetadata()
+            newCM.market = newMarket
+            newCM.name = metadata.categories[i].name
+            newCM.ticker = metadata.categories[i].ticker
+            newCM.img = metadata.categories[i].img
+            newCM.color = metadata.categories[i].color
+
+            console.log(`[${event.method}] Saving category metadata: ${JSON.stringify(newCM, null, 2)}`)
+            await store.save<CategoryMetadata>(newCM)
+        }
+    }
 
     const newMH = new MarketHistory()
     newMH.market = newMarket
@@ -340,7 +355,15 @@ async function decodeMarketMetadata(
 }
 
 type DecodedMarketMetadata = {
-    slug: string;
-    question: string;
-    description: string;
-};
+    slug: string
+    question: string
+    description: string
+    categories?: CategoryData[]
+}
+
+type CategoryData = {
+    name: string
+    ticker?: string
+    img?: string
+    color?: string
+}
