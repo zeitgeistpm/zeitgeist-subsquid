@@ -246,6 +246,123 @@ input BaseWhereInput {
 """GraphQL representation of BigInt"""
 scalar BigInt
 
+type CategoryMetadata implements BaseGraphQLObject {
+  id: ID!
+  createdAt: DateTime!
+  createdById: String!
+  updatedAt: DateTime
+  updatedById: String
+  deletedAt: DateTime
+  deletedById: String
+  version: Int!
+  market: Market!
+  marketId: String!
+  name: String!
+  ticker: String
+  img: String
+  color: String
+}
+
+type CategoryMetadataConnection {
+  totalCount: Int!
+  edges: [CategoryMetadataEdge!]!
+  pageInfo: PageInfo!
+}
+
+input CategoryMetadataCreateInput {
+  market: ID!
+  name: String!
+  ticker: String
+  img: String
+  color: String
+}
+
+type CategoryMetadataEdge {
+  node: CategoryMetadata!
+  cursor: String!
+}
+
+enum CategoryMetadataOrderByInput {
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  deletedAt_ASC
+  deletedAt_DESC
+  market_ASC
+  market_DESC
+  name_ASC
+  name_DESC
+  ticker_ASC
+  ticker_DESC
+  img_ASC
+  img_DESC
+  color_ASC
+  color_DESC
+}
+
+input CategoryMetadataUpdateInput {
+  market: ID
+  name: String
+  ticker: String
+  img: String
+  color: String
+}
+
+input CategoryMetadataWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  name_eq: String
+  name_contains: String
+  name_startsWith: String
+  name_endsWith: String
+  name_in: [String!]
+  ticker_eq: String
+  ticker_contains: String
+  ticker_startsWith: String
+  ticker_endsWith: String
+  ticker_in: [String!]
+  img_eq: String
+  img_contains: String
+  img_startsWith: String
+  img_endsWith: String
+  img_in: [String!]
+  color_eq: String
+  color_contains: String
+  color_startsWith: String
+  color_endsWith: String
+  color_in: [String!]
+  market: MarketWhereInput
+  AND: [CategoryMetadataWhereInput!]
+  OR: [CategoryMetadataWhereInput!]
+}
+
+input CategoryMetadataWhereUniqueInput {
+  id: ID!
+}
+
 """
 The javascript `Date` as string. Type represents date and time as the ISO Date string.
 """
@@ -526,6 +643,7 @@ type Market implements BaseGraphQLObject {
   slug: String
   question: String
   description: String
+  categories: [CategoryMetadata!]
   marketType: MarketType!
   period: MarketPeriod!
   scoringRule: String!
@@ -1081,6 +1199,9 @@ input MarketWhereInput {
   resolvedOutcome_endsWith: String
   resolvedOutcome_in: [String!]
   mdm_json: JSONObject
+  categories_none: CategoryMetadataWhereInput
+  categories_some: CategoryMetadataWhereInput
+  categories_every: CategoryMetadataWhereInput
   marketHistory_none: MarketHistoryWhereInput
   marketHistory_some: MarketHistoryWhereInput
   marketHistory_every: MarketHistoryWhereInput
@@ -1334,6 +1455,9 @@ type Query {
   assetBalances(offset: Int, limit: Int = 50, where: AssetBalanceWhereInput, orderBy: [AssetBalanceOrderByInput!]): [AssetBalance!]!
   assetBalanceByUniqueInput(where: AssetBalanceWhereUniqueInput!): AssetBalance
   assetBalancesConnection(first: Int, after: String, last: Int, before: String, where: AssetBalanceWhereInput, orderBy: [AssetBalanceOrderByInput!]): AssetBalanceConnection!
+  categoryMetadata(offset: Int, limit: Int = 50, where: CategoryMetadataWhereInput, orderBy: [CategoryMetadataOrderByInput!]): [CategoryMetadata!]!
+  categoryMetadataByUniqueInput(where: CategoryMetadataWhereUniqueInput!): CategoryMetadata
+  categoryMetadataConnection(first: Int, after: String, last: Int, before: String, where: CategoryMetadataWhereInput, orderBy: [CategoryMetadataOrderByInput!]): CategoryMetadataConnection!
   historicalAssetBalances(offset: Int, limit: Int = 50, where: HistoricalAssetBalanceWhereInput, orderBy: [HistoricalAssetBalanceOrderByInput!]): [HistoricalAssetBalance!]!
   historicalAssetBalanceByUniqueInput(where: HistoricalAssetBalanceWhereUniqueInput!): HistoricalAssetBalance
   historicalAssetBalancesConnection(first: Int, after: String, last: Int, before: String, where: HistoricalAssetBalanceWhereInput, orderBy: [HistoricalAssetBalanceOrderByInput!]): HistoricalAssetBalanceConnection!
