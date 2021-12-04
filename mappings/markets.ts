@@ -76,6 +76,13 @@ export async function predictionMarketCreated({
         newMarket.slug = metadata.slug
         newMarket.question = metadata.question
         newMarket.description = metadata.description
+        
+        if (metadata.tags) {
+            newMarket.tags = []
+            for (let i = 0; i < metadata.tags.length; i++) {
+                newMarket.tags.push(metadata.tags[i])
+            }
+        }
     }
 
     const marketType = new MarketType()
@@ -359,6 +366,7 @@ type DecodedMarketMetadata = {
     question: string
     description: string
     categories?: CategoryData[]
+    tags?: string[]
 }
 
 type CategoryData = {
