@@ -29,7 +29,7 @@ type Market @entity {
   slug: String
   question: String
   description: String
-  categories: [CategoryMetadata] @derivedFrom(field: "market")
+  categories: [CategoryMetadata]
   tags: [String]
   marketType: MarketType!
   period: MarketPeriod!
@@ -38,17 +38,16 @@ type Market @entity {
   report: MarketReport
   resolvedOutcome: String
   mdm: MarketDisputeMechanism!
-  marketHistory: [MarketHistory] @derivedFrom(field: "market")
+  marketHistory: [MarketHistory]
 }
 
-type MarketHistory @entity {
-  market: Market!
-  event: String!
+type MarketHistory @jsonField {
+  event: String
   status: String
   report: MarketReport
   resolvedOutcome: String
-  blockNumber: Int!
-  timestamp: BigInt!
+  blockNumber: Int
+  timestamp: BigInt
 }
 
 type Pool @entity {
@@ -70,9 +69,8 @@ type HistoricalPool @entity {
   timestamp: BigInt!
 }
 
-type CategoryMetadata @entity {
-  market: Market!
-  name: String!
+type CategoryMetadata @jsonField {
+  name: String
   ticker: String
   img: String
   color: String

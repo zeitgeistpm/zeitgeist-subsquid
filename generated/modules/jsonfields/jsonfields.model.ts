@@ -14,6 +14,30 @@ import {
 import BN from 'bn.js';
 import { InputType, Field } from 'type-graphql';
 
+@InputType('CategoryMetadataInput')
+@ObjectType()
+export class CategoryMetadata {
+  @StringField({
+    nullable: true,
+  })
+  name?: string;
+
+  @StringField({
+    nullable: true,
+  })
+  ticker?: string;
+
+  @StringField({
+    nullable: true,
+  })
+  img?: string;
+
+  @StringField({
+    nullable: true,
+  })
+  color?: string;
+}
+
 @InputType('MarketDisputeMechanismInput')
 @ObjectType()
 export class MarketDisputeMechanism {
@@ -31,6 +55,38 @@ export class MarketDisputeMechanism {
     nullable: true,
   })
   simpleDisputes?: boolean;
+}
+
+@InputType('MarketHistoryInput')
+@ObjectType()
+export class MarketHistory {
+  @StringField({
+    nullable: true,
+  })
+  event?: string;
+
+  @StringField({
+    nullable: true,
+  })
+  status?: string;
+
+  @Field(() => MarketReport, { nullable: true })
+  report?: MarketReport;
+
+  @StringField({
+    nullable: true,
+  })
+  resolvedOutcome?: string;
+
+  @IntField({
+    nullable: true,
+  })
+  blockNumber?: number;
+
+  @NumericField({
+    nullable: true,
+  })
+  timestamp?: BN;
 }
 
 @InputType('MarketPeriodInput')
