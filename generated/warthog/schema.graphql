@@ -644,6 +644,7 @@ type Market implements BaseGraphQLObject {
   question: String
   description: String
   categories: [CategoryMetadata!]
+  tags: [String!]
   marketType: MarketType!
   period: MarketPeriod!
   scoringRule: String!
@@ -668,6 +669,7 @@ input MarketCreateInput {
   slug: String
   question: String
   description: String
+  tags: [String!]
   marketType: MarketTypeInput!
   period: MarketPeriodInput!
   scoringRule: String!
@@ -1110,6 +1112,7 @@ input MarketUpdateInput {
   slug: String
   question: String
   description: String
+  tags: [String!]
   marketType: MarketTypeInput
   period: MarketPeriodInput
   scoringRule: String
@@ -1180,6 +1183,9 @@ input MarketWhereInput {
   description_startsWith: String
   description_endsWith: String
   description_in: [String!]
+  tags_containsAll: [String!]
+  tags_containsNone: [String!]
+  tags_containsAny: [String!]
   marketType_json: JSONObject
   period_json: JSONObject
   scoringRule_eq: String

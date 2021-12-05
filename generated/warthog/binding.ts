@@ -570,6 +570,7 @@ export interface MarketCreateInput {
   slug?: String | null
   question?: String | null
   description?: String | null
+  tags?: String[] | String | null
   marketType: MarketTypeInput
   period: MarketPeriodInput
   scoringRule: String
@@ -905,6 +906,7 @@ export interface MarketUpdateInput {
   slug?: String | null
   question?: String | null
   description?: String | null
+  tags?: String[] | String | null
   marketType?: MarketTypeInput | null
   period?: MarketPeriodInput | null
   scoringRule?: String | null
@@ -975,6 +977,9 @@ export interface MarketWhereInput {
   description_startsWith?: String | null
   description_endsWith?: String | null
   description_in?: String[] | String | null
+  tags_containsAll?: String[] | String | null
+  tags_containsNone?: String[] | String | null
+  tags_containsAny?: String[] | String | null
   marketType_json?: JSONObject | null
   period_json?: JSONObject | null
   scoringRule_eq?: String | null
@@ -1358,6 +1363,7 @@ export interface Market extends BaseGraphQLObject {
   question?: String | null
   description?: String | null
   categories?: Array<CategoryMetadata> | null
+  tags?: Array<String> | null
   marketType: MarketType
   period: MarketPeriod
   scoringRule: String

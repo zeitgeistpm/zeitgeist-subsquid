@@ -2113,6 +2113,15 @@ export class MarketWhereInput {
   @TypeGraphQLField(() => [String], { nullable: true })
   description_in?: string[];
 
+  @TypeGraphQLField(() => [String], { nullable: true })
+  tags_containsAll?: [string];
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  tags_containsNone?: [string];
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  tags_containsAny?: [string];
+
   @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
   marketType_json?: JsonObject;
 
@@ -2224,6 +2233,9 @@ export class MarketCreateInput {
   @TypeGraphQLField({ nullable: true })
   description?: string;
 
+  @TypeGraphQLField(() => [String], { nullable: true })
+  tags?: string[];
+
   @TypeGraphQLField(() => MarketType)
   marketType!: MarketType;
 
@@ -2268,6 +2280,9 @@ export class MarketUpdateInput {
 
   @TypeGraphQLField({ nullable: true })
   description?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  tags?: string[];
 
   @TypeGraphQLField(() => MarketType, { nullable: true })
   marketType?: MarketType;
