@@ -29,7 +29,7 @@ type Market @entity {
   slug: String
   question: String
   description: String
-  categories: [CategoryMetadata] @derivedFrom(field: "market")
+  categories: [CategoryMetadata]
   tags: [String]
   marketType: MarketType!
   period: MarketPeriod!
@@ -70,9 +70,8 @@ type HistoricalPool @entity {
   timestamp: BigInt!
 }
 
-type CategoryMetadata @entity {
-  market: Market!
-  name: String!
+type CategoryMetadata @jsonField {
+  name: String
   ticker: String
   img: String
   color: String
