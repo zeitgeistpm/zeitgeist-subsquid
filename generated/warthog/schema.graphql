@@ -246,63 +246,28 @@ input BaseWhereInput {
 """GraphQL representation of BigInt"""
 scalar BigInt
 
-type CategoryMetadata implements BaseGraphQLObject {
-  id: ID!
-  createdAt: DateTime!
-  createdById: String!
-  updatedAt: DateTime
-  updatedById: String
-  deletedAt: DateTime
-  deletedById: String
-  version: Int!
-  market: Market!
-  marketId: String!
-  name: String!
+type CategoryMetadata {
+  name: String
   ticker: String
   img: String
   color: String
-}
-
-type CategoryMetadataConnection {
-  totalCount: Int!
-  edges: [CategoryMetadataEdge!]!
-  pageInfo: PageInfo!
 }
 
 input CategoryMetadataCreateInput {
-  market: ID!
-  name: String!
+  name: String
   ticker: String
   img: String
   color: String
 }
 
-type CategoryMetadataEdge {
-  node: CategoryMetadata!
-  cursor: String!
-}
-
-enum CategoryMetadataOrderByInput {
-  createdAt_ASC
-  createdAt_DESC
-  updatedAt_ASC
-  updatedAt_DESC
-  deletedAt_ASC
-  deletedAt_DESC
-  market_ASC
-  market_DESC
-  name_ASC
-  name_DESC
-  ticker_ASC
-  ticker_DESC
-  img_ASC
-  img_DESC
-  color_ASC
-  color_DESC
+input CategoryMetadataInput {
+  name: String
+  ticker: String
+  img: String
+  color: String
 }
 
 input CategoryMetadataUpdateInput {
-  market: ID
   name: String
   ticker: String
   img: String
@@ -354,7 +319,6 @@ input CategoryMetadataWhereInput {
   color_startsWith: String
   color_endsWith: String
   color_in: [String!]
-  market: MarketWhereInput
   AND: [CategoryMetadataWhereInput!]
   OR: [CategoryMetadataWhereInput!]
 }
@@ -643,7 +607,7 @@ type Market implements BaseGraphQLObject {
   slug: String
   question: String
   description: String
-  categories: [CategoryMetadata!]
+  categories: CategoryMetadata
   tags: [String!]
   marketType: MarketType!
   period: MarketPeriod!
@@ -669,6 +633,7 @@ input MarketCreateInput {
   slug: String
   question: String
   description: String
+  categories: CategoryMetadataInput
   tags: [String!]
   marketType: MarketTypeInput!
   period: MarketPeriodInput!
@@ -1112,6 +1077,7 @@ input MarketUpdateInput {
   slug: String
   question: String
   description: String
+  categories: CategoryMetadataInput
   tags: [String!]
   marketType: MarketTypeInput
   period: MarketPeriodInput
@@ -1183,6 +1149,7 @@ input MarketWhereInput {
   description_startsWith: String
   description_endsWith: String
   description_in: [String!]
+  categories_json: JSONObject
   tags_containsAll: [String!]
   tags_containsNone: [String!]
   tags_containsAny: [String!]
@@ -1205,9 +1172,6 @@ input MarketWhereInput {
   resolvedOutcome_endsWith: String
   resolvedOutcome_in: [String!]
   mdm_json: JSONObject
-  categories_none: CategoryMetadataWhereInput
-  categories_some: CategoryMetadataWhereInput
-  categories_every: CategoryMetadataWhereInput
   marketHistory_none: MarketHistoryWhereInput
   marketHistory_some: MarketHistoryWhereInput
   marketHistory_every: MarketHistoryWhereInput
@@ -1461,9 +1425,6 @@ type Query {
   assetBalances(offset: Int, limit: Int = 50, where: AssetBalanceWhereInput, orderBy: [AssetBalanceOrderByInput!]): [AssetBalance!]!
   assetBalanceByUniqueInput(where: AssetBalanceWhereUniqueInput!): AssetBalance
   assetBalancesConnection(first: Int, after: String, last: Int, before: String, where: AssetBalanceWhereInput, orderBy: [AssetBalanceOrderByInput!]): AssetBalanceConnection!
-  categoryMetadata(offset: Int, limit: Int = 50, where: CategoryMetadataWhereInput, orderBy: [CategoryMetadataOrderByInput!]): [CategoryMetadata!]!
-  categoryMetadataByUniqueInput(where: CategoryMetadataWhereUniqueInput!): CategoryMetadata
-  categoryMetadataConnection(first: Int, after: String, last: Int, before: String, where: CategoryMetadataWhereInput, orderBy: [CategoryMetadataOrderByInput!]): CategoryMetadataConnection!
   historicalAssetBalances(offset: Int, limit: Int = 50, where: HistoricalAssetBalanceWhereInput, orderBy: [HistoricalAssetBalanceOrderByInput!]): [HistoricalAssetBalance!]!
   historicalAssetBalanceByUniqueInput(where: HistoricalAssetBalanceWhereUniqueInput!): HistoricalAssetBalance
   historicalAssetBalancesConnection(first: Int, after: String, last: Int, before: String, where: HistoricalAssetBalanceWhereInput, orderBy: [HistoricalAssetBalanceOrderByInput!]): HistoricalAssetBalanceConnection!

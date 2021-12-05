@@ -2,8 +2,6 @@ import { Account } from '../modules/account/account.model';
 export { Account };
 import { AssetBalance } from '../modules/asset-balance/asset-balance.model';
 export { AssetBalance };
-import { CategoryMetadata } from '../modules/category-metadata/category-metadata.model';
-export { CategoryMetadata };
 import { HistoricalAssetBalance } from '../modules/historical-asset-balance/historical-asset-balance.model';
 export { HistoricalAssetBalance };
 import { HistoricalPool } from '../modules/historical-pool/historical-pool.model';
@@ -18,6 +16,8 @@ export { Pool };
 import { MarketStatus } from '../modules/enums/enums';
 export { MarketStatus };
 
+import { CategoryMetadata } from '../modules/jsonfields/jsonfields.model';
+export { CategoryMetadata };
 import { MarketDisputeMechanism } from '../modules/jsonfields/jsonfields.model';
 export { MarketDisputeMechanism };
 import { MarketPeriod } from '../modules/jsonfields/jsonfields.model';

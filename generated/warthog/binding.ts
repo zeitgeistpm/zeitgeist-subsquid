@@ -12,9 +12,6 @@ export interface Query {
     assetBalances: <T = Array<AssetBalance>>(args: { offset?: Int | null, limit?: Int | null, where?: AssetBalanceWhereInput | null, orderBy?: Array<AssetBalanceOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     assetBalanceByUniqueInput: <T = AssetBalance | null>(args: { where: AssetBalanceWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
     assetBalancesConnection: <T = AssetBalanceConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: AssetBalanceWhereInput | null, orderBy?: Array<AssetBalanceOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
-    categoryMetadata: <T = Array<CategoryMetadata>>(args: { offset?: Int | null, limit?: Int | null, where?: CategoryMetadataWhereInput | null, orderBy?: Array<CategoryMetadataOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
-    categoryMetadataByUniqueInput: <T = CategoryMetadata | null>(args: { where: CategoryMetadataWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
-    categoryMetadataConnection: <T = CategoryMetadataConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: CategoryMetadataWhereInput | null, orderBy?: Array<CategoryMetadataOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     historicalAssetBalances: <T = Array<HistoricalAssetBalance>>(args: { offset?: Int | null, limit?: Int | null, where?: HistoricalAssetBalanceWhereInput | null, orderBy?: Array<HistoricalAssetBalanceOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     historicalAssetBalanceByUniqueInput: <T = HistoricalAssetBalance | null>(args: { where: HistoricalAssetBalanceWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
     historicalAssetBalancesConnection: <T = HistoricalAssetBalanceConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: HistoricalAssetBalanceWhereInput | null, orderBy?: Array<HistoricalAssetBalanceOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
@@ -83,23 +80,6 @@ export type AssetBalanceOrderByInput =   'createdAt_ASC' |
   'assetId_DESC' |
   'balance_ASC' |
   'balance_DESC'
-
-export type CategoryMetadataOrderByInput =   'createdAt_ASC' |
-  'createdAt_DESC' |
-  'updatedAt_ASC' |
-  'updatedAt_DESC' |
-  'deletedAt_ASC' |
-  'deletedAt_DESC' |
-  'market_ASC' |
-  'market_DESC' |
-  'name_ASC' |
-  'name_DESC' |
-  'ticker_ASC' |
-  'ticker_DESC' |
-  'img_ASC' |
-  'img_DESC' |
-  'color_ASC' |
-  'color_DESC'
 
 export type HistoricalAssetBalanceOrderByInput =   'createdAt_ASC' |
   'createdAt_DESC' |
@@ -340,15 +320,20 @@ export interface BaseWhereInput {
 }
 
 export interface CategoryMetadataCreateInput {
-  market: ID_Output
-  name: String
+  name?: String | null
+  ticker?: String | null
+  img?: String | null
+  color?: String | null
+}
+
+export interface CategoryMetadataInput {
+  name?: String | null
   ticker?: String | null
   img?: String | null
   color?: String | null
 }
 
 export interface CategoryMetadataUpdateInput {
-  market?: ID_Input | null
   name?: String | null
   ticker?: String | null
   img?: String | null
@@ -400,7 +385,6 @@ export interface CategoryMetadataWhereInput {
   color_startsWith?: String | null
   color_endsWith?: String | null
   color_in?: String[] | String | null
-  market?: MarketWhereInput | null
   AND?: CategoryMetadataWhereInput[] | CategoryMetadataWhereInput | null
   OR?: CategoryMetadataWhereInput[] | CategoryMetadataWhereInput | null
 }
@@ -570,6 +554,7 @@ export interface MarketCreateInput {
   slug?: String | null
   question?: String | null
   description?: String | null
+  categories?: CategoryMetadataInput | null
   tags?: String[] | String | null
   marketType: MarketTypeInput
   period: MarketPeriodInput
@@ -906,6 +891,7 @@ export interface MarketUpdateInput {
   slug?: String | null
   question?: String | null
   description?: String | null
+  categories?: CategoryMetadataInput | null
   tags?: String[] | String | null
   marketType?: MarketTypeInput | null
   period?: MarketPeriodInput | null
@@ -977,6 +963,7 @@ export interface MarketWhereInput {
   description_startsWith?: String | null
   description_endsWith?: String | null
   description_in?: String[] | String | null
+  categories_json?: JSONObject | null
   tags_containsAll?: String[] | String | null
   tags_containsNone?: String[] | String | null
   tags_containsAny?: String[] | String | null
@@ -999,9 +986,6 @@ export interface MarketWhereInput {
   resolvedOutcome_endsWith?: String | null
   resolvedOutcome_in?: String[] | String | null
   mdm_json?: JSONObject | null
-  categories_none?: CategoryMetadataWhereInput | null
-  categories_some?: CategoryMetadataWhereInput | null
-  categories_every?: CategoryMetadataWhereInput | null
   marketHistory_none?: MarketHistoryWhereInput | null
   marketHistory_some?: MarketHistoryWhereInput | null
   marketHistory_every?: MarketHistoryWhereInput | null
@@ -1261,32 +1245,11 @@ export interface BaseModelUUID extends BaseGraphQLObject {
   version: Int
 }
 
-export interface CategoryMetadata extends BaseGraphQLObject {
-  id: ID_Output
-  createdAt: DateTime
-  createdById: String
-  updatedAt?: DateTime | null
-  updatedById?: String | null
-  deletedAt?: DateTime | null
-  deletedById?: String | null
-  version: Int
-  market: Market
-  marketId: String
-  name: String
+export interface CategoryMetadata {
+  name?: String | null
   ticker?: String | null
   img?: String | null
   color?: String | null
-}
-
-export interface CategoryMetadataConnection {
-  totalCount: Int
-  edges: Array<CategoryMetadataEdge>
-  pageInfo: PageInfo
-}
-
-export interface CategoryMetadataEdge {
-  node: CategoryMetadata
-  cursor: String
 }
 
 export interface HistoricalAssetBalance extends BaseGraphQLObject {
@@ -1362,7 +1325,7 @@ export interface Market extends BaseGraphQLObject {
   slug?: String | null
   question?: String | null
   description?: String | null
-  categories?: Array<CategoryMetadata> | null
+  categories?: CategoryMetadata | null
   tags?: Array<String> | null
   marketType: MarketType
   period: MarketPeriod

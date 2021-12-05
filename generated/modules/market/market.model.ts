@@ -1,6 +1,5 @@
 import { BaseModel, IntField, Model, OneToMany, CustomField, StringField, JSONField } from '@subsquid/warthog';
 
-import { CategoryMetadata } from '../category-metadata/category-metadata.model';
 import { MarketHistory } from '../market-history/market-history.model';
 
 import * as jsonTypes from '../jsonfields/jsonfields.model';
@@ -34,13 +33,8 @@ export class Market extends BaseModel {
   })
   description?: string;
 
-  @OneToMany(() => CategoryMetadata, (param: CategoryMetadata) => param.market, {
-    nullable: true,
-    modelName: 'Market',
-    relModelName: 'CategoryMetadata',
-    propertyName: 'categories',
-  })
-  categories?: CategoryMetadata[];
+  @JSONField({ filter: true, gqlFieldType: jsonTypes.CategoryMetadata, nullable: true })
+  categories?: jsonTypes.CategoryMetadata[];
 
   @CustomField({
     db: { type: 'text', array: true, nullable: true },

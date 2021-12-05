@@ -14,6 +14,30 @@ import {
 import BN from 'bn.js';
 import { InputType, Field } from 'type-graphql';
 
+@InputType('CategoryMetadataInput')
+@ObjectType()
+export class CategoryMetadata {
+  @StringField({
+    nullable: true,
+  })
+  name?: string;
+
+  @StringField({
+    nullable: true,
+  })
+  ticker?: string;
+
+  @StringField({
+    nullable: true,
+  })
+  img?: string;
+
+  @StringField({
+    nullable: true,
+  })
+  color?: string;
+}
+
 @InputType('MarketDisputeMechanismInput')
 @ObjectType()
 export class MarketDisputeMechanism {

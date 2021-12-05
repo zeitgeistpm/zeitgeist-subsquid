@@ -39,8 +39,6 @@ import {
 import { Market } from './market.model';
 import { MarketService } from './market.service';
 
-import { CategoryMetadata } from '../category-metadata/category-metadata.model';
-import { CategoryMetadataService } from '../category-metadata/category-metadata.service';
 import { MarketHistory } from '../market-history/market-history.model';
 import { MarketHistoryService } from '../market-history/market-history.service';
 import { getConnection, getRepository, In, Not } from 'typeorm';
@@ -140,11 +138,6 @@ export class MarketResolver {
     }
 
     return result as Promise<MarketConnection>;
-  }
-
-  @FieldResolver(() => CategoryMetadata)
-  async categories(@Root() r: Market, @Ctx() ctx: BaseContext): Promise<CategoryMetadata[] | null> {
-    return ctx.dataLoader.loaders.Market.categories.load(r);
   }
 
   @FieldResolver(() => MarketHistory)
