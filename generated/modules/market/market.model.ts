@@ -1,6 +1,4 @@
-import { BaseModel, IntField, Model, OneToMany, CustomField, StringField, JSONField } from '@subsquid/warthog';
-
-import { MarketHistory } from '../market-history/market-history.model';
+import { BaseModel, IntField, Model, CustomField, StringField, JSONField } from '@subsquid/warthog';
 
 import * as jsonTypes from '../jsonfields/jsonfields.model';
 
@@ -65,13 +63,8 @@ export class Market extends BaseModel {
   @JSONField({ filter: true, gqlFieldType: jsonTypes.MarketDisputeMechanism })
   mdm!: jsonTypes.MarketDisputeMechanism;
 
-  @OneToMany(() => MarketHistory, (param: MarketHistory) => param.market, {
-    nullable: true,
-    modelName: 'Market',
-    relModelName: 'MarketHistory',
-    propertyName: 'marketHistory',
-  })
-  marketHistory?: MarketHistory[];
+  @JSONField({ filter: true, gqlFieldType: jsonTypes.MarketHistory, nullable: true })
+  marketHistory?: jsonTypes.MarketHistory[];
 
   constructor(init?: Partial<Market>) {
     super();

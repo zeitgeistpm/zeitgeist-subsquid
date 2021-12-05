@@ -616,7 +616,7 @@ type Market implements BaseGraphQLObject {
   report: MarketReport
   resolvedOutcome: String
   mdm: MarketDisputeMechanism!
-  marketHistory: [MarketHistory!]
+  marketHistory: MarketHistory
 }
 
 type MarketConnection {
@@ -642,6 +642,7 @@ input MarketCreateInput {
   report: MarketReportInput
   resolvedOutcome: String
   mdm: MarketDisputeMechanismInput!
+  marketHistory: MarketHistoryInput
 }
 
 type MarketDisputeMechanism {
@@ -715,72 +716,35 @@ type MarketEdge {
   cursor: String!
 }
 
-type MarketHistory implements BaseGraphQLObject {
-  id: ID!
-  createdAt: DateTime!
-  createdById: String!
-  updatedAt: DateTime
-  updatedById: String
-  deletedAt: DateTime
-  deletedById: String
-  version: Int!
-  market: Market!
-  marketId: String!
-  event: String!
+type MarketHistory {
+  event: String
   status: String
   report: MarketReport
   resolvedOutcome: String
-  blockNumber: Int!
-  timestamp: BigInt!
-}
-
-type MarketHistoryConnection {
-  totalCount: Int!
-  edges: [MarketHistoryEdge!]!
-  pageInfo: PageInfo!
+  blockNumber: Int
+  timestamp: BigInt
 }
 
 input MarketHistoryCreateInput {
-  market: ID!
-  event: String!
+  event: String
   status: String
-  report: MarketReportInput
   resolvedOutcome: String
-  blockNumber: Float!
-  timestamp: String!
+  blockNumber: Float
+  timestamp: String
 }
 
-type MarketHistoryEdge {
-  node: MarketHistory!
-  cursor: String!
-}
-
-enum MarketHistoryOrderByInput {
-  createdAt_ASC
-  createdAt_DESC
-  updatedAt_ASC
-  updatedAt_DESC
-  deletedAt_ASC
-  deletedAt_DESC
-  market_ASC
-  market_DESC
-  event_ASC
-  event_DESC
-  status_ASC
-  status_DESC
-  resolvedOutcome_ASC
-  resolvedOutcome_DESC
-  blockNumber_ASC
-  blockNumber_DESC
-  timestamp_ASC
-  timestamp_DESC
-}
-
-input MarketHistoryUpdateInput {
-  market: ID
+input MarketHistoryInput {
   event: String
   status: String
   report: MarketReportInput
+  resolvedOutcome: String
+  blockNumber: Int
+  timestamp: BigInt
+}
+
+input MarketHistoryUpdateInput {
+  event: String
+  status: String
   resolvedOutcome: String
   blockNumber: Float
   timestamp: String
@@ -821,7 +785,6 @@ input MarketHistoryWhereInput {
   status_startsWith: String
   status_endsWith: String
   status_in: [String!]
-  report_json: JSONObject
   resolvedOutcome_eq: String
   resolvedOutcome_contains: String
   resolvedOutcome_startsWith: String
@@ -839,7 +802,6 @@ input MarketHistoryWhereInput {
   timestamp_lt: BigInt
   timestamp_lte: BigInt
   timestamp_in: [BigInt!]
-  market: MarketWhereInput
   AND: [MarketHistoryWhereInput!]
   OR: [MarketHistoryWhereInput!]
 }
@@ -1086,6 +1048,7 @@ input MarketUpdateInput {
   report: MarketReportInput
   resolvedOutcome: String
   mdm: MarketDisputeMechanismInput
+  marketHistory: MarketHistoryInput
 }
 
 input MarketWhereInput {
@@ -1172,9 +1135,7 @@ input MarketWhereInput {
   resolvedOutcome_endsWith: String
   resolvedOutcome_in: [String!]
   mdm_json: JSONObject
-  marketHistory_none: MarketHistoryWhereInput
-  marketHistory_some: MarketHistoryWhereInput
-  marketHistory_every: MarketHistoryWhereInput
+  marketHistory_json: JSONObject
   AND: [MarketWhereInput!]
   OR: [MarketWhereInput!]
 }
@@ -1431,9 +1392,6 @@ type Query {
   historicalPools(offset: Int, limit: Int = 50, where: HistoricalPoolWhereInput, orderBy: [HistoricalPoolOrderByInput!]): [HistoricalPool!]!
   historicalPoolByUniqueInput(where: HistoricalPoolWhereUniqueInput!): HistoricalPool
   historicalPoolsConnection(first: Int, after: String, last: Int, before: String, where: HistoricalPoolWhereInput, orderBy: [HistoricalPoolOrderByInput!]): HistoricalPoolConnection!
-  marketHistories(offset: Int, limit: Int = 50, where: MarketHistoryWhereInput, orderBy: [MarketHistoryOrderByInput!]): [MarketHistory!]!
-  marketHistoryByUniqueInput(where: MarketHistoryWhereUniqueInput!): MarketHistory
-  marketHistoriesConnection(first: Int, after: String, last: Int, before: String, where: MarketHistoryWhereInput, orderBy: [MarketHistoryOrderByInput!]): MarketHistoryConnection!
   markets(offset: Int, limit: Int = 50, where: MarketWhereInput, orderBy: [MarketOrderByInput!]): [Market!]!
   marketByUniqueInput(where: MarketWhereUniqueInput!): Market
   marketsConnection(first: Int, after: String, last: Int, before: String, where: MarketWhereInput, orderBy: [MarketOrderByInput!]): MarketConnection!

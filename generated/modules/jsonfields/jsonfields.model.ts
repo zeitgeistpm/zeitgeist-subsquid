@@ -57,6 +57,38 @@ export class MarketDisputeMechanism {
   simpleDisputes?: boolean;
 }
 
+@InputType('MarketHistoryInput')
+@ObjectType()
+export class MarketHistory {
+  @StringField({
+    nullable: true,
+  })
+  event?: string;
+
+  @StringField({
+    nullable: true,
+  })
+  status?: string;
+
+  @Field(() => MarketReport, { nullable: true })
+  report?: MarketReport;
+
+  @StringField({
+    nullable: true,
+  })
+  resolvedOutcome?: string;
+
+  @IntField({
+    nullable: true,
+  })
+  blockNumber?: number;
+
+  @NumericField({
+    nullable: true,
+  })
+  timestamp?: BN;
+}
+
 @InputType('MarketPeriodInput')
 @ObjectType()
 export class MarketPeriod {
