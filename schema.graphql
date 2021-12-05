@@ -38,17 +38,16 @@ type Market @entity {
   report: MarketReport
   resolvedOutcome: String
   mdm: MarketDisputeMechanism!
-  marketHistory: [MarketHistory] @derivedFrom(field: "market")
+  marketHistory: [MarketHistory]
 }
 
-type MarketHistory @entity {
-  market: Market!
-  event: String!
+type MarketHistory @jsonField {
+  event: String
   status: String
   report: MarketReport
   resolvedOutcome: String
-  blockNumber: Int!
-  timestamp: BigInt!
+  blockNumber: Int
+  timestamp: BigInt
 }
 
 type Pool @entity {
