@@ -83,10 +83,10 @@ export class MarketHistory {
   })
   blockNumber?: number;
 
-  @NumericField({
+  @StringField({
     nullable: true,
   })
-  timestamp?: BN;
+  timestamp?: string;
 }
 
 @InputType('MarketPeriodInput')

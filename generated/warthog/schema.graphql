@@ -603,12 +603,14 @@ type Market implements BaseGraphQLObject {
   marketId: Int!
   creator: String!
   creation: String!
+  creatorFee: Int
   oracle: String!
   slug: String
   question: String
   description: String
   categories: CategoryMetadata
   tags: [String!]
+  img: String
   marketType: MarketType!
   period: MarketPeriod!
   scoringRule: String!
@@ -616,6 +618,7 @@ type Market implements BaseGraphQLObject {
   report: MarketReport
   resolvedOutcome: String
   mdm: MarketDisputeMechanism!
+  outcomeAssets: [String!]
   marketHistory: MarketHistory
 }
 
@@ -629,12 +632,14 @@ input MarketCreateInput {
   marketId: Float!
   creator: String!
   creation: String!
+  creatorFee: Float
   oracle: String!
   slug: String
   question: String
   description: String
   categories: CategoryMetadataInput
   tags: [String!]
+  img: String
   marketType: MarketTypeInput!
   period: MarketPeriodInput!
   scoringRule: String!
@@ -642,6 +647,7 @@ input MarketCreateInput {
   report: MarketReportInput
   resolvedOutcome: String
   mdm: MarketDisputeMechanismInput!
+  outcomeAssets: [String!]
   marketHistory: MarketHistoryInput
 }
 
@@ -722,7 +728,7 @@ type MarketHistory {
   report: MarketReport
   resolvedOutcome: String
   blockNumber: Int
-  timestamp: BigInt
+  timestamp: String
 }
 
 input MarketHistoryCreateInput {
@@ -739,7 +745,7 @@ input MarketHistoryInput {
   report: MarketReportInput
   resolvedOutcome: String
   blockNumber: Int
-  timestamp: BigInt
+  timestamp: String
 }
 
 input MarketHistoryUpdateInput {
@@ -796,12 +802,11 @@ input MarketHistoryWhereInput {
   blockNumber_lt: Int
   blockNumber_lte: Int
   blockNumber_in: [Int!]
-  timestamp_eq: BigInt
-  timestamp_gt: BigInt
-  timestamp_gte: BigInt
-  timestamp_lt: BigInt
-  timestamp_lte: BigInt
-  timestamp_in: [BigInt!]
+  timestamp_eq: String
+  timestamp_contains: String
+  timestamp_startsWith: String
+  timestamp_endsWith: String
+  timestamp_in: [String!]
   AND: [MarketHistoryWhereInput!]
   OR: [MarketHistoryWhereInput!]
 }
@@ -823,6 +828,8 @@ enum MarketOrderByInput {
   creator_DESC
   creation_ASC
   creation_DESC
+  creatorFee_ASC
+  creatorFee_DESC
   oracle_ASC
   oracle_DESC
   slug_ASC
@@ -831,6 +838,8 @@ enum MarketOrderByInput {
   question_DESC
   description_ASC
   description_DESC
+  img_ASC
+  img_DESC
   scoringRule_ASC
   scoringRule_DESC
   status_ASC
@@ -1035,12 +1044,14 @@ input MarketUpdateInput {
   marketId: Float
   creator: String
   creation: String
+  creatorFee: Float
   oracle: String
   slug: String
   question: String
   description: String
   categories: CategoryMetadataInput
   tags: [String!]
+  img: String
   marketType: MarketTypeInput
   period: MarketPeriodInput
   scoringRule: String
@@ -1048,6 +1059,7 @@ input MarketUpdateInput {
   report: MarketReportInput
   resolvedOutcome: String
   mdm: MarketDisputeMechanismInput
+  outcomeAssets: [String!]
   marketHistory: MarketHistoryInput
 }
 
@@ -1092,6 +1104,12 @@ input MarketWhereInput {
   creation_startsWith: String
   creation_endsWith: String
   creation_in: [String!]
+  creatorFee_eq: Int
+  creatorFee_gt: Int
+  creatorFee_gte: Int
+  creatorFee_lt: Int
+  creatorFee_lte: Int
+  creatorFee_in: [Int!]
   oracle_eq: String
   oracle_contains: String
   oracle_startsWith: String
@@ -1116,6 +1134,11 @@ input MarketWhereInput {
   tags_containsAll: [String!]
   tags_containsNone: [String!]
   tags_containsAny: [String!]
+  img_eq: String
+  img_contains: String
+  img_startsWith: String
+  img_endsWith: String
+  img_in: [String!]
   marketType_json: JSONObject
   period_json: JSONObject
   scoringRule_eq: String
@@ -1135,6 +1158,9 @@ input MarketWhereInput {
   resolvedOutcome_endsWith: String
   resolvedOutcome_in: [String!]
   mdm_json: JSONObject
+  outcomeAssets_containsAll: [String!]
+  outcomeAssets_containsNone: [String!]
+  outcomeAssets_containsAny: [String!]
   marketHistory_json: JSONObject
   AND: [MarketWhereInput!]
   OR: [MarketWhereInput!]

@@ -13,6 +13,11 @@ export class Market extends BaseModel {
   @StringField({})
   creation!: string;
 
+  @IntField({
+    nullable: true,
+  })
+  creatorFee?: number;
+
   @StringField({})
   oracle!: string;
 
@@ -40,6 +45,11 @@ export class Market extends BaseModel {
   })
   tags?: string[];
 
+  @StringField({
+    nullable: true,
+  })
+  img?: string;
+
   @JSONField({ filter: true, gqlFieldType: jsonTypes.MarketType })
   marketType!: jsonTypes.MarketType;
 
@@ -62,6 +72,12 @@ export class Market extends BaseModel {
 
   @JSONField({ filter: true, gqlFieldType: jsonTypes.MarketDisputeMechanism })
   mdm!: jsonTypes.MarketDisputeMechanism;
+
+  @CustomField({
+    db: { type: 'text', array: true, nullable: true },
+    api: { type: 'string', nullable: true },
+  })
+  outcomeAssets?: string[];
 
   @JSONField({ filter: true, gqlFieldType: jsonTypes.MarketHistory, nullable: true })
   marketHistory?: jsonTypes.MarketHistory[];

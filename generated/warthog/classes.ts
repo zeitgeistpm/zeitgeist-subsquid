@@ -1840,22 +1840,19 @@ export class MarketHistoryWhereInput {
   @TypeGraphQLField(() => [Int], { nullable: true })
   blockNumber_in?: number[];
 
-  @TypeGraphQLField(() => BigInt, { nullable: true })
+  @TypeGraphQLField({ nullable: true })
   timestamp_eq?: string;
 
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  timestamp_gt?: string;
+  @TypeGraphQLField({ nullable: true })
+  timestamp_contains?: string;
 
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  timestamp_gte?: string;
+  @TypeGraphQLField({ nullable: true })
+  timestamp_startsWith?: string;
 
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  timestamp_lt?: string;
+  @TypeGraphQLField({ nullable: true })
+  timestamp_endsWith?: string;
 
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  timestamp_lte?: string;
-
-  @TypeGraphQLField(() => [BigInt], { nullable: true })
+  @TypeGraphQLField(() => [String], { nullable: true })
   timestamp_in?: string[];
 
   @TypeGraphQLField(() => MarketHistoryWhereInput, { nullable: true })
@@ -2664,6 +2661,9 @@ export enum MarketOrderByEnum {
   creation_ASC = "creation_ASC",
   creation_DESC = "creation_DESC",
 
+  creatorFee_ASC = "creatorFee_ASC",
+  creatorFee_DESC = "creatorFee_DESC",
+
   oracle_ASC = "oracle_ASC",
   oracle_DESC = "oracle_DESC",
 
@@ -2675,6 +2675,9 @@ export enum MarketOrderByEnum {
 
   description_ASC = "description_ASC",
   description_DESC = "description_DESC",
+
+  img_ASC = "img_ASC",
+  img_DESC = "img_DESC",
 
   scoringRule_ASC = "scoringRule_ASC",
   scoringRule_DESC = "scoringRule_DESC",
@@ -2812,6 +2815,24 @@ export class MarketWhereInput {
   @TypeGraphQLField(() => [String], { nullable: true })
   creation_in?: string[];
 
+  @TypeGraphQLField(() => Int, { nullable: true })
+  creatorFee_eq?: number;
+
+  @TypeGraphQLField(() => Int, { nullable: true })
+  creatorFee_gt?: number;
+
+  @TypeGraphQLField(() => Int, { nullable: true })
+  creatorFee_gte?: number;
+
+  @TypeGraphQLField(() => Int, { nullable: true })
+  creatorFee_lt?: number;
+
+  @TypeGraphQLField(() => Int, { nullable: true })
+  creatorFee_lte?: number;
+
+  @TypeGraphQLField(() => [Int], { nullable: true })
+  creatorFee_in?: number[];
+
   @TypeGraphQLField({ nullable: true })
   oracle_eq?: string;
 
@@ -2884,6 +2905,21 @@ export class MarketWhereInput {
   @TypeGraphQLField(() => [String], { nullable: true })
   tags_containsAny?: [string];
 
+  @TypeGraphQLField({ nullable: true })
+  img_eq?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  img_contains?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  img_startsWith?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  img_endsWith?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  img_in?: string[];
+
   @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
   marketType_json?: JsonObject;
 
@@ -2941,6 +2977,15 @@ export class MarketWhereInput {
   @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
   mdm_json?: JsonObject;
 
+  @TypeGraphQLField(() => [String], { nullable: true })
+  outcomeAssets_containsAll?: [string];
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  outcomeAssets_containsNone?: [string];
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  outcomeAssets_containsAny?: [string];
+
   @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
   marketHistory_json?: JsonObject;
 
@@ -2968,6 +3013,9 @@ export class MarketCreateInput {
   @TypeGraphQLField()
   creation!: string;
 
+  @TypeGraphQLField({ nullable: true })
+  creatorFee?: number;
+
   @TypeGraphQLField()
   oracle!: string;
 
@@ -2985,6 +3033,9 @@ export class MarketCreateInput {
 
   @TypeGraphQLField(() => [String], { nullable: true })
   tags?: string[];
+
+  @TypeGraphQLField({ nullable: true })
+  img?: string;
 
   @TypeGraphQLField(() => MarketType)
   marketType!: MarketType;
@@ -3007,6 +3058,9 @@ export class MarketCreateInput {
   @TypeGraphQLField(() => MarketDisputeMechanism)
   mdm!: MarketDisputeMechanism;
 
+  @TypeGraphQLField(() => [String], { nullable: true })
+  outcomeAssets?: string[];
+
   @TypeGraphQLField(() => MarketHistory, { nullable: true })
   marketHistory?: MarketHistory;
 }
@@ -3021,6 +3075,9 @@ export class MarketUpdateInput {
 
   @TypeGraphQLField({ nullable: true })
   creation?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  creatorFee?: number;
 
   @TypeGraphQLField({ nullable: true })
   oracle?: string;
@@ -3039,6 +3096,9 @@ export class MarketUpdateInput {
 
   @TypeGraphQLField(() => [String], { nullable: true })
   tags?: string[];
+
+  @TypeGraphQLField({ nullable: true })
+  img?: string;
 
   @TypeGraphQLField(() => MarketType, { nullable: true })
   marketType?: MarketType;
@@ -3060,6 +3120,9 @@ export class MarketUpdateInput {
 
   @TypeGraphQLField(() => MarketDisputeMechanism, { nullable: true })
   mdm?: MarketDisputeMechanism;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  outcomeAssets?: string[];
 
   @TypeGraphQLField(() => MarketHistory, { nullable: true })
   marketHistory?: MarketHistory;
