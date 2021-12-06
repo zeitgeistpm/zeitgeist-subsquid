@@ -126,6 +126,8 @@ export type MarketOrderByInput =   'createdAt_ASC' |
   'creator_DESC' |
   'creation_ASC' |
   'creation_DESC' |
+  'creatorFee_ASC' |
+  'creatorFee_DESC' |
   'oracle_ASC' |
   'oracle_DESC' |
   'slug_ASC' |
@@ -134,6 +136,8 @@ export type MarketOrderByInput =   'createdAt_ASC' |
   'question_DESC' |
   'description_ASC' |
   'description_DESC' |
+  'img_ASC' |
+  'img_DESC' |
   'scoringRule_ASC' |
   'scoringRule_DESC' |
   'status_ASC' |
@@ -528,12 +532,14 @@ export interface MarketCreateInput {
   marketId: Float
   creator: String
   creation: String
+  creatorFee?: Float | null
   oracle: String
   slug?: String | null
   question?: String | null
   description?: String | null
   categories?: CategoryMetadataInput | null
   tags?: String[] | String | null
+  img?: String | null
   marketType: MarketTypeInput
   period: MarketPeriodInput
   scoringRule: String
@@ -541,6 +547,7 @@ export interface MarketCreateInput {
   report?: MarketReportInput | null
   resolvedOutcome?: String | null
   mdm: MarketDisputeMechanismInput
+  outcomeAssets?: String[] | String | null
   marketHistory?: MarketHistoryInput | null
 }
 
@@ -618,7 +625,7 @@ export interface MarketHistoryInput {
   report?: MarketReportInput | null
   resolvedOutcome?: String | null
   blockNumber?: Int | null
-  timestamp?: BigInt | null
+  timestamp?: String | null
 }
 
 export interface MarketHistoryUpdateInput {
@@ -675,12 +682,11 @@ export interface MarketHistoryWhereInput {
   blockNumber_lt?: Int | null
   blockNumber_lte?: Int | null
   blockNumber_in?: Int[] | Int | null
-  timestamp_eq?: BigInt | null
-  timestamp_gt?: BigInt | null
-  timestamp_gte?: BigInt | null
-  timestamp_lt?: BigInt | null
-  timestamp_lte?: BigInt | null
-  timestamp_in?: BigInt[] | BigInt | null
+  timestamp_eq?: String | null
+  timestamp_contains?: String | null
+  timestamp_startsWith?: String | null
+  timestamp_endsWith?: String | null
+  timestamp_in?: String[] | String | null
   AND?: MarketHistoryWhereInput[] | MarketHistoryWhereInput | null
   OR?: MarketHistoryWhereInput[] | MarketHistoryWhereInput | null
 }
@@ -869,12 +875,14 @@ export interface MarketUpdateInput {
   marketId?: Float | null
   creator?: String | null
   creation?: String | null
+  creatorFee?: Float | null
   oracle?: String | null
   slug?: String | null
   question?: String | null
   description?: String | null
   categories?: CategoryMetadataInput | null
   tags?: String[] | String | null
+  img?: String | null
   marketType?: MarketTypeInput | null
   period?: MarketPeriodInput | null
   scoringRule?: String | null
@@ -882,6 +890,7 @@ export interface MarketUpdateInput {
   report?: MarketReportInput | null
   resolvedOutcome?: String | null
   mdm?: MarketDisputeMechanismInput | null
+  outcomeAssets?: String[] | String | null
   marketHistory?: MarketHistoryInput | null
 }
 
@@ -926,6 +935,12 @@ export interface MarketWhereInput {
   creation_startsWith?: String | null
   creation_endsWith?: String | null
   creation_in?: String[] | String | null
+  creatorFee_eq?: Int | null
+  creatorFee_gt?: Int | null
+  creatorFee_gte?: Int | null
+  creatorFee_lt?: Int | null
+  creatorFee_lte?: Int | null
+  creatorFee_in?: Int[] | Int | null
   oracle_eq?: String | null
   oracle_contains?: String | null
   oracle_startsWith?: String | null
@@ -950,6 +965,11 @@ export interface MarketWhereInput {
   tags_containsAll?: String[] | String | null
   tags_containsNone?: String[] | String | null
   tags_containsAny?: String[] | String | null
+  img_eq?: String | null
+  img_contains?: String | null
+  img_startsWith?: String | null
+  img_endsWith?: String | null
+  img_in?: String[] | String | null
   marketType_json?: JSONObject | null
   period_json?: JSONObject | null
   scoringRule_eq?: String | null
@@ -969,6 +989,9 @@ export interface MarketWhereInput {
   resolvedOutcome_endsWith?: String | null
   resolvedOutcome_in?: String[] | String | null
   mdm_json?: JSONObject | null
+  outcomeAssets_containsAll?: String[] | String | null
+  outcomeAssets_containsNone?: String[] | String | null
+  outcomeAssets_containsAny?: String[] | String | null
   marketHistory_json?: JSONObject | null
   AND?: MarketWhereInput[] | MarketWhereInput | null
   OR?: MarketWhereInput[] | MarketWhereInput | null
@@ -1302,12 +1325,14 @@ export interface Market extends BaseGraphQLObject {
   marketId: Int
   creator: String
   creation: String
+  creatorFee?: Int | null
   oracle: String
   slug?: String | null
   question?: String | null
   description?: String | null
   categories?: CategoryMetadata | null
   tags?: Array<String> | null
+  img?: String | null
   marketType: MarketType
   period: MarketPeriod
   scoringRule: String
@@ -1315,6 +1340,7 @@ export interface Market extends BaseGraphQLObject {
   report?: MarketReport | null
   resolvedOutcome?: String | null
   mdm: MarketDisputeMechanism
+  outcomeAssets?: Array<String> | null
   marketHistory?: MarketHistory | null
 }
 
@@ -1341,7 +1367,7 @@ export interface MarketHistory {
   report?: MarketReport | null
   resolvedOutcome?: String | null
   blockNumber?: Int | null
-  timestamp?: BigInt | null
+  timestamp?: String | null
 }
 
 export interface MarketPeriod {

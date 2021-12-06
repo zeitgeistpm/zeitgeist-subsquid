@@ -1,5 +1,5 @@
-import BN from 'bn.js'
 import { EventContext, StoreContext } from '@subsquid/hydra-common'
+import SDK from '@zeitgeistpm/sdk'
 import { CategoryMetadata, Market, MarketDisputeMechanism, MarketHistory, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../generated/model'
 import { PredictionMarkets } from '../chain'
 import IPFS from './util'
@@ -20,7 +20,7 @@ export async function predictionMarketBoughtCompleteSet({
     const mh = new MarketHistory()
     mh.event = event.method
     mh.blockNumber = block.height
-    mh.timestamp = new BN(block.timestamp)
+    mh.timestamp = block.timestamp.toString()
     savedMarket.marketHistory?.push(mh)
 
     console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
@@ -45,7 +45,7 @@ export async function predictionMarketApproved({
     mh.event = event.method
     mh.status = savedMarket.status
     mh.blockNumber = block.height
-    mh.timestamp = new BN(block.timestamp)
+    mh.timestamp = block.timestamp.toString()
     savedMarket.marketHistory?.push(mh)
 
     console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
@@ -65,6 +65,7 @@ export async function predictionMarketCreated({
     newMarket.marketId = marketIdOf.toNumber()
     newMarket.creator = market.creator.toString()
     newMarket.creation = market.creation.toString()
+    newMarket.creatorFee = market.creator_fee.toNumber()
     newMarket.oracle = market.oracle.toString()
 
     const metadata = await decodeMarketMetadata(market.metadata.toString())
@@ -72,17 +73,22 @@ export async function predictionMarketCreated({
         newMarket.slug = metadata.slug
         newMarket.question = metadata.question
         newMarket.description = metadata.description
+        newMarket.img = metadata.img
 
         if (metadata.categories) {
             newMarket.categories = []
+            newMarket.outcomeAssets = []
             for (let i = 0; i < metadata.categories.length; i++) {
                 const cm = new CategoryMetadata()
                 cm.name = metadata.categories[i].name
                 cm.ticker = metadata.categories[i].ticker
                 cm.img = metadata.categories[i].img
                 cm.color = metadata.categories[i].color
-    
                 newMarket.categories.push(cm)
+
+                const sdk = await SDK.initialize("wss://bsr.zeitgeist.pm")
+                const outcomeAsset = sdk.api.createType("Asset", { categoricalOutcome: [marketIdOf, i] })
+                newMarket.outcomeAssets.push(outcomeAsset)
             }
         }
         
@@ -128,7 +134,7 @@ export async function predictionMarketCreated({
     mh.event = event.method
     mh.status = newMarket.status
     mh.blockNumber = block.height
-    mh.timestamp = new BN(block.timestamp)
+    mh.timestamp = block.timestamp.toString()
     newMarket.marketHistory.push(mh)
 
     console.log(`[${event.name}] Saving market: ${JSON.stringify(newMarket, null, 2)}`)
@@ -153,7 +159,7 @@ export async function predictionMarketStartedWithSubsidy({
     mh.event = event.method
     mh.status = savedMarket.status
     mh.blockNumber = block.height
-    mh.timestamp = new BN(block.timestamp)
+    mh.timestamp = block.timestamp.toString()
     savedMarket.marketHistory?.push(mh)
 
     console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
@@ -178,7 +184,7 @@ export async function predictionMarketInsufficientSubsidy({
     mh.event = event.method
     mh.status = savedMarket.status
     mh.blockNumber = block.height
-    mh.timestamp = new BN(block.timestamp)
+    mh.timestamp = block.timestamp.toString()
     savedMarket.marketHistory?.push(mh)
 
     console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
@@ -217,7 +223,7 @@ export async function predictionMarketReported({
     mh.status = savedMarket.status
     mh.report = savedMarket.report
     mh.blockNumber = block.height
-    mh.timestamp = new BN(block.timestamp)
+    mh.timestamp = block.timestamp.toString()
     savedMarket.marketHistory?.push(mh)
 
     console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
@@ -242,7 +248,7 @@ export async function predictionMarketDisputed({
     mh.event = event.method
     mh.status = savedMarket.status
     mh.blockNumber = block.height
-    mh.timestamp = new BN(block.timestamp)
+    mh.timestamp = block.timestamp.toString()
     savedMarket.marketHistory?.push(mh)
 
     console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
@@ -267,7 +273,7 @@ export async function predictionMarketRejected({
     mh.event = event.method
     mh.status = savedMarket.status
     mh.blockNumber = block.height
-    mh.timestamp = new BN(block.timestamp)
+    mh.timestamp = block.timestamp.toString()
     savedMarket.marketHistory?.push(mh)
 
     console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
@@ -292,7 +298,7 @@ export async function predictionMarketCancelled({
     mh.event = event.method
     mh.status = savedMarket.status
     mh.blockNumber = block.height
-    mh.timestamp = new BN(block.timestamp)
+    mh.timestamp = block.timestamp.toString()
     savedMarket.marketHistory?.push(mh)
 
     console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
@@ -314,7 +320,7 @@ export async function predictionMarketSoldCompleteSet({
     const mh = new MarketHistory()
     mh.event = event.method
     mh.blockNumber = block.height
-    mh.timestamp = new BN(block.timestamp)
+    mh.timestamp = block.timestamp.toString()
     savedMarket.marketHistory?.push(mh)
 
     console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
@@ -342,6 +348,7 @@ type DecodedMarketMetadata = {
     description: string
     categories?: CategoryData[]
     tags?: string[]
+    img?: string
 }
 
 type CategoryData = {

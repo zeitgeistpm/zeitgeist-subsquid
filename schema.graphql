@@ -25,12 +25,14 @@ type Market @entity {
   marketId: Int! 
   creator: String!
   creation: String!
+  creatorFee: Int
   oracle: String!
   slug: String
   question: String
   description: String
   categories: [CategoryMetadata]
   tags: [String]
+  img: String
   marketType: MarketType!
   period: MarketPeriod!
   scoringRule: String!
@@ -38,6 +40,7 @@ type Market @entity {
   report: MarketReport
   resolvedOutcome: String
   mdm: MarketDisputeMechanism!
+  outcomeAssets: [String]
   marketHistory: [MarketHistory]
 }
 
@@ -47,7 +50,7 @@ type MarketHistory @jsonField {
   report: MarketReport
   resolvedOutcome: String
   blockNumber: Int
-  timestamp: BigInt
+  timestamp: String
 }
 
 type Pool @entity {
