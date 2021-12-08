@@ -86,7 +86,7 @@ export async function predictionMarketCreated({
                 cm.color = metadata.categories[i].color
                 newMarket.categories.push(cm)
 
-                const sdk = await SDK.initialize("wss://bsr.zeitgeist.pm")
+                const sdk = await SDK.initialize(process.env['WS_NODE_URL'] ?? 'wss://bsr.zeitgeist.pm')
                 const outcomeAsset = sdk.api.createType("Asset", { categoricalOutcome: [marketIdOf, i] })
                 newMarket.outcomeAssets.push(outcomeAsset)
             }
