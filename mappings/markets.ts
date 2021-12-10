@@ -79,7 +79,7 @@ export async function predictionMarketCreated({
             newMarket.categories = []
             newMarket.outcomeAssets = []
             const sdk = await SDK.initialize(process.env['WS_NODE_URL'] ?? 'wss://bsr.zeitgeist.pm')
-            
+
             for (let i = 0; i < metadata.categories.length; i++) {
                 const cm = new CategoryMetadata()
                 cm.name = metadata.categories[i].name
@@ -113,8 +113,17 @@ export async function predictionMarketCreated({
     const period = new MarketPeriod()
     if (market.period.isBlock) {
         period.block = market.period.asBlock.toString()
+
+        const sdk = await SDK.initialize(process.env['WS_NODE_URL'] ?? 'wss://bsr.zeitgeist.pm')
+        const now = (await sdk.api.query.timestamp.now()).toNumber();
+        const head = await sdk.api.rpc.chain.getHeader();
+        const blockNum = head.number.toNumber();
+        const diffInMs = (await sdk.api.consts.timestamp.minimumPeriod).toNumber() * (market.period.asBlock[1].toNumber() - blockNum);
+        newMarket.end = (now + diffInMs).toString();
+        sdk.api.disconnect()
     } else if (market.period.isTimestamp) {
         period.timestamp = market.period.asTimestamp.toString()
+        newMarket.end = market.period.asTimestamp[1].toString()
     }
     newMarket.period = period
 

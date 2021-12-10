@@ -35,6 +35,7 @@ type Market @entity {
   img: String
   marketType: MarketType!
   period: MarketPeriod!
+  end: String!
   scoringRule: String!
   status: String!
   report: MarketReport

@@ -138,6 +138,8 @@ export type MarketOrderByInput =   'createdAt_ASC' |
   'description_DESC' |
   'img_ASC' |
   'img_DESC' |
+  'end_ASC' |
+  'end_DESC' |
   'scoringRule_ASC' |
   'scoringRule_DESC' |
   'status_ASC' |
@@ -542,6 +544,7 @@ export interface MarketCreateInput {
   img?: String | null
   marketType: MarketTypeInput
   period: MarketPeriodInput
+  end: String
   scoringRule: String
   status: String
   report?: MarketReportInput | null
@@ -885,6 +888,7 @@ export interface MarketUpdateInput {
   img?: String | null
   marketType?: MarketTypeInput | null
   period?: MarketPeriodInput | null
+  end?: String | null
   scoringRule?: String | null
   status?: String | null
   report?: MarketReportInput | null
@@ -972,6 +976,11 @@ export interface MarketWhereInput {
   img_in?: String[] | String | null
   marketType_json?: JSONObject | null
   period_json?: JSONObject | null
+  end_eq?: String | null
+  end_contains?: String | null
+  end_startsWith?: String | null
+  end_endsWith?: String | null
+  end_in?: String[] | String | null
   scoringRule_eq?: String | null
   scoringRule_contains?: String | null
   scoringRule_startsWith?: String | null
@@ -1335,6 +1344,7 @@ export interface Market extends BaseGraphQLObject {
   img?: String | null
   marketType: MarketType
   period: MarketPeriod
+  end: String
   scoringRule: String
   status: String
   report?: MarketReport | null

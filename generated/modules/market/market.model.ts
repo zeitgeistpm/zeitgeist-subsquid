@@ -57,6 +57,9 @@ export class Market extends BaseModel {
   period!: jsonTypes.MarketPeriod;
 
   @StringField({})
+  end!: string;
+
+  @StringField({})
   scoringRule!: string;
 
   @StringField({})
