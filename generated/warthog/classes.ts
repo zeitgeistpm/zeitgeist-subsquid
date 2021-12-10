@@ -2679,6 +2679,9 @@ export enum MarketOrderByEnum {
   img_ASC = "img_ASC",
   img_DESC = "img_DESC",
 
+  end_ASC = "end_ASC",
+  end_DESC = "end_DESC",
+
   scoringRule_ASC = "scoringRule_ASC",
   scoringRule_DESC = "scoringRule_DESC",
 
@@ -2927,6 +2930,21 @@ export class MarketWhereInput {
   period_json?: JsonObject;
 
   @TypeGraphQLField({ nullable: true })
+  end_eq?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  end_contains?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  end_startsWith?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  end_endsWith?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  end_in?: string[];
+
+  @TypeGraphQLField({ nullable: true })
   scoringRule_eq?: string;
 
   @TypeGraphQLField({ nullable: true })
@@ -3044,6 +3062,9 @@ export class MarketCreateInput {
   period!: MarketPeriod;
 
   @TypeGraphQLField()
+  end!: string;
+
+  @TypeGraphQLField()
   scoringRule!: string;
 
   @TypeGraphQLField()
@@ -3105,6 +3126,9 @@ export class MarketUpdateInput {
 
   @TypeGraphQLField(() => MarketPeriod, { nullable: true })
   period?: MarketPeriod;
+
+  @TypeGraphQLField({ nullable: true })
+  end?: string;
 
   @TypeGraphQLField({ nullable: true })
   scoringRule?: string;
