@@ -1,4 +1,5 @@
 import BN from 'bn.js'
+import { encodeAddress } from '@polkadot/keyring'
 import { EventContext, StoreContext } from '@subsquid/hydra-common'
 import SDK from '@zeitgeistpm/sdk'
 import { CategoryMetadata, Market, MarketDisputeMechanism, MarketHistory, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../generated/model'
@@ -64,10 +65,10 @@ export async function predictionMarketCreated({
 
     const newMarket = new Market()
     newMarket.marketId = marketIdOf.toNumber()
-    newMarket.creator = market.creator.toString()
+    newMarket.creator = encodeAddress(market.creator, 73)
     newMarket.creation = market.creation.toString()
     newMarket.creatorFee = market.creator_fee.toNumber()
-    newMarket.oracle = market.oracle.toString()
+    newMarket.oracle = encodeAddress(market.oracle, 73)
 
     const metadata = await decodeMarketMetadata(market.metadata.toString())
     if (metadata) {
