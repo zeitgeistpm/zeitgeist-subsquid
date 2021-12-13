@@ -976,11 +976,12 @@ export interface MarketWhereInput {
   img_in?: String[] | String | null
   marketType_json?: JSONObject | null
   period_json?: JSONObject | null
-  end_eq?: String | null
-  end_contains?: String | null
-  end_startsWith?: String | null
-  end_endsWith?: String | null
-  end_in?: String[] | String | null
+  end_eq?: BigInt | null
+  end_gt?: BigInt | null
+  end_gte?: BigInt | null
+  end_lt?: BigInt | null
+  end_lte?: BigInt | null
+  end_in?: BigInt[] | BigInt | null
   scoringRule_eq?: String | null
   scoringRule_contains?: String | null
   scoringRule_startsWith?: String | null
@@ -1344,7 +1345,7 @@ export interface Market extends BaseGraphQLObject {
   img?: String | null
   marketType: MarketType
   period: MarketPeriod
-  end: String
+  end: BigInt
   scoringRule: String
   status: String
   report?: MarketReport | null

@@ -2929,19 +2929,22 @@ export class MarketWhereInput {
   @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
   period_json?: JsonObject;
 
-  @TypeGraphQLField({ nullable: true })
+  @TypeGraphQLField(() => BigInt, { nullable: true })
   end_eq?: string;
 
-  @TypeGraphQLField({ nullable: true })
-  end_contains?: string;
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  end_gt?: string;
 
-  @TypeGraphQLField({ nullable: true })
-  end_startsWith?: string;
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  end_gte?: string;
 
-  @TypeGraphQLField({ nullable: true })
-  end_endsWith?: string;
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  end_lt?: string;
 
-  @TypeGraphQLField(() => [String], { nullable: true })
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  end_lte?: string;
+
+  @TypeGraphQLField(() => [BigInt], { nullable: true })
   end_in?: string[];
 
   @TypeGraphQLField({ nullable: true })

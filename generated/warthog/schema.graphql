@@ -613,7 +613,7 @@ type Market implements BaseGraphQLObject {
   img: String
   marketType: MarketType!
   period: MarketPeriod!
-  end: String!
+  end: BigInt!
   scoringRule: String!
   status: String!
   report: MarketReport
@@ -1146,11 +1146,12 @@ input MarketWhereInput {
   img_in: [String!]
   marketType_json: JSONObject
   period_json: JSONObject
-  end_eq: String
-  end_contains: String
-  end_startsWith: String
-  end_endsWith: String
-  end_in: [String!]
+  end_eq: BigInt
+  end_gt: BigInt
+  end_gte: BigInt
+  end_lt: BigInt
+  end_lte: BigInt
+  end_in: [BigInt!]
   scoringRule_eq: String
   scoringRule_contains: String
   scoringRule_startsWith: String
