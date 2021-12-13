@@ -619,7 +619,6 @@ type Market implements BaseGraphQLObject {
   report: MarketReport
   resolvedOutcome: String
   mdm: MarketDisputeMechanism!
-  outcomeAssets: [String!]
   marketHistory: MarketHistory
 }
 
@@ -649,7 +648,6 @@ input MarketCreateInput {
   report: MarketReportInput
   resolvedOutcome: String
   mdm: MarketDisputeMechanismInput!
-  outcomeAssets: [String!]
   marketHistory: MarketHistoryInput
 }
 
@@ -1064,7 +1062,6 @@ input MarketUpdateInput {
   report: MarketReportInput
   resolvedOutcome: String
   mdm: MarketDisputeMechanismInput
-  outcomeAssets: [String!]
   marketHistory: MarketHistoryInput
 }
 
@@ -1169,9 +1166,6 @@ input MarketWhereInput {
   resolvedOutcome_endsWith: String
   resolvedOutcome_in: [String!]
   mdm_json: JSONObject
-  outcomeAssets_containsAll: [String!]
-  outcomeAssets_containsNone: [String!]
-  outcomeAssets_containsAny: [String!]
   marketHistory_json: JSONObject
   AND: [MarketWhereInput!]
   OR: [MarketWhereInput!]

@@ -78,8 +78,6 @@ export async function predictionMarketCreated({
 
         if (metadata.categories) {
             newMarket.categories = []
-            newMarket.outcomeAssets = []
-            const sdk = await SDK.initialize(process.env['WS_NODE_URL'] ?? 'wss://bsr.zeitgeist.pm')
 
             for (let i = 0; i < metadata.categories.length; i++) {
                 const cm = new CategoryMetadata()
@@ -88,11 +86,7 @@ export async function predictionMarketCreated({
                 cm.img = metadata.categories[i].img
                 cm.color = metadata.categories[i].color
                 newMarket.categories.push(cm)
-
-                const outcomeAsset = sdk.api.createType("Asset", { categoricalOutcome: [marketIdOf, i] })
-                newMarket.outcomeAssets.push(outcomeAsset)
             }
-            sdk.api.disconnect()
         }
         
         if (metadata.tags) {

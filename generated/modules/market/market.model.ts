@@ -84,12 +84,6 @@ export class Market extends BaseModel {
   @JSONField({ filter: true, gqlFieldType: jsonTypes.MarketDisputeMechanism })
   mdm!: jsonTypes.MarketDisputeMechanism;
 
-  @CustomField({
-    db: { type: 'text', array: true, nullable: true },
-    api: { type: 'string', nullable: true },
-  })
-  outcomeAssets?: string[];
-
   @JSONField({ filter: true, gqlFieldType: jsonTypes.MarketHistory, nullable: true })
   marketHistory?: jsonTypes.MarketHistory[];
 

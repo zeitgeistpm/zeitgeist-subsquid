@@ -550,7 +550,6 @@ export interface MarketCreateInput {
   report?: MarketReportInput | null
   resolvedOutcome?: String | null
   mdm: MarketDisputeMechanismInput
-  outcomeAssets?: String[] | String | null
   marketHistory?: MarketHistoryInput | null
 }
 
@@ -894,7 +893,6 @@ export interface MarketUpdateInput {
   report?: MarketReportInput | null
   resolvedOutcome?: String | null
   mdm?: MarketDisputeMechanismInput | null
-  outcomeAssets?: String[] | String | null
   marketHistory?: MarketHistoryInput | null
 }
 
@@ -999,9 +997,6 @@ export interface MarketWhereInput {
   resolvedOutcome_endsWith?: String | null
   resolvedOutcome_in?: String[] | String | null
   mdm_json?: JSONObject | null
-  outcomeAssets_containsAll?: String[] | String | null
-  outcomeAssets_containsNone?: String[] | String | null
-  outcomeAssets_containsAny?: String[] | String | null
   marketHistory_json?: JSONObject | null
   AND?: MarketWhereInput[] | MarketWhereInput | null
   OR?: MarketWhereInput[] | MarketWhereInput | null
@@ -1351,7 +1346,6 @@ export interface Market extends BaseGraphQLObject {
   report?: MarketReport | null
   resolvedOutcome?: String | null
   mdm: MarketDisputeMechanism
-  outcomeAssets?: Array<String> | null
   marketHistory?: MarketHistory | null
 }
 

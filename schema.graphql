@@ -41,7 +41,6 @@ type Market @entity {
   report: MarketReport
   resolvedOutcome: String
   mdm: MarketDisputeMechanism!
-  outcomeAssets: [String]
   marketHistory: [MarketHistory]
 }
 

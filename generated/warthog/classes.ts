@@ -2998,15 +2998,6 @@ export class MarketWhereInput {
   @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
   mdm_json?: JsonObject;
 
-  @TypeGraphQLField(() => [String], { nullable: true })
-  outcomeAssets_containsAll?: [string];
-
-  @TypeGraphQLField(() => [String], { nullable: true })
-  outcomeAssets_containsNone?: [string];
-
-  @TypeGraphQLField(() => [String], { nullable: true })
-  outcomeAssets_containsAny?: [string];
-
   @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
   marketHistory_json?: JsonObject;
 
@@ -3082,9 +3073,6 @@ export class MarketCreateInput {
   @TypeGraphQLField(() => MarketDisputeMechanism)
   mdm!: MarketDisputeMechanism;
 
-  @TypeGraphQLField(() => [String], { nullable: true })
-  outcomeAssets?: string[];
-
   @TypeGraphQLField(() => MarketHistory, { nullable: true })
   marketHistory?: MarketHistory;
 }
@@ -3147,9 +3135,6 @@ export class MarketUpdateInput {
 
   @TypeGraphQLField(() => MarketDisputeMechanism, { nullable: true })
   mdm?: MarketDisputeMechanism;
-
-  @TypeGraphQLField(() => [String], { nullable: true })
-  outcomeAssets?: string[];
 
   @TypeGraphQLField(() => MarketHistory, { nullable: true })
   marketHistory?: MarketHistory;
