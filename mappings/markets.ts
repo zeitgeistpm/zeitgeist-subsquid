@@ -4,7 +4,7 @@ import { EventContext, StoreContext } from '@subsquid/hydra-common'
 import SDK from '@zeitgeistpm/sdk'
 import { CategoryMetadata, Market, MarketDisputeMechanism, MarketHistory, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../generated/model'
 import { PredictionMarkets } from '../chain'
-import IPFS from './util'
+import { IPFS, Tools } from './util'
 import { MarketStatus } from '../generated/modules/enums/enums'
 
 export async function predictionMarketBoughtCompleteSet({
@@ -110,7 +110,7 @@ export async function predictionMarketCreated({
     if (market.period.isBlock) {
         period.block = market.period.asBlock.toString()
 
-        const sdk = await SDK.initialize(process.env['WS_NODE_URL'] ?? 'wss://bsr.zeitgeist.pm')
+        const sdk = await Tools.getSDK()
         const now = (await sdk.api.query.timestamp.now()).toNumber();
         const head = await sdk.api.rpc.chain.getHeader();
         const blockNum = head.number.toNumber();

@@ -1,10 +1,11 @@
 import { hexToString, u8aToString } from "@polkadot/util";
+import SDK from '@zeitgeistpm/sdk'
 import CID from "cids";
 import all from "it-all";
 import { concat, toString } from "uint8arrays";
 import ipfsClient from "ipfs-http-client";
 
-export default class IPFS {
+export class IPFS {
   private client: any;
 
   constructor() {
@@ -29,5 +30,26 @@ export default class IPFS {
     const cid = new CID("f0155" + partialCid.slice(2));
     const data = await all(this.client.cat(cid)) as any[];
     return data.map(u8aToString).reduce((p, c) => p + c);
+  }
+}
+
+export class Tools {
+  private static sdk: SDK
+
+  private static async init(): Promise<SDK> {
+    console.log(`Initializing SDK`)
+    const sdk = await SDK.initialize(process.env['WS_NODE_URL'] ?? 'wss://bsr.zeitgeist.pm')
+    this.sdk = sdk
+    return sdk
+  }
+
+  static async getSDK() {
+    if (!this.sdk) {
+      return this.init()
+    } 
+    if (!this.sdk.api.isConnected) {
+      this.sdk.api.connect()
+    }
+    return this.sdk
   }
 }
