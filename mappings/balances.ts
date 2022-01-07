@@ -1,12 +1,12 @@
 import BN from 'bn.js'
-import { EventContext, StoreContext } from '@subsquid/hydra-common'
+import { EventContext, StoreContext, SubstrateBlock, SubstrateExtrinsic } from '@subsquid/hydra-common'
 import { Currency } from '../chain/currency'
 import { Account } from '../generated/modules/account/account.model'
 import { AssetBalance } from '../generated/modules/asset-balance/asset-balance.model'
 import { HistoricalAssetBalance } from '../generated/modules/historical-asset-balance/historical-asset-balance.model'
 import { Balances, System, Tokens } from '../chain'
 import { encodeAddress } from '@polkadot/keyring'
-import { getFees } from '.'
+import { Tools } from './util'
 
 export async function balancesEndowed({
     store,
@@ -585,4 +585,28 @@ export async function systemExtrinsicFailed({
 
     console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
     await store.save<HistoricalAssetBalance>(hab)
+}
+
+async function getFees(block: SubstrateBlock, extrinsic: SubstrateExtrinsic): Promise<number> {
+    const id = +extrinsic.id.substring(extrinsic.id.indexOf('-')+1, extrinsic.id.lastIndexOf('-'))!
+    const sdk = await Tools.getSDK()
+    const { block: blk } = await sdk.api.rpc.chain.getBlock(block.hash)
+    const fees = await sdk.api.rpc.payment.queryFeeDetails(blk.extrinsics[id].toHex(), block.hash)
+
+    var totalFees = BigInt(0)
+    if (fees) {
+        const feesFormatted = JSON.parse(JSON.stringify(fees))
+        const inclusionFee = feesFormatted.inclusionFee
+        const baseFee = inclusionFee.baseFee
+        const lenFee = inclusionFee.lenFee
+        const adjustedWeightFee = inclusionFee.adjustedWeightFee
+        const tip = extrinsic.tip.valueOf()
+        if (inclusionFee){
+            if(baseFee) totalFees = totalFees + BigInt(baseFee)
+            if(lenFee) totalFees = totalFees + BigInt(lenFee)
+            if(adjustedWeightFee) totalFees = totalFees + BigInt(adjustedWeightFee)
+            if(tip) totalFees = totalFees + BigInt(tip)
+        }
+    }
+    return +totalFees.toString()
 }
