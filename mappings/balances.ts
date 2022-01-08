@@ -539,6 +539,54 @@ export async function currencyWithdrawn({
     await store.save<HistoricalAssetBalance>(hab)
 }
 
+export async function systemExtrinsicSuccess({
+    store,
+    event,
+    block,
+    extrinsic,
+}: EventContext & StoreContext) {
+
+    const [info] = new System.ExtrinsicSuccessEvent(event).params
+    if (!extrinsic || (+extrinsic.signature! == 0) || info.paysFee.isNo ) { 
+        return 
+    }
+
+    const accountId = extrinsic.signer
+    var acc = await store.get(Account, { where: { wallet: accountId } })
+    if (!acc) {
+        acc = new Account()
+        acc.wallet = accountId
+
+        console.log(`[${event.method}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+        await store.save<Account>(acc)
+    }
+
+    const txnFees = await getFees(block, extrinsic) 
+    var ab = await store.get(AssetBalance, { where: { account: acc, assetId: "Ztg" } })
+    if (!ab) {
+        ab = new AssetBalance()
+        ab.account = acc
+        ab.assetId = "Ztg"
+        ab.balance = new BN(0 - txnFees)
+    } else {
+        ab.balance = ab.balance.sub(new BN(txnFees))
+    }
+    console.log(`[${event.method}] Saving asset balance: ${JSON.stringify(ab, null, 2)}`)
+    await store.save<AssetBalance>(ab)
+
+    const hab = new HistoricalAssetBalance()
+    hab.account = acc
+    hab.event = event.method
+    hab.assetId = ab.assetId
+    hab.amount = new BN(0 - txnFees)
+    hab.balance = ab.balance 
+    hab.blockNumber = block.height
+    hab.timestamp = new BN(block.timestamp)
+
+    console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
+    await store.save<HistoricalAssetBalance>(hab)
+}
+
 export async function systemExtrinsicFailed({
     store,
     event,

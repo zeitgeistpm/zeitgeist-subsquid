@@ -40,6 +40,8 @@ typegen:
 mappings:
   mappingsModule: mappings
   eventHandlers:
+    - event: system.ExtrinsicSuccess
+      handler: systemExtrinsicSuccess
     - event: system.ExtrinsicFailed
       handler: systemExtrinsicFailed
     - event: predictionMarkets.BoughtCompleteSet
