@@ -9,6 +9,7 @@ typeRegistry.register(
 
 export { typeRegistry };
 
+export * from "./system";
 export * from "./prediction-markets";
 export * from "./swaps";
 export * from "./balances";

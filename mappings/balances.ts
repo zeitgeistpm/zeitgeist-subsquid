@@ -1,10 +1,12 @@
 import BN from 'bn.js'
-import { EventContext, StoreContext } from '@subsquid/hydra-common'
+import { EventContext, StoreContext, SubstrateBlock, SubstrateExtrinsic } from '@subsquid/hydra-common'
 import { Currency } from '../chain/currency'
 import { Account } from '../generated/modules/account/account.model'
 import { AssetBalance } from '../generated/modules/asset-balance/asset-balance.model'
 import { HistoricalAssetBalance } from '../generated/modules/historical-asset-balance/historical-asset-balance.model'
-import { Balances, Tokens } from '../chain'
+import { Balances, System, Tokens } from '../chain'
+import { encodeAddress } from '@polkadot/keyring'
+import { Tools } from './util'
 
 export async function balancesEndowed({
     store,
@@ -535,4 +537,124 @@ export async function currencyWithdrawn({
 
     console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
     await store.save<HistoricalAssetBalance>(hab)
+}
+
+export async function systemExtrinsicSuccess({
+    store,
+    event,
+    block,
+    extrinsic,
+}: EventContext & StoreContext) {
+
+    const [info] = new System.ExtrinsicSuccessEvent(event).params
+    if (!extrinsic || (+extrinsic.signature! == 0) || info.paysFee.isNo ) { 
+        return 
+    }
+
+    const accountId = extrinsic.signer
+    var acc = await store.get(Account, { where: { wallet: accountId } })
+    if (!acc) {
+        acc = new Account()
+        acc.wallet = accountId
+
+        console.log(`[${event.method}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+        await store.save<Account>(acc)
+    }
+
+    const txnFees = await getFees(block, extrinsic) 
+    var ab = await store.get(AssetBalance, { where: { account: acc, assetId: "Ztg" } })
+    if (!ab) {
+        ab = new AssetBalance()
+        ab.account = acc
+        ab.assetId = "Ztg"
+        ab.balance = new BN(0 - txnFees)
+    } else {
+        ab.balance = ab.balance.sub(new BN(txnFees))
+    }
+    console.log(`[${event.method}] Saving asset balance: ${JSON.stringify(ab, null, 2)}`)
+    await store.save<AssetBalance>(ab)
+
+    const hab = new HistoricalAssetBalance()
+    hab.account = acc
+    hab.event = event.method
+    hab.assetId = ab.assetId
+    hab.amount = new BN(0 - txnFees)
+    hab.balance = ab.balance 
+    hab.blockNumber = block.height
+    hab.timestamp = new BN(block.timestamp)
+
+    console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
+    await store.save<HistoricalAssetBalance>(hab)
+}
+
+export async function systemExtrinsicFailed({
+    store,
+    event,
+    block,
+    extrinsic,
+}: EventContext & StoreContext) {
+
+    const [error, info] = new System.ExtrinsicFailedEvent(event).params
+    if (info.paysFee.isNo || !extrinsic) { 
+        return 
+    }
+
+    const accountId = extrinsic.signer
+    var acc = await store.get(Account, { where: { wallet: accountId } })
+    if (!acc) {
+        acc = new Account()
+        acc.wallet = accountId
+
+        console.log(`[${event.method}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+        await store.save<Account>(acc)
+    }
+
+    const txnFees = await getFees(block, extrinsic) 
+    var ab = await store.get(AssetBalance, { where: { account: acc, assetId: "Ztg" } })
+    if (!ab) {
+        ab = new AssetBalance()
+        ab.account = acc
+        ab.assetId = "Ztg"
+        ab.balance = new BN(0 - txnFees)
+    } else {
+        ab.balance = ab.balance.sub(new BN(txnFees))
+    }
+    console.log(`[${event.method}] Saving asset balance: ${JSON.stringify(ab, null, 2)}`)
+    await store.save<AssetBalance>(ab)
+
+    const hab = new HistoricalAssetBalance()
+    hab.account = acc
+    hab.event = event.method
+    hab.assetId = ab.assetId
+    hab.amount = new BN(0 - txnFees)
+    hab.balance = ab.balance 
+    hab.blockNumber = block.height
+    hab.timestamp = new BN(block.timestamp)
+
+    console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
+    await store.save<HistoricalAssetBalance>(hab)
+}
+
+async function getFees(block: SubstrateBlock, extrinsic: SubstrateExtrinsic): Promise<number> {
+    const id = +extrinsic.id.substring(extrinsic.id.indexOf('-')+1, extrinsic.id.lastIndexOf('-'))!
+    const sdk = await Tools.getSDK()
+    const { block: blk } = await sdk.api.rpc.chain.getBlock(block.hash)
+    const fees = await sdk.api.rpc.payment.queryFeeDetails(blk.extrinsics[id].toHex(), block.hash)
+
+    var totalFees = BigInt(0)
+    if (fees) {
+        const feesFormatted = JSON.parse(JSON.stringify(fees))
+        const inclusionFee = feesFormatted.inclusionFee
+        const baseFee = inclusionFee.baseFee
+        const lenFee = inclusionFee.lenFee
+        const adjustedWeightFee = inclusionFee.adjustedWeightFee
+        const tip = extrinsic.tip.valueOf()
+        if (inclusionFee){
+            if(baseFee) totalFees = totalFees + BigInt(baseFee)
+            if(lenFee) totalFees = totalFees + BigInt(lenFee)
+            if(adjustedWeightFee) totalFees = totalFees + BigInt(adjustedWeightFee)
+            if(tip) totalFees = totalFees + BigInt(tip)
+        }
+    }
+    return +totalFees.toString()
 }

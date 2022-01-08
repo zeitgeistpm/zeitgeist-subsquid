@@ -705,10 +705,10 @@
   resolved "https://registry.yarnpkg.com/@subsquid/graphiql-console/-/graphiql-console-0.2.0.tgz#53edcc562342735e800361bb3892c54388b2e717"
   integrity sha512-Wh2Oxi9JkK79Y728yDEeY7JelcY1cGiQTbzVIRMFLT2tjkkoQ69goAGXdh9QmM/ANAVrHQkBUNJOLd5oAg//oQ==
 
-"@subsquid/hydra-cli@4.2.0-alpha.0":
-  version "4.2.0-alpha.0"
-  resolved "https://registry.yarnpkg.com/@subsquid/hydra-cli/-/hydra-cli-4.2.0-alpha.0.tgz#b6218a44036ab5fa7af5862bd04ed55ae8934e7f"
-  integrity sha512-Vcv4Uo/dRrod91tVnxbzCk5FJCgxepiTK3waKD8eLDGmz6ugzC5A9Xh17WziSVQqYbbtnES6gNrWlHB+WXE5hw==
+"@subsquid/hydra-cli@4.2.0-alpha.9":
+  version "4.2.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@subsquid/hydra-cli/-/hydra-cli-4.2.0-alpha.9.tgz#a297b71676d3f28cb7c9a9cdbdd922ffa377f90b"
+  integrity sha512-sn9ygheNXq5+xQOw8D9fwD55WiUSObHa4G+9dyiqaOz5G9n8Ez8vpF+TxoZGeoiSRVpBu5Ou/pzH6NQ+05607A==
   dependencies:
     "@inquirer/input" "^0.0.13-alpha.0"
     "@inquirer/password" "^0.0.12-alpha.0"
@@ -718,7 +718,7 @@
     "@oclif/errors" "^1.3.5"
     "@oclif/plugin-help" "^2"
     "@octokit/auth-oauth-device" "^3.1.2"
-    "@subsquid/warthog" "^4.2.0-alpha.0"
+    "@subsquid/warthog" "^4.2.0-alpha.9"
     "@types/copyfiles" "^2.4.1"
     "@types/fs-extra" "^8.1.2"
     "@types/graphql" "^14.5.0"
@@ -741,20 +741,20 @@
     simple-git "^2.44.0"
     tslib "^2.3.1"
 
-"@subsquid/hydra-common@^4.2.0-alpha.0", "@subsquid/hydra-common@^4.2.0-alpha.6":
-  version "4.2.0-alpha.6"
-  resolved "https://registry.yarnpkg.com/@subsquid/hydra-common/-/hydra-common-4.2.0-alpha.6.tgz#0d6dc928d27d8e0a4b2bcc7b2d1153c44bb62059"
-  integrity sha512-QzVn69icJlYLx9vmmr60PnJCF61ARlFoRVuwAGMRrOLlDeX9t+OfVEOkGLl0CFyOrNIedFGuncL6eJO+4UKjTQ==
+"@subsquid/hydra-common@^4.2.0-alpha.9":
+  version "4.2.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@subsquid/hydra-common/-/hydra-common-4.2.0-alpha.9.tgz#0002b686206f040d49ba89a66d6342a14bf8fafa"
+  integrity sha512-3vztKEvCL6rB8am9AvDfNTalmDftN7UlROVQRiMP0otJgo18x7k6fCfEtbyPxBNEKcwN9Z2o95RGb8uIYGNW5g==
   dependencies:
     bn.js "^4.12.0"
     lodash "^4.17.21"
 
-"@subsquid/hydra-db-utils@^4.2.0-alpha.0":
-  version "4.2.0-alpha.6"
-  resolved "https://registry.yarnpkg.com/@subsquid/hydra-db-utils/-/hydra-db-utils-4.2.0-alpha.6.tgz#8ef54ed75531035122cb1044ca4d8db9e54d3911"
-  integrity sha512-hUDHU/dQBuITDU//YYoUXS//c9Dan7iiEIxjDiHQOZPwlX9mQWDAiVg+TXwKzIohlpTS5D8QQzZzF9y0kwyKVw==
+"@subsquid/hydra-db-utils@^4.2.0-alpha.9":
+  version "4.2.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@subsquid/hydra-db-utils/-/hydra-db-utils-4.2.0-alpha.9.tgz#f9d9173bd7615bdb1d7862e47de782317b25a776"
+  integrity sha512-ifugqlvIKZjIby75CvTh6cdxxmioCqcQd+WED7t7Vf+eV2bNJ8lKyP0Du3+S6ClgqdBpLf1DZctoYhjd4YB8wg==
   dependencies:
-    "@subsquid/hydra-common" "^4.2.0-alpha.6"
+    "@subsquid/hydra-common" "^4.2.0-alpha.9"
     "@types/ioredis" "^4.26.7"
     bn.js "^4.12.0"
     ioredis "^4.27.8"
@@ -762,16 +762,16 @@
     shortid "^2.2.16"
     typeorm "0.2.37"
 
-"@subsquid/hydra-processor@4.2.0-alpha.0":
-  version "4.2.0-alpha.0"
-  resolved "https://registry.yarnpkg.com/@subsquid/hydra-processor/-/hydra-processor-4.2.0-alpha.0.tgz#46a573ac2e97a1fea147abe7d8d59b21507b358c"
-  integrity sha512-3EaYEBObpgz5Fp7AJqLKUARvxGeGJhIIoKu4kTFVKaASs3MO87dqSwakSjuH/H+MWvRVXgh9VPOJwfVSzE5oVA==
+"@subsquid/hydra-processor@4.2.0-alpha.9":
+  version "4.2.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@subsquid/hydra-processor/-/hydra-processor-4.2.0-alpha.9.tgz#3942174cd499b7bf2a9c81104120e633cca3eb9f"
+  integrity sha512-LtOlR35B0gjteMgMlcMzJix+Y3tyZcYrSkz4JBcdIcseGm+G3kxjGvOO+8+n1oJNy6klhfMvZb1M6wzS8bj+nA==
   dependencies:
     "@oclif/command" "^1.8.0"
     "@oclif/config" "^1"
     "@oclif/errors" "^1.3.5"
-    "@subsquid/hydra-common" "^4.2.0-alpha.0"
-    "@subsquid/hydra-db-utils" "^4.2.0-alpha.0"
+    "@subsquid/hydra-common" "^4.2.0-alpha.9"
+    "@subsquid/hydra-db-utils" "^4.2.0-alpha.9"
     bn.js "^4.12.0"
     chalk "^4.1.2"
     delay "~5.0.0"
@@ -792,10 +792,10 @@
     yaml "^1.10.2"
     yaml-validator "^3.0.1"
 
-"@subsquid/hydra-typegen@4.2.0-alpha.0":
-  version "4.2.0-alpha.0"
-  resolved "https://registry.yarnpkg.com/@subsquid/hydra-typegen/-/hydra-typegen-4.2.0-alpha.0.tgz#d56ac7ea705fc1d34ebc1afc48d454c6de271dbf"
-  integrity sha512-46Q7fq/euk/7Z+AHUJMUN7U92pv8FkjpalXxV+J5KEJKpwj+XIj6hwnLfW3M3RzsfSx5gZ1qU42Bt+TmCEUdDw==
+"@subsquid/hydra-typegen@4.2.0-alpha.9":
+  version "4.2.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@subsquid/hydra-typegen/-/hydra-typegen-4.2.0-alpha.9.tgz#b87802ee9e86695dd03f35a3336a3b503c5055de"
+  integrity sha512-dURkQBIdmbYYCL5h+cab8vXIa4S6kp4yRZxp+oQXgs/smhMjL5SYeEYf73q6n+Ti219A6eiDa06T50pkVCAVLQ==
   dependencies:
     "@oclif/command" "^1.8.0"
     "@oclif/config" "^1"
@@ -807,10 +807,10 @@
     yaml "^1.10.2"
     yaml-validator "^3.0.1"
 
-"@subsquid/warthog@^4.2.0-alpha.0":
-  version "4.2.0-alpha.6"
-  resolved "https://registry.yarnpkg.com/@subsquid/warthog/-/warthog-4.2.0-alpha.6.tgz#5b54835319e3035fb35484aaaa02be83cbda5293"
-  integrity sha512-xvCz0uJWbv3ASHhtE1LZhrdHk4ooVrm0C5wgis+DDpiLrWF3h66a0bTTpKH48+hPqAPVjno9ErOCTOblUao8+g==
+"@subsquid/warthog@^4.2.0-alpha.9":
+  version "4.2.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@subsquid/warthog/-/warthog-4.2.0-alpha.9.tgz#b20ce0db43176b4d15eb3ce08a68609fa4c5ec6a"
+  integrity sha512-t6W8v9oEmf0+0fWzYsFYoSe6npE7NjGNvkud+M4giwHPe7M23XG0BKFFb4PpakcgD0Ij1oFiam60RIkSIO0lNw==
   dependencies:
     "@subsquid/graphiql-console" "^0.2.0"
     "@types/app-root-path" "^1.2.4"

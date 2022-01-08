@@ -10,6 +10,8 @@ typegen:
   metadata:
     source: wss://bsr.zeitgeist.pm
   events:
+    - system.ExtrinsicSuccess
+    - system.ExtrinsicFailed
     - predictionMarkets.BoughtCompleteSet
     - predictionMarkets.MarketApproved
     - predictionMarkets.MarketCreated
@@ -38,6 +40,10 @@ typegen:
 mappings:
   mappingsModule: mappings
   eventHandlers:
+    - event: system.ExtrinsicSuccess
+      handler: systemExtrinsicSuccess
+    - event: system.ExtrinsicFailed
+      handler: systemExtrinsicFailed
     - event: predictionMarkets.BoughtCompleteSet
       handler: predictionMarketBoughtCompleteSet
     - event: predictionMarkets.MarketApproved
