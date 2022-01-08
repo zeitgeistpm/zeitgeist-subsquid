@@ -7,6 +7,38 @@ import { DispatchError, DispatchInfo } from "@polkadot/types/interfaces";
 
 export namespace System {
   /**
+   *  An extrinsic completed successfully. \[info\]
+   *
+   *  Event parameters: [DispatchInfo, ]
+   */
+  export class ExtrinsicSuccessEvent {
+    public readonly expectedParamTypes = ["DispatchInfo"];
+
+    constructor(public readonly ctx: SubstrateEvent) {}
+
+    get params(): [DispatchInfo] {
+      return [
+        createTypeUnsafe<DispatchInfo & Codec>(typeRegistry, "DispatchInfo", [
+          this.ctx.params[0].value,
+        ]),
+      ];
+    }
+
+    validateParams(): boolean {
+      if (this.expectedParamTypes.length !== this.ctx.params.length) {
+        return false;
+      }
+      let valid = true;
+      this.expectedParamTypes.forEach((type, i) => {
+        if (type !== this.ctx.params[i].type) {
+          valid = false;
+        }
+      });
+      return valid;
+    }
+  }
+
+  /**
    *  An extrinsic failed. \[error, info\]
    *
    *  Event parameters: [DispatchError, DispatchInfo, ]

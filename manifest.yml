@@ -10,6 +10,7 @@ typegen:
   metadata:
     source: wss://bsr.zeitgeist.pm
   events:
+    - system.ExtrinsicSuccess
     - system.ExtrinsicFailed
     - predictionMarkets.BoughtCompleteSet
     - predictionMarkets.MarketApproved
