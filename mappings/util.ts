@@ -38,9 +38,8 @@ export class Tools {
 
   private static async init(): Promise<SDK> {
     console.log(`Initializing SDK`)
-    const sdk = await SDK.initialize(process.env['WS_NODE_URL'] ?? 'wss://bsr.zeitgeist.pm')
-    this.sdk = sdk
-    return sdk
+    this.sdk = await SDK.initialize(process.env['WS_NODE_URL'] ?? 'wss://bsr.zeitgeist.pm')
+    return this.sdk
   }
 
   static async getSDK() {

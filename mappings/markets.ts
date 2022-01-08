@@ -1,7 +1,6 @@
 import BN from 'bn.js'
 import { encodeAddress } from '@polkadot/keyring'
 import { EventContext, StoreContext } from '@subsquid/hydra-common'
-import SDK from '@zeitgeistpm/sdk'
 import { CategoryMetadata, Market, MarketDisputeMechanism, MarketHistory, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../generated/model'
 import { PredictionMarkets } from '../chain'
 import { IPFS, Tools } from './util'
@@ -117,9 +116,8 @@ export async function predictionMarketCreated({
         const now = (await sdk.api.query.timestamp.now()).toNumber();
         const head = await sdk.api.rpc.chain.getHeader();
         const blockNum = head.number.toNumber();
-        const diffInMs = (await sdk.api.consts.timestamp.minimumPeriod).toNumber() * (market.period.asBlock[1].toNumber() - blockNum);
+        const diffInMs = (sdk.api.consts.timestamp.minimumPeriod).toNumber() * (market.period.asBlock[1].toNumber() - blockNum);
         newMarket.end = new BN(now + diffInMs)
-        sdk.api.disconnect()
     } else if (market.period.isTimestamp) {
         period.timestamp = market.period.asTimestamp.toString()
         newMarket.end = new BN(market.period.asTimestamp[1])
