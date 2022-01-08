@@ -63,12 +63,15 @@ export async function predictionMarketCreated({
 
     const [marketIdOf, market, accountId] = new PredictionMarkets.MarketCreatedEvent(event).params
 
+    const marketCreator = encodeAddress(market.creator, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
+    const marketOracle = encodeAddress(market.oracle, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
+
     const newMarket = new Market()
     newMarket.marketId = marketIdOf.toNumber()
-    newMarket.creator = encodeAddress(market.creator, 73)
+    newMarket.creator = marketCreator
     newMarket.creation = market.creation.toString()
     newMarket.creatorFee = market.creator_fee.toNumber()
-    newMarket.oracle = encodeAddress(market.oracle, 73)
+    newMarket.oracle = marketOracle
 
     const metadata = await decodeMarketMetadata(market.metadata.toString())
     if (metadata) {

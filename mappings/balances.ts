@@ -16,11 +16,12 @@ export async function balancesEndowed({
 }: EventContext & StoreContext) {
 
     const [accountId, amount] = new Balances.EndowedEvent(event).params
+    const walletId = encodeAddress(accountId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
     
-    var acc = await store.get(Account, { where: { wallet: accountId.toString() } })
+    var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) {
         acc = new Account()
-        acc.wallet = accountId.toString()
+        acc.wallet = walletId
 
         console.log(`[${event.method}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
@@ -59,8 +60,9 @@ export async function balancesDustLost({
 }: EventContext & StoreContext) {
 
     const [accountId, amount] = new Balances.DustLostEvent(event).params
+    const walletId = encodeAddress(accountId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
     
-    const acc = await store.get(Account, { where: { wallet: accountId.toString() } })
+    const acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) { return }
 
     const ab = await store.get(AssetBalance, { where: { account: acc, assetId: "Ztg" } })
@@ -88,10 +90,13 @@ export async function balancesTransfer({
 
     const [fromId, toId, amount] = new Balances.TransferEvent(event).params
     
-    var fa = await store.get(Account, { where: { wallet: fromId.toString() } })
+    const fromWId = encodeAddress(fromId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
+    const toWId = encodeAddress(toId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
+    
+    var fa = await store.get(Account, { where: { wallet: fromWId } })
     if (!fa) {
         fa = new Account()
-        fa.wallet = fromId.toString()
+        fa.wallet = fromWId
 
         console.log(`[${event.method}] Saving account: ${JSON.stringify(fa, null, 2)}`)
         await store.save<Account>(fa)
@@ -149,10 +154,10 @@ export async function balancesTransfer({
     console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(faHAB, null, 2)}`)
     await store.save<HistoricalAssetBalance>(faHAB)
 
-    var ta = await store.get(Account, { where: { wallet: toId.toString() } })
+    var ta = await store.get(Account, { where: { wallet: toWId } })
     if (!ta) {
         ta = new Account()
-        ta.wallet = toId.toString()
+        ta.wallet = toWId
 
         console.log(`[${event.method}] Saving account: ${JSON.stringify(ta, null, 2)}`)
         await store.save<Account>(ta)
@@ -197,11 +202,12 @@ export async function balancesBalanceSet({
 }: EventContext & StoreContext) {
 
     const [accountId, famount, ramount] = new Balances.BalanceSetEvent(event).params
+    const walletId = encodeAddress(accountId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
     
-    var acc = await store.get(Account, { where: { wallet: accountId.toString() } })
+    var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) {
         acc = new Account()
-        acc.wallet = accountId.toString()
+        acc.wallet = walletId
 
         console.log(`[${event.method}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
@@ -246,11 +252,12 @@ export async function balancesReserved({
 }: EventContext & StoreContext) {
 
     const [accountId, amount] = new Balances.ReservedEvent(event).params
+    const walletId = encodeAddress(accountId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
     
-    var acc = await store.get(Account, { where: { wallet: accountId.toString() } })
+    var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) {
         acc = new Account()
-        acc.wallet = accountId.toString()
+        acc.wallet = walletId
 
         console.log(`[${event.method}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
@@ -288,11 +295,12 @@ export async function balancesUnreserved({
 }: EventContext & StoreContext) {
 
     const [accountId, amount] = new Balances.UnreservedEvent(event).params
+    const walletId = encodeAddress(accountId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
     
-    var acc = await store.get(Account, { where: { wallet: accountId.toString() } })
+    var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) {
         acc = new Account()
-        acc.wallet = accountId.toString()
+        acc.wallet = walletId
 
         console.log(`[${event.method}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
@@ -330,11 +338,12 @@ export async function tokensEndowed({
 }: EventContext & StoreContext) {
 
     const [currencyId, accountId, amount] = new Tokens.EndowedEvent(event).params
+    const walletId = encodeAddress(accountId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
     
-    var acc = await store.get(Account, { where: { wallet: accountId.toString() } })
+    var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) {
         acc = new Account()
-        acc.wallet = accountId.toString()
+        acc.wallet = walletId
 
         console.log(`[${event.method}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
@@ -374,11 +383,14 @@ export async function currencyTransferred({
 
     const [currencyId, fromId, toId, amount] = new Currency.TransferredEvent(event).params
     if (currencyId.toString() === "Ztg") { return }
+
+    const fromWId = encodeAddress(fromId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
+    const toWId = encodeAddress(toId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
     
-    var fa = await store.get(Account, { where: { wallet: fromId.toString() } })
+    var fa = await store.get(Account, { where: { wallet: fromWId } })
     if (!fa) {
         fa = new Account()
-        fa.wallet = fromId.toString()
+        fa.wallet = fromWId
 
         console.log(`[${event.method}] Saving account: ${JSON.stringify(fa, null, 2)}`)
         await store.save<Account>(fa)
@@ -408,10 +420,10 @@ export async function currencyTransferred({
     console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(faHAB, null, 2)}`)
     await store.save<HistoricalAssetBalance>(faHAB)
 
-    var ta = await store.get(Account, { where: { wallet: toId.toString() } })
+    var ta = await store.get(Account, { where: { wallet: toWId } })
     if (!ta) {
         ta = new Account()
-        ta.wallet = toId.toString()
+        ta.wallet = toWId
 
         console.log(`[${event.method}] Saving account: ${JSON.stringify(ta, null, 2)}`)
         await store.save<Account>(ta)
@@ -456,11 +468,12 @@ export async function currencyDeposited({
 }: EventContext & StoreContext) {
 
     const [currencyId, accountId, amount] = new Currency.DepositedEvent(event).params
+    const walletId = encodeAddress(accountId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
     
-    var acc = await store.get(Account, { where: { wallet: accountId.toString() } })
+    var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) {
         acc = new Account()
-        acc.wallet = accountId.toString()
+        acc.wallet = walletId
 
         console.log(`[${event.method}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
@@ -505,11 +518,12 @@ export async function currencyWithdrawn({
 }: EventContext & StoreContext) {
 
     const [currencyId, accountId, amount] = new Currency.WithdrawnEvent(event).params
+    const walletId = encodeAddress(accountId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
     
-    var acc = await store.get(Account, { where: { wallet: accountId.toString() } })
+    var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) {
         acc = new Account()
-        acc.wallet = accountId.toString()
+        acc.wallet = walletId
 
         console.log(`[${event.method}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
