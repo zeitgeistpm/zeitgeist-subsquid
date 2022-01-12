@@ -1,7 +1,8 @@
 import BN from 'bn.js'
 import { encodeAddress } from '@polkadot/keyring'
 import { EventContext, StoreContext } from '@subsquid/hydra-common'
-import { CategoryMetadata, Market, MarketDisputeMechanism, MarketHistory, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../generated/model'
+import { util } from '@zeitgeistpm/sdk'
+import { Account, AssetBalance, CategoryMetadata, HistoricalAssetBalance, Market, MarketDisputeMechanism, MarketHistory, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../generated/model'
 import { PredictionMarkets } from '../chain'
 import { IPFS, Tools } from './util'
 import { MarketStatus } from '../generated/modules/enums/enums'
@@ -26,6 +27,42 @@ export async function predictionMarketBoughtCompleteSet({
 
     console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
     await store.save<Market>(savedMarket)
+
+    const walletId = encodeAddress(accountId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
+    var acc = await store.get(Account, { where: { wallet: walletId } })
+    if (!acc) { return }
+
+    const len = +savedMarket.marketType.categorical!
+    for (var i = 0; i < len; i++) {
+        const currencyId = util.AssetIdFromString(`[${marketIdOf},${i}]`)
+        
+        const ab = await store.get(AssetBalance, { where: { account: acc, assetId: currencyId } })
+        if (!ab) {
+            return
+        } else {
+            var hab = await store.get(HistoricalAssetBalance, { where: 
+                { account: acc, assetId: currencyId, event: "Endowed", blockNumber: block.height } })
+            if (!hab) {
+                const amount = new BN(extrinsic?.args[1].value.toString()!)
+                ab.balance = ab.balance.add(amount)
+                console.log(`[${event.method}] Saving asset balance: ${JSON.stringify(ab, null, 2)}`)
+                await store.save<AssetBalance>(ab)
+
+                hab = new HistoricalAssetBalance()
+                hab.account = acc
+                hab.event = event.method
+                hab.assetId = ab.assetId
+                hab.amount = amount
+                hab.balance = ab.balance
+                hab.blockNumber = block.height
+                hab.timestamp = new BN(block.timestamp)
+            } else {
+                hab.event = hab.event.concat(event.method)
+            }
+            console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
+            await store.save<HistoricalAssetBalance>(hab) 
+        }
+    }
 }
 
 export async function predictionMarketApproved({
