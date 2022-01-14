@@ -4,7 +4,7 @@ import { EventContext, StoreContext } from '@subsquid/hydra-common'
 import { util } from '@zeitgeistpm/sdk'
 import { Account, AssetBalance, CategoryMetadata, HistoricalAssetBalance, Market, MarketDisputeMechanism, MarketHistory, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../generated/model'
 import { PredictionMarkets } from '../chain'
-import { IPFS, Tools } from './util'
+import { Cache, IPFS, Tools } from './util'
 import { MarketStatus } from '../generated/modules/enums/enums'
 
 export async function predictionMarketBoughtCompleteSet({
@@ -376,14 +376,21 @@ async function decodeMarketMetadata(
     metadata: string,
 ): Promise<DecodedMarketMetadata | undefined> {
 
-    try {
-        if (metadata) {
-            const ipfs = new IPFS();
-            const raw = await ipfs.read(metadata);
+    if (metadata) {
+        var raw = await (await Cache.init()).getMeta(metadata)
+        if (raw) {
+            return raw !== '0' ? JSON.parse(raw) as DecodedMarketMetadata : undefined
+        } else {
+            try {
+                const ipfs = new IPFS();
+                raw = await ipfs.read(metadata);
+            } catch (err) {
+                console.error(err);
+                await (await Cache.init()).setMeta(metadata, '0')
+            }
+            await (await Cache.init()).setMeta(metadata, raw ? raw : '0')
             return raw ? JSON.parse(raw) as DecodedMarketMetadata : undefined
         }
-    } catch (err) {
-        console.error(err);
     }
 }
 
