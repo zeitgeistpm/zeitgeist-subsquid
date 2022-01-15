@@ -44,3 +44,11 @@ services:
       - "4000:${GRAPHQL_SERVER_PORT}"
     depends_on: 
       - db
+
+  redis:
+    image: redis:6.0-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./db/cache:/data

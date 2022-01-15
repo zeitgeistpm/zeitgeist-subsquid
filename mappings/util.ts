@@ -18,7 +18,7 @@ export class Cache {
       if (!this._instance) {
           console.log('Connecting to Redis DB...')
           this._instance = new Cache({
-              host: 'host.docker.internal',
+              host: 'redis',
               port: 6379,
               connect_timeout: 3600000,
               retry_strategy: (options) => {
