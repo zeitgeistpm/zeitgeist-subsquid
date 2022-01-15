@@ -6,7 +6,7 @@ import { AssetBalance } from '../generated/modules/asset-balance/asset-balance.m
 import { HistoricalAssetBalance } from '../generated/modules/historical-asset-balance/historical-asset-balance.model'
 import { Balances, System, Tokens } from '../chain'
 import { encodeAddress } from '@polkadot/keyring'
-import { Tools } from './util'
+import { Cache, Tools } from './util'
 
 export async function balancesEndowed({
     store,
@@ -651,24 +651,27 @@ export async function systemExtrinsicFailed({
 
 async function getFees(block: SubstrateBlock, extrinsic: SubstrateExtrinsic): Promise<number> {
     const id = +extrinsic.id.substring(extrinsic.id.indexOf('-')+1, extrinsic.id.lastIndexOf('-'))!
-    const sdk = await Tools.getSDK()
-    const { block: blk } = await sdk.api.rpc.chain.getBlock(block.hash)
-    const fees = await sdk.api.rpc.payment.queryFeeDetails(blk.extrinsics[id].toHex(), block.hash)
+    var fees = await (await Cache.init()).getFee(block.hash+id)
+    if (fees) { return +fees }
 
     var totalFees = BigInt(0)
+    const sdk = await Tools.getSDK()
+    const { block: blk } = await sdk.api.rpc.chain.getBlock(block.hash)
+    fees = JSON.stringify(await sdk.api.rpc.payment.queryFeeDetails(blk.extrinsics[id].toHex(), block.hash))
     if (fees) {
-        const feesFormatted = JSON.parse(JSON.stringify(fees))
+        const feesFormatted = JSON.parse(fees)
         const inclusionFee = feesFormatted.inclusionFee
         const baseFee = inclusionFee.baseFee
         const lenFee = inclusionFee.lenFee
         const adjustedWeightFee = inclusionFee.adjustedWeightFee
         const tip = extrinsic.tip.valueOf()
-        if (inclusionFee){
-            if(baseFee) totalFees = totalFees + BigInt(baseFee)
-            if(lenFee) totalFees = totalFees + BigInt(lenFee)
-            if(adjustedWeightFee) totalFees = totalFees + BigInt(adjustedWeightFee)
-            if(tip) totalFees = totalFees + BigInt(tip)
+        if (inclusionFee) {
+            if (baseFee) totalFees = totalFees + BigInt(baseFee)
+            if (lenFee) totalFees = totalFees + BigInt(lenFee)
+            if (adjustedWeightFee) totalFees = totalFees + BigInt(adjustedWeightFee)
+            if (tip) totalFees = totalFees + BigInt(tip)
         }
     }
+    await (await Cache.init()).setFee(block.hash+id, totalFees.toString())
     return +totalFees.toString()
 }
