@@ -1,5 +1,5 @@
 import BN from 'bn.js'
-import { EventContext, StoreContext, SubstrateBlock, SubstrateExtrinsic } from '@subsquid/hydra-common'
+import { DatabaseManager, EventContext, StoreContext, SubstrateBlock, SubstrateExtrinsic, SubstrateEvent } from '@subsquid/hydra-common'
 import { Currency } from '../chain/currency'
 import { Account } from '../generated/modules/account/account.model'
 import { AssetBalance } from '../generated/modules/asset-balance/asset-balance.model'
@@ -25,6 +25,7 @@ export async function balancesEndowed({
 
         console.log(`[${event.method}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
+        await initBalance(acc, walletId, store, event, block)
     }
 
     var ab = await store.get(AssetBalance, { where: { account: acc, assetId: "Ztg" } })
@@ -100,6 +101,7 @@ export async function balancesTransfer({
 
         console.log(`[${event.method}] Saving account: ${JSON.stringify(fa, null, 2)}`)
         await store.save<Account>(fa)
+        await initBalance(fa, fromWId, store, event, block)
     }
 
     var faAB = await store.get(AssetBalance, { where: { account: fa, assetId: "Ztg" } })
@@ -161,6 +163,7 @@ export async function balancesTransfer({
 
         console.log(`[${event.method}] Saving account: ${JSON.stringify(ta, null, 2)}`)
         await store.save<Account>(ta)
+        await initBalance(ta, toWId, store, event, block)
     }
 
     const taAB = await store.get(AssetBalance, { where: { account: ta, assetId: "Ztg" } })
@@ -211,6 +214,7 @@ export async function balancesBalanceSet({
 
         console.log(`[${event.method}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
+        await initBalance(acc, walletId, store, event, block)
     }
 
     const ab = await store.get(AssetBalance, { where: { account: acc, assetId: "Ztg" } })
@@ -261,6 +265,7 @@ export async function balancesReserved({
 
         console.log(`[${event.method}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
+        await initBalance(acc, walletId, store, event, block)
     }
 
     var ab = await store.get(AssetBalance, { where: { account: acc, assetId: "Ztg" } })
@@ -304,6 +309,7 @@ export async function balancesUnreserved({
 
         console.log(`[${event.method}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
+        await initBalance(acc, walletId, store, event, block)
     }
 
     var ab = await store.get(AssetBalance, { where: { account: acc, assetId: "Ztg" } })
@@ -347,6 +353,7 @@ export async function tokensEndowed({
 
         console.log(`[${event.method}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
+        await initBalance(acc, walletId, store, event, block)
     }
 
     var ab = await store.get(AssetBalance, { where: { account: acc, assetId: currencyId.toString() } })
@@ -394,6 +401,7 @@ export async function currencyTransferred({
 
         console.log(`[${event.method}] Saving account: ${JSON.stringify(fa, null, 2)}`)
         await store.save<Account>(fa)
+        await initBalance(fa, fromWId, store, event, block)
     }
 
     var faAB = await store.get(AssetBalance, { where: { account: fa, assetId: currencyId.toString() } })
@@ -427,6 +435,7 @@ export async function currencyTransferred({
 
         console.log(`[${event.method}] Saving account: ${JSON.stringify(ta, null, 2)}`)
         await store.save<Account>(ta)
+        await initBalance(ta, toWId, store, event, block)
     }
 
     const taAB = await store.get(AssetBalance, { where: { account: ta, assetId: currencyId.toString() } })
@@ -477,6 +486,7 @@ export async function currencyDeposited({
 
         console.log(`[${event.method}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
+        await initBalance(acc, walletId, store, event, block)
     }
 
     const ab = await store.get(AssetBalance, { where: { account: acc, assetId: currencyId.toString() } })
@@ -527,6 +537,7 @@ export async function currencyWithdrawn({
 
         console.log(`[${event.method}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
+        await initBalance(acc, walletId, store, event, block)
     }
 
     var ab = await store.get(AssetBalance, { where: { account: acc, assetId: currencyId.toString() } })
@@ -565,14 +576,15 @@ export async function systemExtrinsicSuccess({
         return 
     }
 
-    const accountId = extrinsic.signer
-    var acc = await store.get(Account, { where: { wallet: accountId } })
+    const walletId = extrinsic.signer
+    var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) {
         acc = new Account()
-        acc.wallet = accountId
+        acc.wallet = walletId
 
         console.log(`[${event.method}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
+        await initBalance(acc, walletId, store, event, block)
     }
 
     const txnFees = await getFees(block, extrinsic) 
@@ -613,14 +625,15 @@ export async function systemExtrinsicFailed({
         return 
     }
 
-    const accountId = extrinsic.signer
-    var acc = await store.get(Account, { where: { wallet: accountId } })
+    const walletId = extrinsic.signer
+    var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) {
         acc = new Account()
-        acc.wallet = accountId
+        acc.wallet = walletId
 
         console.log(`[${event.method}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
+        await initBalance(acc, walletId, store, event, block)
     }
 
     const txnFees = await getFees(block, extrinsic) 
@@ -674,4 +687,32 @@ async function getFees(block: SubstrateBlock, extrinsic: SubstrateExtrinsic): Pr
     }
     await (await Cache.init()).setFee(block.hash+id, totalFees.toString())
     return +totalFees.toString()
+}
+
+async function initBalance(acc: Account, walletId: string, store: DatabaseManager, event: SubstrateEvent, block: SubstrateBlock) {
+    const sdk = await Tools.getSDK()
+    const blockZero = `0xb90cd3a37b4793c6494b78962986f4f6ed3ec2eda91a6b84fd8457d24f606b9c`
+    const { data : { free: amt } } = await sdk.api.query.system.account.at(blockZero, walletId)
+
+    if (new BN(amt) > new BN(0)) {
+        const ab = new AssetBalance()
+        ab.account = acc
+        ab.assetId = "Ztg"
+        ab.balance = new BN(amt)
+
+        console.log(`[${event.method}] Saving asset balance: ${JSON.stringify(ab, null, 2)}`)
+        await store.save<AssetBalance>(ab)
+
+        const hab = new HistoricalAssetBalance()
+        hab.account = acc
+        hab.event = "Initialised"
+        hab.assetId = ab.assetId
+        hab.amount = new BN(amt)
+        hab.balance = ab.balance 
+        hab.blockNumber = block.height
+        hab.timestamp = new BN(block.timestamp)
+
+        console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
+        await store.save<HistoricalAssetBalance>(hab)
+    }
 }
