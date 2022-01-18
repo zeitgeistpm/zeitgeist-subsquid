@@ -16,6 +16,9 @@ services:
   processor:
     image: processor:latest
     restart: unless-stopped
+    depends_on:
+      - db
+      - redis
     build: 
       dockerfile: docker/Dockerfile.processor
       context: ./
@@ -33,6 +36,8 @@ services:
   query-node:
     image: query-node:latest
     restart: unless-stopped
+    depends_on:
+      - db
     build: 
       dockerfile: docker/Dockerfile.query-node
       context: ./
@@ -42,8 +47,6 @@ services:
       - DB_HOST=db
     ports:
       - "4000:${GRAPHQL_SERVER_PORT}"
-    depends_on: 
-      - db
 
   redis:
     image: redis:6.0-alpine
@@ -52,3 +55,6 @@ services:
       - "6379:6379"
     volumes:
       - ./db/cache:/data
+    environment:
+      REDIS_PASS: ${REDIS_PASS}
+    command: sh -c "redis-server --appendonly yes --requirepass ${REDIS_PASS}"

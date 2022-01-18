@@ -18,12 +18,13 @@ export class Cache {
       if (!this._instance) {
           console.log('Connecting to Redis DB...')
           this._instance = new Cache({
-              host: 'redis',
-              port: 6379,
-              connect_timeout: 3600000,
-              retry_strategy: (options) => {
-                  return 2000
-              },
+            host: process.env.REDIS_HOST ?? 'redis',
+            port: 6379,
+            password: process.env.REDIS_PASS,
+            connect_timeout: 3600000,
+            retry_strategy: (options) => {
+                return 2000
+            },
           })
       }
       return this._instance
