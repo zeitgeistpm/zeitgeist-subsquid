@@ -8,6 +8,7 @@
   "scripts": {
     "typegen": "hydra-typegen typegen manifest.yml",
     "codegen": "hydra-cli codegen",
+    "redis:up": "docker-compose up -d redis",
     "db:create": "hydra-cli db:create",
     "db:up": "docker-compose up -d db",
     "db:drop": "hydra-cli db:drop",
@@ -18,8 +19,8 @@
     "processor:migrate": "hydra-processor migrate",
     "processor:start": "hydra-processor run",
     "query-node:start": "ts-node --type-check ./generated/server/index.ts",
-    "docker:deploy": "rm -rf db/migrations/* && yarn db:reset && npm run db:create-migration -n 'init' && yarn db:migrate && docker-compose up -d",
-    "local:deploy": "rm -rf db/migrations/* && yarn db:reset && npm run db:create-migration -n 'init' && yarn db:migrate && npm run processor:start"
+    "docker:deploy": "yarn db:up && yarn redis:up && rm -rf db/migrations/* && yarn db:reset && npm run db:create-migration -n 'init' && yarn db:migrate && docker-compose up -d",
+    "local:deploy": "yarn db:up && yarn redis:up && rm -rf db/migrations/* && yarn db:reset && npm run db:create-migration -n 'init' && yarn db:migrate && npm run processor:start"
   },
   "dependencies": {
     "@subsquid/hydra-cli": "4.2.0-alpha.9",
