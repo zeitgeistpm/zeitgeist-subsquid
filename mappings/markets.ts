@@ -65,14 +65,14 @@ export async function predictionMarketBoughtCompleteSet({
     }
 }
 
-export async function predictionMarketApproved({
+export async function predictionMarketApprovedV1({
     store,
     event,
     block,
     extrinsic,
 }: EventContext & StoreContext) {
 
-    const [marketIdOf] = new PredictionMarkets.MarketApprovedEvent(event).params
+    const [marketIdOf] = new PredictionMarkets.MarketApprovedEventV1(event).params
 
     const savedMarket = await store.get(Market, { where: { marketId: marketIdOf.toNumber() } })
     if (!savedMarket) return
@@ -90,14 +90,39 @@ export async function predictionMarketApproved({
     await store.save<Market>(savedMarket)
 }
 
-export async function predictionMarketCreated({
+export async function predictionMarketApprovedV2({
     store,
     event,
     block,
     extrinsic,
 }: EventContext & StoreContext) {
 
-    const [marketIdOf, market, accountId] = new PredictionMarkets.MarketCreatedEvent(event).params
+    const [marketIdOf] = new PredictionMarkets.MarketApprovedEventV2(event).params
+
+    const savedMarket = await store.get(Market, { where: { marketId: marketIdOf.toNumber() } })
+    if (!savedMarket) return
+
+    savedMarket.status = savedMarket.scoringRule === "CPMM" ? MarketStatus.Active : MarketStatus.CollectingSubsidy
+
+    const mh = new MarketHistory()
+    mh.event = event.method
+    mh.status = savedMarket.status
+    mh.blockNumber = block.height
+    mh.timestamp = block.timestamp.toString()
+    savedMarket.marketHistory?.push(mh)
+
+    console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
+    await store.save<Market>(savedMarket)
+}
+
+export async function predictionMarketCreatedV1({
+    store,
+    event,
+    block,
+    extrinsic,
+}: EventContext & StoreContext) {
+
+    const [marketIdOf, market] = new PredictionMarkets.MarketCreatedEventV1(event).params
 
     const marketCreator = encodeAddress(market.creator, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
     const marketOracle = encodeAddress(market.oracle, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
@@ -186,14 +211,110 @@ export async function predictionMarketCreated({
     await store.save<Market>(newMarket)
 }
 
-export async function predictionMarketStartedWithSubsidy({
+export async function predictionMarketCreatedV2({
     store,
     event,
     block,
     extrinsic,
 }: EventContext & StoreContext) {
 
-    const [marketIdOf] = new PredictionMarkets.MarketStartedWithSubsidyEvent(event).params
+    const [marketIdOf, market] = new PredictionMarkets.MarketCreatedEventV2(event).params
+
+    const marketCreator = encodeAddress(market.creator, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
+    const marketOracle = encodeAddress(market.oracle, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
+
+    const newMarket = new Market()
+    newMarket.marketId = marketIdOf.toNumber()
+    newMarket.creator = marketCreator
+    newMarket.creation = market.creation.toString()
+    newMarket.creatorFee = market.creator_fee.toNumber()
+    newMarket.oracle = marketOracle
+
+    const metadata = await decodeMarketMetadata(market.metadata.toString())
+    if (metadata) {
+        newMarket.slug = metadata.slug
+        newMarket.question = metadata.question
+        newMarket.description = metadata.description
+        newMarket.img = metadata.img
+
+        if (metadata.categories) {
+            newMarket.categories = []
+
+            for (let i = 0; i < metadata.categories.length; i++) {
+                const cm = new CategoryMetadata()
+                cm.name = metadata.categories[i].name
+                cm.ticker = metadata.categories[i].ticker
+                cm.img = metadata.categories[i].img
+                cm.color = metadata.categories[i].color
+                newMarket.categories.push(cm)
+            }
+        }
+        
+        if (metadata.tags) {
+            newMarket.tags = []
+            for (let i = 0; i < metadata.tags.length; i++) {
+                newMarket.tags.push(metadata.tags[i])
+            }
+        }
+    }
+
+    const marketType = new MarketType()
+    if (market.market_type.isCategorical) {
+        marketType.categorical = market.market_type.asCategorical.toString()
+    } else if (market.market_type.isScalar) {
+        marketType.scalar = market.market_type.asScalar.toString()
+    }
+    newMarket.marketType = marketType
+
+    const period = new MarketPeriod()
+    if (market.period.isBlock) {
+        period.block = market.period.asBlock.toString()
+
+        const sdk = await Tools.getSDK()
+        const now = (await sdk.api.query.timestamp.now()).toNumber();
+        const head = await sdk.api.rpc.chain.getHeader();
+        const blockNum = head.number.toNumber();
+        const diffInMs = (sdk.api.consts.timestamp.minimumPeriod).toNumber() * (market.period.asBlock[1].toNumber() - blockNum);
+        newMarket.end = new BN(now + diffInMs)
+    } else if (market.period.isTimestamp) {
+        period.timestamp = market.period.asTimestamp.toString()
+        newMarket.end = new BN(market.period.asTimestamp[1])
+    }
+    newMarket.period = period
+
+    newMarket.scoringRule = market.scoring_rule.toString()
+    newMarket.status = market.status.toString()
+
+    const mdm = new MarketDisputeMechanism()
+    if (market.mdm.isAuthorized) {
+        mdm.authorized = market.mdm.asAuthorized.toString()
+    } else if (market.mdm.isCourt) {
+        mdm.court = true
+    } else if (market.mdm.isSimpleDisputes) {
+        mdm.simpleDisputes = true
+    }
+    newMarket.mdm = mdm
+
+    newMarket.marketHistory = []
+    const mh = new MarketHistory()
+    mh.event = event.method
+    mh.status = newMarket.status
+    mh.blockNumber = block.height
+    mh.timestamp = block.timestamp.toString()
+    newMarket.marketHistory.push(mh)
+
+    console.log(`[${event.name}] Saving market: ${JSON.stringify(newMarket, null, 2)}`)
+    await store.save<Market>(newMarket)
+}
+
+export async function predictionMarketStartedWithSubsidyV1({
+    store,
+    event,
+    block,
+    extrinsic,
+}: EventContext & StoreContext) {
+
+    const [marketIdOf] = new PredictionMarkets.MarketStartedWithSubsidyEventV1(event).params
 
     const savedMarket = await store.get(Market, { where: { marketId: marketIdOf.toNumber() } })
     if (!savedMarket) return
@@ -211,14 +332,39 @@ export async function predictionMarketStartedWithSubsidy({
     await store.save<Market>(savedMarket)
 }
 
-export async function predictionMarketInsufficientSubsidy({
+export async function predictionMarketStartedWithSubsidyV2({
     store,
     event,
     block,
     extrinsic,
 }: EventContext & StoreContext) {
 
-    const [marketIdOf] = new PredictionMarkets.MarketInsufficientSubsidyEvent(event).params
+    const [marketIdOf] = new PredictionMarkets.MarketStartedWithSubsidyEventV2(event).params
+
+    const savedMarket = await store.get(Market, { where: { marketId: marketIdOf.toNumber() } })
+    if (!savedMarket) return
+
+    savedMarket.status = MarketStatus.Active
+
+    const mh = new MarketHistory()
+    mh.event = event.method
+    mh.status = savedMarket.status
+    mh.blockNumber = block.height
+    mh.timestamp = block.timestamp.toString()
+    savedMarket.marketHistory?.push(mh)
+
+    console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
+    await store.save<Market>(savedMarket)
+}
+
+export async function predictionMarketInsufficientSubsidyV1({
+    store,
+    event,
+    block,
+    extrinsic,
+}: EventContext & StoreContext) {
+
+    const [marketIdOf] = new PredictionMarkets.MarketInsufficientSubsidyEventV1(event).params
 
     const savedMarket = await store.get(Market, { where: { marketId: marketIdOf.toNumber() } })
     if (!savedMarket) return
@@ -236,16 +382,42 @@ export async function predictionMarketInsufficientSubsidy({
     await store.save<Market>(savedMarket)
 }
 
-export async function predictionMarketReported({
+export async function predictionMarketInsufficientSubsidyV2({
     store,
     event,
     block,
     extrinsic,
 }: EventContext & StoreContext) {
 
-    const [marketIdOf, outcomeReport] = new PredictionMarkets.MarketReportedEvent(event).params
+    const [marketIdOf] = new PredictionMarkets.MarketInsufficientSubsidyEventV2(event).params
 
     const savedMarket = await store.get(Market, { where: { marketId: marketIdOf.toNumber() } })
+    if (!savedMarket) return
+
+    savedMarket.status = MarketStatus.InsufficientSubsidy
+
+    const mh = new MarketHistory()
+    mh.event = event.method
+    mh.status = savedMarket.status
+    mh.blockNumber = block.height
+    mh.timestamp = block.timestamp.toString()
+    savedMarket.marketHistory?.push(mh)
+
+    console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
+    await store.save<Market>(savedMarket)
+}
+
+export async function predictionMarketReportedV1({
+    store,
+    event,
+    block,
+    extrinsic,
+}: EventContext & StoreContext) {
+
+    const [marketIdOf, outcomeReport] = new PredictionMarkets.MarketReportedEventV1(event).params
+
+    const savedMarket = await store.get(Market, { where: { marketId: marketIdOf.toNumber() } })
+    console.log('I am here')
     if (!savedMarket) return
 
     const ocr = new OutcomeReport()
@@ -275,14 +447,78 @@ export async function predictionMarketReported({
     await store.save<Market>(savedMarket)
 }
 
-export async function predictionMarketDisputed({
+export async function predictionMarketReportedV2({
     store,
     event,
     block,
     extrinsic,
 }: EventContext & StoreContext) {
 
-    const [marketIdOf, outcomeReport] = new PredictionMarkets.MarketDisputedEvent(event).params
+    const [marketIdOf, marketStatus, report] = new PredictionMarkets.MarketReportedEventV2(event).params
+
+    const savedMarket = await store.get(Market, { where: { marketId: marketIdOf.toNumber() } })
+    if (!savedMarket) return
+
+    const ocr = new OutcomeReport()
+    if (report.outcome.asCategorical) {
+        ocr.categorical = report.outcome.asCategorical.toNumber()
+    } else if (report.outcome.asScalar) {
+        ocr.scalar = report.outcome.asScalar.toNumber()
+    }
+
+    const mr = new MarketReport()
+    mr.at = block.height
+    mr.by = savedMarket.oracle
+    mr.outcome = ocr
+
+    savedMarket.status = MarketStatus.Reported
+    savedMarket.report = mr
+
+    const mh = new MarketHistory()
+    mh.event = event.method
+    mh.status = savedMarket.status
+    mh.report = savedMarket.report
+    mh.blockNumber = block.height
+    mh.timestamp = block.timestamp.toString()
+    savedMarket.marketHistory?.push(mh)
+
+    console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
+    await store.save<Market>(savedMarket)
+}
+
+export async function predictionMarketDisputedV1({
+    store,
+    event,
+    block,
+    extrinsic,
+}: EventContext & StoreContext) {
+
+    const [marketIdOf, outcomeReport] = new PredictionMarkets.MarketDisputedEventV1(event).params
+
+    const savedMarket = await store.get(Market, { where: { marketId: marketIdOf.toNumber() } })
+    if (!savedMarket) return
+
+    savedMarket.status = MarketStatus.Disputed
+
+    const mh = new MarketHistory()
+    mh.event = event.method
+    mh.status = savedMarket.status
+    mh.blockNumber = block.height
+    mh.timestamp = block.timestamp.toString()
+    savedMarket.marketHistory?.push(mh)
+
+    console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
+    await store.save<Market>(savedMarket)
+}
+
+export async function predictionMarketDisputedV2({
+    store,
+    event,
+    block,
+    extrinsic,
+}: EventContext & StoreContext) {
+
+    const [marketIdOf, outcomeReport] = new PredictionMarkets.MarketDisputedEventV2(event).params
 
     const savedMarket = await store.get(Market, { where: { marketId: marketIdOf.toNumber() } })
     if (!savedMarket) return
