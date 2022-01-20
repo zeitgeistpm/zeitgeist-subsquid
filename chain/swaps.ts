@@ -22,14 +22,14 @@ export namespace Swaps {
         get params(): [CommonPoolEventParams,Pool] {
 
             return [
-                createTypeUnsafe<CommonPoolEventParams & Codec>(
+                (createTypeUnsafe<CommonPoolEventParams & Codec>(
                     typeRegistry,
                     'CommonPoolEventParams',
                     [this.ctx.params[0].value]
-                ),
-                createTypeUnsafe<Pool & Codec>(typeRegistry, "Pool", this.removeWeights([
+                ) as any) as CommonPoolEventParams,
+                (createTypeUnsafe<Pool & Codec>(typeRegistry, "Pool", this.removeWeights([
                     this.ctx.params[1].value,
-                ])),
+                ])) as any) as Pool,
             ]
         }
 
@@ -68,8 +68,8 @@ export namespace Swaps {
 
         get params(): [SwapEvent] {
 
-            return [createTypeUnsafe<SwapEvent & Codec>(
-            typeRegistry, 'SwapEvent', [this.ctx.params[0].value]) ]
+            return [(createTypeUnsafe<SwapEvent & Codec>(
+            typeRegistry, 'SwapEvent', [this.ctx.params[0].value]) as any) as SwapEvent ]
         }
 
         validateParams(): boolean {
@@ -101,8 +101,8 @@ export namespace Swaps {
 
         get params(): [SwapEvent] {
 
-            return [createTypeUnsafe<SwapEvent & Codec>(
-            typeRegistry, 'SwapEvent', [this.ctx.params[0].value]) ]
+            return [(createTypeUnsafe<SwapEvent & Codec>(
+            typeRegistry, 'SwapEvent', [this.ctx.params[0].value]) as any) as SwapEvent ]
         }
 
         validateParams(): boolean {

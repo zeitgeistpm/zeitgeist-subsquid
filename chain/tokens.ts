@@ -20,9 +20,9 @@ export namespace Tokens {
 
     get params(): [CurrencyId, AccountId, Balance] {
       return [
-        createTypeUnsafe<CurrencyId & Codec>(typeRegistry, "CurrencyId", [
+        (createTypeUnsafe<CurrencyId & Codec>(typeRegistry, "CurrencyId", [
           this.ctx.params[0].value,
-        ]),
+        ]) as any) as CurrencyId,
         createTypeUnsafe<AccountId & Codec>(typeRegistry, "AccountId", [
           this.ctx.params[1].value,
         ]),

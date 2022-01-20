@@ -99,9 +99,9 @@ export namespace PredictionMarkets {
         createTypeUnsafe<MarketIdOf & Codec>(typeRegistry, "MarketIdOf", [
           this.ctx.params[0].value,
         ]),
-        createTypeUnsafe<MarketStatus & Codec>(typeRegistry, "MarketStatus", [
+        (createTypeUnsafe<MarketStatus & Codec>(typeRegistry, "MarketStatus", [
           this.ctx.params[1].value,
-        ]),
+        ]) as any) as MarketStatus,
       ];
     }
 
@@ -138,9 +138,9 @@ export namespace PredictionMarkets {
         createTypeUnsafe<MarketIdOf & Codec>(typeRegistry, "MarketIdOf", [
           this.ctx.params[0].value,
         ]),
-        createTypeUnsafe<Market & Codec>(typeRegistry, "Market", [
+        (createTypeUnsafe<Market & Codec>(typeRegistry, "Market", [
           this.ctx.params[1].value,
-        ]),
+        ]) as any) as Market,
         createTypeUnsafe<AccountId & Codec>(typeRegistry, "AccountId", [
           this.ctx.params[2].value,
         ]),
@@ -179,9 +179,9 @@ export namespace PredictionMarkets {
         createTypeUnsafe<MarketIdOf & Codec>(typeRegistry, "MarketIdOf", [
           this.ctx.params[0].value,
         ]),
-        createTypeUnsafe<Market & Codec>(typeRegistry, "Market", [
+        (createTypeUnsafe<Market & Codec>(typeRegistry, "Market", [
           this.ctx.params[1].value,
-        ]),
+        ]) as any) as Market,
       ];
     }
 
@@ -246,9 +246,9 @@ export namespace PredictionMarkets {
         createTypeUnsafe<MarketIdOf & Codec>(typeRegistry, "MarketIdOf", [
           this.ctx.params[0].value,
         ]),
-        createTypeUnsafe<MarketStatus & Codec>(typeRegistry, "MarketStatus", [
+        (createTypeUnsafe<MarketStatus & Codec>(typeRegistry, "MarketStatus", [
           this.ctx.params[1].value,
-        ]),
+        ]) as any) as MarketStatus,
       ];
     }
 
@@ -313,9 +313,9 @@ export namespace PredictionMarkets {
         createTypeUnsafe<MarketIdOf & Codec>(typeRegistry, "MarketIdOf", [
           this.ctx.params[0].value,
         ]),
-        createTypeUnsafe<MarketStatus & Codec>(typeRegistry, "MarketStatus", [
+        (createTypeUnsafe<MarketStatus & Codec>(typeRegistry, "MarketStatus", [
           this.ctx.params[1].value,
-        ]),
+        ]) as any) as MarketStatus,
       ];
     }
 
@@ -348,9 +348,9 @@ export namespace PredictionMarkets {
         createTypeUnsafe<MarketIdOf & Codec>(typeRegistry, "MarketIdOf", [
           this.ctx.params[0].value,
         ]),
-        createTypeUnsafe<OutcomeReport & Codec>(typeRegistry, "OutcomeReport", [
+        (createTypeUnsafe<OutcomeReport & Codec>(typeRegistry, "OutcomeReport", [
           this.ctx.params[1].value,
-        ]),
+        ]) as any) as OutcomeReport,
       ];
     }
 
@@ -387,12 +387,12 @@ export namespace PredictionMarkets {
         createTypeUnsafe<MarketIdOf & Codec>(typeRegistry, "MarketIdOf", [
           this.ctx.params[0].value,
         ]),
-        createTypeUnsafe<MarketStatus & Codec>(typeRegistry, "MarketStatus", [
+        (createTypeUnsafe<MarketStatus & Codec>(typeRegistry, "MarketStatus", [
           this.ctx.params[1].value,
-        ]),
-        createTypeUnsafe<MarketDispute & Codec>(typeRegistry, "MarketDispute", [
+        ]) as any) as MarketStatus,
+        (createTypeUnsafe<MarketDispute & Codec>(typeRegistry, "MarketDispute", [
           this.ctx.params[2].value,
-        ]),
+        ]) as any) as MarketDispute,
       ];
     }
 
@@ -457,9 +457,9 @@ export namespace PredictionMarkets {
         createTypeUnsafe<MarketIdOf & Codec>(typeRegistry, "MarketIdOf", [
           this.ctx.params[0].value,
         ]),
-        createTypeUnsafe<OutcomeReport & Codec>(typeRegistry, "OutcomeReport", [
+        (createTypeUnsafe<OutcomeReport & Codec>(typeRegistry, "OutcomeReport", [
           this.ctx.params[1].value,
-        ]),
+        ]) as any) as OutcomeReport,
       ];
     }
 
@@ -496,12 +496,12 @@ export namespace PredictionMarkets {
         createTypeUnsafe<MarketIdOf & Codec>(typeRegistry, "MarketIdOf", [
           this.ctx.params[0].value,
         ]),
-        createTypeUnsafe<MarketStatus & Codec>(typeRegistry, "MarketStatus", [
+        (createTypeUnsafe<MarketStatus & Codec>(typeRegistry, "MarketStatus", [
           this.ctx.params[1].value,
-        ]),
-        createTypeUnsafe<Report & Codec>(typeRegistry, "Report", [
+        ]) as any) as MarketStatus,
+        (createTypeUnsafe<Report & Codec>(typeRegistry, "Report", [
           this.ctx.params[2].value,
-        ]),
+        ]) as any) as Report,
       ];
     }
 
