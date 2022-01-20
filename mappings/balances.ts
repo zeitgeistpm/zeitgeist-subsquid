@@ -271,6 +271,7 @@ export async function balancesReserved({
     var ab = await store.get(AssetBalance, { where: { account: acc, assetId: "Ztg" } })
     if (!ab) {
         ab = new AssetBalance()
+        ab.account = acc
         ab.assetId = "Ztg"
         ab.balance = new BN(0 - amount.toNumber())
     } else {
@@ -315,6 +316,7 @@ export async function balancesUnreserved({
     var ab = await store.get(AssetBalance, { where: { account: acc, assetId: "Ztg" } })
     if (!ab) {
         ab = new AssetBalance()
+        ab.account = acc
         ab.assetId = "Ztg"
         ab.balance = new BN(amount)
     } else {
@@ -543,6 +545,7 @@ export async function currencyWithdrawn({
     var ab = await store.get(AssetBalance, { where: { account: acc, assetId: currencyId.toString() } })
     if (!ab) {
         ab = new AssetBalance()
+        ab.account = acc
         ab.assetId = currencyId.toString()
         ab.balance = new BN(0 - amount.toNumber())
     } else {
