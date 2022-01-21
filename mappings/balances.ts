@@ -567,6 +567,40 @@ export async function currencyWithdrawn({
     await store.save<HistoricalAssetBalance>(hab)
 }
 
+export async function systemNewAccount({
+    store,
+    event,
+    block,
+    extrinsic,
+}: EventContext & StoreContext) {
+
+    const [accountId] = new System.NewAccountEvent(event).params
+    const walletId = encodeAddress(accountId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
+    
+    const acc = new Account()
+    acc.wallet = walletId
+    console.log(`[${event.method}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+    await store.save<Account>(acc)
+
+    const ab = new AssetBalance()
+    ab.account = acc
+    ab.assetId = "Ztg"
+    ab.balance = new BN(0)
+    console.log(`[${event.method}] Saving asset balance: ${JSON.stringify(ab, null, 2)}`)
+    await store.save<AssetBalance>(ab)
+
+    const hab = new HistoricalAssetBalance()
+    hab.account = acc
+    hab.event = event.method
+    hab.assetId = ab.assetId
+    hab.amount = new BN(0)
+    hab.balance = ab.balance
+    hab.blockNumber = block.height
+    hab.timestamp = new BN(block.timestamp)
+    console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
+    await store.save<HistoricalAssetBalance>(hab)
+}
+
 export async function systemExtrinsicSuccess({
     store,
     event,

@@ -41,6 +41,8 @@ typegen:
 mappings:
   mappingsModule: mappings
   eventHandlers:
+    - event: system.NewAccount
+      handler: systemNewAccount
     - event: system.ExtrinsicSuccess
       handler: systemExtrinsicSuccess
     - event: system.ExtrinsicFailed
