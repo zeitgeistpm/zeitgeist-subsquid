@@ -600,6 +600,40 @@ export async function predictionMarketCancelled({
     await store.save<Market>(savedMarket)
 }
 
+export async function predictionMarketResolved({
+    store,
+    event,
+    block,
+    extrinsic,
+}: EventContext & StoreContext) {
+
+    const [marketIdOf, status, outcomeReport] = new PredictionMarkets.MarketResolvedEvent(event).params
+
+    const savedMarket = await store.get(Market, { where: { marketId: marketIdOf.toNumber() } })
+    if (!savedMarket) return
+
+    const ocr = new OutcomeReport()
+    if (outcomeReport.asCategorical) {
+        ocr.categorical = outcomeReport.asCategorical.toNumber()
+    } else if (outcomeReport.asScalar) {
+        ocr.scalar = outcomeReport.asScalar.toNumber()
+    }
+
+    if (savedMarket.report) { savedMarket.report.outcome = ocr }
+    savedMarket.status = status.toString()
+
+    const mh = new MarketHistory()
+    mh.event = event.method
+    mh.status = savedMarket.status
+    mh.report = savedMarket.report
+    mh.blockNumber = block.height
+    mh.timestamp = block.timestamp.toString()
+    savedMarket.marketHistory?.push(mh)
+
+    console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
+    await store.save<Market>(savedMarket)
+}
+
 export async function predictionMarketSoldCompleteSet({
     store,
     event,
