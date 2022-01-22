@@ -615,6 +615,26 @@ export async function systemExtrinsicSuccess({
         hab.timestamp = new BN(block.timestamp)
         console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
         await store.save<HistoricalAssetBalance>(hab)
+
+        const dhab = await store.get(HistoricalAssetBalance, { where: 
+            { account: acc, assetId: "Ztg", event: "DustLost", blockNumber: block.height } })
+        if (dhab) {
+            ab.balance = ab.balance.sub(dhab.amount)
+
+            const hab = new HistoricalAssetBalance()
+            hab.account = acc
+            hab.event = dhab.event
+            hab.assetId = ab.assetId
+            hab.amount = new BN(0 - dhab.amount.toNumber())
+            hab.balance = ab.balance
+            hab.blockNumber = block.height
+            hab.timestamp = new BN(block.timestamp)
+            console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
+            await store.save<HistoricalAssetBalance>(hab)
+
+            console.log(`[${event.method}] Removing historical asset balance: ${JSON.stringify(dhab, null, 2)}`)
+            await store.remove<HistoricalAssetBalance>(dhab)
+        }
     }
 }
 
