@@ -552,20 +552,23 @@ export async function systemNewAccount({
     const [accountId] = new System.NewAccountEvent(event).params
     const walletId = encodeAddress(accountId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
     
-    const acc = new Account()
-    acc.wallet = walletId
-    console.log(`[${event.method}] Saving account: ${JSON.stringify(acc, null, 2)}`)
-    await store.save<Account>(acc)
+    const acc = await store.get(Account, { where: { wallet: walletId } })
+    if (acc) return
+
+    const newAcc = new Account()
+    newAcc.wallet = walletId
+    console.log(`[${event.method}] Saving account: ${JSON.stringify(newAcc, null, 2)}`)
+    await store.save<Account>(newAcc)
 
     const ab = new AssetBalance()
-    ab.account = acc
+    ab.account = newAcc
     ab.assetId = "Ztg"
     ab.balance = new BN(0)
     console.log(`[${event.method}] Saving asset balance: ${JSON.stringify(ab, null, 2)}`)
     await store.save<AssetBalance>(ab)
 
     const hab = new HistoricalAssetBalance()
-    hab.account = acc
+    hab.account = newAcc
     hab.event = event.method
     hab.assetId = ab.assetId
     hab.amount = new BN(0)
