@@ -38,6 +38,7 @@ type Market @entity {
   end: BigInt!
   scoringRule: String!
   status: String!
+  poolId: Int
   report: MarketReport
   resolvedOutcome: String
   mdm: MarketDisputeMechanism!
@@ -47,6 +48,7 @@ type Market @entity {
 type MarketHistory @jsonField {
   event: String
   status: String
+  poolId: Int
   report: MarketReport
   resolvedOutcome: String
   blockNumber: Int
