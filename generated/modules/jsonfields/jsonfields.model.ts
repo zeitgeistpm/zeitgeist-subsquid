@@ -70,6 +70,11 @@ export class MarketHistory {
   })
   status?: string;
 
+  @IntField({
+    nullable: true,
+  })
+  poolId?: number;
+
   @Field(() => MarketReport, { nullable: true })
   report?: MarketReport;
 

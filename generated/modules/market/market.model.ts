@@ -73,6 +73,11 @@ export class Market extends BaseModel {
   @StringField({})
   status!: string;
 
+  @IntField({
+    nullable: true,
+  })
+  poolId?: number;
+
   @JSONField({ filter: true, gqlFieldType: jsonTypes.MarketReport, nullable: true })
   report?: jsonTypes.MarketReport;
 

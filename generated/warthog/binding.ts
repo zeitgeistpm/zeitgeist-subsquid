@@ -144,6 +144,8 @@ export type MarketOrderByInput =   'createdAt_ASC' |
   'scoringRule_DESC' |
   'status_ASC' |
   'status_DESC' |
+  'poolId_ASC' |
+  'poolId_DESC' |
   'resolvedOutcome_ASC' |
   'resolvedOutcome_DESC'
 
@@ -547,6 +549,7 @@ export interface MarketCreateInput {
   end: String
   scoringRule: String
   status: String
+  poolId?: Float | null
   report?: MarketReportInput | null
   resolvedOutcome?: String | null
   mdm: MarketDisputeMechanismInput
@@ -616,6 +619,7 @@ export interface MarketDisputeMechanismWhereUniqueInput {
 export interface MarketHistoryCreateInput {
   event?: String | null
   status?: String | null
+  poolId?: Float | null
   resolvedOutcome?: String | null
   blockNumber?: Float | null
   timestamp?: String | null
@@ -624,6 +628,7 @@ export interface MarketHistoryCreateInput {
 export interface MarketHistoryInput {
   event?: String | null
   status?: String | null
+  poolId?: Int | null
   report?: MarketReportInput | null
   resolvedOutcome?: String | null
   blockNumber?: Int | null
@@ -633,6 +638,7 @@ export interface MarketHistoryInput {
 export interface MarketHistoryUpdateInput {
   event?: String | null
   status?: String | null
+  poolId?: Float | null
   resolvedOutcome?: String | null
   blockNumber?: Float | null
   timestamp?: String | null
@@ -673,6 +679,12 @@ export interface MarketHistoryWhereInput {
   status_startsWith?: String | null
   status_endsWith?: String | null
   status_in?: String[] | String | null
+  poolId_eq?: Int | null
+  poolId_gt?: Int | null
+  poolId_gte?: Int | null
+  poolId_lt?: Int | null
+  poolId_lte?: Int | null
+  poolId_in?: Int[] | Int | null
   resolvedOutcome_eq?: String | null
   resolvedOutcome_contains?: String | null
   resolvedOutcome_startsWith?: String | null
@@ -890,6 +902,7 @@ export interface MarketUpdateInput {
   end?: String | null
   scoringRule?: String | null
   status?: String | null
+  poolId?: Float | null
   report?: MarketReportInput | null
   resolvedOutcome?: String | null
   mdm?: MarketDisputeMechanismInput | null
@@ -990,6 +1003,12 @@ export interface MarketWhereInput {
   status_startsWith?: String | null
   status_endsWith?: String | null
   status_in?: String[] | String | null
+  poolId_eq?: Int | null
+  poolId_gt?: Int | null
+  poolId_gte?: Int | null
+  poolId_lt?: Int | null
+  poolId_lte?: Int | null
+  poolId_in?: Int[] | Int | null
   report_json?: JSONObject | null
   resolvedOutcome_eq?: String | null
   resolvedOutcome_contains?: String | null
@@ -1343,6 +1362,7 @@ export interface Market extends BaseGraphQLObject {
   end: BigInt
   scoringRule: String
   status: String
+  poolId?: Int | null
   report?: MarketReport | null
   resolvedOutcome?: String | null
   mdm: MarketDisputeMechanism
@@ -1369,6 +1389,7 @@ export interface MarketEdge {
 export interface MarketHistory {
   event?: String | null
   status?: String | null
+  poolId?: Int | null
   report?: MarketReport | null
   resolvedOutcome?: String | null
   blockNumber?: Int | null
