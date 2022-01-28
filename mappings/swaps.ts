@@ -1,6 +1,6 @@
 import BN from 'bn.js'
 import { EventContext, StoreContext } from '@subsquid/hydra-common'
-import { Pool } from '../generated/model'
+import { Market, MarketHistory, Pool } from '../generated/model'
 import { Swaps } from '../chain'
 import { HistoricalPool } from '../generated/modules/historical-pool/historical-pool.model'
 
@@ -34,6 +34,22 @@ export async function swapPoolCreated({
 
     console.log(`Saving historical pool: ${JSON.stringify(newHP, null, 2)}`)
     await store.save<HistoricalPool>(newHP)
+
+    const savedMarket = await store.get(Market, { where: { marketId: newPool.marketId } })
+    if (savedMarket) {
+        savedMarket.poolId = newPool.poolId
+
+        const mh = new MarketHistory()
+        mh.event = event.method
+        mh.poolId = savedMarket.poolId
+        mh.blockNumber = block.height
+        mh.timestamp = block.timestamp.toString()
+        savedMarket.marketHistory?.push(mh)
+
+        console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
+        await store.save<Market>(savedMarket)
+    }
+    
 }
 
 export async function swapExactAmountIn({

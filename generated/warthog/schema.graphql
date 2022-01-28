@@ -616,6 +616,7 @@ type Market implements BaseGraphQLObject {
   end: BigInt!
   scoringRule: String!
   status: String!
+  poolId: Int
   report: MarketReport
   resolvedOutcome: String
   mdm: MarketDisputeMechanism!
@@ -645,6 +646,7 @@ input MarketCreateInput {
   end: String!
   scoringRule: String!
   status: String!
+  poolId: Float
   report: MarketReportInput
   resolvedOutcome: String
   mdm: MarketDisputeMechanismInput!
@@ -725,6 +727,7 @@ type MarketEdge {
 type MarketHistory {
   event: String
   status: String
+  poolId: Int
   report: MarketReport
   resolvedOutcome: String
   blockNumber: Int
@@ -734,6 +737,7 @@ type MarketHistory {
 input MarketHistoryCreateInput {
   event: String
   status: String
+  poolId: Float
   resolvedOutcome: String
   blockNumber: Float
   timestamp: String
@@ -742,6 +746,7 @@ input MarketHistoryCreateInput {
 input MarketHistoryInput {
   event: String
   status: String
+  poolId: Int
   report: MarketReportInput
   resolvedOutcome: String
   blockNumber: Int
@@ -751,6 +756,7 @@ input MarketHistoryInput {
 input MarketHistoryUpdateInput {
   event: String
   status: String
+  poolId: Float
   resolvedOutcome: String
   blockNumber: Float
   timestamp: String
@@ -791,6 +797,12 @@ input MarketHistoryWhereInput {
   status_startsWith: String
   status_endsWith: String
   status_in: [String!]
+  poolId_eq: Int
+  poolId_gt: Int
+  poolId_gte: Int
+  poolId_lt: Int
+  poolId_lte: Int
+  poolId_in: [Int!]
   resolvedOutcome_eq: String
   resolvedOutcome_contains: String
   resolvedOutcome_startsWith: String
@@ -846,6 +858,8 @@ enum MarketOrderByInput {
   scoringRule_DESC
   status_ASC
   status_DESC
+  poolId_ASC
+  poolId_DESC
   resolvedOutcome_ASC
   resolvedOutcome_DESC
 }
@@ -1059,6 +1073,7 @@ input MarketUpdateInput {
   end: String
   scoringRule: String
   status: String
+  poolId: Float
   report: MarketReportInput
   resolvedOutcome: String
   mdm: MarketDisputeMechanismInput
@@ -1159,6 +1174,12 @@ input MarketWhereInput {
   status_startsWith: String
   status_endsWith: String
   status_in: [String!]
+  poolId_eq: Int
+  poolId_gt: Int
+  poolId_gte: Int
+  poolId_lt: Int
+  poolId_lte: Int
+  poolId_in: [Int!]
   report_json: JSONObject
   resolvedOutcome_eq: String
   resolvedOutcome_contains: String

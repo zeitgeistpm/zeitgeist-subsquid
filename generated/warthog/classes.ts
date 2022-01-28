@@ -1689,6 +1689,9 @@ export enum MarketHistoryOrderByEnum {
   status_ASC = "status_ASC",
   status_DESC = "status_DESC",
 
+  poolId_ASC = "poolId_ASC",
+  poolId_DESC = "poolId_DESC",
+
   resolvedOutcome_ASC = "resolvedOutcome_ASC",
   resolvedOutcome_DESC = "resolvedOutcome_DESC",
 
@@ -1807,6 +1810,24 @@ export class MarketHistoryWhereInput {
   @TypeGraphQLField(() => [String], { nullable: true })
   status_in?: string[];
 
+  @TypeGraphQLField(() => Int, { nullable: true })
+  poolId_eq?: number;
+
+  @TypeGraphQLField(() => Int, { nullable: true })
+  poolId_gt?: number;
+
+  @TypeGraphQLField(() => Int, { nullable: true })
+  poolId_gte?: number;
+
+  @TypeGraphQLField(() => Int, { nullable: true })
+  poolId_lt?: number;
+
+  @TypeGraphQLField(() => Int, { nullable: true })
+  poolId_lte?: number;
+
+  @TypeGraphQLField(() => [Int], { nullable: true })
+  poolId_in?: number[];
+
   @TypeGraphQLField({ nullable: true })
   resolvedOutcome_eq?: string;
 
@@ -1877,6 +1898,9 @@ export class MarketHistoryCreateInput {
   status?: string;
 
   @TypeGraphQLField({ nullable: true })
+  poolId?: number;
+
+  @TypeGraphQLField({ nullable: true })
   resolvedOutcome?: string;
 
   @TypeGraphQLField({ nullable: true })
@@ -1893,6 +1917,9 @@ export class MarketHistoryUpdateInput {
 
   @TypeGraphQLField({ nullable: true })
   status?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  poolId?: number;
 
   @TypeGraphQLField({ nullable: true })
   resolvedOutcome?: string;
@@ -2688,6 +2715,9 @@ export enum MarketOrderByEnum {
   status_ASC = "status_ASC",
   status_DESC = "status_DESC",
 
+  poolId_ASC = "poolId_ASC",
+  poolId_DESC = "poolId_DESC",
+
   resolvedOutcome_ASC = "resolvedOutcome_ASC",
   resolvedOutcome_DESC = "resolvedOutcome_DESC",
 }
@@ -2977,6 +3007,24 @@ export class MarketWhereInput {
   @TypeGraphQLField(() => [String], { nullable: true })
   status_in?: string[];
 
+  @TypeGraphQLField(() => Int, { nullable: true })
+  poolId_eq?: number;
+
+  @TypeGraphQLField(() => Int, { nullable: true })
+  poolId_gt?: number;
+
+  @TypeGraphQLField(() => Int, { nullable: true })
+  poolId_gte?: number;
+
+  @TypeGraphQLField(() => Int, { nullable: true })
+  poolId_lt?: number;
+
+  @TypeGraphQLField(() => Int, { nullable: true })
+  poolId_lte?: number;
+
+  @TypeGraphQLField(() => [Int], { nullable: true })
+  poolId_in?: number[];
+
   @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
   report_json?: JsonObject;
 
@@ -3064,6 +3112,9 @@ export class MarketCreateInput {
   @TypeGraphQLField()
   status!: string;
 
+  @TypeGraphQLField({ nullable: true })
+  poolId?: number;
+
   @TypeGraphQLField(() => MarketReport, { nullable: true })
   report?: MarketReport;
 
@@ -3126,6 +3177,9 @@ export class MarketUpdateInput {
 
   @TypeGraphQLField({ nullable: true })
   status?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  poolId?: number;
 
   @TypeGraphQLField(() => MarketReport, { nullable: true })
   report?: MarketReport;
