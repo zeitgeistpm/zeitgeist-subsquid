@@ -42,7 +42,13 @@ export async function predictionMarketBoughtCompleteSet({
         } else {
             var hab = await store.get(HistoricalAssetBalance, { where: 
                 { account: acc, assetId: currencyId, event: "Endowed", blockNumber: block.height } })
-            if (!hab) {
+            if (hab) {
+                hab.event = hab.event.concat(event.method)
+                console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
+                await store.save<HistoricalAssetBalance>(hab) 
+            }
+
+            if (!hab && extrinsic?.args[1]) {
                 const amount = new BN(extrinsic?.args[1].value.toString()!)
                 ab.balance = ab.balance.add(amount)
                 console.log(`[${event.method}] Saving asset balance: ${JSON.stringify(ab, null, 2)}`)
@@ -56,11 +62,9 @@ export async function predictionMarketBoughtCompleteSet({
                 hab.balance = ab.balance
                 hab.blockNumber = block.height
                 hab.timestamp = new BN(block.timestamp)
-            } else {
-                hab.event = hab.event.concat(event.method)
+                console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
+                await store.save<HistoricalAssetBalance>(hab) 
             }
-            console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
-            await store.save<HistoricalAssetBalance>(hab) 
         }
     }
 }
