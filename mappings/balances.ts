@@ -584,6 +584,8 @@ export async function systemExtrinsicSuccess({
             { account: acc, assetId: "Ztg", event: "DustLost", blockNumber: block.height } })
         if (dhab) {
             ab.balance = ab.balance.sub(dhab.amount)
+            console.log(`[${event.method}] Saving asset balance: ${JSON.stringify(ab, null, 2)}`)
+            await store.save<AssetBalance>(ab)
 
             const hab = new HistoricalAssetBalance()
             hab.account = acc
