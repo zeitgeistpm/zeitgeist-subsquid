@@ -12,7 +12,8 @@
       "experimentalDecorators": true,
       "emitDecoratorMetadata": true,
       "noEmitOnError": true,
-      "skipLibCheck": true
+      "skipLibCheck": true,
+      "downlevelIteration": true
     },
     "exclude": [
       "node_modules"

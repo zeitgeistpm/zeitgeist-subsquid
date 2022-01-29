@@ -6,6 +6,7 @@ import { Account, AssetBalance, CategoryMetadata, HistoricalAssetBalance, Market
 import { PredictionMarkets } from '../chain'
 import { Cache, IPFS, Tools } from './util'
 import { MarketStatus } from '../generated/modules/enums/enums'
+import { MarketId, MarketType as MType } from '@zeitgeistpm/types/dist/interfaces'
 
 export async function predictionMarketBoughtCompleteSet({
     store,
@@ -137,6 +138,7 @@ export async function predictionMarketCreatedV1({
     newMarket.creation = market.creation.toString()
     newMarket.creatorFee = market.creator_fee.toNumber()
     newMarket.oracle = marketOracle
+    newMarket.outcomeAssets = (await createAssetsForMarket(marketIdOf, market.market_type)) as string[]
 
     const metadata = await decodeMarketMetadata(market.metadata.toString())
     if (metadata) {
@@ -233,6 +235,7 @@ export async function predictionMarketCreatedV2({
     newMarket.creation = market.creation.toString()
     newMarket.creatorFee = market.creator_fee.toNumber()
     newMarket.oracle = marketOracle
+    newMarket.outcomeAssets = (await createAssetsForMarket(marketIdOf, market.market_type)) as string[]
 
     const metadata = await decodeMarketMetadata(market.metadata.toString())
     if (metadata) {
@@ -658,6 +661,25 @@ export async function predictionMarketSoldCompleteSet({
 
     console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
     await store.save<Market>(savedMarket)
+}
+
+async function createAssetsForMarket(
+    marketId: MarketId,
+    marketType: MType
+): Promise<string[]> {
+    const sdk = await Tools.getSDK()
+    return marketType.isCategorical
+      ? [...Array(marketType.asCategorical.toNumber()).keys()].map((catIdx) => {
+          return sdk.api.createType("Asset", {
+            categoricalOutcome: [marketId, catIdx],
+          });
+        })
+      : ["Long", "Short"].map((pos) => {
+          const position = sdk.api.createType("ScalarPosition", pos);
+          return sdk.api.createType("Asset", {
+            scalarOutcome: [marketId, position.toString()],
+          });
+        });
 }
 
 async function decodeMarketMetadata(

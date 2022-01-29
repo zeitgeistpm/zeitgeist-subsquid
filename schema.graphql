@@ -27,6 +27,7 @@ type Market @entity {
   creation: String!
   creatorFee: Int
   oracle: String!
+  outcomeAssets: [String]!
   slug: String
   question: String
   description: String
