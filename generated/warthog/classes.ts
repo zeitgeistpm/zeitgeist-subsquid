@@ -2881,6 +2881,15 @@ export class MarketWhereInput {
   @TypeGraphQLField(() => [String], { nullable: true })
   oracle_in?: string[];
 
+  @TypeGraphQLField(() => [String], { nullable: true })
+  outcomeAssets_containsAll?: [string];
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  outcomeAssets_containsNone?: [string];
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  outcomeAssets_containsAny?: [string];
+
   @TypeGraphQLField({ nullable: true })
   slug_eq?: string;
 
@@ -3079,6 +3088,9 @@ export class MarketCreateInput {
   @TypeGraphQLField()
   oracle!: string;
 
+  @TypeGraphQLField(() => [String])
+  outcomeAssets!: string[];
+
   @TypeGraphQLField({ nullable: true })
   slug?: string;
 
@@ -3144,6 +3156,9 @@ export class MarketUpdateInput {
 
   @TypeGraphQLField({ nullable: true })
   oracle?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  outcomeAssets?: string[];
 
   @TypeGraphQLField({ nullable: true })
   slug?: string;

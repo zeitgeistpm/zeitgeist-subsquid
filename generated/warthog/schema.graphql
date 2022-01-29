@@ -605,6 +605,7 @@ type Market implements BaseGraphQLObject {
   creation: String!
   creatorFee: Int
   oracle: String!
+  outcomeAssets: [String!]!
   slug: String
   question: String
   description: String
@@ -635,6 +636,7 @@ input MarketCreateInput {
   creation: String!
   creatorFee: Float
   oracle: String!
+  outcomeAssets: [String!]!
   slug: String
   question: String
   description: String
@@ -1062,6 +1064,7 @@ input MarketUpdateInput {
   creation: String
   creatorFee: Float
   oracle: String
+  outcomeAssets: [String!]
   slug: String
   question: String
   description: String
@@ -1132,6 +1135,9 @@ input MarketWhereInput {
   oracle_startsWith: String
   oracle_endsWith: String
   oracle_in: [String!]
+  outcomeAssets_containsAll: [String!]
+  outcomeAssets_containsNone: [String!]
+  outcomeAssets_containsAny: [String!]
   slug_eq: String
   slug_contains: String
   slug_startsWith: String

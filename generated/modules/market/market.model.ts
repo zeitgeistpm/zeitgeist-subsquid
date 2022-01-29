@@ -23,6 +23,12 @@ export class Market extends BaseModel {
   @StringField({})
   oracle!: string;
 
+  @CustomField({
+    db: { type: 'text', array: true },
+    api: { type: 'string' },
+  })
+  outcomeAssets!: string[];
+
   @StringField({
     nullable: true,
   })

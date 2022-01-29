@@ -538,6 +538,7 @@ export interface MarketCreateInput {
   creation: String
   creatorFee?: Float | null
   oracle: String
+  outcomeAssets: Array<String>
   slug?: String | null
   question?: String | null
   description?: String | null
@@ -891,6 +892,7 @@ export interface MarketUpdateInput {
   creation?: String | null
   creatorFee?: Float | null
   oracle?: String | null
+  outcomeAssets?: String[] | String | null
   slug?: String | null
   question?: String | null
   description?: String | null
@@ -961,6 +963,9 @@ export interface MarketWhereInput {
   oracle_startsWith?: String | null
   oracle_endsWith?: String | null
   oracle_in?: String[] | String | null
+  outcomeAssets_containsAll?: String[] | String | null
+  outcomeAssets_containsNone?: String[] | String | null
+  outcomeAssets_containsAny?: String[] | String | null
   slug_eq?: String | null
   slug_contains?: String | null
   slug_startsWith?: String | null
@@ -1351,6 +1356,7 @@ export interface Market extends BaseGraphQLObject {
   creation: String
   creatorFee?: Int | null
   oracle: String
+  outcomeAssets: Array<String>
   slug?: String | null
   question?: String | null
   description?: String | null
