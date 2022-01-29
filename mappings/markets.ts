@@ -660,6 +660,25 @@ export async function predictionMarketSoldCompleteSet({
     await store.save<Market>(savedMarket)
 }
 
+async function createAssetsForMarket(
+    marketId: MarketId,
+    marketType: MType
+): Promise<string[]> {
+    const sdk = await Tools.getSDK()
+    return marketType.isCategorical
+      ? [...Array(marketType.asCategorical.toNumber()).keys()].map((catIdx) => {
+          return sdk.api.createType("Asset", {
+            categoricalOutcome: [marketId, catIdx],
+          });
+        })
+      : ["Long", "Short"].map((pos) => {
+          const position = sdk.api.createType("ScalarPosition", pos);
+          return sdk.api.createType("Asset", {
+            scalarOutcome: [marketId, position.toString()],
+          });
+        });
+}
+
 async function decodeMarketMetadata(
     metadata: string,
 ): Promise<DecodedMarketMetadata | undefined> {
