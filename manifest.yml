@@ -53,53 +53,53 @@ mappings:
     - event: predictionMarkets.MarketApproved
       handler: predictionMarketApprovedV1
       filter:
-        specVersion: '[0,30)'
+        specVersion: '[0,29)'
     - event: predictionMarkets.MarketApproved
       handler: predictionMarketApprovedV2
       filter:
-        specVersion: '[30,)'
+        specVersion: '[29,)'
     - event: predictionMarkets.MarketCreated
       handler: predictionMarketCreatedV1
       filter:
-        specVersion: '[0,30)'
+        specVersion: '[0,29)'
     - event: predictionMarkets.MarketCreated
       handler: predictionMarketCreatedV2
       filter:
-        specVersion: '[30,)'
+        specVersion: '[29,)'
     - event: predictionMarkets.MarketStartedWithSubsidy
       handler: predictionMarketStartedWithSubsidyV1
       filter:
-        specVersion: '[0,30)'
+        specVersion: '[0,29)'
     - event: predictionMarkets.MarketStartedWithSubsidy
       handler: predictionMarketStartedWithSubsidyV2
       filter:
-        specVersion: '[30,)'
+        specVersion: '[29,)'
     - event: predictionMarkets.MarketInsufficientSubsidy
       handler: predictionMarketInsufficientSubsidyV1
       filter:
-        specVersion: '[0,30)'
+        specVersion: '[0,29)'
     - event: predictionMarkets.MarketInsufficientSubsidy
       handler: predictionMarketInsufficientSubsidyV2
       filter:
-        specVersion: '[30,)'
+        specVersion: '[29,)'
     - event: predictionMarkets.MarketDisputed
       handler: predictionMarketDisputedV1
       filter:
-        specVersion: '[0,30)'
+        specVersion: '[0,29)'
     - event: predictionMarkets.MarketDisputed
       handler: predictionMarketDisputedV2
       filter:
-        specVersion: '[30,)'
+        specVersion: '[29,)'
     - event: predictionMarkets.MarketRejected
       handler: predictionMarketRejected
     - event: predictionMarkets.MarketReported
       handler: predictionMarketReportedV1
       filter:
-        specVersion: '[0,30)'
+        specVersion: '[0,29)'
     - event: predictionMarkets.MarketReported
       handler: predictionMarketReportedV2
       filter:
-        specVersion: '[30,)'
+        specVersion: '[29,)'
     - event: predictionMarkets.MarketCancelled
       handler: predictionMarketCancelled
     - event: predictionMarkets.MarketResolved
