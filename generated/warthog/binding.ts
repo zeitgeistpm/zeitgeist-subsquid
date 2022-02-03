@@ -12,9 +12,15 @@ export interface Query {
     assetBalances: <T = Array<AssetBalance>>(args: { offset?: Int | null, limit?: Int | null, where?: AssetBalanceWhereInput | null, orderBy?: Array<AssetBalanceOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     assetBalanceByUniqueInput: <T = AssetBalance | null>(args: { where: AssetBalanceWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
     assetBalancesConnection: <T = AssetBalanceConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: AssetBalanceWhereInput | null, orderBy?: Array<AssetBalanceOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
+    assets: <T = Array<Asset>>(args: { offset?: Int | null, limit?: Int | null, where?: AssetWhereInput | null, orderBy?: Array<AssetOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
+    assetByUniqueInput: <T = Asset | null>(args: { where: AssetWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
+    assetsConnection: <T = AssetConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: AssetWhereInput | null, orderBy?: Array<AssetOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     historicalAssetBalances: <T = Array<HistoricalAssetBalance>>(args: { offset?: Int | null, limit?: Int | null, where?: HistoricalAssetBalanceWhereInput | null, orderBy?: Array<HistoricalAssetBalanceOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     historicalAssetBalanceByUniqueInput: <T = HistoricalAssetBalance | null>(args: { where: HistoricalAssetBalanceWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
     historicalAssetBalancesConnection: <T = HistoricalAssetBalanceConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: HistoricalAssetBalanceWhereInput | null, orderBy?: Array<HistoricalAssetBalanceOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
+    historicalAssetPrices: <T = Array<HistoricalAssetPrice>>(args: { offset?: Int | null, limit?: Int | null, where?: HistoricalAssetPriceWhereInput | null, orderBy?: Array<HistoricalAssetPriceOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
+    historicalAssetPriceByUniqueInput: <T = HistoricalAssetPrice | null>(args: { where: HistoricalAssetPriceWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
+    historicalAssetPricesConnection: <T = HistoricalAssetPriceConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: HistoricalAssetPriceWhereInput | null, orderBy?: Array<HistoricalAssetPriceOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     historicalPools: <T = Array<HistoricalPool>>(args: { offset?: Int | null, limit?: Int | null, where?: HistoricalPoolWhereInput | null, orderBy?: Array<HistoricalPoolOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     historicalPoolByUniqueInput: <T = HistoricalPool | null>(args: { where: HistoricalPoolWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
     historicalPoolsConnection: <T = HistoricalPoolConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: HistoricalPoolWhereInput | null, orderBy?: Array<HistoricalPoolOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
@@ -78,6 +84,15 @@ export type AssetBalanceOrderByInput =   'createdAt_ASC' |
   'balance_ASC' |
   'balance_DESC'
 
+export type AssetOrderByInput =   'createdAt_ASC' |
+  'createdAt_DESC' |
+  'updatedAt_ASC' |
+  'updatedAt_DESC' |
+  'deletedAt_ASC' |
+  'deletedAt_DESC' |
+  'assetId_ASC' |
+  'assetId_DESC'
+
 export type HistoricalAssetBalanceOrderByInput =   'createdAt_ASC' |
   'createdAt_DESC' |
   'updatedAt_ASC' |
@@ -94,6 +109,25 @@ export type HistoricalAssetBalanceOrderByInput =   'createdAt_ASC' |
   'amount_DESC' |
   'balance_ASC' |
   'balance_DESC' |
+  'blockNumber_ASC' |
+  'blockNumber_DESC' |
+  'timestamp_ASC' |
+  'timestamp_DESC'
+
+export type HistoricalAssetPriceOrderByInput =   'createdAt_ASC' |
+  'createdAt_DESC' |
+  'updatedAt_ASC' |
+  'updatedAt_DESC' |
+  'deletedAt_ASC' |
+  'deletedAt_DESC' |
+  'asset_ASC' |
+  'asset_DESC' |
+  'quantity_ASC' |
+  'quantity_DESC' |
+  'price_ASC' |
+  'price_DESC' |
+  'event_ASC' |
+  'event_DESC' |
   'blockNumber_ASC' |
   'blockNumber_DESC' |
   'timestamp_ASC' |
@@ -281,6 +315,58 @@ export interface AssetBalanceWhereUniqueInput {
   id: ID_Output
 }
 
+export interface AssetCreateInput {
+  assetId: String
+  price?: PriceInput | null
+}
+
+export interface AssetUpdateInput {
+  assetId?: String | null
+  price?: PriceInput | null
+}
+
+export interface AssetWhereInput {
+  id_eq?: ID_Input | null
+  id_in?: ID_Output[] | ID_Output | null
+  createdAt_eq?: DateTime | null
+  createdAt_lt?: DateTime | null
+  createdAt_lte?: DateTime | null
+  createdAt_gt?: DateTime | null
+  createdAt_gte?: DateTime | null
+  createdById_eq?: ID_Input | null
+  createdById_in?: ID_Output[] | ID_Output | null
+  updatedAt_eq?: DateTime | null
+  updatedAt_lt?: DateTime | null
+  updatedAt_lte?: DateTime | null
+  updatedAt_gt?: DateTime | null
+  updatedAt_gte?: DateTime | null
+  updatedById_eq?: ID_Input | null
+  updatedById_in?: ID_Output[] | ID_Output | null
+  deletedAt_all?: Boolean | null
+  deletedAt_eq?: DateTime | null
+  deletedAt_lt?: DateTime | null
+  deletedAt_lte?: DateTime | null
+  deletedAt_gt?: DateTime | null
+  deletedAt_gte?: DateTime | null
+  deletedById_eq?: ID_Input | null
+  deletedById_in?: ID_Output[] | ID_Output | null
+  assetId_eq?: String | null
+  assetId_contains?: String | null
+  assetId_startsWith?: String | null
+  assetId_endsWith?: String | null
+  assetId_in?: String[] | String | null
+  price_json?: JSONObject | null
+  historicalAssetPrice_none?: HistoricalAssetPriceWhereInput | null
+  historicalAssetPrice_some?: HistoricalAssetPriceWhereInput | null
+  historicalAssetPrice_every?: HistoricalAssetPriceWhereInput | null
+  AND?: AssetWhereInput[] | AssetWhereInput | null
+  OR?: AssetWhereInput[] | AssetWhereInput | null
+}
+
+export interface AssetWhereUniqueInput {
+  id: ID_Output
+}
+
 export interface BaseWhereInput {
   id_eq?: String | null
   id_in?: String[] | String | null
@@ -464,6 +550,87 @@ export interface HistoricalAssetBalanceWhereInput {
 }
 
 export interface HistoricalAssetBalanceWhereUniqueInput {
+  id: ID_Output
+}
+
+export interface HistoricalAssetPriceCreateInput {
+  asset: ID_Output
+  quantity: Float
+  price: String
+  event: String
+  blockNumber: Float
+  timestamp: String
+}
+
+export interface HistoricalAssetPriceUpdateInput {
+  asset?: ID_Input | null
+  quantity?: Float | null
+  price?: String | null
+  event?: String | null
+  blockNumber?: Float | null
+  timestamp?: String | null
+}
+
+export interface HistoricalAssetPriceWhereInput {
+  id_eq?: ID_Input | null
+  id_in?: ID_Output[] | ID_Output | null
+  createdAt_eq?: DateTime | null
+  createdAt_lt?: DateTime | null
+  createdAt_lte?: DateTime | null
+  createdAt_gt?: DateTime | null
+  createdAt_gte?: DateTime | null
+  createdById_eq?: ID_Input | null
+  createdById_in?: ID_Output[] | ID_Output | null
+  updatedAt_eq?: DateTime | null
+  updatedAt_lt?: DateTime | null
+  updatedAt_lte?: DateTime | null
+  updatedAt_gt?: DateTime | null
+  updatedAt_gte?: DateTime | null
+  updatedById_eq?: ID_Input | null
+  updatedById_in?: ID_Output[] | ID_Output | null
+  deletedAt_all?: Boolean | null
+  deletedAt_eq?: DateTime | null
+  deletedAt_lt?: DateTime | null
+  deletedAt_lte?: DateTime | null
+  deletedAt_gt?: DateTime | null
+  deletedAt_gte?: DateTime | null
+  deletedById_eq?: ID_Input | null
+  deletedById_in?: ID_Output[] | ID_Output | null
+  quantity_eq?: Int | null
+  quantity_gt?: Int | null
+  quantity_gte?: Int | null
+  quantity_lt?: Int | null
+  quantity_lte?: Int | null
+  quantity_in?: Int[] | Int | null
+  price_eq?: BigInt | null
+  price_gt?: BigInt | null
+  price_gte?: BigInt | null
+  price_lt?: BigInt | null
+  price_lte?: BigInt | null
+  price_in?: BigInt[] | BigInt | null
+  event_eq?: String | null
+  event_contains?: String | null
+  event_startsWith?: String | null
+  event_endsWith?: String | null
+  event_in?: String[] | String | null
+  blockNumber_eq?: Int | null
+  blockNumber_gt?: Int | null
+  blockNumber_gte?: Int | null
+  blockNumber_lt?: Int | null
+  blockNumber_lte?: Int | null
+  blockNumber_in?: Int[] | Int | null
+  timestamp_eq?: BigInt | null
+  timestamp_gt?: BigInt | null
+  timestamp_gte?: BigInt | null
+  timestamp_lt?: BigInt | null
+  timestamp_lte?: BigInt | null
+  timestamp_in?: BigInt[] | BigInt | null
+  asset?: AssetWhereInput | null
+  AND?: HistoricalAssetPriceWhereInput[] | HistoricalAssetPriceWhereInput | null
+  OR?: HistoricalAssetPriceWhereInput[] | HistoricalAssetPriceWhereInput | null
+}
+
+export interface HistoricalAssetPriceWhereUniqueInput {
   id: ID_Output
 }
 
@@ -1190,6 +1357,66 @@ export interface PoolWhereUniqueInput {
   id: ID_Output
 }
 
+export interface PriceCreateInput {
+  quantity?: Float | null
+  price?: String | null
+}
+
+export interface PriceInput {
+  quantity?: Int | null
+  price?: BigInt | null
+}
+
+export interface PriceUpdateInput {
+  quantity?: Float | null
+  price?: String | null
+}
+
+export interface PriceWhereInput {
+  id_eq?: ID_Input | null
+  id_in?: ID_Output[] | ID_Output | null
+  createdAt_eq?: DateTime | null
+  createdAt_lt?: DateTime | null
+  createdAt_lte?: DateTime | null
+  createdAt_gt?: DateTime | null
+  createdAt_gte?: DateTime | null
+  createdById_eq?: ID_Input | null
+  createdById_in?: ID_Output[] | ID_Output | null
+  updatedAt_eq?: DateTime | null
+  updatedAt_lt?: DateTime | null
+  updatedAt_lte?: DateTime | null
+  updatedAt_gt?: DateTime | null
+  updatedAt_gte?: DateTime | null
+  updatedById_eq?: ID_Input | null
+  updatedById_in?: ID_Output[] | ID_Output | null
+  deletedAt_all?: Boolean | null
+  deletedAt_eq?: DateTime | null
+  deletedAt_lt?: DateTime | null
+  deletedAt_lte?: DateTime | null
+  deletedAt_gt?: DateTime | null
+  deletedAt_gte?: DateTime | null
+  deletedById_eq?: ID_Input | null
+  deletedById_in?: ID_Output[] | ID_Output | null
+  quantity_eq?: Int | null
+  quantity_gt?: Int | null
+  quantity_gte?: Int | null
+  quantity_lt?: Int | null
+  quantity_lte?: Int | null
+  quantity_in?: Int[] | Int | null
+  price_eq?: BigInt | null
+  price_gt?: BigInt | null
+  price_gte?: BigInt | null
+  price_lt?: BigInt | null
+  price_lte?: BigInt | null
+  price_in?: BigInt[] | BigInt | null
+  AND?: PriceWhereInput[] | PriceWhereInput | null
+  OR?: PriceWhereInput[] | PriceWhereInput | null
+}
+
+export interface PriceWhereUniqueInput {
+  id: ID_Output
+}
+
 export interface BaseGraphQLObject {
   id: ID_Output
   createdAt: DateTime
@@ -1230,6 +1457,20 @@ export interface AccountEdge {
   cursor: String
 }
 
+export interface Asset extends BaseGraphQLObject {
+  id: ID_Output
+  createdAt: DateTime
+  createdById: String
+  updatedAt?: DateTime | null
+  updatedById?: String | null
+  deletedAt?: DateTime | null
+  deletedById?: String | null
+  version: Int
+  assetId: String
+  price?: Price | null
+  historicalAssetPrice?: Array<HistoricalAssetPrice> | null
+}
+
 export interface AssetBalance extends BaseGraphQLObject {
   id: ID_Output
   createdAt: DateTime
@@ -1253,6 +1494,17 @@ export interface AssetBalanceConnection {
 
 export interface AssetBalanceEdge {
   node: AssetBalance
+  cursor: String
+}
+
+export interface AssetConnection {
+  totalCount: Int
+  edges: Array<AssetEdge>
+  pageInfo: PageInfo
+}
+
+export interface AssetEdge {
+  node: Asset
   cursor: String
 }
 
@@ -1312,6 +1564,35 @@ export interface HistoricalAssetBalanceConnection {
 
 export interface HistoricalAssetBalanceEdge {
   node: HistoricalAssetBalance
+  cursor: String
+}
+
+export interface HistoricalAssetPrice extends BaseGraphQLObject {
+  id: ID_Output
+  createdAt: DateTime
+  createdById: String
+  updatedAt?: DateTime | null
+  updatedById?: String | null
+  deletedAt?: DateTime | null
+  deletedById?: String | null
+  version: Int
+  asset: Asset
+  assetId: String
+  quantity: Int
+  price: BigInt
+  event: String
+  blockNumber: Int
+  timestamp: BigInt
+}
+
+export interface HistoricalAssetPriceConnection {
+  totalCount: Int
+  edges: Array<HistoricalAssetPriceEdge>
+  pageInfo: PageInfo
+}
+
+export interface HistoricalAssetPriceEdge {
+  node: HistoricalAssetPrice
   cursor: String
 }
 
@@ -1459,6 +1740,11 @@ export interface PoolConnection {
 export interface PoolEdge {
   node: Pool
   cursor: String
+}
+
+export interface Price {
+  quantity?: Int | null
+  price?: BigInt | null
 }
 
 export interface ProcessorState {
