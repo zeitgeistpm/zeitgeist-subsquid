@@ -2,7 +2,7 @@ import BN from 'bn.js'
 import { encodeAddress } from '@polkadot/keyring'
 import { EventContext, StoreContext } from '@subsquid/hydra-common'
 import { util } from '@zeitgeistpm/sdk'
-import { Account, AssetBalance, CategoryMetadata, HistoricalAssetBalance, Market, MarketDisputeMechanism, MarketHistory, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../generated/model'
+import { Account, Asset, AssetBalance, CategoryMetadata, HistoricalAssetBalance, Market, MarketDisputeMechanism, MarketHistory, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../generated/model'
 import { PredictionMarkets } from '../chain'
 import { Cache, IPFS, Tools } from './util'
 import { MarketStatus } from '../generated/modules/enums/enums'
@@ -224,6 +224,15 @@ export async function predictionMarketCreatedV1({
 
     console.log(`[${event.name}] Saving market: ${JSON.stringify(newMarket, null, 2)}`)
     await store.save<Market>(newMarket)
+
+    const len = +newMarket.marketType.categorical!
+    for (var i = 0; i < len; i++) {
+        const asset = new Asset()
+        asset.assetId = JSON.stringify(util.AssetIdFromString(`[${marketIdOf},${i}]`))
+        
+        console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
+        await store.save<Asset>(asset)
+    }
 }
 
 export async function predictionMarketCreatedV2({
@@ -321,6 +330,15 @@ export async function predictionMarketCreatedV2({
 
     console.log(`[${event.name}] Saving market: ${JSON.stringify(newMarket, null, 2)}`)
     await store.save<Market>(newMarket)
+
+    const len = +newMarket.marketType.categorical!
+    for (var i = 0; i < len; i++) {
+        const asset = new Asset()
+        asset.assetId = JSON.stringify(util.AssetIdFromString(`[${marketIdOf},${i}]`))
+        
+        console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
+        await store.save<Asset>(asset)
+    }
 }
 
 export async function predictionMarketStartedWithSubsidyV1({
