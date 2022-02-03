@@ -669,6 +669,46 @@ export async function predictionMarketSoldCompleteSet({
 
     console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
     await store.save<Market>(savedMarket)
+
+    const walletId = encodeAddress(accountId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
+    var acc = await store.get(Account, { where: { wallet: walletId } })
+    if (!acc) { return }
+
+    const len = +savedMarket.marketType.categorical!
+    for (var i = 0; i < len; i++) {
+        const currencyId = util.AssetIdFromString(`[${marketIdOf},${i}]`)
+        const ab = await store.get(AssetBalance, { where: { account: acc, assetId: currencyId } })
+        if (!ab) { return }
+
+        var amount = new BN(0)
+        if (extrinsic?.args[1]) {
+            amount = new BN(extrinsic?.args[1].value.toString()!)
+        } else if (extrinsic?.args[0].name === "calls") {
+            for (var ext of extrinsic.args[0].value as Array<{ args: { amount: number, market_id: number }}> ) {
+                const { args: { amount: amt, market_id } } = ext;
+                if (market_id == marketIdOf.toNumber()) {
+                    amount = new BN(amt)
+                    break
+                }
+            }
+        }
+        if (amount > new BN(0)) {
+            ab.balance = ab.balance.sub(amount)
+            console.log(`[${event.method}] Saving asset balance: ${JSON.stringify(ab, null, 2)}`)
+            await store.save<AssetBalance>(ab)
+
+            const hab = new HistoricalAssetBalance()
+            hab.account = acc
+            hab.event = event.method
+            hab.assetId = ab.assetId
+            hab.amount = new BN(0 - amount.toNumber())
+            hab.balance = ab.balance
+            hab.blockNumber = block.height
+            hab.timestamp = new BN(block.timestamp)
+            console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
+            await store.save<HistoricalAssetBalance>(hab) 
+        }
+    }
 }
 
 async function createAssetsForMarket(
