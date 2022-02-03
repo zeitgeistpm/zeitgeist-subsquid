@@ -45,36 +45,35 @@ export async function predictionMarketBoughtCompleteSet({
             hab.event = hab.event.concat(event.method)
             console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
             await store.save<HistoricalAssetBalance>(hab)
-            return
-        }
-
-        var amount = new BN(0)
-        if (extrinsic?.args[1]) {
-            amount = new BN(extrinsic?.args[1].value.toString()!)
-        } else if (extrinsic?.args[0].name === "calls") {
-            for (var ext of extrinsic.args[0].value as Array<{ args: { amount: number, market_id: number }}> ) {
-                const { args: { amount: amt, market_id } } = ext;
-                if (market_id == marketIdOf.toNumber()) {
-                    amount = new BN(amt)
-                    break
+        } else {
+            var amount = new BN(0)
+            if (extrinsic?.args[1]) {
+                amount = new BN(extrinsic?.args[1].value.toString()!)
+            } else if (extrinsic?.args[0].name === "calls") {
+                for (var ext of extrinsic.args[0].value as Array<{ args: { amount: number, market_id: number }}> ) {
+                    const { args: { amount: amt, market_id } } = ext;
+                    if (market_id == marketIdOf.toNumber()) {
+                        amount = new BN(amt)
+                        break
+                    }
                 }
             }
-        }
-        if (amount > new BN(0)) {
-            ab.balance = ab.balance.add(amount)
-            console.log(`[${event.method}] Saving asset balance: ${JSON.stringify(ab, null, 2)}`)
-            await store.save<AssetBalance>(ab)
+            if (amount > new BN(0)) {
+                ab.balance = ab.balance.add(amount)
+                console.log(`[${event.method}] Saving asset balance: ${JSON.stringify(ab, null, 2)}`)
+                await store.save<AssetBalance>(ab)
 
-            hab = new HistoricalAssetBalance()
-            hab.account = acc
-            hab.event = event.method
-            hab.assetId = ab.assetId
-            hab.amount = amount
-            hab.balance = ab.balance
-            hab.blockNumber = block.height
-            hab.timestamp = new BN(block.timestamp)
-            console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
-            await store.save<HistoricalAssetBalance>(hab) 
+                hab = new HistoricalAssetBalance()
+                hab.account = acc
+                hab.event = event.method
+                hab.assetId = ab.assetId
+                hab.amount = amount
+                hab.balance = ab.balance
+                hab.blockNumber = block.height
+                hab.timestamp = new BN(block.timestamp)
+                console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
+                await store.save<HistoricalAssetBalance>(hab) 
+            }
         }
     }
 }
