@@ -1,6 +1,4 @@
-import { BaseModel, Model, OneToMany, StringField, JSONField } from '@subsquid/warthog';
-
-import { HistoricalAssetPrice } from '../historical-asset-price/historical-asset-price.model';
+import { BaseModel, Model, StringField, JSONField } from '@subsquid/warthog';
 
 import * as jsonTypes from '../jsonfields/jsonfields.model';
 
@@ -9,16 +7,8 @@ export class Asset extends BaseModel {
   @StringField({})
   assetId!: string;
 
-  @JSONField({ filter: true, gqlFieldType: jsonTypes.Price, nullable: true })
-  price?: jsonTypes.Price;
-
-  @OneToMany(() => HistoricalAssetPrice, (param: HistoricalAssetPrice) => param.asset, {
-    nullable: true,
-    modelName: 'Asset',
-    relModelName: 'HistoricalAssetPrice',
-    propertyName: 'historicalAssetPrice',
-  })
-  historicalAssetPrice?: HistoricalAssetPrice[];
+  @JSONField({ filter: true, gqlFieldType: jsonTypes.PoolInfo, nullable: true })
+  poolInfo?: jsonTypes.PoolInfo;
 
   constructor(init?: Partial<Asset>) {
     super();

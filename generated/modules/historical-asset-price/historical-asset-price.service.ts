@@ -7,16 +7,8 @@ import { HistoricalAssetPrice } from './historical-asset-price.model';
 
 import { HistoricalAssetPriceWhereArgs, HistoricalAssetPriceWhereInput } from '../../warthog';
 
-import { Asset } from '../asset/asset.model';
-import { AssetService } from '../asset/asset.service';
-import { getConnection, getRepository, In, Not } from 'typeorm';
-import _ from 'lodash';
-
 @Service('HistoricalAssetPriceService')
 export class HistoricalAssetPriceService extends HydraBaseService<HistoricalAssetPrice> {
-  @Inject('AssetService')
-  public readonly assetService!: AssetService;
-
   constructor(@InjectRepository(HistoricalAssetPrice) protected readonly repository: Repository<HistoricalAssetPrice>) {
     super(HistoricalAssetPrice, repository);
   }
@@ -50,24 +42,9 @@ export class HistoricalAssetPriceService extends HydraBaseService<HistoricalAsse
   ): SelectQueryBuilder<HistoricalAssetPrice> {
     const where = <HistoricalAssetPriceWhereInput>(_where || {});
 
-    // remove relation filters to enable warthog query builders
-    const { asset } = where;
-    delete where.asset;
-
     let mainQuery = this.buildFindQueryWithParams(<any>where, orderBy, undefined, fields, 'main').take(undefined); // remove LIMIT
 
     let parameters = mainQuery.getParameters();
-
-    if (asset) {
-      // OTO or MTO
-      const assetQuery = this.assetService
-        .buildFindQueryWithParams(<any>asset, undefined, undefined, ['id'], 'asset')
-        .take(undefined); // remove the default LIMIT
-
-      mainQuery = mainQuery.andWhere(`"historicalassetprice"."asset_id" IN (${assetQuery.getQuery()})`);
-
-      parameters = { ...parameters, ...assetQuery.getParameters() };
-    }
 
     mainQuery = mainQuery.setParameters(parameters);
 

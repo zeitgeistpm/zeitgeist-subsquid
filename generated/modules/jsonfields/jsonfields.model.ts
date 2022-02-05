@@ -149,16 +149,12 @@ export class OutcomeReport {
   scalar?: number;
 }
 
-@InputType('PriceInput')
+@InputType('PoolInfoInput')
 @ObjectType()
-export class Price {
-  @IntField({
-    nullable: true,
-  })
-  quantity?: number;
+export class PoolInfo {
+  @FloatField({})
+  price!: number;
 
-  @NumericField({
-    nullable: true,
-  })
-  price?: BN;
+  @NumericField({})
+  qty!: BN;
 }

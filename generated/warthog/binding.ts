@@ -120,12 +120,16 @@ export type HistoricalAssetPriceOrderByInput =   'createdAt_ASC' |
   'updatedAt_DESC' |
   'deletedAt_ASC' |
   'deletedAt_DESC' |
-  'asset_ASC' |
-  'asset_DESC' |
-  'quantity_ASC' |
-  'quantity_DESC' |
+  'assetId_ASC' |
+  'assetId_DESC' |
+  'dPrice_ASC' |
+  'dPrice_DESC' |
+  'dQty_ASC' |
+  'dQty_DESC' |
   'price_ASC' |
   'price_DESC' |
+  'qty_ASC' |
+  'qty_DESC' |
   'event_ASC' |
   'event_DESC' |
   'blockNumber_ASC' |
@@ -317,12 +321,12 @@ export interface AssetBalanceWhereUniqueInput {
 
 export interface AssetCreateInput {
   assetId: String
-  price?: PriceInput | null
+  poolInfo?: PoolInfoInput | null
 }
 
 export interface AssetUpdateInput {
   assetId?: String | null
-  price?: PriceInput | null
+  poolInfo?: PoolInfoInput | null
 }
 
 export interface AssetWhereInput {
@@ -355,10 +359,7 @@ export interface AssetWhereInput {
   assetId_startsWith?: String | null
   assetId_endsWith?: String | null
   assetId_in?: String[] | String | null
-  price_json?: JSONObject | null
-  historicalAssetPrice_none?: HistoricalAssetPriceWhereInput | null
-  historicalAssetPrice_some?: HistoricalAssetPriceWhereInput | null
-  historicalAssetPrice_every?: HistoricalAssetPriceWhereInput | null
+  poolInfo_json?: JSONObject | null
   AND?: AssetWhereInput[] | AssetWhereInput | null
   OR?: AssetWhereInput[] | AssetWhereInput | null
 }
@@ -554,18 +555,22 @@ export interface HistoricalAssetBalanceWhereUniqueInput {
 }
 
 export interface HistoricalAssetPriceCreateInput {
-  asset: ID_Output
-  quantity: Float
-  price: String
+  assetId: String
+  dPrice: Float
+  dQty: String
+  price: Float
+  qty: String
   event: String
   blockNumber: Float
   timestamp: String
 }
 
 export interface HistoricalAssetPriceUpdateInput {
-  asset?: ID_Input | null
-  quantity?: Float | null
-  price?: String | null
+  assetId?: String | null
+  dPrice?: Float | null
+  dQty?: String | null
+  price?: Float | null
+  qty?: String | null
   event?: String | null
   blockNumber?: Float | null
   timestamp?: String | null
@@ -596,18 +601,35 @@ export interface HistoricalAssetPriceWhereInput {
   deletedAt_gte?: DateTime | null
   deletedById_eq?: ID_Input | null
   deletedById_in?: ID_Output[] | ID_Output | null
-  quantity_eq?: Int | null
-  quantity_gt?: Int | null
-  quantity_gte?: Int | null
-  quantity_lt?: Int | null
-  quantity_lte?: Int | null
-  quantity_in?: Int[] | Int | null
-  price_eq?: BigInt | null
-  price_gt?: BigInt | null
-  price_gte?: BigInt | null
-  price_lt?: BigInt | null
-  price_lte?: BigInt | null
-  price_in?: BigInt[] | BigInt | null
+  assetId_eq?: String | null
+  assetId_contains?: String | null
+  assetId_startsWith?: String | null
+  assetId_endsWith?: String | null
+  assetId_in?: String[] | String | null
+  dPrice_eq?: Float | null
+  dPrice_gt?: Float | null
+  dPrice_gte?: Float | null
+  dPrice_lt?: Float | null
+  dPrice_lte?: Float | null
+  dPrice_in?: Float[] | Float | null
+  dQty_eq?: BigInt | null
+  dQty_gt?: BigInt | null
+  dQty_gte?: BigInt | null
+  dQty_lt?: BigInt | null
+  dQty_lte?: BigInt | null
+  dQty_in?: BigInt[] | BigInt | null
+  price_eq?: Float | null
+  price_gt?: Float | null
+  price_gte?: Float | null
+  price_lt?: Float | null
+  price_lte?: Float | null
+  price_in?: Float[] | Float | null
+  qty_eq?: BigInt | null
+  qty_gt?: BigInt | null
+  qty_gte?: BigInt | null
+  qty_lt?: BigInt | null
+  qty_lte?: BigInt | null
+  qty_in?: BigInt[] | BigInt | null
   event_eq?: String | null
   event_contains?: String | null
   event_startsWith?: String | null
@@ -625,7 +647,6 @@ export interface HistoricalAssetPriceWhereInput {
   timestamp_lt?: BigInt | null
   timestamp_lte?: BigInt | null
   timestamp_in?: BigInt[] | BigInt | null
-  asset?: AssetWhereInput | null
   AND?: HistoricalAssetPriceWhereInput[] | HistoricalAssetPriceWhereInput | null
   OR?: HistoricalAssetPriceWhereInput[] | HistoricalAssetPriceWhereInput | null
 }
@@ -1268,6 +1289,66 @@ export interface PoolCreateInput {
   totalWeight: String
 }
 
+export interface PoolInfoCreateInput {
+  price: Float
+  qty: String
+}
+
+export interface PoolInfoInput {
+  price: Float
+  qty: BigInt
+}
+
+export interface PoolInfoUpdateInput {
+  price?: Float | null
+  qty?: String | null
+}
+
+export interface PoolInfoWhereInput {
+  id_eq?: ID_Input | null
+  id_in?: ID_Output[] | ID_Output | null
+  createdAt_eq?: DateTime | null
+  createdAt_lt?: DateTime | null
+  createdAt_lte?: DateTime | null
+  createdAt_gt?: DateTime | null
+  createdAt_gte?: DateTime | null
+  createdById_eq?: ID_Input | null
+  createdById_in?: ID_Output[] | ID_Output | null
+  updatedAt_eq?: DateTime | null
+  updatedAt_lt?: DateTime | null
+  updatedAt_lte?: DateTime | null
+  updatedAt_gt?: DateTime | null
+  updatedAt_gte?: DateTime | null
+  updatedById_eq?: ID_Input | null
+  updatedById_in?: ID_Output[] | ID_Output | null
+  deletedAt_all?: Boolean | null
+  deletedAt_eq?: DateTime | null
+  deletedAt_lt?: DateTime | null
+  deletedAt_lte?: DateTime | null
+  deletedAt_gt?: DateTime | null
+  deletedAt_gte?: DateTime | null
+  deletedById_eq?: ID_Input | null
+  deletedById_in?: ID_Output[] | ID_Output | null
+  price_eq?: Float | null
+  price_gt?: Float | null
+  price_gte?: Float | null
+  price_lt?: Float | null
+  price_lte?: Float | null
+  price_in?: Float[] | Float | null
+  qty_eq?: BigInt | null
+  qty_gt?: BigInt | null
+  qty_gte?: BigInt | null
+  qty_lt?: BigInt | null
+  qty_lte?: BigInt | null
+  qty_in?: BigInt[] | BigInt | null
+  AND?: PoolInfoWhereInput[] | PoolInfoWhereInput | null
+  OR?: PoolInfoWhereInput[] | PoolInfoWhereInput | null
+}
+
+export interface PoolInfoWhereUniqueInput {
+  id: ID_Output
+}
+
 export interface PoolUpdateInput {
   poolId?: Float | null
   baseAsset?: String | null
@@ -1357,66 +1438,6 @@ export interface PoolWhereUniqueInput {
   id: ID_Output
 }
 
-export interface PriceCreateInput {
-  quantity?: Float | null
-  price?: String | null
-}
-
-export interface PriceInput {
-  quantity?: Int | null
-  price?: BigInt | null
-}
-
-export interface PriceUpdateInput {
-  quantity?: Float | null
-  price?: String | null
-}
-
-export interface PriceWhereInput {
-  id_eq?: ID_Input | null
-  id_in?: ID_Output[] | ID_Output | null
-  createdAt_eq?: DateTime | null
-  createdAt_lt?: DateTime | null
-  createdAt_lte?: DateTime | null
-  createdAt_gt?: DateTime | null
-  createdAt_gte?: DateTime | null
-  createdById_eq?: ID_Input | null
-  createdById_in?: ID_Output[] | ID_Output | null
-  updatedAt_eq?: DateTime | null
-  updatedAt_lt?: DateTime | null
-  updatedAt_lte?: DateTime | null
-  updatedAt_gt?: DateTime | null
-  updatedAt_gte?: DateTime | null
-  updatedById_eq?: ID_Input | null
-  updatedById_in?: ID_Output[] | ID_Output | null
-  deletedAt_all?: Boolean | null
-  deletedAt_eq?: DateTime | null
-  deletedAt_lt?: DateTime | null
-  deletedAt_lte?: DateTime | null
-  deletedAt_gt?: DateTime | null
-  deletedAt_gte?: DateTime | null
-  deletedById_eq?: ID_Input | null
-  deletedById_in?: ID_Output[] | ID_Output | null
-  quantity_eq?: Int | null
-  quantity_gt?: Int | null
-  quantity_gte?: Int | null
-  quantity_lt?: Int | null
-  quantity_lte?: Int | null
-  quantity_in?: Int[] | Int | null
-  price_eq?: BigInt | null
-  price_gt?: BigInt | null
-  price_gte?: BigInt | null
-  price_lt?: BigInt | null
-  price_lte?: BigInt | null
-  price_in?: BigInt[] | BigInt | null
-  AND?: PriceWhereInput[] | PriceWhereInput | null
-  OR?: PriceWhereInput[] | PriceWhereInput | null
-}
-
-export interface PriceWhereUniqueInput {
-  id: ID_Output
-}
-
 export interface BaseGraphQLObject {
   id: ID_Output
   createdAt: DateTime
@@ -1467,8 +1488,7 @@ export interface Asset extends BaseGraphQLObject {
   deletedById?: String | null
   version: Int
   assetId: String
-  price?: Price | null
-  historicalAssetPrice?: Array<HistoricalAssetPrice> | null
+  poolInfo?: PoolInfo | null
 }
 
 export interface AssetBalance extends BaseGraphQLObject {
@@ -1576,10 +1596,11 @@ export interface HistoricalAssetPrice extends BaseGraphQLObject {
   deletedAt?: DateTime | null
   deletedById?: String | null
   version: Int
-  asset: Asset
   assetId: String
-  quantity: Int
-  price: BigInt
+  dPrice: Float
+  dQty: BigInt
+  price: Float
+  qty: BigInt
   event: String
   blockNumber: Int
   timestamp: BigInt
@@ -1742,9 +1763,9 @@ export interface PoolEdge {
   cursor: String
 }
 
-export interface Price {
-  quantity?: Int | null
-  price?: BigInt | null
+export interface PoolInfo {
+  price: Float
+  qty: BigInt
 }
 
 export interface ProcessorState {
