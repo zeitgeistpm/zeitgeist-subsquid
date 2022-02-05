@@ -3,7 +3,7 @@ import { SubstrateEvent, SubstrateExtrinsic } from "@subsquid/hydra-common";
 import { Codec } from "@polkadot/types/types";
 import { typeRegistry } from ".";
 
-import { CommonPoolEventParams, Pool, SwapEvent } from '@zeitgeistpm/types/dist/interfaces';
+import { Asset, CommonPoolEventParams, Pool, SwapEvent } from '@zeitgeistpm/types/dist/interfaces';
 
 export namespace Swaps {
     /**
@@ -27,9 +27,11 @@ export namespace Swaps {
                     'CommonPoolEventParams',
                     [this.ctx.params[0].value]
                 ) as any) as CommonPoolEventParams,
-                (createTypeUnsafe<Pool & Codec>(typeRegistry, "Pool", this.removeWeights([
-                    this.ctx.params[1].value,
-                ])) as any) as Pool,
+                (createTypeUnsafe<Pool & Codec>(
+                    typeRegistry,
+                    "Pool", 
+                    this.reformatWeights([this.ctx.params[1].value])
+                ) as any) as Pool,
             ]
         }
 
@@ -46,9 +48,29 @@ export namespace Swaps {
             return valid
         }
 
-        removeWeights(arg: any[]): any[] {
+        reformatWeights(arg: any[]): any[] {
             if (arg[0].weights) {
-              arg[0].weights = null;
+                var map = new Map()
+                Object.entries(arg[0].weights).map(entry => {
+                    const marketId = arg[0].market_id
+                    if (entry[0].length > 5) {
+                        const catIdx = entry[0].substring(entry[0].indexOf(',')+1, entry[0].indexOf(']'))
+                        const asset = (createTypeUnsafe<Asset & Codec>(
+                            typeRegistry,
+                            'Asset',
+                            [{ categoricalOutcome: [marketId, catIdx] }]
+                        ))
+                        map.set(asset, entry[1])
+                    } else {
+                        const asset = (createTypeUnsafe<Asset & Codec>(
+                            typeRegistry,
+                            'Asset',
+                            [{ Ztg: null }]
+                        ))
+                        map.set(asset, entry[1])
+                    }
+                });
+                arg[0].weights = map;
             }
             return arg;
         }
