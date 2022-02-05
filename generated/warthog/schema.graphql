@@ -88,6 +88,20 @@ input AccountWhereUniqueInput {
   id: ID!
 }
 
+type Asset implements BaseGraphQLObject {
+  id: ID!
+  createdAt: DateTime!
+  createdById: String!
+  updatedAt: DateTime
+  updatedById: String
+  deletedAt: DateTime
+  deletedById: String
+  version: Int!
+  assetId: String!
+  price: Price
+  historicalAssetPrice: [HistoricalAssetPrice!]
+}
+
 type AssetBalance implements BaseGraphQLObject {
   id: ID!
   createdAt: DateTime!
@@ -183,6 +197,80 @@ input AssetBalanceWhereInput {
 }
 
 input AssetBalanceWhereUniqueInput {
+  id: ID!
+}
+
+type AssetConnection {
+  totalCount: Int!
+  edges: [AssetEdge!]!
+  pageInfo: PageInfo!
+}
+
+input AssetCreateInput {
+  assetId: String!
+  price: PriceInput
+}
+
+type AssetEdge {
+  node: Asset!
+  cursor: String!
+}
+
+enum AssetOrderByInput {
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  deletedAt_ASC
+  deletedAt_DESC
+  assetId_ASC
+  assetId_DESC
+}
+
+input AssetUpdateInput {
+  assetId: String
+  price: PriceInput
+}
+
+input AssetWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  assetId_eq: String
+  assetId_contains: String
+  assetId_startsWith: String
+  assetId_endsWith: String
+  assetId_in: [String!]
+  price_json: JSONObject
+  historicalAssetPrice_none: HistoricalAssetPriceWhereInput
+  historicalAssetPrice_some: HistoricalAssetPriceWhereInput
+  historicalAssetPrice_every: HistoricalAssetPriceWhereInput
+  AND: [AssetWhereInput!]
+  OR: [AssetWhereInput!]
+}
+
+input AssetWhereUniqueInput {
   id: ID!
 }
 
@@ -474,6 +562,137 @@ input HistoricalAssetBalanceWhereInput {
 }
 
 input HistoricalAssetBalanceWhereUniqueInput {
+  id: ID!
+}
+
+type HistoricalAssetPrice implements BaseGraphQLObject {
+  id: ID!
+  createdAt: DateTime!
+  createdById: String!
+  updatedAt: DateTime
+  updatedById: String
+  deletedAt: DateTime
+  deletedById: String
+  version: Int!
+  asset: Asset!
+  assetId: String!
+  quantity: Int!
+  price: BigInt!
+  event: String!
+  blockNumber: Int!
+  timestamp: BigInt!
+}
+
+type HistoricalAssetPriceConnection {
+  totalCount: Int!
+  edges: [HistoricalAssetPriceEdge!]!
+  pageInfo: PageInfo!
+}
+
+input HistoricalAssetPriceCreateInput {
+  asset: ID!
+  quantity: Float!
+  price: String!
+  event: String!
+  blockNumber: Float!
+  timestamp: String!
+}
+
+type HistoricalAssetPriceEdge {
+  node: HistoricalAssetPrice!
+  cursor: String!
+}
+
+enum HistoricalAssetPriceOrderByInput {
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  deletedAt_ASC
+  deletedAt_DESC
+  asset_ASC
+  asset_DESC
+  quantity_ASC
+  quantity_DESC
+  price_ASC
+  price_DESC
+  event_ASC
+  event_DESC
+  blockNumber_ASC
+  blockNumber_DESC
+  timestamp_ASC
+  timestamp_DESC
+}
+
+input HistoricalAssetPriceUpdateInput {
+  asset: ID
+  quantity: Float
+  price: String
+  event: String
+  blockNumber: Float
+  timestamp: String
+}
+
+input HistoricalAssetPriceWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  quantity_eq: Int
+  quantity_gt: Int
+  quantity_gte: Int
+  quantity_lt: Int
+  quantity_lte: Int
+  quantity_in: [Int!]
+  price_eq: BigInt
+  price_gt: BigInt
+  price_gte: BigInt
+  price_lt: BigInt
+  price_lte: BigInt
+  price_in: [BigInt!]
+  event_eq: String
+  event_contains: String
+  event_startsWith: String
+  event_endsWith: String
+  event_in: [String!]
+  blockNumber_eq: Int
+  blockNumber_gt: Int
+  blockNumber_gte: Int
+  blockNumber_lt: Int
+  blockNumber_lte: Int
+  blockNumber_in: [Int!]
+  timestamp_eq: BigInt
+  timestamp_gt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lt: BigInt
+  timestamp_lte: BigInt
+  timestamp_in: [BigInt!]
+  asset: AssetWhereInput
+  AND: [HistoricalAssetPriceWhereInput!]
+  OR: [HistoricalAssetPriceWhereInput!]
+}
+
+input HistoricalAssetPriceWhereUniqueInput {
   id: ID!
 }
 
@@ -1430,6 +1649,71 @@ input PoolWhereUniqueInput {
   id: ID!
 }
 
+type Price {
+  quantity: Int
+  price: BigInt
+}
+
+input PriceCreateInput {
+  quantity: Float
+  price: String
+}
+
+input PriceInput {
+  quantity: Int
+  price: BigInt
+}
+
+input PriceUpdateInput {
+  quantity: Float
+  price: String
+}
+
+input PriceWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  quantity_eq: Int
+  quantity_gt: Int
+  quantity_gte: Int
+  quantity_lt: Int
+  quantity_lte: Int
+  quantity_in: [Int!]
+  price_eq: BigInt
+  price_gt: BigInt
+  price_gte: BigInt
+  price_lt: BigInt
+  price_lte: BigInt
+  price_in: [BigInt!]
+  AND: [PriceWhereInput!]
+  OR: [PriceWhereInput!]
+}
+
+input PriceWhereUniqueInput {
+  id: ID!
+}
+
 type ProcessorState {
   lastCompleteBlock: Float!
   lastProcessedEvent: String!
@@ -1444,9 +1728,15 @@ type Query {
   assetBalances(offset: Int, limit: Int = 50, where: AssetBalanceWhereInput, orderBy: [AssetBalanceOrderByInput!]): [AssetBalance!]!
   assetBalanceByUniqueInput(where: AssetBalanceWhereUniqueInput!): AssetBalance
   assetBalancesConnection(first: Int, after: String, last: Int, before: String, where: AssetBalanceWhereInput, orderBy: [AssetBalanceOrderByInput!]): AssetBalanceConnection!
+  assets(offset: Int, limit: Int = 50, where: AssetWhereInput, orderBy: [AssetOrderByInput!]): [Asset!]!
+  assetByUniqueInput(where: AssetWhereUniqueInput!): Asset
+  assetsConnection(first: Int, after: String, last: Int, before: String, where: AssetWhereInput, orderBy: [AssetOrderByInput!]): AssetConnection!
   historicalAssetBalances(offset: Int, limit: Int = 50, where: HistoricalAssetBalanceWhereInput, orderBy: [HistoricalAssetBalanceOrderByInput!]): [HistoricalAssetBalance!]!
   historicalAssetBalanceByUniqueInput(where: HistoricalAssetBalanceWhereUniqueInput!): HistoricalAssetBalance
   historicalAssetBalancesConnection(first: Int, after: String, last: Int, before: String, where: HistoricalAssetBalanceWhereInput, orderBy: [HistoricalAssetBalanceOrderByInput!]): HistoricalAssetBalanceConnection!
+  historicalAssetPrices(offset: Int, limit: Int = 50, where: HistoricalAssetPriceWhereInput, orderBy: [HistoricalAssetPriceOrderByInput!]): [HistoricalAssetPrice!]!
+  historicalAssetPriceByUniqueInput(where: HistoricalAssetPriceWhereUniqueInput!): HistoricalAssetPrice
+  historicalAssetPricesConnection(first: Int, after: String, last: Int, before: String, where: HistoricalAssetPriceWhereInput, orderBy: [HistoricalAssetPriceOrderByInput!]): HistoricalAssetPriceConnection!
   historicalPools(offset: Int, limit: Int = 50, where: HistoricalPoolWhereInput, orderBy: [HistoricalPoolOrderByInput!]): [HistoricalPool!]!
   historicalPoolByUniqueInput(where: HistoricalPoolWhereUniqueInput!): HistoricalPool
   historicalPoolsConnection(first: Int, after: String, last: Int, before: String, where: HistoricalPoolWhereInput, orderBy: [HistoricalPoolOrderByInput!]): HistoricalPoolConnection!

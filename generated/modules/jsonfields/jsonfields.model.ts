@@ -148,3 +148,17 @@ export class OutcomeReport {
   })
   scalar?: number;
 }
+
+@InputType('PriceInput')
+@ObjectType()
+export class Price {
+  @IntField({
+    nullable: true,
+  })
+  quantity?: number;
+
+  @NumericField({
+    nullable: true,
+  })
+  price?: BN;
+}
