@@ -32,5 +32,5 @@ import { MarketType } from '../modules/jsonfields/jsonfields.model';
 export { MarketType };
 import { OutcomeReport } from '../modules/jsonfields/jsonfields.model';
 export { OutcomeReport };
-import { Price } from '../modules/jsonfields/jsonfields.model';
-export { Price };
+import { PoolInfo } from '../modules/jsonfields/jsonfields.model';
+export { PoolInfo };

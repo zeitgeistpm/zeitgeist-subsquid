@@ -98,8 +98,7 @@ type Asset implements BaseGraphQLObject {
   deletedById: String
   version: Int!
   assetId: String!
-  price: Price
-  historicalAssetPrice: [HistoricalAssetPrice!]
+  poolInfo: PoolInfo
 }
 
 type AssetBalance implements BaseGraphQLObject {
@@ -208,7 +207,7 @@ type AssetConnection {
 
 input AssetCreateInput {
   assetId: String!
-  price: PriceInput
+  poolInfo: PoolInfoInput
 }
 
 type AssetEdge {
@@ -229,7 +228,7 @@ enum AssetOrderByInput {
 
 input AssetUpdateInput {
   assetId: String
-  price: PriceInput
+  poolInfo: PoolInfoInput
 }
 
 input AssetWhereInput {
@@ -262,10 +261,7 @@ input AssetWhereInput {
   assetId_startsWith: String
   assetId_endsWith: String
   assetId_in: [String!]
-  price_json: JSONObject
-  historicalAssetPrice_none: HistoricalAssetPriceWhereInput
-  historicalAssetPrice_some: HistoricalAssetPriceWhereInput
-  historicalAssetPrice_every: HistoricalAssetPriceWhereInput
+  poolInfo_json: JSONObject
   AND: [AssetWhereInput!]
   OR: [AssetWhereInput!]
 }
@@ -574,10 +570,11 @@ type HistoricalAssetPrice implements BaseGraphQLObject {
   deletedAt: DateTime
   deletedById: String
   version: Int!
-  asset: Asset!
   assetId: String!
-  quantity: Int!
-  price: BigInt!
+  dPrice: Float!
+  dQty: BigInt!
+  price: Float!
+  qty: BigInt!
   event: String!
   blockNumber: Int!
   timestamp: BigInt!
@@ -590,9 +587,11 @@ type HistoricalAssetPriceConnection {
 }
 
 input HistoricalAssetPriceCreateInput {
-  asset: ID!
-  quantity: Float!
-  price: String!
+  assetId: String!
+  dPrice: Float!
+  dQty: String!
+  price: Float!
+  qty: String!
   event: String!
   blockNumber: Float!
   timestamp: String!
@@ -610,12 +609,16 @@ enum HistoricalAssetPriceOrderByInput {
   updatedAt_DESC
   deletedAt_ASC
   deletedAt_DESC
-  asset_ASC
-  asset_DESC
-  quantity_ASC
-  quantity_DESC
+  assetId_ASC
+  assetId_DESC
+  dPrice_ASC
+  dPrice_DESC
+  dQty_ASC
+  dQty_DESC
   price_ASC
   price_DESC
+  qty_ASC
+  qty_DESC
   event_ASC
   event_DESC
   blockNumber_ASC
@@ -625,9 +628,11 @@ enum HistoricalAssetPriceOrderByInput {
 }
 
 input HistoricalAssetPriceUpdateInput {
-  asset: ID
-  quantity: Float
-  price: String
+  assetId: String
+  dPrice: Float
+  dQty: String
+  price: Float
+  qty: String
   event: String
   blockNumber: Float
   timestamp: String
@@ -658,18 +663,35 @@ input HistoricalAssetPriceWhereInput {
   deletedAt_gte: DateTime
   deletedById_eq: ID
   deletedById_in: [ID!]
-  quantity_eq: Int
-  quantity_gt: Int
-  quantity_gte: Int
-  quantity_lt: Int
-  quantity_lte: Int
-  quantity_in: [Int!]
-  price_eq: BigInt
-  price_gt: BigInt
-  price_gte: BigInt
-  price_lt: BigInt
-  price_lte: BigInt
-  price_in: [BigInt!]
+  assetId_eq: String
+  assetId_contains: String
+  assetId_startsWith: String
+  assetId_endsWith: String
+  assetId_in: [String!]
+  dPrice_eq: Float
+  dPrice_gt: Float
+  dPrice_gte: Float
+  dPrice_lt: Float
+  dPrice_lte: Float
+  dPrice_in: [Float!]
+  dQty_eq: BigInt
+  dQty_gt: BigInt
+  dQty_gte: BigInt
+  dQty_lt: BigInt
+  dQty_lte: BigInt
+  dQty_in: [BigInt!]
+  price_eq: Float
+  price_gt: Float
+  price_gte: Float
+  price_lt: Float
+  price_lte: Float
+  price_in: [Float!]
+  qty_eq: BigInt
+  qty_gt: BigInt
+  qty_gte: BigInt
+  qty_lt: BigInt
+  qty_lte: BigInt
+  qty_in: [BigInt!]
   event_eq: String
   event_contains: String
   event_startsWith: String
@@ -687,7 +709,6 @@ input HistoricalAssetPriceWhereInput {
   timestamp_lt: BigInt
   timestamp_lte: BigInt
   timestamp_in: [BigInt!]
-  asset: AssetWhereInput
   AND: [HistoricalAssetPriceWhereInput!]
   OR: [HistoricalAssetPriceWhereInput!]
 }
@@ -1535,6 +1556,71 @@ type PoolEdge {
   cursor: String!
 }
 
+type PoolInfo {
+  price: Float!
+  qty: BigInt!
+}
+
+input PoolInfoCreateInput {
+  price: Float!
+  qty: String!
+}
+
+input PoolInfoInput {
+  price: Float!
+  qty: BigInt!
+}
+
+input PoolInfoUpdateInput {
+  price: Float
+  qty: String
+}
+
+input PoolInfoWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  price_eq: Float
+  price_gt: Float
+  price_gte: Float
+  price_lt: Float
+  price_lte: Float
+  price_in: [Float!]
+  qty_eq: BigInt
+  qty_gt: BigInt
+  qty_gte: BigInt
+  qty_lt: BigInt
+  qty_lte: BigInt
+  qty_in: [BigInt!]
+  AND: [PoolInfoWhereInput!]
+  OR: [PoolInfoWhereInput!]
+}
+
+input PoolInfoWhereUniqueInput {
+  id: ID!
+}
+
 enum PoolOrderByInput {
   createdAt_ASC
   createdAt_DESC
@@ -1646,71 +1732,6 @@ input PoolWhereInput {
 }
 
 input PoolWhereUniqueInput {
-  id: ID!
-}
-
-type Price {
-  quantity: Int
-  price: BigInt
-}
-
-input PriceCreateInput {
-  quantity: Float
-  price: String
-}
-
-input PriceInput {
-  quantity: Int
-  price: BigInt
-}
-
-input PriceUpdateInput {
-  quantity: Float
-  price: String
-}
-
-input PriceWhereInput {
-  id_eq: ID
-  id_in: [ID!]
-  createdAt_eq: DateTime
-  createdAt_lt: DateTime
-  createdAt_lte: DateTime
-  createdAt_gt: DateTime
-  createdAt_gte: DateTime
-  createdById_eq: ID
-  createdById_in: [ID!]
-  updatedAt_eq: DateTime
-  updatedAt_lt: DateTime
-  updatedAt_lte: DateTime
-  updatedAt_gt: DateTime
-  updatedAt_gte: DateTime
-  updatedById_eq: ID
-  updatedById_in: [ID!]
-  deletedAt_all: Boolean
-  deletedAt_eq: DateTime
-  deletedAt_lt: DateTime
-  deletedAt_lte: DateTime
-  deletedAt_gt: DateTime
-  deletedAt_gte: DateTime
-  deletedById_eq: ID
-  deletedById_in: [ID!]
-  quantity_eq: Int
-  quantity_gt: Int
-  quantity_gte: Int
-  quantity_lt: Int
-  quantity_lte: Int
-  quantity_in: [Int!]
-  price_eq: BigInt
-  price_gt: BigInt
-  price_gte: BigInt
-  price_lt: BigInt
-  price_lte: BigInt
-  price_in: [BigInt!]
-  AND: [PriceWhereInput!]
-  OR: [PriceWhereInput!]
-}
-
-input PriceWhereUniqueInput {
   id: ID!
 }
 

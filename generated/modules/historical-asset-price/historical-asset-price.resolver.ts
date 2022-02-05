@@ -39,11 +39,6 @@ import {
 import { HistoricalAssetPrice } from './historical-asset-price.model';
 import { HistoricalAssetPriceService } from './historical-asset-price.service';
 
-import { Asset } from '../asset/asset.model';
-import { AssetService } from '../asset/asset.service';
-import { getConnection, getRepository, In, Not } from 'typeorm';
-import _ from 'lodash';
-
 @ObjectType()
 export class HistoricalAssetPriceEdge {
   @Field(() => HistoricalAssetPrice, { nullable: false })
@@ -143,10 +138,5 @@ export class HistoricalAssetPriceResolver {
     }
 
     return result as Promise<HistoricalAssetPriceConnection>;
-  }
-
-  @FieldResolver(() => Asset)
-  async asset(@Root() r: HistoricalAssetPrice, @Ctx() ctx: BaseContext): Promise<Asset | null> {
-    return ctx.dataLoader.loaders.HistoricalAssetPrice.asset.load(r);
   }
 }
