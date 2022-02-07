@@ -1,6 +1,6 @@
 import BN from 'bn.js'
 import { EventContext, StoreContext } from '@subsquid/hydra-common'
-import { Asset, HistoricalAssetPrice, Market, MarketHistory, Pool, PoolInfo} from '../generated/model'
+import { Asset, HistoricalAssetPrice, Market, MarketHistory, Pool, PoolInfo, Weight} from '../generated/model'
 import { Swaps } from '../chain'
 import { HistoricalPool } from '../generated/modules/historical-pool/historical-pool.model'
 
@@ -22,16 +22,7 @@ export async function swapPoolCreated({
     newPool.swapFee = pool.swap_fee.toString();
     newPool.totalSubsidy = pool.total_subsidy.toString();
     newPool.totalWeight = pool.total_weight.toString();
-    console.log(`[${event.method}] Saving pool: ${JSON.stringify(newPool, null, 2)}`)
-    await store.save<Pool>(newPool)
-
-    const newHP = new HistoricalPool()
-    newHP.pool = newPool
-    newHP.event = event.method
-    newHP.blockNumber = block.height
-    newHP.timestamp = new BN(block.timestamp)
-    console.log(`[${event.method}] Saving historical pool: ${JSON.stringify(newHP, null, 2)}`)
-    await store.save<HistoricalPool>(newHP)
+    newPool.weights = []
 
     const savedMarket = await store.get(Market, { where: { marketId: newPool.marketId } })
     if (savedMarket) {
@@ -49,16 +40,19 @@ export async function swapPoolCreated({
 
     const weights = JSON.parse(pool.weights.toString())
     Object.entries(weights).map(async entry => {
+        const weight = new Weight()
+        weight.assetId = entry[0]
+        weight.len = entry[1] as string
+        newPool.weights.push(weight)
+        
         if (entry[0].length > 5) {
             const asset = await store.get(Asset, { where: { assetId: entry[0] } })
             if (!asset) { return }
 
-            const wt = entry[1] as string
-            const spotPrice = await calcSpotPrice(1000000000000,weights.Ztg,1000000000000,+wt, +pool.swap_fee.toString())
-
+            const spotPrice = await calcSpotPrice(1000000000000,weights.Ztg,1000000000000,+weight.len, +pool.swap_fee.toString())
             const poolInfo = new PoolInfo()
             poolInfo.price = spotPrice
-            poolInfo.qty = new BN(1000000000000)
+            poolInfo.qty = ''+1000000000000
             asset.poolInfo = poolInfo
             console.log(`[${event.method}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
             await store.save<Asset>(asset)
@@ -76,6 +70,16 @@ export async function swapPoolCreated({
             await store.save<HistoricalAssetPrice>(hap)
         }
     });
+    console.log(`[${event.method}] Saving pool: ${JSON.stringify(newPool, null, 2)}`)
+    await store.save<Pool>(newPool)
+
+    const newHP = new HistoricalPool()
+    newHP.pool = newPool
+    newHP.event = event.method
+    newHP.blockNumber = block.height
+    newHP.timestamp = new BN(block.timestamp)
+    console.log(`[${event.method}] Saving historical pool: ${JSON.stringify(newHP, null, 2)}`)
+    await store.save<HistoricalPool>(newHP)
 }
 
 export async function swapExactAmountIn({
