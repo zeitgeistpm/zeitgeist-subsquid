@@ -46,6 +46,8 @@ import { OutcomeReport } from "../modules/jsonfields/jsonfields.model";
 // @ts-ignore
 import { PoolInfo } from "../modules/jsonfields/jsonfields.model";
 // @ts-ignore
+import { Weight } from "../modules/jsonfields/jsonfields.model";
+// @ts-ignore
 import { Asset } from "../modules/asset/asset.model";
 // @ts-ignore
 import { HistoricalAssetPrice } from "../modules/historical-asset-price/historical-asset-price.model";
@@ -2233,22 +2235,19 @@ export class PoolInfoWhereInput {
   @TypeGraphQLField(() => [Float], { nullable: true })
   price_in?: number[];
 
-  @TypeGraphQLField(() => BigInt, { nullable: true })
+  @TypeGraphQLField({ nullable: true })
   qty_eq?: string;
 
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  qty_gt?: string;
+  @TypeGraphQLField({ nullable: true })
+  qty_contains?: string;
 
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  qty_gte?: string;
+  @TypeGraphQLField({ nullable: true })
+  qty_startsWith?: string;
 
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  qty_lt?: string;
+  @TypeGraphQLField({ nullable: true })
+  qty_endsWith?: string;
 
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  qty_lte?: string;
-
-  @TypeGraphQLField(() => [BigInt], { nullable: true })
+  @TypeGraphQLField(() => [String], { nullable: true })
   qty_in?: string[];
 
   @TypeGraphQLField(() => PoolInfoWhereInput, { nullable: true })
@@ -2301,6 +2300,183 @@ export class PoolInfoCreateManyArgs {
 export class PoolInfoUpdateArgs {
   @TypeGraphQLField() data!: PoolInfoUpdateInput;
   @TypeGraphQLField() where!: PoolInfoWhereUniqueInput;
+}
+
+export enum WeightOrderByEnum {
+  createdAt_ASC = "createdAt_ASC",
+  createdAt_DESC = "createdAt_DESC",
+
+  updatedAt_ASC = "updatedAt_ASC",
+  updatedAt_DESC = "updatedAt_DESC",
+
+  deletedAt_ASC = "deletedAt_ASC",
+  deletedAt_DESC = "deletedAt_DESC",
+
+  assetId_ASC = "assetId_ASC",
+  assetId_DESC = "assetId_DESC",
+
+  len_ASC = "len_ASC",
+  len_DESC = "len_DESC",
+}
+
+registerEnumType(WeightOrderByEnum, {
+  name: "WeightOrderByInput",
+});
+
+@TypeGraphQLInputType()
+export class WeightWhereInput {
+  @TypeGraphQLField(() => ID, { nullable: true })
+  id_eq?: string;
+
+  @TypeGraphQLField(() => [ID], { nullable: true })
+  id_in?: string[];
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_eq?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_lt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_lte?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_gt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_gte?: Date;
+
+  @TypeGraphQLField(() => ID, { nullable: true })
+  createdById_eq?: string;
+
+  @TypeGraphQLField(() => [ID], { nullable: true })
+  createdById_in?: string[];
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_eq?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_lt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_lte?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_gt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_gte?: Date;
+
+  @TypeGraphQLField(() => ID, { nullable: true })
+  updatedById_eq?: string;
+
+  @TypeGraphQLField(() => [ID], { nullable: true })
+  updatedById_in?: string[];
+
+  @TypeGraphQLField({ nullable: true })
+  deletedAt_all?: Boolean;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_eq?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_lt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_lte?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_gt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_gte?: Date;
+
+  @TypeGraphQLField(() => ID, { nullable: true })
+  deletedById_eq?: string;
+
+  @TypeGraphQLField(() => [ID], { nullable: true })
+  deletedById_in?: string[];
+
+  @TypeGraphQLField({ nullable: true })
+  assetId_eq?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  assetId_contains?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  assetId_startsWith?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  assetId_endsWith?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  assetId_in?: string[];
+
+  @TypeGraphQLField({ nullable: true })
+  len_eq?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  len_contains?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  len_startsWith?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  len_endsWith?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  len_in?: string[];
+
+  @TypeGraphQLField(() => WeightWhereInput, { nullable: true })
+  AND?: [WeightWhereInput];
+
+  @TypeGraphQLField(() => WeightWhereInput, { nullable: true })
+  OR?: [WeightWhereInput];
+}
+
+@TypeGraphQLInputType()
+export class WeightWhereUniqueInput {
+  @TypeGraphQLField(() => ID)
+  id?: string;
+}
+
+@TypeGraphQLInputType()
+export class WeightCreateInput {
+  @TypeGraphQLField()
+  assetId!: string;
+
+  @TypeGraphQLField()
+  len!: string;
+}
+
+@TypeGraphQLInputType()
+export class WeightUpdateInput {
+  @TypeGraphQLField({ nullable: true })
+  assetId?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  len?: string;
+}
+
+@ArgsType()
+export class WeightWhereArgs extends PaginationArgs {
+  @TypeGraphQLField(() => WeightWhereInput, { nullable: true })
+  where?: WeightWhereInput;
+
+  @TypeGraphQLField(() => WeightOrderByEnum, { nullable: true })
+  orderBy?: WeightOrderByEnum[];
+}
+
+@ArgsType()
+export class WeightCreateManyArgs {
+  @TypeGraphQLField(() => [WeightCreateInput])
+  data!: WeightCreateInput[];
+}
+
+@ArgsType()
+export class WeightUpdateArgs {
+  @TypeGraphQLField() data!: WeightUpdateInput;
+  @TypeGraphQLField() where!: WeightWhereUniqueInput;
 }
 
 export enum AssetOrderByEnum {
@@ -2611,22 +2787,19 @@ export class HistoricalAssetPriceWhereInput {
   @TypeGraphQLField(() => [Float], { nullable: true })
   dPrice_in?: number[];
 
-  @TypeGraphQLField(() => BigInt, { nullable: true })
+  @TypeGraphQLField({ nullable: true })
   dQty_eq?: string;
 
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  dQty_gt?: string;
+  @TypeGraphQLField({ nullable: true })
+  dQty_contains?: string;
 
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  dQty_gte?: string;
+  @TypeGraphQLField({ nullable: true })
+  dQty_startsWith?: string;
 
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  dQty_lt?: string;
+  @TypeGraphQLField({ nullable: true })
+  dQty_endsWith?: string;
 
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  dQty_lte?: string;
-
-  @TypeGraphQLField(() => [BigInt], { nullable: true })
+  @TypeGraphQLField(() => [String], { nullable: true })
   dQty_in?: string[];
 
   @TypeGraphQLField(() => Float, { nullable: true })
@@ -2647,22 +2820,19 @@ export class HistoricalAssetPriceWhereInput {
   @TypeGraphQLField(() => [Float], { nullable: true })
   price_in?: number[];
 
-  @TypeGraphQLField(() => BigInt, { nullable: true })
+  @TypeGraphQLField({ nullable: true })
   qty_eq?: string;
 
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  qty_gt?: string;
+  @TypeGraphQLField({ nullable: true })
+  qty_contains?: string;
 
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  qty_gte?: string;
+  @TypeGraphQLField({ nullable: true })
+  qty_startsWith?: string;
 
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  qty_lt?: string;
+  @TypeGraphQLField({ nullable: true })
+  qty_endsWith?: string;
 
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  qty_lte?: string;
-
-  @TypeGraphQLField(() => [BigInt], { nullable: true })
+  @TypeGraphQLField(() => [String], { nullable: true })
   qty_in?: string[];
 
   @TypeGraphQLField({ nullable: true })
@@ -3043,6 +3213,9 @@ export class PoolWhereInput {
   @TypeGraphQLField(() => [String], { nullable: true })
   totalWeight_in?: string[];
 
+  @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
+  weights_json?: JsonObject;
+
   @TypeGraphQLField(() => HistoricalPoolWhereInput, { nullable: true })
   historicalPool_none?: HistoricalPoolWhereInput;
 
@@ -3090,6 +3263,9 @@ export class PoolCreateInput {
 
   @TypeGraphQLField()
   totalWeight!: string;
+
+  @TypeGraphQLField(() => Weight)
+  weights!: Weight;
 }
 
 @TypeGraphQLInputType()
@@ -3117,6 +3293,9 @@ export class PoolUpdateInput {
 
   @TypeGraphQLField({ nullable: true })
   totalWeight?: string;
+
+  @TypeGraphQLField(() => Weight, { nullable: true })
+  weights?: Weight;
 }
 
 @ArgsType()

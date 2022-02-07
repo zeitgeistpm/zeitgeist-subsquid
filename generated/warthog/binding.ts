@@ -612,24 +612,22 @@ export interface HistoricalAssetPriceWhereInput {
   dPrice_lt?: Float | null
   dPrice_lte?: Float | null
   dPrice_in?: Float[] | Float | null
-  dQty_eq?: BigInt | null
-  dQty_gt?: BigInt | null
-  dQty_gte?: BigInt | null
-  dQty_lt?: BigInt | null
-  dQty_lte?: BigInt | null
-  dQty_in?: BigInt[] | BigInt | null
+  dQty_eq?: String | null
+  dQty_contains?: String | null
+  dQty_startsWith?: String | null
+  dQty_endsWith?: String | null
+  dQty_in?: String[] | String | null
   price_eq?: Float | null
   price_gt?: Float | null
   price_gte?: Float | null
   price_lt?: Float | null
   price_lte?: Float | null
   price_in?: Float[] | Float | null
-  qty_eq?: BigInt | null
-  qty_gt?: BigInt | null
-  qty_gte?: BigInt | null
-  qty_lt?: BigInt | null
-  qty_lte?: BigInt | null
-  qty_in?: BigInt[] | BigInt | null
+  qty_eq?: String | null
+  qty_contains?: String | null
+  qty_startsWith?: String | null
+  qty_endsWith?: String | null
+  qty_in?: String[] | String | null
   event_eq?: String | null
   event_contains?: String | null
   event_startsWith?: String | null
@@ -1287,6 +1285,7 @@ export interface PoolCreateInput {
   swapFee: String
   totalSubsidy: String
   totalWeight: String
+  weights: WeightInput
 }
 
 export interface PoolInfoCreateInput {
@@ -1296,7 +1295,7 @@ export interface PoolInfoCreateInput {
 
 export interface PoolInfoInput {
   price: Float
-  qty: BigInt
+  qty: String
 }
 
 export interface PoolInfoUpdateInput {
@@ -1335,12 +1334,11 @@ export interface PoolInfoWhereInput {
   price_lt?: Float | null
   price_lte?: Float | null
   price_in?: Float[] | Float | null
-  qty_eq?: BigInt | null
-  qty_gt?: BigInt | null
-  qty_gte?: BigInt | null
-  qty_lt?: BigInt | null
-  qty_lte?: BigInt | null
-  qty_in?: BigInt[] | BigInt | null
+  qty_eq?: String | null
+  qty_contains?: String | null
+  qty_startsWith?: String | null
+  qty_endsWith?: String | null
+  qty_in?: String[] | String | null
   AND?: PoolInfoWhereInput[] | PoolInfoWhereInput | null
   OR?: PoolInfoWhereInput[] | PoolInfoWhereInput | null
 }
@@ -1358,6 +1356,7 @@ export interface PoolUpdateInput {
   swapFee?: String | null
   totalSubsidy?: String | null
   totalWeight?: String | null
+  weights?: WeightInput | null
 }
 
 export interface PoolWhereInput {
@@ -1427,6 +1426,7 @@ export interface PoolWhereInput {
   totalWeight_startsWith?: String | null
   totalWeight_endsWith?: String | null
   totalWeight_in?: String[] | String | null
+  weights_json?: JSONObject | null
   historicalPool_none?: HistoricalPoolWhereInput | null
   historicalPool_some?: HistoricalPoolWhereInput | null
   historicalPool_every?: HistoricalPoolWhereInput | null
@@ -1435,6 +1435,64 @@ export interface PoolWhereInput {
 }
 
 export interface PoolWhereUniqueInput {
+  id: ID_Output
+}
+
+export interface WeightCreateInput {
+  assetId: String
+  len: String
+}
+
+export interface WeightInput {
+  assetId: String
+  len: String
+}
+
+export interface WeightUpdateInput {
+  assetId?: String | null
+  len?: String | null
+}
+
+export interface WeightWhereInput {
+  id_eq?: ID_Input | null
+  id_in?: ID_Output[] | ID_Output | null
+  createdAt_eq?: DateTime | null
+  createdAt_lt?: DateTime | null
+  createdAt_lte?: DateTime | null
+  createdAt_gt?: DateTime | null
+  createdAt_gte?: DateTime | null
+  createdById_eq?: ID_Input | null
+  createdById_in?: ID_Output[] | ID_Output | null
+  updatedAt_eq?: DateTime | null
+  updatedAt_lt?: DateTime | null
+  updatedAt_lte?: DateTime | null
+  updatedAt_gt?: DateTime | null
+  updatedAt_gte?: DateTime | null
+  updatedById_eq?: ID_Input | null
+  updatedById_in?: ID_Output[] | ID_Output | null
+  deletedAt_all?: Boolean | null
+  deletedAt_eq?: DateTime | null
+  deletedAt_lt?: DateTime | null
+  deletedAt_lte?: DateTime | null
+  deletedAt_gt?: DateTime | null
+  deletedAt_gte?: DateTime | null
+  deletedById_eq?: ID_Input | null
+  deletedById_in?: ID_Output[] | ID_Output | null
+  assetId_eq?: String | null
+  assetId_contains?: String | null
+  assetId_startsWith?: String | null
+  assetId_endsWith?: String | null
+  assetId_in?: String[] | String | null
+  len_eq?: String | null
+  len_contains?: String | null
+  len_startsWith?: String | null
+  len_endsWith?: String | null
+  len_in?: String[] | String | null
+  AND?: WeightWhereInput[] | WeightWhereInput | null
+  OR?: WeightWhereInput[] | WeightWhereInput | null
+}
+
+export interface WeightWhereUniqueInput {
   id: ID_Output
 }
 
@@ -1598,9 +1656,9 @@ export interface HistoricalAssetPrice extends BaseGraphQLObject {
   version: Int
   assetId: String
   dPrice: Float
-  dQty: BigInt
+  dQty: String
   price: Float
-  qty: BigInt
+  qty: String
   event: String
   blockNumber: Int
   timestamp: BigInt
@@ -1749,6 +1807,7 @@ export interface Pool extends BaseGraphQLObject {
   swapFee: String
   totalSubsidy: String
   totalWeight: String
+  weights: Weight
   historicalPool?: Array<HistoricalPool> | null
 }
 
@@ -1765,7 +1824,7 @@ export interface PoolEdge {
 
 export interface PoolInfo {
   price: Float
-  qty: BigInt
+  qty: String
 }
 
 export interface ProcessorState {
@@ -1777,6 +1836,11 @@ export interface ProcessorState {
 
 export interface StandardDeleteResponse {
   id: ID_Output
+}
+
+export interface Weight {
+  assetId: String
+  len: String
 }
 
 /*

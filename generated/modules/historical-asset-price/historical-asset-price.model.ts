@@ -12,26 +12,14 @@ export class HistoricalAssetPrice extends BaseModel {
   @FloatField({})
   dPrice!: number;
 
-  @NumericField({
-    transformer: {
-      to: (entityValue: BN) => (entityValue !== undefined ? entityValue.toString(10) : null),
-      from: (dbValue: string) =>
-        dbValue !== undefined && dbValue !== null && dbValue.length > 0 ? new BN(dbValue, 10) : undefined,
-    },
-  })
-  dQty!: BN;
+  @StringField({})
+  dQty!: string;
 
   @FloatField({})
   price!: number;
 
-  @NumericField({
-    transformer: {
-      to: (entityValue: BN) => (entityValue !== undefined ? entityValue.toString(10) : null),
-      from: (dbValue: string) =>
-        dbValue !== undefined && dbValue !== null && dbValue.length > 0 ? new BN(dbValue, 10) : undefined,
-    },
-  })
-  qty!: BN;
+  @StringField({})
+  qty!: string;
 
   @StringField({})
   event!: string;

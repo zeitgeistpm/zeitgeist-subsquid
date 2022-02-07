@@ -34,3 +34,5 @@ import { OutcomeReport } from '../modules/jsonfields/jsonfields.model';
 export { OutcomeReport };
 import { PoolInfo } from '../modules/jsonfields/jsonfields.model';
 export { PoolInfo };
+import { Weight } from '../modules/jsonfields/jsonfields.model';
+export { Weight };
