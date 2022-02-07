@@ -155,6 +155,16 @@ export class PoolInfo {
   @FloatField({})
   price!: number;
 
-  @NumericField({})
-  qty!: BN;
+  @StringField({})
+  qty!: string;
+}
+
+@InputType('WeightInput')
+@ObjectType()
+export class Weight {
+  @StringField({})
+  assetId!: string;
+
+  @StringField({})
+  len!: string;
 }

@@ -30,6 +30,9 @@ export class Pool extends BaseModel {
   @StringField({})
   totalWeight!: string;
 
+  @JSONField({ filter: true, gqlFieldType: jsonTypes.Weight })
+  weights!: jsonTypes.Weight[];
+
   @OneToMany(() => HistoricalPool, (param: HistoricalPool) => param.pool, {
     nullable: true,
     modelName: 'Pool',

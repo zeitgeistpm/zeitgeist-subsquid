@@ -29,9 +29,9 @@ type Asset @entity {
 type HistoricalAssetPrice @entity {
   assetId: String!
   dPrice: Float!
-  dQty: BigInt!
+  dQty: String!
   price: Float!
-  qty: BigInt!
+  qty: String!
   event: String!
   blockNumber: Int!
   timestamp: BigInt!
@@ -81,6 +81,7 @@ type Pool @entity {
   swapFee: String!
   totalSubsidy: String!
   totalWeight: String!
+  weights: [Weight]!
   historicalPool: [HistoricalPool] @derivedFrom(field: "pool")
 }
 
@@ -91,9 +92,14 @@ type HistoricalPool @entity {
   timestamp: BigInt!
 }
 
+type Weight @jsonField {
+  assetId: String!
+  len: String!
+}
+
 type PoolInfo @jsonField {
   price: Float!
-  qty: BigInt!
+  qty: String!
 }
 
 type CategoryMetadata @jsonField {

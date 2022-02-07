@@ -572,9 +572,9 @@ type HistoricalAssetPrice implements BaseGraphQLObject {
   version: Int!
   assetId: String!
   dPrice: Float!
-  dQty: BigInt!
+  dQty: String!
   price: Float!
-  qty: BigInt!
+  qty: String!
   event: String!
   blockNumber: Int!
   timestamp: BigInt!
@@ -674,24 +674,22 @@ input HistoricalAssetPriceWhereInput {
   dPrice_lt: Float
   dPrice_lte: Float
   dPrice_in: [Float!]
-  dQty_eq: BigInt
-  dQty_gt: BigInt
-  dQty_gte: BigInt
-  dQty_lt: BigInt
-  dQty_lte: BigInt
-  dQty_in: [BigInt!]
+  dQty_eq: String
+  dQty_contains: String
+  dQty_startsWith: String
+  dQty_endsWith: String
+  dQty_in: [String!]
   price_eq: Float
   price_gt: Float
   price_gte: Float
   price_lt: Float
   price_lte: Float
   price_in: [Float!]
-  qty_eq: BigInt
-  qty_gt: BigInt
-  qty_gte: BigInt
-  qty_lt: BigInt
-  qty_lte: BigInt
-  qty_in: [BigInt!]
+  qty_eq: String
+  qty_contains: String
+  qty_startsWith: String
+  qty_endsWith: String
+  qty_in: [String!]
   event_eq: String
   event_contains: String
   event_startsWith: String
@@ -1531,6 +1529,7 @@ type Pool implements BaseGraphQLObject {
   swapFee: String!
   totalSubsidy: String!
   totalWeight: String!
+  weights: Weight!
   historicalPool: [HistoricalPool!]
 }
 
@@ -1549,6 +1548,7 @@ input PoolCreateInput {
   swapFee: String!
   totalSubsidy: String!
   totalWeight: String!
+  weights: WeightInput!
 }
 
 type PoolEdge {
@@ -1558,7 +1558,7 @@ type PoolEdge {
 
 type PoolInfo {
   price: Float!
-  qty: BigInt!
+  qty: String!
 }
 
 input PoolInfoCreateInput {
@@ -1568,7 +1568,7 @@ input PoolInfoCreateInput {
 
 input PoolInfoInput {
   price: Float!
-  qty: BigInt!
+  qty: String!
 }
 
 input PoolInfoUpdateInput {
@@ -1607,12 +1607,11 @@ input PoolInfoWhereInput {
   price_lt: Float
   price_lte: Float
   price_in: [Float!]
-  qty_eq: BigInt
-  qty_gt: BigInt
-  qty_gte: BigInt
-  qty_lt: BigInt
-  qty_lte: BigInt
-  qty_in: [BigInt!]
+  qty_eq: String
+  qty_contains: String
+  qty_startsWith: String
+  qty_endsWith: String
+  qty_in: [String!]
   AND: [PoolInfoWhereInput!]
   OR: [PoolInfoWhereInput!]
 }
@@ -1655,6 +1654,7 @@ input PoolUpdateInput {
   swapFee: String
   totalSubsidy: String
   totalWeight: String
+  weights: WeightInput
 }
 
 input PoolWhereInput {
@@ -1724,6 +1724,7 @@ input PoolWhereInput {
   totalWeight_startsWith: String
   totalWeight_endsWith: String
   totalWeight_in: [String!]
+  weights_json: JSONObject
   historicalPool_none: HistoricalPoolWhereInput
   historicalPool_some: HistoricalPoolWhereInput
   historicalPool_every: HistoricalPoolWhereInput
@@ -1775,4 +1776,67 @@ type StandardDeleteResponse {
 
 type Subscription {
   stateSubscription: ProcessorState!
+}
+
+type Weight {
+  assetId: String!
+  len: String!
+}
+
+input WeightCreateInput {
+  assetId: String!
+  len: String!
+}
+
+input WeightInput {
+  assetId: String!
+  len: String!
+}
+
+input WeightUpdateInput {
+  assetId: String
+  len: String
+}
+
+input WeightWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  assetId_eq: String
+  assetId_contains: String
+  assetId_startsWith: String
+  assetId_endsWith: String
+  assetId_in: [String!]
+  len_eq: String
+  len_contains: String
+  len_startsWith: String
+  len_endsWith: String
+  len_in: [String!]
+  AND: [WeightWhereInput!]
+  OR: [WeightWhereInput!]
+}
+
+input WeightWhereUniqueInput {
+  id: ID!
 }
