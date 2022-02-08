@@ -23,6 +23,7 @@ export async function swapPoolCreated({
     newPool.totalSubsidy = pool.total_subsidy.toString();
     newPool.totalWeight = pool.total_weight.toString();
     newPool.weights = []
+    newPool.ztgQty = ''+1000000000000
 
     const savedMarket = await store.get(Market, { where: { marketId: newPool.marketId } })
     if (savedMarket) {
@@ -49,7 +50,7 @@ export async function swapPoolCreated({
             const asset = await store.get(Asset, { where: { assetId: entry[0] } })
             if (!asset) { return }
 
-            const spotPrice = await calcSpotPrice(1000000000000,weights.Ztg,1000000000000,+weight.len, +pool.swap_fee.toString())
+            const spotPrice = await calcSpotPrice(+newPool.ztgQty,weights.Ztg,1000000000000,+weight.len, +pool.swap_fee.toString())
             const poolInfo = new PoolInfo()
             poolInfo.price = spotPrice
             poolInfo.qty = ''+1000000000000
@@ -76,6 +77,7 @@ export async function swapPoolCreated({
     const newHP = new HistoricalPool()
     newHP.pool = newPool
     newHP.event = event.method
+    newHP.ztgQty = newPool.ztgQty
     newHP.blockNumber = block.height
     newHP.timestamp = new BN(block.timestamp)
     console.log(`[${event.method}] Saving historical pool: ${JSON.stringify(newHP, null, 2)}`)

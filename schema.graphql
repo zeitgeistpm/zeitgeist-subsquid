@@ -82,12 +82,14 @@ type Pool @entity {
   totalSubsidy: String!
   totalWeight: String!
   weights: [Weight]!
+  ztgQty: String!
   historicalPool: [HistoricalPool] @derivedFrom(field: "pool")
 }
 
 type HistoricalPool @entity {
   pool: Pool!
   event: String!
+  ztgQty: String!
   blockNumber: Int!
   timestamp: BigInt!
 }

@@ -20,6 +20,9 @@ export class HistoricalPool extends BaseModel {
   @StringField({})
   event!: string;
 
+  @StringField({})
+  ztgQty!: string;
+
   @IntField({})
   blockNumber!: number;
 

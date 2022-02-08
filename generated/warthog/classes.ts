@@ -3007,6 +3007,9 @@ export enum PoolOrderByEnum {
 
   totalWeight_ASC = "totalWeight_ASC",
   totalWeight_DESC = "totalWeight_DESC",
+
+  ztgQty_ASC = "ztgQty_ASC",
+  ztgQty_DESC = "ztgQty_DESC",
 }
 
 registerEnumType(PoolOrderByEnum, {
@@ -3216,6 +3219,21 @@ export class PoolWhereInput {
   @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
   weights_json?: JsonObject;
 
+  @TypeGraphQLField({ nullable: true })
+  ztgQty_eq?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  ztgQty_contains?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  ztgQty_startsWith?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  ztgQty_endsWith?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  ztgQty_in?: string[];
+
   @TypeGraphQLField(() => HistoricalPoolWhereInput, { nullable: true })
   historicalPool_none?: HistoricalPoolWhereInput;
 
@@ -3266,6 +3284,9 @@ export class PoolCreateInput {
 
   @TypeGraphQLField(() => Weight)
   weights!: Weight;
+
+  @TypeGraphQLField()
+  ztgQty!: string;
 }
 
 @TypeGraphQLInputType()
@@ -3296,6 +3317,9 @@ export class PoolUpdateInput {
 
   @TypeGraphQLField(() => Weight, { nullable: true })
   weights?: Weight;
+
+  @TypeGraphQLField({ nullable: true })
+  ztgQty?: string;
 }
 
 @ArgsType()
@@ -3334,6 +3358,9 @@ export enum HistoricalPoolOrderByEnum {
 
   event_ASC = "event_ASC",
   event_DESC = "event_DESC",
+
+  ztgQty_ASC = "ztgQty_ASC",
+  ztgQty_DESC = "ztgQty_DESC",
 
   blockNumber_ASC = "blockNumber_ASC",
   blockNumber_DESC = "blockNumber_DESC",
@@ -3435,6 +3462,21 @@ export class HistoricalPoolWhereInput {
   @TypeGraphQLField(() => [String], { nullable: true })
   event_in?: string[];
 
+  @TypeGraphQLField({ nullable: true })
+  ztgQty_eq?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  ztgQty_contains?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  ztgQty_startsWith?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  ztgQty_endsWith?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  ztgQty_in?: string[];
+
   @TypeGraphQLField(() => Int, { nullable: true })
   blockNumber_eq?: number;
 
@@ -3496,6 +3538,9 @@ export class HistoricalPoolCreateInput {
   event!: string;
 
   @TypeGraphQLField()
+  ztgQty!: string;
+
+  @TypeGraphQLField()
   blockNumber!: number;
 
   @TypeGraphQLField()
@@ -3509,6 +3554,9 @@ export class HistoricalPoolUpdateInput {
 
   @TypeGraphQLField({ nullable: true })
   event?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  ztgQty?: string;
 
   @TypeGraphQLField({ nullable: true })
   blockNumber?: number;

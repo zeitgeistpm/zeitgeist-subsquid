@@ -727,6 +727,7 @@ type HistoricalPool implements BaseGraphQLObject {
   pool: Pool!
   poolId: String!
   event: String!
+  ztgQty: String!
   blockNumber: Int!
   timestamp: BigInt!
 }
@@ -740,6 +741,7 @@ type HistoricalPoolConnection {
 input HistoricalPoolCreateInput {
   pool: ID!
   event: String!
+  ztgQty: String!
   blockNumber: Float!
   timestamp: String!
 }
@@ -760,6 +762,8 @@ enum HistoricalPoolOrderByInput {
   pool_DESC
   event_ASC
   event_DESC
+  ztgQty_ASC
+  ztgQty_DESC
   blockNumber_ASC
   blockNumber_DESC
   timestamp_ASC
@@ -769,6 +773,7 @@ enum HistoricalPoolOrderByInput {
 input HistoricalPoolUpdateInput {
   pool: ID
   event: String
+  ztgQty: String
   blockNumber: Float
   timestamp: String
 }
@@ -803,6 +808,11 @@ input HistoricalPoolWhereInput {
   event_startsWith: String
   event_endsWith: String
   event_in: [String!]
+  ztgQty_eq: String
+  ztgQty_contains: String
+  ztgQty_startsWith: String
+  ztgQty_endsWith: String
+  ztgQty_in: [String!]
   blockNumber_eq: Int
   blockNumber_gt: Int
   blockNumber_gte: Int
@@ -1530,6 +1540,7 @@ type Pool implements BaseGraphQLObject {
   totalSubsidy: String!
   totalWeight: String!
   weights: Weight!
+  ztgQty: String!
   historicalPool: [HistoricalPool!]
 }
 
@@ -1549,6 +1560,7 @@ input PoolCreateInput {
   totalSubsidy: String!
   totalWeight: String!
   weights: WeightInput!
+  ztgQty: String!
 }
 
 type PoolEdge {
@@ -1643,6 +1655,8 @@ enum PoolOrderByInput {
   totalSubsidy_DESC
   totalWeight_ASC
   totalWeight_DESC
+  ztgQty_ASC
+  ztgQty_DESC
 }
 
 input PoolUpdateInput {
@@ -1655,6 +1669,7 @@ input PoolUpdateInput {
   totalSubsidy: String
   totalWeight: String
   weights: WeightInput
+  ztgQty: String
 }
 
 input PoolWhereInput {
@@ -1725,6 +1740,11 @@ input PoolWhereInput {
   totalWeight_endsWith: String
   totalWeight_in: [String!]
   weights_json: JSONObject
+  ztgQty_eq: String
+  ztgQty_contains: String
+  ztgQty_startsWith: String
+  ztgQty_endsWith: String
+  ztgQty_in: [String!]
   historicalPool_none: HistoricalPoolWhereInput
   historicalPool_some: HistoricalPoolWhereInput
   historicalPool_every: HistoricalPoolWhereInput
