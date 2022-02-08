@@ -3,7 +3,7 @@ import { SubstrateEvent, SubstrateExtrinsic } from "@subsquid/hydra-common";
 import { Codec } from "@polkadot/types/types";
 import { typeRegistry } from ".";
 
-import { Asset, CommonPoolEventParams, Pool, SwapEvent } from '@zeitgeistpm/types/dist/interfaces';
+import { Asset, CommonPoolEventParams, Pool, SwapEvent } from '@zeitgeistpm/typesV1/dist/interfaces';
 
 export namespace Swaps {
     /**

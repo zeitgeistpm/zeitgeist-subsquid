@@ -6,6 +6,7 @@ import { AssetBalance } from '../generated/modules/asset-balance/asset-balance.m
 import { HistoricalAssetBalance } from '../generated/modules/historical-asset-balance/historical-asset-balance.model'
 import { Balances, System, Tokens } from '../chain'
 import { encodeAddress } from '@polkadot/keyring'
+import { AccountInfo } from "@polkadot/types/interfaces/system";
 import { Cache, Tools } from './util'
 
 export async function balancesEndowed({
@@ -16,7 +17,7 @@ export async function balancesEndowed({
 }: EventContext & StoreContext) {
 
     const [accountId, amount] = new Balances.EndowedEvent(event).params
-    const walletId = encodeAddress(accountId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
+    const walletId = encodeAddress(accountId, +(await Tools.getSDK()).api.consts.system.ss58Prefix.toString())
     
     var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) {
@@ -54,7 +55,7 @@ export async function balancesDustLost({
 }: EventContext & StoreContext) {
 
     const [accountId, amount] = new Balances.DustLostEvent(event).params
-    const walletId = encodeAddress(accountId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
+    const walletId = encodeAddress(accountId, +(await Tools.getSDK()).api.consts.system.ss58Prefix.toString())
     
     const acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) { return }
@@ -84,8 +85,8 @@ export async function balancesTransfer({
 
     const [fromId, toId, amount] = new Balances.TransferEvent(event).params
     
-    const fromWId = encodeAddress(fromId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
-    const toWId = encodeAddress(toId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
+    const fromWId = encodeAddress(fromId, +(await Tools.getSDK()).api.consts.system.ss58Prefix.toString())
+    const toWId = encodeAddress(toId, +(await Tools.getSDK()).api.consts.system.ss58Prefix.toString())
     
     var fa = await store.get(Account, { where: { wallet: fromWId } })
     if (!fa) {
@@ -159,7 +160,7 @@ export async function balancesBalanceSet({
 }: EventContext & StoreContext) {
 
     const [accountId, famount, ramount] = new Balances.BalanceSetEvent(event).params
-    const walletId = encodeAddress(accountId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
+    const walletId = encodeAddress(accountId, +(await Tools.getSDK()).api.consts.system.ss58Prefix.toString())
     
     var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) {
@@ -206,7 +207,7 @@ export async function balancesReserved({
 }: EventContext & StoreContext) {
 
     const [accountId, amount] = new Balances.ReservedEvent(event).params
-    const walletId = encodeAddress(accountId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
+    const walletId = encodeAddress(accountId, +(await Tools.getSDK()).api.consts.system.ss58Prefix.toString())
     
     var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) {
@@ -244,7 +245,7 @@ export async function balancesUnreserved({
 }: EventContext & StoreContext) {
 
     const [accountId, amount] = new Balances.UnreservedEvent(event).params
-    const walletId = encodeAddress(accountId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
+    const walletId = encodeAddress(accountId, +(await Tools.getSDK()).api.consts.system.ss58Prefix.toString())
     
     var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) {
@@ -282,7 +283,7 @@ export async function tokensEndowed({
 }: EventContext & StoreContext) {
 
     const [currencyId, accountId, amount] = new Tokens.EndowedEvent(event).params
-    const walletId = encodeAddress(accountId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
+    const walletId = encodeAddress(accountId, +(await Tools.getSDK()).api.consts.system.ss58Prefix.toString())
     
     var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) {
@@ -329,8 +330,8 @@ export async function currencyTransferred({
     const [currencyId, fromId, toId, amount] = new Currency.TransferredEvent(event).params
     if (currencyId.toString() === "Ztg") { return }
 
-    const fromWId = encodeAddress(fromId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
-    const toWId = encodeAddress(toId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
+    const fromWId = encodeAddress(fromId, +(await Tools.getSDK()).api.consts.system.ss58Prefix.toString())
+    const toWId = encodeAddress(toId, +(await Tools.getSDK()).api.consts.system.ss58Prefix.toString())
     
     var fa = await store.get(Account, { where: { wallet: fromWId } })
     if (!fa) {
@@ -415,7 +416,7 @@ export async function currencyDeposited({
 }: EventContext & StoreContext) {
 
     const [currencyId, accountId, amount] = new Currency.DepositedEvent(event).params
-    const walletId = encodeAddress(accountId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
+    const walletId = encodeAddress(accountId, +(await Tools.getSDK()).api.consts.system.ss58Prefix.toString())
     
     var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) {
@@ -466,7 +467,7 @@ export async function currencyWithdrawn({
 }: EventContext & StoreContext) {
 
     const [currencyId, accountId, amount] = new Currency.WithdrawnEvent(event).params
-    const walletId = encodeAddress(accountId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
+    const walletId = encodeAddress(accountId, +(await Tools.getSDK()).api.consts.system.ss58Prefix.toString())
     
     var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) {
@@ -511,7 +512,7 @@ export async function systemNewAccount({
 }: EventContext & StoreContext) {
 
     const [accountId] = new System.NewAccountEvent(event).params
-    const walletId = encodeAddress(accountId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
+    const walletId = encodeAddress(accountId, +(await Tools.getSDK()).api.consts.system.ss58Prefix.toString())
     
     const acc = await store.get(Account, { where: { wallet: walletId } })
     if (acc) return
@@ -676,7 +677,7 @@ async function getFees(block: SubstrateBlock, extrinsic: SubstrateExtrinsic): Pr
 async function initBalance(acc: Account, walletId: string, store: DatabaseManager, event: SubstrateEvent, block: SubstrateBlock) {
     const sdk = await Tools.getSDK()
     const blockZero = `0xb90cd3a37b4793c6494b78962986f4f6ed3ec2eda91a6b84fd8457d24f606b9c`
-    const { data : { free: amt } } = await sdk.api.query.system.account.at(blockZero, walletId)
+    const { data : { free: amt } } = await sdk.api.query.system.account.at(blockZero, walletId) as AccountInfo
 
     const ab = new AssetBalance()
     ab.account = acc

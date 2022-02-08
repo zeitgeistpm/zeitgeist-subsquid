@@ -10,7 +10,7 @@ import {
   MarketStatus,
   Report,
   OutcomeReport,
-} from "@zeitgeistpm/types/dist/interfaces";
+} from "@zeitgeistpm/typesV1/dist/interfaces";
 import { AccountId } from "@polkadot/types/interfaces";
 
 export namespace PredictionMarkets {

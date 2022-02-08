@@ -16,9 +16,9 @@ export async function swapPoolCreated({
     const newPool = new Pool()
     newPool.poolId = cpep.pool_id.toNumber();
     newPool.baseAsset = pool.base_asset.toString();
-    newPool.marketId = pool.market_id;
+    newPool.marketId = pool.market_id.toNumber();
     newPool.poolStatus = pool.pool_status.toString();
-    newPool.scoringRule = pool.scoring_rule;
+    newPool.scoringRule = pool.scoring_rule.toString();
     newPool.swapFee = pool.swap_fee.toString();
     newPool.totalSubsidy = pool.total_subsidy.toString();
     newPool.totalWeight = pool.total_weight.toString();

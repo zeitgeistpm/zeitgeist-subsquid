@@ -6,7 +6,7 @@ import { Account, Asset, AssetBalance, CategoryMetadata, HistoricalAssetBalance,
 import { PredictionMarkets } from '../chain'
 import { Cache, IPFS, Tools } from './util'
 import { MarketStatus } from '../generated/modules/enums/enums'
-import { MarketId, MarketType as MType } from '@zeitgeistpm/types/dist/interfaces'
+import { MarketId, MarketType as MType } from '@zeitgeistpm/typesV1/dist/interfaces'
 
 export async function predictionMarketBoughtCompleteSet({
     store,
@@ -29,7 +29,7 @@ export async function predictionMarketBoughtCompleteSet({
     console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
     await store.save<Market>(savedMarket)
 
-    const walletId = encodeAddress(accountId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
+    const walletId = encodeAddress(accountId, +(await Tools.getSDK()).api.consts.system.ss58Prefix.toString())
     var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) { return }
 
@@ -137,8 +137,8 @@ export async function predictionMarketCreatedV1({
 
     const [marketIdOf, market] = new PredictionMarkets.MarketCreatedEventV1(event).params
 
-    const marketCreator = encodeAddress(market.creator, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
-    const marketOracle = encodeAddress(market.oracle, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
+    const marketCreator = encodeAddress(market.creator, +(await Tools.getSDK()).api.consts.system.ss58Prefix.toString())
+    const marketOracle = encodeAddress(market.oracle, +(await Tools.getSDK()).api.consts.system.ss58Prefix.toString())
 
     const newMarket = new Market()
     newMarket.marketId = marketIdOf.toNumber()
@@ -189,10 +189,10 @@ export async function predictionMarketCreatedV1({
         period.block = market.period.asBlock.toString()
 
         const sdk = await Tools.getSDK()
-        const now = (await sdk.api.query.timestamp.now()).toNumber();
+        const now = (await sdk.api.query.timestamp.now()).toString();
         const head = await sdk.api.rpc.chain.getHeader();
         const blockNum = head.number.toNumber();
-        const diffInMs = (sdk.api.consts.timestamp.minimumPeriod).toNumber() * (market.period.asBlock[1].toNumber() - blockNum);
+        const diffInMs = +(sdk.api.consts.timestamp.minimumPeriod).toString() * (market.period.asBlock[1].toNumber() - blockNum);
         newMarket.end = new BN(now + diffInMs)
     } else if (market.period.isTimestamp) {
         period.timestamp = market.period.asTimestamp.toString()
@@ -243,8 +243,8 @@ export async function predictionMarketCreatedV2({
 
     const [marketIdOf, market] = new PredictionMarkets.MarketCreatedEventV2(event).params
 
-    const marketCreator = encodeAddress(market.creator, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
-    const marketOracle = encodeAddress(market.oracle, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
+    const marketCreator = encodeAddress(market.creator, +(await Tools.getSDK()).api.consts.system.ss58Prefix.toString())
+    const marketOracle = encodeAddress(market.oracle, +(await Tools.getSDK()).api.consts.system.ss58Prefix.toString())
 
     const newMarket = new Market()
     newMarket.marketId = marketIdOf.toNumber()
@@ -295,10 +295,10 @@ export async function predictionMarketCreatedV2({
         period.block = market.period.asBlock.toString()
 
         const sdk = await Tools.getSDK()
-        const now = (await sdk.api.query.timestamp.now()).toNumber();
+        const now = (await sdk.api.query.timestamp.now()).toString();
         const head = await sdk.api.rpc.chain.getHeader();
         const blockNum = head.number.toNumber();
-        const diffInMs = (sdk.api.consts.timestamp.minimumPeriod).toNumber() * (market.period.asBlock[1].toNumber() - blockNum);
+        const diffInMs = +(sdk.api.consts.timestamp.minimumPeriod).toString() * (market.period.asBlock[1].toNumber() - blockNum);
         newMarket.end = new BN(now + diffInMs)
     } else if (market.period.isTimestamp) {
         period.timestamp = market.period.asTimestamp.toString()
@@ -687,7 +687,7 @@ export async function predictionMarketSoldCompleteSet({
     console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
     await store.save<Market>(savedMarket)
 
-    const walletId = encodeAddress(accountId, (await Tools.getSDK()).api.consts.system.ss58Prefix.toNumber())
+    const walletId = encodeAddress(accountId, +(await Tools.getSDK()).api.consts.system.ss58Prefix.toString())
     var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) { return }
 
