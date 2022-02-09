@@ -30,6 +30,10 @@ import { HistoricalAssetBalance } from "../modules/historical-asset-balance/hist
 // @ts-ignore
 import { Account } from "../modules/account/account.model";
 // @ts-ignore
+import { Asset } from "../modules/asset/asset.model";
+// @ts-ignore
+import { HistoricalAssetPrice } from "../modules/historical-asset-price/historical-asset-price.model";
+// @ts-ignore
 import { CategoryMetadata } from "../modules/jsonfields/jsonfields.model";
 // @ts-ignore
 import { MarketDisputeMechanism } from "../modules/jsonfields/jsonfields.model";
@@ -44,13 +48,7 @@ import { MarketType } from "../modules/jsonfields/jsonfields.model";
 // @ts-ignore
 import { OutcomeReport } from "../modules/jsonfields/jsonfields.model";
 // @ts-ignore
-import { PoolInfo } from "../modules/jsonfields/jsonfields.model";
-// @ts-ignore
 import { Weight } from "../modules/jsonfields/jsonfields.model";
-// @ts-ignore
-import { Asset } from "../modules/asset/asset.model";
-// @ts-ignore
-import { HistoricalAssetPrice } from "../modules/historical-asset-price/historical-asset-price.model";
 // @ts-ignore
 import { Pool } from "../modules/pool/pool.model";
 // @ts-ignore
@@ -716,6 +714,552 @@ export class AccountCreateManyArgs {
 export class AccountUpdateArgs {
   @TypeGraphQLField() data!: AccountUpdateInput;
   @TypeGraphQLField() where!: AccountWhereUniqueInput;
+}
+
+export enum AssetOrderByEnum {
+  createdAt_ASC = "createdAt_ASC",
+  createdAt_DESC = "createdAt_DESC",
+
+  updatedAt_ASC = "updatedAt_ASC",
+  updatedAt_DESC = "updatedAt_DESC",
+
+  deletedAt_ASC = "deletedAt_ASC",
+  deletedAt_DESC = "deletedAt_DESC",
+
+  assetId_ASC = "assetId_ASC",
+  assetId_DESC = "assetId_DESC",
+
+  price_ASC = "price_ASC",
+  price_DESC = "price_DESC",
+
+  qty_ASC = "qty_ASC",
+  qty_DESC = "qty_DESC",
+}
+
+registerEnumType(AssetOrderByEnum, {
+  name: "AssetOrderByInput",
+});
+
+@TypeGraphQLInputType()
+export class AssetWhereInput {
+  @TypeGraphQLField(() => ID, { nullable: true })
+  id_eq?: string;
+
+  @TypeGraphQLField(() => [ID], { nullable: true })
+  id_in?: string[];
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_eq?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_lt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_lte?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_gt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_gte?: Date;
+
+  @TypeGraphQLField(() => ID, { nullable: true })
+  createdById_eq?: string;
+
+  @TypeGraphQLField(() => [ID], { nullable: true })
+  createdById_in?: string[];
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_eq?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_lt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_lte?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_gt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_gte?: Date;
+
+  @TypeGraphQLField(() => ID, { nullable: true })
+  updatedById_eq?: string;
+
+  @TypeGraphQLField(() => [ID], { nullable: true })
+  updatedById_in?: string[];
+
+  @TypeGraphQLField({ nullable: true })
+  deletedAt_all?: Boolean;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_eq?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_lt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_lte?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_gt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_gte?: Date;
+
+  @TypeGraphQLField(() => ID, { nullable: true })
+  deletedById_eq?: string;
+
+  @TypeGraphQLField(() => [ID], { nullable: true })
+  deletedById_in?: string[];
+
+  @TypeGraphQLField({ nullable: true })
+  assetId_eq?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  assetId_contains?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  assetId_startsWith?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  assetId_endsWith?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  assetId_in?: string[];
+
+  @TypeGraphQLField(() => Float, { nullable: true })
+  price_eq?: number;
+
+  @TypeGraphQLField(() => Float, { nullable: true })
+  price_gt?: number;
+
+  @TypeGraphQLField(() => Float, { nullable: true })
+  price_gte?: number;
+
+  @TypeGraphQLField(() => Float, { nullable: true })
+  price_lt?: number;
+
+  @TypeGraphQLField(() => Float, { nullable: true })
+  price_lte?: number;
+
+  @TypeGraphQLField(() => [Float], { nullable: true })
+  price_in?: number[];
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  qty_eq?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  qty_gt?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  qty_gte?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  qty_lt?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  qty_lte?: string;
+
+  @TypeGraphQLField(() => [BigInt], { nullable: true })
+  qty_in?: string[];
+
+  @TypeGraphQLField(() => AssetWhereInput, { nullable: true })
+  AND?: [AssetWhereInput];
+
+  @TypeGraphQLField(() => AssetWhereInput, { nullable: true })
+  OR?: [AssetWhereInput];
+}
+
+@TypeGraphQLInputType()
+export class AssetWhereUniqueInput {
+  @TypeGraphQLField(() => ID)
+  id?: string;
+}
+
+@TypeGraphQLInputType()
+export class AssetCreateInput {
+  @TypeGraphQLField()
+  assetId!: string;
+
+  @TypeGraphQLField({ nullable: true })
+  price?: number;
+
+  @TypeGraphQLField({ nullable: true })
+  qty?: string;
+}
+
+@TypeGraphQLInputType()
+export class AssetUpdateInput {
+  @TypeGraphQLField({ nullable: true })
+  assetId?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  price?: number;
+
+  @TypeGraphQLField({ nullable: true })
+  qty?: string;
+}
+
+@ArgsType()
+export class AssetWhereArgs extends PaginationArgs {
+  @TypeGraphQLField(() => AssetWhereInput, { nullable: true })
+  where?: AssetWhereInput;
+
+  @TypeGraphQLField(() => AssetOrderByEnum, { nullable: true })
+  orderBy?: AssetOrderByEnum[];
+}
+
+@ArgsType()
+export class AssetCreateManyArgs {
+  @TypeGraphQLField(() => [AssetCreateInput])
+  data!: AssetCreateInput[];
+}
+
+@ArgsType()
+export class AssetUpdateArgs {
+  @TypeGraphQLField() data!: AssetUpdateInput;
+  @TypeGraphQLField() where!: AssetWhereUniqueInput;
+}
+
+export enum HistoricalAssetPriceOrderByEnum {
+  createdAt_ASC = "createdAt_ASC",
+  createdAt_DESC = "createdAt_DESC",
+
+  updatedAt_ASC = "updatedAt_ASC",
+  updatedAt_DESC = "updatedAt_DESC",
+
+  deletedAt_ASC = "deletedAt_ASC",
+  deletedAt_DESC = "deletedAt_DESC",
+
+  assetId_ASC = "assetId_ASC",
+  assetId_DESC = "assetId_DESC",
+
+  dPrice_ASC = "dPrice_ASC",
+  dPrice_DESC = "dPrice_DESC",
+
+  dQty_ASC = "dQty_ASC",
+  dQty_DESC = "dQty_DESC",
+
+  price_ASC = "price_ASC",
+  price_DESC = "price_DESC",
+
+  qty_ASC = "qty_ASC",
+  qty_DESC = "qty_DESC",
+
+  event_ASC = "event_ASC",
+  event_DESC = "event_DESC",
+
+  blockNumber_ASC = "blockNumber_ASC",
+  blockNumber_DESC = "blockNumber_DESC",
+
+  timestamp_ASC = "timestamp_ASC",
+  timestamp_DESC = "timestamp_DESC",
+}
+
+registerEnumType(HistoricalAssetPriceOrderByEnum, {
+  name: "HistoricalAssetPriceOrderByInput",
+});
+
+@TypeGraphQLInputType()
+export class HistoricalAssetPriceWhereInput {
+  @TypeGraphQLField(() => ID, { nullable: true })
+  id_eq?: string;
+
+  @TypeGraphQLField(() => [ID], { nullable: true })
+  id_in?: string[];
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_eq?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_lt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_lte?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_gt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  createdAt_gte?: Date;
+
+  @TypeGraphQLField(() => ID, { nullable: true })
+  createdById_eq?: string;
+
+  @TypeGraphQLField(() => [ID], { nullable: true })
+  createdById_in?: string[];
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_eq?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_lt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_lte?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_gt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  updatedAt_gte?: Date;
+
+  @TypeGraphQLField(() => ID, { nullable: true })
+  updatedById_eq?: string;
+
+  @TypeGraphQLField(() => [ID], { nullable: true })
+  updatedById_in?: string[];
+
+  @TypeGraphQLField({ nullable: true })
+  deletedAt_all?: Boolean;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_eq?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_lt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_lte?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_gt?: Date;
+
+  @TypeGraphQLField(() => DateTime, { nullable: true })
+  deletedAt_gte?: Date;
+
+  @TypeGraphQLField(() => ID, { nullable: true })
+  deletedById_eq?: string;
+
+  @TypeGraphQLField(() => [ID], { nullable: true })
+  deletedById_in?: string[];
+
+  @TypeGraphQLField({ nullable: true })
+  assetId_eq?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  assetId_contains?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  assetId_startsWith?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  assetId_endsWith?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  assetId_in?: string[];
+
+  @TypeGraphQLField(() => Float, { nullable: true })
+  dPrice_eq?: number;
+
+  @TypeGraphQLField(() => Float, { nullable: true })
+  dPrice_gt?: number;
+
+  @TypeGraphQLField(() => Float, { nullable: true })
+  dPrice_gte?: number;
+
+  @TypeGraphQLField(() => Float, { nullable: true })
+  dPrice_lt?: number;
+
+  @TypeGraphQLField(() => Float, { nullable: true })
+  dPrice_lte?: number;
+
+  @TypeGraphQLField(() => [Float], { nullable: true })
+  dPrice_in?: number[];
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  dQty_eq?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  dQty_gt?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  dQty_gte?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  dQty_lt?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  dQty_lte?: string;
+
+  @TypeGraphQLField(() => [BigInt], { nullable: true })
+  dQty_in?: string[];
+
+  @TypeGraphQLField(() => Float, { nullable: true })
+  price_eq?: number;
+
+  @TypeGraphQLField(() => Float, { nullable: true })
+  price_gt?: number;
+
+  @TypeGraphQLField(() => Float, { nullable: true })
+  price_gte?: number;
+
+  @TypeGraphQLField(() => Float, { nullable: true })
+  price_lt?: number;
+
+  @TypeGraphQLField(() => Float, { nullable: true })
+  price_lte?: number;
+
+  @TypeGraphQLField(() => [Float], { nullable: true })
+  price_in?: number[];
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  qty_eq?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  qty_gt?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  qty_gte?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  qty_lt?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  qty_lte?: string;
+
+  @TypeGraphQLField(() => [BigInt], { nullable: true })
+  qty_in?: string[];
+
+  @TypeGraphQLField({ nullable: true })
+  event_eq?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  event_contains?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  event_startsWith?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  event_endsWith?: string;
+
+  @TypeGraphQLField(() => [String], { nullable: true })
+  event_in?: string[];
+
+  @TypeGraphQLField(() => Int, { nullable: true })
+  blockNumber_eq?: number;
+
+  @TypeGraphQLField(() => Int, { nullable: true })
+  blockNumber_gt?: number;
+
+  @TypeGraphQLField(() => Int, { nullable: true })
+  blockNumber_gte?: number;
+
+  @TypeGraphQLField(() => Int, { nullable: true })
+  blockNumber_lt?: number;
+
+  @TypeGraphQLField(() => Int, { nullable: true })
+  blockNumber_lte?: number;
+
+  @TypeGraphQLField(() => [Int], { nullable: true })
+  blockNumber_in?: number[];
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  timestamp_eq?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  timestamp_gt?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  timestamp_gte?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  timestamp_lt?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  timestamp_lte?: string;
+
+  @TypeGraphQLField(() => [BigInt], { nullable: true })
+  timestamp_in?: string[];
+
+  @TypeGraphQLField(() => HistoricalAssetPriceWhereInput, { nullable: true })
+  AND?: [HistoricalAssetPriceWhereInput];
+
+  @TypeGraphQLField(() => HistoricalAssetPriceWhereInput, { nullable: true })
+  OR?: [HistoricalAssetPriceWhereInput];
+}
+
+@TypeGraphQLInputType()
+export class HistoricalAssetPriceWhereUniqueInput {
+  @TypeGraphQLField(() => ID)
+  id?: string;
+}
+
+@TypeGraphQLInputType()
+export class HistoricalAssetPriceCreateInput {
+  @TypeGraphQLField()
+  assetId!: string;
+
+  @TypeGraphQLField()
+  dPrice!: number;
+
+  @TypeGraphQLField()
+  dQty!: string;
+
+  @TypeGraphQLField()
+  price!: number;
+
+  @TypeGraphQLField()
+  qty!: string;
+
+  @TypeGraphQLField()
+  event!: string;
+
+  @TypeGraphQLField()
+  blockNumber!: number;
+
+  @TypeGraphQLField()
+  timestamp!: string;
+}
+
+@TypeGraphQLInputType()
+export class HistoricalAssetPriceUpdateInput {
+  @TypeGraphQLField({ nullable: true })
+  assetId?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  dPrice?: number;
+
+  @TypeGraphQLField({ nullable: true })
+  dQty?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  price?: number;
+
+  @TypeGraphQLField({ nullable: true })
+  qty?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  event?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  blockNumber?: number;
+
+  @TypeGraphQLField({ nullable: true })
+  timestamp?: string;
+}
+
+@ArgsType()
+export class HistoricalAssetPriceWhereArgs extends PaginationArgs {
+  @TypeGraphQLField(() => HistoricalAssetPriceWhereInput, { nullable: true })
+  where?: HistoricalAssetPriceWhereInput;
+
+  @TypeGraphQLField(() => HistoricalAssetPriceOrderByEnum, { nullable: true })
+  orderBy?: HistoricalAssetPriceOrderByEnum[];
+}
+
+@ArgsType()
+export class HistoricalAssetPriceCreateManyArgs {
+  @TypeGraphQLField(() => [HistoricalAssetPriceCreateInput])
+  data!: HistoricalAssetPriceCreateInput[];
+}
+
+@ArgsType()
+export class HistoricalAssetPriceUpdateArgs {
+  @TypeGraphQLField() data!: HistoricalAssetPriceUpdateInput;
+  @TypeGraphQLField() where!: HistoricalAssetPriceWhereUniqueInput;
 }
 
 export enum CategoryMetadataOrderByEnum {
@@ -2122,186 +2666,6 @@ export class OutcomeReportUpdateArgs {
   @TypeGraphQLField() where!: OutcomeReportWhereUniqueInput;
 }
 
-export enum PoolInfoOrderByEnum {
-  createdAt_ASC = "createdAt_ASC",
-  createdAt_DESC = "createdAt_DESC",
-
-  updatedAt_ASC = "updatedAt_ASC",
-  updatedAt_DESC = "updatedAt_DESC",
-
-  deletedAt_ASC = "deletedAt_ASC",
-  deletedAt_DESC = "deletedAt_DESC",
-
-  price_ASC = "price_ASC",
-  price_DESC = "price_DESC",
-
-  qty_ASC = "qty_ASC",
-  qty_DESC = "qty_DESC",
-}
-
-registerEnumType(PoolInfoOrderByEnum, {
-  name: "PoolInfoOrderByInput",
-});
-
-@TypeGraphQLInputType()
-export class PoolInfoWhereInput {
-  @TypeGraphQLField(() => ID, { nullable: true })
-  id_eq?: string;
-
-  @TypeGraphQLField(() => [ID], { nullable: true })
-  id_in?: string[];
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  createdAt_eq?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  createdAt_lt?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  createdAt_lte?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  createdAt_gt?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  createdAt_gte?: Date;
-
-  @TypeGraphQLField(() => ID, { nullable: true })
-  createdById_eq?: string;
-
-  @TypeGraphQLField(() => [ID], { nullable: true })
-  createdById_in?: string[];
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  updatedAt_eq?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  updatedAt_lt?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  updatedAt_lte?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  updatedAt_gt?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  updatedAt_gte?: Date;
-
-  @TypeGraphQLField(() => ID, { nullable: true })
-  updatedById_eq?: string;
-
-  @TypeGraphQLField(() => [ID], { nullable: true })
-  updatedById_in?: string[];
-
-  @TypeGraphQLField({ nullable: true })
-  deletedAt_all?: Boolean;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  deletedAt_eq?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  deletedAt_lt?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  deletedAt_lte?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  deletedAt_gt?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  deletedAt_gte?: Date;
-
-  @TypeGraphQLField(() => ID, { nullable: true })
-  deletedById_eq?: string;
-
-  @TypeGraphQLField(() => [ID], { nullable: true })
-  deletedById_in?: string[];
-
-  @TypeGraphQLField(() => Float, { nullable: true })
-  price_eq?: number;
-
-  @TypeGraphQLField(() => Float, { nullable: true })
-  price_gt?: number;
-
-  @TypeGraphQLField(() => Float, { nullable: true })
-  price_gte?: number;
-
-  @TypeGraphQLField(() => Float, { nullable: true })
-  price_lt?: number;
-
-  @TypeGraphQLField(() => Float, { nullable: true })
-  price_lte?: number;
-
-  @TypeGraphQLField(() => [Float], { nullable: true })
-  price_in?: number[];
-
-  @TypeGraphQLField({ nullable: true })
-  qty_eq?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  qty_contains?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  qty_startsWith?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  qty_endsWith?: string;
-
-  @TypeGraphQLField(() => [String], { nullable: true })
-  qty_in?: string[];
-
-  @TypeGraphQLField(() => PoolInfoWhereInput, { nullable: true })
-  AND?: [PoolInfoWhereInput];
-
-  @TypeGraphQLField(() => PoolInfoWhereInput, { nullable: true })
-  OR?: [PoolInfoWhereInput];
-}
-
-@TypeGraphQLInputType()
-export class PoolInfoWhereUniqueInput {
-  @TypeGraphQLField(() => ID)
-  id?: string;
-}
-
-@TypeGraphQLInputType()
-export class PoolInfoCreateInput {
-  @TypeGraphQLField()
-  price!: number;
-
-  @TypeGraphQLField()
-  qty!: string;
-}
-
-@TypeGraphQLInputType()
-export class PoolInfoUpdateInput {
-  @TypeGraphQLField({ nullable: true })
-  price?: number;
-
-  @TypeGraphQLField({ nullable: true })
-  qty?: string;
-}
-
-@ArgsType()
-export class PoolInfoWhereArgs extends PaginationArgs {
-  @TypeGraphQLField(() => PoolInfoWhereInput, { nullable: true })
-  where?: PoolInfoWhereInput;
-
-  @TypeGraphQLField(() => PoolInfoOrderByEnum, { nullable: true })
-  orderBy?: PoolInfoOrderByEnum[];
-}
-
-@ArgsType()
-export class PoolInfoCreateManyArgs {
-  @TypeGraphQLField(() => [PoolInfoCreateInput])
-  data!: PoolInfoCreateInput[];
-}
-
-@ArgsType()
-export class PoolInfoUpdateArgs {
-  @TypeGraphQLField() data!: PoolInfoUpdateInput;
-  @TypeGraphQLField() where!: PoolInfoWhereUniqueInput;
-}
-
 export enum WeightOrderByEnum {
   createdAt_ASC = "createdAt_ASC",
   createdAt_DESC = "createdAt_DESC",
@@ -2477,501 +2841,6 @@ export class WeightCreateManyArgs {
 export class WeightUpdateArgs {
   @TypeGraphQLField() data!: WeightUpdateInput;
   @TypeGraphQLField() where!: WeightWhereUniqueInput;
-}
-
-export enum AssetOrderByEnum {
-  createdAt_ASC = "createdAt_ASC",
-  createdAt_DESC = "createdAt_DESC",
-
-  updatedAt_ASC = "updatedAt_ASC",
-  updatedAt_DESC = "updatedAt_DESC",
-
-  deletedAt_ASC = "deletedAt_ASC",
-  deletedAt_DESC = "deletedAt_DESC",
-
-  assetId_ASC = "assetId_ASC",
-  assetId_DESC = "assetId_DESC",
-}
-
-registerEnumType(AssetOrderByEnum, {
-  name: "AssetOrderByInput",
-});
-
-@TypeGraphQLInputType()
-export class AssetWhereInput {
-  @TypeGraphQLField(() => ID, { nullable: true })
-  id_eq?: string;
-
-  @TypeGraphQLField(() => [ID], { nullable: true })
-  id_in?: string[];
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  createdAt_eq?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  createdAt_lt?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  createdAt_lte?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  createdAt_gt?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  createdAt_gte?: Date;
-
-  @TypeGraphQLField(() => ID, { nullable: true })
-  createdById_eq?: string;
-
-  @TypeGraphQLField(() => [ID], { nullable: true })
-  createdById_in?: string[];
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  updatedAt_eq?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  updatedAt_lt?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  updatedAt_lte?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  updatedAt_gt?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  updatedAt_gte?: Date;
-
-  @TypeGraphQLField(() => ID, { nullable: true })
-  updatedById_eq?: string;
-
-  @TypeGraphQLField(() => [ID], { nullable: true })
-  updatedById_in?: string[];
-
-  @TypeGraphQLField({ nullable: true })
-  deletedAt_all?: Boolean;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  deletedAt_eq?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  deletedAt_lt?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  deletedAt_lte?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  deletedAt_gt?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  deletedAt_gte?: Date;
-
-  @TypeGraphQLField(() => ID, { nullable: true })
-  deletedById_eq?: string;
-
-  @TypeGraphQLField(() => [ID], { nullable: true })
-  deletedById_in?: string[];
-
-  @TypeGraphQLField({ nullable: true })
-  assetId_eq?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  assetId_contains?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  assetId_startsWith?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  assetId_endsWith?: string;
-
-  @TypeGraphQLField(() => [String], { nullable: true })
-  assetId_in?: string[];
-
-  @TypeGraphQLField(() => GraphQLJSONObject, { nullable: true })
-  poolInfo_json?: JsonObject;
-
-  @TypeGraphQLField(() => AssetWhereInput, { nullable: true })
-  AND?: [AssetWhereInput];
-
-  @TypeGraphQLField(() => AssetWhereInput, { nullable: true })
-  OR?: [AssetWhereInput];
-}
-
-@TypeGraphQLInputType()
-export class AssetWhereUniqueInput {
-  @TypeGraphQLField(() => ID)
-  id?: string;
-}
-
-@TypeGraphQLInputType()
-export class AssetCreateInput {
-  @TypeGraphQLField()
-  assetId!: string;
-
-  @TypeGraphQLField(() => PoolInfo, { nullable: true })
-  poolInfo?: PoolInfo;
-}
-
-@TypeGraphQLInputType()
-export class AssetUpdateInput {
-  @TypeGraphQLField({ nullable: true })
-  assetId?: string;
-
-  @TypeGraphQLField(() => PoolInfo, { nullable: true })
-  poolInfo?: PoolInfo;
-}
-
-@ArgsType()
-export class AssetWhereArgs extends PaginationArgs {
-  @TypeGraphQLField(() => AssetWhereInput, { nullable: true })
-  where?: AssetWhereInput;
-
-  @TypeGraphQLField(() => AssetOrderByEnum, { nullable: true })
-  orderBy?: AssetOrderByEnum[];
-}
-
-@ArgsType()
-export class AssetCreateManyArgs {
-  @TypeGraphQLField(() => [AssetCreateInput])
-  data!: AssetCreateInput[];
-}
-
-@ArgsType()
-export class AssetUpdateArgs {
-  @TypeGraphQLField() data!: AssetUpdateInput;
-  @TypeGraphQLField() where!: AssetWhereUniqueInput;
-}
-
-export enum HistoricalAssetPriceOrderByEnum {
-  createdAt_ASC = "createdAt_ASC",
-  createdAt_DESC = "createdAt_DESC",
-
-  updatedAt_ASC = "updatedAt_ASC",
-  updatedAt_DESC = "updatedAt_DESC",
-
-  deletedAt_ASC = "deletedAt_ASC",
-  deletedAt_DESC = "deletedAt_DESC",
-
-  assetId_ASC = "assetId_ASC",
-  assetId_DESC = "assetId_DESC",
-
-  dPrice_ASC = "dPrice_ASC",
-  dPrice_DESC = "dPrice_DESC",
-
-  dQty_ASC = "dQty_ASC",
-  dQty_DESC = "dQty_DESC",
-
-  price_ASC = "price_ASC",
-  price_DESC = "price_DESC",
-
-  qty_ASC = "qty_ASC",
-  qty_DESC = "qty_DESC",
-
-  event_ASC = "event_ASC",
-  event_DESC = "event_DESC",
-
-  blockNumber_ASC = "blockNumber_ASC",
-  blockNumber_DESC = "blockNumber_DESC",
-
-  timestamp_ASC = "timestamp_ASC",
-  timestamp_DESC = "timestamp_DESC",
-}
-
-registerEnumType(HistoricalAssetPriceOrderByEnum, {
-  name: "HistoricalAssetPriceOrderByInput",
-});
-
-@TypeGraphQLInputType()
-export class HistoricalAssetPriceWhereInput {
-  @TypeGraphQLField(() => ID, { nullable: true })
-  id_eq?: string;
-
-  @TypeGraphQLField(() => [ID], { nullable: true })
-  id_in?: string[];
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  createdAt_eq?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  createdAt_lt?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  createdAt_lte?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  createdAt_gt?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  createdAt_gte?: Date;
-
-  @TypeGraphQLField(() => ID, { nullable: true })
-  createdById_eq?: string;
-
-  @TypeGraphQLField(() => [ID], { nullable: true })
-  createdById_in?: string[];
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  updatedAt_eq?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  updatedAt_lt?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  updatedAt_lte?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  updatedAt_gt?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  updatedAt_gte?: Date;
-
-  @TypeGraphQLField(() => ID, { nullable: true })
-  updatedById_eq?: string;
-
-  @TypeGraphQLField(() => [ID], { nullable: true })
-  updatedById_in?: string[];
-
-  @TypeGraphQLField({ nullable: true })
-  deletedAt_all?: Boolean;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  deletedAt_eq?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  deletedAt_lt?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  deletedAt_lte?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  deletedAt_gt?: Date;
-
-  @TypeGraphQLField(() => DateTime, { nullable: true })
-  deletedAt_gte?: Date;
-
-  @TypeGraphQLField(() => ID, { nullable: true })
-  deletedById_eq?: string;
-
-  @TypeGraphQLField(() => [ID], { nullable: true })
-  deletedById_in?: string[];
-
-  @TypeGraphQLField({ nullable: true })
-  assetId_eq?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  assetId_contains?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  assetId_startsWith?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  assetId_endsWith?: string;
-
-  @TypeGraphQLField(() => [String], { nullable: true })
-  assetId_in?: string[];
-
-  @TypeGraphQLField(() => Float, { nullable: true })
-  dPrice_eq?: number;
-
-  @TypeGraphQLField(() => Float, { nullable: true })
-  dPrice_gt?: number;
-
-  @TypeGraphQLField(() => Float, { nullable: true })
-  dPrice_gte?: number;
-
-  @TypeGraphQLField(() => Float, { nullable: true })
-  dPrice_lt?: number;
-
-  @TypeGraphQLField(() => Float, { nullable: true })
-  dPrice_lte?: number;
-
-  @TypeGraphQLField(() => [Float], { nullable: true })
-  dPrice_in?: number[];
-
-  @TypeGraphQLField({ nullable: true })
-  dQty_eq?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  dQty_contains?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  dQty_startsWith?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  dQty_endsWith?: string;
-
-  @TypeGraphQLField(() => [String], { nullable: true })
-  dQty_in?: string[];
-
-  @TypeGraphQLField(() => Float, { nullable: true })
-  price_eq?: number;
-
-  @TypeGraphQLField(() => Float, { nullable: true })
-  price_gt?: number;
-
-  @TypeGraphQLField(() => Float, { nullable: true })
-  price_gte?: number;
-
-  @TypeGraphQLField(() => Float, { nullable: true })
-  price_lt?: number;
-
-  @TypeGraphQLField(() => Float, { nullable: true })
-  price_lte?: number;
-
-  @TypeGraphQLField(() => [Float], { nullable: true })
-  price_in?: number[];
-
-  @TypeGraphQLField({ nullable: true })
-  qty_eq?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  qty_contains?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  qty_startsWith?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  qty_endsWith?: string;
-
-  @TypeGraphQLField(() => [String], { nullable: true })
-  qty_in?: string[];
-
-  @TypeGraphQLField({ nullable: true })
-  event_eq?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  event_contains?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  event_startsWith?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  event_endsWith?: string;
-
-  @TypeGraphQLField(() => [String], { nullable: true })
-  event_in?: string[];
-
-  @TypeGraphQLField(() => Int, { nullable: true })
-  blockNumber_eq?: number;
-
-  @TypeGraphQLField(() => Int, { nullable: true })
-  blockNumber_gt?: number;
-
-  @TypeGraphQLField(() => Int, { nullable: true })
-  blockNumber_gte?: number;
-
-  @TypeGraphQLField(() => Int, { nullable: true })
-  blockNumber_lt?: number;
-
-  @TypeGraphQLField(() => Int, { nullable: true })
-  blockNumber_lte?: number;
-
-  @TypeGraphQLField(() => [Int], { nullable: true })
-  blockNumber_in?: number[];
-
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  timestamp_eq?: string;
-
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  timestamp_gt?: string;
-
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  timestamp_gte?: string;
-
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  timestamp_lt?: string;
-
-  @TypeGraphQLField(() => BigInt, { nullable: true })
-  timestamp_lte?: string;
-
-  @TypeGraphQLField(() => [BigInt], { nullable: true })
-  timestamp_in?: string[];
-
-  @TypeGraphQLField(() => HistoricalAssetPriceWhereInput, { nullable: true })
-  AND?: [HistoricalAssetPriceWhereInput];
-
-  @TypeGraphQLField(() => HistoricalAssetPriceWhereInput, { nullable: true })
-  OR?: [HistoricalAssetPriceWhereInput];
-}
-
-@TypeGraphQLInputType()
-export class HistoricalAssetPriceWhereUniqueInput {
-  @TypeGraphQLField(() => ID)
-  id?: string;
-}
-
-@TypeGraphQLInputType()
-export class HistoricalAssetPriceCreateInput {
-  @TypeGraphQLField()
-  assetId!: string;
-
-  @TypeGraphQLField()
-  dPrice!: number;
-
-  @TypeGraphQLField()
-  dQty!: string;
-
-  @TypeGraphQLField()
-  price!: number;
-
-  @TypeGraphQLField()
-  qty!: string;
-
-  @TypeGraphQLField()
-  event!: string;
-
-  @TypeGraphQLField()
-  blockNumber!: number;
-
-  @TypeGraphQLField()
-  timestamp!: string;
-}
-
-@TypeGraphQLInputType()
-export class HistoricalAssetPriceUpdateInput {
-  @TypeGraphQLField({ nullable: true })
-  assetId?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  dPrice?: number;
-
-  @TypeGraphQLField({ nullable: true })
-  dQty?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  price?: number;
-
-  @TypeGraphQLField({ nullable: true })
-  qty?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  event?: string;
-
-  @TypeGraphQLField({ nullable: true })
-  blockNumber?: number;
-
-  @TypeGraphQLField({ nullable: true })
-  timestamp?: string;
-}
-
-@ArgsType()
-export class HistoricalAssetPriceWhereArgs extends PaginationArgs {
-  @TypeGraphQLField(() => HistoricalAssetPriceWhereInput, { nullable: true })
-  where?: HistoricalAssetPriceWhereInput;
-
-  @TypeGraphQLField(() => HistoricalAssetPriceOrderByEnum, { nullable: true })
-  orderBy?: HistoricalAssetPriceOrderByEnum[];
-}
-
-@ArgsType()
-export class HistoricalAssetPriceCreateManyArgs {
-  @TypeGraphQLField(() => [HistoricalAssetPriceCreateInput])
-  data!: HistoricalAssetPriceCreateInput[];
-}
-
-@ArgsType()
-export class HistoricalAssetPriceUpdateArgs {
-  @TypeGraphQLField() data!: HistoricalAssetPriceUpdateInput;
-  @TypeGraphQLField() where!: HistoricalAssetPriceWhereUniqueInput;
 }
 
 export enum PoolOrderByEnum {

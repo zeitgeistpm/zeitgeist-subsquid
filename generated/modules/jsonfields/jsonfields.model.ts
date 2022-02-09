@@ -149,16 +149,6 @@ export class OutcomeReport {
   scalar?: number;
 }
 
-@InputType('PoolInfoInput')
-@ObjectType()
-export class PoolInfo {
-  @FloatField({})
-  price!: number;
-
-  @StringField({})
-  qty!: string;
-}
-
 @InputType('WeightInput')
 @ObjectType()
 export class Weight {
