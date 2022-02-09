@@ -98,7 +98,8 @@ type Asset implements BaseGraphQLObject {
   deletedById: String
   version: Int!
   assetId: String!
-  poolInfo: PoolInfo
+  price: Float
+  qty: BigInt
 }
 
 type AssetBalance implements BaseGraphQLObject {
@@ -207,7 +208,8 @@ type AssetConnection {
 
 input AssetCreateInput {
   assetId: String!
-  poolInfo: PoolInfoInput
+  price: Float
+  qty: String
 }
 
 type AssetEdge {
@@ -224,11 +226,16 @@ enum AssetOrderByInput {
   deletedAt_DESC
   assetId_ASC
   assetId_DESC
+  price_ASC
+  price_DESC
+  qty_ASC
+  qty_DESC
 }
 
 input AssetUpdateInput {
   assetId: String
-  poolInfo: PoolInfoInput
+  price: Float
+  qty: String
 }
 
 input AssetWhereInput {
@@ -261,7 +268,18 @@ input AssetWhereInput {
   assetId_startsWith: String
   assetId_endsWith: String
   assetId_in: [String!]
-  poolInfo_json: JSONObject
+  price_eq: Float
+  price_gt: Float
+  price_gte: Float
+  price_lt: Float
+  price_lte: Float
+  price_in: [Float!]
+  qty_eq: BigInt
+  qty_gt: BigInt
+  qty_gte: BigInt
+  qty_lt: BigInt
+  qty_lte: BigInt
+  qty_in: [BigInt!]
   AND: [AssetWhereInput!]
   OR: [AssetWhereInput!]
 }
@@ -572,9 +590,9 @@ type HistoricalAssetPrice implements BaseGraphQLObject {
   version: Int!
   assetId: String!
   dPrice: Float!
-  dQty: String!
+  dQty: BigInt!
   price: Float!
-  qty: String!
+  qty: BigInt!
   event: String!
   blockNumber: Int!
   timestamp: BigInt!
@@ -674,22 +692,24 @@ input HistoricalAssetPriceWhereInput {
   dPrice_lt: Float
   dPrice_lte: Float
   dPrice_in: [Float!]
-  dQty_eq: String
-  dQty_contains: String
-  dQty_startsWith: String
-  dQty_endsWith: String
-  dQty_in: [String!]
+  dQty_eq: BigInt
+  dQty_gt: BigInt
+  dQty_gte: BigInt
+  dQty_lt: BigInt
+  dQty_lte: BigInt
+  dQty_in: [BigInt!]
   price_eq: Float
   price_gt: Float
   price_gte: Float
   price_lt: Float
   price_lte: Float
   price_in: [Float!]
-  qty_eq: String
-  qty_contains: String
-  qty_startsWith: String
-  qty_endsWith: String
-  qty_in: [String!]
+  qty_eq: BigInt
+  qty_gt: BigInt
+  qty_gte: BigInt
+  qty_lt: BigInt
+  qty_lte: BigInt
+  qty_in: [BigInt!]
   event_eq: String
   event_contains: String
   event_startsWith: String
@@ -1566,70 +1586,6 @@ input PoolCreateInput {
 type PoolEdge {
   node: Pool!
   cursor: String!
-}
-
-type PoolInfo {
-  price: Float!
-  qty: String!
-}
-
-input PoolInfoCreateInput {
-  price: Float!
-  qty: String!
-}
-
-input PoolInfoInput {
-  price: Float!
-  qty: String!
-}
-
-input PoolInfoUpdateInput {
-  price: Float
-  qty: String
-}
-
-input PoolInfoWhereInput {
-  id_eq: ID
-  id_in: [ID!]
-  createdAt_eq: DateTime
-  createdAt_lt: DateTime
-  createdAt_lte: DateTime
-  createdAt_gt: DateTime
-  createdAt_gte: DateTime
-  createdById_eq: ID
-  createdById_in: [ID!]
-  updatedAt_eq: DateTime
-  updatedAt_lt: DateTime
-  updatedAt_lte: DateTime
-  updatedAt_gt: DateTime
-  updatedAt_gte: DateTime
-  updatedById_eq: ID
-  updatedById_in: [ID!]
-  deletedAt_all: Boolean
-  deletedAt_eq: DateTime
-  deletedAt_lt: DateTime
-  deletedAt_lte: DateTime
-  deletedAt_gt: DateTime
-  deletedAt_gte: DateTime
-  deletedById_eq: ID
-  deletedById_in: [ID!]
-  price_eq: Float
-  price_gt: Float
-  price_gte: Float
-  price_lt: Float
-  price_lte: Float
-  price_in: [Float!]
-  qty_eq: String
-  qty_contains: String
-  qty_startsWith: String
-  qty_endsWith: String
-  qty_in: [String!]
-  AND: [PoolInfoWhereInput!]
-  OR: [PoolInfoWhereInput!]
-}
-
-input PoolInfoWhereUniqueInput {
-  id: ID!
 }
 
 enum PoolOrderByInput {
