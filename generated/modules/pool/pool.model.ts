@@ -1,6 +1,6 @@
-import { BaseModel, IntField, Model, OneToMany, StringField, JSONField } from '@subsquid/warthog';
+import { BaseModel, IntField, NumericField, Model, StringField, JSONField } from '@subsquid/warthog';
 
-import { HistoricalPool } from '../historical-pool/historical-pool.model';
+import BN from 'bn.js';
 
 import * as jsonTypes from '../jsonfields/jsonfields.model';
 
@@ -33,16 +33,14 @@ export class Pool extends BaseModel {
   @JSONField({ filter: true, gqlFieldType: jsonTypes.Weight })
   weights!: jsonTypes.Weight[];
 
-  @StringField({})
-  ztgQty!: string;
-
-  @OneToMany(() => HistoricalPool, (param: HistoricalPool) => param.pool, {
-    nullable: true,
-    modelName: 'Pool',
-    relModelName: 'HistoricalPool',
-    propertyName: 'historicalPool',
+  @NumericField({
+    transformer: {
+      to: (entityValue: BN) => (entityValue !== undefined ? entityValue.toString(10) : null),
+      from: (dbValue: string) =>
+        dbValue !== undefined && dbValue !== null && dbValue.length > 0 ? new BN(dbValue, 10) : undefined,
+    },
   })
-  historicalPool?: HistoricalPool[];
+  ztgQty!: BN;
 
   constructor(init?: Partial<Pool>) {
     super();
