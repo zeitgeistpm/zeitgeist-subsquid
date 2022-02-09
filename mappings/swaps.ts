@@ -142,9 +142,17 @@ export async function swapExactAmountOut({
         const oldAssetQty = +asset.poolInfo!.qty
         const oldPrice = asset.poolInfo?.price!
         var newAssetQty = 0
-        
-        if (wt.assetId === JSON.stringify(extrinsic?.args[3].value)) {
+
+        if (extrinsic?.args[1] && wt.assetId === JSON.stringify(extrinsic?.args[3].value)) {
             newAssetQty = oldAssetQty - swapEvent.asset_amount_in.toNumber()
+        } else if (extrinsic?.args[0].name === "calls") {
+            for (var ext of extrinsic.args[0].value as Array<{ args: { pool_id: number, asset_out: string }}> ) {
+                const { args: { asset_out: assetOut, pool_id } } = ext;
+                if (pool_id == swapEvent.cpep.pool_id.toNumber() && wt.assetId === assetOut) {
+                    newAssetQty = oldAssetQty - swapEvent.asset_amount_in.toNumber()
+                    break
+                }
+            }
         } else {
             newAssetQty = oldAssetQty
         }
