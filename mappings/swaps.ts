@@ -118,14 +118,57 @@ export async function swapExactAmountOut({
     const savedPool = await store.get(Pool, { where: { poolId: swapEvent.cpep.pool_id.toNumber() } })
     if (!savedPool) return
 
+    const ztgWt = +savedPool.weights[savedPool.weights.length - 1].len
+    const oldZtgQty = +savedPool.ztgQty
+    const newZtgQty = oldZtgQty + swapEvent.asset_amount_out.toNumber() 
+    savedPool.ztgQty = newZtgQty.toString()
+    console.log(`Saving pool: ${JSON.stringify(savedPool, null, 2)}`)
+    await store.save<Pool>(savedPool)
+
     const newHP = new HistoricalPool()
     newHP.pool = savedPool
     newHP.event = event.method
+    newHP.ztgQty = savedPool.ztgQty
     newHP.blockNumber = block.height
     newHP.timestamp = new BN(block.timestamp)
-
     console.log(`Saving historical pool: ${JSON.stringify(newHP, null, 2)}`)
     await store.save<HistoricalPool>(newHP)
+
+    savedPool.weights.forEach(async wt => {
+        const asset = await store.get(Asset, { where: { assetId: wt.assetId } })
+        if (!asset) return
+
+        const assetWt = +wt.len
+        const oldAssetQty = +asset.poolInfo!.qty
+        const oldPrice = asset.poolInfo?.price!
+        var newAssetQty = 0
+        
+        if (wt.assetId === JSON.stringify(extrinsic?.args[3].value)) {
+            newAssetQty = oldAssetQty - swapEvent.asset_amount_in.toNumber()
+        } else {
+            newAssetQty = oldAssetQty
+        }
+
+        const newPrice = await calcSpotPrice(newZtgQty,ztgWt,newAssetQty,assetWt,+savedPool.swapFee.toString())
+        const poolInfo = new PoolInfo()
+        poolInfo.price = newPrice
+        poolInfo.qty = newAssetQty.toString()
+        asset.poolInfo = poolInfo
+        console.log(`[${event.method}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
+        await store.save<Asset>(asset)
+
+        const hap = new HistoricalAssetPrice()
+        hap.assetId = asset.assetId
+        hap.price = poolInfo.price
+        hap.qty = poolInfo.qty
+        hap.dPrice = newPrice - oldPrice
+        hap.dQty = (newAssetQty - oldAssetQty).toString()
+        hap.event = event.method
+        hap.blockNumber = block.height
+        hap.timestamp = new BN(block.timestamp)
+        console.log(`[${event.method}] Saving historical asset price: ${JSON.stringify(hap, null, 2)}`)
+        await store.save<HistoricalAssetPrice>(hap)
+    });
 }
 
 async function calcSpotPrice(tokenBalanceIn: number, tokenWeightIn: number, tokenBalanceOut: number, tokenWeightOut: number, swapFee: number): Promise<number> {
