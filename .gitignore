@@ -2,6 +2,5 @@
 /db/cache
 /mappings/generated
 /mappings/node_modules
-.env
 .env.local
 .env.prod
