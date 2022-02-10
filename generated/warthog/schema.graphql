@@ -744,10 +744,9 @@ type HistoricalPool implements BaseGraphQLObject {
   deletedAt: DateTime
   deletedById: String
   version: Int!
-  pool: Pool!
-  poolId: String!
+  poolId: Int!
   event: String!
-  ztgQty: String!
+  ztgQty: BigInt!
   blockNumber: Int!
   timestamp: BigInt!
 }
@@ -759,7 +758,7 @@ type HistoricalPoolConnection {
 }
 
 input HistoricalPoolCreateInput {
-  pool: ID!
+  poolId: Float!
   event: String!
   ztgQty: String!
   blockNumber: Float!
@@ -778,8 +777,8 @@ enum HistoricalPoolOrderByInput {
   updatedAt_DESC
   deletedAt_ASC
   deletedAt_DESC
-  pool_ASC
-  pool_DESC
+  poolId_ASC
+  poolId_DESC
   event_ASC
   event_DESC
   ztgQty_ASC
@@ -791,7 +790,7 @@ enum HistoricalPoolOrderByInput {
 }
 
 input HistoricalPoolUpdateInput {
-  pool: ID
+  poolId: Float
   event: String
   ztgQty: String
   blockNumber: Float
@@ -823,16 +822,23 @@ input HistoricalPoolWhereInput {
   deletedAt_gte: DateTime
   deletedById_eq: ID
   deletedById_in: [ID!]
+  poolId_eq: Int
+  poolId_gt: Int
+  poolId_gte: Int
+  poolId_lt: Int
+  poolId_lte: Int
+  poolId_in: [Int!]
   event_eq: String
   event_contains: String
   event_startsWith: String
   event_endsWith: String
   event_in: [String!]
-  ztgQty_eq: String
-  ztgQty_contains: String
-  ztgQty_startsWith: String
-  ztgQty_endsWith: String
-  ztgQty_in: [String!]
+  ztgQty_eq: BigInt
+  ztgQty_gt: BigInt
+  ztgQty_gte: BigInt
+  ztgQty_lt: BigInt
+  ztgQty_lte: BigInt
+  ztgQty_in: [BigInt!]
   blockNumber_eq: Int
   blockNumber_gt: Int
   blockNumber_gte: Int
@@ -845,7 +851,6 @@ input HistoricalPoolWhereInput {
   timestamp_lt: BigInt
   timestamp_lte: BigInt
   timestamp_in: [BigInt!]
-  pool: PoolWhereInput
   AND: [HistoricalPoolWhereInput!]
   OR: [HistoricalPoolWhereInput!]
 }
@@ -1560,8 +1565,7 @@ type Pool implements BaseGraphQLObject {
   totalSubsidy: String!
   totalWeight: String!
   weights: Weight!
-  ztgQty: String!
-  historicalPool: [HistoricalPool!]
+  ztgQty: BigInt!
 }
 
 type PoolConnection {
@@ -1696,14 +1700,12 @@ input PoolWhereInput {
   totalWeight_endsWith: String
   totalWeight_in: [String!]
   weights_json: JSONObject
-  ztgQty_eq: String
-  ztgQty_contains: String
-  ztgQty_startsWith: String
-  ztgQty_endsWith: String
-  ztgQty_in: [String!]
-  historicalPool_none: HistoricalPoolWhereInput
-  historicalPool_some: HistoricalPoolWhereInput
-  historicalPool_every: HistoricalPoolWhereInput
+  ztgQty_eq: BigInt
+  ztgQty_gt: BigInt
+  ztgQty_gte: BigInt
+  ztgQty_lt: BigInt
+  ztgQty_lte: BigInt
+  ztgQty_in: [BigInt!]
   AND: [PoolWhereInput!]
   OR: [PoolWhereInput!]
 }

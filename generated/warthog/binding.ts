@@ -147,8 +147,8 @@ export type HistoricalPoolOrderByInput =   'createdAt_ASC' |
   'updatedAt_DESC' |
   'deletedAt_ASC' |
   'deletedAt_DESC' |
-  'pool_ASC' |
-  'pool_DESC' |
+  'poolId_ASC' |
+  'poolId_DESC' |
   'event_ASC' |
   'event_DESC' |
   'ztgQty_ASC' |
@@ -677,7 +677,7 @@ export interface HistoricalAssetPriceWhereUniqueInput {
 }
 
 export interface HistoricalPoolCreateInput {
-  pool: ID_Output
+  poolId: Float
   event: String
   ztgQty: String
   blockNumber: Float
@@ -685,7 +685,7 @@ export interface HistoricalPoolCreateInput {
 }
 
 export interface HistoricalPoolUpdateInput {
-  pool?: ID_Input | null
+  poolId?: Float | null
   event?: String | null
   ztgQty?: String | null
   blockNumber?: Float | null
@@ -717,16 +717,23 @@ export interface HistoricalPoolWhereInput {
   deletedAt_gte?: DateTime | null
   deletedById_eq?: ID_Input | null
   deletedById_in?: ID_Output[] | ID_Output | null
+  poolId_eq?: Int | null
+  poolId_gt?: Int | null
+  poolId_gte?: Int | null
+  poolId_lt?: Int | null
+  poolId_lte?: Int | null
+  poolId_in?: Int[] | Int | null
   event_eq?: String | null
   event_contains?: String | null
   event_startsWith?: String | null
   event_endsWith?: String | null
   event_in?: String[] | String | null
-  ztgQty_eq?: String | null
-  ztgQty_contains?: String | null
-  ztgQty_startsWith?: String | null
-  ztgQty_endsWith?: String | null
-  ztgQty_in?: String[] | String | null
+  ztgQty_eq?: BigInt | null
+  ztgQty_gt?: BigInt | null
+  ztgQty_gte?: BigInt | null
+  ztgQty_lt?: BigInt | null
+  ztgQty_lte?: BigInt | null
+  ztgQty_in?: BigInt[] | BigInt | null
   blockNumber_eq?: Int | null
   blockNumber_gt?: Int | null
   blockNumber_gte?: Int | null
@@ -739,7 +746,6 @@ export interface HistoricalPoolWhereInput {
   timestamp_lt?: BigInt | null
   timestamp_lte?: BigInt | null
   timestamp_in?: BigInt[] | BigInt | null
-  pool?: PoolWhereInput | null
   AND?: HistoricalPoolWhereInput[] | HistoricalPoolWhereInput | null
   OR?: HistoricalPoolWhereInput[] | HistoricalPoolWhereInput | null
 }
@@ -1400,14 +1406,12 @@ export interface PoolWhereInput {
   totalWeight_endsWith?: String | null
   totalWeight_in?: String[] | String | null
   weights_json?: JSONObject | null
-  ztgQty_eq?: String | null
-  ztgQty_contains?: String | null
-  ztgQty_startsWith?: String | null
-  ztgQty_endsWith?: String | null
-  ztgQty_in?: String[] | String | null
-  historicalPool_none?: HistoricalPoolWhereInput | null
-  historicalPool_some?: HistoricalPoolWhereInput | null
-  historicalPool_every?: HistoricalPoolWhereInput | null
+  ztgQty_eq?: BigInt | null
+  ztgQty_gt?: BigInt | null
+  ztgQty_gte?: BigInt | null
+  ztgQty_lt?: BigInt | null
+  ztgQty_lte?: BigInt | null
+  ztgQty_in?: BigInt[] | BigInt | null
   AND?: PoolWhereInput[] | PoolWhereInput | null
   OR?: PoolWhereInput[] | PoolWhereInput | null
 }
@@ -1663,10 +1667,9 @@ export interface HistoricalPool extends BaseGraphQLObject {
   deletedAt?: DateTime | null
   deletedById?: String | null
   version: Int
-  pool: Pool
-  poolId: String
+  poolId: Int
   event: String
-  ztgQty: String
+  ztgQty: BigInt
   blockNumber: Int
   timestamp: BigInt
 }
@@ -1788,8 +1791,7 @@ export interface Pool extends BaseGraphQLObject {
   totalSubsidy: String
   totalWeight: String
   weights: Weight
-  ztgQty: String
-  historicalPool?: Array<HistoricalPool> | null
+  ztgQty: BigInt
 }
 
 export interface PoolConnection {

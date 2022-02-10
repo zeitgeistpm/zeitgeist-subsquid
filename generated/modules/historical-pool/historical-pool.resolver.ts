@@ -39,11 +39,6 @@ import {
 import { HistoricalPool } from './historical-pool.model';
 import { HistoricalPoolService } from './historical-pool.service';
 
-import { Pool } from '../pool/pool.model';
-import { PoolService } from '../pool/pool.service';
-import { getConnection, getRepository, In, Not } from 'typeorm';
-import _ from 'lodash';
-
 @ObjectType()
 export class HistoricalPoolEdge {
   @Field(() => HistoricalPool, { nullable: false })
@@ -138,10 +133,5 @@ export class HistoricalPoolResolver {
     }
 
     return result as Promise<HistoricalPoolConnection>;
-  }
-
-  @FieldResolver(() => Pool)
-  async pool(@Root() r: HistoricalPool, @Ctx() ctx: BaseContext): Promise<Pool | null> {
-    return ctx.dataLoader.loaders.HistoricalPool.pool.load(r);
   }
 }
