@@ -112,6 +112,8 @@ mappings:
       handler: swapPoolCreated
     - event: swaps.PoolExit
       handler: swapPoolExited
+    - event: swaps.PoolJoin
+      handler: swapPoolJoined
     - event: swaps.SwapExactAmountIn
       handler: swapExactAmountIn
     - event: swaps.SwapExactAmountOut
