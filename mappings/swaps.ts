@@ -245,7 +245,7 @@ export async function swapExactAmountIn({
             }
         }
         if (newAssetQty.eq(new BN(0))) newAssetQty = oldAssetQty
-        const newPrice = await calcSpotPrice(newAssetQty.toNumber(),assetWt,newZtgQty.toNumber(),ztgWt,+savedPool.swapFee)
+        const newPrice = await calcSpotPrice(newZtgQty.toNumber(),ztgWt,newAssetQty.toNumber(),assetWt,+savedPool.swapFee)
 
         asset.price = newPrice
         asset.qty = newAssetQty
