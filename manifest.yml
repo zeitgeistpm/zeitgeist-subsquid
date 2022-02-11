@@ -110,6 +110,8 @@ mappings:
       handler: predictionMarketSoldCompleteSet
     - event: swaps.PoolCreate
       handler: swapPoolCreated
+    - event: swaps.PoolExit
+      handler: swapPoolExited
     - event: swaps.SwapExactAmountIn
       handler: swapExactAmountIn
     - event: swaps.SwapExactAmountOut
