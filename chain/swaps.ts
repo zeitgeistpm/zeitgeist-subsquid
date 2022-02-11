@@ -3,7 +3,7 @@ import { SubstrateEvent, SubstrateExtrinsic } from "@subsquid/hydra-common";
 import { Codec } from "@polkadot/types/types";
 import { typeRegistry } from ".";
 
-import { Asset, CommonPoolEventParams, Pool, SwapEvent } from '@zeitgeistpm/typesV1/dist/interfaces';
+import { Asset, CommonPoolEventParams, Pool, PoolAssetsEvent, SwapEvent } from '@zeitgeistpm/typesV1/dist/interfaces';
 
 export namespace Swaps {
     /**
@@ -74,6 +74,68 @@ export namespace Swaps {
             }
             return arg;
         }
+    }
+
+    /**
+     *  Someone has exited a pool. \[PoolAssetsEvent\]
+     *
+     *  Event parameters: [PoolAssetsEvent<<T as frame_system::Config>::AccountId, Asset<T::MarketId>, BalanceOf<T>,>, ]
+     */
+    export class PoolExitEvent {
+        public readonly expectedParamTypes = ['PoolAssetsEvent<<T as frame_system::Config>::AccountId, Asset<T::MarketId>, BalanceOf<T>,>', ]
+
+        constructor(public readonly ctx: SubstrateEvent) {}
+
+        get params(): [PoolAssetsEvent] {
+
+            return [(createTypeUnsafe<PoolAssetsEvent & Codec>(
+            typeRegistry, 'PoolAssetsEvent', [this.ctx.params[0].value]) as any) as PoolAssetsEvent ]
+        }
+
+        validateParams(): boolean {
+            if (this.expectedParamTypes.length !== this.ctx.params.length) {
+                return false
+            }
+            let valid = true
+            this.expectedParamTypes.forEach((type, i) => {
+                if (type !== this.ctx.params[i].type) {
+                    valid = false
+                }
+            })
+            return valid
+        }
+
+    }
+
+    /**
+     *  Someone has joined a pool. \[PoolAssetsEvent\]
+     *
+     *  Event parameters: [PoolAssetsEvent<<T as frame_system::Config>::AccountId, Asset<T::MarketId>, BalanceOf<T>,>, ]
+     */
+    export class PoolJoinEvent {
+        public readonly expectedParamTypes = ['PoolAssetsEvent<<T as frame_system::Config>::AccountId, Asset<T::MarketId>, BalanceOf<T>,>', ]
+
+        constructor(public readonly ctx: SubstrateEvent) {}
+
+        get params(): [PoolAssetsEvent] {
+
+            return [(createTypeUnsafe<PoolAssetsEvent & Codec>(
+            typeRegistry, 'PoolAssetsEvent', [this.ctx.params[0].value]) as any) as PoolAssetsEvent ]
+        }
+
+        validateParams(): boolean {
+            if (this.expectedParamTypes.length !== this.ctx.params.length) {
+                return false
+            }
+            let valid = true
+            this.expectedParamTypes.forEach((type, i) => {
+                if (type !== this.ctx.params[i].type) {
+                    valid = false
+                }
+            })
+            return valid
+        }
+
     }
 
     /**

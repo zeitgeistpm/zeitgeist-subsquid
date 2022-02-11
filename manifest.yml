@@ -25,6 +25,8 @@ typegen:
     - predictionMarkets.MarketResolved
     - predictionMarkets.SoldCompleteSet
     - swaps.PoolCreate
+    - swaps.PoolExit
+    - swaps.PoolJoin
     - swaps.SwapExactAmountIn
     - swaps.SwapExactAmountOut
     - balances.Endowed
