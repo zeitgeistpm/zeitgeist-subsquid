@@ -1,7 +1,6 @@
 import { BaseModel, Model, OneToMany, StringField, JSONField } from '@subsquid/warthog';
 
-import { AssetBalance } from '../asset-balance/asset-balance.model';
-import { HistoricalAssetBalance } from '../historical-asset-balance/historical-asset-balance.model';
+import { AccountBalance } from '../account-balance/account-balance.model';
 
 import * as jsonTypes from '../jsonfields/jsonfields.model';
 
@@ -12,21 +11,13 @@ export class Account extends BaseModel {
   })
   wallet!: string;
 
-  @OneToMany(() => AssetBalance, (param: AssetBalance) => param.account, {
+  @OneToMany(() => AccountBalance, (param: AccountBalance) => param.account, {
     nullable: true,
     modelName: 'Account',
-    relModelName: 'AssetBalance',
-    propertyName: 'assetBalances',
+    relModelName: 'AccountBalance',
+    propertyName: 'accountBalances',
   })
-  assetBalances?: AssetBalance[];
-
-  @OneToMany(() => HistoricalAssetBalance, (param: HistoricalAssetBalance) => param.account, {
-    nullable: true,
-    modelName: 'Account',
-    relModelName: 'HistoricalAssetBalance',
-    propertyName: 'historicalAssetBalances',
-  })
-  historicalAssetBalances?: HistoricalAssetBalance[];
+  accountBalances?: AccountBalance[];
 
   constructor(init?: Partial<Account>) {
     super();
