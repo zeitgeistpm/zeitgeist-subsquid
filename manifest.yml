@@ -25,6 +25,8 @@ typegen:
     - predictionMarkets.MarketResolved
     - predictionMarkets.SoldCompleteSet
     - swaps.PoolCreate
+    - swaps.PoolExit
+    - swaps.PoolJoin
     - swaps.SwapExactAmountIn
     - swaps.SwapExactAmountOut
     - balances.Endowed
@@ -108,6 +110,10 @@ mappings:
       handler: predictionMarketSoldCompleteSet
     - event: swaps.PoolCreate
       handler: swapPoolCreated
+    - event: swaps.PoolExit
+      handler: swapPoolExited
+    - event: swaps.PoolJoin
+      handler: swapPoolJoined
     - event: swaps.SwapExactAmountIn
       handler: swapExactAmountIn
     - event: swaps.SwapExactAmountOut
