@@ -1,4 +1,4 @@
-import { BaseModel, FloatField, NumericField, Model, StringField, JSONField } from '@subsquid/warthog';
+import { BaseModel, FloatField, IntField, NumericField, Model, StringField, JSONField } from '@subsquid/warthog';
 
 import BN from 'bn.js';
 
@@ -8,6 +8,11 @@ import * as jsonTypes from '../jsonfields/jsonfields.model';
 export class Asset extends BaseModel {
   @StringField({})
   assetId!: string;
+
+  @IntField({
+    nullable: true,
+  })
+  poolId?: number;
 
   @FloatField({
     nullable: true,

@@ -3,14 +3,14 @@ import { Repository, SelectQueryBuilder } from 'typeorm';
 import { InjectRepository } from 'typeorm-typedi-extensions';
 import { WhereInput, HydraBaseService } from '@subsquid/warthog';
 
-import { HistoricalAssetPrice } from './historical-asset-price.model';
+import { HistoricalAsset } from './historical-asset.model';
 
-import { HistoricalAssetPriceWhereArgs, HistoricalAssetPriceWhereInput } from '../../warthog';
+import { HistoricalAssetWhereArgs, HistoricalAssetWhereInput } from '../../warthog';
 
-@Service('HistoricalAssetPriceService')
-export class HistoricalAssetPriceService extends HydraBaseService<HistoricalAssetPrice> {
-  constructor(@InjectRepository(HistoricalAssetPrice) protected readonly repository: Repository<HistoricalAssetPrice>) {
-    super(HistoricalAssetPrice, repository);
+@Service('HistoricalAssetService')
+export class HistoricalAssetService extends HydraBaseService<HistoricalAsset> {
+  constructor(@InjectRepository(HistoricalAsset) protected readonly repository: Repository<HistoricalAsset>) {
+    super(HistoricalAsset, repository);
   }
 
   async find<W extends WhereInput>(
@@ -19,7 +19,7 @@ export class HistoricalAssetPriceService extends HydraBaseService<HistoricalAsse
     limit?: number,
     offset?: number,
     fields?: string[]
-  ): Promise<HistoricalAssetPrice[]> {
+  ): Promise<HistoricalAsset[]> {
     return this.findWithRelations<W>(where, orderBy, limit, offset, fields);
   }
 
@@ -29,7 +29,7 @@ export class HistoricalAssetPriceService extends HydraBaseService<HistoricalAsse
     limit?: number,
     offset?: number,
     fields?: string[]
-  ): Promise<HistoricalAssetPrice[]> {
+  ): Promise<HistoricalAsset[]> {
     return this.buildFindWithRelationsQuery(_where, orderBy, limit, offset, fields).getMany();
   }
 
@@ -39,8 +39,8 @@ export class HistoricalAssetPriceService extends HydraBaseService<HistoricalAsse
     limit?: number,
     offset?: number,
     fields?: string[]
-  ): SelectQueryBuilder<HistoricalAssetPrice> {
-    const where = <HistoricalAssetPriceWhereInput>(_where || {});
+  ): SelectQueryBuilder<HistoricalAsset> {
+    const where = <HistoricalAssetWhereInput>(_where || {});
 
     let mainQuery = this.buildFindQueryWithParams(<any>where, orderBy, undefined, fields, 'main').take(undefined); // remove LIMIT
 

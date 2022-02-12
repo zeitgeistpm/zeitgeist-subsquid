@@ -5,7 +5,7 @@ import BN from 'bn.js';
 import * as jsonTypes from '../jsonfields/jsonfields.model';
 
 @Model({ api: {} })
-export class HistoricalAssetPrice extends BaseModel {
+export class HistoricalAsset extends BaseModel {
   @StringField({})
   assetId!: string;
 
@@ -48,7 +48,7 @@ export class HistoricalAssetPrice extends BaseModel {
   })
   timestamp!: BN;
 
-  constructor(init?: Partial<HistoricalAssetPrice>) {
+  constructor(init?: Partial<HistoricalAsset>) {
     super();
     Object.assign(this, init);
   }
