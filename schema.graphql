@@ -75,6 +75,7 @@ type MarketHistory @jsonField {
 
 type Pool @entity {
   poolId: Int!
+  accountId: String
   baseAsset: String!
   marketId: Int!
   poolStatus: String!
