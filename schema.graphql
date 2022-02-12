@@ -22,11 +22,12 @@ type HistoricalAccountBalance @entity {
 
 type Asset @entity {
   assetId: String!
+  poolId: Int
   price: Float
   qty: BigInt
 }
 
-type HistoricalAssetPrice @entity {
+type HistoricalAsset @entity {
   assetId: String!
   dPrice: Float!
   dQty: BigInt!
