@@ -39,10 +39,8 @@ import {
 import { Account } from './account.model';
 import { AccountService } from './account.service';
 
-import { AssetBalance } from '../asset-balance/asset-balance.model';
-import { AssetBalanceService } from '../asset-balance/asset-balance.service';
-import { HistoricalAssetBalance } from '../historical-asset-balance/historical-asset-balance.model';
-import { HistoricalAssetBalanceService } from '../historical-asset-balance/historical-asset-balance.service';
+import { AccountBalance } from '../account-balance/account-balance.model';
+import { AccountBalanceService } from '../account-balance/account-balance.service';
 import { getConnection, getRepository, In, Not } from 'typeorm';
 import _ from 'lodash';
 
@@ -142,13 +140,8 @@ export class AccountResolver {
     return result as Promise<AccountConnection>;
   }
 
-  @FieldResolver(() => AssetBalance)
-  async assetBalances(@Root() r: Account, @Ctx() ctx: BaseContext): Promise<AssetBalance[] | null> {
-    return ctx.dataLoader.loaders.Account.assetBalances.load(r);
-  }
-
-  @FieldResolver(() => HistoricalAssetBalance)
-  async historicalAssetBalances(@Root() r: Account, @Ctx() ctx: BaseContext): Promise<HistoricalAssetBalance[] | null> {
-    return ctx.dataLoader.loaders.Account.historicalAssetBalances.load(r);
+  @FieldResolver(() => AccountBalance)
+  async accountBalances(@Root() r: Account, @Ctx() ctx: BaseContext): Promise<AccountBalance[] | null> {
+    return ctx.dataLoader.loaders.Account.accountBalances.load(r);
   }
 }

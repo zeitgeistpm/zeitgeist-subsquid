@@ -7,11 +7,11 @@ import { Account } from '../account/account.model';
 import * as jsonTypes from '../jsonfields/jsonfields.model';
 
 @Model({ api: {} })
-export class AssetBalance extends BaseModel {
-  @ManyToOne(() => Account, (param: Account) => param.assetBalances, {
+export class AccountBalance extends BaseModel {
+  @ManyToOne(() => Account, (param: Account) => param.accountBalances, {
     skipGraphQLField: true,
 
-    modelName: 'AssetBalance',
+    modelName: 'AccountBalance',
     relModelName: 'Account',
     propertyName: 'account',
   })
@@ -29,7 +29,7 @@ export class AssetBalance extends BaseModel {
   })
   balance!: BN;
 
-  constructor(init?: Partial<AssetBalance>) {
+  constructor(init?: Partial<AccountBalance>) {
     super();
     Object.assign(this, init);
   }

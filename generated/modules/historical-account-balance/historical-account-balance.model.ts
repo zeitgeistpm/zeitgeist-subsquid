@@ -1,21 +1,13 @@
-import { BaseModel, IntField, NumericField, Model, ManyToOne, StringField, JSONField } from '@subsquid/warthog';
+import { BaseModel, IntField, NumericField, Model, StringField, JSONField } from '@subsquid/warthog';
 
 import BN from 'bn.js';
-
-import { Account } from '../account/account.model';
 
 import * as jsonTypes from '../jsonfields/jsonfields.model';
 
 @Model({ api: {} })
-export class HistoricalAssetBalance extends BaseModel {
-  @ManyToOne(() => Account, (param: Account) => param.historicalAssetBalances, {
-    skipGraphQLField: true,
-
-    modelName: 'HistoricalAssetBalance',
-    relModelName: 'Account',
-    propertyName: 'account',
-  })
-  account!: Account;
+export class HistoricalAccountBalance extends BaseModel {
+  @StringField({})
+  accountId!: string;
 
   @StringField({})
   event!: string;
@@ -53,7 +45,7 @@ export class HistoricalAssetBalance extends BaseModel {
   })
   timestamp!: BN;
 
-  constructor(init?: Partial<HistoricalAssetBalance>) {
+  constructor(init?: Partial<HistoricalAccountBalance>) {
     super();
     Object.assign(this, init);
   }

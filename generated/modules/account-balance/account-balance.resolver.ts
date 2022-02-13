@@ -27,17 +27,17 @@ import {
 } from '@subsquid/warthog';
 
 import {
-  AssetBalanceCreateInput,
-  AssetBalanceCreateManyArgs,
-  AssetBalanceUpdateArgs,
-  AssetBalanceWhereArgs,
-  AssetBalanceWhereInput,
-  AssetBalanceWhereUniqueInput,
-  AssetBalanceOrderByEnum,
+  AccountBalanceCreateInput,
+  AccountBalanceCreateManyArgs,
+  AccountBalanceUpdateArgs,
+  AccountBalanceWhereArgs,
+  AccountBalanceWhereInput,
+  AccountBalanceWhereUniqueInput,
+  AccountBalanceOrderByEnum,
 } from '../../warthog';
 
-import { AssetBalance } from './asset-balance.model';
-import { AssetBalanceService } from './asset-balance.service';
+import { AccountBalance } from './account-balance.model';
+import { AccountBalanceService } from './account-balance.service';
 
 import { Account } from '../account/account.model';
 import { AccountService } from '../account/account.service';
@@ -45,21 +45,21 @@ import { getConnection, getRepository, In, Not } from 'typeorm';
 import _ from 'lodash';
 
 @ObjectType()
-export class AssetBalanceEdge {
-  @Field(() => AssetBalance, { nullable: false })
-  node!: AssetBalance;
+export class AccountBalanceEdge {
+  @Field(() => AccountBalance, { nullable: false })
+  node!: AccountBalance;
 
   @Field(() => String, { nullable: false })
   cursor!: string;
 }
 
 @ObjectType()
-export class AssetBalanceConnection {
+export class AccountBalanceConnection {
   @Field(() => Int, { nullable: false })
   totalCount!: number;
 
-  @Field(() => [AssetBalanceEdge], { nullable: false })
-  edges!: AssetBalanceEdge[];
+  @Field(() => [AccountBalanceEdge], { nullable: false })
+  edges!: AccountBalanceEdge[];
 
   @Field(() => PageInfo, { nullable: false })
   pageInfo!: PageInfo;
@@ -83,40 +83,40 @@ export class ConnectionPageInputOptions {
 }
 
 @ArgsType()
-export class AssetBalanceConnectionWhereArgs extends ConnectionPageInputOptions {
-  @Field(() => AssetBalanceWhereInput, { nullable: true })
-  where?: AssetBalanceWhereInput;
+export class AccountBalanceConnectionWhereArgs extends ConnectionPageInputOptions {
+  @Field(() => AccountBalanceWhereInput, { nullable: true })
+  where?: AccountBalanceWhereInput;
 
-  @Field(() => AssetBalanceOrderByEnum, { nullable: true })
-  orderBy?: [AssetBalanceOrderByEnum];
+  @Field(() => AccountBalanceOrderByEnum, { nullable: true })
+  orderBy?: [AccountBalanceOrderByEnum];
 }
 
-@Resolver(AssetBalance)
-export class AssetBalanceResolver {
-  constructor(@Inject('AssetBalanceService') public readonly service: AssetBalanceService) {}
+@Resolver(AccountBalance)
+export class AccountBalanceResolver {
+  constructor(@Inject('AccountBalanceService') public readonly service: AccountBalanceService) {}
 
-  @Query(() => [AssetBalance])
-  async assetBalances(
-    @Args() { where, orderBy, limit, offset }: AssetBalanceWhereArgs,
+  @Query(() => [AccountBalance])
+  async accountBalances(
+    @Args() { where, orderBy, limit, offset }: AccountBalanceWhereArgs,
     @Fields() fields: string[]
-  ): Promise<AssetBalance[]> {
-    return this.service.find<AssetBalanceWhereInput>(where, orderBy, limit, offset, fields);
+  ): Promise<AccountBalance[]> {
+    return this.service.find<AccountBalanceWhereInput>(where, orderBy, limit, offset, fields);
   }
 
-  @Query(() => AssetBalance, { nullable: true })
-  async assetBalanceByUniqueInput(
-    @Arg('where') where: AssetBalanceWhereUniqueInput,
+  @Query(() => AccountBalance, { nullable: true })
+  async accountBalanceByUniqueInput(
+    @Arg('where') where: AccountBalanceWhereUniqueInput,
     @Fields() fields: string[]
-  ): Promise<AssetBalance | null> {
+  ): Promise<AccountBalance | null> {
     const result = await this.service.find(where, undefined, 1, 0, fields);
     return result && result.length >= 1 ? result[0] : null;
   }
 
-  @Query(() => AssetBalanceConnection)
-  async assetBalancesConnection(
-    @Args() { where, orderBy, ...pageOptions }: AssetBalanceConnectionWhereArgs,
+  @Query(() => AccountBalanceConnection)
+  async accountBalancesConnection(
+    @Args() { where, orderBy, ...pageOptions }: AccountBalanceConnectionWhereArgs,
     @Info() info: any
-  ): Promise<AssetBalanceConnection> {
+  ): Promise<AccountBalanceConnection> {
     const rawFields = graphqlFields(info, {}, { excludedFields: ['__typename'] });
 
     let result: any = {
@@ -130,18 +130,18 @@ export class AssetBalanceResolver {
     // If the related database table does not have any records then an error is thrown to the client
     // by warthog
     try {
-      result = await this.service.findConnection<AssetBalanceWhereInput>(where, orderBy, pageOptions, rawFields);
+      result = await this.service.findConnection<AccountBalanceWhereInput>(where, orderBy, pageOptions, rawFields);
     } catch (err: any) {
       console.log(err);
       // TODO: should continue to return this on `Error: Items is empty` or throw the error
       if (!(err.message as string).includes('Items is empty')) throw err;
     }
 
-    return result as Promise<AssetBalanceConnection>;
+    return result as Promise<AccountBalanceConnection>;
   }
 
   @FieldResolver(() => Account)
-  async account(@Root() r: AssetBalance, @Ctx() ctx: BaseContext): Promise<Account | null> {
-    return ctx.dataLoader.loaders.AssetBalance.account.load(r);
+  async account(@Root() r: AccountBalance, @Ctx() ctx: BaseContext): Promise<Account | null> {
+    return ctx.dataLoader.loaders.AccountBalance.account.load(r);
   }
 }

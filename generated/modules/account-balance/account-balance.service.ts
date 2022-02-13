@@ -3,22 +3,22 @@ import { Repository, SelectQueryBuilder } from 'typeorm';
 import { InjectRepository } from 'typeorm-typedi-extensions';
 import { WhereInput, HydraBaseService } from '@subsquid/warthog';
 
-import { AssetBalance } from './asset-balance.model';
+import { AccountBalance } from './account-balance.model';
 
-import { AssetBalanceWhereArgs, AssetBalanceWhereInput } from '../../warthog';
+import { AccountBalanceWhereArgs, AccountBalanceWhereInput } from '../../warthog';
 
 import { Account } from '../account/account.model';
 import { AccountService } from '../account/account.service';
 import { getConnection, getRepository, In, Not } from 'typeorm';
 import _ from 'lodash';
 
-@Service('AssetBalanceService')
-export class AssetBalanceService extends HydraBaseService<AssetBalance> {
+@Service('AccountBalanceService')
+export class AccountBalanceService extends HydraBaseService<AccountBalance> {
   @Inject('AccountService')
   public readonly accountService!: AccountService;
 
-  constructor(@InjectRepository(AssetBalance) protected readonly repository: Repository<AssetBalance>) {
-    super(AssetBalance, repository);
+  constructor(@InjectRepository(AccountBalance) protected readonly repository: Repository<AccountBalance>) {
+    super(AccountBalance, repository);
   }
 
   async find<W extends WhereInput>(
@@ -27,7 +27,7 @@ export class AssetBalanceService extends HydraBaseService<AssetBalance> {
     limit?: number,
     offset?: number,
     fields?: string[]
-  ): Promise<AssetBalance[]> {
+  ): Promise<AccountBalance[]> {
     return this.findWithRelations<W>(where, orderBy, limit, offset, fields);
   }
 
@@ -37,7 +37,7 @@ export class AssetBalanceService extends HydraBaseService<AssetBalance> {
     limit?: number,
     offset?: number,
     fields?: string[]
-  ): Promise<AssetBalance[]> {
+  ): Promise<AccountBalance[]> {
     return this.buildFindWithRelationsQuery(_where, orderBy, limit, offset, fields).getMany();
   }
 
@@ -47,8 +47,8 @@ export class AssetBalanceService extends HydraBaseService<AssetBalance> {
     limit?: number,
     offset?: number,
     fields?: string[]
-  ): SelectQueryBuilder<AssetBalance> {
-    const where = <AssetBalanceWhereInput>(_where || {});
+  ): SelectQueryBuilder<AccountBalance> {
+    const where = <AccountBalanceWhereInput>(_where || {});
 
     // remove relation filters to enable warthog query builders
     const { account } = where;
@@ -64,7 +64,7 @@ export class AssetBalanceService extends HydraBaseService<AssetBalance> {
         .buildFindQueryWithParams(<any>account, undefined, undefined, ['id'], 'account')
         .take(undefined); // remove the default LIMIT
 
-      mainQuery = mainQuery.andWhere(`"assetbalance"."account_id" IN (${accountQuery.getQuery()})`);
+      mainQuery = mainQuery.andWhere(`"accountbalance"."account_id" IN (${accountQuery.getQuery()})`);
 
       parameters = { ...parameters, ...accountQuery.getParameters() };
     }

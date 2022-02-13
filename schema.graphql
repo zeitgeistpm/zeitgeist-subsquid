@@ -1,18 +1,17 @@
 type Account @entity {
   "Account address"
   wallet: String!
-  assetBalances: [AssetBalance] @derivedFrom(field: "account")
-  historicalAssetBalances: [HistoricalAssetBalance] @derivedFrom(field: "account")
+  accountBalances: [AccountBalance] @derivedFrom(field: "account")
 }
 
-type AssetBalance @entity {
+type AccountBalance @entity {
   account: Account!
   assetId: String!
   balance: BigInt!
 }
 
-type HistoricalAssetBalance @entity {
-  account: Account!
+type HistoricalAccountBalance @entity {
+  accountId: String!
   event: String!
   assetId: String!
   amount: BigInt!
@@ -23,11 +22,12 @@ type HistoricalAssetBalance @entity {
 
 type Asset @entity {
   assetId: String!
+  poolId: Int
   price: Float
   qty: BigInt
 }
 
-type HistoricalAssetPrice @entity {
+type HistoricalAsset @entity {
   assetId: String!
   dPrice: Float!
   dQty: BigInt!
@@ -75,6 +75,7 @@ type MarketHistory @jsonField {
 
 type Pool @entity {
   poolId: Int!
+  accountId: String
   baseAsset: String!
   marketId: Int!
   poolStatus: String!

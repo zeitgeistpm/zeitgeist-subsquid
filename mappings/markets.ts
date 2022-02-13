@@ -2,10 +2,9 @@ import BN from 'bn.js'
 import { encodeAddress } from '@polkadot/keyring'
 import { EventContext, StoreContext } from '@subsquid/hydra-common'
 import { util } from '@zeitgeistpm/sdk'
-import { Account, Asset, AssetBalance, CategoryMetadata, HistoricalAssetBalance, Market, MarketDisputeMechanism, MarketHistory, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../generated/model'
+import { Account, Asset, AccountBalance, CategoryMetadata, HistoricalAccountBalance, Market, MarketDisputeMechanism, MarketHistory, MarketPeriod, MarketReport, MarketType, OutcomeReport, MarketStatus } from '../generated/model'
 import { PredictionMarkets } from '../chain'
 import { Cache, IPFS, Tools } from './util'
-import { MarketStatus } from '../generated/modules/enums/enums'
 import { MarketId, MarketType as MType } from '@zeitgeistpm/typesV1/dist/interfaces'
 
 export async function predictionMarketBoughtCompleteSet({
@@ -36,15 +35,15 @@ export async function predictionMarketBoughtCompleteSet({
     const len = +savedMarket.marketType.categorical!
     for (var i = 0; i < len; i++) {
         const currencyId = util.AssetIdFromString(`[${marketIdOf},${i}]`)
-        const ab = await store.get(AssetBalance, { where: { account: acc, assetId: currencyId } })
+        const ab = await store.get(AccountBalance, { where: { account: acc, assetId: currencyId } })
         if (!ab) { return } 
 
-        var hab = await store.get(HistoricalAssetBalance, { where: 
-            { account: acc, assetId: currencyId, event: "Endowed", blockNumber: block.height } })
+        var hab = await store.get(HistoricalAccountBalance, { where: 
+            { accountId: acc.wallet, assetId: currencyId, event: "Endowed", blockNumber: block.height } })
         if (hab) {
             hab.event = hab.event.concat(event.method)
-            console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
-            await store.save<HistoricalAssetBalance>(hab)
+            console.log(`[${event.method}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
+            await store.save<HistoricalAccountBalance>(hab)
         } else {
             var amount = new BN(0)
             if (extrinsic?.args[1]) {
@@ -60,19 +59,19 @@ export async function predictionMarketBoughtCompleteSet({
             }
             if (amount > new BN(0)) {
                 ab.balance = ab.balance.add(amount)
-                console.log(`[${event.method}] Saving asset balance: ${JSON.stringify(ab, null, 2)}`)
-                await store.save<AssetBalance>(ab)
+                console.log(`[${event.method}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
+                await store.save<AccountBalance>(ab)
 
-                hab = new HistoricalAssetBalance()
-                hab.account = acc
+                hab = new HistoricalAccountBalance()
+                hab.accountId = acc.wallet
                 hab.event = event.method
                 hab.assetId = ab.assetId
                 hab.amount = amount
                 hab.balance = ab.balance
                 hab.blockNumber = block.height
                 hab.timestamp = new BN(block.timestamp)
-                console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
-                await store.save<HistoricalAssetBalance>(hab) 
+                console.log(`[${event.method}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
+                await store.save<HistoricalAccountBalance>(hab) 
             }
         }
     }
@@ -98,7 +97,6 @@ export async function predictionMarketApprovedV1({
     mh.blockNumber = block.height
     mh.timestamp = block.timestamp.toString()
     savedMarket.marketHistory?.push(mh)
-
     console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
     await store.save<Market>(savedMarket)
 }
@@ -123,7 +121,6 @@ export async function predictionMarketApprovedV2({
     mh.blockNumber = block.height
     mh.timestamp = block.timestamp.toString()
     savedMarket.marketHistory?.push(mh)
-
     console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
     await store.save<Market>(savedMarket)
 }
@@ -220,7 +217,6 @@ export async function predictionMarketCreatedV1({
     mh.blockNumber = block.height
     mh.timestamp = block.timestamp.toString()
     newMarket.marketHistory.push(mh)
-
     console.log(`[${event.name}] Saving market: ${JSON.stringify(newMarket, null, 2)}`)
     await store.save<Market>(newMarket)
 
@@ -228,7 +224,6 @@ export async function predictionMarketCreatedV1({
     for (var i = 0; i < len; i++) {
         const asset = new Asset()
         asset.assetId = JSON.stringify(util.AssetIdFromString(`[${marketIdOf},${i}]`))
-        
         console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
         await store.save<Asset>(asset)
     }
@@ -326,7 +321,6 @@ export async function predictionMarketCreatedV2({
     mh.blockNumber = block.height
     mh.timestamp = block.timestamp.toString()
     newMarket.marketHistory.push(mh)
-
     console.log(`[${event.name}] Saving market: ${JSON.stringify(newMarket, null, 2)}`)
     await store.save<Market>(newMarket)
 
@@ -334,7 +328,6 @@ export async function predictionMarketCreatedV2({
     for (var i = 0; i < len; i++) {
         const asset = new Asset()
         asset.assetId = JSON.stringify(util.AssetIdFromString(`[${marketIdOf},${i}]`))
-        
         console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
         await store.save<Asset>(asset)
     }
@@ -360,7 +353,6 @@ export async function predictionMarketStartedWithSubsidyV1({
     mh.blockNumber = block.height
     mh.timestamp = block.timestamp.toString()
     savedMarket.marketHistory?.push(mh)
-
     console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
     await store.save<Market>(savedMarket)
 }
@@ -385,7 +377,6 @@ export async function predictionMarketStartedWithSubsidyV2({
     mh.blockNumber = block.height
     mh.timestamp = block.timestamp.toString()
     savedMarket.marketHistory?.push(mh)
-
     console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
     await store.save<Market>(savedMarket)
 }
@@ -410,7 +401,6 @@ export async function predictionMarketInsufficientSubsidyV1({
     mh.blockNumber = block.height
     mh.timestamp = block.timestamp.toString()
     savedMarket.marketHistory?.push(mh)
-
     console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
     await store.save<Market>(savedMarket)
 }
@@ -435,7 +425,6 @@ export async function predictionMarketInsufficientSubsidyV2({
     mh.blockNumber = block.height
     mh.timestamp = block.timestamp.toString()
     savedMarket.marketHistory?.push(mh)
-
     console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
     await store.save<Market>(savedMarket)
 }
@@ -474,7 +463,7 @@ export async function predictionMarketReportedV1({
     mh.blockNumber = block.height
     mh.timestamp = block.timestamp.toString()
     savedMarket.marketHistory?.push(mh)
-
+    
     console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
     await store.save<Market>(savedMarket)
 }
@@ -497,7 +486,6 @@ export async function predictionMarketReportedV2({
     } else if (report.outcome.asScalar) {
         ocr.scalar = report.outcome.asScalar.toNumber()
     }
-
     const mr = new MarketReport()
     mr.at = report.at.toNumber()
     mr.by = report.by.toString()
@@ -694,7 +682,7 @@ export async function predictionMarketSoldCompleteSet({
     const len = +savedMarket.marketType.categorical!
     for (var i = 0; i < len; i++) {
         const currencyId = util.AssetIdFromString(`[${marketIdOf},${i}]`)
-        const ab = await store.get(AssetBalance, { where: { account: acc, assetId: currencyId } })
+        const ab = await store.get(AccountBalance, { where: { account: acc, assetId: currencyId } })
         if (!ab) { return }
 
         var amount = new BN(0)
@@ -711,19 +699,19 @@ export async function predictionMarketSoldCompleteSet({
         }
         if (amount > new BN(0)) {
             ab.balance = ab.balance.sub(amount)
-            console.log(`[${event.method}] Saving asset balance: ${JSON.stringify(ab, null, 2)}`)
-            await store.save<AssetBalance>(ab)
+            console.log(`[${event.method}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
+            await store.save<AccountBalance>(ab)
 
-            const hab = new HistoricalAssetBalance()
-            hab.account = acc
+            const hab = new HistoricalAccountBalance()
+            hab.accountId = acc.wallet
             hab.event = event.method
             hab.assetId = ab.assetId
             hab.amount = new BN(0 - amount.toNumber())
             hab.balance = ab.balance
             hab.blockNumber = block.height
             hab.timestamp = new BN(block.timestamp)
-            console.log(`[${event.method}] Saving historical asset balance: ${JSON.stringify(hab, null, 2)}`)
-            await store.save<HistoricalAssetBalance>(hab) 
+            console.log(`[${event.method}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
+            await store.save<HistoricalAccountBalance>(hab) 
         }
     }
 }

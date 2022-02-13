@@ -9,6 +9,11 @@ export class Pool extends BaseModel {
   @IntField({})
   poolId!: number;
 
+  @StringField({
+    nullable: true,
+  })
+  accountId?: string;
+
   @StringField({})
   baseAsset!: string;
 
