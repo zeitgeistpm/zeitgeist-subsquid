@@ -5,7 +5,6 @@ import CID from "cids";
 import all from "it-all";
 import { concat, toString } from "uint8arrays";
 import ipfsClient from "ipfs-http-client";
-import { env } from ".";
 
 export class Cache {
   private static _instance: Cache
@@ -19,9 +18,9 @@ export class Cache {
       if (!this._instance) {
           console.log('Connecting to Redis DB...')
           this._instance = new Cache({
-            host: env.REDIS_HOST ?? 'redis',
+            host: process.env.REDIS_HOST ?? 'redis',
             port: 6379,
-            password: env.REDIS_PASS,
+            password: process.env.REDIS_PASS,
             connect_timeout: 3600000,
             retry_strategy: (options) => {
                 return 2000
@@ -121,7 +120,7 @@ export class Tools {
 
   private static async init(): Promise<SDK> {
     console.log(`Initializing SDK`)
-    this.sdk = await SDK.initialize(env.WS_NODE_URL ?? 'wss://bsr.zeitgeist.pm')
+    this.sdk = await SDK.initialize(process.env.WS_NODE_URL ?? 'wss://bsr.zeitgeist.pm')
     return this.sdk
   }
 

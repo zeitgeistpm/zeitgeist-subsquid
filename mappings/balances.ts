@@ -6,7 +6,6 @@ import { encodeAddress } from '@polkadot/keyring'
 import { AccountInfo } from "@polkadot/types/interfaces/system";
 import { Cache, Tools } from './util'
 import { Account, AccountBalance, HistoricalAccountBalance } from '../generated/model'
-import { env } from '.'
 
 export async function balancesEndowed({
     store,
@@ -652,7 +651,7 @@ async function getFees(block: SubstrateBlock, extrinsic: SubstrateExtrinsic): Pr
 
 async function initBalance(acc: Account, store: DatabaseManager, event: SubstrateEvent, block: SubstrateBlock) {
     const sdk = await Tools.getSDK()
-    const blockZero = env.BLOCK_ZERO
+    const blockZero = process.env.BLOCK_ZERO!
     const { data : { free: amt } } = await sdk.api.query.system.account.at(blockZero, acc.wallet) as AccountInfo
 
     const ab = new AccountBalance()
