@@ -21,6 +21,9 @@ export interface Query {
     historicalAssets: <T = Array<HistoricalAsset>>(args: { offset?: Int | null, limit?: Int | null, where?: HistoricalAssetWhereInput | null, orderBy?: Array<HistoricalAssetOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     historicalAssetByUniqueInput: <T = HistoricalAsset | null>(args: { where: HistoricalAssetWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
     historicalAssetsConnection: <T = HistoricalAssetConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: HistoricalAssetWhereInput | null, orderBy?: Array<HistoricalAssetOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
+    historicalMarkets: <T = Array<HistoricalMarket>>(args: { offset?: Int | null, limit?: Int | null, where?: HistoricalMarketWhereInput | null, orderBy?: Array<HistoricalMarketOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
+    historicalMarketByUniqueInput: <T = HistoricalMarket | null>(args: { where: HistoricalMarketWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
+    historicalMarketsConnection: <T = HistoricalMarketConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: HistoricalMarketWhereInput | null, orderBy?: Array<HistoricalMarketOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     historicalPools: <T = Array<HistoricalPool>>(args: { offset?: Int | null, limit?: Int | null, where?: HistoricalPoolWhereInput | null, orderBy?: Array<HistoricalPoolOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
     historicalPoolByUniqueInput: <T = HistoricalPool | null>(args: { where: HistoricalPoolWhereUniqueInput }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T | null> ,
     historicalPoolsConnection: <T = HistoricalPoolConnection>(args: { first?: Int | null, after?: String | null, last?: Int | null, before?: String | null, where?: HistoricalPoolWhereInput | null, orderBy?: Array<HistoricalPoolOrderByInput> | null }, info?: GraphQLResolveInfo | string, options?: Options) => Promise<T> ,
@@ -138,6 +141,27 @@ export type HistoricalAssetOrderByInput =   'createdAt_ASC' |
   'qty_DESC' |
   'event_ASC' |
   'event_DESC' |
+  'blockNumber_ASC' |
+  'blockNumber_DESC' |
+  'timestamp_ASC' |
+  'timestamp_DESC'
+
+export type HistoricalMarketOrderByInput =   'createdAt_ASC' |
+  'createdAt_DESC' |
+  'updatedAt_ASC' |
+  'updatedAt_DESC' |
+  'deletedAt_ASC' |
+  'deletedAt_DESC' |
+  'marketId_ASC' |
+  'marketId_DESC' |
+  'event_ASC' |
+  'event_DESC' |
+  'status_ASC' |
+  'status_DESC' |
+  'poolId_ASC' |
+  'poolId_DESC' |
+  'resolvedOutcome_ASC' |
+  'resolvedOutcome_DESC' |
   'blockNumber_ASC' |
   'blockNumber_DESC' |
   'timestamp_ASC' |
@@ -689,6 +713,101 @@ export interface HistoricalAssetWhereUniqueInput {
   id: ID_Output
 }
 
+export interface HistoricalMarketCreateInput {
+  marketId: Float
+  event: String
+  status?: String | null
+  poolId?: Float | null
+  report?: MarketReportInput | null
+  resolvedOutcome?: String | null
+  blockNumber: Float
+  timestamp: String
+}
+
+export interface HistoricalMarketUpdateInput {
+  marketId?: Float | null
+  event?: String | null
+  status?: String | null
+  poolId?: Float | null
+  report?: MarketReportInput | null
+  resolvedOutcome?: String | null
+  blockNumber?: Float | null
+  timestamp?: String | null
+}
+
+export interface HistoricalMarketWhereInput {
+  id_eq?: ID_Input | null
+  id_in?: ID_Output[] | ID_Output | null
+  createdAt_eq?: DateTime | null
+  createdAt_lt?: DateTime | null
+  createdAt_lte?: DateTime | null
+  createdAt_gt?: DateTime | null
+  createdAt_gte?: DateTime | null
+  createdById_eq?: ID_Input | null
+  createdById_in?: ID_Output[] | ID_Output | null
+  updatedAt_eq?: DateTime | null
+  updatedAt_lt?: DateTime | null
+  updatedAt_lte?: DateTime | null
+  updatedAt_gt?: DateTime | null
+  updatedAt_gte?: DateTime | null
+  updatedById_eq?: ID_Input | null
+  updatedById_in?: ID_Output[] | ID_Output | null
+  deletedAt_all?: Boolean | null
+  deletedAt_eq?: DateTime | null
+  deletedAt_lt?: DateTime | null
+  deletedAt_lte?: DateTime | null
+  deletedAt_gt?: DateTime | null
+  deletedAt_gte?: DateTime | null
+  deletedById_eq?: ID_Input | null
+  deletedById_in?: ID_Output[] | ID_Output | null
+  marketId_eq?: Int | null
+  marketId_gt?: Int | null
+  marketId_gte?: Int | null
+  marketId_lt?: Int | null
+  marketId_lte?: Int | null
+  marketId_in?: Int[] | Int | null
+  event_eq?: String | null
+  event_contains?: String | null
+  event_startsWith?: String | null
+  event_endsWith?: String | null
+  event_in?: String[] | String | null
+  status_eq?: String | null
+  status_contains?: String | null
+  status_startsWith?: String | null
+  status_endsWith?: String | null
+  status_in?: String[] | String | null
+  poolId_eq?: Int | null
+  poolId_gt?: Int | null
+  poolId_gte?: Int | null
+  poolId_lt?: Int | null
+  poolId_lte?: Int | null
+  poolId_in?: Int[] | Int | null
+  report_json?: JSONObject | null
+  resolvedOutcome_eq?: String | null
+  resolvedOutcome_contains?: String | null
+  resolvedOutcome_startsWith?: String | null
+  resolvedOutcome_endsWith?: String | null
+  resolvedOutcome_in?: String[] | String | null
+  blockNumber_eq?: Int | null
+  blockNumber_gt?: Int | null
+  blockNumber_gte?: Int | null
+  blockNumber_lt?: Int | null
+  blockNumber_lte?: Int | null
+  blockNumber_in?: Int[] | Int | null
+  timestamp_eq?: BigInt | null
+  timestamp_gt?: BigInt | null
+  timestamp_gte?: BigInt | null
+  timestamp_lt?: BigInt | null
+  timestamp_lte?: BigInt | null
+  timestamp_in?: BigInt[] | BigInt | null
+  AND?: HistoricalMarketWhereInput[] | HistoricalMarketWhereInput | null
+  OR?: HistoricalMarketWhereInput[] | HistoricalMarketWhereInput | null
+}
+
+export interface HistoricalMarketWhereUniqueInput {
+  id: ID_Output
+}
+
 export interface HistoricalPoolCreateInput {
   poolId: Float
   event: String
@@ -789,7 +908,6 @@ export interface MarketCreateInput {
   report?: MarketReportInput | null
   resolvedOutcome?: String | null
   mdm: MarketDisputeMechanismInput
-  marketHistory?: MarketHistoryInput | null
 }
 
 export interface MarketDisputeMechanismCreateInput {
@@ -849,99 +967,6 @@ export interface MarketDisputeMechanismWhereInput {
 }
 
 export interface MarketDisputeMechanismWhereUniqueInput {
-  id: ID_Output
-}
-
-export interface MarketHistoryCreateInput {
-  event?: String | null
-  status?: String | null
-  poolId?: Float | null
-  resolvedOutcome?: String | null
-  blockNumber?: Float | null
-  timestamp?: String | null
-}
-
-export interface MarketHistoryInput {
-  event?: String | null
-  status?: String | null
-  poolId?: Int | null
-  report?: MarketReportInput | null
-  resolvedOutcome?: String | null
-  blockNumber?: Int | null
-  timestamp?: String | null
-}
-
-export interface MarketHistoryUpdateInput {
-  event?: String | null
-  status?: String | null
-  poolId?: Float | null
-  resolvedOutcome?: String | null
-  blockNumber?: Float | null
-  timestamp?: String | null
-}
-
-export interface MarketHistoryWhereInput {
-  id_eq?: ID_Input | null
-  id_in?: ID_Output[] | ID_Output | null
-  createdAt_eq?: DateTime | null
-  createdAt_lt?: DateTime | null
-  createdAt_lte?: DateTime | null
-  createdAt_gt?: DateTime | null
-  createdAt_gte?: DateTime | null
-  createdById_eq?: ID_Input | null
-  createdById_in?: ID_Output[] | ID_Output | null
-  updatedAt_eq?: DateTime | null
-  updatedAt_lt?: DateTime | null
-  updatedAt_lte?: DateTime | null
-  updatedAt_gt?: DateTime | null
-  updatedAt_gte?: DateTime | null
-  updatedById_eq?: ID_Input | null
-  updatedById_in?: ID_Output[] | ID_Output | null
-  deletedAt_all?: Boolean | null
-  deletedAt_eq?: DateTime | null
-  deletedAt_lt?: DateTime | null
-  deletedAt_lte?: DateTime | null
-  deletedAt_gt?: DateTime | null
-  deletedAt_gte?: DateTime | null
-  deletedById_eq?: ID_Input | null
-  deletedById_in?: ID_Output[] | ID_Output | null
-  event_eq?: String | null
-  event_contains?: String | null
-  event_startsWith?: String | null
-  event_endsWith?: String | null
-  event_in?: String[] | String | null
-  status_eq?: String | null
-  status_contains?: String | null
-  status_startsWith?: String | null
-  status_endsWith?: String | null
-  status_in?: String[] | String | null
-  poolId_eq?: Int | null
-  poolId_gt?: Int | null
-  poolId_gte?: Int | null
-  poolId_lt?: Int | null
-  poolId_lte?: Int | null
-  poolId_in?: Int[] | Int | null
-  resolvedOutcome_eq?: String | null
-  resolvedOutcome_contains?: String | null
-  resolvedOutcome_startsWith?: String | null
-  resolvedOutcome_endsWith?: String | null
-  resolvedOutcome_in?: String[] | String | null
-  blockNumber_eq?: Int | null
-  blockNumber_gt?: Int | null
-  blockNumber_gte?: Int | null
-  blockNumber_lt?: Int | null
-  blockNumber_lte?: Int | null
-  blockNumber_in?: Int[] | Int | null
-  timestamp_eq?: String | null
-  timestamp_contains?: String | null
-  timestamp_startsWith?: String | null
-  timestamp_endsWith?: String | null
-  timestamp_in?: String[] | String | null
-  AND?: MarketHistoryWhereInput[] | MarketHistoryWhereInput | null
-  OR?: MarketHistoryWhereInput[] | MarketHistoryWhereInput | null
-}
-
-export interface MarketHistoryWhereUniqueInput {
   id: ID_Output
 }
 
@@ -1143,7 +1168,6 @@ export interface MarketUpdateInput {
   report?: MarketReportInput | null
   resolvedOutcome?: String | null
   mdm?: MarketDisputeMechanismInput | null
-  marketHistory?: MarketHistoryInput | null
 }
 
 export interface MarketWhereInput {
@@ -1256,7 +1280,6 @@ export interface MarketWhereInput {
   resolvedOutcome_endsWith?: String | null
   resolvedOutcome_in?: String[] | String | null
   mdm_json?: JSONObject | null
-  marketHistory_json?: JSONObject | null
   AND?: MarketWhereInput[] | MarketWhereInput | null
   OR?: MarketWhereInput[] | MarketWhereInput | null
 }
@@ -1677,6 +1700,36 @@ export interface HistoricalAssetEdge {
   cursor: String
 }
 
+export interface HistoricalMarket extends BaseGraphQLObject {
+  id: ID_Output
+  createdAt: DateTime
+  createdById: String
+  updatedAt?: DateTime | null
+  updatedById?: String | null
+  deletedAt?: DateTime | null
+  deletedById?: String | null
+  version: Int
+  marketId: Int
+  event: String
+  status?: String | null
+  poolId?: Int | null
+  report?: MarketReport | null
+  resolvedOutcome?: String | null
+  blockNumber: Int
+  timestamp: BigInt
+}
+
+export interface HistoricalMarketConnection {
+  totalCount: Int
+  edges: Array<HistoricalMarketEdge>
+  pageInfo: PageInfo
+}
+
+export interface HistoricalMarketEdge {
+  node: HistoricalMarket
+  cursor: String
+}
+
 export interface HistoricalPool extends BaseGraphQLObject {
   id: ID_Output
   createdAt: DateTime
@@ -1734,7 +1787,6 @@ export interface Market extends BaseGraphQLObject {
   report?: MarketReport | null
   resolvedOutcome?: String | null
   mdm: MarketDisputeMechanism
-  marketHistory?: MarketHistory | null
 }
 
 export interface MarketConnection {
@@ -1752,16 +1804,6 @@ export interface MarketDisputeMechanism {
 export interface MarketEdge {
   node: Market
   cursor: String
-}
-
-export interface MarketHistory {
-  event?: String | null
-  status?: String | null
-  poolId?: Int | null
-  report?: MarketReport | null
-  resolvedOutcome?: String | null
-  blockNumber?: Int | null
-  timestamp?: String | null
 }
 
 export interface MarketPeriod {
