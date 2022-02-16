@@ -745,6 +745,154 @@ input HistoricalAssetWhereUniqueInput {
   id: ID!
 }
 
+type HistoricalMarket implements BaseGraphQLObject {
+  id: ID!
+  createdAt: DateTime!
+  createdById: String!
+  updatedAt: DateTime
+  updatedById: String
+  deletedAt: DateTime
+  deletedById: String
+  version: Int!
+  marketId: Int!
+  event: String!
+  status: String
+  poolId: Int
+  report: MarketReport
+  resolvedOutcome: String
+  blockNumber: Int!
+  timestamp: BigInt!
+}
+
+type HistoricalMarketConnection {
+  totalCount: Int!
+  edges: [HistoricalMarketEdge!]!
+  pageInfo: PageInfo!
+}
+
+input HistoricalMarketCreateInput {
+  marketId: Float!
+  event: String!
+  status: String
+  poolId: Float
+  report: MarketReportInput
+  resolvedOutcome: String
+  blockNumber: Float!
+  timestamp: String!
+}
+
+type HistoricalMarketEdge {
+  node: HistoricalMarket!
+  cursor: String!
+}
+
+enum HistoricalMarketOrderByInput {
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  deletedAt_ASC
+  deletedAt_DESC
+  marketId_ASC
+  marketId_DESC
+  event_ASC
+  event_DESC
+  status_ASC
+  status_DESC
+  poolId_ASC
+  poolId_DESC
+  resolvedOutcome_ASC
+  resolvedOutcome_DESC
+  blockNumber_ASC
+  blockNumber_DESC
+  timestamp_ASC
+  timestamp_DESC
+}
+
+input HistoricalMarketUpdateInput {
+  marketId: Float
+  event: String
+  status: String
+  poolId: Float
+  report: MarketReportInput
+  resolvedOutcome: String
+  blockNumber: Float
+  timestamp: String
+}
+
+input HistoricalMarketWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  marketId_eq: Int
+  marketId_gt: Int
+  marketId_gte: Int
+  marketId_lt: Int
+  marketId_lte: Int
+  marketId_in: [Int!]
+  event_eq: String
+  event_contains: String
+  event_startsWith: String
+  event_endsWith: String
+  event_in: [String!]
+  status_eq: String
+  status_contains: String
+  status_startsWith: String
+  status_endsWith: String
+  status_in: [String!]
+  poolId_eq: Int
+  poolId_gt: Int
+  poolId_gte: Int
+  poolId_lt: Int
+  poolId_lte: Int
+  poolId_in: [Int!]
+  report_json: JSONObject
+  resolvedOutcome_eq: String
+  resolvedOutcome_contains: String
+  resolvedOutcome_startsWith: String
+  resolvedOutcome_endsWith: String
+  resolvedOutcome_in: [String!]
+  blockNumber_eq: Int
+  blockNumber_gt: Int
+  blockNumber_gte: Int
+  blockNumber_lt: Int
+  blockNumber_lte: Int
+  blockNumber_in: [Int!]
+  timestamp_eq: BigInt
+  timestamp_gt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lt: BigInt
+  timestamp_lte: BigInt
+  timestamp_in: [BigInt!]
+  AND: [HistoricalMarketWhereInput!]
+  OR: [HistoricalMarketWhereInput!]
+}
+
+input HistoricalMarketWhereUniqueInput {
+  id: ID!
+}
+
 type HistoricalPool implements BaseGraphQLObject {
   id: ID!
   createdAt: DateTime!
@@ -904,7 +1052,6 @@ type Market implements BaseGraphQLObject {
   report: MarketReport
   resolvedOutcome: String
   mdm: MarketDisputeMechanism!
-  marketHistory: MarketHistory
 }
 
 type MarketConnection {
@@ -935,7 +1082,6 @@ input MarketCreateInput {
   report: MarketReportInput
   resolvedOutcome: String
   mdm: MarketDisputeMechanismInput!
-  marketHistory: MarketHistoryInput
 }
 
 type MarketDisputeMechanism {
@@ -1007,109 +1153,6 @@ input MarketDisputeMechanismWhereUniqueInput {
 type MarketEdge {
   node: Market!
   cursor: String!
-}
-
-type MarketHistory {
-  event: String
-  status: String
-  poolId: Int
-  report: MarketReport
-  resolvedOutcome: String
-  blockNumber: Int
-  timestamp: String
-}
-
-input MarketHistoryCreateInput {
-  event: String
-  status: String
-  poolId: Float
-  resolvedOutcome: String
-  blockNumber: Float
-  timestamp: String
-}
-
-input MarketHistoryInput {
-  event: String
-  status: String
-  poolId: Int
-  report: MarketReportInput
-  resolvedOutcome: String
-  blockNumber: Int
-  timestamp: String
-}
-
-input MarketHistoryUpdateInput {
-  event: String
-  status: String
-  poolId: Float
-  resolvedOutcome: String
-  blockNumber: Float
-  timestamp: String
-}
-
-input MarketHistoryWhereInput {
-  id_eq: ID
-  id_in: [ID!]
-  createdAt_eq: DateTime
-  createdAt_lt: DateTime
-  createdAt_lte: DateTime
-  createdAt_gt: DateTime
-  createdAt_gte: DateTime
-  createdById_eq: ID
-  createdById_in: [ID!]
-  updatedAt_eq: DateTime
-  updatedAt_lt: DateTime
-  updatedAt_lte: DateTime
-  updatedAt_gt: DateTime
-  updatedAt_gte: DateTime
-  updatedById_eq: ID
-  updatedById_in: [ID!]
-  deletedAt_all: Boolean
-  deletedAt_eq: DateTime
-  deletedAt_lt: DateTime
-  deletedAt_lte: DateTime
-  deletedAt_gt: DateTime
-  deletedAt_gte: DateTime
-  deletedById_eq: ID
-  deletedById_in: [ID!]
-  event_eq: String
-  event_contains: String
-  event_startsWith: String
-  event_endsWith: String
-  event_in: [String!]
-  status_eq: String
-  status_contains: String
-  status_startsWith: String
-  status_endsWith: String
-  status_in: [String!]
-  poolId_eq: Int
-  poolId_gt: Int
-  poolId_gte: Int
-  poolId_lt: Int
-  poolId_lte: Int
-  poolId_in: [Int!]
-  resolvedOutcome_eq: String
-  resolvedOutcome_contains: String
-  resolvedOutcome_startsWith: String
-  resolvedOutcome_endsWith: String
-  resolvedOutcome_in: [String!]
-  blockNumber_eq: Int
-  blockNumber_gt: Int
-  blockNumber_gte: Int
-  blockNumber_lt: Int
-  blockNumber_lte: Int
-  blockNumber_in: [Int!]
-  timestamp_eq: String
-  timestamp_contains: String
-  timestamp_startsWith: String
-  timestamp_endsWith: String
-  timestamp_in: [String!]
-  AND: [MarketHistoryWhereInput!]
-  OR: [MarketHistoryWhereInput!]
-}
-
-input MarketHistoryWhereUniqueInput {
-  id: ID!
 }
 
 enum MarketOrderByInput {
@@ -1363,7 +1406,6 @@ input MarketUpdateInput {
   report: MarketReportInput
   resolvedOutcome: String
   mdm: MarketDisputeMechanismInput
-  marketHistory: MarketHistoryInput
 }
 
 input MarketWhereInput {
@@ -1476,7 +1518,6 @@ input MarketWhereInput {
   resolvedOutcome_endsWith: String
   resolvedOutcome_in: [String!]
   mdm_json: JSONObject
-  marketHistory_json: JSONObject
   AND: [MarketWhereInput!]
   OR: [MarketWhereInput!]
 }
@@ -1757,6 +1798,9 @@ type Query {
   historicalAssets(offset: Int, limit: Int = 50, where: HistoricalAssetWhereInput, orderBy: [HistoricalAssetOrderByInput!]): [HistoricalAsset!]!
   historicalAssetByUniqueInput(where: HistoricalAssetWhereUniqueInput!): HistoricalAsset
   historicalAssetsConnection(first: Int, after: String, last: Int, before: String, where: HistoricalAssetWhereInput, orderBy: [HistoricalAssetOrderByInput!]): HistoricalAssetConnection!
+  historicalMarkets(offset: Int, limit: Int = 50, where: HistoricalMarketWhereInput, orderBy: [HistoricalMarketOrderByInput!]): [HistoricalMarket!]!
+  historicalMarketByUniqueInput(where: HistoricalMarketWhereUniqueInput!): HistoricalMarket
+  historicalMarketsConnection(first: Int, after: String, last: Int, before: String, where: HistoricalMarketWhereInput, orderBy: [HistoricalMarketOrderByInput!]): HistoricalMarketConnection!
   historicalPools(offset: Int, limit: Int = 50, where: HistoricalPoolWhereInput, orderBy: [HistoricalPoolOrderByInput!]): [HistoricalPool!]!
   historicalPoolByUniqueInput(where: HistoricalPoolWhereUniqueInput!): HistoricalPool
   historicalPoolsConnection(first: Int, after: String, last: Int, before: String, where: HistoricalPoolWhereInput, orderBy: [HistoricalPoolOrderByInput!]): HistoricalPoolConnection!

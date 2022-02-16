@@ -95,9 +95,6 @@ export class Market extends BaseModel {
   @JSONField({ filter: true, gqlFieldType: jsonTypes.MarketDisputeMechanism })
   mdm!: jsonTypes.MarketDisputeMechanism;
 
-  @JSONField({ filter: true, gqlFieldType: jsonTypes.MarketHistory, nullable: true })
-  marketHistory?: jsonTypes.MarketHistory[];
-
   constructor(init?: Partial<Market>) {
     super();
     Object.assign(this, init);
