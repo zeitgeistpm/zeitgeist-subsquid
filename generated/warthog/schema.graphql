@@ -599,9 +599,9 @@ type HistoricalAsset implements BaseGraphQLObject {
   deletedById: String
   version: Int!
   assetId: String!
-  dPrice: Float!
+  dPrice: Float
   dQty: BigInt!
-  price: Float!
+  price: Float
   qty: BigInt!
   event: String!
   blockNumber: Int!
@@ -616,9 +616,9 @@ type HistoricalAssetConnection {
 
 input HistoricalAssetCreateInput {
   assetId: String!
-  dPrice: Float!
+  dPrice: Float
   dQty: String!
-  price: Float!
+  price: Float
   qty: String!
   event: String!
   blockNumber: Float!

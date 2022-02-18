@@ -29,9 +29,9 @@ type Asset @entity {
 
 type HistoricalAsset @entity {
   assetId: String!
-  dPrice: Float!
+  dPrice: Float
   dQty: BigInt!
-  price: Float!
+  price: Float
   qty: BigInt!
   event: String!
   blockNumber: Int!

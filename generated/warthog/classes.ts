@@ -1230,14 +1230,14 @@ export class HistoricalAssetCreateInput {
   @TypeGraphQLField()
   assetId!: string;
 
-  @TypeGraphQLField()
-  dPrice!: number;
+  @TypeGraphQLField({ nullable: true })
+  dPrice?: number;
 
   @TypeGraphQLField()
   dQty!: string;
 
-  @TypeGraphQLField()
-  price!: number;
+  @TypeGraphQLField({ nullable: true })
+  price?: number;
 
   @TypeGraphQLField()
   qty!: string;

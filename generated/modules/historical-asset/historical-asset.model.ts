@@ -9,8 +9,10 @@ export class HistoricalAsset extends BaseModel {
   @StringField({})
   assetId!: string;
 
-  @FloatField({})
-  dPrice!: number;
+  @FloatField({
+    nullable: true,
+  })
+  dPrice?: number;
 
   @NumericField({
     transformer: {
@@ -21,8 +23,10 @@ export class HistoricalAsset extends BaseModel {
   })
   dQty!: BN;
 
-  @FloatField({})
-  price!: number;
+  @FloatField({
+    nullable: true,
+  })
+  price?: number;
 
   @NumericField({
     transformer: {

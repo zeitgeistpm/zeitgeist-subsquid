@@ -614,9 +614,9 @@ export interface HistoricalAccountBalanceWhereUniqueInput {
 
 export interface HistoricalAssetCreateInput {
   assetId: String
-  dPrice: Float
+  dPrice?: Float | null
   dQty: String
-  price: Float
+  price?: Float | null
   qty: String
   event: String
   blockNumber: Float
@@ -1680,9 +1680,9 @@ export interface HistoricalAsset extends BaseGraphQLObject {
   deletedById?: String | null
   version: Int
   assetId: String
-  dPrice: Float
+  dPrice?: Float | null
   dQty: BigInt
-  price: Float
+  price?: Float | null
   qty: BigInt
   event: String
   blockNumber: Int
