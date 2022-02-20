@@ -2939,6 +2939,9 @@ export enum HistoricalPoolOrderByEnum {
   ztgQty_ASC = "ztgQty_ASC",
   ztgQty_DESC = "ztgQty_DESC",
 
+  volume_ASC = "volume_ASC",
+  volume_DESC = "volume_DESC",
+
   blockNumber_ASC = "blockNumber_ASC",
   blockNumber_DESC = "blockNumber_DESC",
 
@@ -3075,6 +3078,24 @@ export class HistoricalPoolWhereInput {
   @TypeGraphQLField(() => [BigInt], { nullable: true })
   ztgQty_in?: string[];
 
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  volume_eq?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  volume_gt?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  volume_gte?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  volume_lt?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  volume_lte?: string;
+
+  @TypeGraphQLField(() => [BigInt], { nullable: true })
+  volume_in?: string[];
+
   @TypeGraphQLField(() => Int, { nullable: true })
   blockNumber_eq?: number;
 
@@ -3135,6 +3156,9 @@ export class HistoricalPoolCreateInput {
   @TypeGraphQLField()
   ztgQty!: string;
 
+  @TypeGraphQLField({ nullable: true })
+  volume?: string;
+
   @TypeGraphQLField()
   blockNumber!: number;
 
@@ -3152,6 +3176,9 @@ export class HistoricalPoolUpdateInput {
 
   @TypeGraphQLField({ nullable: true })
   ztgQty?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  volume?: string;
 
   @TypeGraphQLField({ nullable: true })
   blockNumber?: number;
@@ -3772,6 +3799,9 @@ export enum PoolOrderByEnum {
 
   ztgQty_ASC = "ztgQty_ASC",
   ztgQty_DESC = "ztgQty_DESC",
+
+  volume_ASC = "volume_ASC",
+  volume_DESC = "volume_DESC",
 }
 
 registerEnumType(PoolOrderByEnum, {
@@ -4014,6 +4044,24 @@ export class PoolWhereInput {
   @TypeGraphQLField(() => [BigInt], { nullable: true })
   ztgQty_in?: string[];
 
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  volume_eq?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  volume_gt?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  volume_gte?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  volume_lt?: string;
+
+  @TypeGraphQLField(() => BigInt, { nullable: true })
+  volume_lte?: string;
+
+  @TypeGraphQLField(() => [BigInt], { nullable: true })
+  volume_in?: string[];
+
   @TypeGraphQLField(() => PoolWhereInput, { nullable: true })
   AND?: [PoolWhereInput];
 
@@ -4061,6 +4109,9 @@ export class PoolCreateInput {
 
   @TypeGraphQLField()
   ztgQty!: string;
+
+  @TypeGraphQLField()
+  volume!: string;
 }
 
 @TypeGraphQLInputType()
@@ -4097,6 +4148,9 @@ export class PoolUpdateInput {
 
   @TypeGraphQLField({ nullable: true })
   ztgQty?: string;
+
+  @TypeGraphQLField({ nullable: true })
+  volume?: string;
 }
 
 @ArgsType()

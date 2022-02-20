@@ -179,6 +179,8 @@ export type HistoricalPoolOrderByInput =   'createdAt_ASC' |
   'event_DESC' |
   'ztgQty_ASC' |
   'ztgQty_DESC' |
+  'volume_ASC' |
+  'volume_DESC' |
   'blockNumber_ASC' |
   'blockNumber_DESC' |
   'timestamp_ASC' |
@@ -244,7 +246,9 @@ export type PoolOrderByInput =   'createdAt_ASC' |
   'totalWeight_ASC' |
   'totalWeight_DESC' |
   'ztgQty_ASC' |
-  'ztgQty_DESC'
+  'ztgQty_DESC' |
+  'volume_ASC' |
+  'volume_DESC'
 
 export interface AccountBalanceCreateInput {
   account: ID_Output
@@ -812,6 +816,7 @@ export interface HistoricalPoolCreateInput {
   poolId: Float
   event: String
   ztgQty: String
+  volume?: String | null
   blockNumber: Float
   timestamp: String
 }
@@ -820,6 +825,7 @@ export interface HistoricalPoolUpdateInput {
   poolId?: Float | null
   event?: String | null
   ztgQty?: String | null
+  volume?: String | null
   blockNumber?: Float | null
   timestamp?: String | null
 }
@@ -866,6 +872,12 @@ export interface HistoricalPoolWhereInput {
   ztgQty_lt?: BigInt | null
   ztgQty_lte?: BigInt | null
   ztgQty_in?: BigInt[] | BigInt | null
+  volume_eq?: BigInt | null
+  volume_gt?: BigInt | null
+  volume_gte?: BigInt | null
+  volume_lt?: BigInt | null
+  volume_lte?: BigInt | null
+  volume_in?: BigInt[] | BigInt | null
   blockNumber_eq?: Int | null
   blockNumber_gt?: Int | null
   blockNumber_gte?: Int | null
@@ -1360,6 +1372,7 @@ export interface PoolCreateInput {
   totalWeight: String
   weights: WeightInput
   ztgQty: String
+  volume: String
 }
 
 export interface PoolUpdateInput {
@@ -1374,6 +1387,7 @@ export interface PoolUpdateInput {
   totalWeight?: String | null
   weights?: WeightInput | null
   ztgQty?: String | null
+  volume?: String | null
 }
 
 export interface PoolWhereInput {
@@ -1455,6 +1469,12 @@ export interface PoolWhereInput {
   ztgQty_lt?: BigInt | null
   ztgQty_lte?: BigInt | null
   ztgQty_in?: BigInt[] | BigInt | null
+  volume_eq?: BigInt | null
+  volume_gt?: BigInt | null
+  volume_gte?: BigInt | null
+  volume_lt?: BigInt | null
+  volume_lte?: BigInt | null
+  volume_in?: BigInt[] | BigInt | null
   AND?: PoolWhereInput[] | PoolWhereInput | null
   OR?: PoolWhereInput[] | PoolWhereInput | null
 }
@@ -1742,6 +1762,7 @@ export interface HistoricalPool extends BaseGraphQLObject {
   poolId: Int
   event: String
   ztgQty: BigInt
+  volume?: BigInt | null
   blockNumber: Int
   timestamp: BigInt
 }
@@ -1854,6 +1875,7 @@ export interface Pool extends BaseGraphQLObject {
   totalWeight: String
   weights: Weight
   ztgQty: BigInt
+  volume: BigInt
 }
 
 export interface PoolConnection {
