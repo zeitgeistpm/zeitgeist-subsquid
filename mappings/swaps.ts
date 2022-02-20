@@ -27,6 +27,7 @@ export async function swapPoolCreated({
     newPool.totalWeight = pool.total_weight.toString();
     newPool.weights = []
     newPool.ztgQty = new BN(1000000000000)
+    newPool.volume = new BN(0)
 
     const savedMarket = await store.get(Market, { where: { marketId: newPool.marketId } })
     if (savedMarket) {
@@ -82,6 +83,7 @@ export async function swapPoolCreated({
     newHP.poolId = newPool.poolId
     newHP.event = event.method
     newHP.ztgQty = newPool.ztgQty
+    newHP.volume = newPool.volume
     newHP.blockNumber = block.height
     newHP.timestamp = new BN(block.timestamp)
     console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(newHP, null, 2)}`)
@@ -216,8 +218,9 @@ export async function swapExactAmountIn({
 
     const ztgWt = +savedPool.weights[savedPool.weights.length - 1].len
     const oldZtgQty = savedPool.ztgQty
-    const newZtgQty = oldZtgQty.sub(new BN(swapEvent.asset_amount_out)) 
+    const newZtgQty = oldZtgQty.sub(swapEvent.asset_amount_out) 
     savedPool.ztgQty = newZtgQty
+    savedPool.volume = savedPool.volume.add(swapEvent.asset_amount_out)
     console.log(`Saving pool: ${JSON.stringify(savedPool, null, 2)}`)
     await store.save<Pool>(savedPool)
 
@@ -225,6 +228,7 @@ export async function swapExactAmountIn({
     newHP.poolId = savedPool.poolId
     newHP.event = event.method
     newHP.ztgQty = savedPool.ztgQty
+    newHP.volume = savedPool.volume
     newHP.blockNumber = block.height
     newHP.timestamp = new BN(block.timestamp)
     console.log(`Saving historical pool: ${JSON.stringify(newHP, null, 2)}`)
@@ -289,6 +293,7 @@ export async function swapExactAmountOut({
     const oldZtgQty = savedPool.ztgQty
     const newZtgQty = oldZtgQty.add(swapEvent.asset_amount_in)
     savedPool.ztgQty = newZtgQty
+    savedPool.volume = savedPool.volume.add(swapEvent.asset_amount_in)
     console.log(`Saving pool: ${JSON.stringify(savedPool, null, 2)}`)
     await store.save<Pool>(savedPool)
 
@@ -296,6 +301,7 @@ export async function swapExactAmountOut({
     newHP.poolId = savedPool.poolId
     newHP.event = event.method
     newHP.ztgQty = savedPool.ztgQty
+    newHP.volume = savedPool.volume
     newHP.blockNumber = block.height
     newHP.timestamp = new BN(block.timestamp)
     console.log(`Saving historical pool: ${JSON.stringify(newHP, null, 2)}`)

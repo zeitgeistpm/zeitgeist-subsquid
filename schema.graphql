@@ -85,12 +85,14 @@ type Pool @entity {
   totalWeight: String!
   weights: [Weight]!
   ztgQty: BigInt!
+  volume: BigInt!
 }
 
 type HistoricalPool @entity {
   poolId: Int!
   event: String!
   ztgQty: BigInt!
+  volume: BigInt
   blockNumber: Int!
   timestamp: BigInt!
 }

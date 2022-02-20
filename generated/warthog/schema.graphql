@@ -905,6 +905,7 @@ type HistoricalPool implements BaseGraphQLObject {
   poolId: Int!
   event: String!
   ztgQty: BigInt!
+  volume: BigInt
   blockNumber: Int!
   timestamp: BigInt!
 }
@@ -919,6 +920,7 @@ input HistoricalPoolCreateInput {
   poolId: Float!
   event: String!
   ztgQty: String!
+  volume: String
   blockNumber: Float!
   timestamp: String!
 }
@@ -941,6 +943,8 @@ enum HistoricalPoolOrderByInput {
   event_DESC
   ztgQty_ASC
   ztgQty_DESC
+  volume_ASC
+  volume_DESC
   blockNumber_ASC
   blockNumber_DESC
   timestamp_ASC
@@ -951,6 +955,7 @@ input HistoricalPoolUpdateInput {
   poolId: Float
   event: String
   ztgQty: String
+  volume: String
   blockNumber: Float
   timestamp: String
 }
@@ -997,6 +1002,12 @@ input HistoricalPoolWhereInput {
   ztgQty_lt: BigInt
   ztgQty_lte: BigInt
   ztgQty_in: [BigInt!]
+  volume_eq: BigInt
+  volume_gt: BigInt
+  volume_gte: BigInt
+  volume_lt: BigInt
+  volume_lte: BigInt
+  volume_in: [BigInt!]
   blockNumber_eq: Int
   blockNumber_gt: Int
   blockNumber_gte: Int
@@ -1618,6 +1629,7 @@ type Pool implements BaseGraphQLObject {
   totalWeight: String!
   weights: Weight!
   ztgQty: BigInt!
+  volume: BigInt!
 }
 
 type PoolConnection {
@@ -1638,6 +1650,7 @@ input PoolCreateInput {
   totalWeight: String!
   weights: WeightInput!
   ztgQty: String!
+  volume: String!
 }
 
 type PoolEdge {
@@ -1672,6 +1685,8 @@ enum PoolOrderByInput {
   totalWeight_DESC
   ztgQty_ASC
   ztgQty_DESC
+  volume_ASC
+  volume_DESC
 }
 
 input PoolUpdateInput {
@@ -1686,6 +1701,7 @@ input PoolUpdateInput {
   totalWeight: String
   weights: WeightInput
   ztgQty: String
+  volume: String
 }
 
 input PoolWhereInput {
@@ -1767,6 +1783,12 @@ input PoolWhereInput {
   ztgQty_lt: BigInt
   ztgQty_lte: BigInt
   ztgQty_in: [BigInt!]
+  volume_eq: BigInt
+  volume_gt: BigInt
+  volume_gte: BigInt
+  volume_lt: BigInt
+  volume_lte: BigInt
+  volume_in: [BigInt!]
   AND: [PoolWhereInput!]
   OR: [PoolWhereInput!]
 }
