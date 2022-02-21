@@ -13,7 +13,7 @@
     "processor:migrate": "echo skip",
     "processor:start": "node lib/processor.js",
     "query-node:start": "squid-graphql-server",
-    "typegen": "hydra-typegen typegen manifest.yml",
+    "typegen": "squid-substrate-typegen typegen.json",
     "codegen": "hydra-cli codegen",
     "redis:up": "docker-compose up -d redis",
     "db:create": "hydra-cli db:create",
@@ -26,9 +26,9 @@
     "local:deploy": "yarn db:up && yarn redis:up && rm -rf db/migrations/* && yarn db:reset && npm run db:create-migration -n 'init' && yarn db:migrate && npm run processor:start"
   },
   "dependencies": {
-    "@subsquid/graphql-server": "^0.1.2",
-    "@subsquid/ss58": "^0.0.2",
-    "@subsquid/substrate-processor": "^0.2.3",
+    "@subsquid/graphql-server": "^0.1.4",
+    "@subsquid/ss58": "^0.0.4",
+    "@subsquid/substrate-processor": "^0.3.0",
     "@types/redis": "^2.8.27",
     "@zeitgeistpm/sdk": "^0.4.0",
     "@zeitgeistpm/typesV1": "npm:@zeitgeistpm/types@^0.3.10",
@@ -44,9 +44,9 @@
     "uint8arrays": "^2.1.4"
   },
   "devDependencies": {
-    "@subsquid/cli": "^0.0.6",
-    "@subsquid/substrate-metadata-explorer": "^0.0.6",
-    "@subsquid/substrate-typegen": "^0.0.6",
+    "@subsquid/cli": "^0.1.2",
+    "@subsquid/substrate-metadata-explorer": "^0.0.7",
+    "@subsquid/substrate-typegen": "^0.2.1",
     "ts-node": "^9.0.0",
     "typescript": "4.3.4"
   }
