@@ -110,13 +110,13 @@ type CategoryMetadata @jsonField {
 }
 
 type MarketType @jsonField {
-  Categorical: String
-  Scalar: String
+  categorical: String
+  scalar: String
 }
 
 type MarketPeriod @jsonField {
-  Block: String
-  Timestamp: String
+  block: String
+  timestamp: String
 }
 
 enum MarketStatus {
@@ -136,12 +136,12 @@ type MarketReport @jsonField {
 }
 
 type OutcomeReport @jsonField {
-  Categorical: Int
-  Scalar: Int
+  categorical: Int
+  scalar: Int
 }
 
 type MarketDisputeMechanism @jsonField {
-  Authorized: String
-  Court: Boolean
-  SimpleDisputes: Boolean
+  authorized: String
+  court: Boolean
+  simpleDisputes: Boolean
 }
