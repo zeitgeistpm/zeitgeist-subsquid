@@ -1,4 +1,5 @@
 /node_modules
+/lib
 /db/cache
 /mappings/generated
 /mappings/node_modules
