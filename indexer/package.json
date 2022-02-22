@@ -1,0 +1,10 @@
+{
+    "name": "zeitgeistpm",
+    "version": "1.0.0",
+    "main": "index.js",
+    "license": "MIT",
+    "dependencies": {
+      "@zeitgeistpm/types": "^0.4.5",
+      "@babel/runtime": "^7.16.0"
+    }
+  }
