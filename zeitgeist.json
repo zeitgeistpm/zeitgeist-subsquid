@@ -150,8 +150,8 @@
         "MarketIdOf": "u128",
         "MarketPeriod": {
           "_enum": {
-            "Block": "(BlockNumber, BlockNumber)",
-            "Timestamp": "(Moment, Moment)"
+            "Block": "Range<BlockNumber>",
+            "Timestamp": "Range<Moment>"
           }
         },
         "MarketStatus": {
