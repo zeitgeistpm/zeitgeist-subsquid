@@ -17,7 +17,7 @@ type HistoricalAccountBalance @entity {
   amount: BigInt!
   balance: BigInt!
   blockNumber: Int!
-  timestamp: BigInt!
+  timestamp: DateTime!
 }
 
 type Asset @entity {
