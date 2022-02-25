@@ -70,7 +70,7 @@ type HistoricalMarket @entity {
   report: MarketReport
   resolvedOutcome: String
   blockNumber: Int!
-  timestamp: BigInt!
+  timestamp: DateTime!
 }
 
 type Pool @entity {
