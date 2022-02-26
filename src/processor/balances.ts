@@ -2,11 +2,11 @@ import * as ss58 from "@subsquid/ss58"
 import { EventHandlerContext, Store, SubstrateBlock, SubstrateEvent, SubstrateExtrinsic } from "@subsquid/substrate-processor"
 import { Cache, Tools } from "./util"
 import { Account, AccountBalance, HistoricalAccountBalance } from "../model"
-import { BalancesBalanceSetEvent, BalancesDustLostEvent, BalancesEndowedEvent, BalancesReservedEvent, BalancesTransferEvent, BalancesUnreservedEvent, CurrencyDepositedEvent, CurrencyTransferredEvent, CurrencyWithdrawnEvent, SystemExtrinsicFailedEvent, SystemExtrinsicSuccessEvent, SystemNewAccountEvent, TokensEndowedEvent } from "../types/events"
+import { BalancesBalanceSetEvent, BalancesDustLostEvent, BalancesEndowedEvent, BalancesReservedEvent, BalancesTransferEvent, 
+    BalancesUnreservedEvent, CurrencyDepositedEvent, CurrencyTransferredEvent, CurrencyWithdrawnEvent, SystemExtrinsicFailedEvent, 
+    SystemExtrinsicSuccessEvent, SystemNewAccountEvent, TokensEndowedEvent } from "../types/events"
 import { AccountInfo } from "@polkadot/types/interfaces/system";
-import { Asset } from "../types/v32"
 import { util } from "@zeitgeistpm/sdk"
-import { AssetId } from "@zeitgeistpm/sdk/dist/types"
 
 export async function balancesEndowed(ctx: EventHandlerContext) {
     const {store, event, block, extrinsic} = ctx
@@ -16,7 +16,7 @@ export async function balancesEndowed(ctx: EventHandlerContext) {
     var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) {
         acc = new Account()
-        acc.id = event.id + walletId.substring(walletId.length - 5)
+        acc.id = event.id + '-' + walletId.substring(walletId.length - 5)
         acc.wallet = walletId
         console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
@@ -30,7 +30,7 @@ export async function balancesEndowed(ctx: EventHandlerContext) {
         await store.save<AccountBalance>(ab)
 
         const hab = new HistoricalAccountBalance()
-        hab.id = event.id + walletId.substring(walletId.length - 5)
+        hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
         hab.accountId = acc.wallet
         hab.event = event.method
         hab.assetId = ab.assetId
@@ -55,7 +55,7 @@ export async function balancesDustLost(ctx: EventHandlerContext) {
     if (!ab) { return }
 
     const hab = new HistoricalAccountBalance()
-    hab.id = event.id + walletId.substring(walletId.length - 5)
+    hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
     hab.accountId = acc.wallet
     hab.event = event.method
     hab.assetId = ab.assetId
@@ -77,7 +77,7 @@ export async function balancesTransfer(ctx: EventHandlerContext) {
     var fa = await store.get(Account, { where: { wallet: fromWId } })
     if (!fa) {
         fa = new Account()
-        fa.id = event.id + fromWId.substring(fromWId.length - 5)
+        fa.id = event.id + '-' + fromWId.substring(fromWId.length - 5)
         fa.wallet = fromWId
         console.log(`[${event.name}] Saving account: ${JSON.stringify(fa, null, 2)}`)
         await store.save<Account>(fa)
@@ -91,7 +91,7 @@ export async function balancesTransfer(ctx: EventHandlerContext) {
         await store.save<AccountBalance>(faAB)
 
         const faHAB = new HistoricalAccountBalance()
-        faHAB.id = event.id + fromWId.substring(fromWId.length - 5)
+        faHAB.id = event.id + '-' + fromWId.substring(fromWId.length - 5)
         faHAB.accountId = fa.wallet
         faHAB.event = event.method
         faHAB.assetId = faAB.assetId
@@ -106,7 +106,7 @@ export async function balancesTransfer(ctx: EventHandlerContext) {
     var ta = await store.get(Account, { where: { wallet: toWId } })
     if (!ta) {
         ta = new Account()
-        ta.id = event.id + toWId.substring(toWId.length - 5)
+        ta.id = event.id + '-' + toWId.substring(toWId.length - 5)
         ta.wallet = toWId
         console.log(`[${event.name}] Saving account: ${JSON.stringify(ta, null, 2)}`)
         await store.save<Account>(ta)
@@ -123,7 +123,7 @@ export async function balancesTransfer(ctx: EventHandlerContext) {
             await store.save<AccountBalance>(taAB)
 
             const taHAB = new HistoricalAccountBalance()
-            taHAB.id = event.id + toWId.substring(toWId.length - 5)
+            taHAB.id = event.id + '-' + toWId.substring(toWId.length - 5)
             taHAB.accountId = ta.wallet
             taHAB.event = event.method
             taHAB.assetId = taAB.assetId
@@ -150,7 +150,7 @@ export async function balancesBalanceSet(ctx: EventHandlerContext) {
     var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) {
         acc = new Account()
-        acc.id = event.id + walletId.substring(walletId.length - 5)
+        acc.id = event.id + '-' + walletId.substring(walletId.length - 5)
         acc.wallet = walletId
         console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
@@ -167,7 +167,7 @@ export async function balancesBalanceSet(ctx: EventHandlerContext) {
             await store.save<AccountBalance>(ab)
 
             const hab = new HistoricalAccountBalance()
-            hab.id = event.id + walletId.substring(walletId.length - 5)
+            hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
             hab.accountId = acc.wallet
             hab.event = event.method
             hab.assetId = ab.assetId
@@ -194,7 +194,7 @@ export async function balancesReserved(ctx: EventHandlerContext) {
     var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) {
         acc = new Account()
-        acc.id = event.id + walletId.substring(walletId.length - 5)
+        acc.id = event.id + '-' + walletId.substring(walletId.length - 5)
         acc.wallet = walletId
         console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
@@ -208,7 +208,7 @@ export async function balancesReserved(ctx: EventHandlerContext) {
         await store.save<AccountBalance>(ab)
 
         const hab = new HistoricalAccountBalance()
-        hab.id = event.id + walletId.substring(walletId.length - 5)
+        hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
         hab.accountId = acc.wallet
         hab.event = event.method
         hab.assetId = ab.assetId
@@ -229,7 +229,7 @@ export async function balancesUnreserved(ctx: EventHandlerContext) {
     var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) {
         acc = new Account()
-        acc.id = event.id + walletId.substring(walletId.length - 5)
+        acc.id = event.id + '-' + walletId.substring(walletId.length - 5)
         acc.wallet = walletId
         console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
@@ -243,7 +243,7 @@ export async function balancesUnreserved(ctx: EventHandlerContext) {
         await store.save<AccountBalance>(ab)
 
         const hab = new HistoricalAccountBalance()
-        hab.id = event.id + walletId.substring(walletId.length - 5)
+        hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
         hab.accountId = acc.wallet
         hab.event = event.method
         hab.assetId = ab.assetId
@@ -264,7 +264,7 @@ export async function tokensEndowed(ctx: EventHandlerContext) {
     var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) {
         acc = new Account()
-        acc.id = event.id + walletId.substring(walletId.length - 5)
+        acc.id = event.id + '-' + walletId.substring(walletId.length - 5)
         acc.wallet = walletId
         console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
@@ -274,7 +274,7 @@ export async function tokensEndowed(ctx: EventHandlerContext) {
     var ab = await store.get(AccountBalance, { where: { account: acc, assetId: assetId } })
     if (ab) { return } 
     ab = new AccountBalance()
-    ab.id = event.id + walletId.substring(walletId.length - 5)
+    ab.id = event.id + '-' + walletId.substring(walletId.length - 5)
     ab.account = acc
     ab.assetId = assetId
     ab.balance = amount
@@ -282,7 +282,7 @@ export async function tokensEndowed(ctx: EventHandlerContext) {
     await store.save<AccountBalance>(ab)
 
     const hab = new HistoricalAccountBalance()
-    hab.id = event.id + walletId.substring(walletId.length - 5)
+    hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
     hab.accountId = acc.wallet
     hab.event = event.method
     hab.assetId = ab.assetId
@@ -305,7 +305,7 @@ export async function currencyTransferred(ctx: EventHandlerContext) {
     var fa = await store.get(Account, { where: { wallet: fromWId } })
     if (!fa) {
         fa = new Account()
-        fa.id = event.id + fromWId.substring(fromWId.length - 5)
+        fa.id = event.id + '-' + fromWId.substring(fromWId.length - 5)
         fa.wallet = fromWId
         console.log(`[${event.name}] Saving account: ${JSON.stringify(fa, null, 2)}`)
         await store.save<Account>(fa)
@@ -317,7 +317,7 @@ export async function currencyTransferred(ctx: EventHandlerContext) {
         faAB.balance = faAB.balance - amount
     } else {
         faAB = new AccountBalance()
-        faAB.id = event.id + fromWId.substring(fromWId.length - 5)
+        faAB.id = event.id + '-' + fromWId.substring(fromWId.length - 5)
         faAB.account = fa
         faAB.assetId = assetId
         faAB.balance = - amount
@@ -326,7 +326,7 @@ export async function currencyTransferred(ctx: EventHandlerContext) {
     await store.save<AccountBalance>(faAB)
 
     const faHAB = new HistoricalAccountBalance()
-    faHAB.id = event.id + fromWId.substring(fromWId.length - 5)
+    faHAB.id = event.id + '-' + fromWId.substring(fromWId.length - 5)
     faHAB.accountId = fa.wallet
     faHAB.event = event.method
     faHAB.assetId = faAB.assetId
@@ -340,7 +340,7 @@ export async function currencyTransferred(ctx: EventHandlerContext) {
     var ta = await store.get(Account, { where: { wallet: toWId } })
     if (!ta) {
         ta = new Account()
-        ta.id = event.id + toWId.substring(toWId.length - 5)
+        ta.id = event.id + '-' + toWId.substring(toWId.length - 5)
         ta.wallet = toWId
         console.log(`[${event.name}] Saving account: ${JSON.stringify(ta, null, 2)}`)
         await store.save<Account>(ta)
@@ -364,7 +364,7 @@ export async function currencyTransferred(ctx: EventHandlerContext) {
     }
 
     const taHAB = new HistoricalAccountBalance()
-    taHAB.id = event.id + toWId.substring(toWId.length - 5)
+    taHAB.id = event.id + '-' + toWId.substring(toWId.length - 5)
     taHAB.accountId = ta.wallet
     taHAB.event = event.method
     taHAB.assetId = taAB.assetId
@@ -384,7 +384,7 @@ export async function currencyDeposited(ctx: EventHandlerContext) {
     var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) {
         acc = new Account()
-        acc.id = event.id + walletId.substring(walletId.length - 5)
+        acc.id = event.id + '-' + walletId.substring(walletId.length - 5)
         acc.wallet = walletId
         console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
@@ -408,7 +408,7 @@ export async function currencyDeposited(ctx: EventHandlerContext) {
     }
 
     const hab = new HistoricalAccountBalance()
-    hab.id = event.id + walletId.substring(walletId.length - 5)
+    hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
     hab.accountId = acc.wallet
     hab.event = event.method
     hab.assetId = ab.assetId
@@ -428,7 +428,7 @@ export async function currencyWithdrawn(ctx: EventHandlerContext) {
     var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) {
         acc = new Account()
-        acc.id = event.id + walletId.substring(walletId.length - 5)
+        acc.id = event.id + '-' + walletId.substring(walletId.length - 5)
         acc.wallet = walletId
         console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
@@ -438,7 +438,7 @@ export async function currencyWithdrawn(ctx: EventHandlerContext) {
     var ab = await store.get(AccountBalance, { where: { account: acc, assetId: assetId } })
     if (!ab) {
         ab = new AccountBalance()
-        ab.id = event.id + walletId.substring(walletId.length - 5)
+        ab.id = event.id + '-' + walletId.substring(walletId.length - 5)
         ab.account = acc
         ab.assetId = assetId
         ab.balance = - amount
@@ -449,7 +449,7 @@ export async function currencyWithdrawn(ctx: EventHandlerContext) {
     await store.save<AccountBalance>(ab)
 
     const hab = new HistoricalAccountBalance()
-    hab.id = event.id + walletId.substring(walletId.length - 5)
+    hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
     hab.accountId = acc.wallet
     hab.event = event.method
     hab.assetId = ab.assetId
@@ -469,13 +469,13 @@ export async function systemNewAccount(ctx: EventHandlerContext) {
     const acc = await store.get(Account, { where: { wallet: walletId } })
     if (acc) return
     const newAcc = new Account()
-    newAcc.id = event.id + walletId.substring(walletId.length - 5)
+    newAcc.id = event.id + '-' + walletId.substring(walletId.length - 5)
     newAcc.wallet = walletId
     console.log(`[${event.name}] Saving account: ${JSON.stringify(newAcc, null, 2)}`)
     await store.save<Account>(newAcc)
 
     const ab = new AccountBalance()
-    ab.id = event.id + walletId.substring(walletId.length - 5)
+    ab.id = event.id + '-' + walletId.substring(walletId.length - 5)
     ab.account = newAcc
     ab.assetId = "Ztg"
     ab.balance = BigInt(0)
@@ -483,7 +483,7 @@ export async function systemNewAccount(ctx: EventHandlerContext) {
     await store.save<AccountBalance>(ab)
 
     const hab = new HistoricalAccountBalance()
-    hab.id = event.id + walletId.substring(walletId.length - 5)
+    hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
     hab.accountId = newAcc.wallet
     hab.event = event.method
     hab.assetId = ab.assetId
@@ -509,7 +509,7 @@ export async function systemExtrinsicSuccess(ctx: EventHandlerContext) {
     var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) {
         acc = new Account()
-        acc.id = event.id + walletId.substring(walletId.length - 5)
+        acc.id = event.id + '-' + walletId.substring(walletId.length - 5)
         acc.wallet = walletId
         console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
@@ -524,7 +524,7 @@ export async function systemExtrinsicSuccess(ctx: EventHandlerContext) {
         await store.save<AccountBalance>(ab)
 
         const hab = new HistoricalAccountBalance()
-        hab.id = event.id + walletId.substring(walletId.length - 5)
+        hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
         hab.accountId = acc.wallet
         hab.event = event.method
         hab.assetId = ab.assetId
@@ -543,7 +543,7 @@ export async function systemExtrinsicSuccess(ctx: EventHandlerContext) {
             await store.save<AccountBalance>(ab)
 
             const hab = new HistoricalAccountBalance()
-            hab.id = event.id + walletId.substring(walletId.length - 5)
+            hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
             hab.accountId = acc.wallet
             hab.event = dhab.event
             hab.assetId = ab.assetId
@@ -569,7 +569,7 @@ export async function systemExtrinsicFailed(ctx: EventHandlerContext) {
     var acc = await store.get(Account, { where: { wallet: walletId } })
     if (!acc) {
         acc = new Account()
-        acc.id = event.id + walletId.substring(walletId.length - 5)
+        acc.id = event.id + '-' + walletId.substring(walletId.length - 5)
         acc.wallet = walletId
         console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
@@ -584,7 +584,7 @@ export async function systemExtrinsicFailed(ctx: EventHandlerContext) {
         await store.save<AccountBalance>(ab)
 
         const hab = new HistoricalAccountBalance()
-        hab.id = event.id + walletId.substring(walletId.length - 5)
+        hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
         hab.accountId = acc.wallet
         hab.event = event.method
         hab.assetId = ab.assetId
@@ -833,7 +833,7 @@ async function initBalance(acc: Account, store: Store, event: SubstrateEvent, bl
     const { data : { free: amt } } = await sdk.api.query.system.account.at(blockZero, acc.wallet) as AccountInfo
 
     const ab = new AccountBalance()
-    ab.id = event.id + acc.wallet.substring(acc.wallet.length - 5)
+    ab.id = event.id + '-' + acc.wallet.substring(acc.wallet.length - 5)
     ab.account = acc
     ab.assetId = "Ztg"
     ab.balance = amt.toBigInt()
@@ -841,7 +841,7 @@ async function initBalance(acc: Account, store: Store, event: SubstrateEvent, bl
     await store.save<AccountBalance>(ab)
 
     const hab = new HistoricalAccountBalance()
-    hab.id = "00000-" + acc.wallet.substring(acc.wallet.length - 5)
+    hab.id = event.id + '-000-' + acc.wallet.substring(acc.wallet.length - 5)
     hab.accountId = acc.wallet
     hab.event = "Initialised"
     hab.assetId = ab.assetId
