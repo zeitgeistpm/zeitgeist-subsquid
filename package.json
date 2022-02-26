@@ -8,7 +8,7 @@
   "scripts": {
     "build": "rm -rf lib && tsc",
     "processor:migrate": "echo skip",
-    "processor:start": "node -r dotenv/config lib/processor/index.js",
+    "processor:start": "yarn build && node -r dotenv/config lib/processor/index.js",
     "query-node:start": "squid-graphql-server",
     "typegen": "squid-substrate-typegen typegen.json",
     "codegen": "npx sqd codegen",
