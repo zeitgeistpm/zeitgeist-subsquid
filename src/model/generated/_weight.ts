@@ -3,13 +3,13 @@ import * as marshal from "./marshal"
 
 export class Weight {
   private _assetId!: string
-  private _len!: string
+  private _len!: bigint
 
   constructor(props?: Partial<Omit<Weight, 'toJSON'>>, json?: any) {
     Object.assign(this, props)
     if (json != null) {
       this._assetId = marshal.string.fromJSON(json.assetId)
-      this._len = marshal.string.fromJSON(json.len)
+      this._len = marshal.bigint.fromJSON(json.len)
     }
   }
 
@@ -22,19 +22,19 @@ export class Weight {
     this._assetId = value
   }
 
-  get len(): string {
+  get len(): bigint {
     assert(this._len != null, 'uninitialized access')
     return this._len
   }
 
-  set len(value: string) {
+  set len(value: bigint) {
     this._len = value
   }
 
   toJSON(): object {
     return {
       assetId: this.assetId,
-      len: this.len,
+      len: marshal.bigint.toJSON(this.len),
     }
   }
 }

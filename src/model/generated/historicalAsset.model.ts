@@ -31,6 +31,6 @@ export class HistoricalAsset {
   @Column_("integer", {nullable: false})
   blockNumber!: number
 
-  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
-  timestamp!: bigint
+  @Column_("timestamp with time zone", {nullable: false})
+  timestamp!: Date
 }
