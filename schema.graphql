@@ -35,7 +35,7 @@ type HistoricalAsset @entity {
   qty: BigInt!
   event: String!
   blockNumber: Int!
-  timestamp: BigInt!
+  timestamp: DateTime!
 }
 
 type Market @entity {
@@ -94,12 +94,12 @@ type HistoricalPool @entity {
   ztgQty: BigInt!
   volume: BigInt
   blockNumber: Int!
-  timestamp: BigInt!
+  timestamp: DateTime!
 }
 
 type Weight @jsonField {
   assetId: String!
-  len: String!
+  len: BigInt!
 }
 
 type CategoryMetadata @jsonField {
