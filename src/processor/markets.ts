@@ -1,13 +1,15 @@
 import * as ss58 from "@subsquid/ss58"
+import { encodeAddress } from '@polkadot/keyring'
 import { Cache, IPFS, Tools } from './util'
-import { MarketType as MType } from '@zeitgeistpm/typesV1/dist/interfaces'
 import { PredictionMarketsBoughtCompleteSetEvent, PredictionMarketsMarketApprovedEvent, PredictionMarketsMarketCancelledEvent, 
     PredictionMarketsMarketCreatedEvent, PredictionMarketsMarketDisputedEvent, PredictionMarketsMarketInsufficientSubsidyEvent, 
     PredictionMarketsMarketRejectedEvent, PredictionMarketsMarketReportedEvent, PredictionMarketsMarketResolvedEvent, 
     PredictionMarketsMarketStartedWithSubsidyEvent, PredictionMarketsSoldCompleteSetEvent } from '../types/events'
 import { EventHandlerContext } from '@subsquid/substrate-processor'
-import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBalance, HistoricalMarket, Market, MarketDisputeMechanism, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../model'
+import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBalance, HistoricalMarket, 
+    Market, MarketDisputeMechanism, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../model'
 import { util } from '@zeitgeistpm/sdk'
+import { Market as MarketV1, MarketId} from '@zeitgeistpm/typesV1/dist/interfaces'
 
 export async function predictionMarketBoughtCompleteSet(ctx: EventHandlerContext) {
     const {store, event, block, extrinsic} = ctx
@@ -18,7 +20,7 @@ export async function predictionMarketBoughtCompleteSet(ctx: EventHandlerContext
     if (!savedMarket) return
 
     const hm = new HistoricalMarket()
-    hm.id = event.id + `-` + Math.floor(Math.random() * 3) + `-hm`
+    hm.id = event.id + '-' + savedMarket.marketId
     hm.marketId = savedMarket.marketId
     hm.event = event.method
     hm.blockNumber = block.height
@@ -61,6 +63,7 @@ export async function predictionMarketBoughtCompleteSet(ctx: EventHandlerContext
                 await store.save<AccountBalance>(ab)
 
                 hab = new HistoricalAccountBalance()
+                hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
                 hab.accountId = acc.wallet
                 hab.event = event.method
                 hab.assetId = ab.assetId
@@ -91,7 +94,7 @@ export async function predictionMarketApproved(ctx: EventHandlerContext) {
     await store.save<Market>(savedMarket)
 
     const hm = new HistoricalMarket()
-    hm.id = event.id + `-` + Math.floor(Math.random() * 3) + `-hm`
+    hm.id = event.id + '-' + savedMarket.marketId
     hm.marketId = savedMarket.marketId
     hm.event = event.method
     hm.status = savedMarket.status
@@ -105,16 +108,18 @@ export async function predictionMarketCreated(ctx: EventHandlerContext) {
     const {store, event, block, extrinsic} = ctx
     const {marketId, market} = getCreatedEvent(ctx)
 
-    const marketCreator = ss58.codec('zeitgeist').encode(market.creator)
-    const marketOracle = ss58.codec('zeitgeist').encode(market.oracle)
+    const marketCreator = encodeAddress(market.creator, +(await Tools.getSDK()).api.consts.system.ss58Prefix.toString())
+    const marketOracle = encodeAddress(market.oracle, +(await Tools.getSDK()).api.consts.system.ss58Prefix.toString())
 
     const newMarket = new Market()
-    newMarket.id = event.id + `-` + Math.floor(Math.random() * 3) + `-m`
+    newMarket.id = event.id + '-' + marketId 
     newMarket.marketId = +marketId.toString()
     newMarket.creator = marketCreator
     newMarket.creation = market.creation.toString()
-    newMarket.creatorFee = market.creator_fee.toNumber()
+    newMarket.creatorFee = +market.creator_fee.toString()
     newMarket.oracle = marketOracle
+    newMarket.scoringRule = market.scoring_rule.toString()
+    newMarket.status = market.status.toString()
     newMarket.outcomeAssets = (await createAssetsForMarket(marketId, market.market_type)) as string[]
 
     const metadata = await decodeMarketMetadata(market.metadata.toString())
@@ -146,38 +151,38 @@ export async function predictionMarketCreated(ctx: EventHandlerContext) {
     }
 
     const marketType = new MarketType()
-    if (market.market_type.isCategorical) {
-        marketType.categorical = market.market_type.asCategorical.toString()
-    } else if (market.market_type.isScalar) {
-        marketType.scalar = market.market_type.asScalar.toString()
+    const type = market.market_type as any
+    if (type.categorical) {
+        marketType.categorical = type.categorical.toString()
+    } else if (type.scalar) {
+        marketType.scalar = type.scalar.toString()
     }
     newMarket.marketType = marketType
 
     const period = new MarketPeriod()
-    if (market.period.isBlock) {
-        period.block = market.period.asBlock.toString()
+    const p = market.period as any
+    if (p.block) {
+        period.block = p.block.toString()
 
         const sdk = await Tools.getSDK()
-        const now = (await sdk.api.query.timestamp.now()).toString();
-        const head = await sdk.api.rpc.chain.getHeader();
-        const blockNum = head.number.toNumber();
-        const diffInMs = +(sdk.api.consts.timestamp.minimumPeriod).toString() * (market.period.asBlock[1].toNumber() - blockNum);
+        const now = +(await sdk.api.query.timestamp.now()).toString()
+        const head = await sdk.api.rpc.chain.getHeader()
+        const blockNum = head.number.toNumber()
+        const diffInMs = +(sdk.api.consts.timestamp.minimumPeriod).toString() * (p.block[1] - blockNum)
         newMarket.end = BigInt(now + diffInMs)
-    } else if (market.period.isTimestamp) {
-        period.timestamp = market.period.asTimestamp.toString()
-        newMarket.end = BigInt(market.period.asTimestamp[1])
+    } else if (p.timestamp) {
+        period.timestamp = p.timestamp.toString()
+        newMarket.end = BigInt(p.timestamp[1].toString())
     }
     newMarket.period = period
 
-    newMarket.scoringRule = market.scoring_rule.toString()
-    newMarket.status = market.status.toString()
-
     const mdm = new MarketDisputeMechanism()
-    if (market.mdm.isAuthorized) {
-        mdm.authorized = market.mdm.asAuthorized.toString()
-    } else if (market.mdm.isCourt) {
+    const dispute = market.mdm as any
+    if (dispute.authorized) {
+        mdm.authorized = dispute.authorized.toString()
+    } else if (dispute.court !== undefined) {
         mdm.court = true
-    } else if (market.mdm.isSimpleDisputes) {
+    } else if (dispute.simpleDisputes !== undefined) {
         mdm.simpleDisputes = true
     }
     newMarket.mdm = mdm
@@ -186,7 +191,7 @@ export async function predictionMarketCreated(ctx: EventHandlerContext) {
     await store.save<Market>(newMarket)
 
     const hm = new HistoricalMarket()
-    hm.id = event.id + `-` + Math.floor(Math.random() * 3) + `-hm`
+    hm.id = event.id + '-' + newMarket.marketId
     hm.marketId = newMarket.marketId
     hm.event = event.method
     hm.status = newMarket.status
@@ -198,6 +203,7 @@ export async function predictionMarketCreated(ctx: EventHandlerContext) {
     const len = +newMarket.marketType.categorical!
     for (var i = 0; i < len; i++) {
         const asset = new Asset()
+        asset.id = event.id + '-' + newMarket.marketId + i 
         asset.assetId = JSON.stringify(util.AssetIdFromString(`[${marketId},${i}]`))
         console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
         await store.save<Asset>(asset)
@@ -220,7 +226,7 @@ export async function predictionMarketStartedWithSubsidy(ctx: EventHandlerContex
     await store.save<Market>(savedMarket)
 
     const hm = new HistoricalMarket()
-    hm.id = event.id + `-` + Math.floor(Math.random() * 3) + `-hm`
+    hm.id = event.id + '-' + savedMarket.marketId
     hm.marketId = savedMarket.marketId
     hm.event = event.method
     hm.status = savedMarket.status
@@ -246,7 +252,7 @@ export async function predictionMarketInsufficientSubsidy(ctx: EventHandlerConte
     await store.save<Market>(savedMarket)
 
     const hm = new HistoricalMarket()
-    hm.id = event.id + `-` + Math.floor(Math.random() * 3) + `-hm`
+    hm.id = event.id + '-' + savedMarket.marketId
     hm.marketId = savedMarket.marketId
     hm.event = event.method
     hm.status = savedMarket.status
@@ -264,14 +270,20 @@ export async function predictionMarketReported(ctx: EventHandlerContext) {
     if (!savedMarket) return
 
     const ocr = new OutcomeReport()
-    if (report.outcome.asCategorical) {
-        ocr.categorical = report.outcome.asCategorical.toNumber()
-    } else if (report.outcome.asScalar) {
-        ocr.scalar = report.outcome.asScalar.toNumber()
+    if (report.outcome) {
+        if (report.outcome.categorical) {
+            ocr.categorical = report.outcome.categorical.toNumber()
+        } else if (report.outcome.scalar) {
+            ocr.scalar = report.outcome.scalar.toNumber()
+        }
+    } else {
+        if (report.__kind == "Categorical") ocr.categorical = report.value
+        else ocr.scalar = +report.value.toString()
     }
+
     const mr = new MarketReport()
-    mr.at = report.at.toNumber()
-    mr.by = report.by.toString()
+    mr.at = report.at ? report.at.toNumber() : block.height
+    mr.by = report.by ? report.by.toString() : extrinsic?.signer
     mr.outcome = ocr
 
     if (status.length < 2) {
@@ -284,7 +296,7 @@ export async function predictionMarketReported(ctx: EventHandlerContext) {
     await store.save<Market>(savedMarket)
 
     const hm = new HistoricalMarket()
-    hm.id = event.id + `-` + Math.floor(Math.random() * 3) + `-hm`
+    hm.id = event.id + '-' + savedMarket.marketId
     hm.marketId = savedMarket.marketId
     hm.event = event.method
     hm.status = savedMarket.status
@@ -303,10 +315,15 @@ export async function predictionMarketDisputed(ctx: EventHandlerContext) {
     if (!savedMarket) return
 
     const ocr = new OutcomeReport()
-    if (report.outcome.asCategorical) {
-        ocr.categorical = report.outcome.asCategorical.toNumber()
-    } else if (report.outcome.asScalar) {
-        ocr.scalar = report.outcome.asScalar.toNumber()
+    if (report.outcome) {
+        if (report.outcome.categorical) {
+            ocr.categorical = report.outcome.categorical.toNumber()
+        } else if (report.outcome.scalar) {
+            ocr.scalar = report.outcome.scalar.toNumber()
+        }
+    } else {
+        if (report.__kind == "Categorical") ocr.categorical = report.value
+        else ocr.scalar = report.value
     }
 
     const mr = new MarketReport()
@@ -324,7 +341,7 @@ export async function predictionMarketDisputed(ctx: EventHandlerContext) {
     await store.save<Market>(savedMarket)
 
     const hm = new HistoricalMarket()
-    hm.id = event.id + `-` + Math.floor(Math.random() * 3) + `-hm`
+    hm.id = event.id + '-' + savedMarket.marketId
     hm.marketId = savedMarket.marketId
     hm.event = event.method
     hm.status = savedMarket.status
@@ -347,7 +364,7 @@ export async function predictionMarketRejected(ctx: EventHandlerContext) {
     await store.save<Market>(savedMarket)
 
     const hm = new HistoricalMarket()
-    hm.id = event.id + `-` + Math.floor(Math.random() * 3) + `-hm`
+    hm.id = event.id + '-' + savedMarket.marketId
     hm.marketId = savedMarket.marketId
     hm.event = event.method
     hm.status = savedMarket.status
@@ -369,7 +386,7 @@ export async function predictionMarketCancelled(ctx: EventHandlerContext) {
     await store.save<Market>(savedMarket)
 
     const hm = new HistoricalMarket()
-    hm.id = event.id + `-` + Math.floor(Math.random() * 3) + `-hm`
+    hm.id = event.id + '-' + savedMarket.marketId
     hm.marketId = savedMarket.marketId
     hm.event = event.method
     hm.status = savedMarket.status
@@ -387,16 +404,18 @@ export async function predictionMarketResolved(ctx: EventHandlerContext) {
     if (!savedMarket) return
 
     const ocr = new OutcomeReport()
-    if (report.asCategorical) {
-        ocr.categorical = report.asCategorical.toNumber()
-    } else if (report.asScalar) {
-        ocr.scalar = report.asScalar.toNumber()
+    if (report.__kind == "Categorical") {
+        ocr.categorical = report.value
+        savedMarket.report!.outcome = ocr
+        savedMarket.resolvedOutcome = report.value.toString()
+    } else if (report.__kind == "Scalar") {
+        ocr.scalar = +report.value.toString()
+        savedMarket.report!.outcome = ocr
+        savedMarket.resolvedOutcome = report.value()
     } else if (typeof report == "number") {
-        if (savedMarket.marketType.scalar == null) ocr.categorical = report
-        else ocr.scalar = report
+        savedMarket.resolvedOutcome = report.toString()
     }
 
-    if (savedMarket.report) { savedMarket.report.outcome = ocr }
     if (status.length < 2) {
         savedMarket.status = "Resolved"
     } else {
@@ -406,11 +425,12 @@ export async function predictionMarketResolved(ctx: EventHandlerContext) {
     await store.save<Market>(savedMarket)
 
     const hm = new HistoricalMarket()
-    hm.id = event.id + `-` + Math.floor(Math.random() * 3) + `-hm`
+    hm.id = event.id + '-' + savedMarket.marketId
     hm.marketId = savedMarket.marketId
     hm.event = event.method
     hm.status = savedMarket.status
     hm.report = savedMarket.report
+    hm.resolvedOutcome = savedMarket.resolvedOutcome
     hm.blockNumber = block.height
     hm.timestamp = new Date(block.timestamp)
     console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
@@ -426,7 +446,7 @@ export async function predictionMarketSoldCompleteSet(ctx: EventHandlerContext) 
     if (!savedMarket) return
 
     const hm = new HistoricalMarket()
-    hm.id = event.id + `-` + Math.floor(Math.random() * 3) + `-hm`
+    hm.id = event.id + '-' + savedMarket.marketId
     hm.marketId = savedMarket.marketId
     hm.event = event.method
     hm.blockNumber = block.height
@@ -462,6 +482,7 @@ export async function predictionMarketSoldCompleteSet(ctx: EventHandlerContext) 
             await store.save<AccountBalance>(ab)
 
             const hab = new HistoricalAccountBalance()
+            hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
             hab.accountId = acc.wallet
             hab.event = event.method
             hab.assetId = ab.assetId
@@ -486,8 +507,8 @@ interface ApprovedEvent {
 }
 
 interface CreatedEvent {
-    marketId: bigint
-    market: any
+    marketId: MarketId
+    market: MarketV1
 }
 
 interface StartedWithSubsidyEvent {
@@ -553,20 +574,10 @@ function getApprovedEvent(ctx: EventHandlerContext): ApprovedEvent {
 }
 
 function getCreatedEvent(ctx: EventHandlerContext): CreatedEvent {
-    const event = new PredictionMarketsMarketCreatedEvent(ctx)
-    if (event.isV23) {
-        const [marketId, market] = event.asV23
-        return {marketId, market}
-    } else if (event.isV29) {
-        const [marketId, market] = event.asV29
-        return {marketId, market}
-    } else if (event.isV32) {
-        const [marketId, market] = event.asV32
-        return {marketId, market}
-    } else {
-        const [marketId, market] = event.asLatest
-        return {marketId, market}
-    }
+    const [param0, param1] = ctx.event.params
+    const marketId = param0.value as MarketId
+    const market = param1.value as MarketV1
+    return {marketId, market}
 }
 
 function getStartedWithSubsidyEvent(ctx: EventHandlerContext): StartedWithSubsidyEvent {
@@ -673,12 +684,12 @@ function getSoldCompleteSetEvent(ctx: EventHandlerContext): SoldCompleteSetEvent
 }
 
 async function createAssetsForMarket(
-    marketId: bigint,
-    marketType: MType
+    marketId: MarketId,
+    marketType: any
 ): Promise<string[]> {
     const sdk = await Tools.getSDK()
-    return marketType.isCategorical
-      ? [...Array(marketType.asCategorical.toNumber()).keys()].map((catIdx) => {
+    return marketType.categorical
+      ? [...Array(marketType.categorical).keys()].map((catIdx) => {
           return sdk.api.createType("Asset", {
             categoricalOutcome: [marketId, catIdx],
           });
