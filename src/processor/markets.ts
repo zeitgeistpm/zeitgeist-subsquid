@@ -9,7 +9,7 @@ import { EventHandlerContext } from '@subsquid/substrate-processor'
 import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBalance, HistoricalMarket, 
     Market, MarketDisputeMechanism, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../model'
 import { util } from '@zeitgeistpm/sdk'
-import { Market as MarketV1, MarketId} from '@zeitgeistpm/typesV1/dist/interfaces'
+import { Market as t_Market, MarketId as t_MarketId} from '@zeitgeistpm/typesV1/dist/interfaces'
 
 export async function predictionMarketBoughtCompleteSet(ctx: EventHandlerContext) {
     const {store, event, block, extrinsic} = ctx
@@ -496,6 +496,55 @@ export async function predictionMarketSoldCompleteSet(ctx: EventHandlerContext) 
     }
 }
 
+async function createAssetsForMarket(marketId: t_MarketId, marketType: any): Promise<string[]> {
+    const sdk = await Tools.getSDK()
+    return marketType.categorical
+      ? [...Array(marketType.categorical).keys()].map((catIdx) => {
+          return sdk.api.createType("Asset", {
+            categoricalOutcome: [marketId, catIdx],
+          });
+        })
+      : ["Long", "Short"].map((pos) => {
+          const position = sdk.api.createType("ScalarPosition", pos);
+          return sdk.api.createType("Asset", {
+            scalarOutcome: [marketId, position.toString()],
+          });
+        });
+}
+
+async function decodeMarketMetadata(metadata: string): Promise<DecodedMarketMetadata | undefined> {
+    var raw = await (await Cache.init()).getMeta(metadata)
+    if (raw) {
+        return raw !== '0' ? JSON.parse(raw) as DecodedMarketMetadata : undefined
+    } else {
+        try {
+            const ipfs = new IPFS();
+            raw = await ipfs.read(metadata);
+        } catch (err) {
+            console.error(err);
+            await (await Cache.init()).setMeta(metadata, '0')
+        }
+        await (await Cache.init()).setMeta(metadata, raw ? raw : '0')
+        return raw ? JSON.parse(raw) as DecodedMarketMetadata : undefined
+    }
+}
+
+interface DecodedMarketMetadata {
+    slug: string
+    question: string
+    description: string
+    categories?: CategoryData[]
+    tags?: string[]
+    img?: string
+}
+
+interface CategoryData {
+    name: string
+    ticker?: string
+    img?: string
+    color?: string
+}
+
 interface BoughtCompleteSetEvent {
     marketId: bigint
     accountId: Uint8Array
@@ -507,8 +556,8 @@ interface ApprovedEvent {
 }
 
 interface CreatedEvent {
-    marketId: MarketId
-    market: MarketV1
+    marketId: t_MarketId
+    market: t_Market
 }
 
 interface StartedWithSubsidyEvent {
@@ -575,8 +624,8 @@ function getApprovedEvent(ctx: EventHandlerContext): ApprovedEvent {
 
 function getCreatedEvent(ctx: EventHandlerContext): CreatedEvent {
     const [param0, param1] = ctx.event.params
-    const marketId = param0.value as MarketId
-    const market = param1.value as MarketV1
+    const marketId = param0.value as t_MarketId
+    const market = param1.value as t_Market
     return {marketId, market}
 }
 
@@ -681,61 +730,4 @@ function getSoldCompleteSetEvent(ctx: EventHandlerContext): SoldCompleteSetEvent
     const event = new PredictionMarketsSoldCompleteSetEvent(ctx)
     const [marketId, accountId] = event.asLatest
     return {marketId, accountId}
-}
-
-async function createAssetsForMarket(
-    marketId: MarketId,
-    marketType: any
-): Promise<string[]> {
-    const sdk = await Tools.getSDK()
-    return marketType.categorical
-      ? [...Array(marketType.categorical).keys()].map((catIdx) => {
-          return sdk.api.createType("Asset", {
-            categoricalOutcome: [marketId, catIdx],
-          });
-        })
-      : ["Long", "Short"].map((pos) => {
-          const position = sdk.api.createType("ScalarPosition", pos);
-          return sdk.api.createType("Asset", {
-            scalarOutcome: [marketId, position.toString()],
-          });
-        });
-}
-
-async function decodeMarketMetadata(
-    metadata: string,
-): Promise<DecodedMarketMetadata | undefined> {
-
-    if (metadata) {
-        var raw = await (await Cache.init()).getMeta(metadata)
-        if (raw) {
-            return raw !== '0' ? JSON.parse(raw) as DecodedMarketMetadata : undefined
-        } else {
-            try {
-                const ipfs = new IPFS();
-                raw = await ipfs.read(metadata);
-            } catch (err) {
-                console.error(err);
-                await (await Cache.init()).setMeta(metadata, '0')
-            }
-            await (await Cache.init()).setMeta(metadata, raw ? raw : '0')
-            return raw ? JSON.parse(raw) as DecodedMarketMetadata : undefined
-        }
-    }
-}
-
-type DecodedMarketMetadata = {
-    slug: string
-    question: string
-    description: string
-    categories?: CategoryData[]
-    tags?: string[]
-    img?: string
-}
-
-type CategoryData = {
-    name: string
-    ticker?: string
-    img?: string
-    color?: string
 }
