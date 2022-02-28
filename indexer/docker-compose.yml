@@ -1,5 +1,4 @@
 version: "3.4"
-
 services:
   db:
     image: postgres:12
@@ -9,9 +8,8 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-
   indexer:
-    image: subsquid/hydra-indexer:4
+    image: subsquid/hydra-indexer:5.0.0-alpha.29
     restart: unless-stopped
     environment:
       - WORKERS_NUMBER=5
@@ -21,20 +19,23 @@ services:
       - DB_PASS=postgres
       - DB_PORT=5432
       - REDIS_URI=redis://redis:6379/0
+      - FORCE_HEIGHT=true
       - BLOCK_HEIGHT=0 # starting block height
-      - TYPES_JSON=types.json
       - WS_PROVIDER_ENDPOINT_URI=wss://bsr.zeitgeist.pm
+      - BUNDLE_TYPES=typesBundle.json
+      - BUNDLE_TYPES=/config/typesBundle.json
       - DEBUG=hydra-indexer:*
     volumes:
-      - ./types.json:/hydra/packages/hydra-indexer/types.json
+      - "./typesBundle.json:/config/typesBundle.json"
     depends_on:
       - db
       - redis
     command: >
       sh -c "yarn db:bootstrap && yarn start:prod"
-
+    ports:
+      - 9090:9090
   indexer-gateway:
-    image: subsquid/hydra-indexer-gateway:4
+    image: subsquid/hydra-indexer-gateway:5
     restart: unless-stopped
     depends_on:
       - redis
@@ -51,16 +52,14 @@ services:
       - DB_PASS=postgres
       - DB_PORT=5432
       - HYDRA_INDEXER_STATUS_SERVICE=http://indexer-status-service:8081/status
-
   indexer-status-service:
-    image: subsquid/hydra-indexer-status-service:4
+    image: subsquid/hydra-indexer-status-service:5
     restart: unless-stopped
     depends_on:
       - redis
     environment:
       REDIS_URI: redis://redis:6379/0
       PORT: 8081
-
   redis:
     image: redis:6.0-alpine
     restart: always

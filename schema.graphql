@@ -17,7 +17,7 @@ type HistoricalAccountBalance @entity {
   amount: BigInt!
   balance: BigInt!
   blockNumber: Int!
-  timestamp: BigInt!
+  timestamp: DateTime!
 }
 
 type Asset @entity {
@@ -35,7 +35,7 @@ type HistoricalAsset @entity {
   qty: BigInt!
   event: String!
   blockNumber: Int!
-  timestamp: BigInt!
+  timestamp: DateTime!
 }
 
 type Market @entity {
@@ -70,7 +70,7 @@ type HistoricalMarket @entity {
   report: MarketReport
   resolvedOutcome: String
   blockNumber: Int!
-  timestamp: BigInt!
+  timestamp: DateTime!
 }
 
 type Pool @entity {
@@ -94,12 +94,12 @@ type HistoricalPool @entity {
   ztgQty: BigInt!
   volume: BigInt
   blockNumber: Int!
-  timestamp: BigInt!
+  timestamp: DateTime!
 }
 
 type Weight @jsonField {
   assetId: String!
-  len: String!
+  len: BigInt!
 }
 
 type CategoryMetadata @jsonField {
@@ -110,13 +110,13 @@ type CategoryMetadata @jsonField {
 }
 
 type MarketType @jsonField {
-  Categorical: String
-  Scalar: String
+  categorical: String
+  scalar: String
 }
 
 type MarketPeriod @jsonField {
-  Block: String
-  Timestamp: String
+  block: String
+  timestamp: String
 }
 
 enum MarketStatus {
@@ -136,12 +136,12 @@ type MarketReport @jsonField {
 }
 
 type OutcomeReport @jsonField {
-  Categorical: Int
-  Scalar: Int
+  categorical: Int
+  scalar: Int
 }
 
 type MarketDisputeMechanism @jsonField {
-  Authorized: String
-  Court: Boolean
-  SimpleDisputes: Boolean
+  authorized: String
+  court: Boolean
+  simpleDisputes: Boolean
 }
