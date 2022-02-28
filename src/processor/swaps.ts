@@ -115,12 +115,13 @@ export async function swapPoolExited(ctx: EventHandlerContext) {
     await store.save<HistoricalPool>(newHP)
 
     savedPool.weights.forEach(async (wt, idx) => {
+        if (idx == pae.transferred.length) return
         const asset = await store.get(Asset, { where: { assetId: wt!.assetId } })
         if (!asset) return
 
         const assetWt = +wt!.len.toString()
         const oldAssetQty = asset.qty!
-        const newAssetQty = oldAssetQty - BigInt(pae.transferred[idx].toString())
+        const newAssetQty = oldAssetQty - BigInt(pae.transferred[idx - 1].toString())
         const oldPrice = asset.price!
         const newPrice = await calcSpotPrice(+newZtgQty.toString(),ztgWt,+newAssetQty.toString(),assetWt,+savedPool.swapFee)
 
@@ -169,12 +170,13 @@ export async function swapPoolJoined(ctx: EventHandlerContext) {
     await store.save<HistoricalPool>(newHP)
 
     savedPool.weights.forEach(async (wt, idx) => {
+        if (idx == pae.transferred.length) return
         const asset = await store.get(Asset, { where: { assetId: wt!.assetId } })
         if (!asset) return
 
         const assetWt = +wt!.len.toString()
         const oldAssetQty = asset.qty!
-        const newAssetQty = oldAssetQty + BigInt(pae.transferred[idx].toString())
+        const newAssetQty = oldAssetQty + BigInt(pae.transferred[idx - 1].toString())
         const oldPrice = asset.price!
         const newPrice = await calcSpotPrice(+newZtgQty.toString(),ztgWt,+newAssetQty.toString(),assetWt,+savedPool.swapFee)
 
