@@ -209,7 +209,7 @@ export async function swapExactAmountIn(ctx: EventHandlerContext) {
 
     const ztgWt = +savedPool.weights[0]!.len.toString()
     const oldZtgQty = savedPool.ztgQty
-    const newZtgQty = oldZtgQty - BigInt(swapEvent.assetAmountIn.toString()) 
+    const newZtgQty = oldZtgQty - BigInt(swapEvent.assetAmountOut.toString()) 
     savedPool.ztgQty = newZtgQty
     savedPool.volume = savedPool.volume + BigInt(swapEvent.assetAmountOut.toString())
     console.log(`[${event.name}] Saving pool: ${JSON.stringify(savedPool, null, 2)}`)
