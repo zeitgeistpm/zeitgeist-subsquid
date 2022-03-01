@@ -115,7 +115,7 @@ export async function swapPoolExited(ctx: EventHandlerContext) {
     await store.save<HistoricalPool>(newHP)
 
     savedPool.weights.forEach(async (wt, idx) => {
-        if (idx == pae.transferred.length) return
+        if (idx >= pae.transferred.length) return
         const asset = await store.get(Asset, { where: { assetId: wt!.assetId } })
         if (!asset) return
 
@@ -170,7 +170,7 @@ export async function swapPoolJoined(ctx: EventHandlerContext) {
     await store.save<HistoricalPool>(newHP)
 
     savedPool.weights.forEach(async (wt, idx) => {
-        if (idx == pae.transferred.length) return
+        if (idx >= pae.transferred.length) return
         const asset = await store.get(Asset, { where: { assetId: wt!.assetId } })
         if (!asset) return
 

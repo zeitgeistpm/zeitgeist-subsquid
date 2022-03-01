@@ -51,7 +51,7 @@ export async function predictionMarketBoughtCompleteSet(ctx: EventHandlerContext
             } else if (extrinsic?.args[0].name === "calls") {
                 for (var ext of extrinsic.args[0].value as Array<{ args: { amount: number, market_id: number }}> ) {
                     const { args: { amount: amt, market_id } } = ext;
-                    if (BigInt(market_id) == marketId) {
+                    if (market_id && BigInt(market_id) == marketId) {
                         amount = BigInt(amt)
                         break
                     }
@@ -270,20 +270,19 @@ export async function predictionMarketReported(ctx: EventHandlerContext) {
     if (!savedMarket) return
 
     const ocr = new OutcomeReport()
-    if (report.outcome) {
-        if (report.outcome.categorical) {
-            ocr.categorical = report.outcome.categorical.toNumber()
-        } else if (report.outcome.scalar) {
-            ocr.scalar = report.outcome.scalar.toNumber()
-        }
-    } else {
-        if (report.__kind == "Categorical") ocr.categorical = report.value
-        else ocr.scalar = +report.value.toString()
+    if (report.outcome.categorical) {
+        ocr.categorical = report.outcome.categorical.toNumber()
+    } else if (report.outcome.scalar) {
+        ocr.scalar = report.outcome.scalar.toNumber()
+    } else if (report.outcome.__kind == "Categorical") {
+        ocr.categorical = report.outcome.value
+    } else if (report.outcome.__kind == "Scalar") {
+        ocr.scalar = +report.outcome.value.toString()
     }
 
     const mr = new MarketReport()
-    mr.at = report.at ? report.at.toNumber() : block.height
-    mr.by = report.by ? report.by.toString() : extrinsic?.signer
+    mr.at = report.at ? +report.at.toString() : block.height
+    mr.by = report.by ? ss58.codec('zeitgeist').encode(report.by) : extrinsic!.signer
     mr.outcome = ocr
 
     if (status.length < 2) {
@@ -315,20 +314,19 @@ export async function predictionMarketDisputed(ctx: EventHandlerContext) {
     if (!savedMarket) return
 
     const ocr = new OutcomeReport()
-    if (report.outcome) {
-        if (report.outcome.categorical) {
-            ocr.categorical = report.outcome.categorical.toNumber()
-        } else if (report.outcome.scalar) {
-            ocr.scalar = report.outcome.scalar.toNumber()
-        }
-    } else {
-        if (report.__kind == "Categorical") ocr.categorical = report.value
-        else ocr.scalar = report.value
+    if (report.outcome.categorical) {
+        ocr.categorical = report.outcome.categorical.toNumber()
+    } else if (report.outcome.scalar) {
+        ocr.scalar = report.outcome.scalar.toNumber()
+    } else if (report.outcome.__kind == "Categorical") {
+        ocr.categorical = report.outcome.value
+    } else if (report.outcome.__kind == "Scalar") {
+        ocr.scalar = +report.outcome.value.toString()
     }
 
     const mr = new MarketReport()
-    mr.at = report.at ? report.at.toNumber() : block.height
-    mr.by = report.by ? report.by.toString() : extrinsic?.signer
+    mr.at = report.at ? +report.at.toString() : block.height
+    mr.by = report.by ? ss58.codec('zeitgeist').encode(report.by) : extrinsic!.signer
     mr.outcome = ocr
 
     if (status.length < 2) {
@@ -470,7 +468,7 @@ export async function predictionMarketSoldCompleteSet(ctx: EventHandlerContext) 
         } else if (extrinsic?.args[0].name === "calls") {
             for (var ext of extrinsic.args[0].value as Array<{ args: { amount: number, market_id: number }}> ) {
                 const { args: { amount: amt, market_id } } = ext;
-                if (BigInt(market_id) == marketId) {
+                if (market_id && BigInt(market_id) == marketId) {
                     amount = BigInt(amt)
                     break
                 }
