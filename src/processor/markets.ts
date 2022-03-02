@@ -9,7 +9,7 @@ import { EventHandlerContext } from '@subsquid/substrate-processor'
 import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBalance, HistoricalMarket, 
     Market, MarketDisputeMechanism, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../model'
 import { util } from '@zeitgeistpm/sdk'
-import { Market as t_Market, MarketId as t_MarketId} from '@zeitgeistpm/typesV1/dist/interfaces'
+import { Market as t_Market, MarketId as t_MarketId} from '@zeitgeistpm/typesV2/dist/interfaces'
 
 export async function predictionMarketBoughtCompleteSet(ctx: EventHandlerContext) {
     const {store, event, block, extrinsic} = ctx
@@ -116,11 +116,11 @@ export async function predictionMarketCreated(ctx: EventHandlerContext) {
     newMarket.marketId = +marketId.toString()
     newMarket.creator = marketCreator
     newMarket.creation = market.creation.toString()
-    newMarket.creatorFee = +market.creator_fee.toString()
+    newMarket.creatorFee = +market.creatorFee.toString()
     newMarket.oracle = marketOracle
-    newMarket.scoringRule = market.scoring_rule.toString()
+    newMarket.scoringRule = market.scoringRule.toString()
     newMarket.status = market.status.toString()
-    newMarket.outcomeAssets = (await createAssetsForMarket(marketId, market.market_type)) as string[]
+    newMarket.outcomeAssets = (await createAssetsForMarket(marketId, market.marketType)) as string[]
 
     const metadata = await decodeMarketMetadata(market.metadata.toString())
     if (metadata) {
@@ -151,7 +151,7 @@ export async function predictionMarketCreated(ctx: EventHandlerContext) {
     }
 
     const marketType = new MarketType()
-    const type = market.market_type as any
+    const type = market.marketType as any
     if (type.categorical) {
         marketType.categorical = type.categorical.toString()
     } else if (type.scalar) {
@@ -623,8 +623,16 @@ function getApprovedEvent(ctx: EventHandlerContext): ApprovedEvent {
 function getCreatedEvent(ctx: EventHandlerContext): CreatedEvent {
     const [param0, param1] = ctx.event.params
     const marketId = param0.value as t_MarketId
-    const market = param1.value as t_Market
-    return {marketId, market}
+    if (ctx.block.runtimeVersion.specVersion < 32) {
+        var market = param1.value as any
+        market.creatorFee = market.creator_fee
+        market.scoringRule = market.scoring_rule
+        market.marketType = market.market_type
+        return { marketId, market } 
+    } else {
+        const market = param1.value as t_Market
+        return { marketId, market }
+    }
 }
 
 function getStartedWithSubsidyEvent(ctx: EventHandlerContext): StartedWithSubsidyEvent {
