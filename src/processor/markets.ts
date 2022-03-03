@@ -200,13 +200,14 @@ export async function predictionMarketCreated(ctx: EventHandlerContext) {
     console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
     await store.save<HistoricalMarket>(hm)
 
-    const len = +newMarket.marketType.categorical!
-    for (var i = 0; i < len; i++) {
-        const asset = new Asset()
-        asset.id = event.id + '-' + newMarket.marketId + i 
-        asset.assetId = JSON.stringify(util.AssetIdFromString(`[${marketId},${i}]`))
-        console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
-        await store.save<Asset>(asset)
+    if (newMarket.categories && newMarket.categories.length) {
+        for (var i = 0; i < newMarket.categories.length; i++) {
+            const asset = new Asset()
+            asset.id = event.id + '-' + newMarket.marketId + i
+            asset.assetId = newMarket.outcomeAssets[i]!
+            console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
+            await store.save<Asset>(asset)
+        }
     }
 }
 
