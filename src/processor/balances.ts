@@ -708,8 +708,14 @@ function getTokensEndowedEvent(ctx: EventHandlerContext): TokEndowedEvent {
         [currencyId, accountId, amount] = event.asLatest
     }
 
-    if (currencyId.__kind  == "CategoricalOutcome" || currencyId.__kind  == "ScalarOutcome") {
+    if (currencyId.__kind  == "CategoricalOutcome") {
         const assetId = JSON.stringify(util.AssetIdFromString('[' + currencyId.value.toString() + ']'))
+        return {assetId, accountId, amount}
+    } else if (currencyId.__kind  == "ScalarOutcome") {
+        const scale = new Array()
+        scale.push(+currencyId.value[0].toString())
+        scale.push(currencyId.value[1].__kind)
+        const assetId = JSON.stringify(util.AssetIdFromString(JSON.stringify(scale)))
         return {assetId, accountId, amount}
     } else if (currencyId.__kind == "Ztg") {
         const assetId = "Ztg"
@@ -734,8 +740,14 @@ function getTransferredEvent(ctx: EventHandlerContext): TransferredEvent {
         [currencyId, fromId, toId, amount] = event.asLatest
     }
 
-    if (currencyId.__kind  == "CategoricalOutcome" || currencyId.__kind  == "ScalarOutcome") {
+    if (currencyId.__kind  == "CategoricalOutcome") {
         const assetId = JSON.stringify(util.AssetIdFromString('[' + currencyId.value.toString() + ']'))
+        return {assetId, fromId, toId, amount}
+    } else if (currencyId.__kind  == "ScalarOutcome") {
+        const scale = new Array()
+        scale.push(+currencyId.value[0].toString())
+        scale.push(currencyId.value[1].__kind)
+        const assetId = JSON.stringify(util.AssetIdFromString(JSON.stringify(scale)))
         return {assetId, fromId, toId, amount}
     } else if (currencyId.__kind == "Ztg") {
         const assetId = "Ztg"
@@ -760,8 +772,14 @@ function getDepositedEvent(ctx: EventHandlerContext): DepositedEvent {
         [currencyId, accountId, amount] = event.asLatest
     }
 
-    if (currencyId.__kind  == "CategoricalOutcome" || currencyId.__kind  == "ScalarOutcome") {
+    if (currencyId.__kind  == "CategoricalOutcome") {
         const assetId = JSON.stringify(util.AssetIdFromString('[' + currencyId.value.toString() + ']'))
+        return {assetId, accountId, amount}
+    } else if (currencyId.__kind  == "ScalarOutcome") {
+        const scale = new Array()
+        scale.push(+currencyId.value[0].toString())
+        scale.push(currencyId.value[1].__kind)
+        const assetId = JSON.stringify(util.AssetIdFromString(JSON.stringify(scale)))
         return {assetId, accountId, amount}
     } else if (currencyId.__kind == "Ztg") {
         const assetId = "Ztg"
@@ -786,8 +804,14 @@ function getWithdrawnEvent(ctx: EventHandlerContext): WithdrawnEvent {
         [currencyId, accountId, amount] = event.asLatest
     }
 
-    if (currencyId.__kind  == "CategoricalOutcome" || currencyId.__kind  == "ScalarOutcome") {
+    if (currencyId.__kind  == "CategoricalOutcome") {
         const assetId = JSON.stringify(util.AssetIdFromString('[' + currencyId.value.toString() + ']'))
+        return {assetId, accountId, amount}
+    } else if (currencyId.__kind  == "ScalarOutcome") {
+        const scale = new Array()
+        scale.push(+currencyId.value[0].toString())
+        scale.push(currencyId.value[1].__kind)
+        const assetId = JSON.stringify(util.AssetIdFromString(JSON.stringify(scale)))
         return {assetId, accountId, amount}
     } else if (currencyId.__kind == "Ztg") {
         const assetId = "Ztg"
