@@ -1,0 +1,65 @@
+version: "3.4"
+services:
+  db:
+    restart: always
+    volumes:
+      - /var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+  indexer:
+    restart: unless-stopped
+    environment:
+      - WORKERS_NUMBER=5
+      - DB_NAME=indexer
+      - DB_HOST=db
+      - DB_USER=postgres
+      - DB_PASS=postgres
+      - DB_PORT=5432
+      - REDIS_URI=redis://redis:6379/0
+      - FORCE_HEIGHT=true
+      - BLOCK_HEIGHT=0 # starting block height
+      - WS_PROVIDER_ENDPOINT_URI=ws://node:9944/0
+      - BUNDLE_TYPES=typesBundle.json
+      - BUNDLE_TYPES=/config/typesBundle.json
+      - DEBUG=hydra-indexer:*
+    volumes:
+      - "./typesBundle.json:/config/typesBundle.json"
+    command: >
+      sh -c "yarn db:bootstrap && yarn start:prod"
+    ports:
+      - 9090:9090
+
+  indexer-gateway:
+    restart: unless-stopped
+    ports:
+      - "4010:8080"
+    environment:
+      - DEV_MODE=true
+      - DB_NAME=indexer
+      - DB_HOST=db
+      - DB_USER=postgres
+      - DB_PASS=postgres
+      - DB_PORT=5432
+      - HYDRA_INDEXER_STATUS_SERVICE=http://indexer-status-service:8081/status
+
+  indexer-status-service:
+    restart: unless-stopped
+    environment:
+      REDIS_URI: redis://redis:6379/0
+      PORT: 8081
+
+  redis:
+    restart: always
+    ports:
+      - "6379"
+      
+  node:
+    image: zeitgeistpm/zeitgeist-node:latest
+    ports:
+      - "9944:9944"
+    command: --dev --ws-external --pruning archive
+    environment:
+      - PORT=9944
+      - NODE_URI=ws://node:9944/0
