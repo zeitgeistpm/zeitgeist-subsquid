@@ -1,5 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, OneToMany as OneToMany_} from "typeorm"
-import {AccountBalance} from "./accountBalance.model"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_} from "typeorm"
 
 @Entity_()
 export class Account {
@@ -15,7 +14,4 @@ export class Account {
    */
   @Column_("text", {nullable: false})
   wallet!: string
-
-  @OneToMany_(() => AccountBalance, e => e.account)
-  accountBalances!: AccountBalance[]
 }

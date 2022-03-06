@@ -1,7 +1,6 @@
 type Account @entity {
   "Account address"
   wallet: String!
-  accountBalances: [AccountBalance] @derivedFrom(field: "account")
 }
 
 type AccountBalance @entity {
