@@ -597,6 +597,40 @@ export async function systemExtrinsicFailed(ctx: EventHandlerContext) {
     } 
 }
 
+export async function parachainStakingRewarded(ctx: EventHandlerContext) {
+    const { store, event, block, extrinsic } = ctx
+    const { walletId, amount } = getRewardedEvent(ctx)
+
+    var acc = await store.get(Account, { where: { wallet: walletId } })
+    if (!acc) {
+        acc = new Account()
+        acc.id = event.id + '-' + walletId.substring(walletId.length - 5)
+        acc.wallet = walletId
+        console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+        await store.save<Account>(acc)
+        await initBalance(acc, store, event, block)
+    }
+
+    const ab = await store.get(AccountBalance, { where: { account: acc, assetId: "Ztg" } })
+    if (ab) {
+        ab.balance = ab.balance + BigInt(amount)
+        console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
+        await store.save<AccountBalance>(ab)
+
+        const hab = new HistoricalAccountBalance()
+        hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
+        hab.accountId = acc.wallet
+        hab.event = event.method
+        hab.assetId = ab.assetId
+        hab.amount = BigInt(amount)
+        hab.balance = ab.balance
+        hab.blockNumber = block.height
+        hab.timestamp = new Date(block.timestamp)
+        console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
+        await store.save<HistoricalAccountBalance>(hab)
+    }
+}
+
 interface BalEndowedEvent {
     accountId: Uint8Array
     amount: bigint
@@ -659,6 +693,11 @@ interface NewAccountEvent {
 
 interface ExtrinsicEvent {
     info: any
+}
+
+interface RewardedEvent {
+    walletId: string
+    amount: string
 }
 
 function getBalancesEndowedEvent(ctx: EventHandlerContext): BalEndowedEvent {
@@ -849,6 +888,13 @@ function getExtrinsicFailedEvent(ctx: EventHandlerContext): ExtrinsicEvent {
         const [error, info]  = event.asLatest 
         return {info}
     }
+}
+
+function getRewardedEvent(ctx: EventHandlerContext): RewardedEvent {
+    const [param0, param1] = ctx.event.params
+    const walletId = param0.value as string
+    const amount = param1.value as string
+    return {walletId, amount}
 }
 
 async function initBalance(acc: Account, store: Store, event: SubstrateEvent, block: SubstrateBlock) {
