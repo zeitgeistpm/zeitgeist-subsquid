@@ -1,7 +1,7 @@
 import { SubstrateProcessor } from "@subsquid/substrate-processor"
 import { balancesBalanceSet, balancesDustLost, balancesEndowed, balancesReserved, balancesTransfer, 
-    balancesUnreserved, currencyDeposited, currencyTransferred, currencyWithdrawn, systemExtrinsicFailed, 
-    systemExtrinsicSuccess, systemNewAccount, tokensEndowed } from "./balances";
+    balancesUnreserved, currencyDeposited, currencyTransferred, currencyWithdrawn, parachainStakingRewarded, 
+    systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount, tokensEndowed } from "./balances";
 import { predictionMarketApproved, predictionMarketBoughtCompleteSet, predictionMarketCancelled, 
     predictionMarketCreated, predictionMarketDisputed, predictionMarketInsufficientSubsidy, 
     predictionMarketRejected, predictionMarketReported, predictionMarketResolved, 
@@ -22,6 +22,7 @@ processor.setDataSource({
 })
 //processor.setBlockRange({from: 815, to: 14210})
 
+processor.addEventHandler('parachainStaking.Rewarded', parachainStakingRewarded)
 processor.addEventHandler('system.NewAccount', systemNewAccount)
 processor.addEventHandler('system.ExtrinsicSuccess', systemExtrinsicSuccess)
 processor.addEventHandler('system.ExtrinsicFailed', systemExtrinsicFailed)
