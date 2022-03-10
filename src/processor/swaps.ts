@@ -341,6 +341,7 @@ export async function swapExactAmountOut(ctx: EventHandlerContext) {
 }
 
 async function calcSpotPrice(tokenBalanceIn: number, tokenWeightIn: number, tokenBalanceOut: number, tokenWeightOut: number, swapFee: number): Promise<number> {
+    if (tokenBalanceOut == 0) return 0
     const numer = tokenBalanceIn/tokenWeightIn
     const denom = tokenBalanceOut/tokenWeightOut
     const ratio = numer/denom
