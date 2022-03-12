@@ -1,6 +1,13 @@
+"""
+A type that has ss58 address format of the account. As soon as the chain
+encounters any new address, they get registered here as user or pool account.
+"""
 type Account @entity {
+  "Unique identifier of the object"
+  id: ID!
   "Account address"
   accountId: String!
+  "Zeitgeist's identifier for pool. Valid only for pool account."
   poolId: Int
 }
 
@@ -12,7 +19,7 @@ type AccountBalance @entity {
   id: ID!
   "Connected account"
   account: Account!
-  "Zeitgeist's identifier of the asset"
+  "Zeitgeist's identifier for asset"
   assetId: String!
   "Balance of the asset"
   balance: BigInt!
@@ -27,7 +34,7 @@ type HistoricalAccountBalance @entity {
   id: ID!
   "Account address"
   accountId: String!
-  "Zeitgeist's identifier of the asset"
+  "Zeitgeist's identifier for asset"
   assetId: String!
   "Balance difference"
   amount: BigInt!
@@ -48,9 +55,9 @@ market is created and price is assigned when pool is deployed for the market.
 type Asset @entity {
   "Unique identifier of the object"
   id: ID!
-  "Zeitgeist's identifier of the asset"
+  "Zeitgeist's identifier for asset"
   assetId: String!
-  "Zeitgeist's identifier of the pool"
+  "Zeitgeist's identifier for pool"
   poolId: Int
   "Spot price of the asset in the pool"
   price: Float
@@ -64,7 +71,7 @@ Price history of the outcome asset
 type HistoricalAsset @entity {
   "Unique identifier of the object"
   id: ID!
-  "Zeitgeist's identifier of the asset"
+  "Zeitgeist's identifier for asset"
   assetId: String!
   "Price difference"
   dPrice: Float
@@ -88,7 +95,7 @@ Prediction market details
 type Market @entity {
   "Unique identifier of the object"
   id: ID!
-  "Zeitgeist's identifier of the market"
+  "Zeitgeist's identifier for market"
   marketId: Int!
   "Account address of the market creator" 
   creator: String!
