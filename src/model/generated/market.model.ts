@@ -6,21 +6,36 @@ import {MarketPeriod} from "./_marketPeriod"
 import {MarketReport} from "./_marketReport"
 import {MarketDisputeMechanism} from "./_marketDisputeMechanism"
 
+/**
+ * Prediction market details
+ */
 @Entity_()
 export class Market {
   constructor(props?: Partial<Market>) {
     Object.assign(this, props)
   }
 
+  /**
+   * Unique identifier of the object
+   */
   @PrimaryColumn_()
   id!: string
 
+  /**
+   * Zeitgeist's identifier of the market
+   */
   @Column_("integer", {nullable: false})
   marketId!: number
 
+  /**
+   * Account address of the market creator
+   */
   @Column_("text", {nullable: false})
   creator!: string
 
+  /**
+   * Can be `Permissionless` or `Advised`
+   */
   @Column_("text", {nullable: false})
   creation!: string
 
