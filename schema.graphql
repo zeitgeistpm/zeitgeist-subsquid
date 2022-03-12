@@ -4,43 +4,95 @@ type Account @entity {
   poolId: Int
 }
 
+"""
+Balance of a particular asset denoted by assetId present in the account
+"""
 type AccountBalance @entity {
+  "Unique identifier of the object"
+  id: ID!
+  "Connected account"
   account: Account!
+  "Zeitgeist's identifier of the asset"
   assetId: String!
+  "Balance of the asset"
   balance: BigInt!
 }
 
+"""
+Balance history of a particular asset in an account. Records all transactions
+associated with the account.
+"""
 type HistoricalAccountBalance @entity {
+  "Unique identifier of the object"
+  id: ID!
+  "Account address"
   accountId: String!
-  event: String!
+  "Zeitgeist's identifier of the asset"
   assetId: String!
+  "Balance difference"
   amount: BigInt!
+  "Net balance"
   balance: BigInt!
+  "Event method which initiated this change"
+  event: String!
+  "Height of the block"
   blockNumber: Int!
+  "Timestamp of the block"
   timestamp: DateTime!
 }
 
+"""
+A type that has detail of the outcome asset. It is initialised as soon as the
+market is created and price is assigned when pool is deployed for the market.
+"""
 type Asset @entity {
+  "Unique identifier of the object"
+  id: ID!
+  "Zeitgeist's identifier of the asset"
   assetId: String!
+  "Zeitgeist's identifier of the pool"
   poolId: Int
+  "Spot price of the asset in the pool"
   price: Float
+  "Balance of the asset present in the pool account"
   qty: BigInt
 }
 
+"""
+Price history of the outcome asset
+"""
 type HistoricalAsset @entity {
+  "Unique identifier of the object"
+  id: ID!
+  "Zeitgeist's identifier of the asset"
   assetId: String!
+  "Price difference"
   dPrice: Float
+  "Balance difference"
   dQty: BigInt!
+  "Spot price of the asset"
   price: Float
+  "Balance in the pool account"
   qty: BigInt!
+  "Event method which initiated this change"
   event: String!
+  "Height of the block"
   blockNumber: Int!
+  "Timestamp of the block"
   timestamp: DateTime!
 }
 
+"""
+Prediction market details
+"""
 type Market @entity {
-  marketId: Int! 
+  "Unique identifier of the object"
+  id: ID!
+  "Zeitgeist's identifier of the market"
+  marketId: Int!
+  "Account address of the market creator" 
   creator: String!
+  "Can be `Permissionless` or `Advised`"
   creation: String!
   creatorFee: Int
   oracle: String!
