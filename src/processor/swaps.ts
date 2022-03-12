@@ -1,5 +1,5 @@
 import { EventHandlerContext } from "@subsquid/substrate-processor"
-import { Asset, HistoricalAccountBalance, HistoricalAsset, HistoricalPool, Market, HistoricalMarket, Weight, Pool} from '../model'
+import { Asset, HistoricalAccountBalance, HistoricalAsset, HistoricalPool, Market, HistoricalMarket, Weight, Pool, Account} from '../model'
 import { CommonPoolEventParams as t_CPEP, Pool as t_Pool, PoolAssetsEvent as t_PAE, SwapEvent as t_SE } from '@zeitgeistpm/typesV2/dist/interfaces'
 
 export async function swapPoolCreated(ctx: EventHandlerContext) {
@@ -25,6 +25,13 @@ export async function swapPoolCreated(ctx: EventHandlerContext) {
 
     const base = pool.baseAsset as any
     newPool.baseAsset = base.ztg !== undefined ? "Ztg" : JSON.stringify(base)
+
+    var acc = await store.get(Account, { where: { accountId: hab?.accountId } })
+    if (acc) {
+        acc.poolId = newPool.poolId
+        console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+        await store.save<Account>(acc)
+    }
 
     const savedMarket = await store.get(Market, { where: { marketId: newPool.marketId } })
     if (savedMarket) {

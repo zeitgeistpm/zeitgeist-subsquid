@@ -1,6 +1,7 @@
 type Account @entity {
   "Account address"
-  wallet: String!
+  accountId: String!
+  poolId: Int
 }
 
 type AccountBalance @entity {

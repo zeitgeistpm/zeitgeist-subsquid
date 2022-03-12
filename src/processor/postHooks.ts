@@ -8,7 +8,7 @@ export async function add_balance_108949(ctx: BlockHandlerContext) {
         if (event.name == "balances.Unreserved") {
             const walletId = "dE1EyDwADmoUReAUN2ynVgvGmqkmaWj3Ht1hMndubRPY4NrjD"
 
-            const acc = await store.get(Account, { where: { wallet: walletId } })
+            const acc = await store.get(Account, { where: { accountId: walletId } })
             if (!acc) { return }
 
             const ab = await store.get(AccountBalance, { where: { account: acc, assetId: "Ztg" } })
@@ -19,7 +19,7 @@ export async function add_balance_108949(ctx: BlockHandlerContext) {
 
                 const hab = new HistoricalAccountBalance()
                 hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
-                hab.accountId = acc.wallet
+                hab.accountId = acc.accountId
                 hab.event = "PostHook"
                 hab.assetId = ab.assetId
                 hab.amount = BigInt(5000000000)
@@ -41,7 +41,7 @@ export async function add_balance_155917(ctx: BlockHandlerContext) {
         if (event.name == "balances.Unreserved") {
             const walletId = "dE4NbK6XC4dJEkjU5erpDNj2ydMh1fMNw8ug7xNgzTxqFo5iW"
 
-            const acc = await store.get(Account, { where: { wallet: walletId } })
+            const acc = await store.get(Account, { where: { accountId: walletId } })
             if (!acc) { return }
 
             const ab = await store.get(AccountBalance, { where: { account: acc, assetId: "Ztg" } })
@@ -52,7 +52,7 @@ export async function add_balance_155917(ctx: BlockHandlerContext) {
 
                 const hab = new HistoricalAccountBalance()
                 hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
-                hab.accountId = acc.wallet
+                hab.accountId = acc.accountId
                 hab.event = "PostHook"
                 hab.assetId = ab.assetId
                 hab.amount = BigInt(5000000000)
