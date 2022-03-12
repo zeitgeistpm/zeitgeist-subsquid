@@ -13,5 +13,8 @@ export class Account {
    * Account address
    */
   @Column_("text", {nullable: false})
-  wallet!: string
+  accountId!: string
+
+  @Column_("integer", {nullable: true})
+  poolId!: number | undefined | null
 }
