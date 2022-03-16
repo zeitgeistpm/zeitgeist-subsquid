@@ -17,7 +17,7 @@ export class HistoricalAsset {
   id!: string
 
   /**
-   * Zeitgeist's identifier of the asset
+   * Zeitgeist's identifier for asset
    */
   @Column_("text", {nullable: false})
   assetId!: string

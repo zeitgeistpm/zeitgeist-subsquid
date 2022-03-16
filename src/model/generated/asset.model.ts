@@ -18,13 +18,13 @@ export class Asset {
   id!: string
 
   /**
-   * Zeitgeist's identifier of the asset
+   * Zeitgeist's identifier for asset
    */
   @Column_("text", {nullable: false})
   assetId!: string
 
   /**
-   * Zeitgeist's identifier of the pool
+   * Zeitgeist's identifier for pool
    */
   @Column_("integer", {nullable: true})
   poolId!: number | undefined | null

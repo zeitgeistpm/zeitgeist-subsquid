@@ -25,7 +25,7 @@ export class AccountBalance {
   account!: Account
 
   /**
-   * Zeitgeist's identifier of the asset
+   * Zeitgeist's identifier for asset
    */
   @Column_("text", {nullable: false})
   assetId!: string
