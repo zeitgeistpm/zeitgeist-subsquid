@@ -1,6 +1,9 @@
 import assert from "assert"
 import * as marshal from "./marshal"
 
+/**
+ * Asset weightage details
+ */
 export class Weight {
   private _assetId!: string
   private _len!: bigint
@@ -13,6 +16,9 @@ export class Weight {
     }
   }
 
+  /**
+   * Zeitgeist's identifier for asset
+   */
   get assetId(): string {
     assert(this._assetId != null, 'uninitialized access')
     return this._assetId
@@ -22,6 +28,9 @@ export class Weight {
     this._assetId = value
   }
 
+  /**
+   * Length or weight of the asset
+   */
   get len(): bigint {
     assert(this._len != null, 'uninitialized access')
     return this._len
