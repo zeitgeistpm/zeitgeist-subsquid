@@ -101,23 +101,41 @@ type Market @entity {
   creator: String!
   "Can be `Permissionless` or `Advised`"
   creation: String!
+  "The creator's fee"
   creatorFee: Int
+  "Account designated to report on the market"
   oracle: String!
+  "Share identifiers"
   outcomeAssets: [String]!
+  "Short name for the market"
   slug: String
+  "Market question"
   question: String
+  "Description of the market"
   description: String
+  "Share details"
   categories: [CategoryMetadata]
+  "Market tags"
   tags: [String]
+  "Image for the market"
   img: String
+  "Type of the market"
   marketType: MarketType!
+  "Time period expressed in block numbers or timestamps"
   period: MarketPeriod!
+  "Timestamp at which market should end"
   end: BigInt!
+  "Scoring rule used for the market"
   scoringRule: String!
+  "Status of the market"
   status: String!
+  "Zeitgeist's indentifier for liquidity pool"
   poolId: Int
+  "Reported outcome of the market. Null if the market is not reported yet"
   report: MarketReport
+  "Resolved outcome for the market"
   resolvedOutcome: String
+  "Can be `authorized` or `court` or `simpleDisputes`"
   mdm: MarketDisputeMechanism!
 }
 
