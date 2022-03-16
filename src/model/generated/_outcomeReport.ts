@@ -1,6 +1,9 @@
 import assert from "assert"
 import * as marshal from "./marshal"
 
+/**
+ * Market's outcome details
+ */
 export class OutcomeReport {
   private _categorical!: number | undefined | null
   private _scalar!: number | undefined | null
@@ -13,6 +16,9 @@ export class OutcomeReport {
     }
   }
 
+  /**
+   * Index of the categories. Null if market is scalar
+   */
   get categorical(): number | undefined | null {
     return this._categorical
   }
@@ -21,6 +27,9 @@ export class OutcomeReport {
     this._categorical = value
   }
 
+  /**
+   * Resultant value from the scalar range. Null if market is categorical
+   */
   get scalar(): number | undefined | null {
     return this._scalar
   }
