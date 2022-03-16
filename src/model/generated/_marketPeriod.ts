@@ -1,6 +1,9 @@
 import assert from "assert"
 import * as marshal from "./marshal"
 
+/**
+ * Time period of the market
+ */
 export class MarketPeriod {
   private _block!: string | undefined | null
   private _timestamp!: string | undefined | null
@@ -13,6 +16,9 @@ export class MarketPeriod {
     }
   }
 
+  /**
+   * start & end block numbers
+   */
   get block(): string | undefined | null {
     return this._block
   }
@@ -21,6 +27,9 @@ export class MarketPeriod {
     this._block = value
   }
 
+  /**
+   * start & end timestamps
+   */
   get timestamp(): string | undefined | null {
     return this._timestamp
   }

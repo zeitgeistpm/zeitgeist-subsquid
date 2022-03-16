@@ -2,6 +2,9 @@ import assert from "assert"
 import * as marshal from "./marshal"
 import {OutcomeReport} from "./_outcomeReport"
 
+/**
+ * Market's report details
+ */
 export class MarketReport {
   private _at!: number
   private _by!: string
@@ -16,6 +19,9 @@ export class MarketReport {
     }
   }
 
+  /**
+   * Block number
+   */
   get at(): number {
     assert(this._at != null, 'uninitialized access')
     return this._at
@@ -25,6 +31,9 @@ export class MarketReport {
     this._at = value
   }
 
+  /**
+   * Account which reported
+   */
   get by(): string {
     assert(this._by != null, 'uninitialized access')
     return this._by
@@ -34,6 +43,9 @@ export class MarketReport {
     this._by = value
   }
 
+  /**
+   * Outcome details
+   */
   get outcome(): OutcomeReport {
     assert(this._outcome != null, 'uninitialized access')
     return this._outcome

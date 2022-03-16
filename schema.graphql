@@ -1,124 +1,262 @@
+"""
+A type that has ss58 address format of the account. As soon as the chain
+encounters any new address, they get registered here as user or pool account.
+"""
 type Account @entity {
+  "Unique identifier of the object"
+  id: ID!
   "Account address"
   accountId: String!
+  "Zeitgeist's identifier for pool. Valid only for pool account."
   poolId: Int
 }
 
+"""
+Balance of a particular asset denoted by assetId present in the account
+"""
 type AccountBalance @entity {
+  "Unique identifier of the object"
+  id: ID!
+  "Connected account"
   account: Account!
+  "Zeitgeist's identifier for asset"
   assetId: String!
+  "Balance of the asset"
   balance: BigInt!
 }
 
+"""
+Balance history of a particular asset in an account. Records all transactions
+associated with the account.
+"""
 type HistoricalAccountBalance @entity {
+  "Unique identifier of the object"
+  id: ID!
+  "Account address"
   accountId: String!
-  event: String!
+  "Zeitgeist's identifier for asset"
   assetId: String!
+  "Balance difference"
   amount: BigInt!
+  "Net balance"
   balance: BigInt!
+  "Event method which initiated this change"
+  event: String!
+  "Height of the block"
   blockNumber: Int!
+  "Timestamp of the block"
   timestamp: DateTime!
 }
 
+"""
+A type that has detail of the outcome asset. It is initialised as soon as the
+market is created and price is assigned when pool is deployed for the market.
+"""
 type Asset @entity {
+  "Unique identifier of the object"
+  id: ID!
+  "Zeitgeist's identifier for asset"
   assetId: String!
+  "Zeitgeist's identifier for pool"
   poolId: Int
+  "Spot price of the asset in the pool"
   price: Float
+  "Balance of the asset present in the pool account"
   qty: BigInt
 }
 
+"""
+Price history of the outcome asset
+"""
 type HistoricalAsset @entity {
+  "Unique identifier of the object"
+  id: ID!
+  "Zeitgeist's identifier for asset"
   assetId: String!
+  "Price difference"
   dPrice: Float
+  "Balance difference"
   dQty: BigInt!
+  "Spot price of the asset"
   price: Float
+  "Balance in the pool account"
   qty: BigInt!
+  "Event method which initiated this change"
   event: String!
+  "Height of the block"
   blockNumber: Int!
+  "Timestamp of the block"
   timestamp: DateTime!
 }
 
+"""
+Prediction market details
+"""
 type Market @entity {
-  marketId: Int! 
+  "Unique identifier of the object"
+  id: ID!
+  "Zeitgeist's identifier for market"
+  marketId: Int!
+  "Account address of the market creator" 
   creator: String!
+  "Can be `Permissionless` or `Advised`"
   creation: String!
+  "The creator's fee"
   creatorFee: Int
+  "Account designated to report on the market"
   oracle: String!
+  "Share identifiers"
   outcomeAssets: [String]!
+  "Short name for the market"
   slug: String
+  "Market question"
   question: String
+  "Description of the market"
   description: String
+  "Share details"
   categories: [CategoryMetadata]
+  "Market tags"
   tags: [String]
+  "Image for the market"
   img: String
+  "Type of the market"
   marketType: MarketType!
+  "Time period expressed in block numbers or timestamps"
   period: MarketPeriod!
+  "Timestamp at which market should end"
   end: BigInt!
+  "Scoring rule used for the market"
   scoringRule: String!
+  "Status of the market"
   status: String!
+  "Zeitgeist's indentifier for liquidity pool"
   poolId: Int
+  "Reported outcome of the market. Null if the market is not reported yet"
   report: MarketReport
+  "Resolved outcome for the market"
   resolvedOutcome: String
+  "Can be `authorized` or `court` or `simpleDisputes`"
   mdm: MarketDisputeMechanism!
 }
 
+"""
+Market history of a particular market. Records all transactions
+associated with the market.
+"""
 type HistoricalMarket @entity {
+  "Zeitgeist's identifier for market"
   marketId: Int!
-  event: String!
-  status: String
+  "Zeitgeist's identifier for pool"
   poolId: Int
+  "New status. Null if no change"
+  status: String
+  "New market report. Null if no change"
   report: MarketReport
+  "New resolved outcome. Null if no change"
   resolvedOutcome: String
+  "Event method which initiated this change"
+  event: String!
+  "Height of the block"
   blockNumber: Int!
+  "Timestamp of the block"
   timestamp: DateTime!
 }
 
+"""
+Liquidity pool details
+"""
 type Pool @entity {
+  "Zeitgeist's identifier for pool"
   poolId: Int!
+  "Zeitgeist's identifier for account"
   accountId: String
+  "Zeitgeist's identifier for pool"
   baseAsset: String!
   marketId: Int!
+  "Status of the pool"
   poolStatus: String!
+  "Scoring rule used for the pool"
   scoringRule: String!
+  "Fee applied to each swap"
   swapFee: String!
+  "Subsidy gathered for the market"
   totalSubsidy: String!
+  "Sum of `weights`"
   totalWeight: String!
+  "List of lengths for each asset"
   weights: [Weight]!
+  "Amount of ZTG present in the pool"
   ztgQty: BigInt!
+  "Total amount of ZTG that has moved through a market's liquidity pool"
   volume: BigInt!
 }
 
+"""
+Liquidity history of a particular pool. Records all transactions
+associated with the pool.
+"""
 type HistoricalPool @entity {
+  "Zeitgeist's identifier for pool"
   poolId: Int!
-  event: String!
+  "New amount of ZTG present in the pool"
   ztgQty: BigInt!
+  "New updated volume"
   volume: BigInt
+  "Event method which initiated this change"
+  event: String!
+  "Height of the block"
   blockNumber: Int!
+  "Timestamp of the block"
   timestamp: DateTime!
 }
 
+"""
+Asset weightage details
+"""
 type Weight @jsonField {
+  "Zeitgeist's identifier for asset"
   assetId: String!
+  "Length or weight of the asset"
   len: BigInt!
 }
 
+"""
+Market's share details
+"""
 type CategoryMetadata @jsonField {
+  "Title ex. `Locomotiv will not be defeated`"
   name: String
+  "Short abbreviation ex. `LMDRAW`"
   ticker: String
+  "Image identifier"
   img: String
+  "Color identifier"
   color: String
 }
 
+"""
+Market's types
+"""
 type MarketType @jsonField {
+  "Number of categories if categorical market"
   categorical: String
+  "Range of values if scalar market"
   scalar: String
 }
 
+"""
+Time period of the market
+"""
 type MarketPeriod @jsonField {
+  "start & end block numbers"
   block: String
+  "start & end timestamps"
   timestamp: String
 }
 
+"""
+Market's status options
+"""
 enum MarketStatus {
   Active,
   CollectingSubsidy,
@@ -129,19 +267,36 @@ enum MarketStatus {
   Cancelled
 }
 
+"""
+Market's report details
+"""
 type MarketReport @jsonField {
+  "Block number"
   at: Int!
+  "Account which reported"
   by: String!
+  "Outcome details"
   outcome: OutcomeReport!
 }
 
+"""
+Market's outcome details
+"""
 type OutcomeReport @jsonField {
+  "Index of the categories. Null if market is scalar"
   categorical: Int
+  "Resultant value from the scalar range. Null if market is categorical"
   scalar: Int
 }
 
+"""
+Market's dispute details. Only one field would have value rest would be null."
+"""
 type MarketDisputeMechanism @jsonField {
+  "Account address"
   authorized: String
+  "True if mechanism is court else null"
   court: Boolean
+  "True if mechanism is simple-disputes else null"
   simpleDisputes: Boolean
 }

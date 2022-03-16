@@ -1,6 +1,9 @@
 import assert from "assert"
 import * as marshal from "./marshal"
 
+/**
+ * Market's share details
+ */
 export class CategoryMetadata {
   private _name!: string | undefined | null
   private _ticker!: string | undefined | null
@@ -17,6 +20,9 @@ export class CategoryMetadata {
     }
   }
 
+  /**
+   * Title ex. `Locomotiv will not be defeated`
+   */
   get name(): string | undefined | null {
     return this._name
   }
@@ -25,6 +31,9 @@ export class CategoryMetadata {
     this._name = value
   }
 
+  /**
+   * Short abbreviation ex. `LMDRAW`
+   */
   get ticker(): string | undefined | null {
     return this._ticker
   }
@@ -33,6 +42,9 @@ export class CategoryMetadata {
     this._ticker = value
   }
 
+  /**
+   * Image identifier
+   */
   get img(): string | undefined | null {
     return this._img
   }
@@ -41,6 +53,9 @@ export class CategoryMetadata {
     this._img = value
   }
 
+  /**
+   * Color identifier
+   */
   get color(): string | undefined | null {
     return this._color
   }
