@@ -139,14 +139,26 @@ type Market @entity {
   mdm: MarketDisputeMechanism!
 }
 
+"""
+Market history of a particular market. Records all transactions
+associated with the market.
+"""
 type HistoricalMarket @entity {
+  "Zeitgeist's identifier for market"
   marketId: Int!
-  event: String!
-  status: String
+  "Zeitgeist's identifier for pool"
   poolId: Int
+  "New status. Null if no change"
+  status: String
+  "New market report. Null if no change"
   report: MarketReport
+  "New resolved outcome. Null if no change"
   resolvedOutcome: String
+  "Event method which initiated this change"
+  event: String!
+  "Height of the block"
   blockNumber: Int!
+  "Timestamp of the block"
   timestamp: DateTime!
 }
 
@@ -179,23 +191,43 @@ type Weight @jsonField {
   len: BigInt!
 }
 
+"""
+Market's share details
+"""
 type CategoryMetadata @jsonField {
+  "Title ex. `Locomotiv will not be defeated`"
   name: String
+  "Short abbreviation ex. `LMDRAW`"
   ticker: String
+  "Image identifier"
   img: String
+  "Color identifier"
   color: String
 }
 
+"""
+Market's types
+"""
 type MarketType @jsonField {
+  "Number of categories if categorical market"
   categorical: String
+  "Range of values if scalar market"
   scalar: String
 }
 
+"""
+Time period of the market
+"""
 type MarketPeriod @jsonField {
+  "start & end block numbers"
   block: String
+  "start & end timestamps"
   timestamp: String
 }
 
+"""
+Market's status options
+"""
 enum MarketStatus {
   Active,
   CollectingSubsidy,
@@ -206,19 +238,36 @@ enum MarketStatus {
   Cancelled
 }
 
+"""
+Market's report details
+"""
 type MarketReport @jsonField {
+  "Block number"
   at: Int!
+  "Account which reported"
   by: String!
+  "Outcome details"
   outcome: OutcomeReport!
 }
 
+"""
+Market's outcome details
+"""
 type OutcomeReport @jsonField {
+  "Index of the categories. Null if market is scalar"
   categorical: Int
+  "Resultant value from the scalar range. Null if market is categorical"
   scalar: Int
 }
 
+"""
+Market's dispute details. Only one field would have value rest would be null."
+"""
 type MarketDisputeMechanism @jsonField {
+  "Account address"
   authorized: String
+  "True if mechanism is court else null"
   court: Boolean
+  "True if mechanism is simple-disputes else null"
   simpleDisputes: Boolean
 }
