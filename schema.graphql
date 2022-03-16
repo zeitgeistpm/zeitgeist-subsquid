@@ -162,32 +162,61 @@ type HistoricalMarket @entity {
   timestamp: DateTime!
 }
 
+"""
+Liquidity pool details
+"""
 type Pool @entity {
+  "Zeitgeist's identifier for pool"
   poolId: Int!
+  "Zeitgeist's identifier for account"
   accountId: String
+  "Zeitgeist's identifier for pool"
   baseAsset: String!
   marketId: Int!
+  "Status of the pool"
   poolStatus: String!
+  "Scoring rule used for the pool"
   scoringRule: String!
+  "Fee applied to each swap"
   swapFee: String!
+  "Subsidy gathered for the market"
   totalSubsidy: String!
+  "Sum of `weights`"
   totalWeight: String!
+  "List of lengths for each asset"
   weights: [Weight]!
+  "Amount of ZTG present in the pool"
   ztgQty: BigInt!
+  "Total amount of ZTG that has moved through a market's liquidity pool"
   volume: BigInt!
 }
 
+"""
+Liquidity history of a particular pool. Records all transactions
+associated with the pool.
+"""
 type HistoricalPool @entity {
+  "Zeitgeist's identifier for pool"
   poolId: Int!
-  event: String!
+  "New amount of ZTG present in the pool"
   ztgQty: BigInt!
+  "New updated volume"
   volume: BigInt
+  "Event method which initiated this change"
+  event: String!
+  "Height of the block"
   blockNumber: Int!
+  "Timestamp of the block"
   timestamp: DateTime!
 }
 
+"""
+Asset weightage details
+"""
 type Weight @jsonField {
+  "Zeitgeist's identifier for asset"
   assetId: String!
+  "Length or weight of the asset"
   len: BigInt!
 }
 
