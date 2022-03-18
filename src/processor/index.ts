@@ -12,13 +12,15 @@ import { swapExactAmountIn, swapExactAmountOut, swapPoolCreated, swapPoolExited,
     return this.toString();
 }
 
-const processor = new SubstrateProcessor('zeitgeist')
-processor.setTypesBundle('zeitgeist.json')
-processor.setBatchSize(500)
+const processor = new SubstrateProcessor("zeitgeist");
+processor.setTypesBundle("zeitgeist.json");
+processor.setBatchSize(500);
 processor.setDataSource({
-    archive: 'https://indexer.zeitgeist.pm/v1/graphql',
-    chain: 'wss://bsr.zeitgeist.pm'
-})
+  archive:
+    process.env["INDEXER_ENDPOINT_URL"] ??
+    "https://indexer.zeitgeist.pm/v1/graphql",
+  chain: process.env["WS_NODE_URL"] ?? "wss://bsr.zeitgeist.pm",
+});
 //processor.setBlockRange({from: 815, to: 14210})
 
 processor.addEventHandler('system.NewAccount', systemNewAccount)
