@@ -79,7 +79,7 @@ export async function add_balance_175178(ctx: BlockHandlerContext) {
 
             const ab = await store.get(AccountBalance, { where: { account: acc, assetId: "Ztg" } })
             if (ab) {
-                ab.balance = ab.balance + BigInt(5000000000)
+                ab.balance = ab.balance + BigInt(50000000000)
                 console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
                 await store.save<AccountBalance>(ab)
 
@@ -88,7 +88,7 @@ export async function add_balance_175178(ctx: BlockHandlerContext) {
                 hab.accountId = acc.accountId
                 hab.event = "PostHook"
                 hab.assetId = ab.assetId
-                hab.amount = BigInt(5000000000)
+                hab.amount = BigInt(50000000000)
                 hab.balance = ab.balance
                 hab.blockNumber = block.height
                 hab.timestamp = new Date(block.timestamp)
