@@ -853,7 +853,7 @@ function getExtrinsicFailedEvent(ctx: EventHandlerContext): ExtrinsicEvent {
 
 async function initBalance(acc: Account, store: Store, event: SubstrateEvent, block: SubstrateBlock) {
     const sdk = await Tools.getSDK()
-    const blockZero = await sdk.api.rpc.chain.getBlockHash(0);
+    const blockZero = process.env.BLOCK_ZERO!
     const { data : { free: amt } } = await sdk.api.query.system.account.at(blockZero, acc.wallet) as AccountInfo
 
     const ab = new AccountBalance()
