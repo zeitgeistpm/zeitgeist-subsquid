@@ -71,11 +71,13 @@ Price history of the outcome asset
 type HistoricalAsset @entity {
   "Unique identifier of the object"
   id: ID!
+  "Account which executed the trade"
+  accountId: String!
   "Zeitgeist's identifier for asset"
   assetId: String!
   "Price difference"
   dPrice: Float
-  "Balance difference"
+  "Balance difference. It conveys the amount of asset user bought or sold."
   dQty: BigInt!
   "Spot price of the asset"
   price: Float
