@@ -70,6 +70,7 @@ export async function swapPoolCreated(ctx: EventHandlerContext) {
 
             const hap = new HistoricalAsset()
             hap.id = event.id + '-' + savedMarket!.marketId + (idx - 1)
+            hap.accountId = cpep.who.toString()
             hap.assetId = asset.assetId
             hap.price = asset.price
             hap.qty = asset.qty
@@ -139,6 +140,7 @@ export async function swapPoolExited(ctx: EventHandlerContext) {
 
         const hap = new HistoricalAsset()
         hap.id = event.id + '-' + savedPool.marketId + (idx - 1)
+        hap.accountId = pae.cpep.who.toString()
         hap.assetId = asset.assetId
         hap.price = asset.price
         hap.qty = asset.qty
@@ -194,6 +196,7 @@ export async function swapPoolJoined(ctx: EventHandlerContext) {
 
         const hap = new HistoricalAsset()
         hap.id = event.id + '-' + savedPool.marketId + (idx - 1)
+        hap.accountId = pae.cpep.who.toString()
         hap.assetId = asset.assetId
         hap.price = asset.price
         hap.qty = asset.qty
@@ -264,6 +267,7 @@ export async function swapExactAmountIn(ctx: EventHandlerContext) {
 
         const hap = new HistoricalAsset()
         hap.id = event.id + '-' + savedPool.marketId + (idx - 1)
+        hap.accountId = swapEvent.cpep.who.toString()
         hap.assetId = asset.assetId
         hap.price = asset.price
         hap.qty = asset.qty
@@ -334,6 +338,7 @@ export async function swapExactAmountOut(ctx: EventHandlerContext) {
 
         const hap = new HistoricalAsset()
         hap.id = event.id + '-' + savedPool.marketId + (idx - 1)
+        hap.accountId = swapEvent.cpep.who.toString()
         hap.assetId = asset.assetId
         hap.price = asset.price
         hap.qty = asset.qty
