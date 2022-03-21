@@ -7,9 +7,6 @@
   "license": "ISC",
   "scripts": {
     "build": "rm -rf lib && tsc",
-    "processor:migrate": "echo skip",
-    "processor:start": "yarn build && node -r dotenv/config lib/processor/index.js",
-    "query-node:start": "squid-graphql-server",
     "typegen": "squid-substrate-typegen typegen.json",
     "codegen": "npx sqd codegen",
     "redis:up": "docker-compose up -d redis",
@@ -21,8 +18,12 @@
     "db:migrate": "npx sqd db migrate",
     "db:revert": "npx sqd db revert",
     "db:reset": "yarn db:drop && yarn db:create",
-    "docker:deploy": "yarn db:up && yarn redis:up && rm -rf db/migrations/* && yarn db:reset && npm run db:create-migration -n 'init' && yarn db:migrate && docker-compose up -d",
-    "local:deploy": "yarn db:up && yarn redis:up && rm -rf db/migrations/* && yarn db:reset && npm run db:create-migration -n 'init' && yarn db:migrate && yarn processor:start"
+    "processor:migrate": "echo skip",
+    "processor:start": "yarn build && node -r dotenv/config lib/processor/index.js",
+    "processor:deploy": "yarn db:up && yarn redis:up && rm -rf db/migrations/* && yarn db:reset && npm run db:create-migration -n 'init' && yarn db:migrate && yarn processor:start",
+    "query-node:start": "squid-graphql-server",
+    "indexer:local": "docker-compose -f indexer/docker-compose.yml -f indexer/docker-compose.local.yml up -d",
+    "indexer:testnet": "docker-compose -f indexer/docker-compose.yml -f indexer/docker-compose.testnet.yml up -d"
   },
   "dependencies": {
     "@subsquid/graphql-server": "^0.1.4",
