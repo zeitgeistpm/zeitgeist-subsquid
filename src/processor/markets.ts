@@ -28,7 +28,7 @@ export async function predictionMarketBoughtCompleteSet(ctx: EventHandlerContext
     console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
     await store.save<HistoricalMarket>(hm)
 
-    var acc = await store.get(Account, { where: { wallet: walletId } })
+    var acc = await store.get(Account, { where: { accountId: walletId } })
     if (!acc) { return }
 
     const len = +savedMarket.marketType.categorical!
@@ -38,7 +38,7 @@ export async function predictionMarketBoughtCompleteSet(ctx: EventHandlerContext
         if (!ab) { return } 
 
         var hab = await store.get(HistoricalAccountBalance, { where: 
-            { accountId: acc.wallet, assetId: currencyId, event: "Endowed", blockNumber: block.height } })
+            { accountId: acc.accountId, assetId: currencyId, event: "Endowed", blockNumber: block.height } })
         if (hab) {
             hab.event = hab.event.concat(event.method)
             console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
@@ -64,7 +64,7 @@ export async function predictionMarketBoughtCompleteSet(ctx: EventHandlerContext
 
                 hab = new HistoricalAccountBalance()
                 hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
-                hab.accountId = acc.wallet
+                hab.accountId = acc.accountId
                 hab.event = event.method
                 hab.assetId = ab.assetId
                 hab.amount = amount
@@ -271,14 +271,20 @@ export async function predictionMarketReported(ctx: EventHandlerContext) {
     if (!savedMarket) return
 
     const ocr = new OutcomeReport()
-    if (report.outcome.categorical) {
-        ocr.categorical = report.outcome.categorical.toNumber()
-    } else if (report.outcome.scalar) {
-        ocr.scalar = report.outcome.scalar.toNumber()
-    } else if (report.outcome.__kind == "Categorical") {
-        ocr.categorical = report.outcome.value
-    } else if (report.outcome.__kind == "Scalar") {
-        ocr.scalar = +report.outcome.value.toString()
+    if (report.outcome) {
+        if (report.outcome.categorical) {
+            ocr.categorical = report.outcome.categorical.toNumber()
+        } else if (report.outcome.scalar) {
+            ocr.scalar = report.outcome.scalar.toNumber()
+        } else if (report.outcome.__kind == "Categorical") {
+            ocr.categorical = report.outcome.value
+        } else if (report.outcome.__kind == "Scalar") {
+            ocr.scalar = +report.outcome.value.toString()
+        }
+    } else if (report.__kind == "Categorical") {
+        ocr.categorical = report.value
+    } else if (report.__kind == "Scalar") {
+        ocr.scalar = +report.value.toString()
     }
 
     const mr = new MarketReport()
@@ -315,14 +321,20 @@ export async function predictionMarketDisputed(ctx: EventHandlerContext) {
     if (!savedMarket) return
 
     const ocr = new OutcomeReport()
-    if (report.outcome.categorical) {
-        ocr.categorical = report.outcome.categorical.toNumber()
-    } else if (report.outcome.scalar) {
-        ocr.scalar = report.outcome.scalar.toNumber()
-    } else if (report.outcome.__kind == "Categorical") {
-        ocr.categorical = report.outcome.value
-    } else if (report.outcome.__kind == "Scalar") {
-        ocr.scalar = +report.outcome.value.toString()
+    if (report.outcome) {
+        if (report.outcome.categorical) {
+            ocr.categorical = report.outcome.categorical.toNumber()
+        } else if (report.outcome.scalar) {
+            ocr.scalar = report.outcome.scalar.toNumber()
+        } else if (report.outcome.__kind == "Categorical") {
+            ocr.categorical = report.outcome.value
+        } else if (report.outcome.__kind == "Scalar") {
+            ocr.scalar = +report.outcome.value.toString()
+        }
+    } else if (report.__kind == "Categorical") {
+        ocr.categorical = report.value
+    } else if (report.__kind == "Scalar") {
+        ocr.scalar = +report.value.toString()
     }
 
     const mr = new MarketReport()
@@ -453,7 +465,7 @@ export async function predictionMarketSoldCompleteSet(ctx: EventHandlerContext) 
     console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
     await store.save<HistoricalMarket>(hm)
 
-    var acc = await store.get(Account, { where: { wallet: walletId } })
+    var acc = await store.get(Account, { where: { accountId: walletId } })
     if (!acc) { return }
 
     const len = +savedMarket.marketType.categorical!
@@ -482,7 +494,7 @@ export async function predictionMarketSoldCompleteSet(ctx: EventHandlerContext) 
 
             const hab = new HistoricalAccountBalance()
             hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
-            hab.accountId = acc.wallet
+            hab.accountId = acc.accountId
             hab.event = event.method
             hab.assetId = ab.assetId
             hab.amount = - amount

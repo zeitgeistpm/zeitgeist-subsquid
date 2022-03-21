@@ -1,6 +1,9 @@
 import assert from "assert"
 import * as marshal from "./marshal"
 
+/**
+ * Market's dispute details. Only one field would have value rest would be null."
+ */
 export class MarketDisputeMechanism {
   private _authorized!: string | undefined | null
   private _court!: boolean | undefined | null
@@ -15,6 +18,9 @@ export class MarketDisputeMechanism {
     }
   }
 
+  /**
+   * Account address
+   */
   get authorized(): string | undefined | null {
     return this._authorized
   }
@@ -23,6 +29,9 @@ export class MarketDisputeMechanism {
     this._authorized = value
   }
 
+  /**
+   * True if mechanism is court else null
+   */
   get court(): boolean | undefined | null {
     return this._court
   }
@@ -31,6 +40,9 @@ export class MarketDisputeMechanism {
     this._court = value
   }
 
+  /**
+   * True if mechanism is simple-disputes else null
+   */
   get simpleDisputes(): boolean | undefined | null {
     return this._simpleDisputes
   }

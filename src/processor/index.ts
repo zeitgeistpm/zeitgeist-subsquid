@@ -1,11 +1,12 @@
 import { SubstrateProcessor } from "@subsquid/substrate-processor"
 import { balancesBalanceSet, balancesDustLost, balancesEndowed, balancesReserved, balancesTransfer, 
-    balancesUnreserved, currencyDeposited, currencyTransferred, currencyWithdrawn, systemExtrinsicFailed, 
-    systemExtrinsicSuccess, systemNewAccount, tokensEndowed } from "./balances";
+    balancesUnreserved, currencyDeposited, currencyTransferred, currencyWithdrawn, parachainStakingRewarded, 
+    systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount, tokensEndowed } from "./balances";
 import { predictionMarketApproved, predictionMarketBoughtCompleteSet, predictionMarketCancelled, 
     predictionMarketCreated, predictionMarketDisputed, predictionMarketInsufficientSubsidy, 
     predictionMarketRejected, predictionMarketReported, predictionMarketResolved, 
     predictionMarketSoldCompleteSet, predictionMarketStartedWithSubsidy } from "./markets";
+import { add_balance_108949, add_balance_155917, add_balance_175178 } from "./postHooks";
 import { swapExactAmountIn, swapExactAmountOut, swapPoolCreated, swapPoolExited, swapPoolJoined } from "./swaps";
 
 (BigInt.prototype as any).toJSON = function () {
@@ -23,6 +24,7 @@ processor.setDataSource({
 });
 //processor.setBlockRange({from: 815, to: 14210})
 
+processor.addEventHandler('parachainStaking.Rewarded', parachainStakingRewarded)
 processor.addEventHandler('system.NewAccount', systemNewAccount)
 processor.addEventHandler('system.ExtrinsicSuccess', systemExtrinsicSuccess)
 processor.addEventHandler('system.ExtrinsicFailed', systemExtrinsicFailed)
@@ -52,5 +54,9 @@ processor.addEventHandler('swaps.PoolExit', swapPoolExited)
 processor.addEventHandler('swaps.PoolJoin', swapPoolJoined)
 processor.addEventHandler('swaps.SwapExactAmountIn', swapExactAmountIn)
 processor.addEventHandler('swaps.SwapExactAmountOut', swapExactAmountOut)
+
+processor.addPostHook({range: {from: 108949, to: 108949}}, add_balance_108949)
+processor.addPostHook({range: {from: 155917, to: 155917}}, add_balance_155917)
+processor.addPostHook({range: {from: 175178, to: 175178}}, add_balance_175178)
 
 processor.run()

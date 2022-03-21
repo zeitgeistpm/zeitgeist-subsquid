@@ -1,12 +1,18 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, OneToMany as OneToMany_} from "typeorm"
-import {AccountBalance} from "./accountBalance.model"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_} from "typeorm"
 
+/**
+ * A type that has ss58 address format of the account. As soon as the chain
+ * encounters any new address, they get registered here as user or pool account.
+ */
 @Entity_()
 export class Account {
   constructor(props?: Partial<Account>) {
     Object.assign(this, props)
   }
 
+  /**
+   * Unique identifier of the object
+   */
   @PrimaryColumn_()
   id!: string
 
@@ -14,8 +20,11 @@ export class Account {
    * Account address
    */
   @Column_("text", {nullable: false})
-  wallet!: string
+  accountId!: string
 
-  @OneToMany_(() => AccountBalance, e => e.account)
-  accountBalances!: AccountBalance[]
+  /**
+   * Zeitgeist's identifier for pool. Valid only for pool account.
+   */
+  @Column_("integer", {nullable: true})
+  poolId!: number | undefined | null
 }
