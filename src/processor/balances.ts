@@ -633,8 +633,13 @@ export async function currencyWithdrawn(ctx: EventHandlerContext) {
 
 async function initBalance(acc: Account, store: Store, event: SubstrateEvent, block: SubstrateBlock) {
     const sdk = await Tools.getSDK()
-    const blockZero = process.env.BLOCK_ZERO!
-    const { data : { free: amt } } = await sdk.api.query.system.account.at(blockZero, acc.accountId) as AccountInfo
+    const blockZero = await sdk.api.rpc.chain.getBlockHash(0);
+    const {
+      data: { free: amt },
+    } = (await sdk.api.query.system.account.at(
+      blockZero,
+      acc.accountId
+    )) as AccountInfo;
 
     const ab = new AccountBalance()
     ab.id = event.id + '-' + acc.accountId.substring(acc.accountId.length - 5)
