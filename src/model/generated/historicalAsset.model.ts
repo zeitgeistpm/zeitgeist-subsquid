@@ -17,6 +17,12 @@ export class HistoricalAsset {
   id!: string
 
   /**
+   * Account which executed the trade
+   */
+  @Column_("text", {nullable: false})
+  accountId!: string
+
+  /**
    * Zeitgeist's identifier for asset
    */
   @Column_("text", {nullable: false})
@@ -29,7 +35,7 @@ export class HistoricalAsset {
   dPrice!: number | undefined | null
 
   /**
-   * Balance difference
+   * Balance difference. It conveys the amount of asset user bought or sold.
    */
   @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
   dQty!: bigint
