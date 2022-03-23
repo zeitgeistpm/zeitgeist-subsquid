@@ -22,7 +22,7 @@ export async function add_balance_108949(ctx: BlockHandlerContext) {
                 hab.accountId = acc.accountId
                 hab.event = "PostHook"
                 hab.assetId = ab.assetId
-                hab.amount = BigInt(5000000000)
+                hab.dBalance = BigInt(5000000000)
                 hab.balance = ab.balance
                 hab.blockNumber = block.height
                 hab.timestamp = new Date(block.timestamp)
@@ -55,7 +55,7 @@ export async function add_balance_155917(ctx: BlockHandlerContext) {
                 hab.accountId = acc.accountId
                 hab.event = "PostHook"
                 hab.assetId = ab.assetId
-                hab.amount = BigInt(5000000000)
+                hab.dBalance = BigInt(5000000000)
                 hab.balance = ab.balance
                 hab.blockNumber = block.height
                 hab.timestamp = new Date(block.timestamp)
@@ -88,7 +88,7 @@ export async function add_balance_175178(ctx: BlockHandlerContext) {
                 hab.accountId = acc.accountId
                 hab.event = "PostHook"
                 hab.assetId = ab.assetId
-                hab.amount = BigInt(50000000000)
+                hab.dBalance = BigInt(50000000000)
                 hab.balance = ab.balance
                 hab.blockNumber = block.height
                 hab.timestamp = new Date(block.timestamp)
