@@ -92,7 +92,7 @@ export class IPFS {
 
   constructor() {
     this.client = ipfsClient({
-      url: "https://ipfs.zeitgeist.pm",
+      url: process.env["IPFS_CLIENT_URL"] ?? "https://ipfs.zeitgeist.pm",
     });
   }
 
@@ -120,7 +120,10 @@ export class Tools {
 
   private static async init(): Promise<SDK> {
     console.log(`Initializing SDK`)
-    this.sdk = await SDK.initialize(process.env.WS_NODE_URL ?? 'wss://bsr.zeitgeist.pm')
+    this.sdk = await SDK.initialize(
+      process.env.WS_NODE_URL ?? "wss://bsr.zeitgeist.pm",
+      { ipfsClientUrl: process.env["IPFS_CLIENT_URL"] }
+    );
     return this.sdk
   }
 
