@@ -23,6 +23,8 @@ type AccountBalance @entity {
   assetId: String!
   "Balance of the asset"
   balance: BigInt!
+  "Computed based on the spot price of the asset"
+  value: Float
 }
 
 """
@@ -37,9 +39,13 @@ type HistoricalAccountBalance @entity {
   "Zeitgeist's identifier for asset"
   assetId: String!
   "Balance difference"
-  amount: BigInt!
+  dBalance: BigInt!
   "Net balance"
   balance: BigInt!
+  "Value difference"
+  dValue: Float
+  "Net value"
+  value: Float
   "Event method which initiated this change"
   event: String!
   "Height of the block"
