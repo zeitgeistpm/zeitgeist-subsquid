@@ -11,7 +11,6 @@
     "db:up": "docker-compose up -d db",
     "db:create": "npx sqd db create",
     "db:drop": "npx sqd db drop",
-    "db:init": "node db/init.js",
     "db:create-migration": "rm -rf db/migrations/* && yarn db:reset && npx sqd db create-migration init && yarn db:migrate",
     "db:migrate": "yarn build && npx sqd db migrate",
     "db:revert": "npx sqd db revert",
