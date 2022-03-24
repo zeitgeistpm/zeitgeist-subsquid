@@ -33,13 +33,25 @@ export class HistoricalAccountBalance {
    * Balance difference
    */
   @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
-  amount!: bigint
+  dBalance!: bigint
 
   /**
    * Net balance
    */
   @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
   balance!: bigint
+
+  /**
+   * Value difference
+   */
+  @Column_("numeric", {nullable: true})
+  dValue!: number | undefined | null
+
+  /**
+   * Net value
+   */
+  @Column_("numeric", {nullable: true})
+  value!: number | undefined | null
 
   /**
    * Event method which initiated this change

@@ -21,6 +21,7 @@
     "processor:migrate": "echo skip",
     "processor:start": "yarn build && node -r dotenv/config lib/processor/index.js",
     "processor:deploy": "yarn db:up && yarn redis:up && yarn db:reset && yarn db:migrate && yarn processor:start",
+    "query-node:start": "squid-graphql-server",
     "redis:up": "docker-compose up -d redis",
     "typegen": "squid-substrate-typegen typegen.json"
   },

@@ -44,6 +44,8 @@ export async function predictionMarketBoughtCompleteSet(ctx: EventHandlerContext
             console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
             await store.save<HistoricalAccountBalance>(hab)
         } else {
+            const asset = await store.get(Asset, { where: { assetId: currencyId } })
+
             var amount = BigInt(0)
             if (extrinsic?.args[1]) {
                 const amt = extrinsic.args[1].value as any
@@ -59,6 +61,8 @@ export async function predictionMarketBoughtCompleteSet(ctx: EventHandlerContext
             }
             if (amount > BigInt(0)) {
                 ab.balance = ab.balance + amount
+                const oldValue = ab.value!
+                ab.value = asset ? asset.price ? asset.price * Number(ab.balance) : 0 : null
                 console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
                 await store.save<AccountBalance>(ab)
 
@@ -67,8 +71,10 @@ export async function predictionMarketBoughtCompleteSet(ctx: EventHandlerContext
                 hab.accountId = acc.accountId
                 hab.event = event.method
                 hab.assetId = ab.assetId
-                hab.amount = amount
+                hab.dBalance = amount
                 hab.balance = ab.balance
+                hab.dValue = ab.value ? ab.value - oldValue : 0
+                hab.value = ab.value
                 hab.blockNumber = block.height
                 hab.timestamp = new Date(block.timestamp)
                 console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
@@ -497,7 +503,7 @@ export async function predictionMarketSoldCompleteSet(ctx: EventHandlerContext) 
             hab.accountId = acc.accountId
             hab.event = event.method
             hab.assetId = ab.assetId
-            hab.amount = - amount
+            hab.dBalance = - amount
             hab.balance = ab.balance
             hab.blockNumber = block.height
             hab.timestamp = new Date(block.timestamp)

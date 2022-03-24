@@ -35,4 +35,10 @@ export class AccountBalance {
    */
   @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
   balance!: bigint
+
+  /**
+   * Computed based on the spot price of the asset
+   */
+  @Column_("numeric", {nullable: true})
+  value!: number | undefined | null
 }
