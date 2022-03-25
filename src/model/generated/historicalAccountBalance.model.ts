@@ -36,7 +36,7 @@ export class HistoricalAccountBalance {
   dBalance!: bigint
 
   /**
-   * Net balance
+   * Balance of the asset
    */
   @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
   balance!: bigint
@@ -48,10 +48,16 @@ export class HistoricalAccountBalance {
   dValue!: number | undefined | null
 
   /**
-   * Net value
+   * Computed based on the spot price of the asset
    */
   @Column_("numeric", {nullable: true})
   value!: number | undefined | null
+
+  /**
+   * Portfolio value or sum of all asset values in an account
+   */
+  @Column_("numeric", {nullable: true})
+  pvalue!: number | undefined | null
 
   /**
    * Event method which initiated this change
