@@ -66,6 +66,10 @@ export async function predictionMarketBoughtCompleteSet(ctx: EventHandlerContext
                 console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
                 await store.save<AccountBalance>(ab)
 
+                acc.pvalue = ab.value ? acc.pvalue! - oldValue + ab.value! : acc.pvalue
+                console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+                await store.save<Account>(acc)
+
                 hab = new HistoricalAccountBalance()
                 hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
                 hab.accountId = acc.accountId
@@ -75,6 +79,7 @@ export async function predictionMarketBoughtCompleteSet(ctx: EventHandlerContext
                 hab.balance = ab.balance
                 hab.dValue = ab.value ? ab.value - oldValue : 0
                 hab.value = ab.value
+                hab.pvalue = acc.pvalue
                 hab.blockNumber = block.height
                 hab.timestamp = new Date(block.timestamp)
                 console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
@@ -480,6 +485,8 @@ export async function predictionMarketSoldCompleteSet(ctx: EventHandlerContext) 
         const ab = await store.get(AccountBalance, { where: { account: acc, assetId: currencyId } })
         if (!ab) { return }
 
+        const asset = await store.get(Asset, { where: { assetId: currencyId } })
+
         var amount = BigInt(0)
         if (extrinsic?.args[1]) {
             const amt = extrinsic.args[1].value as any
@@ -495,8 +502,14 @@ export async function predictionMarketSoldCompleteSet(ctx: EventHandlerContext) 
         }
         if (amount > BigInt(0)) {
             ab.balance = ab.balance - amount
+            const oldValue = ab.value!
+            ab.value = asset ? asset.price ? asset.price * Number(ab.balance) : 0 : null
             console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
             await store.save<AccountBalance>(ab)
+
+            acc.pvalue = ab.value ? acc.pvalue! - oldValue + ab.value! : acc.pvalue
+            console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+            await store.save<Account>(acc)
 
             const hab = new HistoricalAccountBalance()
             hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
@@ -505,6 +518,9 @@ export async function predictionMarketSoldCompleteSet(ctx: EventHandlerContext) 
             hab.assetId = ab.assetId
             hab.dBalance = - amount
             hab.balance = ab.balance
+            hab.dValue = ab.value ? ab.value - oldValue : 0
+            hab.value = ab.value
+            hab.pvalue = acc.pvalue
             hab.blockNumber = block.height
             hab.timestamp = new Date(block.timestamp)
             console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
