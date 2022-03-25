@@ -9,6 +9,8 @@ type Account @entity {
   accountId: String!
   "Zeitgeist's identifier for pool. Valid only for pool account."
   poolId: Int
+  "Sum of all asset values"
+  pvalue: Float!
 }
 
 """
@@ -40,12 +42,14 @@ type HistoricalAccountBalance @entity {
   assetId: String!
   "Balance difference"
   dBalance: BigInt!
-  "Net balance"
+  "Balance of the asset"
   balance: BigInt!
   "Value difference"
   dValue: Float
-  "Net value"
+  "Computed based on the spot price of the asset"
   value: Float
+  "Portfolio value or sum of all asset values in an account"
+  pvalue: Float
   "Event method which initiated this change"
   event: String!
   "Height of the block"
