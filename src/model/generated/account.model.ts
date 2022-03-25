@@ -27,4 +27,10 @@ export class Account {
    */
   @Column_("integer", {nullable: true})
   poolId!: number | undefined | null
+
+  /**
+   * Sum of all asset values
+   */
+  @Column_("numeric", {nullable: false})
+  pvalue!: number
 }
