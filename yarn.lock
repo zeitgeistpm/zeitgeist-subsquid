@@ -1395,10 +1395,10 @@
   resolved "https://registry.yarnpkg.com/@types/zen-observable/-/zen-observable-0.8.3.tgz#781d360c282436494b32fe7d9f7f8e64b3118aa3"
   integrity sha512-fbF6oTd4sGGy0xjHPKAt+eS2CrxJ3+6gQ3FGcBoIJR2TLAyCkCyI8JqZNy+FeON0AhVgNJoUumVoZQjBFUqHkw==
 
-"@zeitgeistpm/sdk@^0.4.0":
-  version "0.4.9"
-  resolved "https://registry.yarnpkg.com/@zeitgeistpm/sdk/-/sdk-0.4.9.tgz#2aa25f07eb62bcd89b2f7c6e7c6a2ffff30f8a51"
-  integrity sha512-DIQI1NkzFUAm0s2c/zaXNRE1Anx/Aai2D50aB/08oJj5O2bXFpM/mPd2/ie8R0uHV2JozYBHfcniiUVRpl2NBg==
+"@zeitgeistpm/sdk@^0.4.10":
+  version "0.4.10"
+  resolved "https://registry.yarnpkg.com/@zeitgeistpm/sdk/-/sdk-0.4.10.tgz#97623cb34a55fe51868ec2b0068177568c621207"
+  integrity sha512-lU7iIfCYll9Ta5kMxDLI9KSgb/pXtxf4hMozSxfQ/wJQSN+GjB4PDGxzw3d8VSURp1l5nTDAd0mBnSsbty0Qdw==
   dependencies:
     "@polkadot/api" "^7.5.1"
     "@polkadot/keyring" "^8.3.3"
