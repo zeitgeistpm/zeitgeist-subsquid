@@ -82,7 +82,9 @@ type HistoricalAsset @entity {
   "Unique identifier of the object"
   id: ID!
   "Account which executed the trade"
-  accountId: String!
+  accountId: String
+  "Amount of ZTG which user spent/redeemed for swap trade"
+  ztgTraded: BigInt
   "Zeitgeist's identifier for asset"
   assetId: String!
   "Price difference"
