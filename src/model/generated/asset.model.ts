@@ -39,5 +39,5 @@ export class Asset {
    * Balance of the asset present in the pool account
    */
   @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
-  qty!: bigint | undefined | null
+  amountInPool!: bigint | undefined | null
 }

@@ -2,7 +2,8 @@ import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_} f
 import * as marshal from "./marshal"
 
 /**
- * Price history of the outcome asset
+ * A type that records the price history of an outcome asset and
+ * trade history of an account
  */
 @Entity_()
 export class HistoricalAsset {
@@ -19,8 +20,14 @@ export class HistoricalAsset {
   /**
    * Account which executed the trade
    */
-  @Column_("text", {nullable: false})
-  accountId!: string
+  @Column_("text", {nullable: true})
+  accountId!: string | undefined | null
+
+  /**
+   * Amount of ZTG which user spent/redeemed for swap trade
+   */
+  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
+  ztgTraded!: bigint | undefined | null
 
   /**
    * Zeitgeist's identifier for asset
@@ -29,28 +36,28 @@ export class HistoricalAsset {
   assetId!: string
 
   /**
-   * Price difference
+   * Price of the asset has decreased if -ve and +ve if increased
    */
   @Column_("numeric", {nullable: true})
   dPrice!: number | undefined | null
 
   /**
-   * Balance difference. It conveys the amount of asset user bought or sold.
+   * Units of asset user bought (-ve) or sold (+ve)
    */
   @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
-  dQty!: bigint
+  dAmountInPool!: bigint
 
   /**
-   * Spot price of the asset
+   * Price of the asset after trade execution
    */
   @Column_("numeric", {nullable: true})
-  price!: number | undefined | null
+  newPrice!: number | undefined | null
 
   /**
-   * Balance in the pool account
+   * Units of asset present in the pool account
    */
   @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
-  qty!: bigint
+  newAmountInPool!: bigint
 
   /**
    * Event method which initiated this change
