@@ -72,27 +72,30 @@ type Asset @entity {
   "Spot price of the asset in the pool"
   price: Float
   "Balance of the asset present in the pool account"
-  qty: BigInt
+  amountInPool: BigInt
 }
 
 """
-Price history of the outcome asset
+A type that records the price history of an outcome asset and
+trade history of an account
 """
 type HistoricalAsset @entity {
   "Unique identifier of the object"
   id: ID!
   "Account which executed the trade"
-  accountId: String!
+  accountId: String
+  "Amount of ZTG which user spent/redeemed for swap trade"
+  ztgTraded: BigInt
   "Zeitgeist's identifier for asset"
   assetId: String!
-  "Price difference"
+  "Price of the asset has decreased if -ve and +ve if increased"
   dPrice: Float
-  "Balance difference. It conveys the amount of asset user bought or sold."
-  dQty: BigInt!
-  "Spot price of the asset"
-  price: Float
-  "Balance in the pool account"
-  qty: BigInt!
+  "Units of asset user bought (-ve) or sold (+ve)"
+  dAmountInPool: BigInt!
+  "Price of the asset after trade execution"
+  newPrice: Float
+  "Units of asset present in the pool account"
+  newAmountInPool: BigInt!
   "Event method which initiated this change"
   event: String!
   "Height of the block"
