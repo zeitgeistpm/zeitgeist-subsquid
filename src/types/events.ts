@@ -3,6 +3,8 @@ import {EventContext, Result, deprecateLatest} from './support'
 import * as v23 from './v23'
 import * as v29 from './v29'
 import * as v32 from './v32'
+import * as v33 from './v33'
+import * as v34 from './v34'
 
 export class BalancesBalanceSetEvent {
   constructor(private ctx: EventContext) {
@@ -24,14 +26,29 @@ export class BalancesBalanceSetEvent {
     return this.ctx._chain.decodeEvent(this.ctx.event)
   }
 
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV23
+  /**
+   * A balance was set by root.
+   */
+  get isV34(): boolean {
+    return this.ctx._chain.getEventHash('balances.BalanceSet') === '4ab45d6d95726adfeb725535bf55a2406d3b4d8ae14ac9005c7bd7e07ea76fcc'
   }
 
-  get asLatest(): [Uint8Array, bigint, bigint] {
+  /**
+   * A balance was set by root.
+   */
+  get asV34(): {who: v34.AccountId32, free: bigint, reserved: bigint} {
+    assert(this.isV34)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
     deprecateLatest()
-    return this.asV23
+    return this.isV34
+  }
+
+  get asLatest(): {who: v34.AccountId32, free: bigint, reserved: bigint} {
+    deprecateLatest()
+    return this.asV34
   }
 }
 
@@ -57,14 +74,31 @@ export class BalancesDustLostEvent {
     return this.ctx._chain.decodeEvent(this.ctx.event)
   }
 
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV23
+  /**
+   * An account was removed whose balance was non-zero but below ExistentialDeposit,
+   * resulting in an outright loss.
+   */
+  get isV34(): boolean {
+    return this.ctx._chain.getEventHash('balances.DustLost') === '10bbf3b0d3ec83ccf1a23f056e1a60d4f66be59072296b48ebf9172ffcdab3f6'
   }
 
-  get asLatest(): [Uint8Array, bigint] {
+  /**
+   * An account was removed whose balance was non-zero but below ExistentialDeposit,
+   * resulting in an outright loss.
+   */
+  get asV34(): {account: v34.AccountId32, amount: bigint} {
+    assert(this.isV34)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
     deprecateLatest()
-    return this.asV23
+    return this.isV34
+  }
+
+  get asLatest(): {account: v34.AccountId32, amount: bigint} {
+    deprecateLatest()
+    return this.asV34
   }
 }
 
@@ -88,14 +122,29 @@ export class BalancesEndowedEvent {
     return this.ctx._chain.decodeEvent(this.ctx.event)
   }
 
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV23
+  /**
+   * An account was created with some free balance.
+   */
+  get isV34(): boolean {
+    return this.ctx._chain.getEventHash('balances.Endowed') === '089e94580955109582764033c0ac689ca378b9d2d399441102b094e72be986e7'
   }
 
-  get asLatest(): [Uint8Array, bigint] {
+  /**
+   * An account was created with some free balance.
+   */
+  get asV34(): {account: v34.AccountId32, freeBalance: bigint} {
+    assert(this.isV34)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
     deprecateLatest()
-    return this.asV23
+    return this.isV34
+  }
+
+  get asLatest(): {account: v34.AccountId32, freeBalance: bigint} {
+    deprecateLatest()
+    return this.asV34
   }
 }
 
@@ -119,14 +168,29 @@ export class BalancesReservedEvent {
     return this.ctx._chain.decodeEvent(this.ctx.event)
   }
 
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV23
+  /**
+   * Some balance was reserved (moved from free to reserved).
+   */
+  get isV34(): boolean {
+    return this.ctx._chain.getEventHash('balances.Reserved') === 'bc321147cc9b824c85c432ac3c753b1319c9ad37babdd0e09ae0f99aeecc9360'
   }
 
-  get asLatest(): [Uint8Array, bigint] {
+  /**
+   * Some balance was reserved (moved from free to reserved).
+   */
+  get asV34(): {who: v34.AccountId32, amount: bigint} {
+    assert(this.isV34)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
     deprecateLatest()
-    return this.asV23
+    return this.isV34
+  }
+
+  get asLatest(): {who: v34.AccountId32, amount: bigint} {
+    deprecateLatest()
+    return this.asV34
   }
 }
 
@@ -150,14 +214,29 @@ export class BalancesTransferEvent {
     return this.ctx._chain.decodeEvent(this.ctx.event)
   }
 
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV23
+  /**
+   * Transfer succeeded.
+   */
+  get isV34(): boolean {
+    return this.ctx._chain.getEventHash('balances.Transfer') === '99bc4786247456e0d4a44373efe405e598bfadfac87a7c41b0a82a91296836c1'
   }
 
-  get asLatest(): [Uint8Array, Uint8Array, bigint] {
+  /**
+   * Transfer succeeded.
+   */
+  get asV34(): {from: v34.AccountId32, to: v34.AccountId32, amount: bigint} {
+    assert(this.isV34)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
     deprecateLatest()
-    return this.asV23
+    return this.isV34
+  }
+
+  get asLatest(): {from: v34.AccountId32, to: v34.AccountId32, amount: bigint} {
+    deprecateLatest()
+    return this.asV34
   }
 }
 
@@ -181,14 +260,75 @@ export class BalancesUnreservedEvent {
     return this.ctx._chain.decodeEvent(this.ctx.event)
   }
 
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV23
+  /**
+   * Some balance was unreserved (moved from reserved to free).
+   */
+  get isV34(): boolean {
+    return this.ctx._chain.getEventHash('balances.Unreserved') === 'be12b7473ab82e15891b929b20269451c731ffad981836a76ca0aae115b9e9f6'
   }
 
-  get asLatest(): [Uint8Array, bigint] {
+  /**
+   * Some balance was unreserved (moved from reserved to free).
+   */
+  get asV34(): {who: v34.AccountId32, amount: bigint} {
+    assert(this.isV34)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
     deprecateLatest()
-    return this.asV23
+    return this.isV34
+  }
+
+  get asLatest(): {who: v34.AccountId32, amount: bigint} {
+    deprecateLatest()
+    return this.asV34
+  }
+}
+
+export class BalancesWithdrawEvent {
+  constructor(private ctx: EventContext) {
+    assert(this.ctx.event.name === 'balances.Withdraw')
+  }
+
+  /**
+   * Some amount was withdrawn from the account (e.g. for transaction fees). \[who, value\]
+   */
+  get isV33(): boolean {
+    return this.ctx._chain.getEventHash('balances.Withdraw') === 'c817a046dc9663596372188650f4e0b0897f9149bbc73435595dee84b7a9b049'
+  }
+
+  /**
+   * Some amount was withdrawn from the account (e.g. for transaction fees). \[who, value\]
+   */
+  get asV33(): [v33.AccountId32, bigint] {
+    assert(this.isV33)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  /**
+   * Some amount was withdrawn from the account (e.g. for transaction fees).
+   */
+  get isV34(): boolean {
+    return this.ctx._chain.getEventHash('balances.Withdraw') === '7d47465a5bcac497a2c0e813fe27069aff5d6086a74365c4f40bc0d5332e1356'
+  }
+
+  /**
+   * Some amount was withdrawn from the account (e.g. for transaction fees).
+   */
+  get asV34(): {who: v34.AccountId32, amount: bigint} {
+    assert(this.isV34)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
+    deprecateLatest()
+    return this.isV34
+  }
+
+  get asLatest(): {who: v34.AccountId32, amount: bigint} {
+    deprecateLatest()
+    return this.asV34
   }
 }
 
@@ -227,14 +367,29 @@ export class CurrencyDepositedEvent {
     return this.ctx._chain.decodeEvent(this.ctx.event)
   }
 
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV32
+  /**
+   * Deposit success.
+   */
+  get isV34(): boolean {
+    return this.ctx._chain.getEventHash('currency.Deposited') === '71581e41f83b687ffbc92b77a08e5743dcd1579a433d0f2c018e02b05352dbb6'
   }
 
-  get asLatest(): [v32.Asset, v32.AccountId32, bigint] {
+  /**
+   * Deposit success.
+   */
+  get asV34(): {currencyId: v34.Asset, who: v34.AccountId32, amount: bigint} {
+    assert(this.isV34)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
     deprecateLatest()
-    return this.asV32
+    return this.isV34
+  }
+
+  get asLatest(): {currencyId: v34.Asset, who: v34.AccountId32, amount: bigint} {
+    deprecateLatest()
+    return this.asV34
   }
 }
 
@@ -273,14 +428,29 @@ export class CurrencyTransferredEvent {
     return this.ctx._chain.decodeEvent(this.ctx.event)
   }
 
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV32
+  /**
+   * Currency transfer success.
+   */
+  get isV34(): boolean {
+    return this.ctx._chain.getEventHash('currency.Transferred') === '6cd79b56ede9551a07b417d6f577862ddd41f7215ddf4a7336baa0a89bec27d6'
   }
 
-  get asLatest(): [v32.Asset, v32.AccountId32, v32.AccountId32, bigint] {
+  /**
+   * Currency transfer success.
+   */
+  get asV34(): {currencyId: v34.Asset, from: v34.AccountId32, to: v34.AccountId32, amount: bigint} {
+    assert(this.isV34)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
     deprecateLatest()
-    return this.asV32
+    return this.isV34
+  }
+
+  get asLatest(): {currencyId: v34.Asset, from: v34.AccountId32, to: v34.AccountId32, amount: bigint} {
+    deprecateLatest()
+    return this.asV34
   }
 }
 
@@ -319,14 +489,29 @@ export class CurrencyWithdrawnEvent {
     return this.ctx._chain.decodeEvent(this.ctx.event)
   }
 
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV32
+  /**
+   * Withdraw success.
+   */
+  get isV34(): boolean {
+    return this.ctx._chain.getEventHash('currency.Withdrawn') === 'badbf91e776e5a8f698cc47ebaffff75d383373030b25d704d2b49be86bde77b'
   }
 
-  get asLatest(): [v32.Asset, v32.AccountId32, bigint] {
+  /**
+   * Withdraw success.
+   */
+  get asV34(): {currencyId: v34.Asset, who: v34.AccountId32, amount: bigint} {
+    assert(this.isV34)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
     deprecateLatest()
-    return this.asV32
+    return this.isV34
+  }
+
+  get asLatest(): {currencyId: v34.Asset, who: v34.AccountId32, amount: bigint} {
+    deprecateLatest()
+    return this.asV34
   }
 }
 
@@ -350,14 +535,29 @@ export class PredictionMarketsBoughtCompleteSetEvent {
     return this.ctx._chain.decodeEvent(this.ctx.event)
   }
 
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV23
+  /**
+   * A complete set of assets has been bought \[market_id, amount_per_asset, buyer\]
+   */
+  get isV34(): boolean {
+    return this.ctx._chain.getEventHash('predictionMarkets.BoughtCompleteSet') === '168e95b42b15d7b5ab2fbe53bda60ea2148e92d690013ca1bde7baa8b0efcb86'
   }
 
-  get asLatest(): [bigint, Uint8Array] {
+  /**
+   * A complete set of assets has been bought \[market_id, amount_per_asset, buyer\]
+   */
+  get asV34(): [bigint, bigint, v34.AccountId32] {
+    assert(this.isV34)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
     deprecateLatest()
-    return this.asV23
+    return this.isV34
+  }
+
+  get asLatest(): [bigint, bigint, v34.AccountId32] {
+    deprecateLatest()
+    return this.asV34
   }
 }
 
@@ -782,14 +982,29 @@ export class PredictionMarketsSoldCompleteSetEvent {
     return this.ctx._chain.decodeEvent(this.ctx.event)
   }
 
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV23
+  /**
+   * A complete set of assets has been sold \[market_id, amount_per_asset, seller\]
+   */
+  get isV34(): boolean {
+    return this.ctx._chain.getEventHash('predictionMarkets.SoldCompleteSet') === '1fa1d0f705231fce5bab988ac4164d3d9c6f4d66c8184d1fed3992e2985bafd6'
   }
 
-  get asLatest(): [bigint, Uint8Array] {
+  /**
+   * A complete set of assets has been sold \[market_id, amount_per_asset, seller\]
+   */
+  get asV34(): [bigint, bigint, v34.AccountId32] {
+    assert(this.isV34)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
     deprecateLatest()
-    return this.asV23
+    return this.isV34
+  }
+
+  get asLatest(): [bigint, bigint, v34.AccountId32] {
+    deprecateLatest()
+    return this.asV34
   }
 }
 
@@ -1058,14 +1273,29 @@ export class SystemExtrinsicFailedEvent {
     return this.ctx._chain.decodeEvent(this.ctx.event)
   }
 
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV32
+  /**
+   * An extrinsic failed.
+   */
+  get isV34(): boolean {
+    return this.ctx._chain.getEventHash('system.ExtrinsicFailed') === '496691f0c811d0944bacbcdfd5e5a9262e7337e070134398577a4631ba259b6d'
   }
 
-  get asLatest(): [v32.DispatchError, v32.DispatchInfo] {
+  /**
+   * An extrinsic failed.
+   */
+  get asV34(): {dispatchError: v34.DispatchError, dispatchInfo: v34.DispatchInfo} {
+    assert(this.isV34)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
     deprecateLatest()
-    return this.asV32
+    return this.isV34
+  }
+
+  get asLatest(): {dispatchError: v34.DispatchError, dispatchInfo: v34.DispatchInfo} {
+    deprecateLatest()
+    return this.asV34
   }
 }
 
@@ -1089,14 +1319,29 @@ export class SystemExtrinsicSuccessEvent {
     return this.ctx._chain.decodeEvent(this.ctx.event)
   }
 
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV23
+  /**
+   * An extrinsic completed successfully.
+   */
+  get isV34(): boolean {
+    return this.ctx._chain.getEventHash('system.ExtrinsicSuccess') === 'd1518501dcf2f87b09d7fbeefe29eaf7f3d9926323748707ef5582bd589a9e19'
   }
 
-  get asLatest(): v23.DispatchInfo {
+  /**
+   * An extrinsic completed successfully.
+   */
+  get asV34(): {dispatchInfo: v34.DispatchInfo} {
+    assert(this.isV34)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
     deprecateLatest()
-    return this.asV23
+    return this.isV34
+  }
+
+  get asLatest(): {dispatchInfo: v34.DispatchInfo} {
+    deprecateLatest()
+    return this.asV34
   }
 }
 
@@ -1120,14 +1365,29 @@ export class SystemNewAccountEvent {
     return this.ctx._chain.decodeEvent(this.ctx.event)
   }
 
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV23
+  /**
+   * A new account was created.
+   */
+  get isV34(): boolean {
+    return this.ctx._chain.getEventHash('system.NewAccount') === '907b2fa451c8f03a165484ae615c0d34a56c36fbf3d8949aae035cc3054112c1'
   }
 
-  get asLatest(): Uint8Array {
+  /**
+   * A new account was created.
+   */
+  get asV34(): {account: v34.AccountId32} {
+    assert(this.isV34)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
     deprecateLatest()
-    return this.asV23
+    return this.isV34
+  }
+
+  get asLatest(): {account: v34.AccountId32} {
+    deprecateLatest()
+    return this.asV34
   }
 }
 
@@ -1170,13 +1430,28 @@ export class TokensEndowedEvent {
     return this.ctx._chain.decodeEvent(this.ctx.event)
   }
 
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV32
+  /**
+   * An account was created with some free balance.
+   */
+  get isV34(): boolean {
+    return this.ctx._chain.getEventHash('tokens.Endowed') === '86247dad7f4c13239394ed124a341be2d45f15730142e1b10ca1157bb6be61e8'
   }
 
-  get asLatest(): [v32.Asset, v32.AccountId32, bigint] {
+  /**
+   * An account was created with some free balance.
+   */
+  get asV34(): {currencyId: v34.Asset, who: v34.AccountId32, amount: bigint} {
+    assert(this.isV34)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
     deprecateLatest()
-    return this.asV32
+    return this.isV34
+  }
+
+  get asLatest(): {currencyId: v34.Asset, who: v34.AccountId32, amount: bigint} {
+    deprecateLatest()
+    return this.asV34
   }
 }
