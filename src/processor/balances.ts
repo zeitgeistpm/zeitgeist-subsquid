@@ -523,7 +523,7 @@ export async function balancesUnreserved(ctx: EventHandlerContext) {
 
 export async function tokensEndowed(ctx: EventHandlerContext) {
     const { store, event, block, extrinsic } = ctx
-    const { assetId, accountId, amount } = getTokensEndowedEvent(ctx)!
+    const { assetId, accountId, amount } = getTokensEndowedEvent(ctx)
     const walletId = ss58.codec('zeitgeist').encode(accountId)
 
     var acc = await store.get(Account, { where: { accountId: walletId } })
@@ -893,6 +893,11 @@ interface UnreservedEvent {
     amount: bigint
 }
 
+interface WithdrawEvent {
+    accountId: Uint8Array
+    amount: bigint
+}
+
 interface TokEndowedEvent {
     assetId: string
     accountId: Uint8Array
@@ -927,14 +932,26 @@ function getRewardedEvent(ctx: EventHandlerContext): RewardedEvent {
 
 function getNewAccountEvent(ctx: EventHandlerContext): NewAccountEvent {
     const event = new SystemNewAccountEvent(ctx)
-    const accountId = event.asLatest
-    return {accountId}
+    if (event.isV23) {
+        const accountId = event.asV23
+        return {accountId}
+    } else {
+        const {account} = event.asLatest
+        const accountId = account
+        return {accountId}
+    }
 }
 
 function getExtrinsicSuccessEvent(ctx: EventHandlerContext): ExtrinsicEvent {
     const event = new SystemExtrinsicSuccessEvent(ctx)
-    const info = event.asLatest
-    return {info}
+    if (event.isV23) {
+        const info = event.asV23
+        return {info}
+    } else {
+        const {dispatchInfo}  = event.asLatest
+        const info = dispatchInfo
+        return {info}
+    }
 }
 
 function getExtrinsicFailedEvent(ctx: EventHandlerContext): ExtrinsicEvent {
@@ -946,45 +963,85 @@ function getExtrinsicFailedEvent(ctx: EventHandlerContext): ExtrinsicEvent {
         const [error, info]  = event.asV32
         return {info}
     } else {
-        const [error, info]  = event.asLatest 
+        const {dispatchError, dispatchInfo}  = event.asLatest
+        const info = dispatchInfo
         return {info}
     }
 }
 
 function getBalancesEndowedEvent(ctx: EventHandlerContext): BalEndowedEvent {
     const event = new BalancesEndowedEvent(ctx)
-    const [accountId, amount] = event.asLatest
-    return {accountId, amount}
+    if (event.isV23) {
+        const [accountId, amount] = event.asV23
+        return {accountId, amount}
+    } else {
+        const {account, freeBalance} = event.asLatest
+        const accountId = account
+        const amount = freeBalance
+        return {accountId, amount}
+    }
 }
 
 function getDustLostEvent(ctx: EventHandlerContext): DustLostEvent {
     const event = new BalancesDustLostEvent(ctx)
-    const [accountId, amount] = event.asLatest
-    return {accountId, amount}
+    if (event.isV23) {
+        const [accountId, amount] = event.asV23
+        return {accountId, amount}
+    } else {
+        const {account, amount} = event.asLatest
+        const accountId = account
+        return {accountId, amount}
+    }
 }
 
 function getTransferEvent(ctx: EventHandlerContext): TransferEvent {
     const event = new BalancesTransferEvent(ctx)
-    const [fromId, toId, amount] = event.asLatest
-    return {fromId, toId, amount}
+    if (event.isV23) {
+        const [fromId, toId, amount] = event.asV23
+        return {fromId, toId, amount}
+    } else {
+        const {from, to, amount} = event.asLatest
+        const fromId = from
+        const toId = to
+        return {fromId, toId, amount}
+    }
 }
 
 function getBalanceSetEvent(ctx: EventHandlerContext): BalanceSetEvent {
     const event = new BalancesBalanceSetEvent(ctx)
-    const [accountId, amount] = event.asLatest
-    return {accountId, amount}
+    if (event.isV23) {
+        const [accountId, amount] = event.asV23
+        return {accountId, amount}
+    } else {
+        const {who, free} = event.asLatest
+        const accountId = who
+        const amount = free
+        return {accountId, amount}
+    }
 }
 
 function getReservedEvent(ctx: EventHandlerContext): ReservedEvent {
     const event = new BalancesReservedEvent(ctx)
-    const [accountId, amount] = event.asLatest
-    return {accountId, amount}
+    if (event.isV23) {
+        const [accountId, amount] = event.asV23
+        return {accountId, amount}
+    } else {
+        const {who, amount} = event.asLatest
+        const accountId = who
+        return {accountId, amount}
+    }
 }
 
 function getUnreservedEvent(ctx: EventHandlerContext): UnreservedEvent {
     const event = new BalancesUnreservedEvent(ctx)
-    const [accountId, amount] = event.asLatest
-    return {accountId, amount}
+    if (event.isV23) {
+        const [accountId, amount] = event.asV23
+        return {accountId, amount}
+    } else {
+        const {who, amount} = event.asLatest
+        const accountId = who
+        return {accountId, amount}
+    }
 }
 
 function getTokensEndowedEvent(ctx: EventHandlerContext): TokEndowedEvent {
@@ -995,7 +1052,10 @@ function getTokensEndowedEvent(ctx: EventHandlerContext): TokEndowedEvent {
     } else if (event.isV32) {
         [currencyId, accountId, amount] = event.asV32
     } else {
-        [currencyId, accountId, amount] = event.asLatest
+        const info = event.asLatest
+        currencyId = info.currencyId
+        accountId = info.who
+        amount = info.amount
     }
 
     if (currencyId.__kind  == "CategoricalOutcome") {
@@ -1027,7 +1087,11 @@ function getTransferredEvent(ctx: EventHandlerContext): TransferredEvent {
     } else if (event.isV32) {
         [currencyId, fromId, toId, amount] = event.asV32
     } else {
-        [currencyId, fromId, toId, amount] = event.asLatest
+        const info = event.asLatest
+        currencyId = info.currencyId
+        fromId = info.from
+        toId = info.to
+        amount = info.amount
     }
 
     if (currencyId.__kind  == "CategoricalOutcome") {
@@ -1059,7 +1123,10 @@ function getDepositedEvent(ctx: EventHandlerContext): DepositedEvent {
     } else if (event.isV32) {
         [currencyId, accountId, amount] = event.asV32
     } else {
-        [currencyId, accountId, amount] = event.asLatest
+        const info = event.asLatest
+        currencyId = info.currencyId
+        accountId = info.who
+        amount = info.amount
     }
 
     if (currencyId.__kind  == "CategoricalOutcome") {
@@ -1091,7 +1158,10 @@ function getWithdrawnEvent(ctx: EventHandlerContext): WithdrawnEvent {
     } else if (event.isV32) {
         [currencyId, accountId, amount] = event.asV32
     } else {
-        [currencyId, accountId, amount] = event.asLatest
+        const info = event.asLatest
+        currencyId = info.currencyId
+        accountId = info.who
+        amount = info.amount
     }
 
     if (currencyId.__kind  == "CategoricalOutcome") {
