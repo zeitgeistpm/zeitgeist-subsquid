@@ -1,7 +1,7 @@
 import { SubstrateProcessor } from "@subsquid/substrate-processor"
 import { balancesBalanceSet, balancesDustLost, balancesEndowed, balancesReserved, balancesTransfer, 
-    balancesUnreserved, currencyDeposited, currencyTransferred, currencyWithdrawn, parachainStakingRewarded, 
-    systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount, tokensEndowed } from "./balances";
+    balancesUnreserved, balancesWithdraw, currencyDeposited, currencyTransferred, currencyWithdrawn, 
+    parachainStakingRewarded, systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount, tokensEndowed } from "./balances";
 import { predictionMarketApproved, predictionMarketBoughtCompleteSet, predictionMarketCancelled, 
     predictionMarketCreated, predictionMarketDisputed, predictionMarketInsufficientSubsidy, 
     predictionMarketRejected, predictionMarketReported, predictionMarketResolved, 
@@ -35,6 +35,7 @@ processor.addEventHandler('balances.Transfer', balancesTransfer)
 processor.addEventHandler('balances.BalanceSet', balancesBalanceSet)
 processor.addEventHandler('balances.Reserved', balancesReserved)
 processor.addEventHandler('balances.Unreserved', balancesUnreserved)
+processor.addEventHandler('balances.Withdraw', balancesWithdraw)
 processor.addEventHandler('tokens.Endowed', tokensEndowed)
 processor.addEventHandler('currency.Transferred', currencyTransferred)
 processor.addEventHandler('currency.Deposited', currencyDeposited)
