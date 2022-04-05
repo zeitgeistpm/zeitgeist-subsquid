@@ -27,8 +27,8 @@ processor.setDataSource({
 
 processor.addEventHandler('parachainStaking.Rewarded', parachainStakingRewarded)
 processor.addEventHandler('system.NewAccount', systemNewAccount)
-processor.addEventHandler('system.ExtrinsicSuccess', systemExtrinsicSuccess)
-processor.addEventHandler('system.ExtrinsicFailed', systemExtrinsicFailed)
+processor.addEventHandler('system.ExtrinsicSuccess', {range: {from: 0, to: 588249}}, systemExtrinsicSuccess)
+processor.addEventHandler('system.ExtrinsicFailed', {range: {from: 0, to: 588249}}, systemExtrinsicFailed)
 processor.addEventHandler('balances.Endowed', balancesEndowed)
 processor.addEventHandler('balances.DustLost', balancesDustLost)
 processor.addEventHandler('balances.Transfer', balancesTransfer)
