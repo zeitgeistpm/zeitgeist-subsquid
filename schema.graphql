@@ -204,6 +204,8 @@ type Pool @entity {
   ztgQty: BigInt!
   "Total amount of ZTG that has moved through a market's liquidity pool"
   volume: BigInt!
+  "Timestamp of pool creation"
+  createdAt: DateTime!
 }
 
 """
