@@ -539,12 +539,12 @@ export async function balancesWithdraw(ctx: EventHandlerContext) {
 
     const ab = await store.get(AccountBalance, { where: { account: acc, assetId: "Ztg" } })
     if (ab) {
-        ab.balance = ab.balance + amount
+        ab.balance = ab.balance - amount
         ab.value = Number(ab.balance)
         console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
         await store.save<AccountBalance>(ab)
 
-        acc.pvalue = Number(acc.pvalue) + Number(amount)
+        acc.pvalue = Number(acc.pvalue) - Number(amount)
         console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
         await store.save<Account>(acc)
 
@@ -553,7 +553,7 @@ export async function balancesWithdraw(ctx: EventHandlerContext) {
         hab.accountId = acc.accountId
         hab.event = event.method
         hab.assetId = ab.assetId
-        hab.dBalance = amount
+        hab.dBalance = - amount
         hab.balance = ab.balance
         hab.dValue = Number(hab.dBalance)
         hab.value = Number(hab.balance)

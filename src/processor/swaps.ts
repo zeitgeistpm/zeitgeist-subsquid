@@ -22,6 +22,7 @@ export async function swapPoolCreated(ctx: EventHandlerContext) {
     newPool.weights = []
     newPool.ztgQty = BigInt(1000000000000)
     newPool.volume = BigInt(0)
+    newPool.createdAt = new Date(block.timestamp)
 
     const base = pool.baseAsset as any
     newPool.baseAsset = base.ztg !== undefined ? "Ztg" : JSON.stringify(base)

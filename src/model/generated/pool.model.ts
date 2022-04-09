@@ -82,4 +82,10 @@ export class Pool {
    */
   @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
   volume!: bigint
+
+  /**
+   * Timestamp of pool creation
+   */
+  @Column_("timestamp with time zone", {nullable: false})
+  createdAt!: Date
 }
