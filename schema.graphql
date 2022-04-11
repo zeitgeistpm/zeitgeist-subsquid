@@ -138,7 +138,7 @@ type Market @entity {
   marketType: MarketType!
   "Time period expressed in block numbers or timestamps"
   period: MarketPeriod!
-  "Timestamp at which market should end"
+  "Timestamp (in ms) at which market should end"
   end: BigInt!
   "Scoring rule used for the market"
   scoringRule: String!
@@ -148,8 +148,8 @@ type Market @entity {
   poolId: Int
   "Reported outcome of the market. Null if the market is not reported yet"
   report: MarketReport
-  "Resolved outcome for the market"
-  resolvedOutcome: String
+  "Resolved outcome of the market. Null if the market is not resolved yet"
+  resolution: MarketResolution
   "Can be `authorized` or `court` or `simpleDisputes`"
   mdm: MarketDisputeMechanism!
 }
@@ -167,8 +167,8 @@ type HistoricalMarket @entity {
   status: String
   "New market report. Null if no change"
   report: MarketReport
-  "New resolved outcome. Null if no change"
-  resolvedOutcome: String
+  "Market resolution details. Null if no change"
+  resolution: MarketResolution
   "Event method which initiated this change"
   event: String!
   "Height of the block"
