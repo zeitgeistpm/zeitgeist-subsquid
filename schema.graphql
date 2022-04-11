@@ -297,6 +297,16 @@ type MarketReport @jsonField {
 }
 
 """
+Market's resolution details
+"""
+type MarketResolution @jsonField {
+  "Timestamp of resolution"
+  at: DateTime!
+  "Resolved outcome for the market"
+  outcome: String!
+}
+
+"""
 Market's outcome details
 """
 type OutcomeReport @jsonField {
