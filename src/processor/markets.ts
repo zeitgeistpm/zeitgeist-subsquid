@@ -7,7 +7,7 @@ import { PredictionMarketsBoughtCompleteSetEvent, PredictionMarketsMarketApprove
     PredictionMarketsMarketStartedWithSubsidyEvent, PredictionMarketsSoldCompleteSetEvent } from '../types/events'
 import { EventHandlerContext } from '@subsquid/substrate-processor'
 import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBalance, HistoricalMarket, 
-    Market, MarketDisputeMechanism, MarketPeriod, MarketReport, MarketResolution, MarketType, OutcomeReport } from '../model'
+    Market, MarketDisputeMechanism, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../model'
 import { util } from '@zeitgeistpm/sdk'
 import { Market as t_Market, MarketId as t_MarketId} from '@zeitgeistpm/typesV2/dist/interfaces'
 
@@ -427,17 +427,24 @@ export async function predictionMarketResolved(ctx: EventHandlerContext) {
     const savedMarket = await store.get(Market, { where: { marketId: marketId } })
     if (!savedMarket) return
 
-    const mr = new MarketResolution()
-    mr.at = new Date(block.timestamp)
+    const ocr = new OutcomeReport()
     if (report.__kind == "Categorical") {
-        mr.outcome = report.value.toString()
+        ocr.categorical = report.value
+        savedMarket.report!.outcome = ocr
+        savedMarket.resolvedOutcome = report.value.toString()
     } else if (report.__kind == "Scalar") {
-        mr.outcome = report.value()
+        ocr.scalar = +report.value.toString()
+        savedMarket.report!.outcome = ocr
+        savedMarket.resolvedOutcome = report.value()
     } else if (typeof report == "number") {
-        mr.outcome = report.toString()
+        savedMarket.resolvedOutcome = report.toString()
     }
-    savedMarket.status = status.length < 2 ? "Resolved" : status.__kind
-    savedMarket.resolution = mr
+
+    if (status.length < 2) {
+        savedMarket.status = "Resolved"
+    } else {
+        savedMarket.status = status.__kind
+    }
     console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
     await store.save<Market>(savedMarket)
 
@@ -446,7 +453,8 @@ export async function predictionMarketResolved(ctx: EventHandlerContext) {
     hm.marketId = savedMarket.marketId
     hm.event = event.method
     hm.status = savedMarket.status
-    hm.resolution = savedMarket.resolution
+    hm.report = savedMarket.report
+    hm.resolvedOutcome = savedMarket.resolvedOutcome
     hm.blockNumber = block.height
     hm.timestamp = new Date(block.timestamp)
     console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)

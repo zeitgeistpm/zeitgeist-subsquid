@@ -138,7 +138,7 @@ type Market @entity {
   marketType: MarketType!
   "Time period expressed in block numbers or timestamps"
   period: MarketPeriod!
-  "Timestamp (in ms) at which market should end"
+  "Timestamp at which market should end"
   end: BigInt!
   "Scoring rule used for the market"
   scoringRule: String!
@@ -148,8 +148,8 @@ type Market @entity {
   poolId: Int
   "Reported outcome of the market. Null if the market is not reported yet"
   report: MarketReport
-  "Resolved outcome of the market. Null if the market is not resolved yet"
-  resolution: MarketResolution
+  "Resolved outcome for the market"
+  resolvedOutcome: String
   "Can be `authorized` or `court` or `simpleDisputes`"
   mdm: MarketDisputeMechanism!
 }
@@ -167,8 +167,8 @@ type HistoricalMarket @entity {
   status: String
   "New market report. Null if no change"
   report: MarketReport
-  "Market resolution details. Null if no change"
-  resolution: MarketResolution
+  "New resolved outcome. Null if no change"
+  resolvedOutcome: String
   "Event method which initiated this change"
   event: String!
   "Height of the block"
@@ -294,16 +294,6 @@ type MarketReport @jsonField {
   by: String!
   "Outcome details"
   outcome: OutcomeReport!
-}
-
-"""
-Market's resolution details
-"""
-type MarketResolution @jsonField {
-  "Timestamp of resolution"
-  at: DateTime!
-  "Resolved outcome for the market"
-  outcome: String!
 }
 
 """

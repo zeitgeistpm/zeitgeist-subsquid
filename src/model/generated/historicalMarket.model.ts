@@ -1,7 +1,6 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_} from "typeorm"
 import * as marshal from "./marshal"
 import {MarketReport} from "./_marketReport"
-import {MarketResolution} from "./_marketResolution"
 
 /**
  * Market history of a particular market. Records all transactions
@@ -41,10 +40,10 @@ export class HistoricalMarket {
   report!: MarketReport | undefined | null
 
   /**
-   * Market resolution details. Null if no change
+   * New resolved outcome. Null if no change
    */
-  @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new MarketResolution(undefined, obj)}, nullable: true})
-  resolution!: MarketResolution | undefined | null
+  @Column_("text", {nullable: true})
+  resolvedOutcome!: string | undefined | null
 
   /**
    * Event method which initiated this change

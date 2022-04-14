@@ -4,7 +4,6 @@ import {CategoryMetadata} from "./_categoryMetadata"
 import {MarketType} from "./_marketType"
 import {MarketPeriod} from "./_marketPeriod"
 import {MarketReport} from "./_marketReport"
-import {MarketResolution} from "./_marketResolution"
 import {MarketDisputeMechanism} from "./_marketDisputeMechanism"
 
 /**
@@ -107,7 +106,7 @@ export class Market {
   period!: MarketPeriod
 
   /**
-   * Timestamp (in ms) at which market should end
+   * Timestamp at which market should end
    */
   @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
   end!: bigint
@@ -137,10 +136,10 @@ export class Market {
   report!: MarketReport | undefined | null
 
   /**
-   * Resolved outcome of the market. Null if the market is not resolved yet
+   * Resolved outcome for the market
    */
-  @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new MarketResolution(undefined, obj)}, nullable: true})
-  resolution!: MarketResolution | undefined | null
+  @Column_("text", {nullable: true})
+  resolvedOutcome!: string | undefined | null
 
   /**
    * Can be `authorized` or `court` or `simpleDisputes`
