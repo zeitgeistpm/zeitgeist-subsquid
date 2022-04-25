@@ -5,6 +5,7 @@ import * as v29 from './v29'
 import * as v32 from './v32'
 import * as v33 from './v33'
 import * as v34 from './v34'
+import * as v35 from './v35'
 
 export class BalancesBalanceSetEvent {
   constructor(private ctx: EventContext) {
@@ -1043,14 +1044,29 @@ export class SwapsPoolCreateEvent {
     return this.ctx._chain.decodeEvent(this.ctx.event)
   }
 
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV32
+  /**
+   * A new pool has been created. \[CommonPoolEventParams, pool, pool_amount\]
+   */
+  get isV35(): boolean {
+    return this.ctx._chain.getEventHash('swaps.PoolCreate') === '4062f8bbf839a56111b44d9e9ad9197242fbce2949151e8e34cea7d266355826'
   }
 
-  get asLatest(): [v32.CommonPoolEventParams, v32.Pool] {
+  /**
+   * A new pool has been created. \[CommonPoolEventParams, pool, pool_amount\]
+   */
+  get asV35(): [v35.CommonPoolEventParams, v35.Pool, bigint] {
+    assert(this.isV35)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
     deprecateLatest()
-    return this.asV32
+    return this.isV35
+  }
+
+  get asLatest(): [v35.CommonPoolEventParams, v35.Pool, bigint] {
+    deprecateLatest()
+    return this.asV35
   }
 }
 
@@ -1089,14 +1105,29 @@ export class SwapsPoolExitEvent {
     return this.ctx._chain.decodeEvent(this.ctx.event)
   }
 
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV32
+  /**
+   * Someone has exited a pool. \[PoolAssetsEvent\]
+   */
+  get isV35(): boolean {
+    return this.ctx._chain.getEventHash('swaps.PoolExit') === '6415c656af5a84e68b89084a6429f7b2793906993a85b92f6a4ad41c98be2a52'
   }
 
-  get asLatest(): v32.PoolAssetsEvent {
+  /**
+   * Someone has exited a pool. \[PoolAssetsEvent\]
+   */
+  get asV35(): v35.PoolAssetsEvent {
+    assert(this.isV35)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
     deprecateLatest()
-    return this.asV32
+    return this.isV35
+  }
+
+  get asLatest(): v35.PoolAssetsEvent {
+    deprecateLatest()
+    return this.asV35
   }
 }
 
@@ -1135,14 +1166,29 @@ export class SwapsPoolJoinEvent {
     return this.ctx._chain.decodeEvent(this.ctx.event)
   }
 
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV32
+  /**
+   * Someone has joined a pool. \[PoolAssetsEvent\]
+   */
+  get isV35(): boolean {
+    return this.ctx._chain.getEventHash('swaps.PoolJoin') === '2b4d42750b19beaee52c5bba5c95f3f382ef359cf642f480ef75df9edf8e05a9'
   }
 
-  get asLatest(): v32.PoolAssetsEvent {
+  /**
+   * Someone has joined a pool. \[PoolAssetsEvent\]
+   */
+  get asV35(): v35.PoolAssetsEvent {
+    assert(this.isV35)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
     deprecateLatest()
-    return this.asV32
+    return this.isV35
+  }
+
+  get asLatest(): v35.PoolAssetsEvent {
+    deprecateLatest()
+    return this.asV35
   }
 }
 
@@ -1288,14 +1334,29 @@ export class SystemExtrinsicFailedEvent {
     return this.ctx._chain.decodeEvent(this.ctx.event)
   }
 
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV34
+  /**
+   * An extrinsic failed.
+   */
+  get isV35(): boolean {
+    return this.ctx._chain.getEventHash('system.ExtrinsicFailed') === '6ee0abd9a4f0ace52d3227745c8ffaaed4dceadc905c1768133fdf4a912ca14d'
   }
 
-  get asLatest(): {dispatchError: v34.DispatchError, dispatchInfo: v34.DispatchInfo} {
+  /**
+   * An extrinsic failed.
+   */
+  get asV35(): {dispatchError: v35.DispatchError, dispatchInfo: v35.DispatchInfo} {
+    assert(this.isV35)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
     deprecateLatest()
-    return this.asV34
+    return this.isV35
+  }
+
+  get asLatest(): {dispatchError: v35.DispatchError, dispatchInfo: v35.DispatchInfo} {
+    deprecateLatest()
+    return this.asV35
   }
 }
 

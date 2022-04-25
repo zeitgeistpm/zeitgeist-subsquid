@@ -1,6 +1,6 @@
 import { EventHandlerContext } from "@subsquid/substrate-processor"
 import { Asset, HistoricalAccountBalance, HistoricalAsset, HistoricalPool, Market, HistoricalMarket, Weight, Pool, Account} from '../model'
-import { CommonPoolEventParams as t_CPEP, Pool as t_Pool, PoolAssetsEvent as t_PAE, SwapEvent as t_SE } from '@zeitgeistpm/typesV2/dist/interfaces'
+import { CommonPoolEventParams as t_CPEP, Pool as t_Pool, PoolAssetsEvent as t_PAE, SwapEvent as t_SE } from '@zeitgeistpm/types/dist/interfaces'
 
 export async function swapPoolCreated(ctx: EventHandlerContext) {
     const {store, event, block, extrinsic} = ctx
