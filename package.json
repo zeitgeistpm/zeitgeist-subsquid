@@ -19,7 +19,7 @@
     "indexer:testnet": "docker-compose -f indexer/docker-compose.yml -f indexer/docker-compose.testnet.yml up -d",
     "processor:deploy": "yarn db:up && yarn redis:up && yarn db:reset && yarn db:migrate && yarn processor:start",
     "processor:migrate": "echo skip",
-    "processor:start": "yarn build && node -r dotenv/config lib/processor/index.js",
+    "processor:start": "yarn build && node -r dotenv/config lib/processor/testnet/index.js",
     "processor:start:local": "./scripts/run_processor_local.sh",
     "query-node:start": "squid-graphql-server",
     "redis:up": "docker-compose up -d redis",
