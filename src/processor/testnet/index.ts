@@ -1,14 +1,14 @@
 import { SubstrateProcessor } from "@subsquid/substrate-processor"
 import { balancesBalanceSet, balancesDustLost, balancesEndowed, balancesReserved, balancesTransfer, 
     balancesUnreserved, balancesWithdraw, currencyDeposited, currencyTransferred, currencyWithdrawn, 
-    parachainStakingRewarded, systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount, tokensEndowed } from "./balances";
+    parachainStakingRewarded, systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount, tokensEndowed } from "../balances";
 import { predictionMarketApproved, predictionMarketBoughtCompleteSet, predictionMarketCancelled, 
     predictionMarketCreated, predictionMarketDisputed, predictionMarketInsufficientSubsidy, 
     predictionMarketRejected, predictionMarketReported, predictionMarketResolved, 
-    predictionMarketSoldCompleteSet, predictionMarketStartedWithSubsidy } from "./markets";
+    predictionMarketSoldCompleteSet, predictionMarketStartedWithSubsidy } from "../markets";
 import { add_balance_108949, add_balance_155917, add_balance_175178, add_balance_178290, add_balance_179524, 
   add_balance_184820, add_balance_204361 } from "./postHooks";
-import { swapExactAmountIn, swapExactAmountOut, swapPoolCreated, swapPoolExited, swapPoolJoined } from "./swaps";
+import { swapExactAmountIn, swapExactAmountOut, swapPoolCreated, swapPoolExited, swapPoolJoined } from "../swaps";
 
 (BigInt.prototype as any).toJSON = function () {
     return this.toString();
