@@ -9,7 +9,7 @@ import { EventHandlerContext } from '@subsquid/substrate-processor'
 import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBalance, HistoricalMarket, 
     Market, MarketDisputeMechanism, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../model'
 import { util } from '@zeitgeistpm/sdk'
-import { Market as t_Market, MarketId as t_MarketId} from '@zeitgeistpm/typesV2/dist/interfaces'
+import { Market as t_Market, MarketId as t_MarketId} from '@zeitgeistpm/types/dist/interfaces'
 
 export async function predictionMarketBoughtCompleteSet(ctx: EventHandlerContext) {
     const {store, event, block, extrinsic} = ctx
@@ -533,7 +533,7 @@ export async function predictionMarketSoldCompleteSet(ctx: EventHandlerContext) 
     }
 }
 
-async function createAssetsForMarket(marketId: t_MarketId, marketType: any): Promise<string[]> {
+async function createAssetsForMarket(marketId: t_MarketId, marketType: any): Promise<any> {
     const sdk = await Tools.getSDK()
     return marketType.categorical
       ? [...Array(marketType.categorical).keys()].map((catIdx) => {
