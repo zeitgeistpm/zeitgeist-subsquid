@@ -9,5 +9,5 @@ yarn build
 
 # using .env file for environment variables
 node -r dotenv/config \
-    lib/processor/index.js \
+    lib/processor/testnet/index.js \
     dotenv_config_debug=true
