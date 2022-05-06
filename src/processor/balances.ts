@@ -848,7 +848,7 @@ async function initBalance(acc: Account, store: Store, event: SubstrateEvent, bl
     console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
     await store.save<AccountBalance>(ab)
 
-    acc.pvalue = Number(acc.pvalue) + amt.toNumber()
+    acc.pvalue = Number(acc.pvalue) + Number(amt)
     console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
     await store.save<Account>(acc)
 
