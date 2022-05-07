@@ -26,13 +26,9 @@ The substrate events are processed in a multi-step pipeline:
 # The dependencies setup
 yarn install
 
-# Run indexer for Zeitgeist PM testnet (wss://bsr.zeitgeist.pm) 
-# Indexer for testnet is already live and will be used by default for processor
-yarn indexer:testnet
-
-# Alternatively, run fresh development Zeitgeist PM node (accessible from
+# Run fresh development Zeitgeist PM node (accessible from
 # ws://localhost:9944) from docker image and start indexing it
-yarn indexer:local
+yarn indexer:start
 
 # Start services needed for processor
 yarn db:up && yarn redis:up
@@ -56,19 +52,18 @@ yarn db:reset
 # Run existing migrations onto database
 yarn db:migrate
 
-
 # Now you can start processing chain data
-yarn processor:start
+yarn processor:resume
 
-# If `yarn indexer:local` is used for indexer, processor is started this way
+# If `yarn indexer:start` is used for indexer, processor is started this way
 # Will override following environment variables:
 #  - WS_NODE_URL
 #  - IPFS_CLIENT_URL
 #  - INDEXER_ENDPOINT_URL
-yarn processor:start:local
+yarn processor:local:start
 
 # Following will start services for processor, reset database, run migrations and start processor (testnet only)
-yarn processor:deploy
+yarn processor:start
 
 # The above command will block
 # Open a separate terminal and launch the graphql server to query the processed data
@@ -88,7 +83,7 @@ Hydra tools expect a certain directory layout:
 - INDEXER_ENDPOINT_URL - Url for indexer graphql api to be processed (default: https://indexer.zeitgeist.pm/v1/graphql).
 - IPFS_CLIENT_URL - Shouldn't be manually set most of the time. Used for development / local environment.
 
-Those three environment variables are overriden when running `yarn processor:start:local` with urls for services provided by docker.
+Those three environment variables are overriden when running `yarn processor:local:start` with urls for services provided by docker.
 
 ## Development flow
 
