@@ -440,6 +440,45 @@ export async function predictionMarketResolved(ctx: EventHandlerContext) {
         savedMarket.resolvedOutcome = report.toString()
     }
 
+    if (savedMarket.resolvedOutcome) {
+        for (var i = 0; i < savedMarket.outcomeAssets.length; i++) {
+            if (i == +savedMarket.resolvedOutcome) continue
+
+            const abs = await store.find(AccountBalance, { where: { assetId: savedMarket.outcomeAssets[i] } })
+            await Promise.all(
+                abs.map(async ab => {
+                    if (ab.balance > BigInt(0)) {
+                        const oldBalance = ab.balance
+                        const oldValue = ab.value
+                        ab.account.pvalue = oldValue ? ab.account.pvalue - oldValue : ab.account.pvalue
+                        console.log(`[${event.name}] Saving account: ${JSON.stringify(ab.account, null, 2)}`)
+                        await store.save<Account>(ab.account)
+
+                        ab.balance = BigInt(0)
+                        ab.value = 0
+                        console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
+                        await store.save<AccountBalance>(ab)
+
+                        const hab = new HistoricalAccountBalance()
+                        hab.id = event.id + '-' + ab.account.accountId.substring(ab.account.accountId.length - 5)
+                        hab.accountId = ab.account.accountId
+                        hab.event = event.method
+                        hab.assetId = ab.assetId
+                        hab.dBalance = ab.balance - oldBalance
+                        hab.balance = ab.balance
+                        hab.dValue = oldValue ? ab.value - oldValue : null
+                        hab.value = ab.value
+                        hab.pvalue = ab.account.pvalue
+                        hab.blockNumber = block.height
+                        hab.timestamp = new Date(block.timestamp)
+                        console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
+                        await store.save<HistoricalAccountBalance>(hab)
+                    }
+                })
+            );
+        }
+    }
+
     if (status.length < 2) {
         savedMarket.status = "Resolved"
     } else {
