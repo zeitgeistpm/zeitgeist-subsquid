@@ -10,6 +10,7 @@ import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBala
     Market, MarketDisputeMechanism, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../model'
 import { util } from '@zeitgeistpm/sdk'
 import { Market as t_Market, MarketId as t_MarketId} from '@zeitgeistpm/types/dist/interfaces'
+import { Like } from "typeorm"
 
 export async function predictionMarketBoughtCompleteSet(ctx: EventHandlerContext) {
     const {store, event, block, extrinsic} = ctx
@@ -447,12 +448,14 @@ export async function predictionMarketResolved(ctx: EventHandlerContext) {
             const abs = await store.find(AccountBalance, { where: { assetId: savedMarket.outcomeAssets[i] } })
             await Promise.all(
                 abs.map(async ab => {
-                    if (ab.balance > BigInt(0)) {
+                    const keyword = ab.id.substring(ab.id.lastIndexOf('-')+1, ab.id.length)
+                    const acc = await store.get(Account, { where: { id: Like(`%${keyword}%`), poolId: null}})
+                    if (acc != null) {
                         const oldBalance = ab.balance
                         const oldValue = ab.value
-                        ab.account.pvalue = oldValue ? ab.account.pvalue - oldValue : ab.account.pvalue
-                        console.log(`[${event.name}] Saving account: ${JSON.stringify(ab.account, null, 2)}`)
-                        await store.save<Account>(ab.account)
+                        acc.pvalue = oldValue ? acc.pvalue - oldValue : acc.pvalue
+                        console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+                        await store.save<Account>(acc)
 
                         ab.balance = BigInt(0)
                         ab.value = 0
@@ -460,15 +463,15 @@ export async function predictionMarketResolved(ctx: EventHandlerContext) {
                         await store.save<AccountBalance>(ab)
 
                         const hab = new HistoricalAccountBalance()
-                        hab.id = event.id + '-' + ab.account.accountId.substring(ab.account.accountId.length - 5)
-                        hab.accountId = ab.account.accountId
+                        hab.id = event.id + '-' + acc.accountId.substring(acc.accountId.length - 5)
+                        hab.accountId = acc.accountId
                         hab.event = event.method
                         hab.assetId = ab.assetId
                         hab.dBalance = ab.balance - oldBalance
                         hab.balance = ab.balance
                         hab.dValue = oldValue ? ab.value - oldValue : null
                         hab.value = ab.value
-                        hab.pvalue = ab.account.pvalue
+                        hab.pvalue = acc.pvalue
                         hab.blockNumber = block.height
                         hab.timestamp = new Date(block.timestamp)
                         console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
