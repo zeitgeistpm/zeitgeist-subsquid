@@ -28,6 +28,7 @@
       "predictionMarkets.MarketCancelled",
       "predictionMarkets.MarketResolved",
       "predictionMarkets.SoldCompleteSet",
+      "predictionMarkets.TokensRedeemed",
       "swaps.PoolCreate",
       "swaps.PoolExit",
       "swaps.PoolJoin",

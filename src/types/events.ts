@@ -1009,6 +1009,37 @@ export class PredictionMarketsSoldCompleteSetEvent {
   }
 }
 
+export class PredictionMarketsTokensRedeemedEvent {
+  constructor(private ctx: EventContext) {
+    assert(this.ctx.event.name === 'predictionMarkets.TokensRedeemed')
+  }
+
+  /**
+   * An amount of winning outcomes have been redeemed \[market_id, currency_id, amount_redeemed, payout, who\]
+   */
+  get isV35(): boolean {
+    return this.ctx._chain.getEventHash('predictionMarkets.TokensRedeemed') === '3a83de7261485bc97cbf52e751caac34719bbde41adb228f86f557eb6de3de55'
+  }
+
+  /**
+   * An amount of winning outcomes have been redeemed \[market_id, currency_id, amount_redeemed, payout, who\]
+   */
+  get asV35(): [bigint, v35.Asset, bigint, bigint, v35.AccountId32] {
+    assert(this.isV35)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
+    deprecateLatest()
+    return this.isV35
+  }
+
+  get asLatest(): [bigint, v35.Asset, bigint, bigint, v35.AccountId32] {
+    deprecateLatest()
+    return this.asV35
+  }
+}
+
 export class SwapsPoolCreateEvent {
   constructor(private ctx: EventContext) {
     assert(this.ctx.event.name === 'swaps.PoolCreate')
