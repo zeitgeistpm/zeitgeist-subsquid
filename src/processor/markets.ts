@@ -600,12 +600,16 @@ async function decodeMarketMetadata(metadata: string): Promise<DecodedMarketMeta
         try {
             const ipfs = new IPFS();
             raw = await ipfs.read(metadata);
+            const rawData = JSON.parse(raw) as DecodedMarketMetadata
+            await (await Cache.init()).setMeta(metadata, raw)
+            return rawData
         } catch (err) {
             console.error(err);
-            await (await Cache.init()).setMeta(metadata, '0')
+            if (err instanceof SyntaxError) {
+                await (await Cache.init()).setMeta(metadata, '0')
+            }
+            return undefined
         }
-        await (await Cache.init()).setMeta(metadata, raw ? raw : '0')
-        return raw ? JSON.parse(raw) as DecodedMarketMetadata : undefined
     }
 }
 
