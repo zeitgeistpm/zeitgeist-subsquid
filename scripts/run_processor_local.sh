@@ -1,7 +1,7 @@
 #!/bin/sh
 docker-compose up -d
-
-yarn db:create-migration
+yarn db:reset
+yarn db:migrate
 yarn build
 
 # override environment variables from .env file

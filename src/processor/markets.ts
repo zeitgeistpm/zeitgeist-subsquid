@@ -10,6 +10,7 @@ import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBala
     Market, MarketDisputeMechanism, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../model'
 import { util } from '@zeitgeistpm/sdk'
 import { Market as t_Market, MarketId as t_MarketId} from '@zeitgeistpm/types/dist/interfaces'
+import { Like } from "typeorm"
 
 export async function predictionMarketBoughtCompleteSet(ctx: EventHandlerContext) {
     const {store, event, block, extrinsic} = ctx
@@ -440,6 +441,47 @@ export async function predictionMarketResolved(ctx: EventHandlerContext) {
         savedMarket.resolvedOutcome = report.toString()
     }
 
+    if (savedMarket.resolvedOutcome) {
+        for (var i = 0; i < savedMarket.outcomeAssets.length; i++) {
+            if (i == +savedMarket.resolvedOutcome) continue
+
+            const abs = await store.find(AccountBalance, { where: { assetId: savedMarket.outcomeAssets[i] } })
+            await Promise.all(
+                abs.map(async ab => {
+                    const keyword = ab.id.substring(ab.id.lastIndexOf('-')+1, ab.id.length)
+                    const acc = await store.get(Account, { where: { id: Like(`%${keyword}%`), poolId: null}})
+                    if (acc != null && ab.balance > BigInt(0)) {
+                        const oldBalance = ab.balance
+                        const oldValue = ab.value
+                        acc.pvalue = oldValue ? acc.pvalue - oldValue : acc.pvalue
+                        console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+                        await store.save<Account>(acc)
+
+                        ab.balance = BigInt(0)
+                        ab.value = 0
+                        console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
+                        await store.save<AccountBalance>(ab)
+
+                        const hab = new HistoricalAccountBalance()
+                        hab.id = event.id + '-' + acc.accountId.substring(acc.accountId.length - 5)
+                        hab.accountId = acc.accountId
+                        hab.event = event.method
+                        hab.assetId = ab.assetId
+                        hab.dBalance = ab.balance - oldBalance
+                        hab.balance = ab.balance
+                        hab.dValue = oldValue ? ab.value - oldValue : null
+                        hab.value = ab.value
+                        hab.pvalue = acc.pvalue
+                        hab.blockNumber = block.height
+                        hab.timestamp = new Date(block.timestamp)
+                        console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
+                        await store.save<HistoricalAccountBalance>(hab)
+                    }
+                })
+            );
+        }
+    }
+
     if (status.length < 2) {
         savedMarket.status = "Resolved"
     } else {
@@ -558,12 +600,16 @@ async function decodeMarketMetadata(metadata: string): Promise<DecodedMarketMeta
         try {
             const ipfs = new IPFS();
             raw = await ipfs.read(metadata);
+            const rawData = JSON.parse(raw) as DecodedMarketMetadata
+            await (await Cache.init()).setMeta(metadata, raw)
+            return rawData
         } catch (err) {
             console.error(err);
-            await (await Cache.init()).setMeta(metadata, '0')
+            if (err instanceof SyntaxError) {
+                await (await Cache.init()).setMeta(metadata, '0')
+            }
+            return undefined
         }
-        await (await Cache.init()).setMeta(metadata, raw ? raw : '0')
-        return raw ? JSON.parse(raw) as DecodedMarketMetadata : undefined
     }
 }
 
