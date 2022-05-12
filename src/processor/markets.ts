@@ -450,7 +450,7 @@ export async function predictionMarketResolved(ctx: EventHandlerContext) {
                 abs.map(async ab => {
                     const keyword = ab.id.substring(ab.id.lastIndexOf('-')+1, ab.id.length)
                     const acc = await store.get(Account, { where: { id: Like(`%${keyword}%`), poolId: null}})
-                    if (acc != null) {
+                    if (acc != null && ab.balance > BigInt(0)) {
                         const oldBalance = ab.balance
                         const oldValue = ab.value
                         acc.pvalue = oldValue ? acc.pvalue - oldValue : acc.pvalue
