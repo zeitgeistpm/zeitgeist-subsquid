@@ -48,7 +48,7 @@ export class HistoricalAsset {
   dAmountInPool!: bigint | undefined | null
 
   /**
-   * Price of the asset after trade execution
+   * Price of the asset after trade execution/market resolution
    */
   @Column_("numeric", {nullable: true})
   newPrice!: number | undefined | null
