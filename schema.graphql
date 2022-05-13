@@ -91,11 +91,11 @@ type HistoricalAsset @entity {
   "Price of the asset has decreased if -ve and +ve if increased"
   dPrice: Float
   "Units of asset user bought (-ve) or sold (+ve)"
-  dAmountInPool: BigInt!
-  "Price of the asset after trade execution"
+  dAmountInPool: BigInt
+  "Price of the asset after trade execution/market resolution"
   newPrice: Float
   "Units of asset present in the pool account"
-  newAmountInPool: BigInt!
+  newAmountInPool: BigInt
   "Event method which initiated this change"
   event: String!
   "Height of the block"
