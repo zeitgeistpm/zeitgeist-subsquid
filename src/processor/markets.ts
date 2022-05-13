@@ -4,7 +4,7 @@ import { Cache, IPFS, isDevEnvironment, Tools } from './util'
 import { PredictionMarketsBoughtCompleteSetEvent, PredictionMarketsMarketApprovedEvent, PredictionMarketsMarketCancelledEvent, 
     PredictionMarketsMarketCreatedEvent, PredictionMarketsMarketDisputedEvent, PredictionMarketsMarketInsufficientSubsidyEvent, 
     PredictionMarketsMarketRejectedEvent, PredictionMarketsMarketReportedEvent, PredictionMarketsMarketResolvedEvent, 
-    PredictionMarketsMarketStartedWithSubsidyEvent, PredictionMarketsSoldCompleteSetEvent } from '../types/events'
+    PredictionMarketsMarketStartedWithSubsidyEvent, PredictionMarketsSoldCompleteSetEvent, PredictionMarketsTokensRedeemedEvent } from '../types/events'
 import { EventHandlerContext } from '@subsquid/substrate-processor'
 import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBalance, HistoricalMarket, 
     Market, MarketDisputeMechanism, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../model'
@@ -575,6 +575,50 @@ export async function predictionMarketSoldCompleteSet(ctx: EventHandlerContext) 
     }
 }
 
+export async function predictionMarketTokensRedeemed(ctx: EventHandlerContext) {
+    const {store, event, block, extrinsic} = ctx
+    const {marketId, assetId, amtRedeemed, payout, accountId} = getTokensRedeemedEvent(ctx)
+    const walletId = ss58.codec('zeitgeist').encode(accountId)
+
+    const acc = await store.get(Account, { where: { accountId: walletId } })
+    if (!acc) { return }
+
+    const ab = await store.get(AccountBalance, { where: { account: acc, assetId: assetId } })
+    if (!ab) { return }
+
+    const thab = await store.get(HistoricalAccountBalance, { where: 
+        { accountId: walletId, assetId: "Ztg", event: "Transfer", blockNumber: block.height } })
+    if (thab) {
+        thab.event = event.method
+        console.log(`[${event.name}] Updating historical account balance: ${JSON.stringify(thab, null, 2)}`)
+        await store.save<HistoricalAccountBalance>(thab)
+    }
+
+    ab.balance = ab.balance - amtRedeemed
+    ab.value = Number(ab.balance)
+    console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
+    await store.save<AccountBalance>(ab)
+
+    acc.pvalue = acc.pvalue - Number(amtRedeemed)
+    console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+    await store.save<Account>(acc)
+
+    const hab = new HistoricalAccountBalance()
+    hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
+    hab.accountId = acc.accountId
+    hab.event = event.method
+    hab.assetId = ab.assetId
+    hab.dBalance = - amtRedeemed
+    hab.balance = ab.balance
+    hab.dValue = - Number(amtRedeemed)
+    hab.value = ab.value
+    hab.pvalue = acc.pvalue
+    hab.blockNumber = block.height
+    hab.timestamp = new Date(block.timestamp)
+    console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
+    await store.save<HistoricalAccountBalance>(hab)
+}
+
 async function createAssetsForMarket(marketId: t_MarketId, marketType: any): Promise<any> {
     const sdk = await Tools.getSDK()
     return marketType.categorical
@@ -684,6 +728,14 @@ interface ResolvedEvent {
 interface SoldCompleteSetEvent {
     marketId: bigint
     amount: bigint
+    accountId: Uint8Array
+}
+
+interface TokensRedeemedEvent {
+    marketId: bigint
+    assetId: string
+    amtRedeemed: bigint
+    payout: bigint
     accountId: Uint8Array
 }
 
@@ -835,5 +887,35 @@ function getSoldCompleteSetEvent(ctx: EventHandlerContext): SoldCompleteSetEvent
     } else {
         const [marketId, amount, accountId] = event.asLatest
         return {marketId, amount, accountId}
+    }
+}
+
+function getTokensRedeemedEvent(ctx: EventHandlerContext): TokensRedeemedEvent {
+    const event = new PredictionMarketsTokensRedeemedEvent(ctx)
+    var marketId, currencyId, amtRedeemed, payout, accountId
+    if (event.isV35) {
+        [marketId, currencyId, amtRedeemed, payout, accountId] = event.asV35
+    } else {
+        [marketId, currencyId, amtRedeemed, payout, accountId] = event.asLatest
+    }
+
+    if (currencyId.__kind  == "CategoricalOutcome") {
+        const assetId = JSON.stringify(util.AssetIdFromString('[' + currencyId.value.toString() + ']'))
+        return {marketId, assetId, amtRedeemed, payout, accountId}
+    } else if (currencyId.__kind  == "ScalarOutcome") {
+        const scale = new Array()
+        scale.push(+currencyId.value[0].toString())
+        scale.push(currencyId.value[1].__kind)
+        const assetId = JSON.stringify(util.AssetIdFromString(JSON.stringify(scale)))
+        return {marketId, assetId, amtRedeemed, payout, accountId}
+    } else if (currencyId.__kind == "Ztg") {
+        const assetId = "Ztg"
+        return {marketId, assetId, amtRedeemed, payout, accountId}
+    } else if (currencyId.__kind == "PoolShare") {
+        const assetId = JSON.stringify(util.AssetIdFromString("pool" + currencyId.value.toString()))
+        return {marketId, assetId, amtRedeemed, payout, accountId}
+    } else {
+        const assetId = ''
+        return {marketId, assetId, amtRedeemed, payout, accountId}
     }
 }
