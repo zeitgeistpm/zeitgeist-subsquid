@@ -468,15 +468,15 @@ export async function predictionMarketResolved(ctx: EventHandlerContext) {
                     const acc = await store.get(Account, { where: { id: Like(`%${keyword}%`), poolId: null}})
                     if (acc != null && ab.balance > BigInt(0)) {
                         const oldBalance = ab.balance
-                        const oldValue = ab.value
-                        acc.pvalue = oldValue ? acc.pvalue - oldValue : acc.pvalue
-                        console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
-                        await store.save<Account>(acc)
-
-                        ab.balance = BigInt(0)
-                        ab.value = 0
+                        const oldValue = ab.value!
+                        ab.balance = (i == +savedMarket.resolvedOutcome!) ? ab.balance : BigInt(0)
+                        ab.value = Number(ab.balance) * asset.price! 
                         console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
                         await store.save<AccountBalance>(ab)
+
+                        acc.pvalue = acc.pvalue - oldValue + ab.value
+                        console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+                        await store.save<Account>(acc)
 
                         const hab = new HistoricalAccountBalance()
                         hab.id = event.id + '-' + acc.accountId.substring(acc.accountId.length - 5)
@@ -485,7 +485,7 @@ export async function predictionMarketResolved(ctx: EventHandlerContext) {
                         hab.assetId = ab.assetId
                         hab.dBalance = ab.balance - oldBalance
                         hab.balance = ab.balance
-                        hab.dValue = oldValue ? ab.value - oldValue : null
+                        hab.dValue = ab.value - oldValue
                         hab.value = ab.value
                         hab.pvalue = acc.pvalue
                         hab.blockNumber = block.height
