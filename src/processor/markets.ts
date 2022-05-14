@@ -436,7 +436,7 @@ export async function predictionMarketResolved(ctx: EventHandlerContext) {
     } else if (report.__kind == "Scalar") {
         ocr.scalar = +report.value.toString()
         savedMarket.report!.outcome = ocr
-        savedMarket.resolvedOutcome = report.value()
+        savedMarket.resolvedOutcome = report.value.toString()
     } else if (typeof report == "number") {
         savedMarket.resolvedOutcome = report.toString()
     }
