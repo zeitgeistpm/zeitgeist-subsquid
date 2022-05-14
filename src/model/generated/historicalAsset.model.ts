@@ -44,11 +44,11 @@ export class HistoricalAsset {
   /**
    * Units of asset user bought (-ve) or sold (+ve)
    */
-  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
-  dAmountInPool!: bigint
+  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
+  dAmountInPool!: bigint | undefined | null
 
   /**
-   * Price of the asset after trade execution
+   * Price of the asset after trade execution/market resolution
    */
   @Column_("numeric", {nullable: true})
   newPrice!: number | undefined | null
@@ -56,8 +56,8 @@ export class HistoricalAsset {
   /**
    * Units of asset present in the pool account
    */
-  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
-  newAmountInPool!: bigint
+  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
+  newAmountInPool!: bigint | undefined | null
 
   /**
    * Event method which initiated this change

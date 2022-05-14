@@ -6,7 +6,7 @@ import { PredictionMarketsBoughtCompleteSetEvent, PredictionMarketsMarketApprove
     PredictionMarketsMarketRejectedEvent, PredictionMarketsMarketReportedEvent, PredictionMarketsMarketResolvedEvent, 
     PredictionMarketsMarketStartedWithSubsidyEvent, PredictionMarketsSoldCompleteSetEvent, PredictionMarketsTokensRedeemedEvent } from '../types/events'
 import { EventHandlerContext } from '@subsquid/substrate-processor'
-import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBalance, HistoricalMarket, 
+import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBalance, HistoricalAsset, HistoricalMarket, 
     Market, MarketDisputeMechanism, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../model'
 import { util } from '@zeitgeistpm/sdk'
 import { Market as t_Market, MarketId as t_MarketId} from '@zeitgeistpm/types/dist/interfaces'
@@ -443,6 +443,24 @@ export async function predictionMarketResolved(ctx: EventHandlerContext) {
 
     if (savedMarket.resolvedOutcome) {
         for (var i = 0; i < savedMarket.outcomeAssets.length; i++) {
+            const asset = await store.get(Asset, { where: { assetId: savedMarket.outcomeAssets[i] } })
+            if (!asset) return
+            const oldPrice = asset.price!
+            asset.price = (i == +savedMarket.resolvedOutcome) ? 1 : 0
+            console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
+            await store.save<Asset>(asset)
+
+            const ha = new HistoricalAsset()
+            ha.id = event.id + '-' + marketId + i
+            ha.assetId = asset.assetId
+            ha.newPrice = asset.price
+            ha.dPrice = asset.price - oldPrice
+            ha.event = event.method
+            ha.blockNumber = block.height
+            ha.timestamp = new Date(block.timestamp)
+            console.log(`[${event.name}] Saving historical asset: ${JSON.stringify(ha, null, 2)}`)
+            await store.save<HistoricalAsset>(ha)
+
             if (i == +savedMarket.resolvedOutcome) continue
 
             const abs = await store.find(AccountBalance, { where: { assetId: savedMarket.outcomeAssets[i] } })
