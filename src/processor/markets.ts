@@ -461,8 +461,6 @@ export async function predictionMarketResolved(ctx: EventHandlerContext) {
             console.log(`[${event.name}] Saving historical asset: ${JSON.stringify(ha, null, 2)}`)
             await store.save<HistoricalAsset>(ha)
 
-            if (i == +savedMarket.resolvedOutcome) continue
-
             const abs = await store.find(AccountBalance, { where: { assetId: savedMarket.outcomeAssets[i] } })
             await Promise.all(
                 abs.map(async ab => {
