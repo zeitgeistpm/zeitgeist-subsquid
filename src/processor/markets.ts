@@ -610,12 +610,14 @@ export async function predictionMarketTokensRedeemed(ctx: EventHandlerContext) {
         await store.save<HistoricalAccountBalance>(thab)
     }
 
+    const oldBalance = ab.balance
+    const oldValue = ab.value!
     ab.balance = ab.balance - amtRedeemed
     ab.value = Number(ab.balance)
     console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
     await store.save<AccountBalance>(ab)
 
-    acc.pvalue = acc.pvalue - Number(amtRedeemed)
+    acc.pvalue = acc.pvalue - oldValue + ab.value
     console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
     await store.save<Account>(acc)
 
@@ -624,9 +626,9 @@ export async function predictionMarketTokensRedeemed(ctx: EventHandlerContext) {
     hab.accountId = acc.accountId
     hab.event = event.method
     hab.assetId = ab.assetId
-    hab.dBalance = - amtRedeemed
+    hab.dBalance = ab.balance - oldBalance
     hab.balance = ab.balance
-    hab.dValue = - Number(amtRedeemed)
+    hab.dValue = ab.value - oldValue
     hab.value = ab.value
     hab.pvalue = acc.pvalue
     hab.blockNumber = block.height
