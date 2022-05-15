@@ -339,19 +339,19 @@ export async function swapExactAmountOut(ctx: EventHandlerContext) {
 
             const newPrice = await calcSpotPrice(+newZtgQty.toString(),ztgWt,+newAssetQty.toString(),assetWt,+savedPool.swapFee)
             asset.price = newPrice
-            asset.amountInPool = newAssetQty == BigInt(0) ? oldAssetQty : newAssetQty
+            asset.amountInPool = newAssetQty
             console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
             await store.save<Asset>(asset)
 
             const hap = new HistoricalAsset()
             hap.id = event.id + '-' + savedPool.marketId + (idx - 1)
-            hap.accountId = newAssetQty == BigInt(0) ? null : swapEvent.cpep.who.toString()
+            hap.accountId = newAssetQty == oldAssetQty ? null : swapEvent.cpep.who.toString()
             hap.assetId = asset.assetId
-            hap.ztgTraded = newAssetQty == BigInt(0) ? BigInt(0) : BigInt(swapEvent.assetAmountIn.toString())
+            hap.ztgTraded = newAssetQty == oldAssetQty ? BigInt(0) : BigInt(swapEvent.assetAmountIn.toString())
             hap.newPrice = asset.price
             hap.newAmountInPool = asset.amountInPool
             hap.dPrice = newPrice - oldPrice
-            hap.dAmountInPool = newAssetQty == BigInt(0) ? BigInt(0) : newAssetQty - oldAssetQty
+            hap.dAmountInPool = newAssetQty - oldAssetQty
             hap.event = event.method
             hap.blockNumber = block.height
             hap.timestamp = new Date(block.timestamp)
