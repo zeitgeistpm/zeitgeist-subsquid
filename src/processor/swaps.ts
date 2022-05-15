@@ -322,7 +322,7 @@ export async function swapExactAmountOut(ctx: EventHandlerContext) {
             const assetWt = +wt!.len.toString()
             const oldAssetQty = asset.amountInPool!
             const oldPrice = asset.price!
-            var newAssetQty = BigInt(0)
+            var newAssetQty = oldAssetQty
 
             if (extrinsic?.args[1] && wt!.assetId === JSON.stringify(extrinsic?.args[3].value)) {
                 newAssetQty = oldAssetQty - BigInt(swapEvent.assetAmountOut.toString())
