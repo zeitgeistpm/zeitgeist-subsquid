@@ -456,7 +456,9 @@ export async function predictionMarketResolved(ctx: EventHandlerContext) {
             ha.id = event.id + '-' + marketId + i
             ha.assetId = asset.assetId
             ha.newPrice = asset.price
+            ha.newAmountInPool = asset.amountInPool
             ha.dPrice = asset.price - oldPrice
+            ha.dAmountInPool = asset.amountInPool - oldAssetQty
             ha.event = event.method
             ha.blockNumber = block.height
             ha.timestamp = new Date(block.timestamp)
