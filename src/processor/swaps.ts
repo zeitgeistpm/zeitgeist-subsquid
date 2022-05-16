@@ -230,16 +230,16 @@ export async function swapExactAmountIn(ctx: EventHandlerContext) {
     console.log(`[${event.name}] Saving pool: ${JSON.stringify(savedPool, null, 2)}`)
     await store.save<Pool>(savedPool)
 
-    const newHP = new HistoricalPool()
-    newHP.id = event.id + '-' + savedPool.poolId
-    newHP.poolId = savedPool.poolId
-    newHP.event = event.method
-    newHP.ztgQty = savedPool.ztgQty
-    newHP.volume = savedPool.volume
-    newHP.blockNumber = block.height
-    newHP.timestamp = new Date(block.timestamp)
-    console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(newHP, null, 2)}`)
-    await store.save<HistoricalPool>(newHP)
+    const hp = new HistoricalPool()
+    hp.id = event.id + '-' + savedPool.poolId
+    hp.poolId = savedPool.poolId
+    hp.event = event.method
+    hp.ztgQty = savedPool.ztgQty
+    hp.volume = savedPool.volume
+    hp.blockNumber = block.height
+    hp.timestamp = new Date(block.timestamp)
+    console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
+    await store.save<HistoricalPool>(hp)
 
     await Promise.all(
         savedPool.weights.map(async (wt, idx) => {
@@ -303,16 +303,16 @@ export async function swapExactAmountOut(ctx: EventHandlerContext) {
     console.log(`[${event.name}] Saving pool: ${JSON.stringify(savedPool, null, 2)}`)
     await store.save<Pool>(savedPool)
 
-    const newHP = new HistoricalPool()
-    newHP.id = event.id + '-' + savedPool.poolId
-    newHP.poolId = savedPool.poolId
-    newHP.event = event.method
-    newHP.ztgQty = savedPool.ztgQty
-    newHP.volume = savedPool.volume
-    newHP.blockNumber = block.height
-    newHP.timestamp = new Date(block.timestamp)
-    console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(newHP, null, 2)}`)
-    await store.save<HistoricalPool>(newHP)
+    const hp = new HistoricalPool()
+    hp.id = event.id + '-' + savedPool.poolId
+    hp.poolId = savedPool.poolId
+    hp.event = event.method
+    hp.ztgQty = savedPool.ztgQty
+    hp.volume = savedPool.volume
+    hp.blockNumber = block.height
+    hp.timestamp = new Date(block.timestamp)
+    console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
+    await store.save<HistoricalPool>(hp)
 
     await Promise.all(
         savedPool.weights.map(async (wt, idx) => {
@@ -343,20 +343,20 @@ export async function swapExactAmountOut(ctx: EventHandlerContext) {
             console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
             await store.save<Asset>(asset)
 
-            const hap = new HistoricalAsset()
-            hap.id = event.id + '-' + savedPool.marketId + (idx - 1)
-            hap.accountId = newAssetQty == oldAssetQty ? null : swapEvent.cpep.who.toString()
-            hap.assetId = asset.assetId
-            hap.ztgTraded = newAssetQty == oldAssetQty ? BigInt(0) : BigInt(swapEvent.assetAmountIn.toString())
-            hap.newPrice = asset.price
-            hap.newAmountInPool = asset.amountInPool
-            hap.dPrice = newPrice - oldPrice
-            hap.dAmountInPool = newAssetQty - oldAssetQty
-            hap.event = event.method
-            hap.blockNumber = block.height
-            hap.timestamp = new Date(block.timestamp)
-            console.log(`[${event.name}] Saving historical asset: ${JSON.stringify(hap, null, 2)}`)
-            await store.save<HistoricalAsset>(hap)
+            const ha = new HistoricalAsset()
+            ha.id = event.id + '-' + savedPool.marketId + (idx - 1)
+            ha.accountId = newAssetQty == oldAssetQty ? null : swapEvent.cpep.who.toString()
+            ha.assetId = asset.assetId
+            ha.ztgTraded = newAssetQty == oldAssetQty ? BigInt(0) : BigInt(swapEvent.assetAmountIn.toString())
+            ha.newPrice = asset.price
+            ha.newAmountInPool = asset.amountInPool
+            ha.dPrice = newPrice - oldPrice
+            ha.dAmountInPool = newAssetQty - oldAssetQty
+            ha.event = event.method
+            ha.blockNumber = block.height
+            ha.timestamp = new Date(block.timestamp)
+            console.log(`[${event.name}] Saving historical asset: ${JSON.stringify(ha, null, 2)}`)
+            await store.save<HistoricalAsset>(ha)
         })
     );
 }
