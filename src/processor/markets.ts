@@ -446,7 +446,9 @@ export async function predictionMarketResolved(ctx: EventHandlerContext) {
             const asset = await store.get(Asset, { where: { assetId: savedMarket.outcomeAssets[i] } })
             if (!asset) return
             const oldPrice = asset.price!
+            const oldAssetQty = asset.amountInPool!
             asset.price = (i == +savedMarket.resolvedOutcome) ? 1 : 0
+            asset.amountInPool = (i == +savedMarket.resolvedOutcome) ? oldAssetQty : BigInt(0)
             console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
             await store.save<Asset>(asset)
 
