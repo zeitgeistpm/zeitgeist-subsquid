@@ -7,6 +7,8 @@ type Account @entity {
   id: ID!
   "Account address"
   accountId: String!
+  "Zeitgeist's identifier for market. Valid only for market account."
+  marketId: Int
   "Zeitgeist's identifier for pool. Valid only for pool account."
   poolId: Int
   "Sum of all asset values"
