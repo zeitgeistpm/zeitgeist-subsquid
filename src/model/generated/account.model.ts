@@ -23,6 +23,12 @@ export class Account {
   accountId!: string
 
   /**
+   * Zeitgeist's identifier for market. Valid only for market account.
+   */
+  @Column_("integer", {nullable: true})
+  marketId!: number | undefined | null
+
+  /**
    * Zeitgeist's identifier for pool. Valid only for pool account.
    */
   @Column_("integer", {nullable: true})
