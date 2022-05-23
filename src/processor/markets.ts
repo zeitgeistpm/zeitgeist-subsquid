@@ -708,6 +708,7 @@ interface ApprovedEvent {
 
 interface CreatedEvent {
     marketId: t_MarketId
+    accountId: String
     market: t_Market
 }
 
@@ -789,17 +790,23 @@ function getApprovedEvent(ctx: EventHandlerContext): ApprovedEvent {
 }
 
 function getCreatedEvent(ctx: EventHandlerContext): CreatedEvent {
-    const [param0, param1] = ctx.event.params
+    const [param0, param1, param2] = ctx.event.params
     const marketId = param0.value as t_MarketId
     if (ctx.block.runtimeVersion.specVersion < 32) {
+        const accountId = ""
         var market = param1.value as any
         market.creatorFee = market.creator_fee
         market.scoringRule = market.scoring_rule
         market.marketType = market.market_type
-        return { marketId, market } 
-    } else {
+        return { marketId, accountId, market } 
+    } else if (ctx.block.runtimeVersion.specVersion < 36 ) {
+        const accountId = ""
         const market = param1.value as t_Market
-        return { marketId, market }
+        return { marketId, accountId, market }
+    } else {
+        const accountId = param1.value as String
+        const market = param2.value as t_Market
+        return { marketId, accountId, market }
     }
 }
 
