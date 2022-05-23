@@ -1,8 +1,8 @@
-module.exports = class init1652437396585 {
-  name = 'init1652437396585'
+module.exports = class init1653302751295 {
+  name = 'init1653302751295'
 
   async up(db) {
-    await db.query(`CREATE TABLE "account" ("id" character varying NOT NULL, "account_id" text NOT NULL, "pool_id" integer, "pvalue" numeric NOT NULL, CONSTRAINT "PK_54115ee388cdb6d86bb4bf5b2ea" PRIMARY KEY ("id"))`)
+    await db.query(`CREATE TABLE "account" ("id" character varying NOT NULL, "account_id" text NOT NULL, "market_id" integer, "pool_id" integer, "pvalue" numeric NOT NULL, CONSTRAINT "PK_54115ee388cdb6d86bb4bf5b2ea" PRIMARY KEY ("id"))`)
     await db.query(`CREATE TABLE "account_balance" ("id" character varying NOT NULL, "asset_id" text NOT NULL, "balance" numeric NOT NULL, "value" numeric, "account_id" character varying NOT NULL, CONSTRAINT "PK_bd893045760f719e24a95a42562" PRIMARY KEY ("id"))`)
     await db.query(`CREATE INDEX "IDX_029576f147e256f1f93e4865c7" ON "account_balance" ("account_id") `)
     await db.query(`CREATE TABLE "historical_account_balance" ("id" character varying NOT NULL, "account_id" text NOT NULL, "asset_id" text NOT NULL, "d_balance" numeric NOT NULL, "balance" numeric NOT NULL, "d_value" numeric, "value" numeric, "pvalue" numeric, "event" text NOT NULL, "block_number" integer NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_bfc701998dd9e45981c88f4d1af" PRIMARY KEY ("id"))`)
