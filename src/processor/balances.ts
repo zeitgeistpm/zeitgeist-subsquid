@@ -56,13 +56,9 @@ export async function systemNewAccount(ctx: EventHandlerContext) {
     const { accountId } = getNewAccountEvent(ctx)
     const walletId = ss58.codec('zeitgeist').encode(accountId)
 
-    if (extrinsic?.method == 'createCpmmMarketAndDeployAssets' &&
-        block.runtimeVersion.specVersion >= 36) {
-        return
-    }
-
     const acc = await store.get(Account, { where: { accountId: walletId } })
     if (acc) return
+    
     const newAcc = new Account()
     newAcc.id = event.id + '-' + walletId.substring(walletId.length - 5)
     newAcc.accountId = walletId

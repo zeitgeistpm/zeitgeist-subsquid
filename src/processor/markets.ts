@@ -125,38 +125,43 @@ export async function predictionMarketCreated(ctx: EventHandlerContext) {
     if (accountId.length > 2) {
         const walletId = accountId
         const acc = await store.get(Account, { where: { accountId: walletId } })
-        if (acc) return
-        const newAcc = new Account()
-        newAcc.id = event.id + '-' + walletId.substring(walletId.length - 5)
-        newAcc.accountId = walletId.toString()
-        newAcc.marketId = +marketId.toString()
-        newAcc.pvalue = 0
-        console.log(`[${event.name}] Saving account: ${JSON.stringify(newAcc, null, 2)}`)
-        await store.save<Account>(newAcc)
+        if (acc) {
+            acc.marketId = +marketId.toString()
+            console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+            await store.save<Account>(acc)
+        } else {
+            const newAcc = new Account()
+            newAcc.id = event.id + '-' + walletId.substring(walletId.length - 5)
+            newAcc.accountId = walletId.toString()
+            newAcc.marketId = +marketId.toString()
+            newAcc.pvalue = 0
+            console.log(`[${event.name}] Saving account: ${JSON.stringify(newAcc, null, 2)}`)
+            await store.save<Account>(newAcc)
 
-        const ab = new AccountBalance()
-        ab.id = event.id + '-' + walletId.substring(walletId.length - 5)
-        ab.account = newAcc
-        ab.assetId = "Ztg"
-        ab.balance = BigInt(0)
-        ab.value = Number(ab.balance)
-        console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
-        await store.save<AccountBalance>(ab)
+            const ab = new AccountBalance()
+            ab.id = event.id + '-' + walletId.substring(walletId.length - 5)
+            ab.account = newAcc
+            ab.assetId = "Ztg"
+            ab.balance = BigInt(0)
+            ab.value = Number(ab.balance)
+            console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
+            await store.save<AccountBalance>(ab)
 
-        const hab = new HistoricalAccountBalance()
-        hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
-        hab.accountId = newAcc.accountId
-        hab.event = event.method
-        hab.assetId = ab.assetId
-        hab.dBalance = BigInt(0)
-        hab.balance = ab.balance
-        hab.dValue = Number(hab.dBalance)
-        hab.value = Number(hab.balance)
-        hab.pvalue = 0
-        hab.blockNumber = block.height
-        hab.timestamp = new Date(block.timestamp)
-        console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
-        await store.save<HistoricalAccountBalance>(hab)
+            const hab = new HistoricalAccountBalance()
+            hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
+            hab.accountId = newAcc.accountId
+            hab.event = event.method
+            hab.assetId = ab.assetId
+            hab.dBalance = BigInt(0)
+            hab.balance = ab.balance
+            hab.dValue = Number(hab.dBalance)
+            hab.value = Number(hab.balance)
+            hab.pvalue = 0
+            hab.blockNumber = block.height
+            hab.timestamp = new Date(block.timestamp)
+            console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
+            await store.save<HistoricalAccountBalance>(hab)
+        }
     }
 
     const marketCreator = encodeAddress(market.creator, +(await Tools.getSDK()).api.consts.system.ss58Prefix.toString())
