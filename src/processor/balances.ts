@@ -58,6 +58,7 @@ export async function systemNewAccount(ctx: EventHandlerContext) {
 
     const acc = await store.get(Account, { where: { accountId: walletId } })
     if (acc) return
+    
     const newAcc = new Account()
     newAcc.id = event.id + '-' + walletId.substring(walletId.length - 5)
     newAcc.accountId = walletId
