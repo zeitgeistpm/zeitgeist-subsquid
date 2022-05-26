@@ -1,5 +1,5 @@
 import { BlockHandlerContext } from "@subsquid/substrate-processor"
-import { Account, AccountBalance, HistoricalAccountBalance } from "../../model"
+import { Account, AccountBalance, HistoricalAccountBalance } from "../model"
 
 export async function add_balance_108949(ctx: BlockHandlerContext) {
     const {store, events, block} = ctx
