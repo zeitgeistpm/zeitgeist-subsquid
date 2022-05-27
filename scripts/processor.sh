@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# Control points of processor
 if [ "$1" = "--start" ]; then
     echo "Starting processor"
     yarn db:up && yarn redis:up && yarn db:reset && yarn db:migrate
@@ -10,14 +11,15 @@ else
     exit
 fi
 
+# Process data from local-network or battery-station or main-net by passing below argument
 if [ "$2" = "--local" ]; then
     yarn build && NODE_ENV=local node lib/processor/index.js
-elif [ "$2" = "--test" ]; then
-    yarn build && NODE_ENV=test node lib/processor/index.js
+elif [ "$2" = "--dev" ]; then
+    yarn build && NODE_ENV=dev node lib/processor/index.js
 elif [ "$2" = "--m1" ]; then
     yarn build && NODE_ENV=m1 node lib/processor/index.js
 elif [ "$2" = "--m2" ]; then
     yarn build && NODE_ENV=m2 node lib/processor/index.js
 else
-    echo "Please specify second argument with --local or --test"
+    echo "Please specify second argument with --local or --dev"
 fi
