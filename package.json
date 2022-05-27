@@ -17,10 +17,10 @@
     "db:reset": "yarn db:drop && yarn db:create",
     "indexer:start": "./scripts/indexer.sh --local",
     "processor:migrate": "echo skip",
+    "processor:dev:start": "./scripts/processor.sh --start --dev",
+    "processor:dev:resume": "./scripts/processor.sh --resume --dev",
     "processor:local:start": "./scripts/processor.sh --start --local",
     "processor:local:resume": "./scripts/processor.sh --resume --local",
-    "processor:test:start": "./scripts/processor.sh --start --test",
-    "processor:test:resume": "./scripts/processor.sh --resume --test",
     "query-node:start": "squid-graphql-server",
     "redis:up": "docker-compose up -d redis",
     "typegen": "squid-substrate-typegen typegen.json"
