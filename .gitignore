@@ -3,5 +3,7 @@
 /db/cache
 /mappings/generated
 /mappings/node_modules
+.env.t1
+.env.t2
 .env.m1
 .env.m2
