@@ -19,5 +19,5 @@ elif [ "$2" = "--m1" ]; then
 elif [ "$2" = "--m2" ]; then
     yarn build && NODE_ENV=m2 node lib/processor/index.js
 else
-    echo "Please specify second argument with --local or --test or --main"
+    echo "Please specify second argument with --local or --test"
 fi
