@@ -6,14 +6,6 @@ import all from "it-all";
 import { concat, toString } from "uint8arrays";
 import ipfsClient from "ipfs-http-client";
 
-export const isDevEnvironment = () => {
-  return (
-    process.env["IPFS_CLIENT_URL"] === "http://127.0.0.1:5001" &&
-    process.env["WS_NODE_URL"] === "ws://127.0.0.1:9944" &&
-    process.env["INDEXER_ENDPOINT_URL"] === "http://127.0.0.1:4010/v1/graphql"
-  );
-};
-
 export class Cache {
   private static _instance: Cache
   private client: RedisClient

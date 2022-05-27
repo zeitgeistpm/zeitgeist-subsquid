@@ -1,6 +1,6 @@
 import * as ss58 from "@subsquid/ss58"
 import { encodeAddress } from '@polkadot/keyring'
-import { Cache, IPFS, isDevEnvironment, Tools } from './util'
+import { Cache, IPFS, Tools } from './util'
 import { PredictionMarketsBoughtCompleteSetEvent, PredictionMarketsMarketApprovedEvent, PredictionMarketsMarketCancelledEvent, 
     PredictionMarketsMarketCreatedEvent, PredictionMarketsMarketDisputedEvent, PredictionMarketsMarketInsufficientSubsidyEvent, 
     PredictionMarketsMarketRejectedEvent, PredictionMarketsMarketReportedEvent, PredictionMarketsMarketResolvedEvent, 
@@ -702,7 +702,7 @@ async function createAssetsForMarket(marketId: t_MarketId, marketType: any): Pro
 async function decodeMarketMetadata(metadata: string): Promise<DecodedMarketMetadata | undefined> {
     if (metadata.startsWith('0x1530fa0bb52e67d0d9f89bf26552e1')) return undefined
     var raw = await (await Cache.init()).getMeta(metadata)
-    if (raw && !isDevEnvironment()) {
+    if (raw && !(process.env.NODE_ENV == 'local')) {
         return raw !== '0' ? JSON.parse(raw) as DecodedMarketMetadata : undefined
     } else {
         try {
