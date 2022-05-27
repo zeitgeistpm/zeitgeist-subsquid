@@ -14,8 +14,10 @@ if [ "$2" = "--local" ]; then
     yarn build && NODE_ENV=local node lib/processor/index.js
 elif [ "$2" = "--test" ]; then
     yarn build && NODE_ENV=test node lib/processor/index.js
-elif [ "$2" = "--main" ]; then
-    yarn build && NODE_ENV=main node lib/processor/index.js
+elif [ "$2" = "--m1" ]; then
+    yarn build && NODE_ENV=m1 node lib/processor/index.js
+elif [ "$2" = "--m2" ]; then
+    yarn build && NODE_ENV=m2 node lib/processor/index.js
 else
     echo "Please specify second argument with --local or --test or --main"
 fi

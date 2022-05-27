@@ -3,4 +3,5 @@
 /db/cache
 /mappings/generated
 /mappings/node_modules
-.env.main
+.env.m1
+.env.m2
