@@ -2,6 +2,7 @@
 
 # Control points of processor
 if [ "$1" = "--start" ]; then
+    yarn install --frozen-lockfile
     echo "Starting processor"
     yarn db:up && yarn redis:up && yarn db:reset && yarn db:migrate
 elif [ "$1" = "--resume" ]; then
