@@ -7,6 +7,8 @@ import * as v33 from './v33'
 import * as v34 from './v34'
 import * as v35 from './v35'
 import * as v36 from './v36'
+import * as v37 from './v37'
+import * as v38 from './v38'
 
 export class BalancesBalanceSetEvent {
   constructor(private ctx: EventContext) {
@@ -705,14 +707,29 @@ export class PredictionMarketsMarketCreatedEvent {
     return this.ctx._chain.decodeEvent(this.ctx.event)
   }
 
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV36
+  /**
+   * A market has been created \[market_id, market_account, creator\]
+   */
+  get isV38(): boolean {
+    return this.ctx._chain.getEventHash('predictionMarkets.MarketCreated') === '488c431f3ef8fe03fd2416a52daf8f4e3d1110218007b6732ba0744f05c3d887'
   }
 
-  get asLatest(): [bigint, v36.AccountId32, v36.Market] {
+  /**
+   * A market has been created \[market_id, market_account, creator\]
+   */
+  get asV38(): [bigint, v38.AccountId32, v38.Market] {
+    assert(this.isV38)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
     deprecateLatest()
-    return this.asV36
+    return this.isV38
+  }
+
+  get asLatest(): [bigint, v38.AccountId32, v38.Market] {
+    deprecateLatest()
+    return this.asV38
   }
 }
 
@@ -1121,14 +1138,29 @@ export class SwapsPoolCreateEvent {
     return this.ctx._chain.decodeEvent(this.ctx.event)
   }
 
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV36
+  /**
+   * A new pool has been created. \[CommonPoolEventParams, pool, pool_amount, pool_account\]
+   */
+  get isV37(): boolean {
+    return this.ctx._chain.getEventHash('swaps.PoolCreate') === 'e1ae211df35be8d001750987f0bbbe15272a62749a5327048eb46ae20f7c3089'
   }
 
-  get asLatest(): [v36.CommonPoolEventParams, v36.Pool, bigint, v36.AccountId32] {
+  /**
+   * A new pool has been created. \[CommonPoolEventParams, pool, pool_amount, pool_account\]
+   */
+  get asV37(): [v37.CommonPoolEventParams, v37.Pool, bigint, v37.AccountId32] {
+    assert(this.isV37)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
     deprecateLatest()
-    return this.asV36
+    return this.isV37
+  }
+
+  get asLatest(): [v37.CommonPoolEventParams, v37.Pool, bigint, v37.AccountId32] {
+    deprecateLatest()
+    return this.asV37
   }
 }
 
@@ -1289,14 +1321,29 @@ export class SwapsSwapExactAmountInEvent {
     return this.ctx._chain.decodeEvent(this.ctx.event)
   }
 
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV32
+  /**
+   * An exact amount of an asset is entering the pool. \[SwapEvent\]
+   */
+  get isV37(): boolean {
+    return this.ctx._chain.getEventHash('swaps.SwapExactAmountIn') === '06fe2e32873a59e751b617c21a3b9e60e7846f1d65de4b22e2494c006b11352e'
   }
 
-  get asLatest(): v32.SwapEvent {
+  /**
+   * An exact amount of an asset is entering the pool. \[SwapEvent\]
+   */
+  get asV37(): v37.SwapEvent {
+    assert(this.isV37)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
     deprecateLatest()
-    return this.asV32
+    return this.isV37
+  }
+
+  get asLatest(): v37.SwapEvent {
+    deprecateLatest()
+    return this.asV37
   }
 }
 
@@ -1335,14 +1382,29 @@ export class SwapsSwapExactAmountOutEvent {
     return this.ctx._chain.decodeEvent(this.ctx.event)
   }
 
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV32
+  /**
+   * An exact amount of an asset is leaving the pool. \[SwapEvent\]
+   */
+  get isV37(): boolean {
+    return this.ctx._chain.getEventHash('swaps.SwapExactAmountOut') === 'ed8ebcec20259e81859ebfe9d4501c49ce0f02e81d7ac4fea993e62e8646987d'
   }
 
-  get asLatest(): v32.SwapEvent {
+  /**
+   * An exact amount of an asset is leaving the pool. \[SwapEvent\]
+   */
+  get asV37(): v37.SwapEvent {
+    assert(this.isV37)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
     deprecateLatest()
-    return this.asV32
+    return this.isV37
+  }
+
+  get asLatest(): v37.SwapEvent {
+    deprecateLatest()
+    return this.asV37
   }
 }
 
