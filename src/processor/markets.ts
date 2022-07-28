@@ -845,9 +845,14 @@ function getCreatedEvent(ctx: EventHandlerContext): CreatedEvent {
         const accountId = ""
         const market = param1.value as t_Market
         return { marketId, accountId, market }
-    } else {
+    } else if (ctx.block.runtimeVersion.specVersion < 37 ) {
         const accountId = param1.value as String
         const market = param2.value as t_Market
+        return { marketId, accountId, market }
+    } else {
+        const accountId = param1.value as String
+        var market = param2.value as any
+        market.mdm = market.disputeMechanism
         return { marketId, accountId, market }
     }
 }
