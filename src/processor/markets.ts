@@ -2,7 +2,7 @@ import * as ss58 from "@subsquid/ss58"
 import { encodeAddress } from '@polkadot/keyring'
 import { Cache, IPFS, Tools } from './util'
 import { PredictionMarketsBoughtCompleteSetEvent, PredictionMarketsMarketApprovedEvent, PredictionMarketsMarketCancelledEvent, 
-    PredictionMarketsMarketCreatedEvent, PredictionMarketsMarketDisputedEvent, PredictionMarketsMarketInsufficientSubsidyEvent, 
+    PredictionMarketsMarketClosedEvent, PredictionMarketsMarketDisputedEvent, PredictionMarketsMarketInsufficientSubsidyEvent, 
     PredictionMarketsMarketRejectedEvent, PredictionMarketsMarketReportedEvent, PredictionMarketsMarketResolvedEvent, 
     PredictionMarketsMarketStartedWithSubsidyEvent, PredictionMarketsSoldCompleteSetEvent, PredictionMarketsTokensRedeemedEvent } from '../types/events'
 import { EventHandlerContext } from '@subsquid/substrate-processor'
@@ -305,6 +305,28 @@ export async function predictionMarketInsufficientSubsidy(ctx: EventHandlerConte
     } else {
         savedMarket.status = status.__kind
     }
+    console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
+    await store.save<Market>(savedMarket)
+
+    const hm = new HistoricalMarket()
+    hm.id = event.id + '-' + savedMarket.marketId
+    hm.marketId = savedMarket.marketId
+    hm.event = event.method
+    hm.status = savedMarket.status
+    hm.blockNumber = block.height
+    hm.timestamp = new Date(block.timestamp)
+    console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
+    await store.save<HistoricalMarket>(hm)
+}
+
+export async function predictionMarketClosed(ctx: EventHandlerContext) {
+    const {store, event, block, extrinsic} = ctx
+    const {marketId} = getClosedEvent(ctx)
+
+    const savedMarket = await store.get(Market, { where: { marketId: marketId } })
+    if (!savedMarket) return
+
+    savedMarket.status = MarketStatus.CLOSED
     console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
     await store.save<Market>(savedMarket)
 
@@ -721,6 +743,10 @@ async function decodeMarketMetadata(metadata: string): Promise<DecodedMarketMeta
     }
 }
 
+enum MarketStatus {
+    CLOSED = `Closed`
+}
+
 interface DecodedMarketMetadata {
     slug: string
     question: string
@@ -762,6 +788,10 @@ interface StartedWithSubsidyEvent {
 interface InsufficientSubsidyEvent {
     marketId: bigint
     status: any
+}
+
+interface ClosedEvent {
+    marketId: bigint
 }
 
 interface ReportedEvent {
@@ -884,6 +914,17 @@ function getInsufficientSubsidyEvent(ctx: EventHandlerContext): InsufficientSubs
     } else {
         const [marketId, status] = event.asLatest
         return {marketId, status}
+    }
+}
+
+function getClosedEvent(ctx: EventHandlerContext): ClosedEvent {
+    const event = new PredictionMarketsMarketClosedEvent(ctx)
+    if (event.isV37) {
+        const marketId = event.asV37
+        return {marketId}
+    } else {
+        const marketId = event.asLatest
+        return {marketId}
     }
 }
 
