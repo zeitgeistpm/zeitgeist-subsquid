@@ -22,6 +22,7 @@
       "predictionMarkets.MarketCreated",
       "predictionMarkets.MarketStartedWithSubsidy",
       "predictionMarkets.MarketInsufficientSubsidy",
+      "predictionMarkets.MarketClosed",
       "predictionMarkets.MarketDisputed",
       "predictionMarkets.MarketRejected",
       "predictionMarkets.MarketReported",
