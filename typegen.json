@@ -26,7 +26,6 @@
       "predictionMarkets.MarketDisputed",
       "predictionMarkets.MarketRejected",
       "predictionMarkets.MarketReported",
-      "predictionMarkets.MarketCancelled",
       "predictionMarkets.MarketResolved",
       "predictionMarkets.SoldCompleteSet",
       "predictionMarkets.TokensRedeemed",
