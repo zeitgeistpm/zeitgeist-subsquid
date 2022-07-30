@@ -1,8 +1,8 @@
 import * as ss58 from "@subsquid/ss58"
 import { encodeAddress } from '@polkadot/keyring'
 import { Cache, IPFS, Tools } from './util'
-import { PredictionMarketsBoughtCompleteSetEvent, PredictionMarketsMarketApprovedEvent, PredictionMarketsMarketCancelledEvent, 
-    PredictionMarketsMarketClosedEvent, PredictionMarketsMarketDisputedEvent, PredictionMarketsMarketInsufficientSubsidyEvent, 
+import { PredictionMarketsBoughtCompleteSetEvent, PredictionMarketsMarketApprovedEvent, PredictionMarketsMarketClosedEvent, 
+    PredictionMarketsMarketDisputedEvent, PredictionMarketsMarketInsufficientSubsidyEvent, 
     PredictionMarketsMarketRejectedEvent, PredictionMarketsMarketReportedEvent, PredictionMarketsMarketResolvedEvent, 
     PredictionMarketsMarketStartedWithSubsidyEvent, PredictionMarketsSoldCompleteSetEvent, PredictionMarketsTokensRedeemedEvent } from '../types/events'
 import { EventHandlerContext } from '@subsquid/substrate-processor'
@@ -463,28 +463,6 @@ export async function predictionMarketRejected(ctx: EventHandlerContext) {
     await store.save<HistoricalMarket>(hm)
 }
 
-export async function predictionMarketCancelled(ctx: EventHandlerContext) {
-    const {store, event, block, extrinsic} = ctx
-    const {marketId} = getCancelledEvent(ctx)
-
-    const savedMarket = await store.get(Market, { where: { marketId: marketId } })
-    if (!savedMarket) return
-
-    savedMarket.status = "Cancelled"
-    console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
-    await store.save<Market>(savedMarket)
-
-    const hm = new HistoricalMarket()
-    hm.id = event.id + '-' + savedMarket.marketId
-    hm.marketId = savedMarket.marketId
-    hm.event = event.method
-    hm.status = savedMarket.status
-    hm.blockNumber = block.height
-    hm.timestamp = new Date(block.timestamp)
-    console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
-    await store.save<HistoricalMarket>(hm)
-}
-
 export async function predictionMarketResolved(ctx: EventHandlerContext) {
     const {store, event, block, extrinsic} = ctx
     const {marketId, status, report} = getResolvedEvent(ctx)
@@ -810,10 +788,6 @@ interface RejectedEvent {
     marketId: bigint
 }
 
-interface CancelledEvent {
-    marketId: bigint
-}
-
 interface ResolvedEvent {
     marketId: bigint
     status: any
@@ -960,17 +934,6 @@ function getDisputedEvent(ctx: EventHandlerContext): DisputedEvent {
 
 function getRejectedEvent(ctx: EventHandlerContext): RejectedEvent {
     const event = new PredictionMarketsMarketRejectedEvent(ctx)
-    if (event.isV23) {
-        const marketId = event.asV23
-        return {marketId}
-    } else {
-        const marketId = event.asLatest
-        return {marketId}
-    }
-}
-
-function getCancelledEvent(ctx: EventHandlerContext): CancelledEvent {
-    const event = new PredictionMarketsMarketCancelledEvent(ctx)
     if (event.isV23) {
         const marketId = event.asV23
         return {marketId}
