@@ -779,6 +779,37 @@ export class PredictionMarketsMarketDisputedEvent {
   }
 }
 
+export class PredictionMarketsMarketExpiredEvent {
+  constructor(private ctx: EventContext) {
+    assert(this.ctx.event.name === 'predictionMarkets.MarketExpired')
+  }
+
+  /**
+   * An advised market has ended before it was approved or rejected. \[market_id\]
+   */
+  get isV37(): boolean {
+    return this.ctx._chain.getEventHash('predictionMarkets.MarketExpired') === '41435e5ab5f42f13f71c654249bfb9211554327f43e29ec79c55ba45c784d51c'
+  }
+
+  /**
+   * An advised market has ended before it was approved or rejected. \[market_id\]
+   */
+  get asV37(): bigint {
+    assert(this.isV37)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
+    deprecateLatest()
+    return this.isV37
+  }
+
+  get asLatest(): bigint {
+    deprecateLatest()
+    return this.asV37
+  }
+}
+
 export class PredictionMarketsMarketInsufficientSubsidyEvent {
   constructor(private ctx: EventContext) {
     assert(this.ctx.event.name === 'predictionMarkets.MarketInsufficientSubsidy')
