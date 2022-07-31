@@ -1104,6 +1104,37 @@ export class PredictionMarketsTokensRedeemedEvent {
   }
 }
 
+export class SwapsPoolClosedEvent {
+  constructor(private ctx: EventContext) {
+    assert(this.ctx.event.name === 'swaps.PoolClosed')
+  }
+
+  /**
+   * A pool was closed. \[pool_id\]
+   */
+  get isV37(): boolean {
+    return this.ctx._chain.getEventHash('swaps.PoolClosed') === '57f050a9a29c5e73dedb4b2de55baceffef23d79d1874a55732dc3afe63fe852'
+  }
+
+  /**
+   * A pool was closed. \[pool_id\]
+   */
+  get asV37(): bigint {
+    assert(this.isV37)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
+    deprecateLatest()
+    return this.isV37
+  }
+
+  get asLatest(): bigint {
+    deprecateLatest()
+    return this.asV37
+  }
+}
+
 export class SwapsPoolCreateEvent {
   constructor(private ctx: EventContext) {
     assert(this.ctx.event.name === 'swaps.PoolCreate')
