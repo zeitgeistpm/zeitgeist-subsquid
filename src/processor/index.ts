@@ -8,7 +8,7 @@ import { predictionMarketApproved, predictionMarketBoughtCompleteSet, prediction
     predictionMarketSoldCompleteSet, predictionMarketStartedWithSubsidy, predictionMarketTokensRedeemed } from "./markets";
 import { add_balance_108949, add_balance_155917, add_balance_175178, add_balance_178290, add_balance_179524, 
   add_balance_184820, add_balance_204361 } from "./postHooks";
-import { swapExactAmountIn, swapExactAmountOut, swapPoolCreated, swapPoolExited, swapPoolJoined } from "./swaps";
+import { swapExactAmountIn, swapExactAmountOut, swapPoolClosed, swapPoolCreated, swapPoolExited, swapPoolJoined } from "./swaps";
 
 (BigInt.prototype as any).toJSON = function () {
     return this.toString();
@@ -55,6 +55,7 @@ processor.addEventHandler('predictionMarkets.MarketResolved', predictionMarketRe
 processor.addEventHandler('predictionMarkets.SoldCompleteSet', predictionMarketSoldCompleteSet)
 processor.addEventHandler('predictionMarkets.TokensRedeemed', predictionMarketTokensRedeemed)
 processor.addEventHandler('swaps.PoolCreate', swapPoolCreated)
+processor.addEventHandler('swaps.PoolClosed', swapPoolClosed)
 processor.addEventHandler('swaps.PoolExit', swapPoolExited)
 processor.addEventHandler('swaps.PoolJoin', swapPoolJoined)
 processor.addEventHandler('swaps.SwapExactAmountIn', swapExactAmountIn)
