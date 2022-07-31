@@ -2,8 +2,8 @@ import { SubstrateProcessor } from "@subsquid/substrate-processor"
 import { balancesBalanceSet, balancesDustLost, balancesEndowed, balancesReserved, balancesTransfer, 
     balancesUnreserved, balancesWithdraw, currencyDeposited, currencyTransferred, currencyWithdrawn, 
     parachainStakingRewarded, systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount, tokensEndowed } from "./balances";
-import { predictionMarketApproved, predictionMarketBoughtCompleteSet, predictionMarketCancelled, 
-    predictionMarketClosed, predictionMarketCreated, predictionMarketDisputed, predictionMarketInsufficientSubsidy, 
+import { predictionMarketApproved, predictionMarketBoughtCompleteSet, predictionMarketClosed, 
+    predictionMarketCreated, predictionMarketDisputed, predictionMarketInsufficientSubsidy, 
     predictionMarketRejected, predictionMarketReported, predictionMarketResolved, 
     predictionMarketSoldCompleteSet, predictionMarketStartedWithSubsidy, predictionMarketTokensRedeemed } from "./markets";
 import { add_balance_108949, add_balance_155917, add_balance_175178, add_balance_178290, add_balance_179524, 
@@ -50,7 +50,6 @@ processor.addEventHandler('predictionMarkets.MarketClosed', predictionMarketClos
 processor.addEventHandler('predictionMarkets.MarketDisputed', predictionMarketDisputed)
 processor.addEventHandler('predictionMarkets.MarketRejected', predictionMarketRejected)
 processor.addEventHandler('predictionMarkets.MarketReported', predictionMarketReported)
-processor.addEventHandler('predictionMarkets.MarketCancelled', predictionMarketCancelled)
 processor.addEventHandler('predictionMarkets.MarketResolved', predictionMarketResolved)
 processor.addEventHandler('predictionMarkets.SoldCompleteSet', predictionMarketSoldCompleteSet)
 processor.addEventHandler('predictionMarkets.TokensRedeemed', predictionMarketTokensRedeemed)

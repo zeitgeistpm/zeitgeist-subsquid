@@ -611,37 +611,6 @@ export class PredictionMarketsMarketApprovedEvent {
   }
 }
 
-export class PredictionMarketsMarketCancelledEvent {
-  constructor(private ctx: EventContext) {
-    assert(this.ctx.event.name === 'predictionMarkets.MarketCancelled')
-  }
-
-  /**
-   *  A pending market has been cancelled. \[market_id, creator\]
-   */
-  get isV23(): boolean {
-    return this.ctx._chain.getEventHash('predictionMarkets.MarketCancelled') === '47f20e4340181ef6a9fa426529a2a2f806c76198b2a3d7b22d1d1c9bc6b82e25'
-  }
-
-  /**
-   *  A pending market has been cancelled. \[market_id, creator\]
-   */
-  get asV23(): bigint {
-    assert(this.isV23)
-    return this.ctx._chain.decodeEvent(this.ctx.event)
-  }
-
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV23
-  }
-
-  get asLatest(): bigint {
-    deprecateLatest()
-    return this.asV23
-  }
-}
-
 export class PredictionMarketsMarketClosedEvent {
   constructor(private ctx: EventContext) {
     assert(this.ctx.event.name === 'predictionMarkets.MarketClosed')
