@@ -2,7 +2,7 @@ import * as ss58 from "@subsquid/ss58"
 import { encodeAddress } from '@polkadot/keyring'
 import { Cache, IPFS, Tools } from './util'
 import { PredictionMarketsBoughtCompleteSetEvent, PredictionMarketsMarketApprovedEvent, PredictionMarketsMarketClosedEvent, 
-    PredictionMarketsMarketDisputedEvent, PredictionMarketsMarketInsufficientSubsidyEvent, 
+    PredictionMarketsMarketDisputedEvent, PredictionMarketsMarketExpiredEvent, PredictionMarketsMarketInsufficientSubsidyEvent, 
     PredictionMarketsMarketRejectedEvent, PredictionMarketsMarketReportedEvent, PredictionMarketsMarketResolvedEvent, 
     PredictionMarketsMarketStartedWithSubsidyEvent, PredictionMarketsSoldCompleteSetEvent, PredictionMarketsTokensRedeemedEvent } from '../types/events'
 import { EventHandlerContext } from '@subsquid/substrate-processor'
@@ -275,7 +275,7 @@ export async function predictionMarketStartedWithSubsidy(ctx: EventHandlerContex
     if (!savedMarket) return
 
     if (status.length < 2) {
-        savedMarket.status = "Active"
+        savedMarket.status = MarketStatus.ACTIVE
     } else {
         savedMarket.status = status.__kind
     }
@@ -301,7 +301,7 @@ export async function predictionMarketInsufficientSubsidy(ctx: EventHandlerConte
     if (!savedMarket) return
 
     if (status.length < 2) {
-        savedMarket.status = "InsufficientSubsidy"
+        savedMarket.status = MarketStatus.INSUFFICIENT_SUBSIDY
     } else {
         savedMarket.status = status.__kind
     }
@@ -327,6 +327,100 @@ export async function predictionMarketClosed(ctx: EventHandlerContext) {
     if (!savedMarket) return
 
     savedMarket.status = MarketStatus.CLOSED
+    console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
+    await store.save<Market>(savedMarket)
+
+    const hm = new HistoricalMarket()
+    hm.id = event.id + '-' + savedMarket.marketId
+    hm.marketId = savedMarket.marketId
+    hm.event = event.method
+    hm.status = savedMarket.status
+    hm.blockNumber = block.height
+    hm.timestamp = new Date(block.timestamp)
+    console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
+    await store.save<HistoricalMarket>(hm)
+}
+
+export async function predictionMarketDisputed(ctx: EventHandlerContext) {
+    const {store, event, block, extrinsic} = ctx
+    const {marketId, status, report} = getDisputedEvent(ctx)
+
+    const savedMarket = await store.get(Market, { where: { marketId:  marketId } })
+    if (!savedMarket) return
+
+    const ocr = new OutcomeReport()
+    if (report.outcome) {
+        if (report.outcome.categorical) {
+            ocr.categorical = report.outcome.categorical.toNumber()
+        } else if (report.outcome.scalar) {
+            ocr.scalar = report.outcome.scalar.toNumber()
+        } else if (report.outcome.__kind == "Categorical") {
+            ocr.categorical = report.outcome.value
+        } else if (report.outcome.__kind == "Scalar") {
+            ocr.scalar = +report.outcome.value.toString()
+        }
+    } else if (report.__kind == "Categorical") {
+        ocr.categorical = report.value
+    } else if (report.__kind == "Scalar") {
+        ocr.scalar = +report.value.toString()
+    }
+
+    const mr = new MarketReport()
+    mr.at = report.at ? +report.at.toString() : block.height
+    mr.by = report.by ? ss58.codec('zeitgeist').encode(report.by) : extrinsic!.signer
+    mr.outcome = ocr
+
+    if (status.length < 2) {
+        savedMarket.status = MarketStatus.DISPUTED
+    } else {
+        savedMarket.status = status.__kind
+    }
+    savedMarket.report = mr
+    console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
+    await store.save<Market>(savedMarket)
+
+    const hm = new HistoricalMarket()
+    hm.id = event.id + '-' + savedMarket.marketId
+    hm.marketId = savedMarket.marketId
+    hm.event = event.method
+    hm.status = savedMarket.status
+    hm.report = savedMarket.report
+    hm.blockNumber = block.height
+    hm.timestamp = new Date(block.timestamp)
+    console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
+    await store.save<HistoricalMarket>(hm)
+}
+
+export async function predictionMarketExpired(ctx: EventHandlerContext) {
+    const {store, event, block, extrinsic} = ctx
+    const {marketId} = getExpiredEvent(ctx)
+
+    const savedMarket = await store.get(Market, { where: { marketId: marketId } })
+    if (!savedMarket) return
+
+    savedMarket.status = MarketStatus.EXPIRED
+    console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
+    await store.save<Market>(savedMarket)
+
+    const hm = new HistoricalMarket()
+    hm.id = event.id + '-' + savedMarket.marketId
+    hm.marketId = savedMarket.marketId
+    hm.event = event.method
+    hm.status = savedMarket.status
+    hm.blockNumber = block.height
+    hm.timestamp = new Date(block.timestamp)
+    console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
+    await store.save<HistoricalMarket>(hm)
+}
+
+export async function predictionMarketRejected(ctx: EventHandlerContext) {
+    const {store, event, block, extrinsic} = ctx
+    const {marketId} = getRejectedEvent(ctx)
+
+    const savedMarket = await store.get(Market, { where: { marketId: marketId } })
+    if (!savedMarket) return
+
+    savedMarket.status = MarketStatus.Rejected
     console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
     await store.save<Market>(savedMarket)
 
@@ -371,7 +465,7 @@ export async function predictionMarketReported(ctx: EventHandlerContext) {
     mr.outcome = ocr
 
     if (status.length < 2) {
-        savedMarket.status = "Reported"
+        savedMarket.status = MarketStatus.REPORTED
     } else {
         savedMarket.status = status.__kind
     }
@@ -385,78 +479,6 @@ export async function predictionMarketReported(ctx: EventHandlerContext) {
     hm.event = event.method
     hm.status = savedMarket.status
     hm.report = savedMarket.report
-    hm.blockNumber = block.height
-    hm.timestamp = new Date(block.timestamp)
-    console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
-    await store.save<HistoricalMarket>(hm)
-}
-
-export async function predictionMarketDisputed(ctx: EventHandlerContext) {
-    const {store, event, block, extrinsic} = ctx
-    const {marketId, status, report} = getDisputedEvent(ctx)
-
-    const savedMarket = await store.get(Market, { where: { marketId:  marketId } })
-    if (!savedMarket) return
-
-    const ocr = new OutcomeReport()
-    if (report.outcome) {
-        if (report.outcome.categorical) {
-            ocr.categorical = report.outcome.categorical.toNumber()
-        } else if (report.outcome.scalar) {
-            ocr.scalar = report.outcome.scalar.toNumber()
-        } else if (report.outcome.__kind == "Categorical") {
-            ocr.categorical = report.outcome.value
-        } else if (report.outcome.__kind == "Scalar") {
-            ocr.scalar = +report.outcome.value.toString()
-        }
-    } else if (report.__kind == "Categorical") {
-        ocr.categorical = report.value
-    } else if (report.__kind == "Scalar") {
-        ocr.scalar = +report.value.toString()
-    }
-
-    const mr = new MarketReport()
-    mr.at = report.at ? +report.at.toString() : block.height
-    mr.by = report.by ? ss58.codec('zeitgeist').encode(report.by) : extrinsic!.signer
-    mr.outcome = ocr
-
-    if (status.length < 2) {
-        savedMarket.status = "Disputed"
-    } else {
-        savedMarket.status = status.__kind
-    }
-    savedMarket.report = mr
-    console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
-    await store.save<Market>(savedMarket)
-
-    const hm = new HistoricalMarket()
-    hm.id = event.id + '-' + savedMarket.marketId
-    hm.marketId = savedMarket.marketId
-    hm.event = event.method
-    hm.status = savedMarket.status
-    hm.report = savedMarket.report
-    hm.blockNumber = block.height
-    hm.timestamp = new Date(block.timestamp)
-    console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
-    await store.save<HistoricalMarket>(hm)
-}
-
-export async function predictionMarketRejected(ctx: EventHandlerContext) {
-    const {store, event, block, extrinsic} = ctx
-    const {marketId} = getRejectedEvent(ctx)
-
-    const savedMarket = await store.get(Market, { where: { marketId: marketId } })
-    if (!savedMarket) return
-
-    savedMarket.status = "Rejected"
-    console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
-    await store.save<Market>(savedMarket)
-
-    const hm = new HistoricalMarket()
-    hm.id = event.id + '-' + savedMarket.marketId
-    hm.marketId = savedMarket.marketId
-    hm.event = event.method
-    hm.status = savedMarket.status
     hm.blockNumber = block.height
     hm.timestamp = new Date(block.timestamp)
     console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
@@ -545,7 +567,7 @@ export async function predictionMarketResolved(ctx: EventHandlerContext) {
     }
 
     if (status.length < 2) {
-        savedMarket.status = "Resolved"
+        savedMarket.status = MarketStatus.RESOLVED
     } else {
         savedMarket.status = status.__kind
     }
@@ -722,7 +744,14 @@ async function decodeMarketMetadata(metadata: string): Promise<DecodedMarketMeta
 }
 
 enum MarketStatus {
-    CLOSED = `Closed`
+    ACTIVE = `Active`,
+    INSUFFICIENT_SUBSIDY = `InsufficientSubsidy`,
+    CLOSED = `Closed`,
+    DISPUTED = `Disputed`,
+    EXPIRED = `Expired`,
+    Rejected = `Rejected`,
+    REPORTED = `Reported`,
+    RESOLVED = `Resolved`
 }
 
 interface DecodedMarketMetadata {
@@ -772,20 +801,24 @@ interface ClosedEvent {
     marketId: bigint
 }
 
-interface ReportedEvent {
-    marketId: bigint
-    status: any
-    report: any
-}
-
 interface DisputedEvent {
     marketId: bigint
     status: any
     report: any
 }
 
+interface ExpiredEvent {
+    marketId: bigint
+}
+
 interface RejectedEvent {
     marketId: bigint
+}
+
+interface ReportedEvent {
+    marketId: bigint
+    status: any
+    report: any
 }
 
 interface ResolvedEvent {
@@ -902,21 +935,6 @@ function getClosedEvent(ctx: EventHandlerContext): ClosedEvent {
     }
 }
 
-function getReportedEvent(ctx: EventHandlerContext): ReportedEvent {
-    const event = new PredictionMarketsMarketReportedEvent(ctx)
-    if (event.isV23) {
-        const [marketId, report] = event.asV23
-        const status = ""
-        return {marketId, status, report}
-    } else if (event.isV29) {
-        const [marketId, status, report] = event.asV29
-        return {marketId, status, report}
-    } else {
-        const [marketId, status, report] = event.asLatest
-        return {marketId, status, report}
-    }
-}
-
 function getDisputedEvent(ctx: EventHandlerContext): DisputedEvent {
     const event = new PredictionMarketsMarketDisputedEvent(ctx)
     if (event.isV23) {
@@ -932,6 +950,17 @@ function getDisputedEvent(ctx: EventHandlerContext): DisputedEvent {
     }
 }
 
+function getExpiredEvent(ctx: EventHandlerContext): ExpiredEvent {
+    const event = new PredictionMarketsMarketExpiredEvent(ctx)
+    if (event.isV37) {
+        const marketId = event.asV37
+        return {marketId}
+    } else {
+        const marketId = event.asLatest
+        return {marketId}
+    }
+}
+
 function getRejectedEvent(ctx: EventHandlerContext): RejectedEvent {
     const event = new PredictionMarketsMarketRejectedEvent(ctx)
     if (event.isV23) {
@@ -940,6 +969,21 @@ function getRejectedEvent(ctx: EventHandlerContext): RejectedEvent {
     } else {
         const marketId = event.asLatest
         return {marketId}
+    }
+}
+
+function getReportedEvent(ctx: EventHandlerContext): ReportedEvent {
+    const event = new PredictionMarketsMarketReportedEvent(ctx)
+    if (event.isV23) {
+        const [marketId, report] = event.asV23
+        const status = ""
+        return {marketId, status, report}
+    } else if (event.isV29) {
+        const [marketId, status, report] = event.asV29
+        return {marketId, status, report}
+    } else {
+        const [marketId, status, report] = event.asLatest
+        return {marketId, status, report}
     }
 }
 

@@ -779,6 +779,37 @@ export class PredictionMarketsMarketDisputedEvent {
   }
 }
 
+export class PredictionMarketsMarketExpiredEvent {
+  constructor(private ctx: EventContext) {
+    assert(this.ctx.event.name === 'predictionMarkets.MarketExpired')
+  }
+
+  /**
+   * An advised market has ended before it was approved or rejected. \[market_id\]
+   */
+  get isV37(): boolean {
+    return this.ctx._chain.getEventHash('predictionMarkets.MarketExpired') === '41435e5ab5f42f13f71c654249bfb9211554327f43e29ec79c55ba45c784d51c'
+  }
+
+  /**
+   * An advised market has ended before it was approved or rejected. \[market_id\]
+   */
+  get asV37(): bigint {
+    assert(this.isV37)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
+    deprecateLatest()
+    return this.isV37
+  }
+
+  get asLatest(): bigint {
+    deprecateLatest()
+    return this.asV37
+  }
+}
+
 export class PredictionMarketsMarketInsufficientSubsidyEvent {
   constructor(private ctx: EventContext) {
     assert(this.ctx.event.name === 'predictionMarkets.MarketInsufficientSubsidy')
@@ -1070,6 +1101,37 @@ export class PredictionMarketsTokensRedeemedEvent {
   get asLatest(): [bigint, v35.Asset, bigint, bigint, v35.AccountId32] {
     deprecateLatest()
     return this.asV35
+  }
+}
+
+export class SwapsPoolClosedEvent {
+  constructor(private ctx: EventContext) {
+    assert(this.ctx.event.name === 'swaps.PoolClosed')
+  }
+
+  /**
+   * A pool was closed. \[pool_id\]
+   */
+  get isV37(): boolean {
+    return this.ctx._chain.getEventHash('swaps.PoolClosed') === '57f050a9a29c5e73dedb4b2de55baceffef23d79d1874a55732dc3afe63fe852'
+  }
+
+  /**
+   * A pool was closed. \[pool_id\]
+   */
+  get asV37(): bigint {
+    assert(this.isV37)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isLatest(): boolean {
+    deprecateLatest()
+    return this.isV37
+  }
+
+  get asLatest(): bigint {
+    deprecateLatest()
+    return this.asV37
   }
 }
 

@@ -1,6 +1,7 @@
 import { EventHandlerContext } from "@subsquid/substrate-processor"
 import { Asset, HistoricalAccountBalance, HistoricalAsset, HistoricalPool, Market, HistoricalMarket, Weight, Pool, Account} from '../model'
 import { CommonPoolEventParams as t_CPEP, Pool as t_Pool, PoolAssetsEvent as t_PAE, SwapEvent as t_SE } from '@zeitgeistpm/types/dist/interfaces'
+import { SwapsPoolClosedEvent } from "../types/events"
 
 export async function swapPoolCreated(ctx: EventHandlerContext) {
     const {store, event, block, extrinsic} = ctx
@@ -93,6 +94,28 @@ export async function swapPoolCreated(ctx: EventHandlerContext) {
     newHP.event = event.method
     newHP.ztgQty = newPool.ztgQty
     newHP.volume = newPool.volume
+    newHP.blockNumber = block.height
+    newHP.timestamp = new Date(block.timestamp)
+    console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(newHP, null, 2)}`)
+    await store.save<HistoricalPool>(newHP)
+}
+
+export async function swapPoolClosed(ctx: EventHandlerContext) {
+    const {store, event, block, extrinsic} = ctx
+    const {poolId} = getClosedEvent(ctx)
+
+    const savedPool = await store.get(Pool, { where: { poolId: poolId } })
+    if (!savedPool) return
+
+    savedPool.poolStatus = PoolStatus.CLOSED
+    console.log(`[${event.name}] Saving pool: ${JSON.stringify(savedPool, null, 2)}`)
+    await store.save<Pool>(savedPool)
+
+    const newHP = new HistoricalPool()
+    newHP.id = event.id + '-' + savedPool.poolId
+    newHP.poolId = savedPool.poolId
+    newHP.poolStatus = savedPool.poolStatus
+    newHP.event = event.method
     newHP.blockNumber = block.height
     newHP.timestamp = new Date(block.timestamp)
     console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(newHP, null, 2)}`)
@@ -369,9 +392,17 @@ async function calcSpotPrice(tokenBalanceIn: number, tokenWeightIn: number, toke
     return spotPrice
 }
 
+enum PoolStatus {
+    CLOSED = `Closed`
+}
+
 interface CreatedEvent {
     cpep: t_CPEP
     pool: t_Pool
+}
+
+interface ClosedEvent {
+    poolId: bigint
 }
 
 interface ExitedEvent {
@@ -408,6 +439,17 @@ function getCreatedEvent(ctx: EventHandlerContext): CreatedEvent {
         const cpep = param0.value as t_CPEP
         const pool = param1.value as t_Pool
         return {cpep, pool}
+    }
+}
+
+function getClosedEvent(ctx: EventHandlerContext): ClosedEvent {
+    const event = new SwapsPoolClosedEvent(ctx)
+    if (event.isV37) {
+        const poolId = event.asV37
+        return {poolId}
+    } else {
+        const poolId = event.asLatest
+        return {poolId}
     }
 }
 
