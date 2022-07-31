@@ -217,6 +217,8 @@ associated with the pool.
 type HistoricalPool @entity {
   "Zeitgeist's identifier for pool"
   poolId: Int!
+  "New status of the pool"
+  poolStatus: String
   "New amount of ZTG present in the pool"
   ztgQty: BigInt!
   "New updated volume"
