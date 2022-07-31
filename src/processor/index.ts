@@ -3,7 +3,7 @@ import { balancesBalanceSet, balancesDustLost, balancesEndowed, balancesReserved
     balancesUnreserved, balancesWithdraw, currencyDeposited, currencyTransferred, currencyWithdrawn, 
     parachainStakingRewarded, systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount, tokensEndowed } from "./balances";
 import { predictionMarketApproved, predictionMarketBoughtCompleteSet, predictionMarketClosed, 
-    predictionMarketCreated, predictionMarketDisputed, predictionMarketInsufficientSubsidy, 
+    predictionMarketCreated, predictionMarketDisputed, predictionMarketExpired, predictionMarketInsufficientSubsidy, 
     predictionMarketRejected, predictionMarketReported, predictionMarketResolved, 
     predictionMarketSoldCompleteSet, predictionMarketStartedWithSubsidy, predictionMarketTokensRedeemed } from "./markets";
 import { add_balance_108949, add_balance_155917, add_balance_175178, add_balance_178290, add_balance_179524, 
@@ -47,6 +47,7 @@ processor.addEventHandler('predictionMarkets.MarketCreated', predictionMarketCre
 processor.addEventHandler('predictionMarkets.MarketStartedWithSubsidy', predictionMarketStartedWithSubsidy)
 processor.addEventHandler('predictionMarkets.MarketInsufficientSubsidy', predictionMarketInsufficientSubsidy)
 processor.addEventHandler('predictionMarkets.MarketClosed', predictionMarketClosed)
+processor.addEventHandler('predictionMarkets.MarketExpired', predictionMarketExpired)
 processor.addEventHandler('predictionMarkets.MarketDisputed', predictionMarketDisputed)
 processor.addEventHandler('predictionMarkets.MarketRejected', predictionMarketRejected)
 processor.addEventHandler('predictionMarkets.MarketReported', predictionMarketReported)
