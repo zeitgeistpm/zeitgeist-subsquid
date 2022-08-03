@@ -153,7 +153,9 @@ type Market @entity {
   "Resolved outcome for the market"
   resolvedOutcome: String
   "Can be `authorized` or `court` or `simpleDisputes`"
-  mdm: MarketDisputeMechanism!
+  mdm: MarketDisputeMechanism! @deprecated
+  "Can be `authorized` or `court` or `simpleDisputes`"
+  disputeMechanism: MarketDisputeMechanism!
 }
 
 """
