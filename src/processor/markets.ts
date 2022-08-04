@@ -243,6 +243,17 @@ export async function predictionMarketCreated(ctx: EventHandlerContext) {
     }
     newMarket.mdm = mdm
 
+    const disputeMechanism = new MarketDisputeMechanism()
+    const d = market.mdm as any
+    if (d.authorized) {
+        disputeMechanism.authorized = d.authorized.toString()
+    } else if (d.court !== undefined) {
+        disputeMechanism.court = true
+    } else if (d.simpleDisputes !== undefined) {
+        disputeMechanism.simpleDisputes = true
+    }
+    newMarket.disputeMechanism = disputeMechanism
+
     console.log(`[${event.name}] Saving market: ${JSON.stringify(newMarket, null, 2)}`)
     await store.save<Market>(newMarket)
 
