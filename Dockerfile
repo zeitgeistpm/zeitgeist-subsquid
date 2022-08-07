@@ -4,29 +4,30 @@ FROM node AS node-with-gyp
 RUN apk add g++ make python3
 
 FROM node-with-gyp AS builder
-WORKDIR /squid
+WORKDIR /home/zeitgeist-squid
 ADD package.json .
-ADD package-lock.json .
-RUN npm ci
+ADD yarn.lock .
+RUN yarn install --frozen-lockfile
 ADD tsconfig.json .
 ADD src src
 RUN npm run build
 
 FROM node-with-gyp AS deps
-WORKDIR /squid
+WORKDIR /home/zeitgeist-squid
 ADD package.json .
-ADD package-lock.json .
-RUN npm ci --production
+ADD yarn.lock .
+RUN yarn install --frozen-lockfile
 
 FROM node AS squid
-WORKDIR /squid
-COPY --from=deps /squid/package.json .
-COPY --from=deps /squid/package-lock.json .
-COPY --from=deps /squid/node_modules node_modules
-COPY --from=builder /squid/lib lib
+WORKDIR /home/zeitgeist-squid
+COPY --from=deps /home/zeitgeist-squid/package.json .
+COPY --from=deps /home/zeitgeist-squid/yarn.lock .
+COPY --from=deps /home/zeitgeist-squid/node_modules node_modules
+COPY --from=builder /home/zeitgeist-squid/lib lib
 ADD db db
 ADD schema.graphql .
-# TODO: use shorter PROMETHEUS_PORT
-ENV PROCESSOR_PROMETHEUS_PORT 3000
-EXPOSE 3000
-EXPOSE 4000
+ADD zeitgeist.json .
+ADD .env.dev .
+
+ENV NODE_ENV dev
+EXPOSE 9090
