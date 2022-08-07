@@ -20,3 +20,42 @@ services:
     environment:
       REDIS_PASS: ${REDIS_PASS}
     command: sh -c "redis-server --appendonly yes --requirepass ${REDIS_PASS}"
+
+  processor:
+    image: processor:latest
+    build: 
+      dockerfile: Dockerfile
+      context: .
+    env_file:
+      - .env.dev
+    environment:
+      DB_NAME: ${DB_NAME}
+      DB_HOST: db
+      DB_USER: postgres
+      DB_PASS: postgres
+      DB_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PASS: ${REDIS_PASS}
+      PROCESSOR_PROMETHEUS_PORT: ${PROCESSOR_PROMETHEUS_PORT}
+    command: sh -c "yarn db:reset && npx sqd db migrate && node lib/processor/index.js"
+    depends_on:
+      - redis
+      - db
+
+  query-node:
+    image: query-node:latest
+    build: 
+      dockerfile: Dockerfile
+      context: .
+    env_file:
+      - .env.dev
+    environment:
+      BATCH_SIZE: ${BATCH_SIZE}
+      BLOCK_WINDOW: ${BLOCK_WINDOW}
+      GRAPHQL_SERVER_PORT: ${GRAPHQL_SERVER_PORT}
+      GRAPHQL_SERVER_HOST: ${GRAPHQL_SERVER_HOST}
+      WARTHOG_SUBSCRIPTIONS: ${WARTHOG_SUBSCRIPTIONS}
+      GQL_PORT: ${GQL_PORT}
+    command: sh -c "yarn query-node:start"
+    depends_on:
+      - processor
