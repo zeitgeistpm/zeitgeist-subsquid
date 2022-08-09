@@ -21,6 +21,7 @@
     "processor:dev:resume": "./scripts/processor.sh --resume --dev",
     "processor:local:start": "./scripts/processor.sh --start --local",
     "processor:local:resume": "./scripts/processor.sh --resume --local",
+    "processor:stop": "./scripts/processor.sh --stop",
     "query-node:start": "squid-graphql-server",
     "redis:up": "docker-compose up -d redis",
     "typegen": "squid-substrate-typegen typegen.json"
