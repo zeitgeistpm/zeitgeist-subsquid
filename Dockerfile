@@ -28,13 +28,10 @@ ADD db db
 ADD schema.graphql .
 ADD zeitgeist.json .
 
-EXPOSE 3000
-EXPOSE 4000
-
 
 FROM squid AS processor
 CMD ["node", "lib/processor/index.js"]
 
 
 FROM squid AS query-node
-CMD ["npm", "run", "query-node:start"]
+CMD ["yarn", "query-node:start"]
