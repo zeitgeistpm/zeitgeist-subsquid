@@ -34,4 +34,4 @@ CMD ["node", "lib/processor/index.js"]
 
 
 FROM squid AS query-node
-CMD ["yarn", "query-node:start"]
+CMD ["yarn", "squid-graphql-server"]
