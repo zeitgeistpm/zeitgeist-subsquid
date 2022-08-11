@@ -2,15 +2,18 @@ version: "3.4"
 services:
   db:
     image: postgres:12
+    container_name: indexer-db
 
   indexer:
     image: subsquid/hydra-indexer:5.0.0-alpha.29
+    container_name: zeitgeist-indexer
     depends_on:
       - db
       - redis
 
   indexer-gateway:
     image: subsquid/hydra-indexer-gateway:5
+    container_name: indexer-gateway
     depends_on:
       - redis
       - db
@@ -19,8 +22,10 @@ services:
 
   indexer-status-service:
     image: subsquid/hydra-indexer-status-service:5
+    container_name: indexer-status-service
     depends_on:
       - redis
       
   redis:
     image: redis:6.0-alpine
+    container_name: indexer-redis
