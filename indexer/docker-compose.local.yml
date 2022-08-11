@@ -29,7 +29,7 @@ services:
     command: >
       sh -c "yarn db:bootstrap && yarn start:prod"
     ports:
-      - 9090:9090
+      - 9091:9090
 
   indexer-gateway:
     restart: unless-stopped
