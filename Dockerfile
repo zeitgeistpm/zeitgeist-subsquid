@@ -10,7 +10,7 @@ ADD yarn.lock .
 RUN yarn install --frozen-lockfile
 ADD tsconfig.json .
 ADD src src
-RUN npm run build
+RUN yarn build
 
 FROM node-with-gyp AS deps
 WORKDIR /home/zeitgeist-squid
