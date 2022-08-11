@@ -3,6 +3,7 @@ version: "3.4"
 services:
   db:
     image: postgres:12
+    container_name: db
     environment:
       POSTGRES_DB: postgres
       POSTGRES_PASSWORD: postgres
@@ -12,6 +13,7 @@ services:
 
   redis:
     image: redis:6.0-alpine
+    container_name: redis
     restart: always
     ports:
       - "6379:6379"
@@ -19,4 +21,4 @@ services:
       - ./db/cache:/data
     environment:
       REDIS_PASS: ${REDIS_PASS}
-    command: sh -c "redis-server --appendonly yes --requirepass ${REDIS_PASS}"    
+    command: sh -c "redis-server --appendonly yes --requirepass ${REDIS_PASS}"
