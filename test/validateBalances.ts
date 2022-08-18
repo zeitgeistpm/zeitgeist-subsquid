@@ -7,6 +7,7 @@ import { AccountInfo } from "@polkadot/types/interfaces/system";
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // Temporarily stop verifying https certificate
 
 var falseCounter = 0, trueCounter = 0, falseAccs = ``;
+const WS_NODE_URL = `wss://bsr.zeitgeist.pm`;
 const accountLimit = 20; // Number of accounts that need to be validated
 const blockNumber = 1601267; // Balances from polkadot.js will be pulled as on this block number on chain
 
@@ -47,7 +48,7 @@ const req = https.request(options, (res) => {
       return;
     }
     const accounts = JSON.parse(data).data.accountBalances;
-    const sdk = await Tools.getSDK();
+    const sdk = await Tools.getSDK(WS_NODE_URL);
 
     /**
      * It is recommended to use `blockNumber` few blocks before finalized head 

@@ -118,22 +118,20 @@ export class IPFS {
 export class Tools {
   private static sdk: SDK
 
-  private static async init(): Promise<SDK> {
-    console.log(`Initializing SDK`)
-    this.sdk = await SDK.initialize(
-      process.env.WS_NODE_URL ?? "wss://bsr.zeitgeist.pm",
-      { ipfsClientUrl: process.env["IPFS_CLIENT_URL"] }
-    );
+  private static async init(nodeUrl: string): Promise<SDK> {
+    console.log(`Initializing SDK...`)
+    this.sdk = await SDK.initialize(nodeUrl, { ipfsClientUrl: process.env.IPFS_CLIENT_URL });
     return this.sdk
   }
 
-  static async getSDK() {
+  static async getSDK(nodeUrl?: string) {
     if (!this.sdk) {
-      return this.init()
+      const url = nodeUrl ?? process.env.WS_NODE_URL ?? `wss://bsr.zeitgeist.pm`;
+      return this.init(url);
     } 
     if (!this.sdk.api.isConnected) {
-      this.sdk.api.connect()
+      this.sdk.api.connect();
     }
-    return this.sdk
+    return this.sdk;
   }
 }
