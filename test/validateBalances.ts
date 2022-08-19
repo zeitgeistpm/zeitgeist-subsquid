@@ -1,12 +1,12 @@
 /** 
  * Script to validate Ztg balance of an account with polkadot.js 
  */
-import https from 'https'
-import { Tools } from "../src/processor/util"
-import { AccountInfo } from "@polkadot/types/interfaces/system";
+import https from 'https';
+import { Tools } from '../src/processor/util';
+import { AccountInfo } from '@polkadot/types/interfaces/system';
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // Temporarily stop verifying https certificate
 
-var falseCounter = 0, trueCounter = 0, falseAccs = ``;
+// Modify values as per requirement
 const WS_NODE_URL = `wss://bsr.zeitgeist.pm`;
 const QUERY_NODE_HOSTNAME = `processor.zeitgeist.pm`;
 const ACCOUNTS_LIMIT = 20; // Number of accounts that need to be validated
@@ -48,6 +48,7 @@ const req = https.request(options, (res) => {
       console.log(JSON.parse(data).errors[0].message);
       return;
     }
+    var falseCounter = 0, trueCounter = 0, falseAccs = ``;
     const accounts = JSON.parse(data).data.accountBalances;
     const sdk = await Tools.getSDK(WS_NODE_URL);
 
@@ -76,8 +77,8 @@ const req = https.request(options, (res) => {
     console.log(`\nTotal accounts checked: ${trueCounter+falseCounter}`);
     console.log(`Balances match for ${trueCounter} accounts`);
     if (falseCounter > 0) {
+      const falseAccsList = falseAccs.split(',');
       console.log(`Balances don't match for the below ${falseCounter} account(s):`);
-      var falseAccsList = falseAccs.split(',');
       for (var a in falseAccsList) {
         console.log(falseAccsList[a]);
       }
