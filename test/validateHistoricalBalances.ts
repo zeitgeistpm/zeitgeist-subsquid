@@ -56,7 +56,7 @@ const req = https.request(options, (res) => {
 
       if (amt.toString() !== accounts[i].balance.toString()) {
         // Avoid redundant errors in case of multiple transactions in a block number
-        if (accounts[i].blockNumber !== accounts[i+1].blockNumber) {
+        if ((accounts[i+1] !== undefined) ? accounts[i].blockNumber !== accounts[i+1].blockNumber : true) {
           console.log(`\nBalances don't match at ${blockHash} [#${accounts[i].blockNumber}]`);
           console.log(`On Polkadot.js: ` + amt.toBigInt());
           console.log(`On Subsquid: ` + accounts[i].balance);
