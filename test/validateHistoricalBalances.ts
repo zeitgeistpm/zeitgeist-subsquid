@@ -55,9 +55,12 @@ const req = https.request(options, (res) => {
       const {data: { free: amt }} = (await sdk.api.query.system.account.at(blockHash, ACCOUNT_ID)) as AccountInfo;
 
       if (amt.toString() !== accounts[i].balance.toString()) {
-        console.log(`\nBalances don't match at ${blockHash} [#${accounts[i].blockNumber}]`);
-        console.log(`On Polkadot.js: ` + amt.toBigInt());
-        console.log(`On Subsquid: ` + accounts[i].balance);
+        // Avoid redundant errors in case of multiple transactions in a block number
+        if (accounts[i].blockNumber !== accounts[i+1].blockNumber) {
+          console.log(`\nBalances don't match at ${blockHash} [#${accounts[i].blockNumber}]`);
+          console.log(`On Polkadot.js: ` + amt.toBigInt());
+          console.log(`On Subsquid: ` + accounts[i].balance);
+        }
       } else {
         console.log(`Balances match at ${blockHash} [#${accounts[i].blockNumber}]`);
       }
