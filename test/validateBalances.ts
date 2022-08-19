@@ -1,5 +1,5 @@
 /** 
- * Script to validate Ztg balance of an account with polkadot.js 
+ * Script to validate Ztg balance of an account against on-chain balance
  */
 import https from 'https';
 import { Tools } from '../src/processor/util';

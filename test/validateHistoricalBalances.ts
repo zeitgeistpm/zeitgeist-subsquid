@@ -1,5 +1,5 @@
 /** 
- * Script to validate Ztg balance history of an account with polkadot.js 
+ * Script to validate Ztg balance history of an account against on-chain data
  */
 import https from 'https';
 import { Tools } from '../src/processor/util';
@@ -69,9 +69,9 @@ const req = https.request(options, (res) => {
       }
     }
     if (balanceDiff == BigInt(0)) {
-      console.log(`\nBalance history for ${ACCOUNT_ID} is in alliance with polkadot.js`);
+      console.log(`\nBalance history for ${ACCOUNT_ID} is in alliance with on-chain data`);
     } else {
-      console.log(`\nBalance history for ${ACCOUNT_ID} is not in alliance with polkadot.js`);
+      console.log(`\nBalance history for ${ACCOUNT_ID} is not in alliance with on-chain data`);
       const diffsList = diffs.split(',');
       const blockNumsList = blockNums.split(',');
       console.log(`The differences found are:`)
