@@ -46,9 +46,9 @@ const req = https.request(options, (res) => {
       console.log(JSON.parse(data).errors[0].message);
       return;
     }
+    var balanceDiff = BigInt(0), diffs = ``, blockNums = ``;
     const accounts = JSON.parse(data).data.historicalAccountBalances;
     const sdk = await Tools.getSDK(WS_NODE_URL);
-    console.log(`For Account Id: ${ACCOUNT_ID}`);
 
     for (var i = 0; i < accounts.length; i++) {
       const blockHash = await sdk.api.rpc.chain.getBlockHash(accounts[i].blockNumber);
@@ -60,9 +60,23 @@ const req = https.request(options, (res) => {
           console.log(`\nBalances don't match at ${blockHash} [#${accounts[i].blockNumber}]`);
           console.log(`On Polkadot.js: ` + amt.toBigInt());
           console.log(`On Subsquid: ` + accounts[i].balance);
+          balanceDiff = amt.toBigInt() - BigInt(accounts[i].balance);
+          diffs += balanceDiff + `,`;
+          blockNums += accounts[i].blockNumber + `,`;
         }
       } else {
         console.log(`Balances match at ${blockHash} [#${accounts[i].blockNumber}]`);
+      }
+    }
+    if (balanceDiff == BigInt(0)) {
+      console.log(`\nBalance history for ${ACCOUNT_ID} is in alliance with polkadot.js`);
+    } else {
+      console.log(`\nBalance history for ${ACCOUNT_ID} is not in alliance with polkadot.js`);
+      const diffsList = diffs.split(',');
+      const blockNumsList = blockNums.split(',');
+      console.log(`The differences found are:`)
+      for (var i = 0; i < diffsList.length - 1; i++) {
+        console.log(`${diffsList[i]} units at #${blockNumsList[i]}`)
       }
     }
     process.exit(1);
