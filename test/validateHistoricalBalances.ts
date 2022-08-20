@@ -47,25 +47,25 @@ const req = https.request(options, (res) => {
       return;
     }
     var balanceDiff = BigInt(0), diffs = ``, blockNums = ``;
-    const accounts = JSON.parse(data).data.historicalAccountBalances;
+    const balanceHistory = JSON.parse(data).data.historicalAccountBalances;
     const sdk = await Tools.getSDK(WS_NODE_URL);
 
-    for (var i = 0; i < accounts.length; i++) {
-      const blockHash = await sdk.api.rpc.chain.getBlockHash(accounts[i].blockNumber);
+    for (var i = 0; i < balanceHistory.length; i++) {
+      const blockHash = await sdk.api.rpc.chain.getBlockHash(balanceHistory[i].blockNumber);
       const {data: { free: amt }} = (await sdk.api.query.system.account.at(blockHash, ACCOUNT_ID)) as AccountInfo;
 
-      if (amt.toString() !== accounts[i].balance.toString()) {
+      if (amt.toString() !== balanceHistory[i].balance.toString()) {
         // Avoid redundant errors in case of multiple transactions in a block number
-        if ((accounts[i+1] !== undefined) ? accounts[i].blockNumber !== accounts[i+1].blockNumber : true) {
-          console.log(`\nBalances don't match at ${blockHash} [#${accounts[i].blockNumber}]`);
+        if ((balanceHistory[i+1] !== undefined) ? balanceHistory[i].blockNumber !== balanceHistory[i+1].blockNumber : true) {
+          console.log(`\nBalances don't match at ${blockHash} [#${balanceHistory[i].blockNumber}]`);
           console.log(`On Polkadot.js: ` + amt.toBigInt());
-          console.log(`On Subsquid: ` + accounts[i].balance);
-          balanceDiff = amt.toBigInt() - BigInt(accounts[i].balance);
+          console.log(`On Subsquid: ` + balanceHistory[i].balance);
+          balanceDiff = amt.toBigInt() - BigInt(balanceHistory[i].balance);
           diffs += balanceDiff + `,`;
-          blockNums += accounts[i].blockNumber + `,`;
+          blockNums += balanceHistory[i].blockNumber + `,`;
         }
       } else {
-        console.log(`Balances match at ${blockHash} [#${accounts[i].blockNumber}]`);
+        console.log(`Balances match at ${blockHash} [#${balanceHistory[i].blockNumber}]`);
       }
     }
     if (balanceDiff == BigInt(0)) {
