@@ -1,20 +1,21 @@
 /** 
- * Script to validate Ztg balance of an account with polkadot.js 
+ * Script to validate Ztg balance of an account against on-chain balance
  */
-import https from 'https'
-import { Tools } from "../src/processor/util"
-import { AccountInfo } from "@polkadot/types/interfaces/system";
+import https from 'https';
+import { Tools } from '../src/processor/util';
+import { AccountInfo } from '@polkadot/types/interfaces/system';
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // Temporarily stop verifying https certificate
 
-var falseCounter = 0, trueCounter = 0, falseAccs = ``;
+// Modify values as per requirement
 const WS_NODE_URL = `wss://bsr.zeitgeist.pm`;
-const accountLimit = 20; // Number of accounts that need to be validated
-const blockNumber = 1601267; // Balances from polkadot.js will be pulled as on this block number on chain
+const QUERY_NODE_HOSTNAME = `processor.zeitgeist.pm`;
+const ACCOUNTS_LIMIT = 20; // Number of accounts that need to be validated
+const BLOCK_NUMBER = 1601267; // Balances from polkadot.js will be pulled as on this block number on chain
 
 // GraphQL query for retrieving Ztg balances of accounts
 const query = JSON.stringify({
   query: `{
-    accountBalances(where: {assetId_eq: "Ztg"}, limit: ${accountLimit}) {
+    accountBalances(where: {assetId_eq: "Ztg"}, limit: ${ACCOUNTS_LIMIT}) {
       account {
         accountId
       }
@@ -25,7 +26,7 @@ const query = JSON.stringify({
 });
 
 const options = {
-  hostname: 'processor.zeitgeist.pm',
+  hostname: QUERY_NODE_HOSTNAME,
   path: '/graphql',
   method: 'POST',
   headers: {
@@ -47,14 +48,15 @@ const req = https.request(options, (res) => {
       console.log(JSON.parse(data).errors[0].message);
       return;
     }
+    var falseCounter = 0, trueCounter = 0, falseAccs = ``;
     const accounts = JSON.parse(data).data.accountBalances;
     const sdk = await Tools.getSDK(WS_NODE_URL);
 
     /**
-     * It is recommended to use `blockNumber` few blocks before finalized head 
+     * It is recommended to use `BLOCK_NUMBER` few blocks before finalized head 
      * of the chain so that subsquid has the data processed in its database.
      */
-    const blockHash = await sdk.api.rpc.chain.getBlockHash(blockNumber);
+    const blockHash = await sdk.api.rpc.chain.getBlockHash(BLOCK_NUMBER);
     console.log();
 
     for (var i = 0; i < accounts.length; i++) {
@@ -75,13 +77,13 @@ const req = https.request(options, (res) => {
     console.log(`\nTotal accounts checked: ${trueCounter+falseCounter}`);
     console.log(`Balances match for ${trueCounter} accounts`);
     if (falseCounter > 0) {
+      const falseAccsList = falseAccs.split(',');
       console.log(`Balances don't match for the below ${falseCounter} account(s):`);
-      var falseAccsList = falseAccs.split(',');
       for (var a in falseAccsList) {
         console.log(falseAccsList[a]);
       }
     }
-    process.exit();
+    process.exit(1);
   });
 });
 
