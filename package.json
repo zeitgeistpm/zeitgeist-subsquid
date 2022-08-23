@@ -23,9 +23,12 @@
     "processor:local:resume": "./scripts/processor.sh local resume",
     "processor:local:start": "./scripts/processor.sh local start",
     "processor:stop": "./scripts/processor.sh stop",
+    "query-node:dev:start": "./scripts/query-node.sh dev start",
+    "query-node:local:start": "./scripts/query-node.sh local start",
+    "query-node:stop": "./scripts/query-node.sh stop",
     "redis:up": "docker-compose up -d redis",
-    "squid:start": "yarn indexer:start && yarn processor:local:start",
-    "squid:stop": "yarn indexer:stop && docker-compose down && docker stop zeitgeist-query-node",
+    "squid:start": "yarn indexer:start && yarn processor:local:start && yarn query-node:local:start",
+    "squid:stop": "yarn indexer:stop && docker-compose down && yarn query-node:stop",
     "typegen": "squid-substrate-typegen typegen.json"
   },
   "dependencies": {
