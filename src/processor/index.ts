@@ -60,11 +60,9 @@ processor.addEventHandler('swaps.PoolJoin', swapPoolJoined)
 processor.addEventHandler('swaps.SwapExactAmountIn', swapExactAmountIn)
 processor.addEventHandler('swaps.SwapExactAmountOut', swapExactAmountOut)
 
-if ([`local`,`m1`,`m2`].includes(process.env.NODE_ENV!)) {
+if (!process.env.WS_NODE_URL?.includes(`bs`|| `bsr`)) {
   processor.addEventHandler('balances.Transfer', balancesTransfer)
-}
-
-if ([`dev`,`t1`,`t2`].includes(process.env.NODE_ENV!)) {
+} else {
   processor.addEventHandler('balances.Transfer', {range: {from: 0, to: 588249}}, balancesTransferOld)
   processor.addEventHandler('balances.Transfer', {range: {from: 588250}}, balancesTransfer)
   processor.addEventHandler('system.ExtrinsicSuccess', {range: {from: 0, to: 588249}}, systemExtrinsicSuccess)
