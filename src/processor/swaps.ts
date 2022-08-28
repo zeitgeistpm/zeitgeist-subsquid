@@ -386,9 +386,7 @@ async function calcSpotPrice(tokenBalanceIn: number, tokenWeightIn: number, toke
     if (tokenBalanceOut == 0) return 0
     const numer = tokenBalanceIn/tokenWeightIn
     const denom = tokenBalanceOut/tokenWeightOut
-    const ratio = numer/denom
-    const scale = 1/(1-swapFee)
-    const spotPrice = ratio*scale
+    const spotPrice = numer/denom
     return spotPrice
 }
 
