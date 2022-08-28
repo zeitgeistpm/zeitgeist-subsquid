@@ -151,20 +151,13 @@ export async function systemExtrinsicSuccess(ctx: EventHandlerContext) {
             console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
             await store.save<Account>(acc)
 
-            const hab = new HistoricalAccountBalance()
-            hab.id = dhab.id
-            hab.accountId = acc.accountId
-            hab.event = dhab.event
-            hab.assetId = ab.assetId
-            hab.dBalance = - dhab.dBalance
-            hab.balance = ab.balance
-            hab.dValue = Number(hab.dBalance)
-            hab.value = Number(hab.balance)
-            hab.pvalue = acc.pvalue
-            hab.blockNumber = block.height
-            hab.timestamp = new Date(block.timestamp)
-            console.log(`[${event.name}] Updating historical account balance: ${JSON.stringify(hab, null, 2)}`)
-            await store.save<HistoricalAccountBalance>(hab)
+            dhab.dBalance = - dhab.dBalance
+            dhab.balance = ab.balance
+            dhab.dValue = Number(dhab.dBalance)
+            dhab.value = Number(dhab.balance)
+            dhab.pvalue = acc.pvalue
+            console.log(`[${event.name}] Updating historical account balance: ${JSON.stringify(dhab, null, 2)}`)
+            await store.save<HistoricalAccountBalance>(dhab)
         }
     }
 }
@@ -340,20 +333,13 @@ export async function balancesTransfer(ctx: EventHandlerContext) {
             console.log(`[${event.name}] Saving account: ${JSON.stringify(fa, null, 2)}`)
             await store.save<Account>(fa)
   
-            const hab = new HistoricalAccountBalance()
-            hab.id = dhab.id
-            hab.accountId = fa.accountId
-            hab.event = dhab.event
-            hab.assetId = faAB.assetId
-            hab.dBalance = - dhab.dBalance
-            hab.balance = faAB.balance
-            hab.dValue = Number(hab.dBalance)
-            hab.value = Number(hab.balance)
-            hab.pvalue = fa.pvalue
-            hab.blockNumber = block.height
-            hab.timestamp = new Date(block.timestamp)
-            console.log(`[${event.name}] Updating historical asset balance: ${JSON.stringify(hab, null, 2)}`)
-            await store.save<HistoricalAccountBalance>(hab)
+            dhab.dBalance = - dhab.dBalance
+            dhab.balance = faAB.balance
+            dhab.dValue = Number(dhab.dBalance)
+            dhab.value = Number(dhab.balance)
+            dhab.pvalue = fa.pvalue
+            console.log(`[${event.name}] Updating historical asset balance: ${JSON.stringify(dhab, null, 2)}`)
+            await store.save<HistoricalAccountBalance>(dhab)
         }
     } 
     
