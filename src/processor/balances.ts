@@ -151,23 +151,13 @@ export async function systemExtrinsicSuccess(ctx: EventHandlerContext) {
             console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
             await store.save<Account>(acc)
 
-            const hab = new HistoricalAccountBalance()
-            hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
-            hab.accountId = acc.accountId
-            hab.event = dhab.event
-            hab.assetId = ab.assetId
-            hab.dBalance = - dhab.dBalance
-            hab.balance = ab.balance
-            hab.dValue = Number(hab.dBalance)
-            hab.value = Number(hab.balance)
-            hab.pvalue = acc.pvalue
-            hab.blockNumber = block.height
-            hab.timestamp = new Date(block.timestamp)
-            console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
-            await store.save<HistoricalAccountBalance>(hab)
-
-            console.log(`[${event.name}] Removing historical asset balance: ${JSON.stringify(dhab, null, 2)}`)
-            await store.remove<HistoricalAccountBalance>(dhab)
+            dhab.dBalance = - dhab.dBalance
+            dhab.balance = ab.balance
+            dhab.dValue = Number(dhab.dBalance)
+            dhab.value = Number(dhab.balance)
+            dhab.pvalue = acc.pvalue
+            console.log(`[${event.name}] Updating historical account balance: ${JSON.stringify(dhab, null, 2)}`)
+            await store.save<HistoricalAccountBalance>(dhab)
         }
     }
 }
@@ -331,6 +321,26 @@ export async function balancesTransfer(ctx: EventHandlerContext) {
         faHAB.timestamp = new Date(block.timestamp)
         console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(faHAB, null, 2)}`)
         await store.save<HistoricalAccountBalance>(faHAB)
+
+        const dhab = await store.get(HistoricalAccountBalance, { where: 
+          { accountId: fa.accountId, assetId: "Ztg", event: "DustLost", blockNumber: block.height } })
+        if (dhab) {
+            faAB.balance = faAB.balance - dhab.dBalance
+            console.log(`[${event.name}] Saving account balance: ${JSON.stringify(faAB, null, 2)}`)
+            await store.save<AccountBalance>(faAB)
+  
+            fa.pvalue = Number(fa.pvalue) - Number(dhab.dBalance)
+            console.log(`[${event.name}] Saving account: ${JSON.stringify(fa, null, 2)}`)
+            await store.save<Account>(fa)
+  
+            dhab.dBalance = - dhab.dBalance
+            dhab.balance = faAB.balance
+            dhab.dValue = Number(dhab.dBalance)
+            dhab.value = Number(dhab.balance)
+            dhab.pvalue = fa.pvalue
+            console.log(`[${event.name}] Updating historical asset balance: ${JSON.stringify(dhab, null, 2)}`)
+            await store.save<HistoricalAccountBalance>(dhab)
+        }
     } 
     
     var ta = await store.get(Account, { where: { accountId: toWId } })
@@ -379,6 +389,99 @@ export async function balancesTransfer(ctx: EventHandlerContext) {
             return  
         }
     }
+}
+
+export async function balancesTransferOld(ctx: EventHandlerContext) {
+  const {store, event, block, extrinsic} = ctx
+  const {fromId, toId, amount} = getTransferEvent(ctx)
+
+  const fromWId = ss58.codec('zeitgeist').encode(fromId)
+  const toWId = ss58.codec('zeitgeist').encode(toId)
+  
+  var fa = await store.get(Account, { where: { accountId: fromWId } })
+  if (!fa) {
+      fa = new Account()
+      fa.id = event.id + '-' + fromWId.substring(fromWId.length - 5)
+      fa.accountId = fromWId
+      fa.pvalue = 0
+      console.log(`[${event.name}] Saving account: ${JSON.stringify(fa, null, 2)}`)
+      await store.save<Account>(fa)
+      await initBalance(fa, store, event, block)
+  }
+
+  var faAB = await store.get(AccountBalance, { where: { account: fa, assetId: "Ztg" } })
+  if (faAB) {
+      faAB.balance = faAB.balance - amount
+      faAB.value = Number(faAB.balance)
+      console.log(`[${event.name}] Saving account balance: ${JSON.stringify(faAB, null, 2)}`)
+      await store.save<AccountBalance>(faAB)
+
+      fa.pvalue = Number(fa.pvalue) - Number(amount)
+      console.log(`[${event.name}] Saving account: ${JSON.stringify(fa, null, 2)}`)
+      await store.save<Account>(fa)
+
+      const faHAB = new HistoricalAccountBalance()
+      faHAB.id = event.id + '-' + fromWId.substring(fromWId.length - 5)
+      faHAB.accountId = fa.accountId
+      faHAB.event = event.method
+      faHAB.assetId = faAB.assetId
+      faHAB.dBalance = - amount
+      faHAB.balance = faAB.balance
+      faHAB.dValue = Number(faHAB.dBalance)
+      faHAB.value = Number(faHAB.balance)
+      faHAB.pvalue = fa.pvalue
+      faHAB.blockNumber = block.height
+      faHAB.timestamp = new Date(block.timestamp)
+      console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(faHAB, null, 2)}`)
+      await store.save<HistoricalAccountBalance>(faHAB)
+  } 
+  
+  var ta = await store.get(Account, { where: { accountId: toWId } })
+  if (!ta) {
+      ta = new Account()
+      ta.id = event.id + '-' + toWId.substring(toWId.length - 5)
+      ta.accountId = toWId
+      ta.pvalue = 0
+      console.log(`[${event.name}] Saving account: ${JSON.stringify(ta, null, 2)}`)
+      await store.save<Account>(ta)
+      await initBalance(ta, store, event, block)
+  }
+
+  const taAB = await store.get(AccountBalance, { where: { account: ta, assetId: "Ztg" } })
+  if (taAB) {
+      const hab = await store.get(HistoricalAccountBalance, { where: 
+          { accountId: ta.accountId, assetId: "Ztg", event: "Endowed", blockNumber: block.height } })
+      if (!hab) {
+          taAB.balance = taAB.balance + amount
+          taAB.value = Number(taAB.balance)
+          console.log(`[${event.name}] Saving account balance: ${JSON.stringify(taAB, null, 2)}`)
+          await store.save<AccountBalance>(taAB)
+
+          ta.pvalue = Number(ta.pvalue) + Number(amount)
+          console.log(`[${event.name}] Saving account: ${JSON.stringify(ta, null, 2)}`)
+          await store.save<Account>(ta)
+
+          const taHAB = new HistoricalAccountBalance()
+          taHAB.id = event.id + '-' + toWId.substring(toWId.length - 5)
+          taHAB.accountId = ta.accountId
+          taHAB.event = event.method
+          taHAB.assetId = taAB.assetId
+          taHAB.dBalance = amount
+          taHAB.balance = taAB.balance
+          taHAB.dValue = Number(taHAB.dBalance)
+          taHAB.value = Number(taHAB.balance)
+          taHAB.pvalue = ta.pvalue
+          taHAB.blockNumber = block.height
+          taHAB.timestamp = new Date(block.timestamp)
+          console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(taHAB, null, 2)}`)
+          await store.save<HistoricalAccountBalance>(taHAB)
+      } else {
+          hab.event = hab.event.concat(event.method)
+          console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
+          await store.save<HistoricalAccountBalance>(hab)
+          return
+      }
+  }
 }
 
 export async function balancesBalanceSet(ctx: EventHandlerContext) {

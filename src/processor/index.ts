@@ -1,6 +1,6 @@
 import { SubstrateProcessor } from "@subsquid/substrate-processor"
 import { balancesBalanceSet, balancesDustLost, balancesEndowed, balancesReserved, balancesTransfer, 
-    balancesUnreserved, balancesWithdraw, currencyDeposited, currencyTransferred, currencyWithdrawn, 
+    balancesTransferOld, balancesUnreserved, balancesWithdraw, currencyDeposited, currencyTransferred, currencyWithdrawn, 
     parachainStakingRewarded, systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount, tokensEndowed } from "./balances";
 import { predictionMarketApproved, predictionMarketBoughtCompleteSet, predictionMarketClosed, 
     predictionMarketCreated, predictionMarketDisputed, predictionMarketExpired, predictionMarketInsufficientSubsidy, 
@@ -32,7 +32,6 @@ processor.addEventHandler('parachainStaking.Rewarded', parachainStakingRewarded)
 processor.addEventHandler('system.NewAccount', systemNewAccount)
 processor.addEventHandler('balances.Endowed', balancesEndowed)
 processor.addEventHandler('balances.DustLost', balancesDustLost)
-processor.addEventHandler('balances.Transfer', balancesTransfer)
 processor.addEventHandler('balances.BalanceSet', balancesBalanceSet)
 processor.addEventHandler('balances.Reserved', balancesReserved)
 processor.addEventHandler('balances.Unreserved', balancesUnreserved)
@@ -61,7 +60,11 @@ processor.addEventHandler('swaps.PoolJoin', swapPoolJoined)
 processor.addEventHandler('swaps.SwapExactAmountIn', swapExactAmountIn)
 processor.addEventHandler('swaps.SwapExactAmountOut', swapExactAmountOut)
 
-if (process.env.NODE_ENV == 'test') {
+if (!process.env.WS_NODE_URL?.includes(`bs`|| `bsr`)) {
+  processor.addEventHandler('balances.Transfer', balancesTransfer)
+} else {
+  processor.addEventHandler('balances.Transfer', {range: {from: 0, to: 588249}}, balancesTransferOld)
+  processor.addEventHandler('balances.Transfer', {range: {from: 588250}}, balancesTransfer)
   processor.addEventHandler('system.ExtrinsicSuccess', {range: {from: 0, to: 588249}}, systemExtrinsicSuccess)
   processor.addEventHandler('system.ExtrinsicFailed', {range: {from: 0, to: 588249}}, systemExtrinsicFailed)
   processor.addPostHook({range: {from: 108949, to: 108949}}, add_balance_108949)
