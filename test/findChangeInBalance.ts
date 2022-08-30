@@ -15,10 +15,11 @@ const TO_BLOCK_NUM = 736371;
 const findChangeInBalance = async () => {
   const sdk = await Tools.getSDK(WS_NODE_URL);
   let fromBlockNum = FROM_BLOCK_NUM;
-  let toBlockNum = TO_BLOCK_NUM + 1;
+  let toBlockNum = TO_BLOCK_NUM + 1; // Includes `TO_BLOCK_NUM` for querying
   let fromBalance = await getBalanceAt(sdk, fromBlockNum);
   const startBalance = fromBalance.toBigInt();
 
+  // Inspired by binary search algorithm
   while (fromBlockNum <= toBlockNum) {
     let midBlockNum = Math.floor((fromBlockNum + toBlockNum) / 2);
     const midBalance = await getBalanceAt(sdk, midBlockNum);
@@ -30,6 +31,7 @@ const findChangeInBalance = async () => {
       fromBalance = midBalance;
     }
 
+    // When all block numbers are covered
     if (toBlockNum - fromBlockNum == 1) {
       const endBalance = midBalance.toBigInt();
       if (endBalance - startBalance !== BigInt(0)) {
@@ -43,6 +45,7 @@ const findChangeInBalance = async () => {
   }
 }
 
+// To query chain for account balance as on block number
 const getBalanceAt = async (sdk: SDK, blockNumber: number) => {
   const blockHash = await sdk.api.rpc.chain.getBlockHash(blockNumber);
   const {data: { free: amt }} = (await sdk.api.query.system.account.at(blockHash, ACCOUNT_ID)) as AccountInfo;
