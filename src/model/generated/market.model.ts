@@ -82,6 +82,12 @@ export class Market {
   categories!: (CategoryMetadata | undefined | null)[] | undefined | null
 
   /**
+   * Type of scalar range if market is of type scalar
+   */
+  @Column_("text", {nullable: true})
+  scalarType!: string | undefined | null
+
+  /**
    * Market tags
    */
   @Column_("text", {array: true, nullable: true})
