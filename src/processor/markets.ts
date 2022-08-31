@@ -184,6 +184,10 @@ export async function predictionMarketCreated(ctx: EventHandlerContext) {
         newMarket.question = metadata.question
         newMarket.description = metadata.description
         newMarket.img = metadata.img
+        
+        if ((market.marketType as any).scalar) {
+          newMarket.scalarType = metadata.scalarType;
+        }
 
         if (metadata.categories) {
             newMarket.categories = []
@@ -772,6 +776,7 @@ interface DecodedMarketMetadata {
     categories?: CategoryData[]
     tags?: string[]
     img?: string
+    scalarType?: string
 }
 
 interface CategoryData {
