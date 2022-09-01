@@ -132,6 +132,8 @@ type Market @entity {
   description: String
   "Share details"
   categories: [CategoryMetadata]
+  "Type of scalar range if market is of type scalar"
+  scalarType: String
   "Market tags"
   tags: [String]
   "Image for the market"
