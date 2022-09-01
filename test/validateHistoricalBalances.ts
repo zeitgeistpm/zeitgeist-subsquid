@@ -4,17 +4,16 @@
 import https from 'https';
 import { Tools } from '../src/processor/util';
 import { AccountInfo } from '@polkadot/types/interfaces/system';
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // Temporarily stop verifying https certificate
 
 // Modify values as per requirement
-const ACCOUNT_ID = `dE1VdxVn8xy7HFH9dLeebJu3eELFqXXjK8c2cwEuRJXr4QAZA`;
+const ACCOUNT_ID = `dE4NbK6XC4dJEkjU5erpDNj2ydMh1fMNw8ug7xNgzTxqFo5iW`;
 const WS_NODE_URL = `wss://bsr.zeitgeist.pm`;
 const QUERY_NODE_HOSTNAME = `processor.zeitgeist.pm`;
 
 // GraphQL query for retrieving balance history of an account
 const query = JSON.stringify({
   query: `{
-    historicalAccountBalances(where: {accountId_eq: "${ACCOUNT_ID}", assetId_eq: "Ztg"}, orderBy: blockNumber_ASC) {
+    historicalAccountBalances(where: {accountId_eq: "${ACCOUNT_ID}", assetId_eq: "Ztg"}, orderBy: id_ASC) {
       balance
       blockNumber
       event
@@ -46,36 +45,43 @@ const req = https.request(options, (res) => {
       console.log(JSON.parse(data).errors[0].message);
       return;
     }
-    var balanceDiff = BigInt(0), diffs = ``, blockNums = ``;
+    let balanceDiff = BigInt(0), diffs = ``, falseBlockNums = ``, trueBlockNums = ``;
     const balanceHistory = JSON.parse(data).data.historicalAccountBalances;
+    console.log(`Number of records found in balance history of ${ACCOUNT_ID} : ${balanceHistory.length}`);
     const sdk = await Tools.getSDK(WS_NODE_URL);
 
-    for (var i = 0; i < balanceHistory.length; i++) {
+    for (let i = 0; i < balanceHistory.length; i++) {
       const blockHash = await sdk.api.rpc.chain.getBlockHash(balanceHistory[i].blockNumber);
       const {data: { free: amt }} = (await sdk.api.query.system.account.at(blockHash, ACCOUNT_ID)) as AccountInfo;
 
-      if (amt.toString() !== balanceHistory[i].balance.toString()) {
-        // Avoid redundant errors in case of multiple transactions in a block number
-        if ((balanceHistory[i+1] !== undefined) ? balanceHistory[i].blockNumber !== balanceHistory[i+1].blockNumber : true) {
-          console.log(`\nBalances don't match at ${blockHash} [#${balanceHistory[i].blockNumber}]`);
-          console.log(`On Polkadot.js: ` + amt.toBigInt());
-          console.log(`On Subsquid: ` + balanceHistory[i].balance);
-          balanceDiff = amt.toBigInt() - BigInt(balanceHistory[i].balance);
-          diffs += balanceDiff + `,`;
-          blockNums += balanceHistory[i].blockNumber + `,`;
+      // Avoid checking block numbers which have already passed the check
+      if (!trueBlockNums.includes(balanceHistory[i].blockNumber)) {
+        if (amt.toString() !== balanceHistory[i].balance.toString()) {
+          // Avoid redundant errors in case of multiple transactions in a block number
+          if ((balanceHistory[i+1] !== undefined) ? balanceHistory[i].blockNumber !== balanceHistory[i+1].blockNumber : true) {
+            console.log(`\nBalances don't match at ${blockHash} [#${balanceHistory[i].blockNumber}]`);
+            console.log(`On Chain: ` + amt.toBigInt());
+            console.log(`On Subsquid: ` + balanceHistory[i].balance);
+            balanceDiff = amt.toBigInt() - BigInt(balanceHistory[i].balance);
+            diffs += balanceDiff + `,`;
+            falseBlockNums += balanceHistory[i].blockNumber + `,`;
+          }
+        } else {
+          console.log(`Balances match at ${blockHash} [#${balanceHistory[i].blockNumber}]`);
+          trueBlockNums += balanceHistory[i].blockNumber + `,`;
         }
-      } else {
-        console.log(`Balances match at ${blockHash} [#${balanceHistory[i].blockNumber}]`);
       }
     }
+    sdk.api.disconnect();
+
     if (balanceDiff == BigInt(0)) {
       console.log(`\nBalance history for ${ACCOUNT_ID} is in alliance with on-chain data`);
     } else {
       console.log(`\nBalance history for ${ACCOUNT_ID} is not in alliance with on-chain data`);
       const diffsList = diffs.split(',');
-      const blockNumsList = blockNums.split(',');
+      const blockNumsList = falseBlockNums.split(',');
       console.log(`The differences found are:`)
-      for (var i = 0; i < diffsList.length - 1; i++) {
+      for (let i = 0; i < diffsList.length - 1; i++) {
         console.log(`${diffsList[i]} units at #${blockNumsList[i]}`)
       }
     }
