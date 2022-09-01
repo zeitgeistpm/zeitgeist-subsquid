@@ -1,5 +1,6 @@
 /** 
  * Script to validate Ztg balance history of an account against on-chain data
+ * Run using `ts-node test/validateHistoricalBalances.ts`
  */
 import https from 'https';
 import { Tools } from '../src/processor/util';

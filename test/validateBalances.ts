@@ -1,5 +1,6 @@
 /** 
  * Script to validate Ztg balance of an account against on-chain balance
+ * Run using `ts-node test/validateBalances.ts`
  */
 import https from 'https';
 import { Tools } from '../src/processor/util';
