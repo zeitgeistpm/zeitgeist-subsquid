@@ -1,8 +1,7 @@
 /node_modules
 /lib
 /db/cache
-/mappings/generated
-/mappings/node_modules
+.env.d
 .env.t1
 .env.t2
 .env.m1
