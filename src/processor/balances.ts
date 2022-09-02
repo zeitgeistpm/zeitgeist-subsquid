@@ -2,9 +2,9 @@ import * as ss58 from "@subsquid/ss58"
 import { EventHandlerContext, Store, SubstrateBlock, SubstrateEvent, SubstrateExtrinsic } from "@subsquid/substrate-processor"
 import { Cache, Tools } from "./util"
 import { Account, AccountBalance, Asset, HistoricalAccountBalance } from "../model"
-import { BalancesBalanceSetEvent, BalancesWithdrawEvent, BalancesDustLostEvent, BalancesEndowedEvent, BalancesReservedEvent, 
-    BalancesTransferEvent, BalancesUnreservedEvent, CurrencyDepositedEvent, CurrencyTransferredEvent, CurrencyWithdrawnEvent, 
-    SystemExtrinsicFailedEvent, SystemExtrinsicSuccessEvent, SystemNewAccountEvent, TokensEndowedEvent } from "../types/events"
+import { BalancesBalanceSetEvent, BalancesDepositEvent, BalancesWithdrawEvent, BalancesDustLostEvent, BalancesEndowedEvent, 
+  BalancesReservedEvent, BalancesTransferEvent, BalancesUnreservedEvent, CurrencyDepositedEvent, CurrencyTransferredEvent, 
+  CurrencyWithdrawnEvent, SystemExtrinsicFailedEvent, SystemExtrinsicSuccessEvent, SystemNewAccountEvent, TokensEndowedEvent } from "../types/events"
 import { AccountInfo } from "@polkadot/types/interfaces/system";
 import { util } from "@zeitgeistpm/sdk"
 
@@ -625,6 +625,50 @@ export async function balancesUnreserved(ctx: EventHandlerContext) {
     }
 }
 
+export async function balancesDeposit(ctx: EventHandlerContext) {
+  const { store, event, block, extrinsic } = ctx
+  const { accountId, amount } = getDepositEvent(ctx)
+  const walletId = ss58.codec('zeitgeist').encode(accountId)
+
+  var acc = await store.get(Account, { where: { accountId: walletId } })
+  if (!acc) {
+    acc = new Account()
+    acc.id = event.id + '-' + walletId.substring(walletId.length - 5)
+    acc.accountId = walletId
+    acc.pvalue = 0
+    console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+    await store.save<Account>(acc)
+    await initBalance(acc, store, event, block)
+  }
+
+  const ab = await store.get(AccountBalance, { where: { account: acc, assetId: "Ztg" } })
+  if (ab) {
+    ab.balance = ab.balance + amount
+    ab.value = Number(ab.balance)
+    console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
+    await store.save<AccountBalance>(ab)
+
+    acc.pvalue = Number(acc.pvalue) + Number(amount)
+    console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+    await store.save<Account>(acc)
+
+    const hab = new HistoricalAccountBalance()
+    hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
+    hab.accountId = acc.accountId
+    hab.event = event.method
+    hab.assetId = ab.assetId
+    hab.dBalance = amount
+    hab.balance = ab.balance
+    hab.dValue = Number(hab.dBalance)
+    hab.value = Number(hab.balance)
+    hab.pvalue = acc.pvalue
+    hab.blockNumber = block.height
+    hab.timestamp = new Date(block.timestamp)
+    console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
+    await store.save<HistoricalAccountBalance>(hab)
+  }
+}
+
 export async function balancesWithdraw(ctx: EventHandlerContext) {
     const { store, event, block, extrinsic } = ctx
     const { accountId, amount } = getWithdrawEvent(ctx)
@@ -1041,6 +1085,11 @@ interface UnreservedEvent {
     amount: bigint
 }
 
+interface DepositEvent {
+  accountId: Uint8Array
+  amount: bigint
+}
+
 interface WithdrawEvent {
     accountId: Uint8Array
     amount: bigint
@@ -1190,6 +1239,18 @@ function getUnreservedEvent(ctx: EventHandlerContext): UnreservedEvent {
         const accountId = who
         return {accountId, amount}
     }
+}
+
+function getDepositEvent(ctx: EventHandlerContext): DepositEvent {
+  const event = new BalancesDepositEvent(ctx)
+  if (event.isV23) {
+    const [accountId, amount] = event.asV23
+    return {accountId, amount}
+  } else {
+    const {who, amount} = event.asLatest
+    const accountId = who
+    return {accountId, amount}
+  }
 }
 
 function getWithdrawEvent(ctx: EventHandlerContext): WithdrawEvent {
