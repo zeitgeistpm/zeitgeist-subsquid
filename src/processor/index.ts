@@ -1,11 +1,11 @@
 import { SubstrateProcessor } from "@subsquid/substrate-processor"
-import { balancesBalanceSet, balancesDustLost, balancesEndowed, balancesReserved, balancesTransfer, 
-    balancesTransferOld, balancesUnreserved, balancesWithdraw, currencyDeposited, currencyTransferred, currencyWithdrawn, 
-    parachainStakingRewarded, systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount, tokensEndowed } from "./balances";
-import { predictionMarketApproved, predictionMarketBoughtCompleteSet, predictionMarketClosed, 
-    predictionMarketCreated, predictionMarketDisputed, predictionMarketExpired, predictionMarketInsufficientSubsidy, 
-    predictionMarketRejected, predictionMarketReported, predictionMarketResolved, 
-    predictionMarketSoldCompleteSet, predictionMarketStartedWithSubsidy, predictionMarketTokensRedeemed } from "./markets";
+import { balancesBalanceSet, balancesDustLost, balancesEndowed, balancesReserved, balancesTransfer, balancesTransferOld, 
+  balancesUnreserved, balancesDeposit, balancesWithdraw, currencyDeposited, currencyTransferred, currencyWithdrawn, 
+  parachainStakingRewarded, systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount, tokensEndowed } from "./balances";
+import { predictionMarketApproved, predictionMarketBoughtCompleteSet, predictionMarketClosed, predictionMarketCreated, 
+  predictionMarketDisputed, predictionMarketExpired, predictionMarketInsufficientSubsidy, predictionMarketRejected, 
+  predictionMarketReported, predictionMarketResolved, predictionMarketSoldCompleteSet, predictionMarketStartedWithSubsidy, 
+  predictionMarketTokensRedeemed } from "./markets";
 import { add_balance_108949, add_balance_155917, add_balance_175178, add_balance_178290, add_balance_179524, 
   add_balance_184820, add_balance_204361 } from "./postHooks";
 import { swapExactAmountIn, swapExactAmountOut, swapPoolClosed, swapPoolCreated, swapPoolExited, swapPoolJoined } from "./swaps";
@@ -35,6 +35,7 @@ processor.addEventHandler('balances.DustLost', balancesDustLost)
 processor.addEventHandler('balances.BalanceSet', balancesBalanceSet)
 processor.addEventHandler('balances.Reserved', balancesReserved)
 processor.addEventHandler('balances.Unreserved', balancesUnreserved)
+processor.addEventHandler('balances.Deposit', balancesDeposit)
 processor.addEventHandler('balances.Withdraw', balancesWithdraw)
 processor.addEventHandler('tokens.Endowed', tokensEndowed)
 processor.addEventHandler('currency.Transferred', currencyTransferred)
