@@ -9,8 +9,8 @@ import { EventHandlerContext } from '@subsquid/substrate-processor'
 import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBalance, HistoricalAsset, HistoricalMarket, 
     Market, MarketDisputeMechanism, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../model'
 import { util } from '@zeitgeistpm/sdk'
-import { Market as t_Market, MarketId as t_MarketId} from '@zeitgeistpm/types/dist/interfaces'
-import { Like } from "typeorm"
+import { Market as t_Market, MarketId as t_MarketId } from '@zeitgeistpm/types/dist/interfaces'
+import { Like } from 'typeorm'
 
 export async function predictionMarketBoughtCompleteSet(ctx: EventHandlerContext) {
     const {store, event, block, extrinsic} = ctx
@@ -788,7 +788,7 @@ interface ApprovedEvent {
 
 interface CreatedEvent {
     marketId: t_MarketId
-    accountId: String
+    accountId: string
     market: t_Market
 }
 
@@ -888,11 +888,11 @@ function getCreatedEvent(ctx: EventHandlerContext): CreatedEvent {
         const market = param1.value as t_Market
         return { marketId, accountId, market }
     } else if (ctx.block.runtimeVersion.specVersion < 38 ) {
-        const accountId = param1.value as String
+        const accountId = param1.value as string
         const market = param2.value as t_Market
         return { marketId, accountId, market }
     } else {
-        const accountId = param1.value as String
+        const accountId = param1.value as string
         var market = param2.value as any
         market.mdm = market.disputeMechanism
         return { marketId, accountId, market }
