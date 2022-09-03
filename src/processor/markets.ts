@@ -236,17 +236,6 @@ export async function predictionMarketCreated(ctx: EventHandlerContext) {
     }
     newMarket.period = period
 
-    const mdm = new MarketDisputeMechanism()
-    const dispute = market.mdm as any
-    if (dispute.authorized) {
-        mdm.authorized = dispute.authorized.toString()
-    } else if (dispute.court !== undefined) {
-        mdm.court = true
-    } else if (dispute.simpleDisputes !== undefined) {
-        mdm.simpleDisputes = true
-    }
-    newMarket.mdm = mdm
-
     const disputeMechanism = new MarketDisputeMechanism()
     const d = market.mdm as any
     if (d.authorized) {
