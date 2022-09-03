@@ -12,6 +12,7 @@
       "balances.BalanceSet",
       "balances.Reserved",
       "balances.Unreserved",
+      "balances.Deposit",
       "balances.Withdraw",
       "tokens.Endowed",
       "currency.Transferred",
