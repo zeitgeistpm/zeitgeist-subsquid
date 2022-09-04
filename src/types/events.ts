@@ -56,52 +56,6 @@ export class BalancesBalanceSetEvent {
   }
 }
 
-export class BalancesDepositEvent {
-  constructor(private ctx: EventContext) {
-    assert(this.ctx.event.name === 'balances.Deposit')
-  }
-
-  /**
-   *  Some amount was deposited (e.g. for transaction fees). \[who, deposit\]
-   */
-  get isV23(): boolean {
-    return this.ctx._chain.getEventHash('balances.Deposit') === 'cf0c633b4d95aa1626767eef7c869b6d51b4e864772aceeb18ec2d4ebd8a9101'
-  }
-
-  /**
-   *  Some amount was deposited (e.g. for transaction fees). \[who, deposit\]
-   */
-  get asV23(): [Uint8Array, bigint] {
-    assert(this.isV23)
-    return this.ctx._chain.decodeEvent(this.ctx.event)
-  }
-
-  /**
-   * Some amount was deposited (e.g. for transaction fees).
-   */
-  get isV34(): boolean {
-    return this.ctx._chain.getEventHash('balances.Deposit') === '3e10f037979c6bc49d783be86e7fa6eb9642f270ffedf3352fae03a41fcf22e4'
-  }
-
-  /**
-   * Some amount was deposited (e.g. for transaction fees).
-   */
-  get asV34(): {who: v34.AccountId32, amount: bigint} {
-    assert(this.isV34)
-    return this.ctx._chain.decodeEvent(this.ctx.event)
-  }
-
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV34
-  }
-
-  get asLatest(): {who: v34.AccountId32, amount: bigint} {
-    deprecateLatest()
-    return this.asV34
-  }
-}
-
 export class BalancesDustLostEvent {
   constructor(private ctx: EventContext) {
     assert(this.ctx.event.name === 'balances.DustLost')
