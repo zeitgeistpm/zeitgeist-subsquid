@@ -151,11 +151,5 @@ export class Market {
    * Can be `authorized` or `court` or `simpleDisputes`
    */
   @Column_("jsonb", {transformer: {to: obj => obj.toJSON(), from: obj => new MarketDisputeMechanism(undefined, marshal.nonNull(obj))}, nullable: false})
-  mdm!: MarketDisputeMechanism
-
-  /**
-   * Can be `authorized` or `court` or `simpleDisputes`
-   */
-  @Column_("jsonb", {transformer: {to: obj => obj.toJSON(), from: obj => new MarketDisputeMechanism(undefined, marshal.nonNull(obj))}, nullable: false})
   disputeMechanism!: MarketDisputeMechanism
 }
