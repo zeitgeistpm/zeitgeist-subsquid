@@ -1,31 +1,16 @@
-version: "3.4"
 services:
   db:
-    image: postgres:12
-    container_name: indexer-db
+    image: postgres:14  # CockroachDB cluster might be a better fit for production deployment
+    container_name: db
+    restart: always
 
-  indexer:
-    image: subsquid/hydra-indexer:5.0.0-alpha.29
-    container_name: zeitgeist-indexer
+  ingest:
+    image: subsquid/substrate-ingest:firesquid
+    container_name: ingest
+    restart: on-failure
     depends_on:
       - db
-      - redis
 
-  indexer-gateway:
-    image: subsquid/hydra-indexer-gateway:5
-    container_name: indexer-gateway
-    depends_on:
-      - redis
-      - db
-      - indexer-status-service
-      - indexer
-
-  indexer-status-service:
-    image: subsquid/hydra-indexer-status-service:5
-    container_name: indexer-status-service
-    depends_on:
-      - redis
-      
-  redis:
-    image: redis:6.0-alpine
-    container_name: indexer-redis
+  gateway:
+    image: subsquid/substrate-gateway:firesquid
+    container_name: gateway
