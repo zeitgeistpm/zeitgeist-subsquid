@@ -1,5 +1,5 @@
 #!/bin/sh
-cd indexer
+cd archive
 
 # Control points of indexer
 if [ "$2" = "up" ]; then
