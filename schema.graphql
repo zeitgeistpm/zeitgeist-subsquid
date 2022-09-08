@@ -138,6 +138,8 @@ type Market @entity {
   tags: [String]
   "Image for the market"
   img: String
+  "IPFS cid for market metadata"
+  metadata: String!
   "Type of the market"
   marketType: MarketType!
   "Time period expressed in block numbers or timestamps"
