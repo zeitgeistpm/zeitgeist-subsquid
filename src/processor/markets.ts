@@ -177,6 +177,7 @@ export async function predictionMarketCreated(ctx: EventHandlerContext) {
     newMarket.scoringRule = market.scoringRule.toString()
     newMarket.status = market.status.toString()
     newMarket.outcomeAssets = (await createAssetsForMarket(marketId, market.marketType)) as string[]
+    newMarket.metadata = market.metadata.toString()
 
     const metadata = await decodeMarketMetadata(market.metadata.toString())
     if (metadata) {
