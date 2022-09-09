@@ -100,6 +100,12 @@ export class Market {
   img!: string | undefined | null
 
   /**
+   * IPFS cid for market metadata
+   */
+  @Column_("text", {nullable: false})
+  metadata!: string
+
+  /**
    * Type of the market
    */
   @Column_("jsonb", {transformer: {to: obj => obj.toJSON(), from: obj => new MarketType(undefined, marshal.nonNull(obj))}, nullable: false})
