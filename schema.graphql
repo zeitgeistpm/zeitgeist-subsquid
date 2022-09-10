@@ -311,7 +311,7 @@ type OutcomeReport @jsonField {
   "Index of the categories. Null if market is scalar"
   categorical: Int
   "Resultant value from the scalar range. Null if market is categorical"
-  scalar: Int
+  scalar: BigInt
 }
 
 """
