@@ -6,8 +6,7 @@ import { getRewardedEvent } from './types'
 
 export async function parachainStakingRewarded(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
   const { store, event, block } = ctx
-  if (!getRewardedEvent(ctx)) { return }
-  const { walletId, amount } = getRewardedEvent(ctx)!
+  const { walletId, amount } = getRewardedEvent(ctx)
 
   let acc = await store.get(Account, { where: { accountId: walletId } } )
   if (!acc) {
