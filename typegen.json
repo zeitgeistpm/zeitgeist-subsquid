@@ -3,7 +3,8 @@
   "specVersions": "zeitgeistVersions.jsonl",
   "typesBundle": "zeitgeist.json",
   "events": [
-    "ParachainStaking.Rewarded"
+    "ParachainStaking.Rewarded",
+    "System.NewAccount"
   ],
   "calls": []
 }

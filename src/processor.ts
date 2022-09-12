@@ -1,6 +1,7 @@
 import { SubstrateProcessor } from '@subsquid/substrate-processor'
 import { TypeormDatabase } from '@subsquid/typeorm-store'
 import { parachainStakingRewarded } from './mappings/parachainStaking';
+import { systemNewAccount } from './mappings/system';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -19,5 +20,7 @@ processor.setDataSource({
 //processor.setBlockRange({from: 381584, to: 381588})
 
 processor.addEventHandler('ParachainStaking.Rewarded', ctx => parachainStakingRewarded(ctx))
+
+processor.addEventHandler('System.NewAccount', ctx => systemNewAccount(ctx))
 
 processor.run()
