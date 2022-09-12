@@ -1,41 +1,9 @@
 {
-    "outDir": "src/types",
-    "chainVersions": "zeitgeistVersions.json",
-    "typesBundle": "zeitgeist.json",
-    "events": [
-      "system.NewAccount",
-      "system.ExtrinsicSuccess",
-      "system.ExtrinsicFailed",
-      "balances.Endowed",
-      "balances.DustLost",
-      "balances.Transfer",
-      "balances.BalanceSet",
-      "balances.Reserved",
-      "balances.Unreserved",
-      "balances.Withdraw",
-      "tokens.Endowed",
-      "currency.Transferred",
-      "currency.Deposited",
-      "currency.Withdrawn",
-      "predictionMarkets.BoughtCompleteSet",
-      "predictionMarkets.MarketApproved",
-      "predictionMarkets.MarketCreated",
-      "predictionMarkets.MarketStartedWithSubsidy",
-      "predictionMarkets.MarketInsufficientSubsidy",
-      "predictionMarkets.MarketClosed",
-      "predictionMarkets.MarketDisputed",
-      "predictionMarkets.MarketExpired",
-      "predictionMarkets.MarketRejected",
-      "predictionMarkets.MarketReported",
-      "predictionMarkets.MarketResolved",
-      "predictionMarkets.SoldCompleteSet",
-      "predictionMarkets.TokensRedeemed",
-      "swaps.PoolCreate",
-      "swaps.PoolClosed",
-      "swaps.PoolExit",
-      "swaps.PoolJoin",
-      "swaps.SwapExactAmountIn",
-      "swaps.SwapExactAmountOut"
-    ],
-    "calls": []
+  "outDir": "src/types",
+  "specVersions": "zeitgeistVersions.jsonl",
+  "typesBundle": "zeitgeist.json",
+  "events": [
+    "ParachainStaking.Rewarded"
+  ],
+  "calls": []
 }
