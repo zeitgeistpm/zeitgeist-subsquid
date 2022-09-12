@@ -26,7 +26,6 @@ export async function parachainStakingRewarded(ctx: EventHandlerContext<Store, {
     console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
     await store.save<Account>(acc)
 
-    ab.account = acc
     ab.balance = ab.balance + amount
     ab.value = Number(ab.balance)
     console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
