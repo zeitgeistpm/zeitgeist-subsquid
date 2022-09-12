@@ -26,7 +26,7 @@ export class Asset {
   /**
    * Zeitgeist's identifier for pool
    */
-  @Column_("integer", {nullable: true})
+  @Column_("int4", {nullable: true})
   poolId!: number | undefined | null
 
   /**

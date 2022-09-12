@@ -21,7 +21,7 @@ export class AccountBalance {
    * Connected account
    */
   @Index_()
-  @ManyToOne_(() => Account, {nullable: false})
+  @ManyToOne_(() => Account, {nullable: true})
   account!: Account
 
   /**

@@ -24,7 +24,7 @@ export class Market {
   /**
    * Zeitgeist's identifier for market
    */
-  @Column_("integer", {nullable: false})
+  @Column_("int4", {nullable: false})
   marketId!: number
 
   /**
@@ -42,7 +42,7 @@ export class Market {
   /**
    * The creator's fee
    */
-  @Column_("integer", {nullable: true})
+  @Column_("int4", {nullable: true})
   creatorFee!: number | undefined | null
 
   /**
@@ -138,7 +138,7 @@ export class Market {
   /**
    * Zeitgeist's indentifier for liquidity pool
    */
-  @Column_("integer", {nullable: true})
+  @Column_("int4", {nullable: true})
   poolId!: number | undefined | null
 
   /**

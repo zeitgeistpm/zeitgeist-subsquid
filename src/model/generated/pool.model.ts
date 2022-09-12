@@ -17,7 +17,7 @@ export class Pool {
   /**
    * Zeitgeist's identifier for pool
    */
-  @Column_("integer", {nullable: false})
+  @Column_("int4", {nullable: false})
   poolId!: number
 
   /**
@@ -32,7 +32,7 @@ export class Pool {
   @Column_("text", {nullable: false})
   baseAsset!: string
 
-  @Column_("integer", {nullable: false})
+  @Column_("int4", {nullable: false})
   marketId!: number
 
   /**

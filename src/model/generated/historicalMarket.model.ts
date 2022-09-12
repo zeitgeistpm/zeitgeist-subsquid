@@ -18,13 +18,13 @@ export class HistoricalMarket {
   /**
    * Zeitgeist's identifier for market
    */
-  @Column_("integer", {nullable: false})
+  @Column_("int4", {nullable: false})
   marketId!: number
 
   /**
    * Zeitgeist's identifier for pool
    */
-  @Column_("integer", {nullable: true})
+  @Column_("int4", {nullable: true})
   poolId!: number | undefined | null
 
   /**
@@ -54,7 +54,7 @@ export class HistoricalMarket {
   /**
    * Height of the block
    */
-  @Column_("integer", {nullable: false})
+  @Column_("int4", {nullable: false})
   blockNumber!: number
 
   /**
