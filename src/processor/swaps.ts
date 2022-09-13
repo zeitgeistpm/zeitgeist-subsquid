@@ -277,18 +277,24 @@ export async function swapExactAmountIn(ctx: EventHandlerContext) {
             const oldPrice = asset.price!
             var newAssetQty = oldAssetQty
 
-            if (extrinsic?.args[1] && wt!.assetId === JSON.stringify(extrinsic?.args[1].value)) {
-                newAssetQty = oldAssetQty + BigInt(swapEvent.assetAmountIn.toString())
-            } else if (extrinsic?.args[0].name === "calls") {
-                for (var ext of extrinsic.args[0].value as Array<{ args: { pool_id: number, asset_in: string, max_price: number }}> ) {
-                    const { args: { asset_in, pool_id } } = ext;
-                    if (pool_id == +swapEvent.cpep.poolId.toString() && wt!.assetId == JSON.stringify(asset_in)) {
-                        newAssetQty = oldAssetQty + BigInt(swapEvent.assetAmountIn.toString())
-                        break
-                    }
-                }
+            if (swapEvent.assetIn) {
+              if (wt!.assetId == JSON.stringify(swapEvent.assetIn)) {
+                  newAssetQty = oldAssetQty + BigInt(swapEvent.assetAmountIn.toString())
+              }
+            } else {
+              if (extrinsic?.args[1] && wt!.assetId === JSON.stringify(extrinsic?.args[1].value)) {
+                  newAssetQty = oldAssetQty + BigInt(swapEvent.assetAmountIn.toString())
+              } else if (extrinsic?.args[0].name === "calls") {
+                  for (var ext of extrinsic.args[0].value as Array<{ args: { pool_id: number, asset_in: string, max_price: number }}> ) {
+                      const { args: { asset_in, pool_id } } = ext;
+                      if (pool_id == +swapEvent.cpep.poolId.toString() && wt!.assetId == JSON.stringify(asset_in)) {
+                          newAssetQty = oldAssetQty + BigInt(swapEvent.assetAmountIn.toString())
+                          break
+                      }
+                  }
+              }
             }
-
+             
             const newPrice = await calcSpotPrice(+newZtgQty.toString(),ztgWt,+newAssetQty.toString(),assetWt,+savedPool.swapFee)
             asset.price = newPrice
             asset.amountInPool = newAssetQty
