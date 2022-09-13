@@ -6,6 +6,50 @@ import * as v34 from './v34'
 import * as v35 from './v35'
 import * as v36 from './v36'
 
+export class BalancesEndowedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Balances.Endowed')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   *  An account was created with some free balance. \[account, free_balance\]
+   */
+  get isV23(): boolean {
+    return this._chain.getEventHash('Balances.Endowed') === '23bebce4ca9ed37548947d07d4dc50e772f07401b9a416b6aa2f3e9cb5adcaf4'
+  }
+
+  /**
+   *  An account was created with some free balance. \[account, free_balance\]
+   */
+  get asV23(): [Uint8Array, bigint] {
+    assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * An account was created with some free balance.
+   */
+  get isV34(): boolean {
+    return this._chain.getEventHash('Balances.Endowed') === '75951f685df19cbb5fdda09cf928a105518ceca9576d95bd18d4fac8802730ca'
+  }
+
+  /**
+   * An account was created with some free balance.
+   */
+  get asV34(): {account: Uint8Array, freeBalance: bigint} {
+    assert(this.isV34)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class ParachainStakingRewardedEvent {
   private readonly _chain: Chain
   private readonly event: Event

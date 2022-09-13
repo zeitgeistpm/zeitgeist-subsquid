@@ -3,9 +3,11 @@
   "specVersions": "zeitgeistVersions.jsonl",
   "typesBundle": "zeitgeist.json",
   "events": [
+    "Balances.Endowed",
     "ParachainStaking.Rewarded",
     "System.NewAccount",
-    "System.ExtrinsicSuccess"
+    "System.ExtrinsicSuccess",
+    "System.ExtrinsicFailed"
   ],
   "calls": []
 }
