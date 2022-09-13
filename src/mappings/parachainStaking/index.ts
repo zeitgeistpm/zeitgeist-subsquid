@@ -1,11 +1,11 @@
-import { EventHandlerContext } from '@subsquid/substrate-processor'
+import { EventHandlerContext, SubstrateEvent } from '@subsquid/substrate-processor'
 import { Store } from '@subsquid/typeorm-store'
 import { Account, AccountBalance, HistoricalAccountBalance } from '../../model'
 import { initBalance } from '../helper'
 import { getRewardedEvent } from './types'
 
 export async function parachainStakingRewarded(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
-  const { store, event, block } = ctx
+  const { store, block, event } = ctx
   const { walletId, amount } = getRewardedEvent(ctx)
 
   let acc = await store.get(Account, { where: { accountId: walletId } } )
@@ -16,7 +16,7 @@ export async function parachainStakingRewarded(ctx: EventHandlerContext<Store, {
     acc.pvalue = 0
     console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
     await store.save<Account>(acc)
-    await initBalance(acc, ctx)
+    await initBalance(acc, store, block, event as SubstrateEvent)
   }
 
   let ab = await store.findOneBy(AccountBalance, { account: { accountId: walletId }, assetId: "Ztg" })

@@ -1,9 +1,9 @@
-import { EventHandlerContext } from '@subsquid/substrate-processor'
-import { Store } from '@subsquid/typeorm-store'
 import { ParachainStakingRewardedEvent } from '../../types/events'
 import * as ss58 from '@subsquid/ss58'
+import { EventContext } from '../../types/support'
+import { encodeAddress } from '@polkadot/keyring'
 
-export function getRewardedEvent(ctx: EventHandlerContext<Store, {event: {args: true}}>): RewardedEvent {
+export function getRewardedEvent(ctx: EventContext): RewardedEvent {
   const rewardedEvent = new ParachainStakingRewardedEvent(ctx)
   if (rewardedEvent.isV23) {
     const [ accountId, amount ] = rewardedEvent.asV23
@@ -16,7 +16,7 @@ export function getRewardedEvent(ctx: EventHandlerContext<Store, {event: {args: 
     return { walletId, amount }
   } else {
     const [accountId, amount] = ctx.event.args
-    const walletId = ss58.codec('zeitgeist').encode(accountId)
+    const walletId = encodeAddress(accountId, 73)
     return { walletId, amount }
   }
 }
