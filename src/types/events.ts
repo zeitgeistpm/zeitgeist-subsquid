@@ -1,5 +1,7 @@
 import assert from 'assert'
 import {Chain, ChainContext, EventContext, Event, Result} from './support'
+import * as v23 from './v23'
+import * as v34 from './v34'
 
 export class ParachainStakingRewardedEvent {
   private readonly _chain: Chain
@@ -41,6 +43,50 @@ export class ParachainStakingRewardedEvent {
    */
   get asV35(): {account: Uint8Array, rewards: bigint} {
     assert(this.isV35)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class SystemExtrinsicSuccessEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'System.ExtrinsicSuccess')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   *  An extrinsic completed successfully. \[info\]
+   */
+  get isV23(): boolean {
+    return this._chain.getEventHash('System.ExtrinsicSuccess') === '00a75e03130fe6755b02b23ca285a19efc2bd57964ead02525eedef36cbf1bd4'
+  }
+
+  /**
+   *  An extrinsic completed successfully. \[info\]
+   */
+  get asV23(): v23.DispatchInfo {
+    assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * An extrinsic completed successfully.
+   */
+  get isV34(): boolean {
+    return this._chain.getEventHash('System.ExtrinsicSuccess') === '407ed94c14f243acbe2cdb53df52c37d97bbb5ae550a10a6036bf59677cdd165'
+  }
+
+  /**
+   * An extrinsic completed successfully.
+   */
+  get asV34(): {dispatchInfo: v34.DispatchInfo} {
+    assert(this.isV34)
     return this._chain.decodeEvent(this.event)
   }
 }

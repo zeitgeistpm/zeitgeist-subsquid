@@ -1,9 +1,24 @@
-import { EventHandlerContext } from '@subsquid/substrate-processor'
-import { Store } from '@subsquid/typeorm-store'
-import { SystemNewAccountEvent } from '../../types/events'
+import { SystemExtrinsicSuccessEvent, SystemNewAccountEvent } from '../../types/events'
 import * as ss58 from '@subsquid/ss58'
+import { DispatchInfo } from '../../types/v23'
+import { EventContext } from '../../types/support'
+import { encodeAddress } from '@polkadot/keyring'
 
-export function getNewAccountEvent(ctx: EventHandlerContext<Store, {event: {args: true}}>): NewAccountEvent {
+export function getExtrinsicSuccessEvent(ctx: EventContext): ExtrinsicEvent {
+  const extrinsicSuccessEvent = new SystemExtrinsicSuccessEvent(ctx)
+  if (extrinsicSuccessEvent.isV23) {
+    const dispatchInfo = extrinsicSuccessEvent.asV23
+    return { dispatchInfo }
+  } else if (extrinsicSuccessEvent.isV34) {
+    const { dispatchInfo } = extrinsicSuccessEvent.asV34
+    return { dispatchInfo }
+  } else {
+    const [dispatchInfo] = ctx.event.args
+    return { dispatchInfo }
+  }
+}
+
+export function getNewAccountEvent(ctx: EventContext): NewAccountEvent {
   const newAccountEvent = new SystemNewAccountEvent(ctx)
   if (newAccountEvent.isV23) {
     const accountId = newAccountEvent.asV23
@@ -15,9 +30,13 @@ export function getNewAccountEvent(ctx: EventHandlerContext<Store, {event: {args
     return { walletId }
   } else {
     const [accountId] = ctx.event.args
-    const walletId = ss58.codec('zeitgeist').encode(accountId)
+    const walletId = encodeAddress(accountId, 73)
     return { walletId }
   }
+}
+
+interface ExtrinsicEvent {
+  dispatchInfo: DispatchInfo
 }
 
 interface NewAccountEvent {

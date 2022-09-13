@@ -1,7 +1,7 @@
 import { SubstrateProcessor } from '@subsquid/substrate-processor'
 import { TypeormDatabase } from '@subsquid/typeorm-store'
 import { parachainStakingRewarded } from './mappings/parachainStaking';
-import { systemNewAccount } from './mappings/system';
+import { systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -22,5 +22,11 @@ processor.setDataSource({
 processor.addEventHandler('ParachainStaking.Rewarded', ctx => parachainStakingRewarded(ctx))
 
 processor.addEventHandler('System.NewAccount', ctx => systemNewAccount(ctx))
+
+if (!process.env.WS_NODE_URL?.includes(`bs`|| `bsr`)) {
+} else {
+  processor.addEventHandler('System.ExtrinsicSuccess', 
+    {range: {from: 0, to: 588249}}, ctx => systemExtrinsicSuccess(ctx))
+}
 
 processor.run()

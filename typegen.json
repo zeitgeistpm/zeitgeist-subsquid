@@ -4,7 +4,8 @@
   "typesBundle": "zeitgeist.json",
   "events": [
     "ParachainStaking.Rewarded",
-    "System.NewAccount"
+    "System.NewAccount",
+    "System.ExtrinsicSuccess"
   ],
   "calls": []
 }
