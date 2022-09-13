@@ -63,13 +63,13 @@ export async function swapPoolCreated(ctx: EventHandlerContext) {
             const asset = await store.get(Asset, { where: { assetId: entry[0] } })
             if (!asset) { return }
 
-            var ab = await store.get(AccountBalance, { where: { account: acc, assetId: asset.assetId } })
-            if (!ab) { return }
+            const ab = await store.get(AccountBalance, { where: { account: acc, assetId: asset.assetId } })
+            const tokenBalanceOut = ab ? +ab.balance.toString() : 1000000000000
 
-            const spotPrice = await calcSpotPrice(+newPool.ztgQty.toString(),weights.Ztg,+ab.balance.toString(),+weight.len.toString(), +pool.swapFee.toString())
+            const spotPrice = await calcSpotPrice(+newPool.ztgQty.toString(),weights.Ztg,tokenBalanceOut,+weight.len.toString(), +pool.swapFee.toString())
             asset.poolId = newPool.poolId
             asset.price = +spotPrice.toString()
-            asset.amountInPool = ab.balance
+            asset.amountInPool = BigInt(tokenBalanceOut)
             console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
             await store.save<Asset>(asset)
 
