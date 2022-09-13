@@ -1,7 +1,10 @@
 import assert from 'assert'
 import {Chain, ChainContext, EventContext, Event, Result} from './support'
 import * as v23 from './v23'
+import * as v32 from './v32'
 import * as v34 from './v34'
+import * as v35 from './v35'
+import * as v36 from './v36'
 
 export class ParachainStakingRewardedEvent {
   private readonly _chain: Chain
@@ -43,6 +46,95 @@ export class ParachainStakingRewardedEvent {
    */
   get asV35(): {account: Uint8Array, rewards: bigint} {
     assert(this.isV35)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class SystemExtrinsicFailedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'System.ExtrinsicFailed')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   *  An extrinsic failed. \[error, info\]
+   */
+  get isV23(): boolean {
+    return this._chain.getEventHash('System.ExtrinsicFailed') === '8f2e90e6aab8eb714300f529bf2c1959ca0fa57534b7afcfe92932be302ba337'
+  }
+
+  /**
+   *  An extrinsic failed. \[error, info\]
+   */
+  get asV23(): [v23.DispatchError, v23.DispatchInfo] {
+    assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * An extrinsic failed. \[error, info\]
+   */
+  get isV32(): boolean {
+    return this._chain.getEventHash('System.ExtrinsicFailed') === '0995776ff5e8d5f8662a6841d8556c830acc58fbb01f76a13b6aa4222b987150'
+  }
+
+  /**
+   * An extrinsic failed. \[error, info\]
+   */
+  get asV32(): [v32.DispatchError, v32.DispatchInfo] {
+    assert(this.isV32)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * An extrinsic failed.
+   */
+  get isV34(): boolean {
+    return this._chain.getEventHash('System.ExtrinsicFailed') === '2dcccc93ed3f24e5499fe9480fe0a61a806d25bb5fc0d10a1074e360693768e7'
+  }
+
+  /**
+   * An extrinsic failed.
+   */
+  get asV34(): {dispatchError: v34.DispatchError, dispatchInfo: v34.DispatchInfo} {
+    assert(this.isV34)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * An extrinsic failed.
+   */
+  get isV35(): boolean {
+    return this._chain.getEventHash('System.ExtrinsicFailed') === '3b8e9f2b48f4b6f0f996d20434018cdbe20aacb2470e779d965d42dad18b0a4e'
+  }
+
+  /**
+   * An extrinsic failed.
+   */
+  get asV35(): {dispatchError: v35.DispatchError, dispatchInfo: v35.DispatchInfo} {
+    assert(this.isV35)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * An extrinsic failed.
+   */
+  get isV36(): boolean {
+    return this._chain.getEventHash('System.ExtrinsicFailed') === 'a6220584fa4f22cb02db1bfad4eacf1a689aea2324f22b4763def7376b7dd9bf'
+  }
+
+  /**
+   * An extrinsic failed.
+   */
+  get asV36(): {dispatchError: v36.DispatchError, dispatchInfo: v36.DispatchInfo} {
+    assert(this.isV36)
     return this._chain.decodeEvent(this.event)
   }
 }

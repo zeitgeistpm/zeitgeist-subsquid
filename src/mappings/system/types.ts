@@ -1,8 +1,22 @@
-import { SystemExtrinsicSuccessEvent, SystemNewAccountEvent } from '../../types/events'
+import { SystemExtrinsicFailedEvent, SystemExtrinsicSuccessEvent, SystemNewAccountEvent } from '../../types/events'
 import * as ss58 from '@subsquid/ss58'
 import { DispatchInfo } from '../../types/v23'
 import { EventContext } from '../../types/support'
 import { encodeAddress } from '@polkadot/keyring'
+
+export function getExtrinsicFailedEvent(ctx: EventContext): ExtrinsicEvent {
+  const extrinsicFailedEvent = new SystemExtrinsicFailedEvent(ctx)
+  if (extrinsicFailedEvent.isV23) {
+    const [, dispatchInfo ] = extrinsicFailedEvent.asV23
+    return { dispatchInfo }
+  } else if (extrinsicFailedEvent.isV32) {
+    const [, dispatchInfo ] = extrinsicFailedEvent.asV32
+    return { dispatchInfo }
+  } else {
+    const [, dispatchInfo ] = ctx.event.args
+    return { dispatchInfo }
+  }
+}
 
 export function getExtrinsicSuccessEvent(ctx: EventContext): ExtrinsicEvent {
   const extrinsicSuccessEvent = new SystemExtrinsicSuccessEvent(ctx)

@@ -1,7 +1,7 @@
 import { SubstrateProcessor } from '@subsquid/substrate-processor'
 import { TypeormDatabase } from '@subsquid/typeorm-store'
 import { parachainStakingRewarded } from './mappings/parachainStaking';
-import { systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
+import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -15,7 +15,7 @@ processor.setTypesBundle('zeitgeist.json');
 processor.setBatchSize(500);
 processor.setDataSource({
   archive: process.env.INDEXER_ENDPOINT_URL ?? 'http://localhost:8888/graphql',
-  chain: process.env.WS_NODE_URL ?? 'ws://localhost:9944',
+  chain: process.env.WS_NODE_URL ?? 'wss://bsr.zeitgeist.pm',
 });
 //processor.setBlockRange({from: 381584, to: 381588})
 
@@ -25,8 +25,12 @@ processor.addEventHandler('System.NewAccount', ctx => systemNewAccount(ctx))
 
 if (!process.env.WS_NODE_URL?.includes(`bs`|| `bsr`)) {
 } else {
-  processor.addEventHandler('System.ExtrinsicSuccess', 
-    {range: {from: 0, to: 588249}}, ctx => systemExtrinsicSuccess(ctx))
+  processor.addEventHandler('System.ExtrinsicFailed', {
+    range: { from: 0, to: 588249 }
+  }, ctx => systemExtrinsicFailed(ctx))
+  processor.addEventHandler('System.ExtrinsicSuccess', {
+    range: { from: 0, to: 588249 }
+  }, ctx => systemExtrinsicSuccess(ctx))
 }
 
 processor.run()
