@@ -362,12 +362,12 @@ export async function predictionMarketDisputed(ctx: EventHandlerContext) {
         } else if (report.outcome.__kind == "Categorical") {
             ocr.categorical = report.outcome.value
         } else if (report.outcome.__kind == "Scalar") {
-            ocr.scalar = +report.outcome.value.toString()
+            ocr.scalar = BigInt(report.outcome.value.toString())
         }
     } else if (report.__kind == "Categorical") {
         ocr.categorical = report.value
     } else if (report.__kind == "Scalar") {
-        ocr.scalar = +report.value.toString()
+        ocr.scalar = BigInt(report.value.toString())
     }
 
     const mr = new MarketReport()
@@ -456,12 +456,12 @@ export async function predictionMarketReported(ctx: EventHandlerContext) {
         } else if (report.outcome.__kind == "Categorical") {
             ocr.categorical = report.outcome.value
         } else if (report.outcome.__kind == "Scalar") {
-            ocr.scalar = +report.outcome.value.toString()
+            ocr.scalar = BigInt(report.outcome.value.toString())
         }
     } else if (report.__kind == "Categorical") {
         ocr.categorical = report.value
     } else if (report.__kind == "Scalar") {
-        ocr.scalar = +report.value.toString()
+        ocr.scalar = BigInt(report.value.toString())
     }
 
     const mr = new MarketReport()
@@ -503,7 +503,7 @@ export async function predictionMarketResolved(ctx: EventHandlerContext) {
         savedMarket.report!.outcome = ocr
         savedMarket.resolvedOutcome = report.value.toString()
     } else if (report.__kind == "Scalar") {
-        ocr.scalar = +report.value.toString()
+        ocr.scalar = BigInt(report.value.toString())
         savedMarket.report!.outcome = ocr
         savedMarket.resolvedOutcome = report.value.toString()
     } else if (typeof report == "number") {
