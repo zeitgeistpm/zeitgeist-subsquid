@@ -1,11 +1,11 @@
 import { EventHandlerContext } from "@subsquid/substrate-processor"
-import { Asset, HistoricalAccountBalance, HistoricalAsset, HistoricalPool, Market, HistoricalMarket, Weight, Pool, Account} from '../model'
+import { Asset, HistoricalAccountBalance, HistoricalAsset, HistoricalPool, Market, HistoricalMarket, Weight, Pool, Account, AccountBalance} from '../model'
 import { CommonPoolEventParams as t_CPEP, Pool as t_Pool, PoolAssetsEvent as t_PAE, SwapEvent as t_SE } from '@zeitgeistpm/types/dist/interfaces'
 import { SwapsPoolClosedEvent } from "../types/events"
 
 export async function swapPoolCreated(ctx: EventHandlerContext) {
     const {store, event, block, extrinsic} = ctx
-    const {cpep, pool} = getCreatedEvent(ctx)
+    const {cpep, pool, amount} = getCreatedEvent(ctx)
 
     const hab = await store.get(HistoricalAccountBalance, { where: 
         { assetId: "Ztg", event: "NewAccount", blockNumber: block.height } })
@@ -21,7 +21,7 @@ export async function swapPoolCreated(ctx: EventHandlerContext) {
     newPool.totalSubsidy = pool.totalSubsidy ? pool.totalSubsidy.toString() : ""
     newPool.totalWeight = pool.totalWeight.toString()
     newPool.weights = []
-    newPool.ztgQty = BigInt(1000000000000)
+    newPool.ztgQty = amount.length > 2 ? BigInt(amount) : BigInt(1000000000000)
     newPool.volume = BigInt(0)
     newPool.createdAt = new Date(block.timestamp)
 
@@ -63,10 +63,13 @@ export async function swapPoolCreated(ctx: EventHandlerContext) {
             const asset = await store.get(Asset, { where: { assetId: entry[0] } })
             if (!asset) { return }
 
-            const spotPrice = await calcSpotPrice(+newPool.ztgQty.toString(),weights.Ztg,1000000000000,+weight.len.toString(), +pool.swapFee.toString())
+            const ab = await store.get(AccountBalance, { where: { account: acc, assetId: asset.assetId } })
+            const tokenBalanceOut = ab ? +ab.balance.toString() : 1000000000000
+
+            const spotPrice = await calcSpotPrice(+newPool.ztgQty.toString(),weights.Ztg,tokenBalanceOut,+weight.len.toString(), +pool.swapFee.toString())
             asset.poolId = newPool.poolId
             asset.price = +spotPrice.toString()
-            asset.amountInPool = BigInt(1000000000000)
+            asset.amountInPool = BigInt(tokenBalanceOut)
             console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
             await store.save<Asset>(asset)
 
@@ -274,18 +277,24 @@ export async function swapExactAmountIn(ctx: EventHandlerContext) {
             const oldPrice = asset.price!
             var newAssetQty = oldAssetQty
 
-            if (extrinsic?.args[1] && wt!.assetId === JSON.stringify(extrinsic?.args[1].value)) {
-                newAssetQty = oldAssetQty + BigInt(swapEvent.assetAmountIn.toString())
-            } else if (extrinsic?.args[0].name === "calls") {
-                for (var ext of extrinsic.args[0].value as Array<{ args: { pool_id: number, asset_in: string, max_price: number }}> ) {
-                    const { args: { asset_in, pool_id } } = ext;
-                    if (pool_id == +swapEvent.cpep.poolId.toString() && wt!.assetId == JSON.stringify(asset_in)) {
-                        newAssetQty = oldAssetQty + BigInt(swapEvent.assetAmountIn.toString())
-                        break
-                    }
-                }
+            if (swapEvent.assetIn) {
+              if (wt!.assetId == JSON.stringify(swapEvent.assetIn)) {
+                  newAssetQty = oldAssetQty + BigInt(swapEvent.assetAmountIn.toString())
+              }
+            } else {
+              if (extrinsic?.args[1] && wt!.assetId === JSON.stringify(extrinsic?.args[1].value)) {
+                  newAssetQty = oldAssetQty + BigInt(swapEvent.assetAmountIn.toString())
+              } else if (extrinsic?.args[0].name === "calls") {
+                  for (var ext of extrinsic.args[0].value as Array<{ args: { pool_id: number, asset_in: string, max_price: number }}> ) {
+                      const { args: { asset_in, pool_id } } = ext;
+                      if (pool_id == +swapEvent.cpep.poolId.toString() && wt!.assetId == JSON.stringify(asset_in)) {
+                          newAssetQty = oldAssetQty + BigInt(swapEvent.assetAmountIn.toString())
+                          break
+                      }
+                  }
+              }
             }
-
+             
             const newPrice = await calcSpotPrice(+newZtgQty.toString(),ztgWt,+newAssetQty.toString(),assetWt,+savedPool.swapFee)
             asset.price = newPrice
             asset.amountInPool = newAssetQty
@@ -346,16 +355,22 @@ export async function swapExactAmountOut(ctx: EventHandlerContext) {
             const oldPrice = asset.price!
             var newAssetQty = oldAssetQty
 
-            if (extrinsic?.args[1] && wt!.assetId === JSON.stringify(extrinsic?.args[3].value)) {
+            if (swapEvent.assetOut) {
+              if (wt!.assetId == JSON.stringify(swapEvent.assetOut)) {
                 newAssetQty = oldAssetQty - BigInt(swapEvent.assetAmountOut.toString())
-            } else if (extrinsic?.args[0].name === "calls") {
-                for (var ext of extrinsic.args[0].value as Array<{ args: { pool_id: number, asset_out: string, max_price: number }}> ) {
-                    const { args: { asset_out, pool_id } } = ext;
-                    if (pool_id == +swapEvent.cpep.poolId.toString() && wt!.assetId == JSON.stringify(asset_out)) {
-                        newAssetQty = oldAssetQty - BigInt(swapEvent.assetAmountOut.toString())
-                        break
-                    }
-                }
+              }
+            } else {
+              if (extrinsic?.args[1] && wt!.assetId === JSON.stringify(extrinsic?.args[3].value)) {
+                  newAssetQty = oldAssetQty - BigInt(swapEvent.assetAmountOut.toString())
+              } else if (extrinsic?.args[0].name === "calls") {
+                  for (var ext of extrinsic.args[0].value as Array<{ args: { pool_id: number, asset_out: string, max_price: number }}> ) {
+                      const { args: { asset_out, pool_id } } = ext;
+                      if (pool_id == +swapEvent.cpep.poolId.toString() && wt!.assetId == JSON.stringify(asset_out)) {
+                          newAssetQty = oldAssetQty - BigInt(swapEvent.assetAmountOut.toString())
+                          break
+                      }
+                  }
+              }
             }
 
             const newPrice = await calcSpotPrice(+newZtgQty.toString(),ztgWt,+newAssetQty.toString(),assetWt,+savedPool.swapFee)
@@ -397,6 +412,7 @@ enum PoolStatus {
 interface CreatedEvent {
     cpep: t_CPEP
     pool: t_Pool
+    amount: string
 }
 
 interface ClosedEvent {
@@ -420,10 +436,11 @@ interface SwapOutEvent {
 }
 
 function getCreatedEvent(ctx: EventHandlerContext): CreatedEvent {
-    const [param0, param1] = ctx.event.params
+    const [param0, param1, param2] = ctx.event.params
     if (ctx.block.runtimeVersion.specVersion < 32) {
         var cpep = param0.value as any
         var pool = param1.value as any
+        var amount = ""
         cpep.poolId = cpep.pool_id
         pool.marketId = pool.market_id
         pool.baseAsset = pool.base_asset
@@ -432,11 +449,17 @@ function getCreatedEvent(ctx: EventHandlerContext): CreatedEvent {
         pool.swapFee = pool.swap_fee
         pool.totalSubsidy = pool.total_subsidy
         pool.totalWeight = pool.total_weight
-        return {cpep, pool}
+        return {cpep, pool, amount}
+    } else if (ctx.block.runtimeVersion.specVersion < 35) {
+        const cpep = param0.value as t_CPEP
+        const pool = param1.value as t_Pool
+        const amount = ""
+        return {cpep, pool, amount}
     } else {
         const cpep = param0.value as t_CPEP
         const pool = param1.value as t_Pool
-        return {cpep, pool}
+        const amount = param2.value as string
+        return {cpep, pool, amount}
     }
 }
 
