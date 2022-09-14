@@ -21,7 +21,7 @@ export async function swapPoolCreated(ctx: EventHandlerContext) {
     newPool.totalSubsidy = pool.totalSubsidy ? pool.totalSubsidy.toString() : ""
     newPool.totalWeight = pool.totalWeight.toString()
     newPool.weights = []
-    newPool.ztgQty = amount.length > 2 ? BigInt(amount) : BigInt(1000000000000)
+    newPool.ztgQty = amount !== 0 ? BigInt(amount) : BigInt(1000000000000)
     newPool.volume = BigInt(0)
     newPool.createdAt = new Date(block.timestamp)
 
@@ -412,7 +412,7 @@ enum PoolStatus {
 interface CreatedEvent {
     cpep: t_CPEP
     pool: t_Pool
-    amount: string
+    amount: number
 }
 
 interface ClosedEvent {
@@ -440,7 +440,7 @@ function getCreatedEvent(ctx: EventHandlerContext): CreatedEvent {
     if (ctx.block.runtimeVersion.specVersion < 32) {
         var cpep = param0.value as any
         var pool = param1.value as any
-        var amount = ""
+        var amount = 0
         cpep.poolId = cpep.pool_id
         pool.marketId = pool.market_id
         pool.baseAsset = pool.base_asset
@@ -453,12 +453,12 @@ function getCreatedEvent(ctx: EventHandlerContext): CreatedEvent {
     } else if (ctx.block.runtimeVersion.specVersion < 35) {
         const cpep = param0.value as t_CPEP
         const pool = param1.value as t_Pool
-        const amount = ""
+        const amount = 0
         return {cpep, pool, amount}
     } else {
         const cpep = param0.value as t_CPEP
         const pool = param1.value as t_Pool
-        const amount = param2.value as string
+        const amount = param2.value as number
         return {cpep, pool, amount}
     }
 }
