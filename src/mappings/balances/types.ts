@@ -1,7 +1,7 @@
 import { encodeAddress } from '@polkadot/keyring'
 import * as ss58 from '@subsquid/ss58'
 import { EventContext } from '../../types/support'
-import { BalancesBalanceSetEvent, BalancesDustLostEvent, BalancesEndowedEvent, BalancesReservedEvent, BalancesTransferEvent, BalancesUnreservedEvent } from '../../types/events'
+import { BalancesBalanceSetEvent, BalancesDustLostEvent, BalancesEndowedEvent, BalancesReservedEvent, BalancesTransferEvent, BalancesUnreservedEvent, BalancesWithdrawEvent } from '../../types/events'
 
 
 export function getBalanceSetEvent(ctx: EventContext): BalanceSetEvent {
@@ -109,6 +109,23 @@ export function getUnreservedEvent(ctx: EventContext): UnreservedEvent {
   }
 }
 
+export function getWithdrawEvent(ctx: EventContext): WithdrawEvent {
+  const withdrawEvent = new BalancesWithdrawEvent(ctx)
+  if (withdrawEvent.isV33) {
+    const [who, amount] = withdrawEvent.asV33
+    const walletId = ss58.codec('zeitgeist').encode(who)
+    return {walletId, amount}
+  } else if (withdrawEvent.isV34) {
+    const {who, amount} = withdrawEvent.asV34
+    const walletId = ss58.codec('zeitgeist').encode(who)
+    return {walletId, amount}
+  } else {
+    const [who, amount] = ctx.event.args
+    const walletId = encodeAddress(who, 73)
+    return {walletId, amount}
+  }
+}
+
 interface BalanceSetEvent {
   walletId: string
   free: bigint
@@ -136,6 +153,11 @@ interface TransferEvent {
 }
 
 interface UnreservedEvent {
+  walletId: string
+  amount: bigint
+}
+
+interface WithdrawEvent {
   walletId: string
   amount: bigint
 }

@@ -274,6 +274,50 @@ export class BalancesUnreservedEvent {
   }
 }
 
+export class BalancesWithdrawEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Balances.Withdraw')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * Some amount was withdrawn from the account (e.g. for transaction fees). \[who, value\]
+   */
+  get isV33(): boolean {
+    return this._chain.getEventHash('Balances.Withdraw') === '23bebce4ca9ed37548947d07d4dc50e772f07401b9a416b6aa2f3e9cb5adcaf4'
+  }
+
+  /**
+   * Some amount was withdrawn from the account (e.g. for transaction fees). \[who, value\]
+   */
+  get asV33(): [Uint8Array, bigint] {
+    assert(this.isV33)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Some amount was withdrawn from the account (e.g. for transaction fees).
+   */
+  get isV34(): boolean {
+    return this._chain.getEventHash('Balances.Withdraw') === 'e84a34a6a3d577b31f16557bd304282f4fe4cbd7115377f4687635dc48e52ba5'
+  }
+
+  /**
+   * Some amount was withdrawn from the account (e.g. for transaction fees).
+   */
+  get asV34(): {who: Uint8Array, amount: bigint} {
+    assert(this.isV34)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class ParachainStakingRewardedEvent {
   private readonly _chain: Chain
   private readonly event: Event

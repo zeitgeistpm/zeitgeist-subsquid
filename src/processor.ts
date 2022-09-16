@@ -1,6 +1,6 @@
 import { SubstrateProcessor } from '@subsquid/substrate-processor'
 import { TypeormDatabase } from '@subsquid/typeorm-store'
-import { balancesBalanceSet, balancesDustLost, balancesEndowed, balancesReserved, balancesTransfer, balancesTransferOld, balancesUnreserved } from './mappings/balances';
+import { balancesBalanceSet, balancesDustLost, balancesEndowed, balancesReserved, balancesTransfer, balancesTransferOld, balancesUnreserved, balancesWithdraw } from './mappings/balances';
 import { parachainStakingRewarded } from './mappings/parachainStaking';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 
@@ -29,6 +29,7 @@ processor.addEventHandler('Balances.DustLost', ctx => balancesDustLost(ctx))
 processor.addEventHandler('Balances.Endowed', ctx => balancesEndowed(ctx))
 processor.addEventHandler('Balances.Reserved', ctx => balancesReserved(ctx))
 processor.addEventHandler('Balances.Unreserved', ctx => balancesUnreserved(ctx))
+processor.addEventHandler('Balances.Withdraw', ctx => balancesWithdraw(ctx))
 
 if (!process.env.WS_NODE_URL?.includes(`bs`)) {
   processor.addEventHandler('Balances.Transfer', ctx => balancesTransfer(ctx))
