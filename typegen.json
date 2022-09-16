@@ -4,6 +4,7 @@
   "typesBundle": "zeitgeist.json",
   "events": [
     "Balances.Endowed",
+    "Balances.Transfer",
     "ParachainStaking.Rewarded",
     "System.NewAccount",
     "System.ExtrinsicSuccess",
