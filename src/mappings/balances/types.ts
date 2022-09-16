@@ -1,17 +1,34 @@
 import { encodeAddress } from '@polkadot/keyring'
 import * as ss58 from '@subsquid/ss58'
 import { EventContext } from '../../types/support'
-import { BalancesDustLostEvent, BalancesEndowedEvent, BalancesTransferEvent } from '../../types/events'
+import { BalancesBalanceSetEvent, BalancesDustLostEvent, BalancesEndowedEvent, BalancesTransferEvent } from '../../types/events'
 
+
+export function getBalanceSetEvent(ctx: EventContext): BalanceSetEvent {
+  const balanceSetEvent = new BalancesBalanceSetEvent(ctx)
+  if (balanceSetEvent.isV23) {
+    const [who, free] = balanceSetEvent.asV23
+    const walletId = ss58.codec('zeitgeist').encode(who)
+    return {walletId, free}
+  } else if (balanceSetEvent.isV34) {
+    const {who, free} = balanceSetEvent.asV34
+    const walletId = ss58.codec('zeitgeist').encode(who)
+    return {walletId, free}
+  } else {
+    const [account, free] = ctx.event.args
+    const walletId = encodeAddress(account, 73)
+    return {walletId, free}
+  }
+}
 
 export function getDustLostEvent(ctx: EventContext): DustLostEvent {
-  const endowedEvent = new BalancesDustLostEvent(ctx)
-  if (endowedEvent.isV23) {
-    const [account, amount] = endowedEvent.asV23
+  const dustLostEvent = new BalancesDustLostEvent(ctx)
+  if (dustLostEvent.isV23) {
+    const [account, amount] = dustLostEvent.asV23
     const walletId = ss58.codec('zeitgeist').encode(account)
     return {walletId, amount}
-  } else if (endowedEvent.isV34) {
-    const {account, amount} = endowedEvent.asV34
+  } else if (dustLostEvent.isV34) {
+    const {account, amount} = dustLostEvent.asV34
     const walletId = ss58.codec('zeitgeist').encode(account)
     return {walletId, amount}
   } else {
@@ -56,6 +73,11 @@ export function getTransferEvent(ctx: EventContext): TransferEvent {
     const toId = encodeAddress(to, 73)
     return {fromId, toId, amount}
   }
+}
+
+interface BalanceSetEvent {
+  walletId: string
+  free: bigint
 }
 
 interface DustLostEvent {

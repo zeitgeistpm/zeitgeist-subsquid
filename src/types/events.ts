@@ -6,6 +6,50 @@ import * as v34 from './v34'
 import * as v35 from './v35'
 import * as v36 from './v36'
 
+export class BalancesBalanceSetEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Balances.BalanceSet')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   *  A balance was set by root. \[who, free, reserved\]
+   */
+  get isV23(): boolean {
+    return this._chain.getEventHash('Balances.BalanceSet') === '0f263bfdefa394edfb38d20d33662423a2e0902235b599f9b2b0292f157f0902'
+  }
+
+  /**
+   *  A balance was set by root. \[who, free, reserved\]
+   */
+  get asV23(): [Uint8Array, bigint, bigint] {
+    assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * A balance was set by root.
+   */
+  get isV34(): boolean {
+    return this._chain.getEventHash('Balances.BalanceSet') === '1e2b5d5a07046e6d6e5507661d3f3feaddfb41fc609a2336b24957322080ca77'
+  }
+
+  /**
+   * A balance was set by root.
+   */
+  get asV34(): {who: Uint8Array, free: bigint, reserved: bigint} {
+    assert(this.isV34)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class BalancesDustLostEvent {
   private readonly _chain: Chain
   private readonly event: Event
