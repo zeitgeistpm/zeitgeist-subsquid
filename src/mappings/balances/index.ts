@@ -2,8 +2,30 @@ import { EventHandlerContext, SubstrateEvent } from '@subsquid/substrate-process
 import { Store } from '@subsquid/typeorm-store'
 import { Account, AccountBalance, HistoricalAccountBalance } from '../../model'
 import { initBalance } from '../helper'
-import { getEndowedEvent, getTransferEvent } from './types'
+import { getDustLostEvent, getEndowedEvent, getTransferEvent } from './types'
 
+
+export async function balancesDustLost(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
+  const { store, block, event } = ctx
+  const { walletId, amount } = getDustLostEvent(ctx)
+
+  const ab = await store.findOneBy(AccountBalance, { account: { accountId: walletId }, assetId: "Ztg" })
+  if (!ab) { return }
+
+  let hab = new HistoricalAccountBalance()
+  hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
+  hab.accountId = walletId
+  hab.event = event.name.split('.')[1]
+  hab.assetId = ab.assetId
+  hab.dBalance = amount
+  hab.balance = BigInt(0)
+  hab.dValue = Number(hab.dBalance)
+  hab.value = Number(hab.balance)
+  hab.blockNumber = block.height
+  hab.timestamp = new Date(block.timestamp)
+  console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
+  await store.save<HistoricalAccountBalance>(hab)
+}
 
 export async function balancesEndowed(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
   const {store, block, event} = ctx

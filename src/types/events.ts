@@ -6,6 +6,54 @@ import * as v34 from './v34'
 import * as v35 from './v35'
 import * as v36 from './v36'
 
+export class BalancesDustLostEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Balances.DustLost')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   *  An account was removed whose balance was non-zero but below ExistentialDeposit,
+   *  resulting in an outright loss. \[account, balance\]
+   */
+  get isV23(): boolean {
+    return this._chain.getEventHash('Balances.DustLost') === '23bebce4ca9ed37548947d07d4dc50e772f07401b9a416b6aa2f3e9cb5adcaf4'
+  }
+
+  /**
+   *  An account was removed whose balance was non-zero but below ExistentialDeposit,
+   *  resulting in an outright loss. \[account, balance\]
+   */
+  get asV23(): [Uint8Array, bigint] {
+    assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * An account was removed whose balance was non-zero but below ExistentialDeposit,
+   * resulting in an outright loss.
+   */
+  get isV34(): boolean {
+    return this._chain.getEventHash('Balances.DustLost') === '504f155afb2789c50df19d1f747fb2dc0e99bf8b7623c30bdb5cf82029fec760'
+  }
+
+  /**
+   * An account was removed whose balance was non-zero but below ExistentialDeposit,
+   * resulting in an outright loss.
+   */
+  get asV34(): {account: Uint8Array, amount: bigint} {
+    assert(this.isV34)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class BalancesEndowedEvent {
   private readonly _chain: Chain
   private readonly event: Event

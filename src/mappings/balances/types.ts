@@ -1,8 +1,25 @@
 import { encodeAddress } from '@polkadot/keyring'
 import * as ss58 from '@subsquid/ss58'
 import { EventContext } from '../../types/support'
-import { BalancesEndowedEvent, BalancesTransferEvent } from '../../types/events'
+import { BalancesDustLostEvent, BalancesEndowedEvent, BalancesTransferEvent } from '../../types/events'
 
+
+export function getDustLostEvent(ctx: EventContext): DustLostEvent {
+  const endowedEvent = new BalancesDustLostEvent(ctx)
+  if (endowedEvent.isV23) {
+    const [account, amount] = endowedEvent.asV23
+    const walletId = ss58.codec('zeitgeist').encode(account)
+    return {walletId, amount}
+  } else if (endowedEvent.isV34) {
+    const {account, amount} = endowedEvent.asV34
+    const walletId = ss58.codec('zeitgeist').encode(account)
+    return {walletId, amount}
+  } else {
+    const [account, amount] = ctx.event.args
+    const walletId = encodeAddress(account, 73)
+    return {walletId, amount}
+  }
+}
 
 export function getEndowedEvent(ctx: EventContext): EndowedEvent {
   const endowedEvent = new BalancesEndowedEvent(ctx)
@@ -39,6 +56,11 @@ export function getTransferEvent(ctx: EventContext): TransferEvent {
     const toId = encodeAddress(to, 73)
     return {fromId, toId, amount}
   }
+}
+
+interface DustLostEvent {
+  walletId: string
+  amount: bigint
 }
 
 interface EndowedEvent {

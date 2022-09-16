@@ -3,6 +3,7 @@
   "specVersions": "zeitgeistVersions.jsonl",
   "typesBundle": "zeitgeist.json",
   "events": [
+    "Balances.DustLost",
     "Balances.Endowed",
     "Balances.Transfer",
     "ParachainStaking.Rewarded",
