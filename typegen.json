@@ -6,6 +6,7 @@
     "Balances.BalanceSet",
     "Balances.DustLost",
     "Balances.Endowed",
+    "Balances.Reserved",
     "Balances.Transfer",
     "ParachainStaking.Rewarded",
     "System.NewAccount",
