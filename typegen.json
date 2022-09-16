@@ -13,7 +13,8 @@
     "ParachainStaking.Rewarded",
     "System.NewAccount",
     "System.ExtrinsicSuccess",
-    "System.ExtrinsicFailed"
+    "System.ExtrinsicFailed",
+    "Tokens.Endowed"
   ],
   "calls": []
 }

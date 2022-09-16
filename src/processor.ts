@@ -3,6 +3,7 @@ import { TypeormDatabase } from '@subsquid/typeorm-store'
 import { balancesBalanceSet, balancesDustLost, balancesEndowed, balancesReserved, balancesTransfer, balancesTransferOld, balancesUnreserved, balancesWithdraw } from './mappings/balances';
 import { parachainStakingRewarded } from './mappings/parachainStaking';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
+import { tokensEndowed } from './mappings/tokens';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -18,11 +19,7 @@ processor.setDataSource({
   archive: process.env.INDEXER_ENDPOINT_URL ?? 'http://localhost:8888/graphql',
   chain: process.env.WS_NODE_URL ?? 'wss://bsr.zeitgeist.pm',
 });
-//processor.setBlockRange({from: 381584, to: 381588})
-
-processor.addEventHandler('ParachainStaking.Rewarded', ctx => parachainStakingRewarded(ctx))
-
-processor.addEventHandler('System.NewAccount', ctx => systemNewAccount(ctx))
+// processor.setBlockRange({from: 832, to: 832})
 
 processor.addEventHandler('Balances.BalanceSet', ctx => balancesBalanceSet(ctx))
 processor.addEventHandler('Balances.DustLost', ctx => balancesDustLost(ctx))
@@ -30,6 +27,12 @@ processor.addEventHandler('Balances.Endowed', ctx => balancesEndowed(ctx))
 processor.addEventHandler('Balances.Reserved', ctx => balancesReserved(ctx))
 processor.addEventHandler('Balances.Unreserved', ctx => balancesUnreserved(ctx))
 processor.addEventHandler('Balances.Withdraw', ctx => balancesWithdraw(ctx))
+
+processor.addEventHandler('ParachainStaking.Rewarded', ctx => parachainStakingRewarded(ctx))
+
+processor.addEventHandler('System.NewAccount', ctx => systemNewAccount(ctx))
+
+processor.addEventHandler('Tokens.Endowed', ctx => tokensEndowed(ctx))
 
 if (!process.env.WS_NODE_URL?.includes(`bs`)) {
   processor.addEventHandler('Balances.Transfer', ctx => balancesTransfer(ctx))

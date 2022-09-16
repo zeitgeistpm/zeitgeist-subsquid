@@ -48,6 +48,31 @@ export interface DispatchInfo {
   paysFee: Pays
 }
 
+export type CurrencyId = CurrencyId_CategoricalOutcome | CurrencyId_ScalarOutcome | CurrencyId_CombinatorialOutcome | CurrencyId_PoolShare | CurrencyId_Ztg
+
+export interface CurrencyId_CategoricalOutcome {
+  __kind: 'CategoricalOutcome'
+  value: [bigint, number]
+}
+
+export interface CurrencyId_ScalarOutcome {
+  __kind: 'ScalarOutcome'
+  value: [bigint, ScalarPosition]
+}
+
+export interface CurrencyId_CombinatorialOutcome {
+  __kind: 'CombinatorialOutcome'
+}
+
+export interface CurrencyId_PoolShare {
+  __kind: 'PoolShare'
+  value: bigint
+}
+
+export interface CurrencyId_Ztg {
+  __kind: 'Ztg'
+}
+
 export interface DispatchErrorModule {
   index: number
   error: number
@@ -123,4 +148,14 @@ export interface Pays_Yes {
 
 export interface Pays_No {
   __kind: 'No'
+}
+
+export type ScalarPosition = ScalarPosition_Long | ScalarPosition_Short
+
+export interface ScalarPosition_Long {
+  __kind: 'Long'
+}
+
+export interface ScalarPosition_Short {
+  __kind: 'Short'
 }
