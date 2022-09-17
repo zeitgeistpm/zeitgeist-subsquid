@@ -318,6 +318,65 @@ export class BalancesWithdrawEvent {
   }
 }
 
+export class CurrencyDepositedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Currency.Deposited')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   *  Deposit success. \[currency_id, who, amount\]
+   */
+  get isV23(): boolean {
+    return this._chain.getEventHash('Currency.Deposited') === '6a3d7e7accde03ae3a0153b6dc5d6cc04eea87393610da84950bbe601ce449cc'
+  }
+
+  /**
+   *  Deposit success. \[currency_id, who, amount\]
+   */
+  get asV23(): [v23.Currency, Uint8Array, bigint] {
+    assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Deposit success. \[currency_id, who, amount\]
+   */
+  get isV32(): boolean {
+    return this._chain.getEventHash('Currency.Deposited') === 'df0511d0e921e296dbd5c8b43cb7d8933820cb906e355c768e8407ca9193138f'
+  }
+
+  /**
+   * Deposit success. \[currency_id, who, amount\]
+   */
+  get asV32(): [v32.Asset, Uint8Array, bigint] {
+    assert(this.isV32)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Deposit success.
+   */
+  get isV34(): boolean {
+    return this._chain.getEventHash('Currency.Deposited') === 'a4f1c201945cdbe991182662e3e9964553c56bb38739bf247036896397e7d07d'
+  }
+
+  /**
+   * Deposit success.
+   */
+  get asV34(): {currencyId: v34.Asset, who: Uint8Array, amount: bigint} {
+    assert(this.isV34)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class CurrencyTransferredEvent {
   private readonly _chain: Chain
   private readonly event: Event

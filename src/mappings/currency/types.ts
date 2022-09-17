@@ -1,9 +1,30 @@
 import { encodeAddress } from '@polkadot/keyring'
 import * as ss58 from '@subsquid/ss58'
-import { CurrencyTransferredEvent } from '../../types/events'
+import { CurrencyDepositedEvent, CurrencyTransferredEvent } from '../../types/events'
 import { EventContext } from '../../types/support'
 import { getAssetId } from '../helper'
 
+
+export function getDepositedEvent(ctx: EventContext): DepositedEvent {
+  const depositedEvent = new CurrencyDepositedEvent(ctx)
+  let currencyId, who, walletId, amount
+  if (depositedEvent.isV23) {
+    [currencyId, who, amount] = depositedEvent.asV23
+    walletId = ss58.codec('zeitgeist').encode(who)
+  } else if (depositedEvent.isV32) {
+    [currencyId, who, amount] = depositedEvent.asV32
+    walletId = ss58.codec('zeitgeist').encode(who)
+  } else if (depositedEvent.isV34) {
+    currencyId = depositedEvent.asV34.currencyId
+    walletId = ss58.codec('zeitgeist').encode(depositedEvent.asV34.who)
+    amount = depositedEvent.asV34.amount
+  } else {
+    [currencyId, who, amount] = ctx.event.args
+    walletId = encodeAddress(who, 73)
+  }
+  const assetId = getAssetId(currencyId)
+  return {assetId, walletId, amount}
+}
 
 export function getTransferredEvent(ctx: EventContext): TransferredEvent {
   const transferredEvent = new CurrencyTransferredEvent(ctx)
@@ -28,6 +49,12 @@ export function getTransferredEvent(ctx: EventContext): TransferredEvent {
   }
   const assetId = getAssetId(currencyId)
   return {assetId, fromId, toId, amount}
+}
+
+interface DepositedEvent {
+  assetId: string
+  walletId: string
+  amount: bigint
 }
 
 interface TransferredEvent {
