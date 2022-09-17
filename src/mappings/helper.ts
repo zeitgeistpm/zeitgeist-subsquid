@@ -2,9 +2,47 @@ import { AccountInfo } from '@polkadot/types/interfaces/system';
 import { SubstrateBlock, SubstrateEvent, SubstrateExtrinsic } from '@subsquid/substrate-processor';
 import { Store } from '@subsquid/typeorm-store';
 import { util } from '@zeitgeistpm/sdk';
+import { Cache, IPFS, Tools } from '../processor/util';
 import { Account, AccountBalance, HistoricalAccountBalance } from '../model'
-import { Cache, Tools } from '../processor/util';
 
+
+export async function createAssetsForMarket(marketId: string, marketType: any): Promise<any> {
+  const sdk = await Tools.getSDK()
+  return marketType.__kind == "Categorical"
+    ? [...Array(marketType.value).keys()].map((catIdx) => {
+        return sdk.api.createType("Asset", {
+          categoricalOutcome: [marketId, catIdx],
+        });
+      })
+    : ["Long", "Short"].map((pos) => {
+        const position = sdk.api.createType("ScalarPosition", pos);
+        return sdk.api.createType("Asset", {
+          scalarOutcome: [marketId, position.toString()],
+        });
+      });
+}
+
+export async function decodeMarketMetadata(metadata: string): Promise<DecodedMarketMetadata|undefined> {
+  if (metadata.startsWith('0x1530fa0bb52e67d0d9f89bf26552e1')) return undefined
+  let raw = await (await Cache.init()).getMeta(metadata)
+  if (raw && !(process.env.NODE_ENV == 'local')) {
+    return raw !== '0' ? JSON.parse(raw) as DecodedMarketMetadata : undefined
+  } else {
+    try {
+      const ipfs = new IPFS();
+      raw = await ipfs.read(metadata);
+      const rawData = JSON.parse(raw) as DecodedMarketMetadata
+      await (await Cache.init()).setMeta(metadata, raw)
+      return rawData
+    } catch (err) {
+      console.error(err);
+      if (err instanceof SyntaxError) {
+        await (await Cache.init()).setMeta(metadata, '0')
+      }
+      return undefined
+    }
+  }
+}
 
 export function getAssetId(currencyId: any): string {
   if (currencyId.__kind == "CategoricalOutcome") {
@@ -81,4 +119,21 @@ export async function initBalance(acc: Account, store: Store, block: SubstrateBl
   hab.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
   await store.save<HistoricalAccountBalance>(hab)
+}
+
+interface DecodedMarketMetadata {
+  slug: string
+  question: string
+  description: string
+  categories?: CategoryData[]
+  tags?: string[]
+  img?: string
+  scalarType?: string
+}
+
+interface CategoryData {
+  name: string
+  ticker?: string
+  img?: string
+  color?: string
 }
