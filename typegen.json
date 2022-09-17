@@ -12,6 +12,7 @@
     "Balances.Withdraw",
     "Currency.Deposited",
     "Currency.Transferred",
+    "Currency.Withdrawn",
     "ParachainStaking.Rewarded",
     "System.NewAccount",
     "System.ExtrinsicSuccess",
