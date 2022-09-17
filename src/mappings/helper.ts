@@ -1,8 +1,10 @@
-import { EventHandlerContext, SubstrateBlock, SubstrateEvent, SubstrateExtrinsic, SubstrateFinalizationEvent } from '@subsquid/substrate-processor';
+import { AccountInfo } from '@polkadot/types/interfaces/system';
+import { SubstrateBlock, SubstrateEvent, SubstrateExtrinsic } from '@subsquid/substrate-processor';
 import { Store } from '@subsquid/typeorm-store';
+import { util } from '@zeitgeistpm/sdk';
 import { Account, AccountBalance, HistoricalAccountBalance } from '../model'
 import { Cache, Tools } from '../processor/util';
-import { AccountInfo } from '@polkadot/types/interfaces/system';
+
 
 export async function initBalance(acc: Account, store: Store, block: SubstrateBlock, event: SubstrateEvent) {
   const sdk = await Tools.getSDK()
@@ -62,4 +64,21 @@ export async function getFees(block: SubstrateBlock, extrinsic: SubstrateExtrins
   }
   await (await Cache.init()).setFee(block.hash+id, totalFees.toString())
   return totalFees
+}
+
+export function getAssetId(currencyId: any): string {
+  if (currencyId.__kind == "CategoricalOutcome") {
+    return JSON.stringify(util.AssetIdFromString('[' + currencyId.value.toString() + ']'))
+  } else if (currencyId.__kind == "ScalarOutcome") {
+    const scale = new Array()
+    scale.push(+currencyId.value[0].toString())
+    scale.push(currencyId.value[1].__kind)
+    return JSON.stringify(util.AssetIdFromString(JSON.stringify(scale)))
+  } else if (currencyId.__kind == "Ztg") {
+    return "Ztg"
+  } else if (currencyId.__kind == "PoolShare") {
+    return JSON.stringify(util.AssetIdFromString("pool" + currencyId.value.toString()))
+  } else {
+    return ""
+  }
 }
