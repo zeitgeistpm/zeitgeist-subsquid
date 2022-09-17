@@ -1,5 +1,30 @@
 import type {Result} from './support'
 
+export type Asset = Asset_CategoricalOutcome | Asset_ScalarOutcome | Asset_CombinatorialOutcome | Asset_PoolShare | Asset_Ztg
+
+export interface Asset_CategoricalOutcome {
+  __kind: 'CategoricalOutcome'
+  value: [bigint, number]
+}
+
+export interface Asset_ScalarOutcome {
+  __kind: 'ScalarOutcome'
+  value: [bigint, ScalarPosition]
+}
+
+export interface Asset_CombinatorialOutcome {
+  __kind: 'CombinatorialOutcome'
+}
+
+export interface Asset_PoolShare {
+  __kind: 'PoolShare'
+  value: bigint
+}
+
+export interface Asset_Ztg {
+  __kind: 'Ztg'
+}
+
 export type DispatchError = DispatchError_Other | DispatchError_CannotLookup | DispatchError_BadOrigin | DispatchError_Module | DispatchError_ConsumerRemaining | DispatchError_NoProviders | DispatchError_Token | DispatchError_Arithmetic
 
 export interface DispatchError_Other {
@@ -44,29 +69,14 @@ export interface DispatchInfo {
   paysFee: Pays
 }
 
-export type Asset = Asset_CategoricalOutcome | Asset_ScalarOutcome | Asset_CombinatorialOutcome | Asset_PoolShare | Asset_Ztg
+export type ScalarPosition = ScalarPosition_Long | ScalarPosition_Short
 
-export interface Asset_CategoricalOutcome {
-  __kind: 'CategoricalOutcome'
-  value: [bigint, number]
+export interface ScalarPosition_Long {
+  __kind: 'Long'
 }
 
-export interface Asset_ScalarOutcome {
-  __kind: 'ScalarOutcome'
-  value: [bigint, ScalarPosition]
-}
-
-export interface Asset_CombinatorialOutcome {
-  __kind: 'CombinatorialOutcome'
-}
-
-export interface Asset_PoolShare {
-  __kind: 'PoolShare'
-  value: bigint
-}
-
-export interface Asset_Ztg {
-  __kind: 'Ztg'
+export interface ScalarPosition_Short {
+  __kind: 'Short'
 }
 
 export type TokenError = TokenError_NoFunds | TokenError_WouldDie | TokenError_BelowMinimum | TokenError_CannotCreate | TokenError_UnknownAsset | TokenError_Frozen | TokenError_Unsupported
@@ -135,14 +145,4 @@ export interface Pays_Yes {
 
 export interface Pays_No {
   __kind: 'No'
-}
-
-export type ScalarPosition = ScalarPosition_Long | ScalarPosition_Short
-
-export interface ScalarPosition_Long {
-  __kind: 'Long'
-}
-
-export interface ScalarPosition_Short {
-  __kind: 'Short'
 }

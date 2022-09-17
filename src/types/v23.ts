@@ -1,5 +1,30 @@
 import type {Result} from './support'
 
+export type Currency = Currency_CategoricalOutcome | Currency_ScalarOutcome | Currency_CombinatorialOutcome | Currency_PoolShare | Currency_Ztg
+
+export interface Currency_CategoricalOutcome {
+  __kind: 'CategoricalOutcome'
+  value: [bigint, number]
+}
+
+export interface Currency_ScalarOutcome {
+  __kind: 'ScalarOutcome'
+  value: [bigint, ScalarPosition]
+}
+
+export interface Currency_CombinatorialOutcome {
+  __kind: 'CombinatorialOutcome'
+}
+
+export interface Currency_PoolShare {
+  __kind: 'PoolShare'
+  value: bigint
+}
+
+export interface Currency_Ztg {
+  __kind: 'Ztg'
+}
+
 export type DispatchError = DispatchError_Other | DispatchError_CannotLookup | DispatchError_BadOrigin | DispatchError_Module | DispatchError_ConsumerRemaining | DispatchError_NoProviders | DispatchError_Token | DispatchError_Arithmetic
 
 export interface DispatchError_Other {
@@ -71,6 +96,16 @@ export interface CurrencyId_PoolShare {
 
 export interface CurrencyId_Ztg {
   __kind: 'Ztg'
+}
+
+export type ScalarPosition = ScalarPosition_Long | ScalarPosition_Short
+
+export interface ScalarPosition_Long {
+  __kind: 'Long'
+}
+
+export interface ScalarPosition_Short {
+  __kind: 'Short'
 }
 
 export interface DispatchErrorModule {
@@ -148,14 +183,4 @@ export interface Pays_Yes {
 
 export interface Pays_No {
   __kind: 'No'
-}
-
-export type ScalarPosition = ScalarPosition_Long | ScalarPosition_Short
-
-export interface ScalarPosition_Long {
-  __kind: 'Long'
-}
-
-export interface ScalarPosition_Short {
-  __kind: 'Short'
 }

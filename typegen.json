@@ -10,6 +10,7 @@
     "Balances.Unreserved",
     "Balances.Transfer",
     "Balances.Withdraw",
+    "Currency.Transferred",
     "ParachainStaking.Rewarded",
     "System.NewAccount",
     "System.ExtrinsicSuccess",

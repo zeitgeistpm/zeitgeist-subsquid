@@ -318,6 +318,65 @@ export class BalancesWithdrawEvent {
   }
 }
 
+export class CurrencyTransferredEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Currency.Transferred')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   *  Currency transfer success. \[currency_id, from, to, amount\]
+   */
+  get isV23(): boolean {
+    return this._chain.getEventHash('Currency.Transferred') === 'd4ffed7d43664acfa5fe9f6825f538d93e8447c873d770deb40246b11895e2ab'
+  }
+
+  /**
+   *  Currency transfer success. \[currency_id, from, to, amount\]
+   */
+  get asV23(): [v23.Currency, Uint8Array, Uint8Array, bigint] {
+    assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Currency transfer success. \[currency_id, from, to, amount\]
+   */
+  get isV32(): boolean {
+    return this._chain.getEventHash('Currency.Transferred') === '3eb8c7c7a28e521728d456307ad372e814aeb4fb200f4be58a00098f9f61c8de'
+  }
+
+  /**
+   * Currency transfer success. \[currency_id, from, to, amount\]
+   */
+  get asV32(): [v32.Asset, Uint8Array, Uint8Array, bigint] {
+    assert(this.isV32)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Currency transfer success.
+   */
+  get isV34(): boolean {
+    return this._chain.getEventHash('Currency.Transferred') === 'ad3d65a0944e3402fd00687198797c37e7b3335997a6f2143cf8893f4d007b35'
+  }
+
+  /**
+   * Currency transfer success.
+   */
+  get asV34(): {currencyId: v34.Asset, from: Uint8Array, to: Uint8Array, amount: bigint} {
+    assert(this.isV34)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class ParachainStakingRewardedEvent {
   private readonly _chain: Chain
   private readonly event: Event
