@@ -6,6 +6,47 @@ import { Account, AccountBalance, HistoricalAccountBalance } from '../model'
 import { Cache, Tools } from '../processor/util';
 
 
+export function getAssetId(currencyId: any): string {
+  if (currencyId.__kind == "CategoricalOutcome") {
+    return JSON.stringify(util.AssetIdFromString('[' + currencyId.value.toString() + ']'))
+  } else if (currencyId.__kind == "ScalarOutcome") {
+    const scale = new Array()
+    scale.push(+currencyId.value[0].toString())
+    scale.push(currencyId.value[1].__kind)
+    return JSON.stringify(util.AssetIdFromString(JSON.stringify(scale)))
+  } else if (currencyId.__kind == "Ztg") {
+    return "Ztg"
+  } else if (currencyId.__kind == "PoolShare") {
+    return JSON.stringify(util.AssetIdFromString("pool" + currencyId.value.toString()))
+  } else {
+    return ""
+  }
+}
+
+export async function getFees(block: SubstrateBlock, extrinsic: SubstrateExtrinsic): Promise<bigint> {
+  const id = extrinsic.indexInBlock
+  let fees = await (await Cache.init()).getFee(block.hash+id)
+  if (fees) { return BigInt(fees) }
+
+  let totalFees = BigInt(0)
+  const sdk = await Tools.getSDK()
+  fees = JSON.stringify(await sdk.api.rpc.payment.queryFeeDetails(extrinsic.hash, block.hash))
+  if (fees) {
+    const feesFormatted = JSON.parse(fees)
+    const inclusionFee = feesFormatted.inclusionFee
+    const baseFee = inclusionFee.baseFee
+    const lenFee = inclusionFee.lenFee
+    const adjustedWeightFee = inclusionFee.adjustedWeightFee
+    if (inclusionFee) {
+      if (baseFee) totalFees = totalFees + BigInt(baseFee)
+      if (lenFee) totalFees = totalFees + BigInt(lenFee)
+      if (adjustedWeightFee) totalFees = totalFees + BigInt(adjustedWeightFee)
+    }
+  }
+  await (await Cache.init()).setFee(block.hash+id, totalFees.toString())
+  return totalFees
+}
+
 export async function initBalance(acc: Account, store: Store, block: SubstrateBlock, event: SubstrateEvent) {
   const sdk = await Tools.getSDK()
   const blockZero = await sdk.api.rpc.chain.getBlockHash(0);
@@ -40,45 +81,4 @@ export async function initBalance(acc: Account, store: Store, block: SubstrateBl
   hab.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
   await store.save<HistoricalAccountBalance>(hab)
-}
-
-export async function getFees(block: SubstrateBlock, extrinsic: SubstrateExtrinsic): Promise<bigint> {
-  const id = extrinsic.indexInBlock
-  let fees = await (await Cache.init()).getFee(block.hash+id)
-  if (fees) { return BigInt(fees) }
-
-  let totalFees = BigInt(0)
-  const sdk = await Tools.getSDK()
-  fees = JSON.stringify(await sdk.api.rpc.payment.queryFeeDetails(extrinsic.hash, block.hash))
-  if (fees) {
-    const feesFormatted = JSON.parse(fees)
-    const inclusionFee = feesFormatted.inclusionFee
-    const baseFee = inclusionFee.baseFee
-    const lenFee = inclusionFee.lenFee
-    const adjustedWeightFee = inclusionFee.adjustedWeightFee
-    if (inclusionFee) {
-      if (baseFee) totalFees = totalFees + BigInt(baseFee)
-      if (lenFee) totalFees = totalFees + BigInt(lenFee)
-      if (adjustedWeightFee) totalFees = totalFees + BigInt(adjustedWeightFee)
-    }
-  }
-  await (await Cache.init()).setFee(block.hash+id, totalFees.toString())
-  return totalFees
-}
-
-export function getAssetId(currencyId: any): string {
-  if (currencyId.__kind == "CategoricalOutcome") {
-    return JSON.stringify(util.AssetIdFromString('[' + currencyId.value.toString() + ']'))
-  } else if (currencyId.__kind == "ScalarOutcome") {
-    const scale = new Array()
-    scale.push(+currencyId.value[0].toString())
-    scale.push(currencyId.value[1].__kind)
-    return JSON.stringify(util.AssetIdFromString(JSON.stringify(scale)))
-  } else if (currencyId.__kind == "Ztg") {
-    return "Ztg"
-  } else if (currencyId.__kind == "PoolShare") {
-    return JSON.stringify(util.AssetIdFromString("pool" + currencyId.value.toString()))
-  } else {
-    return ""
-  }
 }
