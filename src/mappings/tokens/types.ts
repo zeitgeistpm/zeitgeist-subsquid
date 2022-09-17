@@ -3,6 +3,7 @@ import * as ss58 from '@subsquid/ss58'
 import { util } from '@zeitgeistpm/sdk'
 import { TokensEndowedEvent } from '../../types/events'
 import { EventContext } from '../../types/support'
+import { getAssetId } from '../helper'
 
 
 export function getTokensEndowedEvent(ctx: EventContext): EndowedEvent {
@@ -22,26 +23,8 @@ export function getTokensEndowedEvent(ctx: EventContext): EndowedEvent {
     [currencyId, who, amount] = ctx.event.args
     walletId = encodeAddress(who, 73)
   }
-
-  if (currencyId.__kind  == "CategoricalOutcome") {
-    const assetId = JSON.stringify(util.AssetIdFromString('[' + currencyId.value.toString() + ']'))
-    return {assetId, walletId, amount}
-  } else if (currencyId.__kind  == "ScalarOutcome") {
-    const scale = new Array()
-    scale.push(+currencyId.value[0].toString())
-    scale.push(currencyId.value[1].__kind)
-    const assetId = JSON.stringify(util.AssetIdFromString(JSON.stringify(scale)))
-    return {assetId, walletId, amount}
-  } else if (currencyId.__kind == "Ztg") {
-    const assetId = "Ztg"
-    return {assetId, walletId, amount}
-  } else if (currencyId.__kind == "PoolShare") {
-    const assetId = JSON.stringify(util.AssetIdFromString("pool" + currencyId.value.toString()))
-    return {assetId, walletId, amount}
-  } else {
-    const assetId = ''
-    return {assetId, walletId, amount}
-  }
+  const assetId = getAssetId(currencyId)
+  return {assetId, walletId, amount}
 }
 
 interface EndowedEvent {
