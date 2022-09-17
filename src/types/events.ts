@@ -1,10 +1,12 @@
 import assert from 'assert'
 import {Chain, ChainContext, EventContext, Event, Result} from './support'
 import * as v23 from './v23'
+import * as v29 from './v29'
 import * as v32 from './v32'
 import * as v34 from './v34'
 import * as v35 from './v35'
 import * as v36 from './v36'
+import * as v38 from './v38'
 
 export class BalancesBalanceSetEvent {
   private readonly _chain: Chain
@@ -535,6 +537,95 @@ export class ParachainStakingRewardedEvent {
    */
   get asV35(): {account: Uint8Array, rewards: bigint} {
     assert(this.isV35)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class PredictionMarketsMarketCreatedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'PredictionMarkets.MarketCreated')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   *  A market has been created \[market_id, creator\]
+   */
+  get isV23(): boolean {
+    return this._chain.getEventHash('PredictionMarkets.MarketCreated') === 'd5835dbc0b5506d262ae8a5cba6bb055662b6ce13e8654c481788dc3ccb99f88'
+  }
+
+  /**
+   *  A market has been created \[market_id, creator\]
+   */
+  get asV23(): [bigint, v23.Market, Uint8Array] {
+    assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   *  A market has been created \[market_id, creator\]
+   */
+  get isV29(): boolean {
+    return this._chain.getEventHash('PredictionMarkets.MarketCreated') === '2c071f32da446b7fae945023e2dd3037c4de39decadd715e39fa2083698bec9d'
+  }
+
+  /**
+   *  A market has been created \[market_id, creator\]
+   */
+  get asV29(): [bigint, v29.Market] {
+    assert(this.isV29)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * A market has been created \[market_id, creator\]
+   */
+  get isV32(): boolean {
+    return this._chain.getEventHash('PredictionMarkets.MarketCreated') === '6ca81d4e3886a4c3588554446139248d28ee3bde379a943e1e37ed34f600fb06'
+  }
+
+  /**
+   * A market has been created \[market_id, creator\]
+   */
+  get asV32(): [bigint, v32.Market] {
+    assert(this.isV32)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * A market has been created \[market_id, market_account, creator\]
+   */
+  get isV36(): boolean {
+    return this._chain.getEventHash('PredictionMarkets.MarketCreated') === 'b04e51d4c45b55e4412e9baf77f21cf64f9ec4053537e9e2f6905deef91f547c'
+  }
+
+  /**
+   * A market has been created \[market_id, market_account, creator\]
+   */
+  get asV36(): [bigint, Uint8Array, v36.Market] {
+    assert(this.isV36)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * A market has been created \[market_id, market_account, creator\]
+   */
+  get isV38(): boolean {
+    return this._chain.getEventHash('PredictionMarkets.MarketCreated') === '90ab12cfdc72a6c4a4a4a06f3b17cde83716fef857428b4fe7bf7ddbfa4b9902'
+  }
+
+  /**
+   * A market has been created \[market_id, market_account, creator\]
+   */
+  get asV38(): [bigint, Uint8Array, v38.Market] {
+    assert(this.isV38)
     return this._chain.decodeEvent(this.event)
   }
 }

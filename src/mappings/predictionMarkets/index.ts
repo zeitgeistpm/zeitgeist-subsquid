@@ -1,0 +1,159 @@
+import { encodeAddress } from '@polkadot/keyring'
+import { EventHandlerContext } from '@subsquid/substrate-processor'
+import { Store } from '@subsquid/typeorm-store'
+import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBalance, HistoricalMarket, 
+  Market, MarketDisputeMechanism, MarketPeriod, MarketType } from '../../model'
+import { createAssetsForMarket, decodeMarketMetadata } from '../helper'
+import { Tools } from '../../processor/util'
+import { getMarketCreatedEvent } from './types'
+
+
+export async function marketCreated(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
+  const {store, event, block} = ctx
+  const {marketId, marketAccountId, market} = getMarketCreatedEvent(ctx)
+
+  if (marketAccountId.length > 2) {
+    let acc = await store.findOneBy(Account, { accountId: marketAccountId })
+    if (acc) {
+      acc.marketId = +marketId.toString()
+      console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+      await store.save<Account>(acc)
+    } else {
+      let newAcc = new Account()
+      newAcc.id = event.id + '-' + marketAccountId.substring(marketAccountId.length - 5)
+      newAcc.accountId = marketAccountId.toString()
+      newAcc.marketId = +marketId.toString()
+      newAcc.pvalue = 0
+      console.log(`[${event.name}] Saving account: ${JSON.stringify(newAcc, null, 2)}`)
+      await store.save<Account>(newAcc)
+
+      let ab = new AccountBalance()
+      ab.id = event.id + '-' + marketAccountId.substring(marketAccountId.length - 5)
+      ab.account = newAcc
+      ab.assetId = "Ztg"
+      ab.balance = BigInt(0)
+      ab.value = Number(ab.balance)
+      console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
+      await store.save<AccountBalance>(ab)
+
+      let hab = new HistoricalAccountBalance()
+      hab.id = event.id + '-' + marketAccountId.substring(marketAccountId.length - 5)
+      hab.accountId = newAcc.accountId
+      hab.event = event.name.split('.')[1]
+      hab.assetId = ab.assetId
+      hab.dBalance = BigInt(0)
+      hab.balance = ab.balance
+      hab.dValue = Number(hab.dBalance)
+      hab.value = Number(hab.balance)
+      hab.pvalue = 0
+      hab.blockNumber = block.height
+      hab.timestamp = new Date(block.timestamp)
+      console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
+      await store.save<HistoricalAccountBalance>(hab)
+    }
+  }
+
+  let newMarket = new Market()
+  newMarket.id = event.id + '-' + marketId
+  newMarket.marketId = +marketId
+  newMarket.creator = encodeAddress(market.creator, 73)
+  newMarket.creation = market.creation.__kind;
+  newMarket.creatorFee = +market.creatorFee.toString()
+  newMarket.oracle = encodeAddress(market.oracle, 73)
+  newMarket.scoringRule = market.scoringRule.__kind
+  newMarket.status = market.status.__kind
+  newMarket.outcomeAssets = (await createAssetsForMarket(marketId, market.marketType)) as string[]
+  newMarket.metadata = market.metadata.toString()
+
+  const metadata = await decodeMarketMetadata(market.metadata.toString())
+  if (metadata) {
+    newMarket.slug = metadata.slug
+    newMarket.question = metadata.question
+    newMarket.description = metadata.description
+    newMarket.img = metadata.img
+    
+    if ((market.marketType as any).scalar) {
+      newMarket.scalarType = metadata.scalarType;
+    }
+
+    if (metadata.categories) {
+      newMarket.categories = []
+
+      for (let i = 0; i < metadata.categories.length; i++) {
+        let cm = new CategoryMetadata()
+        cm.name = metadata.categories[i].name
+        cm.ticker = metadata.categories[i].ticker
+        cm.img = metadata.categories[i].img
+        cm.color = metadata.categories[i].color
+        newMarket.categories.push(cm)
+      }
+    }
+    
+    if (metadata.tags) {
+      newMarket.tags = []
+      for (let i = 0; i < metadata.tags.length; i++) {
+        newMarket.tags.push(metadata.tags[i])
+      }
+    }
+  }
+
+  let marketType = new MarketType()
+  const type = market.marketType
+  if (type.__kind == 'Categorical') {
+    marketType.categorical = type.value.toString()
+  } else if (type.__kind == 'Scalar') {
+    marketType.scalar = type.value.toString()
+  }
+  newMarket.marketType = marketType
+
+  let period = new MarketPeriod()
+  const p = market.period
+  if (p.__kind == 'Block') {
+    period.block = p.start.toString() + "," + p.end.toString()
+
+    const sdk = await Tools.getSDK()
+    const now = +(await sdk.api.query.timestamp.now()).toString()
+    const head = await sdk.api.rpc.chain.getHeader()
+    const blockNum = head.number.toNumber()
+    const diffInMs = +(sdk.api.consts.timestamp.minimumPeriod).toString() * (Number(p.end) - blockNum)
+    newMarket.end = BigInt(now + diffInMs)
+  } else if (p.__kind == 'Timestamp') {
+    period.timestamp = p.start.toString() + "," + p.end.toString()
+    newMarket.end = BigInt(p.end) 
+  }
+  newMarket.period = period
+
+  let disputeMechanism = new MarketDisputeMechanism()
+  const d = market.disputeMechanism
+  if (d.__kind == 'Authorized') {
+    disputeMechanism.authorized = encodeAddress(d.value, 73)
+  } else if (d.__kind == 'Court') {
+    disputeMechanism.court = true
+  } else if (d.__kind == 'SimpleDisputes') {
+    disputeMechanism.simpleDisputes = true
+  }
+  newMarket.disputeMechanism = disputeMechanism
+
+  console.log(`[${event.name}] Saving market: ${JSON.stringify(newMarket, null, 2)}`)
+  await store.save<Market>(newMarket)
+
+  let hm = new HistoricalMarket()
+  hm.id = event.id + '-' + newMarket.marketId
+  hm.marketId = newMarket.marketId
+  hm.event = event.name.split('.')[1]
+  hm.status = newMarket.status
+  hm.blockNumber = block.height
+  hm.timestamp = new Date(block.timestamp)
+  console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
+  await store.save<HistoricalMarket>(hm)
+
+  if (newMarket.outcomeAssets && newMarket.outcomeAssets.length) {
+    for (let i = 0; i < newMarket.outcomeAssets.length; i++) {
+      let asset = new Asset()
+      asset.id = event.id + '-' + newMarket.marketId + i
+      asset.assetId = newMarket.outcomeAssets[i]!
+      console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
+      await store.save<Asset>(asset)
+    }
+  }
+}
