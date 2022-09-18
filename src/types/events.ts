@@ -718,6 +718,37 @@ export class PredictionMarketsMarketCreatedEvent {
   }
 }
 
+export class PredictionMarketsMarketRejectedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'PredictionMarkets.MarketRejected')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   *  NOTE: Maybe we should only allow rejections.
+   *  A pending market has been rejected as invalid. \[market_id\]
+   */
+  get isV23(): boolean {
+    return this._chain.getEventHash('PredictionMarkets.MarketRejected') === '47b59f698451e50cce59979f0121e842fa3f8b2bcef2e388222dbd69849514f9'
+  }
+
+  /**
+   *  NOTE: Maybe we should only allow rejections.
+   *  A pending market has been rejected as invalid. \[market_id\]
+   */
+  get asV23(): bigint {
+    assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class PredictionMarketsSoldCompleteSetEvent {
   private readonly _chain: Chain
   private readonly event: Event

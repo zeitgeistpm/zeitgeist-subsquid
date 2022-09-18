@@ -6,7 +6,7 @@ import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBala
   Market, MarketDisputeMechanism, MarketPeriod, MarketType } from '../../model'
 import { createAssetsForMarket, decodeMarketMetadata } from '../helper'
 import { Tools } from '../../processor/util'
-import { getBoughtCompleteSetEvent, getMarketApprovedEvent, getMarketCreatedEvent, getSoldCompleteSetEvent } from './types'
+import { getBoughtCompleteSetEvent, getMarketApprovedEvent, getMarketCreatedEvent, getMarketRejectedEvent, getSoldCompleteSetEvent } from './types'
 
 
 export async function boughtCompleteSet(ctx: EventHandlerContext<Store>) {
@@ -254,6 +254,28 @@ export async function marketCreated(ctx: EventHandlerContext<Store, {event: {arg
       await store.save<Asset>(asset)
     }
   }
+}
+
+export async function marketRejected(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
+  const {store, block, event} = ctx
+  const {marketId} = getMarketRejectedEvent(ctx)
+
+  let savedMarket = await store.get(Market, { where: { marketId: marketId } })
+  if (!savedMarket) return
+
+  savedMarket.status = "Rejected"
+  console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
+  await store.save<Market>(savedMarket)
+
+  let hm = new HistoricalMarket()
+  hm.id = event.id + '-' + savedMarket.marketId
+  hm.marketId = savedMarket.marketId
+  hm.event = event.name.split('.')[1]
+  hm.status = savedMarket.status
+  hm.blockNumber = block.height
+  hm.timestamp = new Date(block.timestamp)
+  console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
+  await store.save<HistoricalMarket>(hm)
 }
 
 export async function soldCompleteSet(ctx: EventHandlerContext<Store>) {
