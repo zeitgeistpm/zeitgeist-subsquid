@@ -629,6 +629,35 @@ export class PredictionMarketsMarketApprovedEvent {
   }
 }
 
+export class PredictionMarketsMarketClosedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'PredictionMarkets.MarketClosed')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * A market has been closed \[market_id\]
+   */
+  get isV37(): boolean {
+    return this._chain.getEventHash('PredictionMarkets.MarketClosed') === '47b59f698451e50cce59979f0121e842fa3f8b2bcef2e388222dbd69849514f9'
+  }
+
+  /**
+   * A market has been closed \[market_id\]
+   */
+  get asV37(): bigint {
+    assert(this.isV37)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class PredictionMarketsMarketCreatedEvent {
   private readonly _chain: Chain
   private readonly event: Event

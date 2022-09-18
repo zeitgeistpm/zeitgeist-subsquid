@@ -1,11 +1,11 @@
 import { SubstrateProcessor } from '@subsquid/substrate-processor'
 import { TypeormDatabase } from '@subsquid/typeorm-store'
-import { balancesBalanceSet, balancesDustLost, balancesEndowed, balancesReserved, balancesTransfer, balancesTransferOld, 
-  balancesUnreserved, balancesWithdraw } from './mappings/balances';
+import { balancesBalanceSet, balancesDustLost, balancesEndowed, balancesReserved, balancesTransfer, 
+  balancesTransferOld, balancesUnreserved, balancesWithdraw } from './mappings/balances';
 import { currencyDeposited, currencyTransferred, currencyWithdrawn } from './mappings/currency';
 import { parachainStakingRewarded } from './mappings/parachainStaking';
-import { boughtCompleteSet, marketApproved, marketCreated, marketInsufficientSubsidy, marketRejected, 
-  marketStartedWithSubsidy, soldCompleteSet } from './mappings/predictionMarkets';
+import { boughtCompleteSet, marketApproved, marketClosed, marketCreated, marketInsufficientSubsidy, 
+  marketRejected, marketStartedWithSubsidy, soldCompleteSet } from './mappings/predictionMarkets';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensEndowed } from './mappings/tokens';
 
@@ -40,6 +40,7 @@ processor.addEventHandler('ParachainStaking.Rewarded', ctx => parachainStakingRe
 
 processor.addEventHandler('PredictionMarkets.BoughtCompleteSet', ctx => boughtCompleteSet(ctx))
 processor.addEventHandler('PredictionMarkets.MarketApproved', ctx => marketApproved(ctx))
+processor.addEventHandler('PredictionMarkets.MarketClosed', ctx => marketClosed(ctx))
 processor.addEventHandler('PredictionMarkets.MarketCreated', ctx => marketCreated(ctx))
 processor.addEventHandler('PredictionMarkets.MarketInsufficientSubsidy', ctx => marketInsufficientSubsidy(ctx))
 processor.addEventHandler('PredictionMarkets.MarketRejected', ctx => marketRejected(ctx))

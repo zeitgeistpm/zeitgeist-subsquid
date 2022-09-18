@@ -3,7 +3,7 @@ import { EventHandlerContext } from '@subsquid/substrate-processor'
 import * as ss58 from '@subsquid/ss58'
 import { Store } from '@subsquid/typeorm-store'
 import { PredictionMarketsBoughtCompleteSetEvent, PredictionMarketsMarketApprovedEvent, 
-  PredictionMarketsMarketInsufficientSubsidyEvent, PredictionMarketsMarketRejectedEvent, 
+  PredictionMarketsMarketClosedEvent, PredictionMarketsMarketInsufficientSubsidyEvent, PredictionMarketsMarketRejectedEvent, 
   PredictionMarketsMarketStartedWithSubsidyEvent, PredictionMarketsSoldCompleteSetEvent } from '../../types/events'
 import { EventContext } from '../../types/support'
 
@@ -46,6 +46,17 @@ export function getMarketApprovedEvent(ctx: EventContext): MarketApprovedEvent {
     const marketId = Number(mId)
     const status = marketStatus.__kind
     return {marketId, status}
+  }
+}
+
+export function getMarketClosedEvent(ctx: EventContext): MarketClosedEvent {
+  const event = new PredictionMarketsMarketClosedEvent(ctx)
+  if (event.isV37) {
+    const marketId = Number(event.asV37)
+    return {marketId}
+  } else {
+    const marketId = Number(ctx.event.args)
+    return {marketId}
   }
 }
 
@@ -162,6 +173,10 @@ interface BoughtCompleteSetEvent {
 interface MarketApprovedEvent {
   marketId: number
   status: string
+}
+
+interface MarketClosedEvent {
+  marketId: number
 }
 
 interface MarketCreatedEvent {

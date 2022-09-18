@@ -16,6 +16,7 @@
     "ParachainStaking.Rewarded",
     "PredictionMarkets.BoughtCompleteSet",
     "PredictionMarkets.MarketApproved",
+    "PredictionMarkets.MarketClosed",
     "PredictionMarkets.MarketCreated",
     "PredictionMarkets.MarketInsufficientSubsidy",
     "PredictionMarkets.MarketRejected",
