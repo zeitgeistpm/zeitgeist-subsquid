@@ -17,6 +17,7 @@
     "PredictionMarkets.BoughtCompleteSet",
     "PredictionMarkets.MarketApproved",
     "PredictionMarkets.MarketCreated",
+    "PredictionMarkets.MarketInsufficientSubsidy",
     "PredictionMarkets.MarketRejected",
     "PredictionMarkets.MarketStartedWithSubsidy",
     "PredictionMarkets.SoldCompleteSet",

@@ -4,8 +4,8 @@ import { balancesBalanceSet, balancesDustLost, balancesEndowed, balancesReserved
   balancesUnreserved, balancesWithdraw } from './mappings/balances';
 import { currencyDeposited, currencyTransferred, currencyWithdrawn } from './mappings/currency';
 import { parachainStakingRewarded } from './mappings/parachainStaking';
-import { boughtCompleteSet, marketApproved, marketCreated, marketRejected, marketStartedWithSubsidy, 
-  soldCompleteSet } from './mappings/predictionMarkets';
+import { boughtCompleteSet, marketApproved, marketCreated, marketInsufficientSubsidy, marketRejected, 
+  marketStartedWithSubsidy, soldCompleteSet } from './mappings/predictionMarkets';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensEndowed } from './mappings/tokens';
 
@@ -41,6 +41,7 @@ processor.addEventHandler('ParachainStaking.Rewarded', ctx => parachainStakingRe
 processor.addEventHandler('PredictionMarkets.BoughtCompleteSet', ctx => boughtCompleteSet(ctx))
 processor.addEventHandler('PredictionMarkets.MarketApproved', ctx => marketApproved(ctx))
 processor.addEventHandler('PredictionMarkets.MarketCreated', ctx => marketCreated(ctx))
+processor.addEventHandler('PredictionMarkets.MarketInsufficientSubsidy', ctx => marketInsufficientSubsidy(ctx))
 processor.addEventHandler('PredictionMarkets.MarketRejected', ctx => marketRejected(ctx))
 processor.addEventHandler('PredictionMarkets.MarketStartedWithSubsidy', ctx => marketStartedWithSubsidy(ctx))
 processor.addEventHandler('PredictionMarkets.SoldCompleteSet', ctx => soldCompleteSet(ctx))

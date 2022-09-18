@@ -3,8 +3,8 @@ import { EventHandlerContext } from '@subsquid/substrate-processor'
 import * as ss58 from '@subsquid/ss58'
 import { Store } from '@subsquid/typeorm-store'
 import { PredictionMarketsBoughtCompleteSetEvent, PredictionMarketsMarketApprovedEvent, 
-  PredictionMarketsMarketRejectedEvent, PredictionMarketsMarketStartedWithSubsidyEvent, 
-  PredictionMarketsSoldCompleteSetEvent } from '../../types/events'
+  PredictionMarketsMarketInsufficientSubsidyEvent, PredictionMarketsMarketRejectedEvent, 
+  PredictionMarketsMarketStartedWithSubsidyEvent, PredictionMarketsSoldCompleteSetEvent } from '../../types/events'
 import { EventContext } from '../../types/support'
 
 
@@ -82,6 +82,25 @@ export function getMarketCreatedEvent(ctx: EventHandlerContext<Store, {event: {a
   }
 }
 
+export function getMarketInsufficientSubsidyEvent(ctx: EventContext): MarketInsufficientSubsidyEvent {
+  const marketInsufficientSubsidyEvent = new PredictionMarketsMarketInsufficientSubsidyEvent(ctx)
+  if (marketInsufficientSubsidyEvent.isV23) {
+    const marketId = Number(marketInsufficientSubsidyEvent.asV23)
+    const status = ""
+    return {marketId, status}
+  } else if (marketInsufficientSubsidyEvent.isV29) {
+    const [mId, marketStatus] = marketInsufficientSubsidyEvent.asV29
+    const marketId = Number(mId)
+    const status = marketStatus.__kind
+    return {marketId, status}
+  } else {
+    const [mId, marketStatus] = ctx.event.args
+    const marketId = Number(mId)
+    const status = marketStatus.__kind
+    return {marketId, status}
+  }
+}
+
 export function getMarketRejectedEvent(ctx: EventContext): MarketRejectedEvent {
   const event = new PredictionMarketsMarketRejectedEvent(ctx)
   if (event.isV23) {
@@ -95,13 +114,13 @@ export function getMarketRejectedEvent(ctx: EventContext): MarketRejectedEvent {
 }
 
 export function getMarketStartedWithSubsidyEvent(ctx: EventContext): MarketStartedWithSubsidyEvent {
-  const event = new PredictionMarketsMarketStartedWithSubsidyEvent(ctx)
-  if (event.isV23) {
-    const marketId = Number(event.asV23)
+  const marketStartedWithSubsidyEvent = new PredictionMarketsMarketStartedWithSubsidyEvent(ctx)
+  if (marketStartedWithSubsidyEvent.isV23) {
+    const marketId = Number(marketStartedWithSubsidyEvent.asV23)
     const status = ""
     return {marketId, status}
-  } else if (event.isV29) {
-    const [mId, marketStatus] = event.asV29
+  } else if (marketStartedWithSubsidyEvent.isV29) {
+    const [mId, marketStatus] = marketStartedWithSubsidyEvent.asV29
     const marketId = Number(mId)
     const status = marketStatus.__kind
     return {marketId, status}
@@ -149,6 +168,11 @@ interface MarketCreatedEvent {
   marketId: string
   marketAccountId: string
   market: any
+}
+
+interface MarketInsufficientSubsidyEvent {
+  marketId: number
+  status: string
 }
 
 interface MarketRejectedEvent {

@@ -718,6 +718,50 @@ export class PredictionMarketsMarketCreatedEvent {
   }
 }
 
+export class PredictionMarketsMarketInsufficientSubsidyEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'PredictionMarkets.MarketInsufficientSubsidy')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * A market was discarded after failing to gather enough subsidy. \[market_id\]
+   */
+  get isV23(): boolean {
+    return this._chain.getEventHash('PredictionMarkets.MarketInsufficientSubsidy') === '47b59f698451e50cce59979f0121e842fa3f8b2bcef2e388222dbd69849514f9'
+  }
+
+  /**
+   * A market was discarded after failing to gather enough subsidy. \[market_id\]
+   */
+  get asV23(): bigint {
+    assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   *  A market was discarded after failing to gather enough subsidy. \[market_id, new_market_status\]
+   */
+  get isV29(): boolean {
+    return this._chain.getEventHash('PredictionMarkets.MarketInsufficientSubsidy') === 'fb75141ba1d5569f28a5c37f474643ded3eff690fd78829c343a0a124058d613'
+  }
+
+  /**
+   *  A market was discarded after failing to gather enough subsidy. \[market_id, new_market_status\]
+   */
+  get asV29(): [bigint, v29.MarketStatus] {
+    assert(this.isV29)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class PredictionMarketsMarketRejectedEvent {
   private readonly _chain: Chain
   private readonly event: Event
