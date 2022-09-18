@@ -18,6 +18,7 @@
     "PredictionMarkets.MarketApproved",
     "PredictionMarkets.MarketClosed",
     "PredictionMarkets.MarketCreated",
+    "PredictionMarkets.MarketExpired",
     "PredictionMarkets.MarketInsufficientSubsidy",
     "PredictionMarkets.MarketRejected",
     "PredictionMarkets.MarketStartedWithSubsidy",

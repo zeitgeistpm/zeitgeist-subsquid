@@ -3,8 +3,9 @@ import { EventHandlerContext } from '@subsquid/substrate-processor'
 import * as ss58 from '@subsquid/ss58'
 import { Store } from '@subsquid/typeorm-store'
 import { PredictionMarketsBoughtCompleteSetEvent, PredictionMarketsMarketApprovedEvent, 
-  PredictionMarketsMarketClosedEvent, PredictionMarketsMarketInsufficientSubsidyEvent, PredictionMarketsMarketRejectedEvent, 
-  PredictionMarketsMarketStartedWithSubsidyEvent, PredictionMarketsSoldCompleteSetEvent } from '../../types/events'
+  PredictionMarketsMarketClosedEvent, PredictionMarketsMarketExpiredEvent, PredictionMarketsMarketInsufficientSubsidyEvent, 
+  PredictionMarketsMarketRejectedEvent, PredictionMarketsMarketStartedWithSubsidyEvent, 
+  PredictionMarketsSoldCompleteSetEvent } from '../../types/events'
 import { EventContext } from '../../types/support'
 
 
@@ -90,6 +91,17 @@ export function getMarketCreatedEvent(ctx: EventHandlerContext<Store, {event: {a
     market.period.start = param2.period.value.start
     market.period.end = market.period.value.end
     return { marketId, marketAccountId, market }
+  }
+}
+
+export function getMarketExpiredEvent(ctx: EventContext): MarketExpiredEvent {
+  const event = new PredictionMarketsMarketExpiredEvent(ctx)
+  if (event.isV37) {
+    const marketId = Number(event.asV37)
+    return {marketId}
+  } else {
+    const marketId = Number(ctx.event.args)
+    return {marketId}
   }
 }
 
@@ -183,6 +195,10 @@ interface MarketCreatedEvent {
   marketId: string
   marketAccountId: string
   market: any
+}
+
+interface MarketExpiredEvent {
+  marketId: number
 }
 
 interface MarketInsufficientSubsidyEvent {
