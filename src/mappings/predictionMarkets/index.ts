@@ -200,7 +200,11 @@ export async function marketCreated(ctx: EventHandlerContext<Store, {event: {arg
   if (type.__kind == 'Categorical') {
     marketType.categorical = type.value.toString()
   } else if (type.__kind == 'Scalar') {
-    marketType.scalar = type.value.toString()
+    if (type.value.start) {
+      marketType.scalar = type.value.start.toString() + "," + type.value.end.toString()
+    } else {
+      marketType.scalar = type.value.toString()
+    }
   }
   newMarket.marketType = marketType
 
