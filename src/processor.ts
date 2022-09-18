@@ -4,7 +4,7 @@ import { balancesBalanceSet, balancesDustLost, balancesEndowed, balancesReserved
   balancesUnreserved, balancesWithdraw } from './mappings/balances';
 import { currencyDeposited, currencyTransferred, currencyWithdrawn } from './mappings/currency';
 import { parachainStakingRewarded } from './mappings/parachainStaking';
-import { boughtCompleteSet, marketCreated } from './mappings/predictionMarkets';
+import { boughtCompleteSet, marketCreated, soldCompleteSet } from './mappings/predictionMarkets';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensEndowed } from './mappings/tokens';
 
@@ -39,6 +39,7 @@ processor.addEventHandler('ParachainStaking.Rewarded', ctx => parachainStakingRe
 
 processor.addEventHandler('PredictionMarkets.BoughtCompleteSet', ctx => boughtCompleteSet(ctx))
 processor.addEventHandler('PredictionMarkets.MarketCreated', ctx => marketCreated(ctx))
+processor.addEventHandler('PredictionMarkets.SoldCompleteSet', ctx => soldCompleteSet(ctx))
 
 processor.addEventHandler('System.NewAccount', ctx => systemNewAccount(ctx))
 

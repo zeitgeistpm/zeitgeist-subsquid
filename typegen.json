@@ -16,6 +16,7 @@
     "ParachainStaking.Rewarded",
     "PredictionMarkets.BoughtCompleteSet",
     "PredictionMarkets.MarketCreated",
+    "PredictionMarkets.SoldCompleteSet",
     "System.NewAccount",
     "System.ExtrinsicSuccess",
     "System.ExtrinsicFailed",

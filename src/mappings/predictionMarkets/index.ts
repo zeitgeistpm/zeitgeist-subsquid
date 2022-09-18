@@ -6,7 +6,7 @@ import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBala
   Market, MarketDisputeMechanism, MarketPeriod, MarketType } from '../../model'
 import { createAssetsForMarket, decodeMarketMetadata } from '../helper'
 import { Tools } from '../../processor/util'
-import { getBoughtCompleteSetEvent, getMarketCreatedEvent } from './types'
+import { getBoughtCompleteSetEvent, getMarketCreatedEvent, getSoldCompleteSetEvent } from './types'
 
 
 export async function boughtCompleteSet(ctx: EventHandlerContext<Store>) {
@@ -227,5 +227,68 @@ export async function marketCreated(ctx: EventHandlerContext<Store, {event: {arg
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
       await store.save<Asset>(asset)
     }
+  }
+}
+
+export async function soldCompleteSet(ctx: EventHandlerContext<Store>) {
+  const {store, block, event} = ctx
+  const {marketId, amount, walletId} = getSoldCompleteSetEvent(ctx)
+
+  const savedMarket = await store.get(Market, { where: { marketId: +marketId.toString() } })
+  if (!savedMarket) return
+
+  let hm = new HistoricalMarket()
+  hm.id = event.id + '-' + savedMarket.marketId
+  hm.marketId = savedMarket.marketId
+  hm.event = event.name.split('.')[1]
+  hm.blockNumber = block.height
+  hm.timestamp = new Date(block.timestamp)
+  console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
+  await store.save<HistoricalMarket>(hm)
+
+  let acc = await store.get(Account, { where: { accountId: walletId } })
+  if (!acc) { return }
+
+  const len = +savedMarket.marketType.categorical!
+  for (let i = 0; i < len; i++) {
+    const currencyId = JSON.stringify(util.AssetIdFromString(`[${marketId},${i}]`))
+    let ab = await store.findOneBy(AccountBalance, { account: { accountId: walletId }, assetId: currencyId })
+    if (!ab) { return }
+
+    const asset = await store.get(Asset, { where: { assetId: currencyId } })
+
+    let amt = BigInt(0)
+    if (amount !== BigInt(0)) {
+      amt = amount
+    } else {
+      if (event.extrinsic && event.extrinsic.call) {
+        const amount = event.extrinsic.call.args.amount as any
+        amt = BigInt(amount.toString())
+      }
+    }
+    ab.balance = ab.balance - amt
+    const oldValue = ab.value!
+    ab.value = asset ? asset.price ? asset.price * Number(ab.balance) : 0 : null
+    console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
+    await store.save<AccountBalance>(ab)
+
+    acc.pvalue = ab.value ? acc.pvalue! - oldValue + ab.value! : acc.pvalue
+    console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+    await store.save<Account>(acc)
+
+    let hab = new HistoricalAccountBalance()
+    hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
+    hab.accountId = acc.accountId
+    hab.event = event.name.split('.')[1]
+    hab.assetId = ab.assetId
+    hab.dBalance = - amt
+    hab.balance = ab.balance
+    hab.dValue = ab.value ? ab.value - oldValue : 0
+    hab.value = ab.value
+    hab.pvalue = acc.pvalue
+    hab.blockNumber = block.height
+    hab.timestamp = new Date(block.timestamp)
+    console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
+    await store.save<HistoricalAccountBalance>(hab)
   }
 }

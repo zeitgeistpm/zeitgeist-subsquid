@@ -674,6 +674,50 @@ export class PredictionMarketsMarketCreatedEvent {
   }
 }
 
+export class PredictionMarketsSoldCompleteSetEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'PredictionMarkets.SoldCompleteSet')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   *  A complete set of shares has been sold \[market_id, seller\]
+   */
+  get isV23(): boolean {
+    return this._chain.getEventHash('PredictionMarkets.SoldCompleteSet') === '06f429abb9e0113523a2523f8db0c3bd34b068fa2de515a51d3e616b00bcdf96'
+  }
+
+  /**
+   *  A complete set of shares has been sold \[market_id, seller\]
+   */
+  get asV23(): [bigint, Uint8Array] {
+    assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * A complete set of assets has been sold \[market_id, amount_per_asset, seller\]
+   */
+  get isV34(): boolean {
+    return this._chain.getEventHash('PredictionMarkets.SoldCompleteSet') === '2e6ae450e029f130403b99833c1e86f99f3c7ee392e24aee194962aae282097b'
+  }
+
+  /**
+   * A complete set of assets has been sold \[market_id, amount_per_asset, seller\]
+   */
+  get asV34(): [bigint, bigint, Uint8Array] {
+    assert(this.isV34)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class SystemExtrinsicFailedEvent {
   private readonly _chain: Chain
   private readonly event: Event
