@@ -2,7 +2,7 @@ import { encodeAddress } from '@polkadot/keyring'
 import { EventHandlerContext } from '@subsquid/substrate-processor'
 import * as ss58 from '@subsquid/ss58'
 import { Store } from '@subsquid/typeorm-store'
-import { PredictionMarketsBoughtCompleteSetEvent, PredictionMarketsSoldCompleteSetEvent } from '../../types/events'
+import { PredictionMarketsBoughtCompleteSetEvent, PredictionMarketsMarketApprovedEvent, PredictionMarketsSoldCompleteSetEvent } from '../../types/events'
 import { EventContext } from '../../types/support'
 
 
@@ -27,7 +27,27 @@ export function getBoughtCompleteSetEvent(ctx: EventContext): BoughtCompleteSetE
   }
 }
 
-export function getMarketCreatedEvent(ctx: EventHandlerContext<Store, {event: {args: true}}>): CreatedEvent {
+export function getMarketApprovedEvent(ctx: EventContext): MarketApprovedEvent {
+  const marketApprovedEvent = new PredictionMarketsMarketApprovedEvent(ctx)
+  if (marketApprovedEvent.isV23) {
+    const mId = marketApprovedEvent.asV23
+    const marketId = Number(mId)
+    const status = ""
+    return {marketId, status}
+  } else if (marketApprovedEvent.isV29) {
+    const [mId, marketStatus] = marketApprovedEvent.asV29
+    const marketId = Number(mId)
+    const status = marketStatus.__kind
+    return {marketId, status}
+  } else {
+    const [mId, marketStatus] = ctx.event.args
+    const marketId = Number(mId)
+    const status = marketStatus.__kind
+    return {marketId, status}
+  }
+}
+
+export function getMarketCreatedEvent(ctx: EventHandlerContext<Store, {event: {args: true}}>): MarketCreatedEvent {
   const [marketId, param1, param2] = ctx.event.args
   const specVersion = +ctx.block.specId.substring(ctx.block.specId.indexOf('@')+1)
   if (specVersion < 32) {
@@ -87,7 +107,12 @@ interface BoughtCompleteSetEvent {
   walletId: string
 }
 
-interface CreatedEvent {
+interface MarketApprovedEvent {
+  marketId: number
+  status: string
+}
+
+interface MarketCreatedEvent {
   marketId: string
   marketAccountId: string
   market: any

@@ -15,6 +15,7 @@
     "Currency.Withdrawn",
     "ParachainStaking.Rewarded",
     "PredictionMarkets.BoughtCompleteSet",
+    "PredictionMarkets.MarketApproved",
     "PredictionMarkets.MarketCreated",
     "PredictionMarkets.SoldCompleteSet",
     "System.NewAccount",

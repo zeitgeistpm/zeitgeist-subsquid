@@ -1,5 +1,43 @@
 import type {Result} from './support'
 
+export type MarketStatus = MarketStatus_Proposed | MarketStatus_Active | MarketStatus_Suspended | MarketStatus_Closed | MarketStatus_CollectingSubsidy | MarketStatus_InsufficientSubsidy | MarketStatus_Reported | MarketStatus_Disputed | MarketStatus_Resolved
+
+export interface MarketStatus_Proposed {
+  __kind: 'Proposed'
+}
+
+export interface MarketStatus_Active {
+  __kind: 'Active'
+}
+
+export interface MarketStatus_Suspended {
+  __kind: 'Suspended'
+}
+
+export interface MarketStatus_Closed {
+  __kind: 'Closed'
+}
+
+export interface MarketStatus_CollectingSubsidy {
+  __kind: 'CollectingSubsidy'
+}
+
+export interface MarketStatus_InsufficientSubsidy {
+  __kind: 'InsufficientSubsidy'
+}
+
+export interface MarketStatus_Reported {
+  __kind: 'Reported'
+}
+
+export interface MarketStatus_Disputed {
+  __kind: 'Disputed'
+}
+
+export interface MarketStatus_Resolved {
+  __kind: 'Resolved'
+}
+
 export interface Market {
   creator: Uint8Array
   creation: MarketCreation
@@ -57,44 +95,6 @@ export interface ScoringRule_CPMM {
 
 export interface ScoringRule_RikiddoSigmoidFeeMarketEma {
   __kind: 'RikiddoSigmoidFeeMarketEma'
-}
-
-export type MarketStatus = MarketStatus_Proposed | MarketStatus_Active | MarketStatus_Suspended | MarketStatus_Closed | MarketStatus_CollectingSubsidy | MarketStatus_InsufficientSubsidy | MarketStatus_Reported | MarketStatus_Disputed | MarketStatus_Resolved
-
-export interface MarketStatus_Proposed {
-  __kind: 'Proposed'
-}
-
-export interface MarketStatus_Active {
-  __kind: 'Active'
-}
-
-export interface MarketStatus_Suspended {
-  __kind: 'Suspended'
-}
-
-export interface MarketStatus_Closed {
-  __kind: 'Closed'
-}
-
-export interface MarketStatus_CollectingSubsidy {
-  __kind: 'CollectingSubsidy'
-}
-
-export interface MarketStatus_InsufficientSubsidy {
-  __kind: 'InsufficientSubsidy'
-}
-
-export interface MarketStatus_Reported {
-  __kind: 'Reported'
-}
-
-export interface MarketStatus_Disputed {
-  __kind: 'Disputed'
-}
-
-export interface MarketStatus_Resolved {
-  __kind: 'Resolved'
 }
 
 export interface Report {
