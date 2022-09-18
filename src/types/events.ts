@@ -541,6 +541,50 @@ export class ParachainStakingRewardedEvent {
   }
 }
 
+export class PredictionMarketsBoughtCompleteSetEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'PredictionMarkets.BoughtCompleteSet')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   *  A complete set of shares has been bought \[market_id, buyer\]
+   */
+  get isV23(): boolean {
+    return this._chain.getEventHash('PredictionMarkets.BoughtCompleteSet') === '06f429abb9e0113523a2523f8db0c3bd34b068fa2de515a51d3e616b00bcdf96'
+  }
+
+  /**
+   *  A complete set of shares has been bought \[market_id, buyer\]
+   */
+  get asV23(): [bigint, Uint8Array] {
+    assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * A complete set of assets has been bought \[market_id, amount_per_asset, buyer\]
+   */
+  get isV34(): boolean {
+    return this._chain.getEventHash('PredictionMarkets.BoughtCompleteSet') === '2e6ae450e029f130403b99833c1e86f99f3c7ee392e24aee194962aae282097b'
+  }
+
+  /**
+   * A complete set of assets has been bought \[market_id, amount_per_asset, buyer\]
+   */
+  get asV34(): [bigint, bigint, Uint8Array] {
+    assert(this.isV34)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class PredictionMarketsMarketCreatedEvent {
   private readonly _chain: Chain
   private readonly event: Event

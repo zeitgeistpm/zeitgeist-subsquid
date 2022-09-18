@@ -1,7 +1,28 @@
 import { encodeAddress } from '@polkadot/keyring'
 import { EventHandlerContext } from '@subsquid/substrate-processor'
+import * as ss58 from '@subsquid/ss58'
 import { Store } from '@subsquid/typeorm-store'
+import { PredictionMarketsBoughtCompleteSetEvent } from '../../types/events'
+import { EventContext } from '../../types/support'
 
+
+export function getBoughtCompleteSetEvent(ctx: EventContext): BoughtCompleteSetEvent {
+  const event = new PredictionMarketsBoughtCompleteSetEvent(ctx)
+  if (event.isV23) {
+    const [marketId, accountId] = event.asV23
+    const amount = BigInt(0)
+    const walletId = ss58.codec('zeitgeist').encode(accountId)
+    return {marketId, amount, walletId}
+  } else if (event.isV34) {
+    const [marketId, amount, accountId] = event.asV34
+    const walletId = ss58.codec('zeitgeist').encode(accountId)
+    return {marketId, amount, walletId}
+  } else {
+    const [marketId, amount, accountId] = ctx.event.args
+    const walletId = encodeAddress(accountId, 73)
+    return {marketId, amount, walletId}
+  }
+}
 
 export function getMarketCreatedEvent(ctx: EventHandlerContext<Store, {event: {args: true}}>): CreatedEvent {
   const [marketId, param1, param2] = ctx.event.args
@@ -34,6 +55,12 @@ export function getMarketCreatedEvent(ctx: EventHandlerContext<Store, {event: {a
     market.period.end = market.period.value.end
     return { marketId, marketAccountId, market }
   }
+}
+
+interface BoughtCompleteSetEvent {
+  marketId: bigint
+  amount: bigint
+  walletId: string
 }
 
 interface CreatedEvent {
