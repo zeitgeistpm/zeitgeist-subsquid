@@ -1,89 +1,90 @@
 import { hexToString, u8aToString } from '@polkadot/util';
 import SDK from '@zeitgeistpm/sdk'
 import { RedisClient, createClient, ClientOpts } from 'redis'
+import ipfsClient from 'ipfs-http-client';
+import { concat, toString } from 'uint8arrays';
 import CID from 'cids';
 import all from 'it-all';
-import { concat, toString } from 'uint8arrays';
-import ipfsClient from 'ipfs-http-client';
+
 
 export class Cache {
   private static _instance: Cache
   private client: RedisClient
 
   constructor(redisOptions: ClientOpts) {
-      this.client = createClient(redisOptions)
+    this.client = createClient(redisOptions)
   }
 
   public static async init() {
-      if (!this._instance) {
-          console.log('Connecting to Redis DB...')
-          this._instance = new Cache({
-            host: process.env.REDIS_HOST ?? 'redis',
-            port: 6379,
-            password: process.env.REDIS_PASS,
-            connect_timeout: 3600000,
-            retry_strategy: (options) => {
-                return 2000
-            },
-          })
-      }
-      return this._instance
+    if (!this._instance) {
+      console.log('Connecting to Redis DB...')
+      this._instance = new Cache({
+        host: process.env.REDIS_HOST ?? 'redis',
+        port: 6379,
+        password: process.env.REDIS_PASS,
+        connect_timeout: 3600000,
+        retry_strategy: (options) => {
+            return 2000
+        },
+      })
+    }
+    return this._instance
   }
 
   private makeKey(prefix: string, key: string) {
-      return `${prefix}_${key}`
+    return `${prefix}_${key}`
   }
 
   async setMeta(key: string, value: string): Promise<void> {
-      return new Promise((resolve, reject) => {
-          const cacheKey = this.makeKey('meta',key)
-          this.client.set(cacheKey, value, (err: any) => {
-              if (err) {
-                  reject(err)
-              } else {
-                  resolve()
-              }
-          })
+    return new Promise((resolve, reject) => {
+      const cacheKey = this.makeKey('meta',key)
+      this.client.set(cacheKey, value, (err: any) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve()
+        }
       })
+    })
   }
 
   async setFee(key: string, value: string): Promise<void> {
-      return new Promise((resolve, reject) => {
-          const cacheKey = this.makeKey('fee', key)
-          this.client.set(cacheKey, value, (err: any) => {
-              if (err) {
-                  reject(err)
-              } else {
-                  resolve()
-              }
-          })
+    return new Promise((resolve, reject) => {
+      const cacheKey = this.makeKey('fee', key)
+      this.client.set(cacheKey, value, (err: any) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve()
+        }
       })
+    })
   }
 
   async getMeta(key: string): Promise<string | null> {
-      return new Promise((resolve, reject) => {
-          const cacheKey = this.makeKey('meta',key)
-          this.client.get(cacheKey, (err: any, data: string | PromiseLike<string | null> | null) => {
-              if (err) {
-                  reject(err)
-              } else {
-                  resolve(data)
-              }
-          })
+    return new Promise((resolve, reject) => {
+      const cacheKey = this.makeKey('meta',key)
+      this.client.get(cacheKey, (err: any, data: string | PromiseLike<string | null> | null) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(data)
+        }
       })
+    })
   }
 
   async getFee(key: string): Promise<string | null> {
-      return new Promise((resolve, reject) => {
-          const cacheKey = this.makeKey('fee',key)
-          this.client.get(cacheKey, (err: any, data: string | PromiseLike<string | null> | null) => {
-              if (err) {
-                  reject(err)
-              } else {
-                  resolve(data)
-              }
-          })
+    return new Promise((resolve, reject) => {
+      const cacheKey = this.makeKey('fee',key)
+      this.client.get(cacheKey, (err: any, data: string | PromiseLike<string | null> | null) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(data)
+        }
       })
+    })
   }
 }
 

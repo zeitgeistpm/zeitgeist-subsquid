@@ -2,7 +2,7 @@ import { AccountInfo } from '@polkadot/types/interfaces/system';
 import { SubstrateBlock, SubstrateEvent, SubstrateExtrinsic } from '@subsquid/substrate-processor';
 import { Store } from '@subsquid/typeorm-store';
 import { util } from '@zeitgeistpm/sdk';
-import { Cache, IPFS, Tools } from '../processor/util';
+import { Cache, IPFS, Tools } from './util';
 import { Account, AccountBalance, HistoricalAccountBalance } from '../model'
 
 

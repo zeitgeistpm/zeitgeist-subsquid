@@ -5,7 +5,7 @@ import { util } from '@zeitgeistpm/sdk'
 import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBalance, HistoricalMarket, 
   Market, MarketDisputeMechanism, MarketPeriod, MarketType } from '../../model'
 import { createAssetsForMarket, decodeMarketMetadata } from '../helper'
-import { Tools } from '../../processor/util'
+import { Tools } from '../util'
 import { getBoughtCompleteSetEvent, getMarketApprovedEvent, getMarketClosedEvent, getMarketCreatedEvent, getMarketInsufficientSubsidyEvent, 
   getMarketRejectedEvent, getMarketStartedWithSubsidyEvent, getSoldCompleteSetEvent } from './types'
 
