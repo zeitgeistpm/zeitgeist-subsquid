@@ -7,18 +7,21 @@ import { EventContext } from '../../types/support'
 
 
 export function getBoughtCompleteSetEvent(ctx: EventContext): BoughtCompleteSetEvent {
-  const event = new PredictionMarketsBoughtCompleteSetEvent(ctx)
-  if (event.isV23) {
-    const [marketId, accountId] = event.asV23
+  const boughtCompleteSetEvent = new PredictionMarketsBoughtCompleteSetEvent(ctx)
+  if (boughtCompleteSetEvent.isV23) {
+    const [mId, accountId] = boughtCompleteSetEvent.asV23
+    const marketId = Number(mId)
     const amount = BigInt(0)
     const walletId = ss58.codec('zeitgeist').encode(accountId)
     return {marketId, amount, walletId}
-  } else if (event.isV34) {
-    const [marketId, amount, accountId] = event.asV34
+  } else if (boughtCompleteSetEvent.isV34) {
+    const [mId, amount, accountId] = boughtCompleteSetEvent.asV34
+    const marketId = Number(mId)
     const walletId = ss58.codec('zeitgeist').encode(accountId)
     return {marketId, amount, walletId}
   } else {
-    const [marketId, amount, accountId] = ctx.event.args
+    const [mId, amount, accountId] = ctx.event.args
+    const marketId = Number(mId)
     const walletId = encodeAddress(accountId, 73)
     return {marketId, amount, walletId}
   }
@@ -58,7 +61,7 @@ export function getMarketCreatedEvent(ctx: EventHandlerContext<Store, {event: {a
 }
 
 interface BoughtCompleteSetEvent {
-  marketId: bigint
+  marketId: number
   amount: bigint
   walletId: string
 }

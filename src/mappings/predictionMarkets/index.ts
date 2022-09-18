@@ -13,7 +13,7 @@ export async function boughtCompleteSet(ctx: EventHandlerContext<Store>) {
   const {store, block, event} = ctx
   const {marketId, amount, walletId} = getBoughtCompleteSetEvent(ctx)
 
-  const savedMarket = await store.get(Market, { where: { marketId: +marketId.toString() } })
+  const savedMarket = await store.get(Market, { where: { marketId: marketId } })
   if (!savedMarket) return
 
   let hm = new HistoricalMarket()
