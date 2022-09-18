@@ -2,7 +2,9 @@ import { encodeAddress } from '@polkadot/keyring'
 import { EventHandlerContext } from '@subsquid/substrate-processor'
 import * as ss58 from '@subsquid/ss58'
 import { Store } from '@subsquid/typeorm-store'
-import { PredictionMarketsBoughtCompleteSetEvent, PredictionMarketsMarketApprovedEvent, PredictionMarketsMarketRejectedEvent, PredictionMarketsSoldCompleteSetEvent } from '../../types/events'
+import { PredictionMarketsBoughtCompleteSetEvent, PredictionMarketsMarketApprovedEvent, 
+  PredictionMarketsMarketRejectedEvent, PredictionMarketsMarketStartedWithSubsidyEvent, 
+  PredictionMarketsSoldCompleteSetEvent } from '../../types/events'
 import { EventContext } from '../../types/support'
 
 
@@ -92,6 +94,25 @@ export function getMarketRejectedEvent(ctx: EventContext): MarketRejectedEvent {
   }
 }
 
+export function getMarketStartedWithSubsidyEvent(ctx: EventContext): MarketStartedWithSubsidyEvent {
+  const event = new PredictionMarketsMarketStartedWithSubsidyEvent(ctx)
+  if (event.isV23) {
+    const marketId = Number(event.asV23)
+    const status = ""
+    return {marketId, status}
+  } else if (event.isV29) {
+    const [mId, marketStatus] = event.asV29
+    const marketId = Number(mId)
+    const status = marketStatus.__kind
+    return {marketId, status}
+  } else {
+    const [mId, marketStatus] = ctx.event.args
+    const marketId = Number(mId)
+    const status = marketStatus.__kind
+    return {marketId, status}
+  }
+}
+
 export function getSoldCompleteSetEvent(ctx: EventContext): SoldCompleteSetEvent {
   const soldCompleteSetEvent = new PredictionMarketsSoldCompleteSetEvent(ctx)
   if (soldCompleteSetEvent.isV23) {
@@ -132,6 +153,11 @@ interface MarketCreatedEvent {
 
 interface MarketRejectedEvent {
   marketId: number
+}
+
+interface MarketStartedWithSubsidyEvent {
+  marketId: number
+  status: string
 }
 
 interface SoldCompleteSetEvent {

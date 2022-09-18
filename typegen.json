@@ -18,6 +18,7 @@
     "PredictionMarkets.MarketApproved",
     "PredictionMarkets.MarketCreated",
     "PredictionMarkets.MarketRejected",
+    "PredictionMarkets.MarketStartedWithSubsidy",
     "PredictionMarkets.SoldCompleteSet",
     "System.NewAccount",
     "System.ExtrinsicSuccess",
