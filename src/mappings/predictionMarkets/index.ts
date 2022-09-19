@@ -48,10 +48,19 @@ export async function boughtCompleteSet(ctx: EventHandlerContext<Store>) {
       let amt = BigInt(0)
       if (amount !== BigInt(0)) {
         amt = amount
-      } else {
-        if (event.extrinsic && event.extrinsic.call) {
-          const amount = event.extrinsic.call.args.amount as any
-          amt = BigInt(amount.toString())
+      } else if (event.extrinsic) {
+        if (event.extrinsic.call.args.amount) {
+          const amount = event.extrinsic.call.args.amount.toString()
+          amt = BigInt(amount)
+        } else if (event.extrinsic.call.args.calls) {
+          for (let ext of event.extrinsic.call.args.calls as 
+            Array<{ __kind: string, value: { __kind: string, amount: string, marketId: string} }> ) {
+            const { __kind: extrinsic, value: { __kind: method, amount: amount, marketId: id} } = ext;
+            if (extrinsic == "PredictionMarkets" && method == "buy_complete_set" && +id == marketId) {
+              amt = BigInt(amount)
+              break
+            }
+          }
         }
       }
       ab.balance = ab.balance + amt
@@ -410,10 +419,19 @@ export async function soldCompleteSet(ctx: EventHandlerContext<Store>) {
     let amt = BigInt(0)
     if (amount !== BigInt(0)) {
       amt = amount
-    } else {
-      if (event.extrinsic && event.extrinsic.call) {
-        const amount = event.extrinsic.call.args.amount as any
-        amt = BigInt(amount.toString())
+    } else if (event.extrinsic) {
+      if (event.extrinsic.call.args.amount) {
+        const amount = event.extrinsic.call.args.amount.toString()
+        amt = BigInt(amount)
+      } else if (event.extrinsic.call.args.calls) {
+        for (let ext of event.extrinsic.call.args.calls as 
+          Array<{ __kind: string, value: { __kind: string, amount: string, marketId: string} }> ) {
+          const { __kind: extrinsic, value: { __kind: method, amount: amount, marketId: id} } = ext;
+          if (extrinsic == "PredictionMarkets" && method == "sell_complete_set" && +id == marketId) {
+            amt = BigInt(amount)
+            break
+          }
+        }
       }
     }
     ab.balance = ab.balance - amt
