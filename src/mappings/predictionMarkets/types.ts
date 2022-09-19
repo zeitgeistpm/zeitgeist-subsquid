@@ -99,7 +99,7 @@ export function getMarketDisputedEvent(ctx: EventContext): MarketDisputedEvent {
   const marketDisputedEvent = new PredictionMarketsMarketDisputedEvent(ctx)
   if (marketDisputedEvent.isV23) {
     const [mId, dispute] = marketDisputedEvent.asV23
-    let report: any
+    let report = {} as any
     const marketId = Number(mId)
     const status = ""
     report.outcome = dispute
@@ -163,24 +163,20 @@ export function getMarketReportedEvent(ctx: EventContext): MarketReportedEvent {
   const marketReportedEvent = new PredictionMarketsMarketReportedEvent(ctx)
   if (marketReportedEvent.isV23) {
     const [mId, marketReport] = marketReportedEvent.asV23
-    let report: any
+    let report = {} as any
     const marketId = Number(mId)
     const status = ""
     report.outcome = marketReport
     return {marketId, status, report}
   } else if (marketReportedEvent.isV29) {
-    const [mId, marketStatus, marketReport] = marketReportedEvent.asV29
-    let report: any
+    const [mId, marketStatus, report] = marketReportedEvent.asV29
     const marketId = Number(mId)
     const status = marketStatus.__kind
-    report.outcome = marketReport
     return {marketId, status, report}
   } else {
-    const [mId, marketStatus, marketReport] = ctx.event.args
-    let report: any
+    const [mId, marketStatus, report] = ctx.event.args
     const marketId = Number(mId)
     const status = marketStatus.__kind
-    report.outcome = marketReport
     return {marketId, status, report}
   }
 }
