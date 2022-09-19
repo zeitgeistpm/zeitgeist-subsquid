@@ -3,13 +3,14 @@ import { EventHandlerContext } from '@subsquid/substrate-processor'
 import { Store } from '@subsquid/typeorm-store'
 import * as ss58 from '@subsquid/ss58'
 import { util } from '@zeitgeistpm/sdk'
-import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBalance, HistoricalMarket, 
+import { Like } from 'typeorm'
+import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBalance, HistoricalAsset, HistoricalMarket, 
   Market, MarketDisputeMechanism, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../../model'
 import { createAssetsForMarket, decodeMarketMetadata } from '../helper'
 import { Tools } from '../util'
 import { getBoughtCompleteSetEvent, getMarketApprovedEvent, getMarketClosedEvent, getMarketCreatedEvent, 
   getMarketDisputedEvent, getMarketExpiredEvent, getMarketInsufficientSubsidyEvent, getMarketRejectedEvent, 
-  getMarketReportedEvent, getMarketStartedWithSubsidyEvent, getSoldCompleteSetEvent } from './types'
+  getMarketReportedEvent, getMarketResolvedEvent, getMarketStartedWithSubsidyEvent, getSoldCompleteSetEvent } from './types'
 
 
 export async function boughtCompleteSet(ctx: EventHandlerContext<Store>) {
@@ -438,6 +439,108 @@ export async function marketReported(ctx: EventHandlerContext<Store, {event: {ar
   hm.event = event.name.split('.')[1]
   hm.status = savedMarket.status
   hm.report = savedMarket.report
+  hm.blockNumber = block.height
+  hm.timestamp = new Date(block.timestamp)
+  console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
+  await store.save<HistoricalMarket>(hm)
+}
+
+export async function marketResolved(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
+  const {store, block, event} = ctx
+  const {marketId, status, report} = getMarketResolvedEvent(ctx)
+
+  const savedMarket = await store.get(Market, { where: { marketId: marketId } })
+  if (!savedMarket) return
+
+  let ocr = new OutcomeReport()
+  if (report.__kind && savedMarket.report) {
+    if (report.__kind == 'Categorical') {
+      ocr.categorical = report.value
+    } else if (report.__kind == 'Scalar') {
+      ocr.scalar = report.value
+    }
+    savedMarket.report.outcome = ocr
+  }
+  savedMarket.resolvedOutcome = report.value.toString()
+
+  const numOfOutcomeAssets = savedMarket.outcomeAssets.length;
+  if (savedMarket.resolvedOutcome && numOfOutcomeAssets > 0) {
+    for (let i = 0; i < numOfOutcomeAssets; i++) {
+      const assetId = savedMarket.outcomeAssets[i]!
+      let asset = await store.get(Asset, { where: { assetId: assetId } })
+      if (!asset) return
+      const oldPrice = asset.price
+      const oldAssetQty = asset.amountInPool
+      asset.price = (i == +savedMarket.resolvedOutcome) ? 1 : 0
+      asset.amountInPool = (i == +savedMarket.resolvedOutcome) ? oldAssetQty : BigInt(0)
+      console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
+      await store.save<Asset>(asset)
+
+      let ha = new HistoricalAsset()
+      ha.id = event.id + '-' + marketId + i
+      ha.assetId = asset.assetId
+      ha.newPrice = asset.price
+      ha.newAmountInPool = asset.amountInPool
+      ha.dPrice = oldPrice ? asset.price - oldPrice : null
+      ha.dAmountInPool = oldAssetQty && asset.amountInPool ? asset.amountInPool - oldAssetQty : null
+      ha.event = event.name.split('.')[1]
+      ha.blockNumber = block.height
+      ha.timestamp = new Date(block.timestamp)
+      console.log(`[${event.name}] Saving historical asset: ${JSON.stringify(ha, null, 2)}`)
+      await store.save<HistoricalAsset>(ha)
+
+      const abs = await store.find(AccountBalance, { where: { assetId: assetId } })
+      await Promise.all(
+        abs.map(async ab => {
+          const keyword = ab.id.substring(ab.id.lastIndexOf('-')+1, ab.id.length)
+          let acc = await store.get(Account, { where: { id: Like(`%${keyword}%`), poolId: undefined}})
+          if (acc != null && ab.balance > BigInt(0)) {
+            const oldBalance = ab.balance
+            const oldValue = ab.value
+            ab.balance = (i == +savedMarket.resolvedOutcome!) ? ab.balance : BigInt(0)
+            ab.value = asset!.price ? Number(ab.balance) * asset!.price : null
+            console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
+            await store.save<AccountBalance>(ab)
+
+            acc.pvalue = oldValue && ab.value ? acc.pvalue - oldValue + ab.value : acc.pvalue
+            console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+            await store.save<Account>(acc)
+
+            let hab = new HistoricalAccountBalance()
+            hab.id = event.id + '-' + acc.accountId.substring(acc.accountId.length - 5)
+            hab.accountId = acc.accountId
+            hab.event = event.name.split('.')[1]
+            hab.assetId = ab.assetId
+            hab.dBalance = ab.balance - oldBalance
+            hab.balance = ab.balance
+            hab.dValue = oldValue && ab.value ? ab.value - oldValue : null
+            hab.value = ab.value
+            hab.pvalue = acc.pvalue
+            hab.blockNumber = block.height
+            hab.timestamp = new Date(block.timestamp)
+            console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
+            await store.save<HistoricalAccountBalance>(hab)
+          }
+        })
+      );
+    }
+  }
+
+  if (status.length < 2) {
+    savedMarket.status = 'Resolved'
+  } else {
+    savedMarket.status = status
+  }
+  console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
+  await store.save<Market>(savedMarket)
+
+  let hm = new HistoricalMarket()
+  hm.id = event.id + '-' + savedMarket.marketId
+  hm.marketId = savedMarket.marketId
+  hm.event = event.name.split('.')[1]
+  hm.status = savedMarket.status
+  hm.report = savedMarket.report
+  hm.resolvedOutcome = savedMarket.resolvedOutcome
   hm.blockNumber = block.height
   hm.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)

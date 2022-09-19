@@ -65,6 +65,18 @@ export interface Report {
   outcome: OutcomeReport
 }
 
+export type OutcomeReport = OutcomeReport_Categorical | OutcomeReport_Scalar
+
+export interface OutcomeReport_Categorical {
+  __kind: 'Categorical'
+  value: number
+}
+
+export interface OutcomeReport_Scalar {
+  __kind: 'Scalar'
+  value: bigint
+}
+
 export type MarketCreation = MarketCreation_Permissionless | MarketCreation_Advised
 
 export interface MarketCreation_Permissionless {
@@ -139,18 +151,6 @@ export interface MarketDisputeMechanism_Court {
 
 export interface MarketDisputeMechanism_SimpleDisputes {
   __kind: 'SimpleDisputes'
-}
-
-export type OutcomeReport = OutcomeReport_Categorical | OutcomeReport_Scalar
-
-export interface OutcomeReport_Categorical {
-  __kind: 'Categorical'
-  value: number
-}
-
-export interface OutcomeReport_Scalar {
-  __kind: 'Scalar'
-  value: bigint
 }
 
 export type XcmErrorV0 = XcmErrorV0_Undefined | XcmErrorV0_Overflow | XcmErrorV0_Unimplemented | XcmErrorV0_UnhandledXcmVersion | XcmErrorV0_UnhandledXcmMessage | XcmErrorV0_UnhandledEffect | XcmErrorV0_EscalationOfPrivilege | XcmErrorV0_UntrustedReserveLocation | XcmErrorV0_UntrustedTeleportLocation | XcmErrorV0_DestinationBufferOverflow | XcmErrorV0_SendFailed | XcmErrorV0_CannotReachDestination | XcmErrorV0_MultiLocationFull | XcmErrorV0_FailedToDecode | XcmErrorV0_BadOrigin | XcmErrorV0_ExceedsMaxMessageSize | XcmErrorV0_FailedToTransactAsset | XcmErrorV0_WeightLimitReached | XcmErrorV0_Wildcard | XcmErrorV0_TooMuchWeightRequired | XcmErrorV0_NotHoldingFees | XcmErrorV0_WeightNotComputable | XcmErrorV0_Barrier | XcmErrorV0_NotWithdrawable | XcmErrorV0_LocationCannotHold | XcmErrorV0_TooExpensive | XcmErrorV0_AssetNotFound | XcmErrorV0_RecursionLimitReached

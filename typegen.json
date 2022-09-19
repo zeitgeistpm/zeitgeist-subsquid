@@ -23,6 +23,7 @@
     "PredictionMarkets.MarketInsufficientSubsidy",
     "PredictionMarkets.MarketRejected",
     "PredictionMarkets.MarketReported",
+    "PredictionMarkets.MarketResolved",
     "PredictionMarkets.MarketStartedWithSubsidy",
     "PredictionMarkets.SoldCompleteSet",
     "System.NewAccount",
