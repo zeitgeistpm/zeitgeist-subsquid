@@ -311,8 +311,12 @@ export async function marketDisputed(ctx: EventHandlerContext<Store, {event: {ar
   }
 
   let mr = new MarketReport()
-  mr.at = report.at ? +report.at.toString() : null
-  mr.by = report.by ? ss58.codec('zeitgeist').encode(report.by) : null
+  if (report.at) {
+    mr.at = +report.at.toString()
+  }
+  if (report.by) {
+    mr.by = ss58.codec('zeitgeist').encode(report.by)
+  }
   mr.outcome = ocr
 
   if (status.length < 2) {
@@ -421,8 +425,12 @@ export async function marketReported(ctx: EventHandlerContext<Store, {event: {ar
   }
 
   let mr = new MarketReport()
-  mr.at = report.at ? +report.at.toString() : null
-  mr.by = report.by ? ss58.codec('zeitgeist').encode(report.by) : null
+  if (report.at) {
+    mr.at = +report.at.toString()
+  }
+  if (report.by) {
+    mr.by = ss58.codec('zeitgeist').encode(report.by)
+  }
   mr.outcome = ocr
 
   if (status.length < 2) {
