@@ -6,7 +6,7 @@ import { currencyDeposited, currencyTransferred, currencyWithdrawn } from './map
 import { parachainStakingRewarded } from './mappings/parachainStaking';
 import { boughtCompleteSet, marketApproved, marketClosed, marketCreated, marketDisputed, marketExpired, 
   marketInsufficientSubsidy, marketRejected, marketReported, marketResolved, marketStartedWithSubsidy, 
-  soldCompleteSet } from './mappings/predictionMarkets';
+  soldCompleteSet, tokensRedeemed} from './mappings/predictionMarkets';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensEndowed } from './mappings/tokens';
 
@@ -51,6 +51,7 @@ processor.addEventHandler('PredictionMarkets.MarketReported', ctx => marketRepor
 processor.addEventHandler('PredictionMarkets.MarketResolved', ctx => marketResolved(ctx))
 processor.addEventHandler('PredictionMarkets.MarketStartedWithSubsidy', ctx => marketStartedWithSubsidy(ctx))
 processor.addEventHandler('PredictionMarkets.SoldCompleteSet', ctx => soldCompleteSet(ctx))
+processor.addEventHandler('PredictionMarkets.TokensRedeemed', ctx => tokensRedeemed(ctx))
 
 processor.addEventHandler('System.NewAccount', ctx => systemNewAccount(ctx))
 

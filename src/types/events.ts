@@ -1071,6 +1071,35 @@ export class PredictionMarketsSoldCompleteSetEvent {
   }
 }
 
+export class PredictionMarketsTokensRedeemedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'PredictionMarkets.TokensRedeemed')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * An amount of winning outcomes have been redeemed \[market_id, currency_id, amount_redeemed, payout, who\]
+   */
+  get isV35(): boolean {
+    return this._chain.getEventHash('PredictionMarkets.TokensRedeemed') === '2b9c381eb8a00d519422605423f387c0b8e976dda3c557fcc65137951d9bcb1d'
+  }
+
+  /**
+   * An amount of winning outcomes have been redeemed \[market_id, currency_id, amount_redeemed, payout, who\]
+   */
+  get asV35(): [bigint, v35.Asset, bigint, bigint, Uint8Array] {
+    assert(this.isV35)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class SystemExtrinsicFailedEvent {
   private readonly _chain: Chain
   private readonly event: Event

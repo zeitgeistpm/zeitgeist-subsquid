@@ -5,9 +5,11 @@ import { Store } from '@subsquid/typeorm-store'
 import { PredictionMarketsBoughtCompleteSetEvent, PredictionMarketsMarketApprovedEvent, PredictionMarketsMarketClosedEvent, 
   PredictionMarketsMarketDisputedEvent, PredictionMarketsMarketExpiredEvent, PredictionMarketsMarketInsufficientSubsidyEvent, 
   PredictionMarketsMarketRejectedEvent, PredictionMarketsMarketReportedEvent, PredictionMarketsMarketResolvedEvent, 
-  PredictionMarketsMarketStartedWithSubsidyEvent, PredictionMarketsSoldCompleteSetEvent } from '../../types/events'
+  PredictionMarketsMarketStartedWithSubsidyEvent, PredictionMarketsSoldCompleteSetEvent, PredictionMarketsTokensRedeemedEvent 
+} from '../../types/events'
 import { EventContext } from '../../types/support'
 import { MarketDispute, OutcomeReport, Report } from '../../types/v29'
+import { getAssetId } from '../helper'
 
 
 export function getBoughtCompleteSetEvent(ctx: EventContext): BoughtCompleteSetEvent {
@@ -243,6 +245,22 @@ export function getSoldCompleteSetEvent(ctx: EventContext): SoldCompleteSetEvent
   }
 }
 
+export function getTokensRedeemedEvent(ctx: EventContext): TokensRedeemedEvent {
+  const tokensRedeemedEvent = new PredictionMarketsTokensRedeemedEvent(ctx)
+  let mId, marketId, currencyId, amtRedeemed, payout, who, walletId
+  if (tokensRedeemedEvent.isV35) {
+    [mId, currencyId, amtRedeemed, payout, who] = tokensRedeemedEvent.asV35
+    marketId = Number(mId)
+    walletId = ss58.codec('zeitgeist').encode(who)
+  } else {
+    [mId, currencyId, amtRedeemed, payout, who] = ctx.event.args
+    marketId = Number(mId)
+    walletId = ss58.codec('zeitgeist').encode(who)
+  }
+  const assetId = getAssetId(currencyId)
+  return {marketId, assetId, amtRedeemed, payout, walletId}
+}
+
 interface BoughtCompleteSetEvent {
   marketId: number
   amount: bigint
@@ -303,5 +321,13 @@ interface MarketStartedWithSubsidyEvent {
 interface SoldCompleteSetEvent {
   marketId: number
   amount: bigint
+  walletId: string
+}
+
+interface TokensRedeemedEvent {
+  marketId: number
+  assetId: string
+  amtRedeemed: bigint
+  payout: bigint
   walletId: string
 }

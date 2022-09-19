@@ -26,6 +26,7 @@
     "PredictionMarkets.MarketResolved",
     "PredictionMarkets.MarketStartedWithSubsidy",
     "PredictionMarkets.SoldCompleteSet",
+    "PredictionMarkets.TokensRedeemed",
     "System.NewAccount",
     "System.ExtrinsicSuccess",
     "System.ExtrinsicFailed",
