@@ -59,6 +59,12 @@ export interface MarketDispute {
   outcome: OutcomeReport
 }
 
+export interface Report {
+  at: bigint
+  by: Uint8Array
+  outcome: OutcomeReport
+}
+
 export type MarketCreation = MarketCreation_Permissionless | MarketCreation_Advised
 
 export interface MarketCreation_Permissionless {
@@ -101,12 +107,6 @@ export interface ScoringRule_CPMM {
 
 export interface ScoringRule_RikiddoSigmoidFeeMarketEma {
   __kind: 'RikiddoSigmoidFeeMarketEma'
-}
-
-export interface Report {
-  at: bigint
-  by: Uint8Array
-  outcome: OutcomeReport
 }
 
 export type Outcome = Outcome_Complete | Outcome_Incomplete | Outcome_Error

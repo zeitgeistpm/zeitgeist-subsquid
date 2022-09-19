@@ -895,6 +895,50 @@ export class PredictionMarketsMarketRejectedEvent {
   }
 }
 
+export class PredictionMarketsMarketReportedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'PredictionMarkets.MarketReported')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   *  A market has been reported on \[market_id, reported_outcome\]
+   */
+  get isV23(): boolean {
+    return this._chain.getEventHash('PredictionMarkets.MarketReported') === '007a7aeacfb1970acc618b491215deef769e6d3d9449f9eb59a07c1dee60c764'
+  }
+
+  /**
+   *  A market has been reported on \[market_id, reported_outcome\]
+   */
+  get asV23(): [bigint, v23.OutcomeReport] {
+    assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   *  A market has been reported on \[market_id, new_market_status, reported_outcome\]
+   */
+  get isV29(): boolean {
+    return this._chain.getEventHash('PredictionMarkets.MarketReported') === 'fd0dc28edb313bddf194e91060b1a24754d595e9b65696cbacef1fff728b33a8'
+  }
+
+  /**
+   *  A market has been reported on \[market_id, new_market_status, reported_outcome\]
+   */
+  get asV29(): [bigint, v29.MarketStatus, v29.Report] {
+    assert(this.isV29)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class PredictionMarketsMarketStartedWithSubsidyEvent {
   private readonly _chain: Chain
   private readonly event: Event
