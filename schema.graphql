@@ -297,9 +297,9 @@ Market's report details
 """
 type MarketReport @jsonField {
   "Block number"
-  at: Int!
+  at: Int
   "Account which reported"
-  by: String!
+  by: String
   "Outcome details"
   outcome: OutcomeReport!
 }
