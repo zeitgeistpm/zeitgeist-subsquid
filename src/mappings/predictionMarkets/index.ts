@@ -1,14 +1,15 @@
 import { encodeAddress } from '@polkadot/keyring'
 import { EventHandlerContext } from '@subsquid/substrate-processor'
 import { Store } from '@subsquid/typeorm-store'
+import * as ss58 from '@subsquid/ss58'
 import { util } from '@zeitgeistpm/sdk'
 import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBalance, HistoricalMarket, 
-  Market, MarketDisputeMechanism, MarketPeriod, MarketType } from '../../model'
+  Market, MarketDisputeMechanism, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../../model'
 import { createAssetsForMarket, decodeMarketMetadata } from '../helper'
 import { Tools } from '../util'
 import { getBoughtCompleteSetEvent, getMarketApprovedEvent, getMarketClosedEvent, getMarketCreatedEvent, 
-  getMarketExpiredEvent, getMarketInsufficientSubsidyEvent, getMarketRejectedEvent, getMarketStartedWithSubsidyEvent, 
-  getSoldCompleteSetEvent } from './types'
+  getMarketDisputedEvent, getMarketExpiredEvent, getMarketInsufficientSubsidyEvent, getMarketRejectedEvent, 
+  getMarketStartedWithSubsidyEvent, getSoldCompleteSetEvent } from './types'
 
 
 export async function boughtCompleteSet(ctx: EventHandlerContext<Store>) {
@@ -291,6 +292,46 @@ export async function marketCreated(ctx: EventHandlerContext<Store, {event: {arg
       await store.save<Asset>(asset)
     }
   }
+}
+
+export async function marketDisputed(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
+  const {store, block, event} = ctx
+  const {marketId, status, report} = getMarketDisputedEvent(ctx)
+
+  let savedMarket = await store.get(Market, { where: { marketId:  marketId } })
+  if (!savedMarket) return
+
+  let ocr = new OutcomeReport()
+  if (report.outcome.__kind == 'Categorical') {
+    ocr.categorical = report.outcome.value
+  } else if (report.outcome.__kind == 'Scalar') {
+    ocr.scalar = report.outcome.value
+  }
+
+  let mr = new MarketReport()
+  mr.at = report.at ? +report.at.toString() : null
+  mr.by = report.by ? ss58.codec('zeitgeist').encode(report.by) : null
+  mr.outcome = ocr
+
+  if (status.length < 2) {
+    savedMarket.status = 'Disputed'
+  } else {
+    savedMarket.status = status
+  }
+  savedMarket.report = mr
+  console.log(`[${event.name}] Saving market: ${JSON.stringify(savedMarket, null, 2)}`)
+  await store.save<Market>(savedMarket)
+
+  let hm = new HistoricalMarket()
+  hm.id = event.id + '-' + savedMarket.marketId
+  hm.marketId = savedMarket.marketId
+  hm.event = event.name.split('.')[1]
+  hm.status = savedMarket.status
+  hm.report = savedMarket.report
+  hm.blockNumber = block.height
+  hm.timestamp = new Date(block.timestamp)
+  console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
+  await store.save<HistoricalMarket>(hm)
 }
 
 export async function marketExpired(ctx: EventHandlerContext<Store, {event: {args: true}}>) {

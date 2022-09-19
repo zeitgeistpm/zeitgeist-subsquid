@@ -2,11 +2,11 @@ import { encodeAddress } from '@polkadot/keyring'
 import { EventHandlerContext } from '@subsquid/substrate-processor'
 import * as ss58 from '@subsquid/ss58'
 import { Store } from '@subsquid/typeorm-store'
-import { PredictionMarketsBoughtCompleteSetEvent, PredictionMarketsMarketApprovedEvent, 
-  PredictionMarketsMarketClosedEvent, PredictionMarketsMarketExpiredEvent, PredictionMarketsMarketInsufficientSubsidyEvent, 
-  PredictionMarketsMarketRejectedEvent, PredictionMarketsMarketStartedWithSubsidyEvent, 
-  PredictionMarketsSoldCompleteSetEvent } from '../../types/events'
+import { PredictionMarketsBoughtCompleteSetEvent, PredictionMarketsMarketApprovedEvent, PredictionMarketsMarketClosedEvent, 
+  PredictionMarketsMarketDisputedEvent, PredictionMarketsMarketExpiredEvent, PredictionMarketsMarketInsufficientSubsidyEvent, 
+  PredictionMarketsMarketRejectedEvent, PredictionMarketsMarketStartedWithSubsidyEvent, PredictionMarketsSoldCompleteSetEvent } from '../../types/events'
 import { EventContext } from '../../types/support'
+import { MarketDispute } from '../../types/v29'
 
 
 export function getBoughtCompleteSetEvent(ctx: EventContext): BoughtCompleteSetEvent {
@@ -91,6 +91,28 @@ export function getMarketCreatedEvent(ctx: EventHandlerContext<Store, {event: {a
     market.period.start = param2.period.value.start
     market.period.end = market.period.value.end
     return { marketId, marketAccountId, market }
+  }
+}
+
+export function getMarketDisputedEvent(ctx: EventContext): MarketDisputedEvent {
+  const event = new PredictionMarketsMarketDisputedEvent(ctx)
+  if (event.isV23) {
+    const [mId, dispute] = event.asV23
+    let report: any
+    const marketId = Number(mId)
+    const status = ""
+    report.outcome = dispute
+    return {marketId, status, report}
+  } else if (event.isV29) {
+    const [mId, marketStatus, report] = event.asV29
+    const marketId = Number(mId)
+    const status = marketStatus.__kind
+    return {marketId, status, report}
+  } else {
+    const [mId, marketStatus, report] = ctx.event.args
+    const marketId = Number(mId)
+    const status = marketStatus.__kind
+    return {marketId, status, report}
   }
 }
 
@@ -195,6 +217,12 @@ interface MarketCreatedEvent {
   marketId: string
   marketAccountId: string
   market: any
+}
+
+interface MarketDisputedEvent {
+  marketId: number
+  status: string
+  report: MarketDispute
 }
 
 interface MarketExpiredEvent {

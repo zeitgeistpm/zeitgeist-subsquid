@@ -53,6 +53,12 @@ export interface Market {
   mdm: MarketDisputeMechanism
 }
 
+export interface MarketDispute {
+  at: bigint
+  by: Uint8Array
+  outcome: OutcomeReport
+}
+
 export type MarketCreation = MarketCreation_Permissionless | MarketCreation_Advised
 
 export interface MarketCreation_Permissionless {
