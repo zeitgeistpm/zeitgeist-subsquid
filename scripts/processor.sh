@@ -25,6 +25,8 @@ elif [ "$2" = "start" ]; then
   docker build . --target processor -t processor
   echo "Starting processor..."
 elif [ "$2" = "resume" ]; then
+  echo "Building processor..."
+  docker build . --target processor -t processor
   echo "Resuming processor..."
 elif [ "$2" = "restart" ]; then
   echo "Stopping processor..."
