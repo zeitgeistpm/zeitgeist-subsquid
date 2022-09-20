@@ -1353,6 +1353,65 @@ export class SwapsPoolJoinEvent {
   }
 }
 
+export class SwapsSwapExactAmountInEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Swaps.SwapExactAmountIn')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   *  An exact amount of an asset is entering the pool. \[SwapEvent\]
+   */
+  get isV23(): boolean {
+    return this._chain.getEventHash('Swaps.SwapExactAmountIn') === '3890c2f04c258eefbc9739d3d4bde06dfdbb1b5ce6ce3a1f2a3c45220d3db6d9'
+  }
+
+  /**
+   *  An exact amount of an asset is entering the pool. \[SwapEvent\]
+   */
+  get asV23(): v23.SwapEvent {
+    assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * An exact amount of an asset is entering the pool. \[SwapEvent\]
+   */
+  get isV32(): boolean {
+    return this._chain.getEventHash('Swaps.SwapExactAmountIn') === '3363369ef48464de22ea935f8044add18f273252e24b894ae18a4b17500d7f31'
+  }
+
+  /**
+   * An exact amount of an asset is entering the pool. \[SwapEvent\]
+   */
+  get asV32(): v32.SwapEvent {
+    assert(this.isV32)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * An exact amount of an asset is entering the pool. \[SwapEvent\]
+   */
+  get isV37(): boolean {
+    return this._chain.getEventHash('Swaps.SwapExactAmountIn') === '9c7395ff3ab7ff78dce5ed10883a78ccecdf215cffb94e54d4d0e4e808b52767'
+  }
+
+  /**
+   * An exact amount of an asset is entering the pool. \[SwapEvent\]
+   */
+  get asV37(): v37.SwapEvent {
+    assert(this.isV37)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class SystemExtrinsicFailedEvent {
   private readonly _chain: Chain
   private readonly event: Event

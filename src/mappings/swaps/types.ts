@@ -1,8 +1,10 @@
 import { encodeAddress } from '@polkadot/keyring'
 import * as ss58 from '@subsquid/ss58'
-import { SwapsPoolClosedEvent, SwapsPoolCreateEvent, SwapsPoolExitEvent, SwapsPoolJoinEvent } from '../../types/events'
+import { SwapsPoolClosedEvent, SwapsPoolCreateEvent, SwapsPoolExitEvent, SwapsPoolJoinEvent, 
+  SwapsSwapExactAmountInEvent } from '../../types/events'
 import { EventContext } from '../../types/support'
 import { PoolAssetsEvent } from '../../types/v35'
+import { SwapEvent } from '../../types/v37'
 import { CommonPoolEventParams, Pool } from '../../types/v39'
 
 
@@ -95,6 +97,24 @@ export function getPoolExitEvent(ctx: EventContext): PoolExitEvent {
   }
 }
 
+export function getSwapExactAmountInEvent(ctx: EventContext): SwapExactAmountInEvent {
+  const swapExactAmountInEvent = new SwapsSwapExactAmountInEvent(ctx)
+  if (swapExactAmountInEvent.isV23) {
+    const swapEvent = swapExactAmountInEvent.asV23
+    const walletId = ss58.codec('zeitgeist').encode(swapEvent.cpep.who)
+    return {swapEvent, walletId}
+  } else if (swapExactAmountInEvent.isV37) {
+    const swapEvent = swapExactAmountInEvent.asV37
+    const walletId = ss58.codec('zeitgeist').encode(swapEvent.cpep.who)
+    return {swapEvent, walletId}
+  } else {
+    const swapEvent = ctx.event.args
+    const walletId = encodeAddress(swapEvent.cpep.who, 73)
+    return {swapEvent, walletId}
+  }
+}
+
+
 interface PoolClosedEvent {
   poolId: bigint
 }
@@ -112,5 +132,10 @@ interface PoolJoinEvent {
 
 interface PoolExitEvent {
   pae: PoolAssetsEvent
+  walletId: string
+}
+
+interface SwapExactAmountInEvent {
+  swapEvent: SwapEvent
   walletId: string
 }

@@ -17,6 +17,16 @@ export interface Pool {
   weights: ([Asset, bigint][] | undefined)
 }
 
+export interface SwapEvent {
+  assetAmountIn: bigint
+  assetAmountOut: bigint
+  assetBound: (bigint | undefined)
+  assetIn: Asset
+  assetOut: Asset
+  cpep: CommonPoolEventParams
+  maxPrice: (bigint | undefined)
+}
+
 export type Asset = Asset_CategoricalOutcome | Asset_ScalarOutcome | Asset_CombinatorialOutcome | Asset_PoolShare | Asset_Ztg
 
 export interface Asset_CategoricalOutcome {

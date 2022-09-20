@@ -76,6 +76,16 @@ export interface PoolAssetsEvent {
   transferred: bigint[]
 }
 
+export interface SwapEvent {
+  assetAmountIn: bigint
+  assetAmountOut: bigint
+  assetBound: bigint
+  assetIn: Asset
+  assetOut: Asset
+  cpep: CommonPoolEventParams
+  maxPrice: bigint
+}
+
 export type DispatchError = DispatchError_Other | DispatchError_CannotLookup | DispatchError_BadOrigin | DispatchError_Module | DispatchError_ConsumerRemaining | DispatchError_NoProviders | DispatchError_Token | DispatchError_Arithmetic
 
 export interface DispatchError_Other {
