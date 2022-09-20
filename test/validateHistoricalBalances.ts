@@ -2,9 +2,9 @@
  * Script to validate Ztg balance history of an account against on-chain data
  * Run using `ts-node test/validateHistoricalBalances.ts`
  */
-import https from 'https';
-import { Tools } from '../src/processor/util';
 import { AccountInfo } from '@polkadot/types/interfaces/system';
+import https from 'https';
+import { Tools } from '../src/mappings/util';
 
 // Modify values as per requirement
 const ACCOUNT_ID = `dE4NbK6XC4dJEkjU5erpDNj2ydMh1fMNw8ug7xNgzTxqFo5iW`;
@@ -14,7 +14,7 @@ const QUERY_NODE_HOSTNAME = `processor.zeitgeist.pm`;
 // GraphQL query for retrieving balance history of an account
 const query = JSON.stringify({
   query: `{
-    historicalAccountBalances(where: {accountId_eq: "${ACCOUNT_ID}", assetId_eq: "Ztg"}, orderBy: id_ASC) {
+    historicalAccountBalances(where: {accountId_eq: "${ACCOUNT_ID}", assetId_eq: "Ztg"}, orderBy: id_DESC) {
       balance
       blockNumber
       event
@@ -55,20 +55,16 @@ const req = https.request(options, (res) => {
       const blockHash = await sdk.api.rpc.chain.getBlockHash(balanceHistory[i].blockNumber);
       const {data: { free: amt }} = (await sdk.api.query.system.account.at(blockHash, ACCOUNT_ID)) as AccountInfo;
 
-      // Avoid checking block numbers which have already passed the check
       if (!trueBlockNums.includes(balanceHistory[i].blockNumber)) {
         if (amt.toString() !== balanceHistory[i].balance.toString()) {
-          // Avoid redundant errors in case of multiple transactions in a block number
-          if ((balanceHistory[i+1] !== undefined) ? balanceHistory[i].blockNumber !== balanceHistory[i+1].blockNumber : true) {
-            console.log(`\nBalances don't match at ${blockHash} [#${balanceHistory[i].blockNumber}]`);
+            console.log(`\n${balanceHistory.length-i}. Balances don't match at ${blockHash} [#${balanceHistory[i].blockNumber}]`);
             console.log(`On Chain: ` + amt.toBigInt());
             console.log(`On Subsquid: ` + balanceHistory[i].balance);
             balanceDiff = amt.toBigInt() - BigInt(balanceHistory[i].balance);
             diffs += balanceDiff + `,`;
             falseBlockNums += balanceHistory[i].blockNumber + `,`;
-          }
         } else {
-          console.log(`Balances match at ${blockHash} [#${balanceHistory[i].blockNumber}]`);
+          console.log(`${balanceHistory.length-i}. Balances match at ${blockHash} [#${balanceHistory[i].blockNumber}]`);
           trueBlockNums += balanceHistory[i].blockNumber + `,`;
         }
       }
