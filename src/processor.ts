@@ -55,14 +55,14 @@ processor.addEventHandler('PredictionMarkets.MarketStartedWithSubsidy', ctx => m
 processor.addEventHandler('PredictionMarkets.SoldCompleteSet', ctx => soldCompleteSet(ctx))
 processor.addEventHandler('PredictionMarkets.TokensRedeemed', ctx => tokensRedeemed(ctx))
 
-processor.addEventHandler('System.NewAccount', ctx => systemNewAccount(ctx))
-
 processor.addEventHandler('Swaps.PoolClosed', ctx => swapsPoolClosed(ctx))
 processor.addEventHandler('Swaps.PoolCreate', ctx => swapsPoolCreate(ctx))
 processor.addEventHandler('Swaps.PoolExit', ctx => swapsPoolExit(ctx))
 processor.addEventHandler('Swaps.PoolJoin', ctx => swapsPoolJoin(ctx))
 processor.addEventHandler('Swaps.SwapExactAmountIn', ctx => swapsSwapExactAmountIn(ctx))
 processor.addEventHandler('Swaps.SwapExactAmountOut', ctx => swapsSwapExactAmountOut(ctx))
+
+processor.addEventHandler('System.NewAccount', ctx => systemNewAccount(ctx))
 
 processor.addEventHandler('Tokens.Endowed', ctx => tokensEndowed(ctx))
 
