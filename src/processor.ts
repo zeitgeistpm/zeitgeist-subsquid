@@ -7,7 +7,8 @@ import { parachainStakingRewarded } from './mappings/parachainStaking';
 import { boughtCompleteSet, marketApproved, marketClosed, marketCreated, marketDisputed, marketExpired, 
   marketInsufficientSubsidy, marketRejected, marketReported, marketResolved, marketStartedWithSubsidy, 
   soldCompleteSet, tokensRedeemed} from './mappings/predictionMarkets';
-import { swapsPoolClosed, swapsPoolCreate, swapsPoolExit, swapsPoolJoin, swapsSwapExactAmountIn } from './mappings/swaps';
+import { swapsPoolClosed, swapsPoolCreate, swapsPoolExit, swapsPoolJoin, swapsSwapExactAmountIn, 
+  swapsSwapExactAmountOut } from './mappings/swaps';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensEndowed } from './mappings/tokens';
 
@@ -61,6 +62,7 @@ processor.addEventHandler('Swaps.PoolCreate', ctx => swapsPoolCreate(ctx))
 processor.addEventHandler('Swaps.PoolExit', ctx => swapsPoolExit(ctx))
 processor.addEventHandler('Swaps.PoolJoin', ctx => swapsPoolJoin(ctx))
 processor.addEventHandler('Swaps.SwapExactAmountIn', ctx => swapsSwapExactAmountIn(ctx))
+processor.addEventHandler('Swaps.SwapExactAmountOut', ctx => swapsSwapExactAmountOut(ctx))
 
 processor.addEventHandler('Tokens.Endowed', ctx => tokensEndowed(ctx))
 

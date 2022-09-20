@@ -32,6 +32,7 @@
     "Swaps.PoolJoin",
     "Swaps.PoolExit",
     "Swaps.SwapExactAmountIn",
+    "Swaps.SwapExactAmountOut",
     "System.NewAccount",
     "System.ExtrinsicSuccess",
     "System.ExtrinsicFailed",
