@@ -6,6 +6,15 @@ import { Cache, IPFS, Tools } from './util';
 import { Account, AccountBalance, HistoricalAccountBalance } from '../model'
 
 
+export function calcSpotPrice(tokenBalanceIn: number, tokenWeightIn: number, 
+  tokenBalanceOut: number, tokenWeightOut: number): number {
+  if (tokenBalanceOut == 0) return 0
+  const numer = tokenBalanceIn/tokenWeightIn
+  const denom = tokenBalanceOut/tokenWeightOut
+  const spotPrice = numer/denom
+  return spotPrice
+}
+
 export async function createAssetsForMarket(marketId: string, marketType: any): Promise<any> {
   const sdk = await Tools.getSDK()
   return marketType.__kind == "Categorical"
