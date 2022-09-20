@@ -293,24 +293,23 @@ export async function swapsSwapExactAmountIn(ctx: EventHandlerContext<Store>) {
         let newAssetQty = oldAssetQty
 
         if (swapEvent.assetIn) {
-          if (wt!.assetId == JSON.stringify(swapEvent.assetIn)) {
+          if (wt!.assetId == getAssetId(swapEvent.assetIn)) {
             newAssetQty = oldAssetQty + BigInt(swapEvent.assetAmountIn.toString())
           }
         } else if (event.extrinsic) {
           const args = event.extrinsic.call.args
-          if (args.assetIn && wt!.assetId == JSON.stringify(args.assetIn)) {
+          if (args.assetOut && wt!.assetId == getAssetId(args.assetIn)) {
             newAssetQty = oldAssetQty + BigInt(swapEvent.assetAmountIn.toString())
           } else if (args.calls) {
-            console.log(JSON.stringify(event.extrinsic, null, 2))
-            throw TypeError('found')
-            // for (let ext of event.extrinsic.call.args.calls as 
-            //   Array<{ __kind: string, value: { __kind: string, amount: string, marketId: string} }> ) {
-            //     // const { __kind: extrinsic, value: { __kind: method, amount: amount, marketId: id} } = ext;
-            //     // if (pool_id == +swapEvent.cpep.poolId.toString() && wt!.assetId == JSON.stringify(asset_out)) {
-            //     //   newAssetQty = oldAssetQty - BigInt(swapEvent.assetAmountOut.toString())
-            //     //   break
-            //   }
-            // }
+            for (let ext of event.extrinsic.call.args.calls as 
+              Array<{ __kind: string, value: { __kind: string, assetIn: any, poolId: string} }> ) {
+              const { __kind: method, value: { __kind, assetIn, poolId} } = ext;
+              if (method == 'Swaps' && __kind == 'swap_exact_amount_in' && 
+                poolId == swapEvent.cpep.poolId.toString() && wt!.assetId == getAssetId(assetIn)) {
+                newAssetQty = oldAssetQty + BigInt(swapEvent.assetAmountIn.toString())
+                break
+              }
+            }
           }
         }
             
@@ -342,7 +341,7 @@ export async function swapsSwapExactAmountIn(ctx: EventHandlerContext<Store>) {
 export async function swapsSwapExactAmountOut(ctx: EventHandlerContext<Store>) {
   const {store, block, event} = ctx
   const {swapEvent, walletId} = getSwapExactAmountOutEvent(ctx)
-  
+
   let pool = await store.get(Pool, { where: { poolId: +swapEvent.cpep.poolId.toString() } })
   if (!pool) return
 
@@ -378,27 +377,25 @@ export async function swapsSwapExactAmountOut(ctx: EventHandlerContext<Store>) {
         let newAssetQty = oldAssetQty
 
         if (swapEvent.assetOut) {
-          if (wt!.assetId == JSON.stringify(swapEvent.assetOut)) {
+          if (wt!.assetId == getAssetId(swapEvent.assetOut)) {
             newAssetQty = oldAssetQty - BigInt(swapEvent.assetAmountOut.toString())
           }
         } else if (event.extrinsic) {
           const args = event.extrinsic.call.args
-          if (args.assetOut && wt!.assetId == JSON.stringify(args.assetOut)) {
+          if (args.assetOut && wt!.assetId == getAssetId(args.assetOut)) {
             newAssetQty = oldAssetQty - BigInt(swapEvent.assetAmountOut.toString())
           } else if (args.calls) {
-            console.log(JSON.stringify(event.extrinsic, null, 2))
-            throw TypeError('found')
-            // for (let ext of event.extrinsic.call.args.calls as 
-            //   Array<{ __kind: string, value: { __kind: string, amount: string, marketId: string} }> ) {
-            //     // const { __kind: extrinsic, value: { __kind: method, amount: amount, marketId: id} } = ext;
-            //     // if (pool_id == +swapEvent.cpep.poolId.toString() && wt!.assetId == JSON.stringify(asset_out)) {
-            //     //   newAssetQty = oldAssetQty - BigInt(swapEvent.assetAmountOut.toString())
-            //     //   break
-            //   }
-            // }
+            for (let ext of event.extrinsic.call.args.calls as 
+              Array<{ __kind: string, value: { __kind: string, assetOut: any, poolId: string} }> ) {
+              const { __kind: method, value: { __kind, assetOut, poolId} } = ext;
+              if (method == 'Swaps' && __kind == 'swap_exact_amount_out' && 
+                poolId == swapEvent.cpep.poolId.toString() && wt!.assetId == getAssetId(assetOut)) {
+                newAssetQty = oldAssetQty - BigInt(swapEvent.assetAmountOut.toString())
+                break
+              }
+            }
           }
         }
-
         const newPrice = calcSpotPrice(+newZtgQty.toString(), tokenWeightIn, +newAssetQty.toString(), assetWt)
         asset.price = newPrice
         asset.amountInPool = newAssetQty
