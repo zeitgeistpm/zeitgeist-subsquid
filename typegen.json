@@ -27,6 +27,7 @@
     "PredictionMarkets.MarketStartedWithSubsidy",
     "PredictionMarkets.SoldCompleteSet",
     "PredictionMarkets.TokensRedeemed",
+    "Swaps.PoolClosed",
     "Swaps.PoolCreate",
     "Swaps.PoolJoin",
     "Swaps.PoolExit",

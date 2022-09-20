@@ -1,8 +1,19 @@
-import { SwapsPoolCreateEvent, SwapsPoolExitEvent, SwapsPoolJoinEvent } from '../../types/events'
+import { SwapsPoolClosedEvent, SwapsPoolCreateEvent, SwapsPoolExitEvent, SwapsPoolJoinEvent } from '../../types/events'
 import { EventContext } from '../../types/support'
 import { PoolAssetsEvent } from '../../types/v35'
 import { CommonPoolEventParams, Pool } from '../../types/v39'
 
+
+export function getPoolClosedEvent(ctx: EventContext): PoolClosedEvent {
+  const poolCloseEvent = new SwapsPoolClosedEvent(ctx)
+  if (poolCloseEvent.isV37) {
+    const poolId = poolCloseEvent.asV37
+    return {poolId}
+  } else {
+    const [poolId] = ctx.event.args
+    return {poolId}
+  }
+}
 
 export function getPoolCreateEvent(ctx: EventContext): PoolCreateEvent {
   const poolCreateEvent = new SwapsPoolCreateEvent(ctx)
@@ -76,6 +87,10 @@ export function getPoolExitEvent(ctx: EventContext): PoolExitEvent {
     const pae = ctx.event.args
     return {pae}
   }
+}
+
+interface PoolClosedEvent {
+  poolId: bigint
 }
 
 interface PoolCreateEvent {

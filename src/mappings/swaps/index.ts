@@ -4,7 +4,30 @@ import * as ss58 from '@subsquid/ss58'
 import { Account, AccountBalance, Asset, HistoricalAccountBalance, HistoricalAsset, 
   HistoricalMarket, HistoricalPool, Market, Pool, Weight } from '../../model'
 import { calcSpotPrice, getAssetId } from '../helper'
-import { getPoolCreateEvent, getPoolExitEvent, getPoolJoinEvent } from './types'
+import { getPoolClosedEvent, getPoolCreateEvent, getPoolExitEvent, getPoolJoinEvent } from './types'
+
+
+export async function swapsPoolClosed(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
+  const {store, block, event} = ctx
+  const {poolId} = getPoolClosedEvent(ctx)
+
+  let pool = await store.get(Pool, { where: { poolId: +poolId.toString() } })
+  if (!pool) return
+
+  pool.poolStatus = 'Closed'
+  console.log(`[${event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`)
+  await store.save<Pool>(pool)
+
+  let hp = new HistoricalPool()
+  hp.id = event.id + '-' + pool.poolId
+  hp.poolId = pool.poolId
+  hp.poolStatus = pool.poolStatus
+  hp.event = event.name.split('.')[1]
+  hp.blockNumber = block.height
+  hp.timestamp = new Date(block.timestamp)
+  console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
+  await store.save<HistoricalPool>(hp)
+}
 
 export async function swapsPoolCreate(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
   const {store, block, event} = ctx
