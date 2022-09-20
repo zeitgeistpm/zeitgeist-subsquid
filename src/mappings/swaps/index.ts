@@ -160,13 +160,13 @@ export async function swapsPoolExit(ctx: EventHandlerContext<Store, {event: {arg
     const tokenWeightIn = +pool.weights[numOfPoolWts-1]!.len.toString()
     await Promise.all(
       pool.weights.map(async (wt, idx) => {
-        if (idx >= pae.transferred.length) return
+        if (idx >= pae.transferred.length - 1) return
         let asset = await store.get(Asset, { where: { assetId: wt!.assetId } })
         if (!asset || !asset.amountInPool || !asset.price) return
 
         const assetWt = +wt!.len.toString()
         const oldAssetQty = asset.amountInPool
-        const newAssetQty = oldAssetQty - BigInt(pae.transferred[idx - 1].toString())
+        const newAssetQty = oldAssetQty - BigInt(pae.transferred[idx].toString())
         const oldPrice = asset.price
         const newPrice = calcSpotPrice(+newZtgQty.toString(), tokenWeightIn, +newAssetQty.toString(), assetWt)
 
@@ -221,13 +221,13 @@ export async function swapsPoolJoin(ctx: EventHandlerContext<Store, {event: {arg
     const tokenWeightIn = +pool.weights[numOfPoolWts-1]!.len.toString()
     await Promise.all(
       pool.weights.map(async (wt, idx) => {
-        if (idx >= pae.transferred.length) return
+        if (idx >= pae.transferred.length - 1) return
         let asset = await store.get(Asset, { where: { assetId: wt!.assetId } })
         if (!asset || !asset.amountInPool || !asset.price) return
   
         const assetWt = +wt!.len.toString()
         const oldAssetQty = asset.amountInPool
-        const newAssetQty = oldAssetQty + BigInt(pae.transferred[idx - 1].toString())
+        const newAssetQty = oldAssetQty + BigInt(pae.transferred[idx].toString())
         const oldPrice = asset.price
         const newPrice = calcSpotPrice(+newZtgQty.toString(), tokenWeightIn, +newAssetQty.toString(), assetWt)
   
