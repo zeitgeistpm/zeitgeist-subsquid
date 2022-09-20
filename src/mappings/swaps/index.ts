@@ -260,9 +260,9 @@ export async function swapsSwapExactAmountIn(ctx: EventHandlerContext<Store>) {
   if (!pool) return
 
   const oldZtgQty = pool.ztgQty
-  const newZtgQty = oldZtgQty - swapEvent.assetAmountOut
+  const newZtgQty = oldZtgQty - BigInt(swapEvent.assetAmountOut.toString())
   pool.ztgQty = newZtgQty
-  pool.volume = pool.volume + swapEvent.assetAmountOut
+  pool.volume = pool.volume + BigInt(swapEvent.assetAmountOut.toString())
   console.log(`[${event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`)
   await store.save<Pool>(pool)
 
@@ -308,7 +308,7 @@ export async function swapsSwapExactAmountIn(ctx: EventHandlerContext<Store>) {
         ha.id = event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-')+1)
         ha.accountId = newAssetQty == oldAssetQty ? null : walletId
         ha.assetId = asset.assetId
-        ha.ztgTraded = newAssetQty == oldAssetQty ? BigInt(0) : swapEvent.assetAmountOut
+        ha.ztgTraded = newAssetQty == oldAssetQty ? BigInt(0) : BigInt(swapEvent.assetAmountOut.toString())
         ha.newPrice = asset.price
         ha.newAmountInPool = asset.amountInPool
         ha.dPrice = newPrice - oldPrice
@@ -331,9 +331,9 @@ export async function swapsSwapExactAmountOut(ctx: EventHandlerContext<Store>) {
   if (!pool) return
 
   const oldZtgQty = pool.ztgQty
-  const newZtgQty = oldZtgQty + swapEvent.assetAmountIn
+  const newZtgQty = oldZtgQty + BigInt(swapEvent.assetAmountIn.toString())
   pool.ztgQty = newZtgQty
-  pool.volume = pool.volume + swapEvent.assetAmountIn
+  pool.volume = pool.volume + BigInt(swapEvent.assetAmountIn.toString())
   console.log(`[${event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`)
   await store.save<Pool>(pool)
 
@@ -379,7 +379,7 @@ export async function swapsSwapExactAmountOut(ctx: EventHandlerContext<Store>) {
         ha.id = event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-')+1)
         ha.accountId = newAssetQty == oldAssetQty ? null : walletId
         ha.assetId = asset.assetId
-        ha.ztgTraded = newAssetQty == oldAssetQty ? BigInt(0) : swapEvent.assetAmountIn
+        ha.ztgTraded = newAssetQty == oldAssetQty ? BigInt(0) : BigInt(swapEvent.assetAmountIn.toString())
         ha.newPrice = asset.price
         ha.newAmountInPool = asset.amountInPool
         ha.dPrice = newPrice - oldPrice
