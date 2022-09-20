@@ -1206,6 +1206,65 @@ export class SwapsPoolCreateEvent {
   }
 }
 
+export class SwapsPoolJoinEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Swaps.PoolJoin')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   *  Someone has joined a pool. \[PoolAssetsEvent\]
+   */
+  get isV23(): boolean {
+    return this._chain.getEventHash('Swaps.PoolJoin') === '99ab0bd285f6f944198c5f42dd98b41f7b9fcf0c44ef6977cf76c3f99c4c184b'
+  }
+
+  /**
+   *  Someone has joined a pool. \[PoolAssetsEvent\]
+   */
+  get asV23(): v23.PoolAssetsEvent {
+    assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Someone has joined a pool. \[PoolAssetsEvent\]
+   */
+  get isV32(): boolean {
+    return this._chain.getEventHash('Swaps.PoolJoin') === 'a016214c18f38035d8a3ccaa23dbbbf3a1b50d26215e35d1bda4568251120ab6'
+  }
+
+  /**
+   * Someone has joined a pool. \[PoolAssetsEvent\]
+   */
+  get asV32(): v32.PoolAssetsEvent {
+    assert(this.isV32)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Someone has joined a pool. \[PoolAssetsEvent\]
+   */
+  get isV35(): boolean {
+    return this._chain.getEventHash('Swaps.PoolJoin') === '5112309cbe063044a218a06b2ed774da16f6e33b08c28eaa718d99597f89f5ae'
+  }
+
+  /**
+   * Someone has joined a pool. \[PoolAssetsEvent\]
+   */
+  get asV35(): v35.PoolAssetsEvent {
+    assert(this.isV35)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class SystemExtrinsicFailedEvent {
   private readonly _chain: Chain
   private readonly event: Event

@@ -1,10 +1,10 @@
-import { EventHandlerContext } from '@subsquid/substrate-processor'
-import { Store } from '@subsquid/typeorm-store'
-import { SwapsPoolCreateEvent } from '../../types/events'
+import { SwapsPoolCreateEvent, SwapsPoolJoinEvent } from '../../types/events'
+import { EventContext } from '../../types/support'
+import { PoolAssetsEvent } from '../../types/v35'
 import { CommonPoolEventParams, Pool } from '../../types/v39'
 
 
-export function getPoolCreateEvent(ctx: EventHandlerContext<Store, {event: {args: true}}>): PoolCreateEvent {
+export function getPoolCreateEvent(ctx: EventContext): PoolCreateEvent {
   const poolCreateEvent = new SwapsPoolCreateEvent(ctx)
   if (poolCreateEvent.isV23) {
     const [cpep, swapPool] = poolCreateEvent.asV23
@@ -36,8 +36,33 @@ export function getPoolCreateEvent(ctx: EventHandlerContext<Store, {event: {args
   }
 }
 
+export function getPoolJoinEvent(ctx: EventContext): PoolJoinEvent {
+  const poolJoinEvent = new SwapsPoolJoinEvent(ctx)
+  if (poolJoinEvent.isV23) {
+    let res = poolJoinEvent.asV23
+    let pae = res as PoolAssetsEvent
+    pae.poolAmount = BigInt(0)
+    return {pae}
+  } else if (poolJoinEvent.isV32) {
+    let res = poolJoinEvent.asV32
+    let pae = res as PoolAssetsEvent
+    pae.poolAmount = BigInt(0)
+    return {pae}
+  } else if (poolJoinEvent.isV35) {
+    const pae = poolJoinEvent.asV35
+    return {pae}
+  } else {
+    const pae = ctx.event.args
+    return {pae}
+  }
+}
+
 interface PoolCreateEvent {
   cpep: CommonPoolEventParams
   pool: Pool
   amount: bigint
+}
+
+interface PoolJoinEvent {
+  pae: PoolAssetsEvent
 }

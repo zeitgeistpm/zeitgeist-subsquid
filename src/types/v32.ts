@@ -57,6 +57,13 @@ export interface Pool {
   weights: ([Asset, bigint][] | undefined)
 }
 
+export interface PoolAssetsEvent {
+  assets: Asset[]
+  bounds: bigint[]
+  cpep: CommonPoolEventParams
+  transferred: bigint[]
+}
+
 export type DispatchError = DispatchError_Other | DispatchError_CannotLookup | DispatchError_BadOrigin | DispatchError_Module | DispatchError_ConsumerRemaining | DispatchError_NoProviders | DispatchError_Token | DispatchError_Arithmetic
 
 export interface DispatchError_Other {
