@@ -155,8 +155,9 @@ export async function swapsPoolExit(ctx: EventHandlerContext<Store, {event: {arg
   console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
   await store.save<HistoricalPool>(hp)
 
-  const tokenWeightIn = pool.weights[0] && pool.weights[0].assetId == 'Ztg' ? +pool.weights[0].len.toString() : 0
-  if (pool.weights && pool.weights.length > 0 && tokenWeightIn !== 0) {
+  const numOfPoolWts = pool.weights.length
+  if (numOfPoolWts > 0 && pool.weights[numOfPoolWts-1]!.assetId == 'Ztg') {
+    const tokenWeightIn = +pool.weights[numOfPoolWts-1]!.len.toString()
     await Promise.all(
       pool.weights.map(async (wt, idx) => {
         if (idx >= pae.transferred.length) return
@@ -215,8 +216,9 @@ export async function swapsPoolJoin(ctx: EventHandlerContext<Store, {event: {arg
   console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
   await store.save<HistoricalPool>(hp)
 
-  const tokenWeightIn = pool.weights[0] && pool.weights[0].assetId == 'Ztg' ? +pool.weights[0].len.toString() : 0
-  if (pool.weights && pool.weights.length > 0 && tokenWeightIn !== 0) {
+  const numOfPoolWts = pool.weights.length
+  if (numOfPoolWts > 0 && pool.weights[numOfPoolWts-1]!.assetId == 'Ztg') {
+    const tokenWeightIn = +pool.weights[numOfPoolWts-1]!.len.toString()
     await Promise.all(
       pool.weights.map(async (wt, idx) => {
         if (idx >= pae.transferred.length) return
@@ -277,8 +279,9 @@ export async function swapsSwapExactAmountIn(ctx: EventHandlerContext<Store>) {
   console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
   await store.save<HistoricalPool>(hp)
 
-  const tokenWeightIn = pool.weights[0] && pool.weights[0].assetId == 'Ztg' ? +pool.weights[0].len.toString() : 0
-  if (pool.weights && pool.weights.length > 0 && tokenWeightIn !== 0) {
+  const numOfPoolWts = pool.weights.length
+  if (numOfPoolWts > 0 && pool.weights[numOfPoolWts-1]!.assetId == 'Ztg') {
+    const tokenWeightIn = +pool.weights[numOfPoolWts-1]!.len.toString()
     await Promise.all(
       pool.weights.map(async wt => {
         let asset = await store.get(Asset, { where: { assetId: wt!.assetId } })
@@ -293,9 +296,22 @@ export async function swapsSwapExactAmountIn(ctx: EventHandlerContext<Store>) {
           if (wt!.assetId == JSON.stringify(swapEvent.assetIn)) {
             newAssetQty = oldAssetQty + BigInt(swapEvent.assetAmountIn.toString())
           }
-        } else {
-          console.log(ctx.event.extrinsic)
-          throw TypeError('found')
+        } else if (event.extrinsic) {
+          const args = event.extrinsic.call.args
+          if (args.assetIn && wt!.assetId == JSON.stringify(args.assetIn)) {
+            newAssetQty = oldAssetQty + BigInt(swapEvent.assetAmountIn.toString())
+          } else if (args.calls) {
+            console.log(JSON.stringify(event.extrinsic, null, 2))
+            throw TypeError('found')
+            // for (let ext of event.extrinsic.call.args.calls as 
+            //   Array<{ __kind: string, value: { __kind: string, amount: string, marketId: string} }> ) {
+            //     // const { __kind: extrinsic, value: { __kind: method, amount: amount, marketId: id} } = ext;
+            //     // if (pool_id == +swapEvent.cpep.poolId.toString() && wt!.assetId == JSON.stringify(asset_out)) {
+            //     //   newAssetQty = oldAssetQty - BigInt(swapEvent.assetAmountOut.toString())
+            //     //   break
+            //   }
+            // }
+          }
         }
             
         const newPrice = calcSpotPrice(+newZtgQty.toString(),tokenWeightIn,+newAssetQty.toString(),assetWt)
@@ -348,8 +364,9 @@ export async function swapsSwapExactAmountOut(ctx: EventHandlerContext<Store>) {
   console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
   await store.save<HistoricalPool>(hp)
 
-  const tokenWeightIn = pool.weights[0] && pool.weights[0].assetId == 'Ztg' ? +pool.weights[0].len.toString() : 0
-  if (pool.weights && pool.weights.length > 0 && tokenWeightIn !== 0) {
+  const numOfPoolWts = pool.weights.length
+  if (numOfPoolWts > 0 && pool.weights[numOfPoolWts-1]!.assetId == 'Ztg') {
+    const tokenWeightIn = +pool.weights[numOfPoolWts-1]!.len.toString()
     await Promise.all(
       pool.weights.map(async wt => {
         let asset = await store.get(Asset, { where: { assetId: wt!.assetId } })
@@ -364,9 +381,22 @@ export async function swapsSwapExactAmountOut(ctx: EventHandlerContext<Store>) {
           if (wt!.assetId == JSON.stringify(swapEvent.assetOut)) {
             newAssetQty = oldAssetQty - BigInt(swapEvent.assetAmountOut.toString())
           }
-        } else {
-          console.log(ctx.event.extrinsic)
-          throw TypeError('found')
+        } else if (event.extrinsic) {
+          const args = event.extrinsic.call.args
+          if (args.assetOut && wt!.assetId == JSON.stringify(args.assetOut)) {
+            newAssetQty = oldAssetQty - BigInt(swapEvent.assetAmountOut.toString())
+          } else if (args.calls) {
+            console.log(JSON.stringify(event.extrinsic, null, 2))
+            throw TypeError('found')
+            // for (let ext of event.extrinsic.call.args.calls as 
+            //   Array<{ __kind: string, value: { __kind: string, amount: string, marketId: string} }> ) {
+            //     // const { __kind: extrinsic, value: { __kind: method, amount: amount, marketId: id} } = ext;
+            //     // if (pool_id == +swapEvent.cpep.poolId.toString() && wt!.assetId == JSON.stringify(asset_out)) {
+            //     //   newAssetQty = oldAssetQty - BigInt(swapEvent.assetAmountOut.toString())
+            //     //   break
+            //   }
+            // }
+          }
         }
 
         const newPrice = calcSpotPrice(+newZtgQty.toString(), tokenWeightIn, +newAssetQty.toString(), assetWt)
