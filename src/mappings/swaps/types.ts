@@ -1,3 +1,5 @@
+import { encodeAddress } from '@polkadot/keyring'
+import * as ss58 from '@subsquid/ss58'
 import { SwapsPoolClosedEvent, SwapsPoolCreateEvent, SwapsPoolExitEvent, SwapsPoolJoinEvent } from '../../types/events'
 import { EventContext } from '../../types/support'
 import { PoolAssetsEvent } from '../../types/v35'
@@ -50,42 +52,46 @@ export function getPoolCreateEvent(ctx: EventContext): PoolCreateEvent {
 export function getPoolJoinEvent(ctx: EventContext): PoolJoinEvent {
   const poolJoinEvent = new SwapsPoolJoinEvent(ctx)
   if (poolJoinEvent.isV23) {
-    let res = poolJoinEvent.asV23
-    let pae = res as PoolAssetsEvent
+    let pae = ctx.event.args as PoolAssetsEvent
     pae.poolAmount = BigInt(0)
-    return {pae}
+    const walletId = encodeAddress(pae.cpep.who, 73)
+    return {pae, walletId}
   } else if (poolJoinEvent.isV32) {
-    let res = poolJoinEvent.asV32
-    let pae = res as PoolAssetsEvent
+    let pae = ctx.event.args as PoolAssetsEvent
     pae.poolAmount = BigInt(0)
-    return {pae}
+    const walletId = encodeAddress(pae.cpep.who, 73)
+    return {pae, walletId}
   } else if (poolJoinEvent.isV35) {
     const pae = poolJoinEvent.asV35
-    return {pae}
+    const walletId = ss58.codec('zeitgeist').encode(pae.cpep.who)
+    return {pae, walletId}
   } else {
     const pae = ctx.event.args
-    return {pae}
+    const walletId = encodeAddress(pae.cpep.who, 73)
+    return {pae, walletId}
   }
 }
 
 export function getPoolExitEvent(ctx: EventContext): PoolExitEvent {
   const poolExitEvent = new SwapsPoolExitEvent(ctx)
   if (poolExitEvent.isV23) {
-    let res = poolExitEvent.asV23
-    let pae = res as PoolAssetsEvent
+    let pae = ctx.event.args as PoolAssetsEvent
     pae.poolAmount = BigInt(0)
-    return {pae}
+    const walletId = encodeAddress(pae.cpep.who, 73)
+    return {pae, walletId}
   } else if (poolExitEvent.isV32) {
-    let res = poolExitEvent.asV32
-    let pae = res as PoolAssetsEvent
+    let pae = ctx.event.args as PoolAssetsEvent
     pae.poolAmount = BigInt(0)
-    return {pae}
+    const walletId = encodeAddress(pae.cpep.who, 73)
+    return {pae, walletId}
   } else if (poolExitEvent.isV35) {
     const pae = poolExitEvent.asV35
-    return {pae}
+    const walletId = ss58.codec('zeitgeist').encode(pae.cpep.who)
+    return {pae, walletId}
   } else {
     const pae = ctx.event.args
-    return {pae}
+    const walletId = encodeAddress(pae.cpep.who, 73)
+    return {pae, walletId}
   }
 }
 
@@ -101,8 +107,10 @@ interface PoolCreateEvent {
 
 interface PoolJoinEvent {
   pae: PoolAssetsEvent
+  walletId: string
 }
 
 interface PoolExitEvent {
   pae: PoolAssetsEvent
+  walletId: string
 }

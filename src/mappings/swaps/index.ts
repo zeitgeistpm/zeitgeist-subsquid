@@ -133,7 +133,7 @@ export async function swapsPoolCreate(ctx: EventHandlerContext<Store, {event: {a
 
 export async function swapsPoolExit(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
   const {store, block, event} = ctx
-  const {pae} = getPoolExitEvent(ctx)
+  const {pae, walletId} = getPoolExitEvent(ctx)
 
   let pool = await store.get(Pool, { where: { poolId: +pae.cpep.poolId.toString() } })
   if (!pool) return
@@ -175,7 +175,7 @@ export async function swapsPoolExit(ctx: EventHandlerContext<Store, {event: {arg
 
         let ha = new HistoricalAsset()
         ha.id = event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-')+1)
-        ha.accountId = ss58.codec('zeitgeist').encode(pae.cpep.who)
+        ha.accountId = walletId
         ha.assetId = asset.assetId
         ha.newPrice = asset.price
         ha.newAmountInPool = asset.amountInPool
@@ -193,7 +193,7 @@ export async function swapsPoolExit(ctx: EventHandlerContext<Store, {event: {arg
 
 export async function swapsPoolJoin(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
   const {store, block, event} = ctx
-  const {pae} = getPoolJoinEvent(ctx)
+  const {pae, walletId} = getPoolJoinEvent(ctx)
 
   let pool = await store.get(Pool, { where: { poolId: +pae.cpep.poolId.toString() } })
   if (!pool) return
@@ -235,7 +235,7 @@ export async function swapsPoolJoin(ctx: EventHandlerContext<Store, {event: {arg
   
         let ha = new HistoricalAsset()
         ha.id = event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-')+1)
-        ha.accountId = ss58.codec('zeitgeist').encode(pae.cpep.who)
+        ha.accountId = walletId
         ha.assetId = asset.assetId
         ha.newPrice = asset.price
         ha.newAmountInPool = asset.amountInPool
