@@ -40,6 +40,23 @@ export interface Market {
   mdm: MarketDisputeMechanism
 }
 
+export interface CommonPoolEventParams {
+  poolId: bigint
+  who: Uint8Array
+}
+
+export interface Pool {
+  assets: Asset[]
+  baseAsset: (Asset | undefined)
+  marketId: bigint
+  poolStatus: PoolStatus
+  scoringRule: ScoringRule
+  swapFee: (bigint | undefined)
+  totalSubsidy: (bigint | undefined)
+  totalWeight: (bigint | undefined)
+  weights: ([Asset, bigint][] | undefined)
+}
+
 export type DispatchError = DispatchError_Other | DispatchError_CannotLookup | DispatchError_BadOrigin | DispatchError_Module | DispatchError_ConsumerRemaining | DispatchError_NoProviders | DispatchError_Token | DispatchError_Arithmetic
 
 export interface DispatchError_Other {
@@ -207,6 +224,20 @@ export interface MarketDisputeMechanism_Court {
 
 export interface MarketDisputeMechanism_SimpleDisputes {
   __kind: 'SimpleDisputes'
+}
+
+export type PoolStatus = PoolStatus_Active | PoolStatus_CollectingSubsidy | PoolStatus_Stale
+
+export interface PoolStatus_Active {
+  __kind: 'Active'
+}
+
+export interface PoolStatus_CollectingSubsidy {
+  __kind: 'CollectingSubsidy'
+}
+
+export interface PoolStatus_Stale {
+  __kind: 'Stale'
 }
 
 export type TokenError = TokenError_NoFunds | TokenError_WouldDie | TokenError_BelowMinimum | TokenError_CannotCreate | TokenError_UnknownAsset | TokenError_Frozen | TokenError_Unsupported

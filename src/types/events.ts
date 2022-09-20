@@ -6,7 +6,9 @@ import * as v32 from './v32'
 import * as v34 from './v34'
 import * as v35 from './v35'
 import * as v36 from './v36'
+import * as v37 from './v37'
 import * as v38 from './v38'
+import * as v39 from './v39'
 
 export class BalancesBalanceSetEvent {
   private readonly _chain: Chain
@@ -1096,6 +1098,110 @@ export class PredictionMarketsTokensRedeemedEvent {
    */
   get asV35(): [bigint, v35.Asset, bigint, bigint, Uint8Array] {
     assert(this.isV35)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class SwapsPoolCreateEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Swaps.PoolCreate')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   *  A new pool has been created. \[CommonPoolEventParams, pool\]
+   */
+  get isV23(): boolean {
+    return this._chain.getEventHash('Swaps.PoolCreate') === '639f38bdf67fe503f5b3383a8f7f82052830b8b21210fa56fb6ac93afbb1d455'
+  }
+
+  /**
+   *  A new pool has been created. \[CommonPoolEventParams, pool\]
+   */
+  get asV23(): [v23.CommonPoolEventParams, v23.Pool] {
+    assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * A new pool has been created. \[CommonPoolEventParams, pool\]
+   */
+  get isV32(): boolean {
+    return this._chain.getEventHash('Swaps.PoolCreate') === '6588e8c5065c2d9dec523e1da61f53572a975e3a30964e7187048972fb7ad11f'
+  }
+
+  /**
+   * A new pool has been created. \[CommonPoolEventParams, pool\]
+   */
+  get asV32(): [v32.CommonPoolEventParams, v32.Pool] {
+    assert(this.isV32)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * A new pool has been created. \[CommonPoolEventParams, pool, pool_amount\]
+   */
+  get isV35(): boolean {
+    return this._chain.getEventHash('Swaps.PoolCreate') === '23302b09e5e7dac54ebbe8f35f527876cd9c205144943b678954c0b45ddd7287'
+  }
+
+  /**
+   * A new pool has been created. \[CommonPoolEventParams, pool, pool_amount\]
+   */
+  get asV35(): [v35.CommonPoolEventParams, v35.Pool, bigint] {
+    assert(this.isV35)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * A new pool has been created. \[CommonPoolEventParams, pool, pool_amount, pool_account\]
+   */
+  get isV36(): boolean {
+    return this._chain.getEventHash('Swaps.PoolCreate') === '5e8abe682013e886690b6d2682906d85de56ea805ba61acd0454659f27833bb4'
+  }
+
+  /**
+   * A new pool has been created. \[CommonPoolEventParams, pool, pool_amount, pool_account\]
+   */
+  get asV36(): [v36.CommonPoolEventParams, v36.Pool, bigint, Uint8Array] {
+    assert(this.isV36)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * A new pool has been created. \[CommonPoolEventParams, pool, pool_amount, pool_account\]
+   */
+  get isV37(): boolean {
+    return this._chain.getEventHash('Swaps.PoolCreate') === '1d7e591f8b1c80fefa10f4c36c3af6a9adbdfb74f72ef5e302dcffada8c0890d'
+  }
+
+  /**
+   * A new pool has been created. \[CommonPoolEventParams, pool, pool_amount, pool_account\]
+   */
+  get asV37(): [v37.CommonPoolEventParams, v37.Pool, bigint, Uint8Array] {
+    assert(this.isV37)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * A new pool has been created. \[CommonPoolEventParams, pool, pool_amount, pool_account\]
+   */
+  get isV39(): boolean {
+    return this._chain.getEventHash('Swaps.PoolCreate') === '2bb33e103ee138cb6c76a958ffe3367ebe1e30bffd2e07956e215ccb4dde6cb1'
+  }
+
+  /**
+   * A new pool has been created. \[CommonPoolEventParams, pool, pool_amount, pool_account\]
+   */
+  get asV39(): [v39.CommonPoolEventParams, v39.Pool, bigint, Uint8Array] {
+    assert(this.isV39)
     return this._chain.decodeEvent(this.event)
   }
 }

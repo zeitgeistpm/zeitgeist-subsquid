@@ -52,6 +52,23 @@ export interface OutcomeReport_Scalar {
   value: bigint
 }
 
+export interface CommonPoolEventParams {
+  poolId: bigint
+  who: Uint8Array
+}
+
+export interface Pool {
+  assets: Asset[]
+  baseAsset: (Asset | undefined)
+  marketId: bigint
+  poolStatus: PoolStatus
+  scoringRule: ScoringRule
+  swapFee: (bigint | undefined)
+  totalSubsidy: (bigint | undefined)
+  totalWeight: (bigint | undefined)
+  weights: ([Asset, bigint][] | undefined)
+}
+
 export type DispatchError = DispatchError_Other | DispatchError_CannotLookup | DispatchError_BadOrigin | DispatchError_Module | DispatchError_ConsumerRemaining | DispatchError_NoProviders | DispatchError_Token | DispatchError_Arithmetic
 
 export interface DispatchError_Other {
@@ -253,6 +270,45 @@ export interface MarketDisputeMechanism_Court {
 
 export interface MarketDisputeMechanism_SimpleDisputes {
   __kind: 'SimpleDisputes'
+}
+
+export type Asset = Asset_CategoricalOutcome | Asset_ScalarOutcome | Asset_CombinatorialOutcome | Asset_PoolShare | Asset_Ztg
+
+export interface Asset_CategoricalOutcome {
+  __kind: 'CategoricalOutcome'
+  value: [bigint, number]
+}
+
+export interface Asset_ScalarOutcome {
+  __kind: 'ScalarOutcome'
+  value: [bigint, ScalarPosition]
+}
+
+export interface Asset_CombinatorialOutcome {
+  __kind: 'CombinatorialOutcome'
+}
+
+export interface Asset_PoolShare {
+  __kind: 'PoolShare'
+  value: bigint
+}
+
+export interface Asset_Ztg {
+  __kind: 'Ztg'
+}
+
+export type PoolStatus = PoolStatus_Active | PoolStatus_CollectingSubsidy | PoolStatus_Stale
+
+export interface PoolStatus_Active {
+  __kind: 'Active'
+}
+
+export interface PoolStatus_CollectingSubsidy {
+  __kind: 'CollectingSubsidy'
+}
+
+export interface PoolStatus_Stale {
+  __kind: 'Stale'
 }
 
 export interface DispatchErrorModule {

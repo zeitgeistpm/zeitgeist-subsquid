@@ -25,6 +25,23 @@ export interface Asset_Ztg {
   __kind: 'Ztg'
 }
 
+export interface CommonPoolEventParams {
+  poolId: bigint
+  who: Uint8Array
+}
+
+export interface Pool {
+  assets: Asset[]
+  baseAsset: Asset
+  marketId: bigint
+  poolStatus: PoolStatus
+  scoringRule: ScoringRule
+  swapFee: (bigint | undefined)
+  totalSubsidy: (bigint | undefined)
+  totalWeight: (bigint | undefined)
+  weights: ([Asset, bigint][] | undefined)
+}
+
 export type DispatchError = DispatchError_Other | DispatchError_CannotLookup | DispatchError_BadOrigin | DispatchError_Module | DispatchError_ConsumerRemaining | DispatchError_NoProviders | DispatchError_TooManyConsumers | DispatchError_Token | DispatchError_Arithmetic
 
 export interface DispatchError_Other {
@@ -80,6 +97,30 @@ export interface ScalarPosition_Long {
 
 export interface ScalarPosition_Short {
   __kind: 'Short'
+}
+
+export type PoolStatus = PoolStatus_Active | PoolStatus_CollectingSubsidy | PoolStatus_Stale
+
+export interface PoolStatus_Active {
+  __kind: 'Active'
+}
+
+export interface PoolStatus_CollectingSubsidy {
+  __kind: 'CollectingSubsidy'
+}
+
+export interface PoolStatus_Stale {
+  __kind: 'Stale'
+}
+
+export type ScoringRule = ScoringRule_CPMM | ScoringRule_RikiddoSigmoidFeeMarketEma
+
+export interface ScoringRule_CPMM {
+  __kind: 'CPMM'
+}
+
+export interface ScoringRule_RikiddoSigmoidFeeMarketEma {
+  __kind: 'RikiddoSigmoidFeeMarketEma'
 }
 
 export interface ModuleError {
