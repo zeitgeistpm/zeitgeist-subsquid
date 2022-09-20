@@ -486,7 +486,7 @@ export async function marketResolved(ctx: EventHandlerContext<Store, {event: {ar
       await store.save<Asset>(asset)
 
       let ha = new HistoricalAsset()
-      ha.id = event.id + '-' + marketId + i
+      ha.id = event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-')+1)
       ha.assetId = asset.assetId
       ha.newPrice = asset.price
       ha.newAmountInPool = asset.amountInPool
