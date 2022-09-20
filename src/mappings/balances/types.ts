@@ -1,7 +1,8 @@
 import { encodeAddress } from '@polkadot/keyring'
 import * as ss58 from '@subsquid/ss58'
 import { EventContext } from '../../types/support'
-import { BalancesBalanceSetEvent, BalancesDustLostEvent, BalancesEndowedEvent, BalancesReservedEvent, BalancesTransferEvent, BalancesUnreservedEvent, BalancesWithdrawEvent } from '../../types/events'
+import { BalancesBalanceSetEvent, BalancesDustLostEvent, BalancesEndowedEvent, BalancesReservedEvent, 
+  BalancesTransferEvent, BalancesUnreservedEvent, BalancesWithdrawEvent } from '../../types/events'
 
 
 export function getBalanceSetEvent(ctx: EventContext): BalanceSetEvent {

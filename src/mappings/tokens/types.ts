@@ -1,8 +1,7 @@
 import { encodeAddress } from '@polkadot/keyring'
 import * as ss58 from '@subsquid/ss58'
-import { util } from '@zeitgeistpm/sdk'
-import { TokensEndowedEvent } from '../../types/events'
 import { EventContext } from '../../types/support'
+import { TokensEndowedEvent } from '../../types/events'
 import { getAssetId } from '../helper'
 
 

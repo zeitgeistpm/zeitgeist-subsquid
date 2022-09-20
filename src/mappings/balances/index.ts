@@ -2,7 +2,8 @@ import { EventHandlerContext, SubstrateEvent } from '@subsquid/substrate-process
 import { Store } from '@subsquid/typeorm-store'
 import { Account, AccountBalance, HistoricalAccountBalance } from '../../model'
 import { initBalance } from '../helper'
-import { getBalanceSetEvent, getDustLostEvent, getEndowedEvent, getReservedEvent, getTransferEvent, getUnreservedEvent, getWithdrawEvent } from './types'
+import { getBalanceSetEvent, getDustLostEvent, getEndowedEvent, getReservedEvent, getTransferEvent, 
+  getUnreservedEvent, getWithdrawEvent } from './types'
 
 
 export async function balancesBalanceSet(ctx: EventHandlerContext<Store, {event: {args: true}}>) {

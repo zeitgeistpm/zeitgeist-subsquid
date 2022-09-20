@@ -1,7 +1,8 @@
-import { ParachainStakingRewardedEvent } from '../../types/events'
+import { encodeAddress } from '@polkadot/keyring'
 import * as ss58 from '@subsquid/ss58'
 import { EventContext } from '../../types/support'
-import { encodeAddress } from '@polkadot/keyring'
+import { ParachainStakingRewardedEvent } from '../../types/events'
+
 
 export function getRewardedEvent(ctx: EventContext): RewardedEvent {
   const rewardedEvent = new ParachainStakingRewardedEvent(ctx)
