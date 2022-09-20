@@ -4,7 +4,7 @@ import * as ss58 from '@subsquid/ss58'
 import { Account, AccountBalance, Asset, HistoricalAccountBalance, HistoricalAsset, 
   HistoricalMarket, HistoricalPool, Market, Pool, Weight } from '../../model'
 import { calcSpotPrice, getAssetId } from '../helper'
-import { getPoolCreateEvent, getPoolJoinEvent } from './types'
+import { getPoolCreateEvent, getPoolExitEvent, getPoolJoinEvent } from './types'
 
 export async function swapsPoolCreate(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
   const {store, block, event} = ctx
@@ -107,6 +107,66 @@ export async function swapsPoolCreate(ctx: EventHandlerContext<Store, {event: {a
   await store.save<HistoricalPool>(hp)
 }
 
+export async function swapsPoolExit(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
+  const {store, block, event} = ctx
+  const {pae} = getPoolExitEvent(ctx)
+
+  let pool = await store.get(Pool, { where: { poolId: +pae.cpep.poolId.toString() } })
+  if (!pool) return
+
+  const oldZtgQty = pool.ztgQty
+  const newZtgQty = oldZtgQty - BigInt(pae.transferred[pae.transferred.length - 1].toString()) 
+  pool.ztgQty = newZtgQty
+  console.log(`[${event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`)
+  await store.save<Pool>(pool)
+
+  let hp = new HistoricalPool()
+  hp.id = event.id + '-' + pool.poolId
+  hp.poolId = pool.poolId
+  hp.event = event.name.split('.')[1]
+  hp.ztgQty = pool.ztgQty
+  hp.blockNumber = block.height
+  hp.timestamp = new Date(block.timestamp)
+  console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
+  await store.save<HistoricalPool>(hp)
+
+  const tokenWeightOut = pool.weights[0] && pool.weights[0].assetId == 'Ztg' ? +pool.weights[0].len.toString() : 0
+  if (pool.weights && pool.weights.length > 0 && tokenWeightOut !== 0) {
+    await Promise.all(
+      pool.weights.map(async (wt, idx) => {
+        if (idx >= pae.transferred.length) return
+        let asset = await store.get(Asset, { where: { assetId: wt!.assetId } })
+        if (!asset || !asset.amountInPool || !asset.price) return
+
+        const assetWt = +wt!.len.toString()
+        const oldAssetQty = asset.amountInPool
+        const newAssetQty = oldAssetQty - BigInt(pae.transferred[idx - 1].toString())
+        const oldPrice = asset.price
+        const newPrice = calcSpotPrice(+newZtgQty.toString(), tokenWeightOut, +newAssetQty.toString(), assetWt)
+
+        asset.price = newPrice
+        asset.amountInPool = newAssetQty
+        console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
+        await store.save<Asset>(asset)
+
+        let ha = new HistoricalAsset()
+        ha.id = event.id + '-' + pool!.marketId + (idx - 1)
+        ha.accountId = ss58.codec('zeitgeist').encode(pae.cpep.who)
+        ha.assetId = asset.assetId
+        ha.newPrice = asset.price
+        ha.newAmountInPool = asset.amountInPool
+        ha.dPrice = newPrice - oldPrice
+        ha.dAmountInPool = newAssetQty - oldAssetQty 
+        ha.event = event.name.split('.')[1]
+        ha.blockNumber = block.height
+        ha.timestamp = new Date(block.timestamp)
+        console.log(`[${event.name}] Saving historical asset: ${JSON.stringify(ha, null, 2)}`)
+        await store.save<HistoricalAsset>(ha)
+      })
+    );
+  }
+}
+
 export async function swapsPoolJoin(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
   const {store, block, event} = ctx
   const {pae} = getPoolJoinEvent(ctx)
@@ -151,7 +211,7 @@ export async function swapsPoolJoin(ctx: EventHandlerContext<Store, {event: {arg
   
         let ha = new HistoricalAsset()
         ha.id = event.id + '-' + pool!.marketId + (idx - 1)
-        ha.accountId = pae.cpep.who.toString()
+        ha.accountId = ss58.codec('zeitgeist').encode(pae.cpep.who)
         ha.assetId = asset.assetId
         ha.newPrice = asset.price
         ha.newAmountInPool = asset.amountInPool

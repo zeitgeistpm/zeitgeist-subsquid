@@ -1,4 +1,4 @@
-import { SwapsPoolCreateEvent, SwapsPoolJoinEvent } from '../../types/events'
+import { SwapsPoolCreateEvent, SwapsPoolExitEvent, SwapsPoolJoinEvent } from '../../types/events'
 import { EventContext } from '../../types/support'
 import { PoolAssetsEvent } from '../../types/v35'
 import { CommonPoolEventParams, Pool } from '../../types/v39'
@@ -57,6 +57,27 @@ export function getPoolJoinEvent(ctx: EventContext): PoolJoinEvent {
   }
 }
 
+export function getPoolExitEvent(ctx: EventContext): PoolExitEvent {
+  const poolExitEvent = new SwapsPoolExitEvent(ctx)
+  if (poolExitEvent.isV23) {
+    let res = poolExitEvent.asV23
+    let pae = res as PoolAssetsEvent
+    pae.poolAmount = BigInt(0)
+    return {pae}
+  } else if (poolExitEvent.isV32) {
+    let res = poolExitEvent.asV32
+    let pae = res as PoolAssetsEvent
+    pae.poolAmount = BigInt(0)
+    return {pae}
+  } else if (poolExitEvent.isV35) {
+    const pae = poolExitEvent.asV35
+    return {pae}
+  } else {
+    const pae = ctx.event.args
+    return {pae}
+  }
+}
+
 interface PoolCreateEvent {
   cpep: CommonPoolEventParams
   pool: Pool
@@ -64,5 +85,9 @@ interface PoolCreateEvent {
 }
 
 interface PoolJoinEvent {
+  pae: PoolAssetsEvent
+}
+
+interface PoolExitEvent {
   pae: PoolAssetsEvent
 }

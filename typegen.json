@@ -29,6 +29,7 @@
     "PredictionMarkets.TokensRedeemed",
     "Swaps.PoolCreate",
     "Swaps.PoolJoin",
+    "Swaps.PoolExit",
     "System.NewAccount",
     "System.ExtrinsicSuccess",
     "System.ExtrinsicFailed",
