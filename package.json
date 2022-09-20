@@ -11,7 +11,6 @@
     "build": "rm -rf lib && tsc",
     "codegen": "npx squid-typeorm-codegen",
     "db:up": "docker-compose up -d db",
-    "dev": "yarn db:up && yarn redis:up && yarn build && NODE_ENV=local node lib/processor.js",
     "migration:generate": "squid-typeorm-migration generate",
     "migration:apply": "squid-typeorm-migration apply",
     "migration:revert": "npx squid-typeorm-migration revert",
