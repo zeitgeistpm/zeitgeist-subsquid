@@ -341,7 +341,7 @@
   },
   "typesAlias": {},
   "signedExtensions": {
-    "TransactionCallFilter": "u16"
+    "TransactionCallFilter": "Null"
   },
   "versions": []
 }

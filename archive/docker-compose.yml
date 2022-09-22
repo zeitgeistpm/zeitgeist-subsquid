@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:14  # CockroachDB cluster might be a better fit for production deployment
+    image: postgres:14
     container_name: db
     restart: always
 
@@ -14,3 +14,5 @@ services:
   gateway:
     image: subsquid/substrate-gateway:firesquid
     container_name: gateway
+    depends_on:
+      - db
