@@ -10,7 +10,7 @@ export async function systemExtrinsicFailed(ctx: EventHandlerContext<Store>) {
   const { store, block, event } = ctx
   if (!event.extrinsic || !event.extrinsic.signature || !event.extrinsic.signature.address) { return }
   const { dispatchInfo } = getExtrinsicFailedEvent(ctx)
-  if (dispatchInfo.paysFee.__kind == "No") { return }
+  if (dispatchInfo.paysFee.__kind == 'No') { return }
 
   const walletId = encodeAddress(event.extrinsic.signature.address['value'], 73)
   let acc = await store.get(Account, { where: { accountId: walletId } })
@@ -25,7 +25,7 @@ export async function systemExtrinsicFailed(ctx: EventHandlerContext<Store>) {
   }
 
   const txnFees = await getFees(block, event.extrinsic) 
-  let ab = await store.findOneBy(AccountBalance, { account: { accountId: walletId }, assetId: "Ztg" })
+  let ab = await store.findOneBy(AccountBalance, { account: { accountId: walletId }, assetId: 'Ztg' })
   if (ab) {
     acc.pvalue = Number(acc.pvalue) - Number(txnFees)
     console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
@@ -57,7 +57,7 @@ export async function systemExtrinsicSuccess(ctx: EventHandlerContext<Store>) {
   const { store, block, event } = ctx
   if (!event.extrinsic || !event.extrinsic.signature || !event.extrinsic.signature.address) { return }
   const { dispatchInfo } = getExtrinsicSuccessEvent(ctx)
-  if (dispatchInfo.paysFee.__kind == "No" ) { return }
+  if (dispatchInfo.paysFee.__kind == 'No' ) { return }
 
   const walletId = encodeAddress(event.extrinsic.signature.address['value'], 73)
   let acc = await store.get(Account, { where: { accountId: walletId } })
@@ -72,7 +72,7 @@ export async function systemExtrinsicSuccess(ctx: EventHandlerContext<Store>) {
   }
 
   const txnFees = await getFees(block, event.extrinsic) 
-  let ab = await store.findOneBy(AccountBalance, { account: { accountId: walletId }, assetId: "Ztg" })
+  let ab = await store.findOneBy(AccountBalance, { account: { accountId: walletId }, assetId: 'Ztg' })
   if (ab) {
     acc.pvalue = Number(acc.pvalue) - Number(txnFees)
     console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
@@ -98,24 +98,24 @@ export async function systemExtrinsicSuccess(ctx: EventHandlerContext<Store>) {
     console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
     await store.save<HistoricalAccountBalance>(hab)
 
-    let dhab = await store.get(HistoricalAccountBalance, { where: 
-      { accountId: acc.accountId, assetId: "Ztg", event: "DustLost", blockNumber: block.height } })
-    if (dhab) {
-      acc.pvalue = Number(acc.pvalue) - Number(dhab.dBalance)
+    let dHab = await store.get(HistoricalAccountBalance, { where: 
+      { accountId: acc.accountId, assetId: 'Ztg', event: 'DustLost', blockNumber: block.height } })
+    if (dHab) {
+      acc.pvalue = Number(acc.pvalue) - Number(dHab.dBalance)
       console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
       await store.save<Account>(acc)
 
-      ab.balance = ab.balance - dhab.dBalance
+      ab.balance = ab.balance - dHab.dBalance
       console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
       await store.save<AccountBalance>(ab)
 
-      dhab.dBalance = - dhab.dBalance
-      dhab.balance = ab.balance
-      dhab.dValue = Number(dhab.dBalance)
-      dhab.value = Number(dhab.balance)
-      dhab.pvalue = acc.pvalue
-      console.log(`[${event.name}] Updating historical account balance: ${JSON.stringify(dhab, null, 2)}`)
-      await store.save<HistoricalAccountBalance>(dhab)
+      dHab.dBalance = - dHab.dBalance
+      dHab.balance = ab.balance
+      dHab.dValue = Number(dHab.dBalance)
+      dHab.value = Number(dHab.balance)
+      dHab.pvalue = acc.pvalue
+      console.log(`[${event.name}] Updating historical account balance: ${JSON.stringify(dHab, null, 2)}`)
+      await store.save<HistoricalAccountBalance>(dHab)
     }
   }
 }
@@ -137,7 +137,7 @@ export async function systemNewAccount(ctx: EventHandlerContext<Store, {event: {
   let ab = new AccountBalance()
   ab.id = event.id + '-' + walletId.substring(walletId.length - 5)
   ab.account = newAcc
-  ab.assetId = "Ztg"
+  ab.assetId = 'Ztg'
   ab.balance = BigInt(0)
   ab.value = Number(ab.balance)
   console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)

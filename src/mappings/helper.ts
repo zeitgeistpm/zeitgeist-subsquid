@@ -17,15 +17,15 @@ export function calcSpotPrice(tokenBalanceIn: number, tokenWeightIn: number,
 
 export async function createAssetsForMarket(marketId: string, marketType: any): Promise<any> {
   const sdk = await Tools.getSDK()
-  return marketType.__kind == "Categorical"
+  return marketType.__kind == 'Categorical'
     ? [...Array(marketType.value).keys()].map((catIdx) => {
-        return sdk.api.createType("Asset", {
+        return sdk.api.createType('Asset', {
           categoricalOutcome: [marketId, catIdx],
         });
       })
-    : ["Long", "Short"].map((pos) => {
-        const position = sdk.api.createType("ScalarPosition", pos);
-        return sdk.api.createType("Asset", {
+    : ['Long', 'Short'].map((pos) => {
+        const position = sdk.api.createType('ScalarPosition', pos);
+        return sdk.api.createType('Asset', {
           scalarOutcome: [marketId, position.toString()],
         });
       });
@@ -54,19 +54,19 @@ export async function decodeMarketMetadata(metadata: string): Promise<DecodedMar
 }
 
 export function getAssetId(currencyId: any): string {
-  if (currencyId.__kind == "CategoricalOutcome") {
+  if (currencyId.__kind == 'CategoricalOutcome') {
     return JSON.stringify(util.AssetIdFromString('[' + currencyId.value.toString() + ']'))
-  } else if (currencyId.__kind == "ScalarOutcome") {
+  } else if (currencyId.__kind == 'ScalarOutcome') {
     const scale = new Array()
     scale.push(+currencyId.value[0].toString())
     scale.push(currencyId.value[1].__kind)
     return JSON.stringify(util.AssetIdFromString(JSON.stringify(scale)))
-  } else if (currencyId.__kind == "Ztg") {
-    return "Ztg"
-  } else if (currencyId.__kind == "PoolShare") {
-    return JSON.stringify(util.AssetIdFromString("pool" + currencyId.value.toString()))
+  } else if (currencyId.__kind == 'Ztg') {
+    return 'Ztg'
+  } else if (currencyId.__kind == 'PoolShare') {
+    return JSON.stringify(util.AssetIdFromString('pool' + currencyId.value.toString()))
   } else {
-    return ""
+    return ''
   }
 }
 

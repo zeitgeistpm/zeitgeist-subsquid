@@ -38,7 +38,7 @@ export function getMarketApprovedEvent(ctx: EventContext): MarketApprovedEvent {
   if (marketApprovedEvent.isV23) {
     const mId = marketApprovedEvent.asV23
     const marketId = Number(mId)
-    const status = ""
+    const status = ''
     return {marketId, status}
   } else if (marketApprovedEvent.isV29) {
     const [mId, marketStatus] = marketApprovedEvent.asV29
@@ -68,14 +68,14 @@ export function getMarketCreatedEvent(ctx: EventHandlerContext<Store, {event: {a
   const [marketId, param1, param2] = ctx.event.args
   const specVersion = +ctx.block.specId.substring(ctx.block.specId.indexOf('@')+1)
   if (specVersion < 32) {
-    const marketAccountId = ""
+    const marketAccountId = ''
     let market = param1 as any
     market.disputeMechanism = market.mdm
     market.period.start = market.period.value[0]
     market.period.end = market.period.value[1]
     return { marketId, marketAccountId, market } 
   } else if (specVersion < 36 ) {
-    const marketAccountId = ""
+    const marketAccountId = ''
     let market = param1 as any
     market.disputeMechanism = market.mdm
     market.period.start = market.period.value.start
@@ -103,7 +103,7 @@ export function getMarketDisputedEvent(ctx: EventContext): MarketDisputedEvent {
     const [mId, dispute] = marketDisputedEvent.asV23
     let report = {} as any
     const marketId = Number(mId)
-    const status = ""
+    const status = ''
     report.outcome = dispute
     return {marketId, status, report}
   } else if (marketDisputedEvent.isV29) {
@@ -134,7 +134,7 @@ export function getMarketInsufficientSubsidyEvent(ctx: EventContext): MarketInsu
   const marketInsufficientSubsidyEvent = new PredictionMarketsMarketInsufficientSubsidyEvent(ctx)
   if (marketInsufficientSubsidyEvent.isV23) {
     const marketId = Number(marketInsufficientSubsidyEvent.asV23)
-    const status = ""
+    const status = ''
     return {marketId, status}
   } else if (marketInsufficientSubsidyEvent.isV29) {
     const [mId, marketStatus] = marketInsufficientSubsidyEvent.asV29
@@ -167,7 +167,7 @@ export function getMarketReportedEvent(ctx: EventContext): MarketReportedEvent {
     const [mId, marketReport] = marketReportedEvent.asV23
     let report = {} as any
     const marketId = Number(mId)
-    const status = ""
+    const status = ''
     report.outcome = marketReport
     return {marketId, status, report}
   } else if (marketReportedEvent.isV29) {
@@ -189,7 +189,7 @@ export function getMarketResolvedEvent(ctx: EventContext): MarketResolvedEvent {
     const [mId, outcome] = marketResolvedEvent.asV23
     let report = {} as any
     const marketId = Number(mId)
-    const status = ""
+    const status = ''
     report.value = outcome
     return {marketId, status, report}
   } else if (marketResolvedEvent.isV29) {
@@ -209,7 +209,7 @@ export function getMarketStartedWithSubsidyEvent(ctx: EventContext): MarketStart
   const marketStartedWithSubsidyEvent = new PredictionMarketsMarketStartedWithSubsidyEvent(ctx)
   if (marketStartedWithSubsidyEvent.isV23) {
     const marketId = Number(marketStartedWithSubsidyEvent.asV23)
-    const status = ""
+    const status = ''
     return {marketId, status}
   } else if (marketStartedWithSubsidyEvent.isV29) {
     const [mId, marketStatus] = marketStartedWithSubsidyEvent.asV29

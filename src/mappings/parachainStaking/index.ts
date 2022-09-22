@@ -19,7 +19,7 @@ export async function parachainStakingRewarded(ctx: EventHandlerContext<Store, {
     await initBalance(acc, store, block, event as SubstrateEvent)
   }
 
-  let ab = await store.findOneBy(AccountBalance, { account: { accountId: walletId }, assetId: "Ztg" })
+  let ab = await store.findOneBy(AccountBalance, { account: { accountId: walletId }, assetId: 'Ztg' })
   if (ab) {
     acc.pvalue = Number(acc.pvalue) + Number(amount)
     console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
