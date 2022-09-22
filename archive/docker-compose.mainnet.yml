@@ -14,8 +14,8 @@ services:
     command: [
       "--types-bundle", "/config/types-mainnet.json",
       "-e", "wss://zeitgeist-rpc.dwellir.com",
+      "-c", "10",
       "-e", "wss://zeitgeist.api.onfinality.io/public-ws",
-      "-c", "10", # allow up to 20 pending requests for the above endpoint (default is 5)
       "--out", "postgres://postgres:postgres@db:5432/squid-archive"
     ]
     ports:
