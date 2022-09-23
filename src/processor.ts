@@ -21,7 +21,7 @@ console.log(`ENVIRONMENT: ${process.env.NODE_ENV}`)
 
 const processor = new SubstrateProcessor(new TypeormDatabase());
 processor.setTypesBundle('zeitgeist.json');
-processor.setBatchSize(500);
+processor.setBatchSize(+(process.env.BATCH_SIZE ?? 500));
 processor.setDataSource({
   archive: process.env.INDEXER_ENDPOINT_URL ?? 'https://indexer.zeitgeist.pm/graphql',
   chain: process.env.WS_NODE_URL ?? 'wss://bsr.zeitgeist.pm',
