@@ -1,7 +1,5 @@
 import type {Result} from './support'
 
-export type AccountId32 = Uint8Array
-
 export type Asset = Asset_CategoricalOutcome | Asset_ScalarOutcome | Asset_CombinatorialOutcome | Asset_PoolShare | Asset_Ztg
 
 export interface Asset_CategoricalOutcome {
@@ -20,7 +18,7 @@ export interface Asset_CombinatorialOutcome {
 
 export interface Asset_PoolShare {
   __kind: 'PoolShare'
-  value: SerdeWrapper
+  value: bigint
 }
 
 export interface Asset_Ztg {
@@ -84,8 +82,6 @@ export interface ScalarPosition_Long {
 export interface ScalarPosition_Short {
   __kind: 'Short'
 }
-
-export type SerdeWrapper = bigint
 
 export type TokenError = TokenError_NoFunds | TokenError_WouldDie | TokenError_BelowMinimum | TokenError_CannotCreate | TokenError_UnknownAsset | TokenError_Frozen | TokenError_Unsupported
 

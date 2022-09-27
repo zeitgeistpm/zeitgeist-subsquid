@@ -6,15 +6,15 @@ import {OutcomeReport} from "./_outcomeReport"
  * Market's report details
  */
 export class MarketReport {
-  private _at!: number
-  private _by!: string
+  private _at!: number | undefined | null
+  private _by!: string | undefined | null
   private _outcome!: OutcomeReport
 
   constructor(props?: Partial<Omit<MarketReport, 'toJSON'>>, json?: any) {
     Object.assign(this, props)
     if (json != null) {
-      this._at = marshal.int.fromJSON(json.at)
-      this._by = marshal.string.fromJSON(json.by)
+      this._at = json.at == null ? undefined : marshal.int.fromJSON(json.at)
+      this._by = json.by == null ? undefined : marshal.string.fromJSON(json.by)
       this._outcome = new OutcomeReport(undefined, marshal.nonNull(json.outcome))
     }
   }
@@ -22,24 +22,22 @@ export class MarketReport {
   /**
    * Block number
    */
-  get at(): number {
-    assert(this._at != null, 'uninitialized access')
+  get at(): number | undefined | null {
     return this._at
   }
 
-  set at(value: number) {
+  set at(value: number | undefined | null) {
     this._at = value
   }
 
   /**
    * Account which reported
    */
-  get by(): string {
-    assert(this._by != null, 'uninitialized access')
+  get by(): string | undefined | null {
     return this._by
   }
 
-  set by(value: string) {
+  set by(value: string | undefined | null) {
     this._by = value
   }
 

@@ -18,20 +18,18 @@ export interface Asset_CombinatorialOutcome {
 
 export interface Asset_PoolShare {
   __kind: 'PoolShare'
-  value: SerdeWrapper
+  value: bigint
 }
 
 export interface Asset_Ztg {
   __kind: 'Ztg'
 }
 
-export type AccountId32 = Uint8Array
-
 export interface Market {
-  creator: AccountId32
+  creator: Uint8Array
   creation: MarketCreation
   creatorFee: number
-  oracle: AccountId32
+  oracle: Uint8Array
   metadata: Uint8Array
   marketType: MarketType
   period: MarketPeriod
@@ -44,7 +42,7 @@ export interface Market {
 
 export interface CommonPoolEventParams {
   poolId: bigint
-  who: AccountId32
+  who: Uint8Array
 }
 
 export interface Pool {
@@ -130,8 +128,6 @@ export interface ScalarPosition_Short {
   __kind: 'Short'
 }
 
-export type SerdeWrapper = bigint
-
 export type MarketCreation = MarketCreation_Permissionless | MarketCreation_Advised
 
 export interface MarketCreation_Permissionless {
@@ -158,12 +154,12 @@ export type MarketPeriod = MarketPeriod_Block | MarketPeriod_Timestamp
 
 export interface MarketPeriod_Block {
   __kind: 'Block'
-  value: Range_77
+  value: Range
 }
 
 export interface MarketPeriod_Timestamp {
   __kind: 'Timestamp'
-  value: Range_77
+  value: Range
 }
 
 export type ScoringRule = ScoringRule_CPMM | ScoringRule_RikiddoSigmoidFeeMarketEma
@@ -216,7 +212,7 @@ export interface MarketStatus_Resolved {
 
 export interface Report {
   at: bigint
-  by: AccountId32
+  by: Uint8Array
   outcome: OutcomeReport
 }
 
@@ -236,7 +232,7 @@ export type MarketDisputeMechanism = MarketDisputeMechanism_Authorized | MarketD
 
 export interface MarketDisputeMechanism_Authorized {
   __kind: 'Authorized'
-  value: AccountId32
+  value: Uint8Array
 }
 
 export interface MarketDisputeMechanism_Court {
@@ -334,7 +330,7 @@ export interface RangeInclusive {
   end: bigint
 }
 
-export interface Range_77 {
+export interface Range {
   start: bigint
   end: bigint
 }

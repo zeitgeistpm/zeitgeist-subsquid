@@ -2,9 +2,9 @@
  * Script to find change in on-chain Ztg balance of an account between two block numbers
  * Run using `ts-node test/findChangeInBalance.ts`
  */
-import { Tools } from "../src/processor/util"
 import { AccountInfo } from "@polkadot/types/interfaces/system";
 import SDK from "@zeitgeistpm/sdk";
+import { Tools } from "../src/mappings/util"
 
 // Modify values as per requirement
 const WS_NODE_URL = `wss://bsr.zeitgeist.pm`;
@@ -49,7 +49,7 @@ const findChangeInBalance = async () => {
 const getBalanceAt = async (sdk: SDK, blockNumber: number) => {
   const blockHash = await sdk.api.rpc.chain.getBlockHash(blockNumber);
   const {data: { free: amt }} = (await sdk.api.query.system.account.at(blockHash, ACCOUNT_ID)) as AccountInfo;
-  console.log(`Balance fetched from #${blockNumber}`);
+  console.log(`Balance fetched from #${blockNumber} [${blockHash}]`);
   return amt;
 }
 

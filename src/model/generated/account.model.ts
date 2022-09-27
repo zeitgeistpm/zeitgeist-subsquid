@@ -25,13 +25,13 @@ export class Account {
   /**
    * Zeitgeist's identifier for market. Valid only for market account.
    */
-  @Column_("integer", {nullable: true})
+  @Column_("int4", {nullable: true})
   marketId!: number | undefined | null
 
   /**
    * Zeitgeist's identifier for pool. Valid only for pool account.
    */
-  @Column_("integer", {nullable: true})
+  @Column_("int4", {nullable: true})
   poolId!: number | undefined | null
 
   /**

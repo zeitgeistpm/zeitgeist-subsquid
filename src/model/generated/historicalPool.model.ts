@@ -17,7 +17,7 @@ export class HistoricalPool {
   /**
    * Zeitgeist's identifier for pool
    */
-  @Column_("integer", {nullable: false})
+  @Column_("int4", {nullable: false})
   poolId!: number
 
   /**
@@ -47,7 +47,7 @@ export class HistoricalPool {
   /**
    * Height of the block
    */
-  @Column_("integer", {nullable: false})
+  @Column_("int4", {nullable: false})
   blockNumber!: number
 
   /**

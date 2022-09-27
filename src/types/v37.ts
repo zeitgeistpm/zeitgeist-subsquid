@@ -2,7 +2,7 @@ import type {Result} from './support'
 
 export interface CommonPoolEventParams {
   poolId: bigint
-  who: AccountId32
+  who: Uint8Array
 }
 
 export interface Pool {
@@ -16,8 +16,6 @@ export interface Pool {
   totalWeight: (bigint | undefined)
   weights: ([Asset, bigint][] | undefined)
 }
-
-export type AccountId32 = Uint8Array
 
 export interface SwapEvent {
   assetAmountIn: bigint
@@ -47,7 +45,7 @@ export interface Asset_CombinatorialOutcome {
 
 export interface Asset_PoolShare {
   __kind: 'PoolShare'
-  value: SerdeWrapper
+  value: bigint
 }
 
 export interface Asset_Ztg {
@@ -91,5 +89,3 @@ export interface ScalarPosition_Long {
 export interface ScalarPosition_Short {
   __kind: 'Short'
 }
-
-export type SerdeWrapper = bigint

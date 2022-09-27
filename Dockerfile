@@ -30,7 +30,7 @@ ADD zeitgeist.json .
 
 
 FROM squid AS processor
-CMD ["node", "lib/processor/index.js"]
+CMD ["node", "lib/processor.js"]
 
 
 FROM squid AS query-node

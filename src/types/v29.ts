@@ -212,7 +212,7 @@ export interface XcmErrorV0_SendFailed {
 
 export interface XcmErrorV0_CannotReachDestination {
   __kind: 'CannotReachDestination'
-  value: [MultiLocationV1, InstructionV2[]]
+  value: [MultiLocation, InstructionV2[]]
 }
 
 export interface XcmErrorV0_MultiLocationFull {
@@ -295,7 +295,7 @@ export interface XcmErrorV0_RecursionLimitReached {
   value: null
 }
 
-export interface MultiLocationV1 {
+export interface MultiLocation {
   parents: number
   interior: JunctionsV1
 }
@@ -327,19 +327,19 @@ export interface InstructionV2_QueryResponse {
 export interface InstructionV2_TransferAsset {
   __kind: 'TransferAsset'
   assets: MultiAssetV1[]
-  beneficiary: MultiLocationV1
+  beneficiary: MultiLocationV2
 }
 
 export interface InstructionV2_TransferReserveAsset {
   __kind: 'TransferReserveAsset'
   assets: MultiAssetV1[]
-  dest: MultiLocationV1
+  dest: MultiLocationV2
   xcm: InstructionV2[]
 }
 
 export interface InstructionV2_Transact {
   __kind: 'Transact'
-  originType: OriginKindV0
+  originType: OriginKindV2
   requireWeightAtMost: bigint
   call: DoubleEncodedCall
 }
@@ -370,62 +370,62 @@ export interface InstructionV2_ClearOrigin {
 
 export interface InstructionV2_DescendOrigin {
   __kind: 'DescendOrigin'
-  value: JunctionsV1
+  value: InteriorMultiLocation
 }
 
 export interface InstructionV2_ReportError {
   __kind: 'ReportError'
   queryId: bigint
-  dest: MultiLocationV1
+  dest: MultiLocationV2
   maxResponseWeight: bigint
 }
 
 export interface InstructionV2_DepositAsset {
   __kind: 'DepositAsset'
-  assets: MultiAssetFilterV1
+  assets: MultiAssetFilterV2
   maxAssets: number
-  beneficiary: MultiLocationV1
+  beneficiary: MultiLocationV2
 }
 
 export interface InstructionV2_DepositReserveAsset {
   __kind: 'DepositReserveAsset'
-  assets: MultiAssetFilterV1
+  assets: MultiAssetFilterV2
   maxAssets: number
-  dest: MultiLocationV1
+  dest: MultiLocationV2
   xcm: InstructionV2[]
 }
 
 export interface InstructionV2_ExchangeAsset {
   __kind: 'ExchangeAsset'
-  give: MultiAssetFilterV1
+  give: MultiAssetFilterV2
   receive: MultiAssetV1[]
 }
 
 export interface InstructionV2_InitiateReserveWithdraw {
   __kind: 'InitiateReserveWithdraw'
-  assets: MultiAssetFilterV1
-  reserve: MultiLocationV1
+  assets: MultiAssetFilterV2
+  reserve: MultiLocationV2
   xcm: InstructionV2[]
 }
 
 export interface InstructionV2_InitiateTeleport {
   __kind: 'InitiateTeleport'
-  assets: MultiAssetFilterV1
-  dest: MultiLocationV1
+  assets: MultiAssetFilterV2
+  dest: MultiLocationV2
   xcm: InstructionV2[]
 }
 
 export interface InstructionV2_QueryHolding {
   __kind: 'QueryHolding'
   queryId: bigint
-  dest: MultiLocationV1
-  assets: MultiAssetFilterV1
+  dest: MultiLocationV2
+  assets: MultiAssetFilterV2
   maxResponseWeight: bigint
 }
 
 export interface InstructionV2_BuyExecution {
   __kind: 'BuyExecution'
-  fees: MultiAssetV1
+  fees: MultiAssetV2
   weightLimit: WeightLimitV2
 }
 
@@ -452,7 +452,7 @@ export interface InstructionV2_ClearError {
 export interface InstructionV2_ClaimAsset {
   __kind: 'ClaimAsset'
   assets: MultiAssetV1[]
-  ticket: MultiLocationV1
+  ticket: MultiLocationV2
 }
 
 export interface InstructionV2_Trap {
@@ -529,21 +529,26 @@ export interface ResponseV2_ExecutionResult {
   value: Result<null, [number, XcmErrorV2]>
 }
 
-export type OriginKindV0 = OriginKindV0_Native | OriginKindV0_SovereignAccount | OriginKindV0_Superuser | OriginKindV0_Xcm
+export interface MultiLocationV2 {
+  parents: number
+  interior: JunctionsV1
+}
 
-export interface OriginKindV0_Native {
+export type OriginKindV2 = OriginKindV2_Native | OriginKindV2_SovereignAccount | OriginKindV2_Superuser | OriginKindV2_Xcm
+
+export interface OriginKindV2_Native {
   __kind: 'Native'
 }
 
-export interface OriginKindV0_SovereignAccount {
+export interface OriginKindV2_SovereignAccount {
   __kind: 'SovereignAccount'
 }
 
-export interface OriginKindV0_Superuser {
+export interface OriginKindV2_Superuser {
   __kind: 'Superuser'
 }
 
-export interface OriginKindV0_Xcm {
+export interface OriginKindV2_Xcm {
   __kind: 'Xcm'
 }
 
@@ -551,16 +556,68 @@ export interface DoubleEncodedCall {
   encoded: Uint8Array
 }
 
-export type MultiAssetFilterV1 = MultiAssetFilterV1_Definite | MultiAssetFilterV1_Wild
+export type InteriorMultiLocation = InteriorMultiLocation_Here | InteriorMultiLocation_X1 | InteriorMultiLocation_X2 | InteriorMultiLocation_X3 | InteriorMultiLocation_X4 | InteriorMultiLocation_X5 | InteriorMultiLocation_X6 | InteriorMultiLocation_X7 | InteriorMultiLocation_X8
 
-export interface MultiAssetFilterV1_Definite {
+export interface InteriorMultiLocation_Here {
+  __kind: 'Here'
+  value: null
+}
+
+export interface InteriorMultiLocation_X1 {
+  __kind: 'X1'
+  value: JunctionV1
+}
+
+export interface InteriorMultiLocation_X2 {
+  __kind: 'X2'
+  value: [JunctionV1, JunctionV1]
+}
+
+export interface InteriorMultiLocation_X3 {
+  __kind: 'X3'
+  value: [JunctionV1, JunctionV1, JunctionV1]
+}
+
+export interface InteriorMultiLocation_X4 {
+  __kind: 'X4'
+  value: [JunctionV1, JunctionV1, JunctionV1, JunctionV1]
+}
+
+export interface InteriorMultiLocation_X5 {
+  __kind: 'X5'
+  value: [JunctionV1, JunctionV1, JunctionV1, JunctionV1, JunctionV1]
+}
+
+export interface InteriorMultiLocation_X6 {
+  __kind: 'X6'
+  value: [JunctionV1, JunctionV1, JunctionV1, JunctionV1, JunctionV1, JunctionV1]
+}
+
+export interface InteriorMultiLocation_X7 {
+  __kind: 'X7'
+  value: [JunctionV1, JunctionV1, JunctionV1, JunctionV1, JunctionV1, JunctionV1, JunctionV1]
+}
+
+export interface InteriorMultiLocation_X8 {
+  __kind: 'X8'
+  value: [JunctionV1, JunctionV1, JunctionV1, JunctionV1, JunctionV1, JunctionV1, JunctionV1, JunctionV1]
+}
+
+export type MultiAssetFilterV2 = MultiAssetFilterV2_Definite | MultiAssetFilterV2_Wild
+
+export interface MultiAssetFilterV2_Definite {
   __kind: 'Definite'
   value: MultiAssetV1[]
 }
 
-export interface MultiAssetFilterV1_Wild {
+export interface MultiAssetFilterV2_Wild {
   __kind: 'Wild'
   value: WildMultiAssetV1
+}
+
+export interface MultiAssetV2 {
+  id: XcmAssetId
+  fungibility: FungibilityV1
 }
 
 export type WeightLimitV2 = WeightLimitV2_Unlimited | WeightLimitV2_Limited
@@ -630,7 +687,7 @@ export type XcmAssetId = XcmAssetId_Concrete | XcmAssetId_Abstract
 
 export interface XcmAssetId_Concrete {
   __kind: 'Concrete'
-  value: MultiLocationV1
+  value: MultiLocation
 }
 
 export interface XcmAssetId_Abstract {

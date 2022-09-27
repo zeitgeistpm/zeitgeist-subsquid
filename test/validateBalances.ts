@@ -2,15 +2,14 @@
  * Script to validate Ztg balance of an account against on-chain balance
  * Run using `ts-node test/validateBalances.ts`
  */
-import https from 'https';
-import { Tools } from '../src/processor/util';
 import { AccountInfo } from '@polkadot/types/interfaces/system';
+import https from 'https';
+import { Tools } from '../src/mappings/util';
 
 // Modify values as per requirement
 const WS_NODE_URL = `wss://bsr.zeitgeist.pm`;
 const QUERY_NODE_HOSTNAME = `processor.zeitgeist.pm`;
-const ACCOUNTS_LIMIT = 20; // Number of accounts that need to be validated
-const BLOCK_NUMBER = 1601267; // Balances from polkadot.js will be pulled as on this block number on chain
+const ACCOUNTS_LIMIT = 100; // Number of accounts that need to be validated
 
 // GraphQL query for retrieving Ztg balances of accounts
 const query = JSON.stringify({
@@ -21,6 +20,9 @@ const query = JSON.stringify({
       }
       assetId
       balance
+    }
+    squidStatus {
+      height
     }
   }`,
 });
@@ -56,7 +58,7 @@ const req = https.request(options, (res) => {
      * It is recommended to use `BLOCK_NUMBER` few blocks before finalized head 
      * of the chain so that subsquid has the data processed in its database.
      */
-    const blockHash = await sdk.api.rpc.chain.getBlockHash(BLOCK_NUMBER);
+    const blockHash = await sdk.api.rpc.chain.getBlockHash(JSON.parse(data).data.squidStatus.height);
     console.log();
 
     for (let i = 0; i < accounts.length; i++) {

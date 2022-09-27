@@ -68,7 +68,7 @@ export class HistoricalAccountBalance {
   /**
    * Height of the block
    */
-  @Column_("integer", {nullable: false})
+  @Column_("int4", {nullable: false})
   blockNumber!: number
 
   /**
