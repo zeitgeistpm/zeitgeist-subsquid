@@ -7,8 +7,7 @@ import { parachainStakingRewarded } from './mappings/parachainStaking';
 import { boughtCompleteSet, marketApproved, marketClosed, marketCreated, marketDisputed, marketExpired, 
   marketInsufficientSubsidy, marketRejected, marketReported, marketResolved, marketStartedWithSubsidy, 
   soldCompleteSet, tokensRedeemed} from './mappings/predictionMarkets';
-import { swapsPoolClosed, swapsPoolCreate, swapsPoolExit, swapsPoolJoin, swapsSwapExactAmountIn, 
-  swapsSwapExactAmountOut } from './mappings/swaps';
+import { poolClosed, poolCreate, poolExit, poolJoin, swapExactAmountIn, swapExactAmountOut } from './mappings/swaps';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensEndowed } from './mappings/tokens';
 
@@ -55,12 +54,12 @@ processor.addEventHandler('PredictionMarkets.MarketStartedWithSubsidy', ctx => m
 processor.addEventHandler('PredictionMarkets.SoldCompleteSet', ctx => soldCompleteSet(ctx))
 processor.addEventHandler('PredictionMarkets.TokensRedeemed', ctx => tokensRedeemed(ctx))
 
-processor.addEventHandler('Swaps.PoolClosed', ctx => swapsPoolClosed(ctx))
-processor.addEventHandler('Swaps.PoolCreate', ctx => swapsPoolCreate(ctx))
-processor.addEventHandler('Swaps.PoolExit', ctx => swapsPoolExit(ctx))
-processor.addEventHandler('Swaps.PoolJoin', ctx => swapsPoolJoin(ctx))
-processor.addEventHandler('Swaps.SwapExactAmountIn', ctx => swapsSwapExactAmountIn(ctx))
-processor.addEventHandler('Swaps.SwapExactAmountOut', ctx => swapsSwapExactAmountOut(ctx))
+processor.addEventHandler('Swaps.PoolClosed', ctx => poolClosed(ctx))
+processor.addEventHandler('Swaps.PoolCreate', ctx => poolCreate(ctx))
+processor.addEventHandler('Swaps.PoolExit', ctx => poolExit(ctx))
+processor.addEventHandler('Swaps.PoolJoin', ctx => poolJoin(ctx))
+processor.addEventHandler('Swaps.SwapExactAmountIn', ctx => swapExactAmountIn(ctx))
+processor.addEventHandler('Swaps.SwapExactAmountOut', ctx => swapExactAmountOut(ctx))
 
 processor.addEventHandler('System.NewAccount', ctx => systemNewAccount(ctx))
 

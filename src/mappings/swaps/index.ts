@@ -8,7 +8,7 @@ import { getPoolClosedEvent, getPoolCreateEvent, getPoolExitEvent, getPoolJoinEv
   getSwapExactAmountInEvent, getSwapExactAmountOutEvent} from './types'
 
 
-export async function swapsPoolClosed(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
+export async function poolClosed(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
   const {store, block, event} = ctx
   const {poolId} = getPoolClosedEvent(ctx)
 
@@ -30,7 +30,7 @@ export async function swapsPoolClosed(ctx: EventHandlerContext<Store, {event: {a
   await store.save<HistoricalPool>(hp)
 }
 
-export async function swapsPoolCreate(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
+export async function poolCreate(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
   const {store, block, event} = ctx
   const {cpep, swapPool, amount} = getPoolCreateEvent(ctx)
 
@@ -132,7 +132,7 @@ export async function swapsPoolCreate(ctx: EventHandlerContext<Store, {event: {a
   await store.save<HistoricalPool>(hp)
 }
 
-export async function swapsPoolExit(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
+export async function poolExit(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
   const {store, block, event} = ctx
   const {pae, walletId} = getPoolExitEvent(ctx)
 
@@ -193,7 +193,7 @@ export async function swapsPoolExit(ctx: EventHandlerContext<Store, {event: {arg
   }
 }
 
-export async function swapsPoolJoin(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
+export async function poolJoin(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
   const {store, block, event} = ctx
   const {pae, walletId} = getPoolJoinEvent(ctx)
 
@@ -254,7 +254,7 @@ export async function swapsPoolJoin(ctx: EventHandlerContext<Store, {event: {arg
   }
 }
 
-export async function swapsSwapExactAmountIn(ctx: EventHandlerContext<Store>) {
+export async function swapExactAmountIn(ctx: EventHandlerContext<Store>) {
   const {store, block, event} = ctx
   const {swapEvent, walletId} = getSwapExactAmountInEvent(ctx)
 
@@ -354,7 +354,7 @@ export async function swapsSwapExactAmountIn(ctx: EventHandlerContext<Store>) {
   }
 }
 
-export async function swapsSwapExactAmountOut(ctx: EventHandlerContext<Store>) {
+export async function swapExactAmountOut(ctx: EventHandlerContext<Store>) {
   const {store, block, event} = ctx
   const {swapEvent, walletId} = getSwapExactAmountOutEvent(ctx)
 
