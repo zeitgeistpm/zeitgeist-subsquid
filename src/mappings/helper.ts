@@ -3,6 +3,7 @@ import { SubstrateBlock, SubstrateEvent, SubstrateExtrinsic } from '@subsquid/su
 import { Store } from '@subsquid/typeorm-store';
 import { util } from '@zeitgeistpm/sdk';
 import { Account, AccountBalance, HistoricalAccountBalance } from '../model'
+import { SwapEvent } from '../types/v37';
 import { Cache, IPFS, Tools } from './util';
 
 
@@ -128,6 +129,34 @@ export async function initBalance(acc: Account, store: Store, block: SubstrateBl
   hab.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
   await store.save<HistoricalAccountBalance>(hab)
+}
+
+export function whetherBuyOrSell(swapEvent: SwapEvent, event: SubstrateEvent): string|undefined {
+  if (swapEvent.assetIn) {
+    if (getAssetId(swapEvent.assetIn) == 'Ztg')
+      return 'Buy'
+    else
+      return 'Sell'
+  } else if (event.extrinsic) {
+    const args = event.extrinsic.call.args
+    if (args.assetIn && getAssetId(args.assetIn) == 'Ztg') {
+      return 'Buy'
+    } else if (args.assetOut && getAssetId(args.assetOut) == 'Ztg') {
+      return 'Sell'
+    } else if (args.calls) {
+      const extrinsic = event.name.indexOf('Out') > -1 ? 'swap_exact_amount_out' : 'swap_exact_amount_in'
+      for (let ext of args.calls as 
+        Array<{ __kind: string, value: { __kind: string, assetIn: any, poolId: string} }> ) {
+        const { __kind: method, value: { __kind, assetIn, poolId} } = ext;
+        if (method == 'Swaps' && __kind == extrinsic && poolId == swapEvent.cpep.poolId.toString()) {
+          if (getAssetId(assetIn) == 'Ztg') 
+            return 'Buy'
+          else
+            return 'Sell'
+        }  
+      }
+    }
+  }
 }
 
 interface DecodedMarketMetadata {
