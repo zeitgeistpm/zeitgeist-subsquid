@@ -135,7 +135,7 @@ export function whetherBuyOrSell(swapEvent: SwapEvent, event: SubstrateEvent): s
   if (swapEvent.assetIn) {
     if (getAssetId(swapEvent.assetIn) == 'Ztg')
       return 'Buy'
-    else
+    else if (getAssetId(swapEvent.assetOut) == 'Ztg')
       return 'Sell'
   } else if (event.extrinsic) {
     const args = event.extrinsic.call.args
@@ -146,12 +146,12 @@ export function whetherBuyOrSell(swapEvent: SwapEvent, event: SubstrateEvent): s
     } else if (args.calls) {
       const extrinsic = event.name.indexOf('Out') > -1 ? 'swap_exact_amount_out' : 'swap_exact_amount_in'
       for (let ext of args.calls as 
-        Array<{ __kind: string, value: { __kind: string, assetIn: any, poolId: string} }> ) {
-        const { __kind: method, value: { __kind, assetIn, poolId} } = ext;
+        Array<{ __kind: string, value: { __kind: string, assetIn: any, assetOut: any, poolId: string } }> ) {
+        const { __kind: method, value: { __kind, assetIn, assetOut, poolId } } = ext;
         if (method == 'Swaps' && __kind == extrinsic && poolId == swapEvent.cpep.poolId.toString()) {
           if (getAssetId(assetIn) == 'Ztg') 
             return 'Buy'
-          else
+          else if (getAssetId(assetOut) == 'Ztg') 
             return 'Sell'
         }  
       }
