@@ -1,12 +1,23 @@
 import { encodeAddress } from '@polkadot/keyring'
 import * as ss58 from '@subsquid/ss58'
-import { SwapsPoolClosedEvent, SwapsPoolCreateEvent, SwapsPoolExitEvent, SwapsPoolJoinEvent, 
-  SwapsSwapExactAmountInEvent, SwapsSwapExactAmountOutEvent} from '../../types/events'
+import { SwapsPoolActiveEvent, SwapsPoolClosedEvent, SwapsPoolCreateEvent, SwapsPoolExitEvent, 
+  SwapsPoolJoinEvent, SwapsSwapExactAmountInEvent, SwapsSwapExactAmountOutEvent} from '../../types/events'
 import { EventContext } from '../../types/support'
 import { PoolAssetsEvent } from '../../types/v35'
 import { SwapEvent } from '../../types/v37'
 import { CommonPoolEventParams, Pool } from '../../types/v39'
 
+
+export function getPoolActiveEvent(ctx: EventContext): PoolActiveEvent {
+  const poolActiveEvent = new SwapsPoolActiveEvent(ctx)
+  if (poolActiveEvent.isV39) {
+    const poolId = poolActiveEvent.asV39
+    return {poolId}
+  } else {
+    const [poolId] = ctx.event.args
+    return {poolId}
+  }
+}
 
 export function getPoolClosedEvent(ctx: EventContext): PoolClosedEvent {
   const poolCloseEvent = new SwapsPoolClosedEvent(ctx)
@@ -139,6 +150,10 @@ export function getSwapExactAmountOutEvent(ctx: EventContext): SwapExactAmountOu
   }
 }
 
+
+interface PoolActiveEvent {
+  poolId: bigint
+}
 
 interface PoolClosedEvent {
   poolId: bigint
