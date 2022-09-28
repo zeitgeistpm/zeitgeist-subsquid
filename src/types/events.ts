@@ -1102,6 +1102,35 @@ export class PredictionMarketsTokensRedeemedEvent {
   }
 }
 
+export class SwapsPoolActiveEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Swaps.PoolActive')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * A pool was opened. \[pool_id\]
+   */
+  get isV39(): boolean {
+    return this._chain.getEventHash('Swaps.PoolActive') === '47b59f698451e50cce59979f0121e842fa3f8b2bcef2e388222dbd69849514f9'
+  }
+
+  /**
+   * A pool was opened. \[pool_id\]
+   */
+  get asV39(): bigint {
+    assert(this.isV39)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class SwapsPoolClosedEvent {
   private readonly _chain: Chain
   private readonly event: Event
