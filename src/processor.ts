@@ -7,7 +7,8 @@ import { parachainStakingRewarded } from './mappings/parachainStaking';
 import { boughtCompleteSet, marketApproved, marketClosed, marketCreated, marketDisputed, marketExpired, 
   marketInsufficientSubsidy, marketRejected, marketReported, marketResolved, marketStartedWithSubsidy, 
   soldCompleteSet, tokensRedeemed} from './mappings/predictionMarkets';
-import { poolClosed, poolCreate, poolExit, poolJoin, swapExactAmountIn, swapExactAmountOut } from './mappings/swaps';
+import { poolActive, poolClosed, poolCreate, poolExit, poolJoin, swapExactAmountIn, 
+  swapExactAmountOut } from './mappings/swaps';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensEndowed } from './mappings/tokens';
 
@@ -54,6 +55,7 @@ processor.addEventHandler('PredictionMarkets.MarketStartedWithSubsidy', ctx => m
 processor.addEventHandler('PredictionMarkets.SoldCompleteSet', ctx => soldCompleteSet(ctx))
 processor.addEventHandler('PredictionMarkets.TokensRedeemed', ctx => tokensRedeemed(ctx))
 
+processor.addEventHandler('Swaps.PoolActive', ctx => poolActive(ctx))
 processor.addEventHandler('Swaps.PoolClosed', ctx => poolClosed(ctx))
 processor.addEventHandler('Swaps.PoolCreate', ctx => poolCreate(ctx))
 processor.addEventHandler('Swaps.PoolExit', ctx => poolExit(ctx))
