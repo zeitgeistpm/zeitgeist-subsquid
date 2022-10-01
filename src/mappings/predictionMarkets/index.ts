@@ -33,9 +33,9 @@ export async function boughtCompleteSet(ctx: EventHandlerContext<Store>) {
   let acc = await store.get(Account, { where: { accountId: walletId } })
   if (!acc) { return }
 
-  const len = +market.marketType.categorical!
+  const len = market.outcomeAssets.length
   for (let i = 0; i < len; i++) {
-    const currencyId = JSON.stringify(util.AssetIdFromString(`[${marketId},${i}]`))
+    const currencyId = market.outcomeAssets[i]!
     let ab = await store.findOneBy(AccountBalance, { account: { accountId: walletId }, assetId: currencyId })
     if (!ab) { return }
 
