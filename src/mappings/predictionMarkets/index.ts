@@ -475,13 +475,23 @@ export async function marketResolved(ctx: EventHandlerContext<Store, {event: {ar
   const numOfOutcomeAssets = market.outcomeAssets.length;
   if (market.resolvedOutcome && numOfOutcomeAssets > 0) {
     for (let i = 0; i < numOfOutcomeAssets; i++) {
-      const assetId = market.outcomeAssets[i]!
-      let asset = await store.get(Asset, { where: { assetId: assetId } })
+      let asset = await store.get(Asset, { where: { assetId: market.outcomeAssets[i]! } })
       if (!asset) return
       const oldPrice = asset.price
       const oldAssetQty = asset.amountInPool
-      asset.price = (i == +market.resolvedOutcome) ? 1 : 0
-      asset.amountInPool = (i == +market.resolvedOutcome) ? oldAssetQty : BigInt(0)
+
+      if (market.marketType.scalar && asset.assetId.indexOf('Long') > -1) {
+        const upperRange = Number(market.marketType.scalar!.split(',')[1])
+        const lowerRange = Number(market.marketType.scalar!.split(',')[0])
+        asset.price = (+market.resolvedOutcome - lowerRange)/(upperRange - lowerRange)
+      } else if (market.marketType.scalar && asset.assetId.indexOf('Short') > -1) {
+        const upperRange = Number(market.marketType.scalar!.split(',')[1])
+        const lowerRange = Number(market.marketType.scalar!.split(',')[0])
+        asset.price = (upperRange - +market.resolvedOutcome)/(upperRange - lowerRange)
+      } else {
+        asset.price = (i == +market.resolvedOutcome) ? 1 : 0
+        asset.amountInPool = (i == +market.resolvedOutcome) ? oldAssetQty : BigInt(0)
+      }
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
       await store.save<Asset>(asset)
 
@@ -490,7 +500,7 @@ export async function marketResolved(ctx: EventHandlerContext<Store, {event: {ar
       ha.assetId = asset.assetId
       ha.newPrice = asset.price
       ha.newAmountInPool = asset.amountInPool
-      ha.dPrice = oldPrice ? asset.price - oldPrice : null
+      ha.dPrice = oldPrice && asset.price ? asset.price - oldPrice : null
       ha.dAmountInPool = oldAssetQty && asset.amountInPool ? asset.amountInPool - oldAssetQty : null
       ha.event = event.name.split('.')[1]
       ha.blockNumber = block.height
