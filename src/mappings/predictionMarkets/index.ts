@@ -508,7 +508,7 @@ export async function marketResolved(ctx: EventHandlerContext<Store, {event: {ar
       console.log(`[${event.name}] Saving historical asset: ${JSON.stringify(ha, null, 2)}`)
       await store.save<HistoricalAsset>(ha)
 
-      const abs = await store.find(AccountBalance, { where: { assetId: assetId } })
+      const abs = await store.find(AccountBalance, { where: { assetId: market.outcomeAssets[i]! } })
       await Promise.all(
         abs.map(async ab => {
           const keyword = ab.id.substring(ab.id.lastIndexOf('-')+1, ab.id.length)
@@ -516,7 +516,10 @@ export async function marketResolved(ctx: EventHandlerContext<Store, {event: {ar
           if (acc != null && ab.balance > BigInt(0)) {
             const oldBalance = ab.balance
             const oldValue = ab.value
-            ab.balance = (i == +market.resolvedOutcome!) ? ab.balance : BigInt(0)
+            
+            if (market.marketType.categorical) {
+              ab.balance = (i == +market.resolvedOutcome!) ? ab.balance : BigInt(0)
+            }
             ab.value = asset!.price ? Number(ab.balance) * asset!.price : null
             console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
             await store.save<AccountBalance>(ab)
@@ -544,12 +547,7 @@ export async function marketResolved(ctx: EventHandlerContext<Store, {event: {ar
       );
     }
   }
-
-  if (status.length < 2) {
-    market.status = 'Resolved'
-  } else {
-    market.status = status
-  }
+  market.status = status.length < 2 ? 'Resolved' : status
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`)
   await store.save<Market>(market)
 
