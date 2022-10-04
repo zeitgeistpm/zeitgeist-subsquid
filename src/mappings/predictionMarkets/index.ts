@@ -475,13 +475,23 @@ export async function marketResolved(ctx: EventHandlerContext<Store, {event: {ar
   const numOfOutcomeAssets = market.outcomeAssets.length;
   if (market.resolvedOutcome && numOfOutcomeAssets > 0) {
     for (let i = 0; i < numOfOutcomeAssets; i++) {
-      const assetId = market.outcomeAssets[i]!
-      let asset = await store.get(Asset, { where: { assetId: assetId } })
+      let asset = await store.get(Asset, { where: { assetId: market.outcomeAssets[i]! } })
       if (!asset) return
       const oldPrice = asset.price
       const oldAssetQty = asset.amountInPool
-      asset.price = (i == +market.resolvedOutcome) ? 1 : 0
-      asset.amountInPool = (i == +market.resolvedOutcome) ? oldAssetQty : BigInt(0)
+
+      if (market.marketType.scalar && asset.assetId.indexOf('Long') > -1) {
+        const upperRange = Number(market.marketType.scalar!.split(',')[1])
+        const lowerRange = Number(market.marketType.scalar!.split(',')[0])
+        asset.price = (+market.resolvedOutcome - lowerRange)/(upperRange - lowerRange)
+      } else if (market.marketType.scalar && asset.assetId.indexOf('Short') > -1) {
+        const upperRange = Number(market.marketType.scalar!.split(',')[1])
+        const lowerRange = Number(market.marketType.scalar!.split(',')[0])
+        asset.price = (upperRange - +market.resolvedOutcome)/(upperRange - lowerRange)
+      } else {
+        asset.price = (i == +market.resolvedOutcome) ? 1 : 0
+        asset.amountInPool = (i == +market.resolvedOutcome) ? oldAssetQty : BigInt(0)
+      }
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
       await store.save<Asset>(asset)
 
@@ -490,7 +500,7 @@ export async function marketResolved(ctx: EventHandlerContext<Store, {event: {ar
       ha.assetId = asset.assetId
       ha.newPrice = asset.price
       ha.newAmountInPool = asset.amountInPool
-      ha.dPrice = oldPrice ? asset.price - oldPrice : null
+      ha.dPrice = oldPrice && asset.price ? asset.price - oldPrice : null
       ha.dAmountInPool = oldAssetQty && asset.amountInPool ? asset.amountInPool - oldAssetQty : null
       ha.event = event.name.split('.')[1]
       ha.blockNumber = block.height
@@ -498,7 +508,7 @@ export async function marketResolved(ctx: EventHandlerContext<Store, {event: {ar
       console.log(`[${event.name}] Saving historical asset: ${JSON.stringify(ha, null, 2)}`)
       await store.save<HistoricalAsset>(ha)
 
-      const abs = await store.find(AccountBalance, { where: { assetId: assetId } })
+      const abs = await store.find(AccountBalance, { where: { assetId: market.outcomeAssets[i]! } })
       await Promise.all(
         abs.map(async ab => {
           const keyword = ab.id.substring(ab.id.lastIndexOf('-')+1, ab.id.length)
@@ -506,7 +516,10 @@ export async function marketResolved(ctx: EventHandlerContext<Store, {event: {ar
           if (acc != null && ab.balance > BigInt(0)) {
             const oldBalance = ab.balance
             const oldValue = ab.value
-            ab.balance = (i == +market.resolvedOutcome!) ? ab.balance : BigInt(0)
+            
+            if (market.marketType.categorical) {
+              ab.balance = (i == +market.resolvedOutcome!) ? ab.balance : BigInt(0)
+            }
             ab.value = asset!.price ? Number(ab.balance) * asset!.price : null
             console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
             await store.save<AccountBalance>(ab)
@@ -534,12 +547,7 @@ export async function marketResolved(ctx: EventHandlerContext<Store, {event: {ar
       );
     }
   }
-
-  if (status.length < 2) {
-    market.status = 'Resolved'
-  } else {
-    market.status = status
-  }
+  market.status = status.length < 2 ? 'Resolved' : status
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`)
   await store.save<Market>(market)
 
