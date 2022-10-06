@@ -131,34 +131,6 @@ export async function initBalance(acc: Account, store: Store, block: SubstrateBl
   await store.save<HistoricalAccountBalance>(hab)
 }
 
-export function whetherBuyOrSell(swapEvent: SwapEvent, event: SubstrateEvent): string|undefined {
-  if (swapEvent.assetIn) {
-    if (getAssetId(swapEvent.assetIn) == 'Ztg')
-      return 'Buy'
-    else if (getAssetId(swapEvent.assetOut) == 'Ztg')
-      return 'Sell'
-  } else if (event.extrinsic) {
-    const args = event.extrinsic.call.args
-    if (args.assetIn && getAssetId(args.assetIn) == 'Ztg') {
-      return 'Buy'
-    } else if (args.assetOut && getAssetId(args.assetOut) == 'Ztg') {
-      return 'Sell'
-    } else if (args.calls) {
-      const extrinsic = event.name.indexOf('Out') > -1 ? 'swap_exact_amount_out' : 'swap_exact_amount_in'
-      for (let ext of args.calls as 
-        Array<{ __kind: string, value: { __kind: string, assetIn: any, assetOut: any, poolId: string } }> ) {
-        const { __kind: method, value: { __kind, assetIn, assetOut, poolId } } = ext;
-        if (method == 'Swaps' && __kind == extrinsic && poolId == swapEvent.cpep.poolId.toString()) {
-          if (getAssetId(assetIn) == 'Ztg') 
-            return 'Buy'
-          else if (getAssetId(assetOut) == 'Ztg') 
-            return 'Sell'
-        }  
-      }
-    }
-  }
-}
-
 interface DecodedMarketMetadata {
   slug: string
   question: string
