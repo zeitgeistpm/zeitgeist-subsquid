@@ -292,9 +292,9 @@ export async function swapExactAmountIn(ctx: EventHandlerContext<Store>) {
       assetSold = args.assetIn
     } else {
       for (let ext of args.calls as Array<{ __kind: string, value: any }> ) {
-        const { __kind: method, value: { __kind, assetIn, assetOut, poolId} } = ext;
+        const { __kind: method, value: { __kind, assetIn, assetOut, maxPrice, poolId} } = ext;
         if (method == 'Swaps' && __kind == 'swap_exact_amount_in' && 
-          poolId == swapEvent.cpep.poolId.toString()) {
+          poolId == swapEvent.cpep.poolId.toString() && maxPrice == swapEvent.maxPrice) {
           assetBought = assetOut
           assetSold = assetIn
           break
@@ -391,9 +391,9 @@ export async function swapExactAmountOut(ctx: EventHandlerContext<Store>) {
       assetSold = args.assetIn
     } else {
       for (let ext of args.calls as Array<{ __kind: string, value: any }> ) {
-        const { __kind: method, value: { __kind, assetIn, assetOut, poolId} } = ext;
+        const { __kind: method, value: { __kind, assetIn, assetOut, maxPrice, poolId} } = ext;
         if (method == 'Swaps' && __kind == 'swap_exact_amount_out' && 
-          poolId == swapEvent.cpep.poolId.toString()) {
+          poolId == swapEvent.cpep.poolId.toString() && maxPrice == swapEvent.maxPrice) {
           assetBought = assetOut
           assetSold = assetIn
           break
