@@ -285,24 +285,28 @@ export async function swapExactAmountIn(ctx: EventHandlerContext<Store>) {
 
   let assetBought = swapEvent.assetOut
   let assetSold = swapEvent.assetIn
-  if (!assetBought && !assetSold && event.extrinsic) {
-    const args = event.extrinsic.call.args
-    if (!args.calls) {
-      assetBought = args.assetOut
-      assetSold = args.assetIn
-    } else {
-      for (let ext of args.calls as Array<{ __kind: string, value: any }> ) {
-        const { __kind: method, value: { __kind, assetIn, assetOut, maxPrice, poolId} } = ext;
-        if (method == 'Swaps' && __kind == 'swap_exact_amount_in' && 
-          poolId == swapEvent.cpep.poolId.toString() && maxPrice == swapEvent.maxPrice) {
-          assetBought = assetOut
-          assetSold = assetIn
-          break
+  if (!assetBought && !assetSold) {
+    if (event.call && event.call.args.assetOut && event.call.args.assetIn) {
+      assetBought = event.call.args.assetOut
+      assetSold = event.call.args.assetIn
+    } else if (event.extrinsic) {
+      const args = event.extrinsic.call.args
+      if (!args.calls) {
+        assetBought = args.assetOut
+        assetSold = args.assetIn
+      } else {
+        for (let ext of args.calls as Array<{ __kind: string, value: any }> ) {
+          const { __kind: method, value: { __kind, assetIn, assetOut, maxPrice, poolId} } = ext;
+          if (method == 'Swaps' && __kind == 'swap_exact_amount_in' && 
+            poolId == swapEvent.cpep.poolId.toString() && maxPrice == swapEvent.maxPrice) {
+            assetBought = assetOut
+            assetSold = assetIn
+            break
+          }
         }
       }
     }
   }
-  if (!assetBought || !assetSold) return
   const assetBoughtQty = BigInt(swapEvent.assetAmountOut.toString())
   const assetSoldQty = BigInt(swapEvent.assetAmountIn.toString())
 
@@ -384,24 +388,28 @@ export async function swapExactAmountOut(ctx: EventHandlerContext<Store>) {
 
   let assetBought = swapEvent.assetOut
   let assetSold = swapEvent.assetIn
-  if (!assetBought && !assetSold && event.extrinsic) {
-    const args = event.extrinsic.call.args
-    if (!args.calls) {
-      assetBought = args.assetOut
-      assetSold = args.assetIn
-    } else {
-      for (let ext of args.calls as Array<{ __kind: string, value: any }> ) {
-        const { __kind: method, value: { __kind, assetIn, assetOut, maxPrice, poolId} } = ext;
-        if (method == 'Swaps' && __kind == 'swap_exact_amount_out' && 
-          poolId == swapEvent.cpep.poolId.toString() && maxPrice == swapEvent.maxPrice) {
-          assetBought = assetOut
-          assetSold = assetIn
-          break
+  if (!assetBought && !assetSold) {
+    if (event.call && event.call.args.assetOut && event.call.args.assetIn) {
+      assetBought = event.call.args.assetOut
+      assetSold = event.call.args.assetIn
+    } else if (event.extrinsic) {
+      const args = event.extrinsic.call.args
+      if (!args.calls) {
+        assetBought = args.assetOut
+        assetSold = args.assetIn
+      } else {
+        for (let ext of args.calls as Array<{ __kind: string, value: any }> ) {
+          const { __kind: method, value: { __kind, assetIn, assetOut, maxPrice, poolId} } = ext;
+          if (method == 'Swaps' && __kind == 'swap_exact_amount_out' && 
+            poolId == swapEvent.cpep.poolId.toString() && maxPrice == swapEvent.maxPrice) {
+            assetBought = assetOut
+            assetSold = assetIn
+            break
+          }
         }
       }
     }
   }
-  if (!assetBought || !assetSold) return
   const assetBoughtQty = BigInt(swapEvent.assetAmountOut.toString())
   const assetSoldQty = BigInt(swapEvent.assetAmountIn.toString())
 
