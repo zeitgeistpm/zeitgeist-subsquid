@@ -10,9 +10,9 @@ services:
 
   ingest:
     volumes:
-      - "./types-mainnet.json:/config/types-mainnet.json"
+      - "../typesBundle.json:/config/typesBundle.json"
     command: [
-      "--types-bundle", "/config/types-mainnet.json",
+      "--types-bundle", "/config/typesBundle.json",
       "-e", "wss://zeitgeist-rpc.dwellir.com",
       "-c", "10",
       "-e", "wss://zeitgeist.api.onfinality.io/public-ws",
