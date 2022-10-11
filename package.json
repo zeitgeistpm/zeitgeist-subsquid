@@ -24,7 +24,7 @@
     "query-node:stop": "./scripts/query-node.sh stop",
     "redis:up": "docker-compose up -d redis",
     "squid:start": "yarn archive:start && yarn processor:local:start && yarn query-node:local:start",
-    "squid:stop": "yarn archive:stop && docker-compose down && yarn query-node:stop",
+    "squid:stop": "yarn archive:stop && yarn query-node:stop && docker-compose down && yarn processor:stop",
     "typegen": "squid-substrate-typegen typegen.json"
   },
   "dependencies": {
