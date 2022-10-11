@@ -41,7 +41,7 @@
       "total": "Balance"
     },
     "CollatorStatus": {
-      "_enum": { 
+      "_enum": {
         "Active": null,
         "Idle": null,
         "Leaving": "RoundIndex"
@@ -55,9 +55,9 @@
     "CurrencyId": "Asset",
     "CurrencyIdOf": "Asset",
     "DelegatorStatus": {
-      "_enum": { 
+      "_enum": {
         "Active": null,
-        "Leaving": "RoundIndex" 
+        "Leaving": "RoundIndex"
       }
     },
     "EmaConfig": {
@@ -100,10 +100,7 @@
       "status": "JurorStatus"
     },
     "JurorStatus": {
-      "_enum": [
-        "Ok",
-        "Tardy"
-      ]
+      "_enum": ["Ok", "Tardy"]
     },
     "Lookup": "MultiAddress",
     "Market": {
@@ -121,10 +118,7 @@
       "mdm": "MarketDisputeMechanism"
     },
     "MarketCreation": {
-      "_enum": [
-        "Permissionless",
-        "Advised"
-      ]
+      "_enum": ["Permissionless", "Advised"]
     },
     "MarketDispute": {
       "at": "BlockNumber",
@@ -166,11 +160,7 @@
       }
     },
     "MarketVolumeState": {
-      "_enum": [
-        "Uninitialized",
-        "DataCollectionStarted",
-        "DataCollected"
-      ]
+      "_enum": ["Uninitialized", "DataCollectionStarted", "DataCollected"]
     },
     "MaxRuntimeUsize": "u64",
     "Moment": "u64",
@@ -188,7 +178,7 @@
       "status": "DelegatorStatus"
     },
     "NominatorAdded": {
-      "_enum": { 
+      "_enum": {
         "AddedToTop": "Balance",
         "AddedToBottom": null
       }
@@ -203,10 +193,7 @@
       "filled": "Balance"
     },
     "OrderSide": {
-      "_enum": [
-        "Bid",
-        "Ask"
-      ]
+      "_enum": ["Bid", "Ask"]
     },
     "OrderedSet": "Vec<Bond>",
     "OwnedValuesParams": {
@@ -241,10 +228,7 @@
       "log2_e": "i128"
     },
     "ScoringRule": {
-      "_enum": [
-        "CPMM",
-        "RikiddoSigmoidFeeMarketEma"
-      ]
+      "_enum": ["CPMM", "RikiddoSigmoidFeeMarketEma"]
     },
     "OutcomeReport": {
       "_enum": {
@@ -281,11 +265,7 @@
     },
     "PoolId": "u128",
     "PoolStatus": {
-      "_enum": [
-        "Active",
-        "CollectingSubsidy",
-        "Stale"
-      ]
+      "_enum": ["Active", "CollectingSubsidy", "Stale"]
     },
     "RegistrationInfo": {
       "account": "AccountId",
@@ -303,10 +283,7 @@
     },
     "RoundIndex": "u32",
     "ScalarPosition": {
-      "_enum": [
-        "Long",
-        "Short"
-      ]
+      "_enum": ["Long", "Short"]
     },
     "SerdeWrapper": "Balance",
     "SubsidyUntil": {
@@ -343,5 +320,28 @@
   "signedExtensions": {
     "TransactionCallFilter": "Null"
   },
-  "versions": []
+  "versions": [
+    {
+      "minmax": [0, 25],
+      "types": {
+        "PoolAssetEvent": {
+          "bound": "Balance",
+          "cpep": "CommonPoolEventParams<AccountId>",
+          "transferred": "Balance"
+        },
+        "PoolAssetsEvent": {
+          "bounds": "Vec<Balance>",
+          "cpep": "CommonPoolEventParams<AccountId>",
+          "transferred": "Vec<Balance>"
+        },
+        "SwapEvent": {
+          "asset_amount_in": "Balance",
+          "asset_amount_out": "Balance",
+          "asset_bound": "Balance",
+          "cpep": "CommonPoolEventParams<AccountId>",
+          "max_price": "Balance"
+        }
+      }
+    }
+  ]
 }

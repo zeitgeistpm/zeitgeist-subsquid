@@ -20,7 +20,7 @@ require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` })
 console.log(`ENVIRONMENT: ${process.env.NODE_ENV}`)
 
 const processor = new SubstrateProcessor(new TypeormDatabase());
-processor.setTypesBundle('zeitgeist.json');
+processor.setTypesBundle('typesBundle.json');
 processor.setBatchSize(+(process.env.BATCH_SIZE ?? 500));
 processor.setDataSource({
   archive: process.env.INDEXER_ENDPOINT_URL ?? 'https://indexer.zeitgeist.pm/graphql',

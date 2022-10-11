@@ -10,9 +10,9 @@ services:
 
   ingest:
     volumes:
-      - "./types-testnet.json:/config/types-testnet.json"
+      - "../typesBundle.json:/config/typesBundle.json"
     command: [
-      "--types-bundle", "/config/types-testnet.json",
+      "--types-bundle", "/config/typesBundle.json",
       "-e", "wss://bsr.zeitgeist.pm",
       "-c", "10", # allow up to 20 pending requests for the above endpoint (default is 5)
       "--out", "postgres://postgres:postgres@db:5432/squid-archive"
