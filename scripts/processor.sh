@@ -45,12 +45,11 @@ else
   exit
 fi
 
-# Use "--network=host" or "-p 4350:4350" in case of db connection issues
+# Use "--network=host" or "-p 9090:9090" in case of db connection issues
 if [ "$1" = "dev" ]; then
   docker run -d -p 9090:9090 --rm -e NODE_ENV=dev --env-file=.env.dev --name=zeitgeist-processor processor
 elif [ "$1" = "local" ]; then
-  sleep 15 # Wait for local node to be up
-  docker run -d --network=host --rm -e NODE_ENV=local --env-file=.env.local --name=zeitgeist-processor processor
+  docker run -d -p 9090:9090 --rm -e NODE_ENV=local -e DB_HOST=host.docker.internal -e REDIS_HOST=host.docker.internal --env-file=.env.local --name=zeitgeist-processor processor
 elif [ "$1" = "d" ] || [ "$1" = "t1" ] || [ "$1" = "t2" ] || [ "$1" = "m1" ] || [ "$1" = "m2" ]; then
   docker run -d --network=host --rm -e NODE_ENV=$1 --env-file=.env.$1 --name=zeitgeist-processor processor
 else
