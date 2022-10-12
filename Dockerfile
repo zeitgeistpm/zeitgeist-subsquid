@@ -34,4 +34,4 @@ CMD ["node", "lib/processor.js"]
 
 
 FROM squid AS query-node
-CMD ["npm", "run", "query-node:start"]
+CMD ["yarn", "query-node:start"]
