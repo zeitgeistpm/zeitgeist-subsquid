@@ -18,6 +18,7 @@
     "processor:dev:start": "./scripts/processor.sh dev start",
     "processor:stop": "./scripts/processor.sh stop",
     "query-node:dev:start": "./scripts/query-node.sh dev start",
+    "query-node:start": "squid-graphql-server --subscriptions",
     "query-node:stop": "./scripts/query-node.sh stop",
     "redis:up": "docker-compose up -d redis",
     "squid:start": "yarn archive:start && sh scripts/processor.sh local start && sh scripts/query-node.sh local start",
