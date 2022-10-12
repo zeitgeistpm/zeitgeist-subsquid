@@ -5,6 +5,7 @@ Usage: ./scripts/processor.sh <first> <second>
 
 Options for <first>:
   local       Process data from local chain
+  mlocal      Process data from local chain running on mac
   dev         Process data from battery-station (dev chain)
   stop        Stop the running processor
 
@@ -45,11 +46,12 @@ else
   exit
 fi
 
-# Use "--network=host" or "-p 9090:9090" in case of db connection issues
-if [ "$1" = "dev" ]; then
+if [ "$1" = "local" ]; then
+  docker run -d -p 9090:9090 --rm -e NODE_ENV=local --env-file=.env.local --name=zeitgeist-processor processor
+elif [ "$1" = "mlocal" ]; then
+  docker run -d -p 9090:9090 --rm -e NODE_ENV=mlocal --env-file=.env.mlocal --name=zeitgeist-processor processor
+elif [ "$1" = "dev" ]; then
   docker run -d -p 9090:9090 --rm -e NODE_ENV=dev --env-file=.env.dev --name=zeitgeist-processor processor
-elif [ "$1" = "local" ]; then
-  docker run -d --network=host --rm -e NODE_ENV=local --env-file=.env.local --name=zeitgeist-processor processor
 elif [ "$1" = "d" ] || [ "$1" = "t1" ] || [ "$1" = "t2" ] || [ "$1" = "m1" ] || [ "$1" = "m2" ]; then
   docker run -d --network=host --rm -e NODE_ENV=$1 --env-file=.env.$1 --name=zeitgeist-processor processor
 else
