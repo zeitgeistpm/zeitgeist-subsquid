@@ -15,7 +15,7 @@ services:
       "--out", "postgres://postgres:postgres@db:5432/squid-archive"
     ]
     ports:
-      - 9090:9090
+      - 9091:9090
     depends_on:
       - node
 
@@ -33,7 +33,7 @@ services:
     image: subsquid/substrate-explorer:firesquid
     container_name: explorer
     environment:
-      DB_TYPE: postgres # set to `cockroach` for Cockroach DB
+      DB_TYPE: postgres
       DB_HOST: db
       DB_PORT: "5432"
       DB_NAME: "squid-archive"
@@ -43,10 +43,10 @@ services:
       - 4444:3000
       
   node:
-    image: zeitgeistpm/zeitgeist-node:latest
+    image: zeitgeistpm/zeitgeist-node:v0.3.5
     container_name: node
     ports:
-      - "9944:9944"
+      - 9944:9944
     command: --dev --ws-external --pruning archive
     environment:
       - PORT=9944
