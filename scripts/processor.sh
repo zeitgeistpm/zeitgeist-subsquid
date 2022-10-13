@@ -21,9 +21,9 @@ if [ "$1" = "stop" ]; then
   exit
 elif [ "$2" = "start" ]; then
   echo "Starting services..."
-  yarn db:up && yarn redis:up && yarn migration:apply
-  echo "Building processor..."
+  yarn db:up && yarn redis:up
   docker build . --target processor -t processor
+  yarn migration:apply
   echo "Starting processor..."
 elif [ "$2" = "resume" ]; then
   echo "Building processor..."
@@ -32,8 +32,9 @@ elif [ "$2" = "resume" ]; then
 elif [ "$2" = "restart" ]; then
   echo "Stopping processor..."
   docker stop zeitgeist-processor
-  echo "Stopping query-node..."
-  docker stop zeitgeist-query-node
+  echo "Stopping api..."
+  docker stop api
+  docker stop sub-api
   echo "Stopping services..."
   docker-compose down
   echo "Starting services..."

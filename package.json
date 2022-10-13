@@ -6,6 +6,9 @@
   "author": "",
   "license": "ISC",
   "scripts": {
+    "api:dev:start": "sh scripts/api.sh dev start",
+    "api:start": "squid-graphql-server --subscriptions",
+    "api:stop": "sh scripts/api.sh stop",
     "archive:start": "./scripts/archive.sh local up",
     "archive:stop": "./scripts/archive.sh local down",
     "build": "rm -rf lib && tsc",
@@ -17,12 +20,10 @@
     "processor:dev:resume": "./scripts/processor.sh dev resume",
     "processor:dev:start": "./scripts/processor.sh dev start",
     "processor:stop": "./scripts/processor.sh stop",
-    "query-node:dev:start": "./scripts/query-node.sh dev start",
-    "query-node:stop": "./scripts/query-node.sh stop",
     "redis:up": "docker-compose up -d redis",
-    "squid:start": "yarn archive:start && sh scripts/processor.sh local start && sh scripts/query-node.sh local start",
-    "squid:mac:start": "yarn archive:start && sh scripts/processor.sh mlocal start && sh scripts/query-node.sh mlocal start",
-    "squid:stop": "yarn archive:stop && yarn query-node:stop && docker-compose down && yarn processor:stop",
+    "squid:start": "yarn archive:start && sh scripts/processor.sh local start && sh scripts/api.sh local start",
+    "squid:mac:start": "yarn archive:start && sh scripts/processor.sh mlocal start && sh scripts/api.sh mlocal start",
+    "squid:stop": "yarn archive:stop && yarn api:stop && docker-compose down && yarn processor:stop",
     "typegen": "squid-substrate-typegen typegen.json"
   },
   "dependencies": {
