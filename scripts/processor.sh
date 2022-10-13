@@ -32,8 +32,8 @@ elif [ "$2" = "resume" ]; then
 elif [ "$2" = "restart" ]; then
   echo "Stopping processor..."
   docker stop zeitgeist-processor
-  echo "Stopping query-node..."
-  docker stop zeitgeist-query-node
+  echo "Stopping api..."
+  docker stop api
   echo "Stopping services..."
   docker-compose down
   echo "Starting services..."

@@ -33,5 +33,5 @@ FROM squid AS processor
 CMD ["node", "lib/processor.js"]
 
 
-FROM squid AS query-node
-CMD ["yarn", "query-node:start"]
+FROM squid AS api
+CMD ["yarn", "api:start"]
