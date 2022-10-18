@@ -2,16 +2,15 @@ import { encodeAddress } from '@polkadot/keyring'
 import { EventHandlerContext } from '@subsquid/substrate-processor'
 import { Store } from '@subsquid/typeorm-store'
 import * as ss58 from '@subsquid/ss58'
-import { util } from '@zeitgeistpm/sdk'
 import { Like } from 'typeorm'
 import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBalance, HistoricalAsset, HistoricalMarket, 
   Market, MarketDisputeMechanism, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../../model'
 import { createAssetsForMarket, decodeMarketMetadata } from '../helper'
 import { Tools } from '../util'
 import { getBoughtCompleteSetEvent, getMarketApprovedEvent, getMarketClosedEvent, getMarketCreatedEvent, 
-  getMarketDisputedEvent, getMarketExpiredEvent, getMarketInsufficientSubsidyEvent, getMarketRejectedEvent, 
-  getMarketReportedEvent, getMarketResolvedEvent, getMarketStartedWithSubsidyEvent, getSoldCompleteSetEvent, 
-  getTokensRedeemedEvent } from './types'
+  getMarketDestroyedEvent, getMarketDisputedEvent, getMarketExpiredEvent, getMarketInsufficientSubsidyEvent, 
+  getMarketRejectedEvent, getMarketReportedEvent, getMarketResolvedEvent, getMarketStartedWithSubsidyEvent, 
+  getSoldCompleteSetEvent, getTokensRedeemedEvent } from './types'
 
 
 export async function boughtCompleteSet(ctx: EventHandlerContext<Store>) {
@@ -296,6 +295,28 @@ export async function marketCreated(ctx: EventHandlerContext<Store, {event: {arg
   }
 }
 
+export async function marketDestroyed(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
+  const {store, block, event} = ctx
+  const {marketId} = getMarketDestroyedEvent(ctx)
+
+  let market = await store.get(Market, { where: { marketId: marketId } })
+  if (!market) return
+
+  market.status = 'Destroyed'
+  console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`)
+  await store.save<Market>(market)
+
+  let hm = new HistoricalMarket()
+  hm.id = event.id + '-' + market.marketId
+  hm.marketId = market.marketId
+  hm.event = event.name.split('.')[1]
+  hm.status = market.status
+  hm.blockNumber = block.height
+  hm.timestamp = new Date(block.timestamp)
+  console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
+  await store.save<HistoricalMarket>(hm)
+}
+
 export async function marketDisputed(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
   const {store, block, event} = ctx
   const {marketId, status, report} = getMarketDisputedEvent(ctx)
@@ -480,11 +501,11 @@ export async function marketResolved(ctx: EventHandlerContext<Store, {event: {ar
       const oldPrice = asset.price
       const oldAssetQty = asset.amountInPool
 
-      if (market.marketType.scalar && asset.assetId.indexOf('Long') > -1) {
+      if (market.marketType.scalar && asset.assetId.includes('Long')) {
         const upperRange = Number(market.marketType.scalar!.split(',')[1])
         const lowerRange = Number(market.marketType.scalar!.split(',')[0])
         asset.price = (+market.resolvedOutcome - lowerRange)/(upperRange - lowerRange)
-      } else if (market.marketType.scalar && asset.assetId.indexOf('Short') > -1) {
+      } else if (market.marketType.scalar && asset.assetId.includes('Short')) {
         const upperRange = Number(market.marketType.scalar!.split(',')[1])
         const lowerRange = Number(market.marketType.scalar!.split(',')[0])
         asset.price = (upperRange - +market.resolvedOutcome)/(upperRange - lowerRange)
@@ -500,8 +521,8 @@ export async function marketResolved(ctx: EventHandlerContext<Store, {event: {ar
       ha.assetId = asset.assetId
       ha.newPrice = asset.price
       ha.newAmountInPool = asset.amountInPool
-      ha.dPrice = oldPrice && asset.price ? asset.price - oldPrice : null
-      ha.dAmountInPool = oldAssetQty && asset.amountInPool ? asset.amountInPool - oldAssetQty : null
+      ha.dPrice = oldPrice ? ha.newPrice - oldPrice : null
+      ha.dAmountInPool = oldAssetQty && ha.newAmountInPool ? ha.newAmountInPool - oldAssetQty : null
       ha.event = event.name.split('.')[1]
       ha.blockNumber = block.height
       ha.timestamp = new Date(block.timestamp)
