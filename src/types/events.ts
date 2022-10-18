@@ -1,6 +1,7 @@
 import assert from 'assert'
 import {Chain, ChainContext, EventContext, Event, Result} from './support'
 import * as v23 from './v23'
+import * as v26 from './v26'
 import * as v29 from './v29'
 import * as v32 from './v32'
 import * as v34 from './v34'
@@ -749,6 +750,35 @@ export class PredictionMarketsMarketCreatedEvent {
   }
 }
 
+export class PredictionMarketsMarketDestroyedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'PredictionMarkets.MarketDestroyed')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * A market has been created \[market_id, creator\]
+   */
+  get isV32(): boolean {
+    return this._chain.getEventHash('PredictionMarkets.MarketDestroyed') === '47b59f698451e50cce59979f0121e842fa3f8b2bcef2e388222dbd69849514f9'
+  }
+
+  /**
+   * A market has been created \[market_id, creator\]
+   */
+  get asV32(): bigint {
+    assert(this.isV32)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class PredictionMarketsMarketDisputedEvent {
   private readonly _chain: Chain
   private readonly event: Event
@@ -1281,7 +1311,7 @@ export class SwapsPoolExitEvent {
    *  Someone has exited a pool. \[PoolAssetsEvent\]
    */
   get isV23(): boolean {
-    return this._chain.getEventHash('Swaps.PoolExit') === '99ab0bd285f6f944198c5f42dd98b41f7b9fcf0c44ef6977cf76c3f99c4c184b'
+    return this._chain.getEventHash('Swaps.PoolExit') === 'a11030c3c6675fd4762b00dbf07071dd2be36329d8293d6c4d83e95c52a284b0'
   }
 
   /**
@@ -1289,6 +1319,21 @@ export class SwapsPoolExitEvent {
    */
   get asV23(): v23.PoolAssetsEvent {
     assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   *  Someone has exited a pool. \[PoolAssetsEvent\]
+   */
+  get isV26(): boolean {
+    return this._chain.getEventHash('Swaps.PoolExit') === '99ab0bd285f6f944198c5f42dd98b41f7b9fcf0c44ef6977cf76c3f99c4c184b'
+  }
+
+  /**
+   *  Someone has exited a pool. \[PoolAssetsEvent\]
+   */
+  get asV26(): v26.PoolAssetsEvent {
+    assert(this.isV26)
     return this._chain.decodeEvent(this.event)
   }
 
@@ -1340,7 +1385,7 @@ export class SwapsPoolJoinEvent {
    *  Someone has joined a pool. \[PoolAssetsEvent\]
    */
   get isV23(): boolean {
-    return this._chain.getEventHash('Swaps.PoolJoin') === '99ab0bd285f6f944198c5f42dd98b41f7b9fcf0c44ef6977cf76c3f99c4c184b'
+    return this._chain.getEventHash('Swaps.PoolJoin') === 'a11030c3c6675fd4762b00dbf07071dd2be36329d8293d6c4d83e95c52a284b0'
   }
 
   /**
@@ -1348,6 +1393,21 @@ export class SwapsPoolJoinEvent {
    */
   get asV23(): v23.PoolAssetsEvent {
     assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   *  Someone has joined a pool. \[PoolAssetsEvent\]
+   */
+  get isV26(): boolean {
+    return this._chain.getEventHash('Swaps.PoolJoin') === '99ab0bd285f6f944198c5f42dd98b41f7b9fcf0c44ef6977cf76c3f99c4c184b'
+  }
+
+  /**
+   *  Someone has joined a pool. \[PoolAssetsEvent\]
+   */
+  get asV26(): v26.PoolAssetsEvent {
+    assert(this.isV26)
     return this._chain.decodeEvent(this.event)
   }
 
@@ -1399,7 +1459,7 @@ export class SwapsSwapExactAmountInEvent {
    *  An exact amount of an asset is entering the pool. \[SwapEvent\]
    */
   get isV23(): boolean {
-    return this._chain.getEventHash('Swaps.SwapExactAmountIn') === '3890c2f04c258eefbc9739d3d4bde06dfdbb1b5ce6ce3a1f2a3c45220d3db6d9'
+    return this._chain.getEventHash('Swaps.SwapExactAmountIn') === '69d6a45c326b79e217d8cc5e5b3e79884d92a90749656b63c90a6fcc42de850c'
   }
 
   /**
@@ -1407,6 +1467,21 @@ export class SwapsSwapExactAmountInEvent {
    */
   get asV23(): v23.SwapEvent {
     assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   *  An exact amount of an asset is entering the pool. \[SwapEvent\]
+   */
+  get isV26(): boolean {
+    return this._chain.getEventHash('Swaps.SwapExactAmountIn') === '3890c2f04c258eefbc9739d3d4bde06dfdbb1b5ce6ce3a1f2a3c45220d3db6d9'
+  }
+
+  /**
+   *  An exact amount of an asset is entering the pool. \[SwapEvent\]
+   */
+  get asV26(): v26.SwapEvent {
+    assert(this.isV26)
     return this._chain.decodeEvent(this.event)
   }
 
@@ -1458,7 +1533,7 @@ export class SwapsSwapExactAmountOutEvent {
    *  An exact amount of an asset is leaving the pool. \[SwapEvent\]
    */
   get isV23(): boolean {
-    return this._chain.getEventHash('Swaps.SwapExactAmountOut') === '3890c2f04c258eefbc9739d3d4bde06dfdbb1b5ce6ce3a1f2a3c45220d3db6d9'
+    return this._chain.getEventHash('Swaps.SwapExactAmountOut') === '69d6a45c326b79e217d8cc5e5b3e79884d92a90749656b63c90a6fcc42de850c'
   }
 
   /**
@@ -1466,6 +1541,21 @@ export class SwapsSwapExactAmountOutEvent {
    */
   get asV23(): v23.SwapEvent {
     assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   *  An exact amount of an asset is leaving the pool. \[SwapEvent\]
+   */
+  get isV26(): boolean {
+    return this._chain.getEventHash('Swaps.SwapExactAmountOut') === '3890c2f04c258eefbc9739d3d4bde06dfdbb1b5ce6ce3a1f2a3c45220d3db6d9'
+  }
+
+  /**
+   *  An exact amount of an asset is leaving the pool. \[SwapEvent\]
+   */
+  get asV26(): v26.SwapEvent {
+    assert(this.isV26)
     return this._chain.decodeEvent(this.event)
   }
 
