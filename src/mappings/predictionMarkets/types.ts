@@ -5,10 +5,10 @@ import { Store } from '@subsquid/typeorm-store'
 import { EventContext } from '../../types/support'
 import { MarketDispute, OutcomeReport, Report } from '../../types/v29'
 import { PredictionMarketsBoughtCompleteSetEvent, PredictionMarketsMarketApprovedEvent, PredictionMarketsMarketClosedEvent, 
-  PredictionMarketsMarketDisputedEvent, PredictionMarketsMarketExpiredEvent, PredictionMarketsMarketInsufficientSubsidyEvent, 
-  PredictionMarketsMarketRejectedEvent, PredictionMarketsMarketReportedEvent, PredictionMarketsMarketResolvedEvent, 
-  PredictionMarketsMarketStartedWithSubsidyEvent, PredictionMarketsSoldCompleteSetEvent, PredictionMarketsTokensRedeemedEvent 
-} from '../../types/events'
+  PredictionMarketsMarketDestroyedEvent, PredictionMarketsMarketDisputedEvent, PredictionMarketsMarketExpiredEvent, 
+  PredictionMarketsMarketInsufficientSubsidyEvent, PredictionMarketsMarketRejectedEvent, PredictionMarketsMarketReportedEvent, 
+  PredictionMarketsMarketResolvedEvent, PredictionMarketsMarketStartedWithSubsidyEvent, PredictionMarketsSoldCompleteSetEvent, 
+  PredictionMarketsTokensRedeemedEvent } from '../../types/events'
 import { getAssetId } from '../helper'
 
 
@@ -94,6 +94,17 @@ export function getMarketCreatedEvent(ctx: EventHandlerContext<Store, {event: {a
     market.period.start = param2.period.value.start
     market.period.end = market.period.value.end
     return { marketId, marketAccountId, market }
+  }
+}
+
+export function getMarketDestroyedEvent(ctx: EventContext): MarketDestroyedEvent {
+  const event = new PredictionMarketsMarketDestroyedEvent(ctx)
+  if (event.isV32) {
+    const marketId = Number(event.asV32)
+    return {marketId}
+  } else {
+    const marketId = Number(ctx.event.args)
+    return {marketId}
   }
 }
 
@@ -280,6 +291,10 @@ interface MarketCreatedEvent {
   marketId: string
   marketAccountId: string
   market: any
+}
+
+interface MarketDestroyedEvent {
+  marketId: number
 }
 
 interface MarketDisputedEvent {
