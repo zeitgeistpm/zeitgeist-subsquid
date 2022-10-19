@@ -70,7 +70,6 @@ export interface Pool {
 }
 
 export interface PoolAssetsEvent {
-  assets: Asset[]
   bounds: bigint[]
   cpep: CommonPoolEventParams
   transferred: bigint[]
@@ -80,8 +79,6 @@ export interface SwapEvent {
   assetAmountIn: bigint
   assetAmountOut: bigint
   assetBound: bigint
-  assetIn: Asset
-  assetOut: Asset
   cpep: CommonPoolEventParams
   maxPrice: bigint
 }

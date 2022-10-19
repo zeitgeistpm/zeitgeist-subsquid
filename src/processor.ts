@@ -4,9 +4,9 @@ import { balancesBalanceSet, balancesDustLost, balancesEndowed, balancesReserved
   balancesTransferOld, balancesUnreserved, balancesWithdraw } from './mappings/balances';
 import { currencyDeposited, currencyTransferred, currencyWithdrawn } from './mappings/currency';
 import { parachainStakingRewarded } from './mappings/parachainStaking';
-import { boughtCompleteSet, marketApproved, marketClosed, marketCreated, marketDisputed, marketExpired, 
-  marketInsufficientSubsidy, marketRejected, marketReported, marketResolved, marketStartedWithSubsidy, 
-  soldCompleteSet, tokensRedeemed} from './mappings/predictionMarkets';
+import { boughtCompleteSet, marketApproved, marketClosed, marketCreated, marketDestroyed, marketDisputed, 
+  marketExpired, marketInsufficientSubsidy, marketRejected, marketReported, marketResolved, 
+  marketStartedWithSubsidy, soldCompleteSet, tokensRedeemed} from './mappings/predictionMarkets';
 import { poolActive, poolClosed, poolCreate, poolExit, poolJoin, swapExactAmountIn, 
   swapExactAmountOut } from './mappings/swaps';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
@@ -45,6 +45,7 @@ processor.addEventHandler('PredictionMarkets.BoughtCompleteSet', ctx => boughtCo
 processor.addEventHandler('PredictionMarkets.MarketApproved', ctx => marketApproved(ctx))
 processor.addEventHandler('PredictionMarkets.MarketClosed', ctx => marketClosed(ctx))
 processor.addEventHandler('PredictionMarkets.MarketCreated', ctx => marketCreated(ctx))
+processor.addEventHandler('PredictionMarkets.MarketDestroyed', ctx => marketDestroyed(ctx))
 processor.addEventHandler('PredictionMarkets.MarketDisputed', ctx => marketDisputed(ctx))
 processor.addEventHandler('PredictionMarkets.MarketExpired', ctx => marketExpired(ctx))
 processor.addEventHandler('PredictionMarkets.MarketInsufficientSubsidy', ctx => marketInsufficientSubsidy(ctx))
