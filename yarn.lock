@@ -1575,7 +1575,7 @@
   resolved "https://registry.yarnpkg.com/@zeitgeistpm/type-defs/-/type-defs-0.5.0.tgz#582edb137178f5a5727f1fff76034b000b644294"
   integrity sha512-+F54gynUwPfWdX6YY2Ekf+9NOgOdUkYw3jwhNIsrd8VNIxXLkZLJi3iluLWfAkKn6ErerCXapGO2s5rg3MXjMA==
 
-"@zeitgeistpm/types@^0.5.0", "@zeitgeistpm/types@npm:@zeitgeistpm/types@^0.5.0":
+"@zeitgeistpm/types@^0.5.0":
   version "0.5.0"
   resolved "https://registry.yarnpkg.com/@zeitgeistpm/types/-/types-0.5.0.tgz#11f9301e03e9b90c5815b6332ba1a92417d10c88"
   integrity sha512-2FQR0J/O4u9sRue8lbODRJavr9i/1vIoqY+ftFQLY4GPoUSad/4r1uVW+gJcRgWZFH7csevKhMiVhzZETctY5g==
