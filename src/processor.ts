@@ -10,7 +10,7 @@ import { boughtCompleteSet, marketApproved, marketClosed, marketCreated, marketD
 import { poolActive, poolClosed, poolCreate, poolExit, poolJoin, swapExactAmountIn, 
   swapExactAmountOut } from './mappings/swaps';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
-import { tokensEndowed } from './mappings/tokens';
+import { tokensEndowed, tokensTransfer } from './mappings/tokens';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -67,6 +67,7 @@ processor.addEventHandler('Swaps.SwapExactAmountOut', ctx => swapExactAmountOut(
 processor.addEventHandler('System.NewAccount', ctx => systemNewAccount(ctx))
 
 processor.addEventHandler('Tokens.Endowed', ctx => tokensEndowed(ctx))
+processor.addEventHandler('Tokens.Transfer', ctx => tokensTransfer(ctx))
 
 if (!process.env.WS_NODE_URL?.includes(`bs`)) {
   processor.addEventHandler('Balances.Transfer', ctx => balancesTransfer(ctx))
