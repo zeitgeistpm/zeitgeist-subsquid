@@ -48,7 +48,7 @@ else
 fi
 
 if [ "$1" = "local" ]; then
-  docker run -d -p 9090:9090 --rm -e NODE_ENV=local --env-file=.env.local --name=zeitgeist-processor processor
+  docker run -d --network=host --rm -e NODE_ENV=local --env-file=.env.local --name=zeitgeist-processor processor
 elif [ "$1" = "mlocal" ]; then
   docker run -d -p 9090:9090 --rm -e NODE_ENV=mlocal --env-file=.env.mlocal --name=zeitgeist-processor processor
 elif [ "$1" = "dev" ]; then
