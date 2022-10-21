@@ -43,7 +43,7 @@ services:
       - 4444:3000
       
   node:
-    image: zeitgeistpm/zeitgeist-node:v0.3.5
+    image: zeitgeistpm/zeitgeist-node:v0.3.6
     container_name: node
     ports:
       - 9944:9944
