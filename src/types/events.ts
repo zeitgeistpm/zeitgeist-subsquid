@@ -10,6 +10,7 @@ import * as v36 from './v36'
 import * as v37 from './v37'
 import * as v38 from './v38'
 import * as v39 from './v39'
+import * as v40 from './v40'
 
 export class BalancesBalanceSetEvent {
   private readonly _chain: Chain
@@ -746,6 +747,21 @@ export class PredictionMarketsMarketCreatedEvent {
    */
   get asV38(): [bigint, Uint8Array, v38.Market] {
     assert(this.isV38)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * A market has been created \[market_id, market_account, creator\]
+   */
+  get isV40(): boolean {
+    return this._chain.getEventHash('PredictionMarkets.MarketCreated') === 'bbc3d53da3fdeb96244f9f79d60e51b2acbbd0f2d00a905d452d4ecc9fa50557'
+  }
+
+  /**
+   * A market has been created \[market_id, market_account, creator\]
+   */
+  get asV40(): [bigint, Uint8Array, v40.Market] {
+    assert(this.isV40)
     return this._chain.decodeEvent(this.event)
   }
 }
