@@ -3,8 +3,9 @@ import { EventHandlerContext } from '@subsquid/substrate-processor'
 import { Store } from '@subsquid/typeorm-store'
 import * as ss58 from '@subsquid/ss58'
 import { Like } from 'typeorm'
-import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBalance, HistoricalAsset, HistoricalMarket, 
-  Market, MarketDisputeMechanism, MarketPeriod, MarketReport, MarketType, OutcomeReport } from '../../model'
+import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBalance, HistoricalAsset, 
+  HistoricalMarket, Market, MarketDeadlines, MarketDisputeMechanism, MarketPeriod, MarketReport, 
+  MarketType, OutcomeReport } from '../../model'
 import { createAssetsForMarket, decodeMarketMetadata } from '../helper'
 import { Tools } from '../util'
 import { getBoughtCompleteSetEvent, getMarketApprovedEvent, getMarketClosedEvent, getMarketCreatedEvent, 
@@ -229,6 +230,12 @@ export async function marketCreated(ctx: EventHandlerContext<Store, {event: {arg
       }
     }
   }
+
+  let deadlines = new MarketDeadlines()
+  deadlines.disputeDuration = market.deadlines.disputeDuration
+  deadlines.gracePeriod = market.deadlines.gracePeriod
+  deadlines.oracleDuration = market.deadlines.oracleDuration
+  newMarket.deadlines = deadlines
 
   let marketType = new MarketType()
   const type = market.marketType
