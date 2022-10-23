@@ -135,7 +135,7 @@ type Market @entity {
   "Type of scalar range if market is of type scalar"
   scalarType: String
   "Deadlines for the market represented in blocks"
-  deadlines: MarketDeadlines!
+  deadlines: MarketDeadlines
   "Market tags"
   tags: [String]
   "Image for the market"
