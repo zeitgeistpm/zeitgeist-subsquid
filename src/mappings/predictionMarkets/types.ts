@@ -67,14 +67,14 @@ export function getMarketClosedEvent(ctx: EventContext): MarketClosedEvent {
 export function getMarketCreatedEvent(ctx: EventHandlerContext<Store, {event: {args: true}}>): MarketCreatedEvent {
   const event = new PredictionMarketsMarketCreatedEvent(ctx)
   const [marketId, param1, param2] = ctx.event.args
-  if (event.isV23 || event.isV29 || event.isV32) {
+  if (event.isV23 || event.isV29) {
     const marketAccountId = ''
     let market = param1 as any
     market.disputeMechanism = market.mdm
     market.period.start = market.period.value[0]
     market.period.end = market.period.value[1]
     return { marketId, marketAccountId, market } 
-  } else if (event.isV36) {
+  } else if (event.isV32 || event.isV36) {
     const marketAccountId = ''
     let market = param1 as any
     market.disputeMechanism = market.mdm
