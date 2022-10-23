@@ -231,12 +231,14 @@ export async function marketCreated(ctx: EventHandlerContext<Store, {event: {arg
     }
   }
 
-  let deadlines = new MarketDeadlines()
-  deadlines.disputeDuration = market.deadlines.disputeDuration
-  deadlines.gracePeriod = market.deadlines.gracePeriod
-  deadlines.oracleDuration = market.deadlines.oracleDuration
-  newMarket.deadlines = deadlines
-
+  if (market.deadlines) {
+    let deadlines = new MarketDeadlines()
+    deadlines.disputeDuration = market.deadlines.disputeDuration
+    deadlines.gracePeriod = market.deadlines.gracePeriod
+    deadlines.oracleDuration = market.deadlines.oracleDuration
+    newMarket.deadlines = deadlines
+  }
+  
   let marketType = new MarketType()
   const type = market.marketType
   if (type.__kind == 'Categorical') {

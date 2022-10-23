@@ -91,8 +91,8 @@ export class Market {
   /**
    * Deadlines for the market represented in blocks
    */
-  @Column_("jsonb", {transformer: {to: obj => obj.toJSON(), from: obj => new MarketDeadlines(undefined, marshal.nonNull(obj))}, nullable: false})
-  deadlines!: MarketDeadlines
+  @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new MarketDeadlines(undefined, obj)}, nullable: true})
+  deadlines!: MarketDeadlines | undefined | null
 
   /**
    * Market tags
