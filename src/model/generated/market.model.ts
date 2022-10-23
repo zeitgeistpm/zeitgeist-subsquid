@@ -1,6 +1,7 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_} from "typeorm"
 import * as marshal from "./marshal"
 import {CategoryMetadata} from "./_categoryMetadata"
+import {MarketDeadlines} from "./_marketDeadlines"
 import {MarketType} from "./_marketType"
 import {MarketPeriod} from "./_marketPeriod"
 import {MarketReport} from "./_marketReport"
@@ -86,6 +87,12 @@ export class Market {
    */
   @Column_("text", {nullable: true})
   scalarType!: string | undefined | null
+
+  /**
+   * Deadlines for the market represented in blocks
+   */
+  @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new MarketDeadlines(undefined, obj)}, nullable: true})
+  deadlines!: MarketDeadlines | undefined | null
 
   /**
    * Market tags

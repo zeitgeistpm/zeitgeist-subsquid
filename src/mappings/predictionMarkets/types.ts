@@ -5,10 +5,10 @@ import { Store } from '@subsquid/typeorm-store'
 import { EventContext } from '../../types/support'
 import { MarketDispute, OutcomeReport, Report } from '../../types/v29'
 import { PredictionMarketsBoughtCompleteSetEvent, PredictionMarketsMarketApprovedEvent, PredictionMarketsMarketClosedEvent, 
-  PredictionMarketsMarketDestroyedEvent, PredictionMarketsMarketDisputedEvent, PredictionMarketsMarketExpiredEvent, 
-  PredictionMarketsMarketInsufficientSubsidyEvent, PredictionMarketsMarketRejectedEvent, PredictionMarketsMarketReportedEvent, 
-  PredictionMarketsMarketResolvedEvent, PredictionMarketsMarketStartedWithSubsidyEvent, PredictionMarketsSoldCompleteSetEvent, 
-  PredictionMarketsTokensRedeemedEvent } from '../../types/events'
+  PredictionMarketsMarketCreatedEvent, PredictionMarketsMarketDestroyedEvent, PredictionMarketsMarketDisputedEvent, 
+  PredictionMarketsMarketExpiredEvent, PredictionMarketsMarketInsufficientSubsidyEvent, PredictionMarketsMarketRejectedEvent, 
+  PredictionMarketsMarketReportedEvent, PredictionMarketsMarketResolvedEvent, PredictionMarketsMarketStartedWithSubsidyEvent, 
+  PredictionMarketsSoldCompleteSetEvent, PredictionMarketsTokensRedeemedEvent } from '../../types/events'
 import { getAssetId } from '../helper'
 
 
@@ -65,26 +65,32 @@ export function getMarketClosedEvent(ctx: EventContext): MarketClosedEvent {
 }
 
 export function getMarketCreatedEvent(ctx: EventHandlerContext<Store, {event: {args: true}}>): MarketCreatedEvent {
+  const event = new PredictionMarketsMarketCreatedEvent(ctx)
   const [marketId, param1, param2] = ctx.event.args
-  const specVersion = +ctx.block.specId.substring(ctx.block.specId.indexOf('@')+1)
-  if (specVersion < 32) {
+  if (event.isV23 || event.isV29) {
     const marketAccountId = ''
     let market = param1 as any
     market.disputeMechanism = market.mdm
     market.period.start = market.period.value[0]
     market.period.end = market.period.value[1]
     return { marketId, marketAccountId, market } 
-  } else if (specVersion < 36 ) {
+  } else if (event.isV32) {
     const marketAccountId = ''
     let market = param1 as any
     market.disputeMechanism = market.mdm
     market.period.start = market.period.value.start
     market.period.end = market.period.value.end
     return { marketId, marketAccountId, market }
-  } else if (specVersion < 38) {
+  } else if (event.isV36) {
     const marketAccountId = encodeAddress(param1, 73)
     const market = param2 as any
     market.disputeMechanism = market.mdm
+    market.period.start = market.period.value.start
+    market.period.end = market.period.value.end
+    return { marketId, marketAccountId, market }
+  } else if (event.isV38 || event.isV40) {
+    const marketAccountId = encodeAddress(param1, 73)
+    const market = param2 as any
     market.period.start = market.period.value.start
     market.period.end = market.period.value.end
     return { marketId, marketAccountId, market }
