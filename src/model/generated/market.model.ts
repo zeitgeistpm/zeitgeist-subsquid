@@ -125,12 +125,6 @@ export class Market {
   period!: MarketPeriod
 
   /**
-   * Timestamp at which market should end
-   */
-  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
-  end!: bigint
-
-  /**
    * Scoring rule used for the market
    */
   @Column_("text", {nullable: false})
