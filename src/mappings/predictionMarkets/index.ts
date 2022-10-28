@@ -255,17 +255,24 @@ export async function marketCreated(ctx: EventHandlerContext<Store, {event: {arg
   let period = new MarketPeriod()
   const p = market.period
   if (p.__kind == 'Block') {
-    period.block = p.start.toString() + ',' + p.end.toString()
-
     const sdk = await Tools.getSDK()
-    const now = +(await sdk.api.query.timestamp.now()).toString()
-    const head = await sdk.api.rpc.chain.getHeader()
-    const blockNum = head.number.toNumber()
-    const diffInMs = +(sdk.api.consts.timestamp.minimumPeriod).toString() * (Number(p.end) - blockNum)
-    newMarket.end = BigInt(now + diffInMs)
+    const now = BigInt((await sdk.api.query.timestamp.now()).toString())
+    const headBlock = (await sdk.api.rpc.chain.getHeader()).number.toBigInt()
+    const blockCreationPeriod = BigInt(2 * Number(sdk.api.consts.timestamp.minimumPeriod))
+    const startDiffInMs = blockCreationPeriod * (BigInt(p.start) - headBlock)
+    const endDiffInMs = blockCreationPeriod * (BigInt(p.end) - headBlock)
+
+    period.block = []
+    period.block.push(BigInt(p.start))
+    period.block.push(BigInt(p.end))
+    period.start = now + startDiffInMs
+    period.end = now + endDiffInMs
   } else if (p.__kind == 'Timestamp') {
-    period.timestamp = p.start.toString() + ',' + p.end.toString()
-    newMarket.end = BigInt(p.end) 
+    period.timestamp = []
+    period.timestamp.push(BigInt(p.start))
+    period.timestamp.push(BigInt(p.end))
+    period.start = BigInt(p.start)
+    period.end = BigInt(p.end)
   }
   newMarket.period = period
 

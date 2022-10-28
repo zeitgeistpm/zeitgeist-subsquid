@@ -146,8 +146,6 @@ type Market @entity {
   marketType: MarketType!
   "Time period expressed in block numbers or timestamps"
   period: MarketPeriod!
-  "Timestamp at which market should end"
-  end: BigInt!
   "Scoring rule used for the market"
   scoringRule: String!
   "Status of the market"
@@ -285,9 +283,13 @@ Time period of the market
 """
 type MarketPeriod @jsonField {
   "start & end block numbers"
-  block: String
+  block: [BigInt]
+  "Timestamp at which market should end"
+  end: BigInt!
+  "Timestamp at which market should start"
+  start: BigInt!
   "start & end timestamps"
-  timestamp: String
+  timestamp: [BigInt]
 }
 
 """
