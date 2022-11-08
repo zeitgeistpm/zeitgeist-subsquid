@@ -206,7 +206,7 @@ export async function marketCreated(ctx: EventHandlerContext<Store, {event: {arg
     newMarket.description = metadata.description
     newMarket.img = metadata.img
     
-    if ((market.marketType as any).scalar) {
+    if (market.marketType.__kind == 'Scalar') {
       newMarket.scalarType = metadata.scalarType;
     }
 
