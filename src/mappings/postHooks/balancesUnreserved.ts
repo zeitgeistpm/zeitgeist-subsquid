@@ -127,9 +127,8 @@ export async function unreserveBalances_168378(ctx: BlockHandlerContext<Store>) 
   const wIds = [
     'dDykRtA8VyuVVtWTD5PWst3f33L1NMVKseQEji8e3B4ZCHrjK', 
     'dE3EP2kkLee2E22JJr8kSEnXkQ1VyAoB8YnQsxgE5BFLMHGDj',
-    'dE1qpHWYrzYSz5x2hkUtb9JW3iSEzE5igqcNR1XEcczWi5n8k'
+    'dE1qpHWYrzYSz5x2hkUtb9JW3iSEzE5igqcNR1XEcczWi5n8k',
   ];
-
   const event = {
     id: '0000168378-000000-e544d',
     name: 'PostHooks.BalancesUnreserved'
@@ -373,43 +372,50 @@ export async function unreserveBalances_184820(ctx: BlockHandlerContext<Store>) 
 }
 
 export async function unreserveBalances_204361(ctx: BlockHandlerContext<Store>) {
-  const walletId = 'dE4NbK6XC4dJEkjU5erpDNj2ydMh1fMNw8ug7xNgzTxqFo5iW';
+  const wIds = [
+    'dE4NbK6XC4dJEkjU5erpDNj2ydMh1fMNw8ug7xNgzTxqFo5iW', 
+    'dDzFGnwpyB9bWPsd9RoxZA6mW4MDNRVHvCFgnqhhE2f5yVJ8v',
+  ];
   const event = {
     id: '0000204361-000000-e6cc2',
     name: 'PostHooks.BalancesUnreserved'
   }
 
-  const acc = await ctx.store.get(Account, { where: { accountId: walletId } })
-  if (!acc) {
-    return;
-  }
+  await Promise.all(
+    wIds.map(async (wId) => {
+      const acc = await ctx.store.get(Account, { where: { accountId: wId } })
+      if (!acc) {
+        return;
+      }
 
-  let ab = await ctx.store.findOneBy(AccountBalance, { account: { accountId: acc.accountId }, assetId: 'Ztg' })
-  if (ab) {
-    ab.balance = ab.balance + BigInt(82500000000);
-    ab.value = Number(ab.balance);
-    console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-    await ctx.store.save<AccountBalance>(ab);
+      let ab = await ctx.store.findOneBy(AccountBalance, { account: { accountId: acc.accountId }, assetId: 'Ztg' })
+      if (ab) {
+        ab.balance = ab.balance + BigInt(82500000000);
+        ab.value = Number(ab.balance);
+        console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
+        await ctx.store.save<AccountBalance>(ab);
 
-    acc.pvalue = acc.pvalue + 82500000000;
-    console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
-    await ctx.store.save<Account>(acc);
+        acc.pvalue = acc.pvalue + 82500000000;
+        console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
+        await ctx.store.save<Account>(acc);
 
-    let hab = new HistoricalAccountBalance();
-    hab.id = event.id + '-' + walletId.substring(walletId.length - 5);
-    hab.accountId = acc.accountId;
-    hab.event = 'Unreserved';
-    hab.assetId = ab.assetId;
-    hab.dBalance = BigInt(82500000000);
-    hab.balance = ab.balance;
-    hab.dValue = Number(hab.dBalance);
-    hab.value = Number(hab.balance);
-    hab.pvalue = acc.pvalue;
-    hab.blockNumber = ctx.block.height;
-    hab.timestamp = new Date(ctx.block.timestamp);
-    console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
-    await ctx.store.save<HistoricalAccountBalance>(hab);
-  }
+        let hab = new HistoricalAccountBalance();
+        hab.id = event.id + '-' + wId.substring(wId.length - 5);
+        hab.accountId = acc.accountId;
+        hab.event = 'Unreserved';
+        hab.assetId = ab.assetId;
+        hab.dBalance = BigInt(82500000000);
+        hab.balance = ab.balance;
+        hab.dValue = Number(hab.dBalance);
+        hab.value = Number(hab.balance);
+        hab.pvalue = acc.pvalue;
+        hab.blockNumber = ctx.block.height;
+        hab.timestamp = new Date(ctx.block.timestamp);
+        console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
+        await ctx.store.save<HistoricalAccountBalance>(hab);
+      }
+    })
+  )
 }
 
 export async function unreserveBalances_211391(ctx: BlockHandlerContext<Store>) {
