@@ -43,8 +43,6 @@ processor.addEventHandler('Currency.Transferred', ctx => currencyTransferred(ctx
 processor.addEventHandler('Currency.Deposited', ctx => currencyDeposited(ctx))
 processor.addEventHandler('Currency.Withdrawn', ctx => currencyWithdrawn(ctx))
 
-processor.addEventHandler('ParachainStaking.Rewarded', ctx => parachainStakingRewarded(ctx))
-
 processor.addEventHandler('PredictionMarkets.BoughtCompleteSet', ctx => boughtCompleteSet(ctx))
 processor.addEventHandler('PredictionMarkets.MarketApproved', ctx => marketApproved(ctx))
 processor.addEventHandler('PredictionMarkets.MarketClosed', ctx => marketClosed(ctx))
@@ -78,6 +76,9 @@ if (!process.env.WS_NODE_URL?.includes(`bs`)) {
 } else {
   processor.addEventHandler('Balances.Transfer', {range: {from: 0, to: 588249}}, ctx => balancesTransferOld(ctx))
   processor.addEventHandler('Balances.Transfer', {range: {from: 588250}}, ctx => balancesTransfer(ctx))
+
+  processor.addEventHandler('ParachainStaking.Rewarded', ctx => parachainStakingRewarded(ctx))
+  
   processor.addEventHandler('System.ExtrinsicFailed', {range: {from: 0, to: 588249}}, ctx => systemExtrinsicFailed(ctx))
   processor.addEventHandler('System.ExtrinsicSuccess', {range: {from: 0, to: 588249}}, ctx => systemExtrinsicSuccess(ctx))
 
