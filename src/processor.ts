@@ -4,6 +4,7 @@ import { balancesBalanceSet, balancesDustLost, balancesEndowed, balancesReserved
   balancesTransferOld, balancesUnreserved, balancesWithdraw } from './mappings/balances';
 import { currencyDeposited, currencyTransferred, currencyWithdrawn } from './mappings/currency';
 import { parachainStakingRewarded } from './mappings/parachainStaking';
+import { destroyMarkets } from './mappings/postHooks/marketDestroyed';
 import { boughtCompleteSet, marketApproved, marketClosed, marketCreated, marketDestroyed, marketDisputed, 
   marketExpired, marketInsufficientSubsidy, marketRejected, marketReported, marketResolved, 
   marketStartedWithSubsidy, soldCompleteSet, tokensRedeemed} from './mappings/predictionMarkets';
@@ -26,7 +27,7 @@ processor.setDataSource({
   archive: process.env.INDEXER_ENDPOINT_URL ?? 'https://indexer.zeitgeist.pm/graphql',
   chain: process.env.WS_NODE_URL ?? 'wss://bsr.zeitgeist.pm',
 });
-// processor.setBlockRange({from: 832, to: 832})
+//processor.setBlockRange({from: 579140, to: 579140})
 
 processor.addEventHandler('Balances.BalanceSet', ctx => balancesBalanceSet(ctx))
 processor.addEventHandler('Balances.DustLost', ctx => balancesDustLost(ctx))
@@ -76,6 +77,8 @@ if (!process.env.WS_NODE_URL?.includes(`bs`)) {
   processor.addEventHandler('Balances.Transfer', {range: {from: 588250}}, ctx => balancesTransfer(ctx))
   processor.addEventHandler('System.ExtrinsicFailed', {range: {from: 0, to: 588249}}, ctx => systemExtrinsicFailed(ctx))
   processor.addEventHandler('System.ExtrinsicSuccess', {range: {from: 0, to: 588249}}, ctx => systemExtrinsicSuccess(ctx))
+
+  processor.addPostHook({range: {from: 579140, to: 579140}}, ctx => destroyMarkets(ctx))
 }
 
 processor.run()
