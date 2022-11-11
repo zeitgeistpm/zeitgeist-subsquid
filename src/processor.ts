@@ -4,6 +4,9 @@ import { balancesBalanceSet, balancesDustLost, balancesEndowed, balancesReserved
   balancesTransferOld, balancesUnreserved, balancesWithdraw } from './mappings/balances';
 import { currencyDeposited, currencyTransferred, currencyWithdrawn } from './mappings/currency';
 import { parachainStakingRewarded } from './mappings/parachainStaking';
+import { unreserveBalances_108949, unreserveBalances_155917, unreserveBalances_168378, unreserveBalances_175178, 
+  unreserveBalances_176408, unreserveBalances_178290, unreserveBalances_179524, unreserveBalances_184820, 
+  unreserveBalances_204361, unreserveBalances_211391, unreserveBalances_92128} from './mappings/postHooks/balancesUnreserved';
 import { destroyMarkets } from './mappings/postHooks/marketDestroyed';
 import { boughtCompleteSet, marketApproved, marketClosed, marketCreated, marketDestroyed, marketDisputed, 
   marketExpired, marketInsufficientSubsidy, marketRejected, marketReported, marketResolved, 
@@ -40,8 +43,6 @@ processor.addEventHandler('Currency.Transferred', ctx => currencyTransferred(ctx
 processor.addEventHandler('Currency.Deposited', ctx => currencyDeposited(ctx))
 processor.addEventHandler('Currency.Withdrawn', ctx => currencyWithdrawn(ctx))
 
-processor.addEventHandler('ParachainStaking.Rewarded', ctx => parachainStakingRewarded(ctx))
-
 processor.addEventHandler('PredictionMarkets.BoughtCompleteSet', ctx => boughtCompleteSet(ctx))
 processor.addEventHandler('PredictionMarkets.MarketApproved', ctx => marketApproved(ctx))
 processor.addEventHandler('PredictionMarkets.MarketClosed', ctx => marketClosed(ctx))
@@ -75,10 +76,25 @@ if (!process.env.WS_NODE_URL?.includes(`bs`)) {
 } else {
   processor.addEventHandler('Balances.Transfer', {range: {from: 0, to: 588249}}, ctx => balancesTransferOld(ctx))
   processor.addEventHandler('Balances.Transfer', {range: {from: 588250}}, ctx => balancesTransfer(ctx))
+
+  processor.addEventHandler('ParachainStaking.Rewarded', ctx => parachainStakingRewarded(ctx))
+  
   processor.addEventHandler('System.ExtrinsicFailed', {range: {from: 0, to: 588249}}, ctx => systemExtrinsicFailed(ctx))
   processor.addEventHandler('System.ExtrinsicSuccess', {range: {from: 0, to: 588249}}, ctx => systemExtrinsicSuccess(ctx))
 
   processor.addPostHook({range: {from: 579140, to: 579140}}, ctx => destroyMarkets(ctx))
+
+  processor.addPostHook({range: {from: 92128, to: 92128}}, ctx => unreserveBalances_92128(ctx))
+  processor.addPostHook({range: {from: 108949, to: 108949}}, ctx => unreserveBalances_108949(ctx))
+  processor.addPostHook({range: {from: 155917, to: 155917}}, ctx => unreserveBalances_155917(ctx))
+  processor.addPostHook({range: {from: 168378, to: 168378}}, ctx => unreserveBalances_168378(ctx))
+  processor.addPostHook({range: {from: 175178, to: 175178}}, ctx => unreserveBalances_175178(ctx))
+  processor.addPostHook({range: {from: 176408, to: 176408}}, ctx => unreserveBalances_176408(ctx))
+  processor.addPostHook({range: {from: 178290, to: 178290}}, ctx => unreserveBalances_178290(ctx))
+  processor.addPostHook({range: {from: 179524, to: 179524}}, ctx => unreserveBalances_179524(ctx))
+  processor.addPostHook({range: {from: 184820, to: 184820}}, ctx => unreserveBalances_184820(ctx))
+  processor.addPostHook({range: {from: 204361, to: 204361}}, ctx => unreserveBalances_204361(ctx))
+  processor.addPostHook({range: {from: 211391, to: 211391}}, ctx => unreserveBalances_211391(ctx))
 }
 
 processor.run()
