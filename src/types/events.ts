@@ -56,6 +56,50 @@ export class BalancesBalanceSetEvent {
   }
 }
 
+export class BalancesDepositEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Balances.Deposit')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   *  Some amount was deposited (e.g. for transaction fees). \[who, deposit\]
+   */
+  get isV23(): boolean {
+    return this._chain.getEventHash('Balances.Deposit') === '23bebce4ca9ed37548947d07d4dc50e772f07401b9a416b6aa2f3e9cb5adcaf4'
+  }
+
+  /**
+   *  Some amount was deposited (e.g. for transaction fees). \[who, deposit\]
+   */
+  get asV23(): [Uint8Array, bigint] {
+    assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Some amount was deposited (e.g. for transaction fees).
+   */
+  get isV34(): boolean {
+    return this._chain.getEventHash('Balances.Deposit') === 'e84a34a6a3d577b31f16557bd304282f4fe4cbd7115377f4687635dc48e52ba5'
+  }
+
+  /**
+   * Some amount was deposited (e.g. for transaction fees).
+   */
+  get asV34(): {who: Uint8Array, amount: bigint} {
+    assert(this.isV34)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class BalancesDustLostEvent {
   private readonly _chain: Chain
   private readonly event: Event

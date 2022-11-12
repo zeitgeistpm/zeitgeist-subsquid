@@ -4,6 +4,7 @@
   "typesBundle": "typesBundle.json",
   "events": [
     "Balances.BalanceSet",
+    "Balances.Deposit",
     "Balances.DustLost",
     "Balances.Endowed",
     "Balances.Reserved",
