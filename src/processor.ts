@@ -1,12 +1,14 @@
 import { SubstrateProcessor } from '@subsquid/substrate-processor'
 import { TypeormDatabase } from '@subsquid/typeorm-store'
-import { balancesBalanceSet, balancesDustLost, balancesEndowed, balancesReserved, balancesTransfer, 
-  balancesTransferOld, balancesUnreserved, balancesWithdraw } from './mappings/balances';
+import { balancesBalanceSet, balancesDeposit, balancesDustLost, balancesEndowed, balancesReserved, 
+  balancesTransfer, balancesTransferOld, balancesUnreserved, balancesWithdraw } from './mappings/balances';
 import { currencyDeposited, currencyTransferred, currencyWithdrawn } from './mappings/currency';
 import { parachainStakingRewarded } from './mappings/parachainStaking';
-import { unreserveBalances_108949, unreserveBalances_155917, unreserveBalances_168378, unreserveBalances_175178, 
+import { 
+  unreserveBalances_108949, unreserveBalances_155917, unreserveBalances_168378, unreserveBalances_175178, 
   unreserveBalances_176408, unreserveBalances_178290, unreserveBalances_179524, unreserveBalances_184820, 
-  unreserveBalances_204361, unreserveBalances_211391, unreserveBalances_92128} from './mappings/postHooks/balancesUnreserved';
+  unreserveBalances_204361, unreserveBalances_211391, unreserveBalances_92128
+} from './mappings/postHooks/balancesUnreserved';
 import { destroyMarkets } from './mappings/postHooks/marketDestroyed';
 import { boughtCompleteSet, marketApproved, marketClosed, marketCreated, marketDestroyed, marketDisputed, 
   marketExpired, marketInsufficientSubsidy, marketRejected, marketReported, marketResolved, 
@@ -74,6 +76,8 @@ processor.addEventHandler('Tokens.Transfer', ctx => tokensTransfer(ctx))
 if (!process.env.WS_NODE_URL?.includes(`bs`)) {
   processor.addEventHandler('Balances.Transfer', ctx => balancesTransfer(ctx))
 } else {
+  processor.addEventHandler('Balances.Deposit', ctx => balancesDeposit(ctx))
+
   processor.addEventHandler('Balances.Transfer', {range: {from: 0, to: 588249}}, ctx => balancesTransferOld(ctx))
   processor.addEventHandler('Balances.Transfer', {range: {from: 588250}}, ctx => balancesTransfer(ctx))
 
