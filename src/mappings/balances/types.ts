@@ -1,8 +1,10 @@
 import { encodeAddress } from '@polkadot/keyring'
 import * as ss58 from '@subsquid/ss58'
 import { EventContext } from '../../types/support'
-import { BalancesBalanceSetEvent, BalancesDustLostEvent, BalancesEndowedEvent, BalancesReservedEvent, 
-  BalancesTransferEvent, BalancesUnreservedEvent, BalancesWithdrawEvent } from '../../types/events'
+import { 
+  BalancesBalanceSetEvent, BalancesDepositEvent, BalancesDustLostEvent, BalancesEndowedEvent, 
+  BalancesReservedEvent, BalancesTransferEvent, BalancesUnreservedEvent, BalancesWithdrawEvent 
+} from '../../types/events'
 
 
 export function getBalanceSetEvent(ctx: EventContext): BalanceSetEvent {
@@ -19,6 +21,23 @@ export function getBalanceSetEvent(ctx: EventContext): BalanceSetEvent {
     const [account, free] = ctx.event.args
     const walletId = encodeAddress(account, 73)
     return {walletId, free}
+  }
+}
+
+export function getDepositEvent(ctx: EventContext): DepositEvent {
+  const event = new BalancesDepositEvent(ctx)
+  if (event.isV23) {
+    const [who, amount] = event.asV23
+    const walletId = ss58.codec('zeitgeist').encode(who)
+    return {walletId, amount}
+  } else if (event.isV34) {
+    const {who, amount} = event.asV34
+    const walletId = ss58.codec('zeitgeist').encode(who)
+    return {walletId, amount}
+  } else {
+    const [who, amount] = ctx.event.args
+    const walletId = encodeAddress(who, 73)
+    return {walletId, amount}
   }
 }
 
@@ -130,6 +149,11 @@ export function getWithdrawEvent(ctx: EventContext): WithdrawEvent {
 interface BalanceSetEvent {
   walletId: string
   free: bigint
+}
+
+interface DepositEvent {
+  walletId: string
+  amount: bigint
 }
 
 interface DustLostEvent {
