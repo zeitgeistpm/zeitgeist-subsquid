@@ -1,10 +1,9 @@
 import { encodeAddress } from '@polkadot/keyring'
 import * as ss58 from '@subsquid/ss58'
 import { EventContext } from '../../types/support'
-import { 
-  BalancesBalanceSetEvent, BalancesDepositEvent, BalancesDustLostEvent, BalancesEndowedEvent, 
-  BalancesReservedEvent, BalancesTransferEvent, BalancesUnreservedEvent, BalancesWithdrawEvent 
-} from '../../types/events'
+import { BalancesBalanceSetEvent, BalancesDepositEvent, BalancesDustLostEvent, BalancesEndowedEvent, 
+  BalancesReservedEvent, BalancesSlashedEvent, BalancesTransferEvent, BalancesUnreservedEvent, 
+  BalancesWithdrawEvent } from '../../types/events'
 
 
 export function getBalanceSetEvent(ctx: EventContext): BalanceSetEvent {
@@ -92,6 +91,23 @@ export function getReservedEvent(ctx: EventContext): ReservedEvent {
   }
 }
 
+export function getSlashedEvent(ctx: EventContext): SlashedEvent {
+  const event = new BalancesSlashedEvent(ctx)
+  if (event.isV33) {
+    const [who, amount] = event.asV33
+    const walletId = ss58.codec('zeitgeist').encode(who)
+    return {walletId, amount}
+  } else if (event.isV34) {
+    const {who, amount} = event.asV34
+    const walletId = ss58.codec('zeitgeist').encode(who)
+    return {walletId, amount}
+  } else {
+    const [who, amount] = ctx.event.args
+    const walletId = encodeAddress(who, 73)
+    return {walletId, amount}
+  }
+}
+
 export function getTransferEvent(ctx: EventContext): TransferEvent {
   const transferEvent = new BalancesTransferEvent(ctx)
   if (transferEvent.isV23) {
@@ -167,6 +183,11 @@ interface EndowedEvent {
 }
 
 interface ReservedEvent {
+  walletId: string
+  amount: bigint
+}
+
+interface SlashedEvent {
   walletId: string
   amount: bigint
 }
