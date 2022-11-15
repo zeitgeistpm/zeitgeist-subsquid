@@ -80,16 +80,11 @@ if (!process.env.WS_NODE_URL?.includes(`bs`)) {
   processor.addEventHandler('Balances.Transfer', ctx => balancesTransfer(ctx))
 } else {
   processor.addEventHandler('Balances.Deposit', ctx => balancesDeposit(ctx))
-
   processor.addEventHandler('Balances.Transfer', {range: {from: 0, to: 588249}}, ctx => balancesTransferOld(ctx))
   processor.addEventHandler('Balances.Transfer', {range: {from: 588250}}, ctx => balancesTransfer(ctx))
-
   processor.addEventHandler('ParachainStaking.Rewarded', ctx => parachainStakingRewarded(ctx))
-  
   processor.addEventHandler('System.ExtrinsicFailed', {range: {from: 0, to: 588249}}, ctx => systemExtrinsicFailed(ctx))
   processor.addEventHandler('System.ExtrinsicSuccess', {range: {from: 0, to: 588249}}, ctx => systemExtrinsicSuccess(ctx))
-
-  processor.addPostHook({range: {from: 579140, to: 579140}}, ctx => destroyMarkets(ctx))
 
   processor.addPostHook({range: {from: 92128, to: 92128}}, ctx => unreserveBalances_92128(ctx))
   processor.addPostHook({range: {from: 108949, to: 108949}}, ctx => unreserveBalances_108949(ctx))
@@ -102,6 +97,7 @@ if (!process.env.WS_NODE_URL?.includes(`bs`)) {
   processor.addPostHook({range: {from: 184820, to: 184820}}, ctx => unreserveBalances_184820(ctx))
   processor.addPostHook({range: {from: 204361, to: 204361}}, ctx => unreserveBalances_204361(ctx))
   processor.addPostHook({range: {from: 211391, to: 211391}}, ctx => unreserveBalances_211391(ctx))
+  processor.addPostHook({range: {from: 579140, to: 579140}}, ctx => destroyMarkets(ctx))
 }
 
 processor.run()
