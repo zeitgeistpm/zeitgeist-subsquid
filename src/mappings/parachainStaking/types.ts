@@ -4,25 +4,24 @@ import { EventContext } from '../../types/support'
 import { ParachainStakingRewardedEvent } from '../../types/events'
 
 
-export function getRewardedEvent(ctx: EventContext): RewardedEvent {
-  const rewardedEvent = new ParachainStakingRewardedEvent(ctx)
-  if (rewardedEvent.isV23) {
-    const [ accountId, amount ] = rewardedEvent.asV23
+export const getRewardedEvent = (ctx: EventContext): RewardedEvent => {
+  const event = new ParachainStakingRewardedEvent(ctx)
+  if (event.isV23) {
+    const [accountId, rewards] = event.asV23
     const walletId = ss58.codec('zeitgeist').encode(accountId)
-    return { walletId, amount }
-  } else if (rewardedEvent.isV35) {
-    const { account, rewards }  = rewardedEvent.asV35
+    return { walletId, rewards }
+  } else if (event.isV35) {
+    const { account, rewards }  = event.asV35
     const walletId = ss58.codec('zeitgeist').encode(account)
-    const amount = rewards
-    return { walletId, amount }
+    return { walletId, rewards }
   } else {
-    const [accountId, amount] = ctx.event.args
+    const [accountId, rewards] = ctx.event.args
     const walletId = encodeAddress(accountId, 73)
-    return { walletId, amount }
+    return { walletId, rewards }
   }
 }
 
 interface RewardedEvent {
   walletId: string
-  amount: bigint
+  rewards: bigint
 }
