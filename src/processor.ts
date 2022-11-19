@@ -40,7 +40,6 @@ processor.addEventHandler('Balances.BalanceSet', ctx => balancesBalanceSet(ctx))
 processor.addEventHandler('Balances.DustLost', ctx => balancesDustLost(ctx))
 processor.addEventHandler('Balances.Endowed', ctx => balancesEndowed(ctx))
 processor.addEventHandler('Balances.Reserved', ctx => balancesReserved(ctx))
-processor.addEventHandler('Balances.Slashed', ctx => balancesSlashed(ctx))
 processor.addEventHandler('Balances.Unreserved', ctx => balancesUnreserved(ctx))
 processor.addEventHandler('Balances.Withdraw', ctx => balancesWithdraw(ctx))
 
