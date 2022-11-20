@@ -1,7 +1,7 @@
 #!/bin/sh
 
 __usage="
-Usage: ./scripts/processor.sh <first> <second>
+Usage: ./scripts/deploy/processor.sh <first> <second>
 
 Options for <first>:
   local       Process data from local chain
