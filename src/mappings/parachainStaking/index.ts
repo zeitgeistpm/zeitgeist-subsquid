@@ -20,15 +20,7 @@ export const parachainStakingRewarded = async(ctx: EventHandlerContext<Store, {e
   }
 
   let ab = await store.findOneBy(AccountBalance, { account: { accountId: walletId }, assetId: 'Ztg' })
-  if (!ab) return
-  
-  let hab = await store.get(HistoricalAccountBalance, { where: 
-    { accountId: acc.accountId, assetId: 'Ztg', event: 'Deposit', blockNumber: block.height } })
-  if (!hab) {
-    acc.pvalue = Number(acc.pvalue) + Number(rewards)
-    console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
-    await store.save<Account>(acc)
-
+  if (ab) {
     ab.balance = ab.balance + rewards
     ab.value = Number(ab.balance)
     console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
@@ -48,11 +40,6 @@ export const parachainStakingRewarded = async(ctx: EventHandlerContext<Store, {e
     hab.timestamp = new Date(block.timestamp)
     console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
     await store.save<HistoricalAccountBalance>(hab)
-  } else {
-    hab.event = hab.event.concat(event.name.split('.')[1])
-    console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
-    await store.save<HistoricalAccountBalance>(hab)
-    return
   }
 }
 
