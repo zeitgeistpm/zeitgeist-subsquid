@@ -1,10 +1,10 @@
 /**
  * Script to validate units of an asset in pool against on-chain data
- * Run using `ts-node test/validateHistoricalAssets.ts`
+ * Run using `ts-node scripts/validate/historicalAssets.ts`
  */
 import { util } from '@zeitgeistpm/sdk';
 import https from 'https';
-import { Tools } from '../src/mappings/util';
+import { Tools } from '../../src/mappings/util';
 
 // Modify values as per requirement
 const NODE_URL = `wss://bsr.zeitgeist.pm`;

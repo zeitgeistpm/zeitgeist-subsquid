@@ -1,24 +1,22 @@
 /** 
  * Script to validate Ztg balance of an account against on-chain balance
- * Run using `ts-node test/validateBalances.ts`
+ * Run using `ts-node scripts/validate/accountBalances.ts wss://bsr.zeitgeist.pm processor.zeitgeist.pm`
  */
 import { AccountInfo } from '@polkadot/types/interfaces/system';
 import https from 'https';
-import { Tools } from '../src/mappings/util';
+import { Tools } from '../../src/mappings/util';
 
 // Modify values as per requirement
-const WS_NODE_URL = `wss://bsr.zeitgeist.pm`;
-const QUERY_NODE_HOSTNAME = `processor.zeitgeist.pm`;
-const ACCOUNTS_LIMIT = 100; // Number of accounts that need to be validated
+const WS_NODE_URL = process.argv[2];
+const QUERY_NODE_HOSTNAME = process.argv[3];
 
 // GraphQL query for retrieving Ztg balances of accounts
 const query = JSON.stringify({
   query: `{
-    accountBalances(where: {assetId_eq: "Ztg"}, limit: ${ACCOUNTS_LIMIT}) {
+    accountBalances(where: {assetId_eq: "Ztg"}) {
       account {
         accountId
       }
-      assetId
       balance
     }
     squidStatus {

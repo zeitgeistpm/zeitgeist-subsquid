@@ -1,9 +1,9 @@
 /**
  * Script to validate spot price of an asset against on-chain price
- * Run using `ts-node test/validateSpotPrices.ts`
+ * Run using `ts-node scripts/validate/spotPrices.ts`
  */
 import https from 'https';
-import { Tools } from '../src/mappings/util';
+import { Tools } from '../../src/mappings/util';
 
 // Modify values as per requirement
 const NODE_URL = `wss://bsr.zeitgeist.pm`;
