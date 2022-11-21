@@ -1,10 +1,10 @@
 /** 
  * Script to find change in on-chain Ztg balance of an account between two block numbers
- * Run using `ts-node test/findChangeInBalance.ts`
+ * Run using `ts-node scripts/detect/changeInBalance.ts`
  */
 import { AccountInfo } from "@polkadot/types/interfaces/system";
 import SDK from "@zeitgeistpm/sdk";
-import { Tools } from "../src/mappings/util"
+import { Tools } from "../../src/mappings/util"
 
 // Modify values as per requirement
 const WS_NODE_URL = `wss://bsr.zeitgeist.pm`;

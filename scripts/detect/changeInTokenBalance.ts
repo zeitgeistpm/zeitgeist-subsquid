@@ -1,9 +1,9 @@
 /**
  * Script to find change in on-chain token balance of an account between two block numbers
- * Run using `ts-node test/findChangeInTokenBalance.ts`
+ * Run using `ts-node scripts/detect/changeInTokenBalance.ts`
  */
 import SDK, { util } from '@zeitgeistpm/sdk';
-import { Tools } from '../src/mappings/util';
+import { Tools } from '../../src/mappings/util';
 
 // Modify values as per requirement
 const WS_NODE_URL = `wss://bsr.zeitgeist.pm`;

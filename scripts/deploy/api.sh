@@ -1,7 +1,7 @@
 #!/bin/sh
 
 __usage="
-Usage: ./scripts/api.sh <first> <second>
+Usage: ./scripts/deploy/api.sh <first> <second>
 
 Options for <first>:
   local       Query data on local chain

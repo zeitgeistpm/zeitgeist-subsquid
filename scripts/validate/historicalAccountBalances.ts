@@ -1,10 +1,10 @@
 /** 
  * Script to validate Ztg balance history of an account against on-chain data
- * Run using `ts-node test/validateHistoricalBalances.ts`
+ * Run using `ts-node scripts/validate/historicalAccountBalances.ts`
  */
 import { AccountInfo } from '@polkadot/types/interfaces/system';
 import https from 'https';
-import { Tools } from '../src/mappings/util';
+import { Tools } from '../../src/mappings/util';
 
 // Modify values as per requirement
 const ACCOUNT_ID = `dE4NbK6XC4dJEkjU5erpDNj2ydMh1fMNw8ug7xNgzTxqFo5iW`;
