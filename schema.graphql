@@ -150,8 +150,8 @@ type Market @entity {
   scoringRule: String!
   "Status of the market"
   status: String!
-  "Zeitgeist's indentifier for liquidity pool"
-  poolId: Int
+  "Market's liquidity pool details"
+  pool: Pool
   "Reported outcome of the market. Null if the market is not reported yet"
   report: MarketReport
   "Resolved outcome for the market"
