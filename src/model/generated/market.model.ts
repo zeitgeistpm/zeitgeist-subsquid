@@ -1,9 +1,10 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_} from "typeorm"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_} from "typeorm"
 import * as marshal from "./marshal"
 import {CategoryMetadata} from "./_categoryMetadata"
 import {MarketDeadlines} from "./_marketDeadlines"
 import {MarketType} from "./_marketType"
 import {MarketPeriod} from "./_marketPeriod"
+import {Pool} from "./pool.model"
 import {MarketReport} from "./_marketReport"
 import {MarketDisputeMechanism} from "./_marketDisputeMechanism"
 
@@ -137,10 +138,11 @@ export class Market {
   status!: string
 
   /**
-   * Zeitgeist's indentifier for liquidity pool
+   * Market's liquidity pool details
    */
-  @Column_("int4", {nullable: true})
-  poolId!: number | undefined | null
+  @Index_()
+  @ManyToOne_(() => Pool, {nullable: true})
+  pool!: Pool | undefined | null
 
   /**
    * Reported outcome of the market. Null if the market is not reported yet
