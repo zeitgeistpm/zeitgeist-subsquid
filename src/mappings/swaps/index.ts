@@ -82,23 +82,6 @@ export async function poolCreate(ctx: EventHandlerContext<Store, {event: {args: 
     await store.save<Account>(acc)
   }
 
-  let market = await store.get(Market, { where: { marketId: pool.marketId } })
-  if (market) {
-    market.poolId = pool.poolId
-    console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`)
-    await store.save<Market>(market)
-
-    let hm = new HistoricalMarket()
-    hm.id = event.id + '-' + market.marketId
-    hm.marketId = market.marketId
-    hm.event = event.name.split('.')[1]
-    hm.poolId = market.poolId
-    hm.blockNumber = block.height
-    hm.timestamp = new Date(block.timestamp)
-    console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
-    await store.save<HistoricalMarket>(hm)
-  }
-
   if (swapPool.weights && swapPool.weights[swapPool.weights.length - 1][0].__kind == 'Ztg') {
     const tokenWeightIn = +swapPool.weights[swapPool.weights.length - 1][1].toString()
     await Promise.all(
@@ -152,6 +135,23 @@ export async function poolCreate(ctx: EventHandlerContext<Store, {event: {args: 
   hp.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
   await store.save<HistoricalPool>(hp)
+
+  let market = await store.get(Market, { where: { marketId: pool.marketId } })
+  if (market) {
+    market.pool = pool
+    console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`)
+    await store.save<Market>(market)
+
+    let hm = new HistoricalMarket()
+    hm.id = event.id + '-' + market.marketId
+    hm.marketId = market.marketId
+    hm.event = event.name.split('.')[1]
+    hm.poolId = market.pool.poolId
+    hm.blockNumber = block.height
+    hm.timestamp = new Date(block.timestamp)
+    console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
+    await store.save<HistoricalMarket>(hm)
+  }
 }
 
 export async function poolExit(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
