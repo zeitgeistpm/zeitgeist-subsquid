@@ -75,6 +75,13 @@ export async function poolCreate(ctx: EventHandlerContext<Store, {event: {args: 
   pool.createdAt = new Date(block.timestamp)
   pool.baseAsset = swapPool.baseAsset.__kind
 
+  let acc = await store.get(Account, { where: { accountId: hab?.accountId } })
+  if (acc) {
+    acc.poolId = pool.poolId
+    console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+    await store.save<Account>(acc)
+  }
+
   if (swapPool.weights && swapPool.weights[swapPool.weights.length - 1][0].__kind == 'Ztg') {
     const tokenWeightIn = +swapPool.weights[swapPool.weights.length - 1][1].toString()
     await Promise.all(
@@ -128,13 +135,6 @@ export async function poolCreate(ctx: EventHandlerContext<Store, {event: {args: 
   hp.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
   await store.save<HistoricalPool>(hp)
-
-  let acc = await store.get(Account, { where: { accountId: hab?.accountId } })
-  if (acc) {
-    acc.poolId = pool.poolId
-    console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
-    await store.save<Account>(acc)
-  }
 
   let market = await store.get(Market, { where: { marketId: pool.marketId } })
   if (market) {
