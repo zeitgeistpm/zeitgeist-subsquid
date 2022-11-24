@@ -1,9 +1,7 @@
 import { SubstrateProcessor } from '@subsquid/substrate-processor'
 import { TypeormDatabase } from '@subsquid/typeorm-store'
-import { 
-  balancesBalanceSet, balancesDeposit, balancesDustLost, balancesEndowed, balancesReserved, 
-  balancesSlashed, balancesTransfer, balancesTransferOld, balancesUnreserved, balancesWithdraw 
-} from './mappings/balances';
+import { balancesBalanceSet, balancesDeposit, balancesDustLost, balancesEndowed, balancesReserved, 
+  balancesTransfer, balancesTransferOld, balancesUnreserved, balancesWithdraw } from './mappings/balances';
 import { currencyDeposited, currencyTransferred, currencyWithdrawn } from './mappings/currency';
 import { parachainStakingRewarded } from './mappings/parachainStaking';
 import { 
@@ -15,6 +13,7 @@ import { destroyMarkets } from './mappings/postHooks/marketDestroyed';
 import { boughtCompleteSet, marketApproved, marketClosed, marketCreated, marketDestroyed, marketDisputed, 
   marketExpired, marketInsufficientSubsidy, marketRejected, marketReported, marketResolved, 
   marketStartedWithSubsidy, soldCompleteSet, tokensRedeemed} from './mappings/predictionMarkets';
+import { accountCrossed } from './mappings/styx';
 import { poolActive, poolClosed, poolCreate, poolExit, poolJoin, swapExactAmountIn, 
   swapExactAmountOut } from './mappings/swaps';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
@@ -61,6 +60,8 @@ processor.addEventHandler('PredictionMarkets.MarketResolved', ctx => marketResol
 processor.addEventHandler('PredictionMarkets.MarketStartedWithSubsidy', ctx => marketStartedWithSubsidy(ctx))
 processor.addEventHandler('PredictionMarkets.SoldCompleteSet', ctx => soldCompleteSet(ctx))
 processor.addEventHandler('PredictionMarkets.TokensRedeemed', ctx => tokensRedeemed(ctx))
+
+processor.addEventHandler('Styx.AccountCrossed', ctx => accountCrossed(ctx))
 
 processor.addEventHandler('Swaps.PoolActive', ctx => poolActive(ctx))
 processor.addEventHandler('Swaps.PoolClosed', ctx => poolClosed(ctx))
