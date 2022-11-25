@@ -1238,6 +1238,35 @@ export class PredictionMarketsTokensRedeemedEvent {
   }
 }
 
+export class StyxAccountCrossedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Styx.AccountCrossed')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * A account crossed and claimed their right to create their avatar.
+   */
+  get isV39(): boolean {
+    return this._chain.getEventHash('Styx.AccountCrossed') === '23bebce4ca9ed37548947d07d4dc50e772f07401b9a416b6aa2f3e9cb5adcaf4'
+  }
+
+  /**
+   * A account crossed and claimed their right to create their avatar.
+   */
+  get asV39(): [Uint8Array, bigint] {
+    assert(this.isV39)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class SwapsPoolActiveEvent {
   private readonly _chain: Chain
   private readonly event: Event
