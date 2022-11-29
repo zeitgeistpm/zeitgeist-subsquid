@@ -130,6 +130,7 @@ export async function poolCreate(ctx: EventHandlerContext<Store, {event: {args: 
   hp.poolId = pool.poolId
   hp.event = event.name.split('.')[1]
   hp.ztgQty = pool.ztgQty
+  hp.dVolume = pool.volume
   hp.volume = pool.volume
   hp.blockNumber = block.height
   hp.timestamp = new Date(block.timestamp)
@@ -327,7 +328,8 @@ export async function swapExactAmountIn(ctx: EventHandlerContext<Store>) {
     hp.poolId = pool.poolId
     hp.event = event.name.split('.')[1]
     hp.ztgQty = pool.ztgQty
-    hp.volume = pool.volume
+    hp.dVolume = newVolume - oldVolume
+    hp.volume = newVolume
     hp.blockNumber = block.height
     hp.timestamp = new Date(block.timestamp)
     console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
@@ -430,7 +432,8 @@ export async function swapExactAmountOut(ctx: EventHandlerContext<Store>) {
     hp.poolId = pool.poolId
     hp.event = event.name.split('.')[1]
     hp.ztgQty = pool.ztgQty
-    hp.volume = pool.volume
+    hp.dVolume = newVolume - oldVolume
+    hp.volume = newVolume
     hp.blockNumber = block.height
     hp.timestamp = new Date(block.timestamp)
     console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
