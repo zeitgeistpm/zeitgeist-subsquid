@@ -170,11 +170,16 @@ export function getMarketRejectedEvent(ctx: EventContext): MarketRejectedEvent {
   const marketRejectedEvent = new PredictionMarketsMarketRejectedEvent(ctx)
   if (marketRejectedEvent.isV23) {
     const marketId = Number(marketRejectedEvent.asV23)
-    return {marketId}
-  } else {
-    const [mId] = ctx.event.args
+    const reason = new Uint8Array(0)
+    return {marketId, reason}
+  } else if (marketRejectedEvent.isV41) {
+    const [mId, reason] = marketRejectedEvent.asV41
     const marketId = Number(mId)
-    return {marketId}
+    return {marketId, reason}
+  } else {
+    const [mId, reason] = ctx.event.args
+    const marketId = Number(mId)
+    return {marketId, reason}
   }
 }
 
@@ -320,6 +325,7 @@ interface MarketInsufficientSubsidyEvent {
 
 interface MarketRejectedEvent {
   marketId: number
+  reason: Uint8Array
 }
 
 interface MarketReportedEvent {
