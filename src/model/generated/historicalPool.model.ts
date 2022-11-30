@@ -39,6 +39,12 @@ export class HistoricalPool {
   volume!: bigint | undefined | null
 
   /**
+   * Volume difference
+   */
+  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
+  dVolume!: bigint | undefined | null
+
+  /**
    * Event method which initiated this change
    */
   @Column_("text", {nullable: false})

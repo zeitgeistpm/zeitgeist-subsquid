@@ -227,6 +227,8 @@ type HistoricalPool @entity {
   ztgQty: BigInt
   "New updated volume"
   volume: BigInt
+  "Volume difference"
+  dVolume: BigInt
   "Event method which initiated this change"
   event: String!
   "Height of the block"
