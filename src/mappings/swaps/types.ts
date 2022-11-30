@@ -3,9 +3,9 @@ import * as ss58 from '@subsquid/ss58'
 import { SwapsPoolActiveEvent, SwapsPoolClosedEvent, SwapsPoolCreateEvent, SwapsPoolExitEvent, 
   SwapsPoolJoinEvent, SwapsSwapExactAmountInEvent, SwapsSwapExactAmountOutEvent} from '../../types/events'
 import { EventContext } from '../../types/support'
-import { PoolAssetsEvent } from '../../types/v35'
-import { SwapEvent } from '../../types/v37'
-import { CommonPoolEventParams, Pool } from '../../types/v39'
+import { PoolAssetsEvent } from '../../types/v41'
+import { SwapEvent } from '../../types/v41'
+import { CommonPoolEventParams, Pool } from '../../types/v41'
 
 
 export function getPoolActiveEvent(ctx: EventContext): PoolActiveEvent {
@@ -56,6 +56,9 @@ export function getPoolCreateEvent(ctx: EventContext): PoolCreateEvent {
   } else if (poolCreateEvent.isV39) {
     const [cpep, swapPool, amount] = poolCreateEvent.asV39
     return {cpep, swapPool, amount}
+  } else if (poolCreateEvent.isV41) {
+    const [cpep, swapPool, amount] = poolCreateEvent.asV41
+    return {cpep, swapPool, amount}
   } else {
     const [cpep, swapPool, amount] = ctx.event.args
     return {cpep, swapPool, amount}
@@ -76,6 +79,10 @@ export function getPoolJoinEvent(ctx: EventContext): PoolJoinEvent {
     return {pae, walletId}
   } else if (poolJoinEvent.isV35) {
     const pae = poolJoinEvent.asV35
+    const walletId = ss58.codec('zeitgeist').encode(pae.cpep.who)
+    return {pae, walletId}
+  } else if (poolJoinEvent.isV41) {
+    const pae = poolJoinEvent.asV41
     const walletId = ss58.codec('zeitgeist').encode(pae.cpep.who)
     return {pae, walletId}
   } else {
@@ -101,6 +108,10 @@ export function getPoolExitEvent(ctx: EventContext): PoolExitEvent {
     const pae = poolExitEvent.asV35
     const walletId = ss58.codec('zeitgeist').encode(pae.cpep.who)
     return {pae, walletId}
+  } else if (poolExitEvent.isV41) {
+    const pae = poolExitEvent.asV41
+    const walletId = ss58.codec('zeitgeist').encode(pae.cpep.who)
+    return {pae, walletId}
   } else {
     const pae = ctx.event.args
     const walletId = encodeAddress(pae.cpep.who, 73)
@@ -122,6 +133,10 @@ export function getSwapExactAmountInEvent(ctx: EventContext): SwapExactAmountInE
     const swapEvent = swapExactAmountInEvent.asV37
     const walletId = ss58.codec('zeitgeist').encode(swapEvent.cpep.who)
     return {swapEvent, walletId}
+  } else if (swapExactAmountInEvent.isV41) {
+    const swapEvent = swapExactAmountInEvent.asV41
+    const walletId = ss58.codec('zeitgeist').encode(swapEvent.cpep.who)
+    return {swapEvent, walletId}
   } else {
     const swapEvent = ctx.event.args
     const walletId = encodeAddress(swapEvent.cpep.who, 73)
@@ -141,6 +156,10 @@ export function getSwapExactAmountOutEvent(ctx: EventContext): SwapExactAmountOu
     return {swapEvent, walletId}
   } else if (swapExactAmountOutEvent.isV37) {
     const swapEvent = swapExactAmountOutEvent.asV37
+    const walletId = ss58.codec('zeitgeist').encode(swapEvent.cpep.who)
+    return {swapEvent, walletId}
+  } else if (swapExactAmountOutEvent.isV41) {
+    const swapEvent = swapExactAmountOutEvent.asV41
     const walletId = ss58.codec('zeitgeist').encode(swapEvent.cpep.who)
     return {swapEvent, walletId}
   } else {

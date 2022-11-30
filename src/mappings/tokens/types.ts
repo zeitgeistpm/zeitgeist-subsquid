@@ -18,6 +18,10 @@ export function getTokensEndowedEvent(ctx: EventContext): EndowedEvent {
     currencyId = event.asV34.currencyId
     walletId = ss58.codec('zeitgeist').encode(event.asV34.who)
     amount = event.asV34.amount
+  } else if (event.isV41) {
+    currencyId = event.asV41.currencyId
+    walletId = ss58.codec('zeitgeist').encode(event.asV41.who)
+    amount = event.asV34.amount
   } else {
     [currencyId, who, amount] = ctx.event.args
     walletId = encodeAddress(who, 73)
@@ -42,6 +46,11 @@ export function getTokensTransferEvent(ctx: EventContext): TransferEvent {
     fromId = ss58.codec('zeitgeist').encode(transferEvent.asV34.from)
     toId = ss58.codec('zeitgeist').encode(transferEvent.asV34.to)
     amount = transferEvent.asV34.amount
+  } else if (transferEvent.isV41) {
+    currencyId = transferEvent.asV41.currencyId
+    fromId = ss58.codec('zeitgeist').encode(transferEvent.asV41.from)
+    toId = ss58.codec('zeitgeist').encode(transferEvent.asV41.to)
+    amount = transferEvent.asV41.amount
   } else {
     [currencyId, from, to, amount] = ctx.event.args
     fromId = encodeAddress(from, 73)
