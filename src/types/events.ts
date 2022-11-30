@@ -11,6 +11,7 @@ import * as v37 from './v37'
 import * as v38 from './v38'
 import * as v39 from './v39'
 import * as v40 from './v40'
+import * as v41 from './v41'
 
 export class BalancesBalanceSetEvent {
   private readonly _chain: Chain
@@ -854,6 +855,21 @@ export class PredictionMarketsMarketCreatedEvent {
     assert(this.isV40)
     return this._chain.decodeEvent(this.event)
   }
+
+  /**
+   * A market has been created \[market_id, market_account, market\]
+   */
+  get isV41(): boolean {
+    return this._chain.getEventHash('PredictionMarkets.MarketCreated') === '3f739f9a1be87014ec152db72c820f2d134f385d21abd7b693357fa5ddae01ff'
+  }
+
+  /**
+   * A market has been created \[market_id, market_account, market\]
+   */
+  get asV41(): [bigint, Uint8Array, v41.Market] {
+    assert(this.isV41)
+    return this._chain.decodeEvent(this.event)
+  }
 }
 
 export class PredictionMarketsMarketDestroyedEvent {
@@ -1029,6 +1045,21 @@ export class PredictionMarketsMarketRejectedEvent {
    */
   get asV23(): bigint {
     assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * A pending market has been rejected as invalid with a reason. \[market_id, reject_reason\]
+   */
+  get isV41(): boolean {
+    return this._chain.getEventHash('PredictionMarkets.MarketRejected') === '483b873436b94231dd53ca1504bb0c4112d5f977d85f24213bc8df5a3c7e693b'
+  }
+
+  /**
+   * A pending market has been rejected as invalid with a reason. \[market_id, reject_reason\]
+   */
+  get asV41(): [bigint, Uint8Array] {
+    assert(this.isV41)
     return this._chain.decodeEvent(this.event)
   }
 }
@@ -1236,6 +1267,23 @@ export class PredictionMarketsTokensRedeemedEvent {
     assert(this.isV35)
     return this._chain.decodeEvent(this.event)
   }
+
+  /**
+   * An amount of winning outcomes have been redeemed
+   * \[market_id, currency_id, amount_redeemed, payout, who\]
+   */
+  get isV41(): boolean {
+    return this._chain.getEventHash('PredictionMarkets.TokensRedeemed') === '5a0edb30c393942ac7a5dd0f398f56fa1dc8c88457cf2f1d998448e885d4c7e9'
+  }
+
+  /**
+   * An amount of winning outcomes have been redeemed
+   * \[market_id, currency_id, amount_redeemed, payout, who\]
+   */
+  get asV41(): [bigint, v41.Asset, bigint, bigint, Uint8Array] {
+    assert(this.isV41)
+    return this._chain.decodeEvent(this.event)
+  }
 }
 
 export class StyxAccountCrossedEvent {
@@ -1427,6 +1475,21 @@ export class SwapsPoolCreateEvent {
     assert(this.isV39)
     return this._chain.decodeEvent(this.event)
   }
+
+  /**
+   * A new pool has been created. \[CommonPoolEventParams, pool, pool_amount, pool_account\]
+   */
+  get isV41(): boolean {
+    return this._chain.getEventHash('Swaps.PoolCreate') === '0b4b856dbc585b4dde1fd65b86af838d80e1325bd4b9fdcc25337afc46b8057d'
+  }
+
+  /**
+   * A new pool has been created. \[CommonPoolEventParams, pool, pool_amount, pool_account\]
+   */
+  get asV41(): [v41.CommonPoolEventParams, v41.Pool, bigint, Uint8Array] {
+    assert(this.isV41)
+    return this._chain.decodeEvent(this.event)
+  }
 }
 
 export class SwapsPoolExitEvent {
@@ -1499,6 +1562,21 @@ export class SwapsPoolExitEvent {
    */
   get asV35(): v35.PoolAssetsEvent {
     assert(this.isV35)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Someone has exited a pool. \[PoolAssetsEvent\]
+   */
+  get isV41(): boolean {
+    return this._chain.getEventHash('Swaps.PoolExit') === '4a55a8750031dc611b1138db8d9cc56d88276b8ea5cf8df2f945eccb16bdea9b'
+  }
+
+  /**
+   * Someone has exited a pool. \[PoolAssetsEvent\]
+   */
+  get asV41(): v41.PoolAssetsEvent {
+    assert(this.isV41)
     return this._chain.decodeEvent(this.event)
   }
 }
@@ -1575,6 +1653,21 @@ export class SwapsPoolJoinEvent {
     assert(this.isV35)
     return this._chain.decodeEvent(this.event)
   }
+
+  /**
+   * Someone has joined a pool. \[PoolAssetsEvent\]
+   */
+  get isV41(): boolean {
+    return this._chain.getEventHash('Swaps.PoolJoin') === '4a55a8750031dc611b1138db8d9cc56d88276b8ea5cf8df2f945eccb16bdea9b'
+  }
+
+  /**
+   * Someone has joined a pool. \[PoolAssetsEvent\]
+   */
+  get asV41(): v41.PoolAssetsEvent {
+    assert(this.isV41)
+    return this._chain.decodeEvent(this.event)
+  }
 }
 
 export class SwapsSwapExactAmountInEvent {
@@ -1649,6 +1742,21 @@ export class SwapsSwapExactAmountInEvent {
     assert(this.isV37)
     return this._chain.decodeEvent(this.event)
   }
+
+  /**
+   * An exact amount of an asset is entering the pool. \[SwapEvent\]
+   */
+  get isV41(): boolean {
+    return this._chain.getEventHash('Swaps.SwapExactAmountIn') === 'f54431823e89e164644ef40856702487560c02c59c5e71e3198a725c00307c42'
+  }
+
+  /**
+   * An exact amount of an asset is entering the pool. \[SwapEvent\]
+   */
+  get asV41(): v41.SwapEvent {
+    assert(this.isV41)
+    return this._chain.decodeEvent(this.event)
+  }
 }
 
 export class SwapsSwapExactAmountOutEvent {
@@ -1721,6 +1829,21 @@ export class SwapsSwapExactAmountOutEvent {
    */
   get asV37(): v37.SwapEvent {
     assert(this.isV37)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * An exact amount of an asset is leaving the pool. \[SwapEvent\]
+   */
+  get isV41(): boolean {
+    return this._chain.getEventHash('Swaps.SwapExactAmountOut') === 'f54431823e89e164644ef40856702487560c02c59c5e71e3198a725c00307c42'
+  }
+
+  /**
+   * An exact amount of an asset is leaving the pool. \[SwapEvent\]
+   */
+  get asV41(): v41.SwapEvent {
+    assert(this.isV41)
     return this._chain.decodeEvent(this.event)
   }
 }
@@ -1963,6 +2086,21 @@ export class TokensEndowedEvent {
     assert(this.isV34)
     return this._chain.decodeEvent(this.event)
   }
+
+  /**
+   * An account was created with some free balance.
+   */
+  get isV41(): boolean {
+    return this._chain.getEventHash('Tokens.Endowed') === '27a10440ff180980c89f27bf3e4fdbe6561b18dc14dabab1bcce3be2753df5e7'
+  }
+
+  /**
+   * An account was created with some free balance.
+   */
+  get asV41(): {currencyId: v41.Asset, who: Uint8Array, amount: bigint} {
+    assert(this.isV41)
+    return this._chain.decodeEvent(this.event)
+  }
 }
 
 export class TokensTransferEvent {
@@ -2020,6 +2158,21 @@ export class TokensTransferEvent {
    */
   get asV34(): {currencyId: v34.Asset, from: Uint8Array, to: Uint8Array, amount: bigint} {
     assert(this.isV34)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Transfer succeeded.
+   */
+  get isV41(): boolean {
+    return this._chain.getEventHash('Tokens.Transfer') === '2e0fdfb9ed7d365d410d3f4bcc85de5d7dc1ba3584a62c91ca0604ab7ca42de6'
+  }
+
+  /**
+   * Transfer succeeded.
+   */
+  get asV41(): {currencyId: v41.Asset, from: Uint8Array, to: Uint8Array, amount: bigint} {
+    assert(this.isV41)
     return this._chain.decodeEvent(this.event)
   }
 }
