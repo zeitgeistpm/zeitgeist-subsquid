@@ -21,7 +21,7 @@ export function getTokensEndowedEvent(ctx: EventContext): EndowedEvent {
   } else if (event.isV41) {
     currencyId = event.asV41.currencyId
     walletId = ss58.codec('zeitgeist').encode(event.asV41.who)
-    amount = event.asV34.amount
+    amount = event.asV41.amount
   } else {
     [currencyId, who, amount] = ctx.event.args
     walletId = encodeAddress(who, 73)
