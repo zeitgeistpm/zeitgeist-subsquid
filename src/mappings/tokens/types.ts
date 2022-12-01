@@ -31,26 +31,26 @@ export function getTokensEndowedEvent(ctx: EventContext): EndowedEvent {
 }
 
 export function getTokensTransferEvent(ctx: EventContext): TransferEvent {
-  const transferEvent = new TokensTransferEvent(ctx)
+  const event = new TokensTransferEvent(ctx)
   let currencyId, from, fromId, to, toId, amount
-  if (transferEvent.isV23) {
-    [currencyId, from, to, amount] = transferEvent.asV23
+  if (event.isV23) {
+    [currencyId, from, to, amount] = event.asV23
     fromId = ss58.codec('zeitgeist').encode(from)
     toId = ss58.codec('zeitgeist').encode(to)
-  } else if (transferEvent.isV32) {
-    [currencyId, from, to, amount] = transferEvent.asV32
+  } else if (event.isV32) {
+    [currencyId, from, to, amount] = event.asV32
     fromId = ss58.codec('zeitgeist').encode(from)
     toId = ss58.codec('zeitgeist').encode(to)
-  } else if (transferEvent.isV34) {
-    currencyId = transferEvent.asV34.currencyId
-    fromId = ss58.codec('zeitgeist').encode(transferEvent.asV34.from)
-    toId = ss58.codec('zeitgeist').encode(transferEvent.asV34.to)
-    amount = transferEvent.asV34.amount
-  } else if (transferEvent.isV41) {
-    currencyId = transferEvent.asV41.currencyId
-    fromId = ss58.codec('zeitgeist').encode(transferEvent.asV41.from)
-    toId = ss58.codec('zeitgeist').encode(transferEvent.asV41.to)
-    amount = transferEvent.asV41.amount
+  } else if (event.isV34) {
+    currencyId = event.asV34.currencyId
+    fromId = ss58.codec('zeitgeist').encode(event.asV34.from)
+    toId = ss58.codec('zeitgeist').encode(event.asV34.to)
+    amount = event.asV34.amount
+  } else if (event.isV41) {
+    currencyId = event.asV41.currencyId
+    fromId = ss58.codec('zeitgeist').encode(event.asV41.from)
+    toId = ss58.codec('zeitgeist').encode(event.asV41.to)
+    amount = event.asV41.amount
   } else {
     [currencyId, from, to, amount] = ctx.event.args
     fromId = encodeAddress(from, 73)

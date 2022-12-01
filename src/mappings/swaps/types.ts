@@ -31,33 +31,33 @@ export function getPoolClosedEvent(ctx: EventContext): PoolClosedEvent {
 }
 
 export function getPoolCreateEvent(ctx: EventContext): PoolCreateEvent {
-  const poolCreateEvent = new SwapsPoolCreateEvent(ctx)
-  if (poolCreateEvent.isV23) {
-    const [cpep, pool] = poolCreateEvent.asV23
+  const event = new SwapsPoolCreateEvent(ctx)
+  if (event.isV23) {
+    const [cpep, pool] = event.asV23
     let swapPool = pool as Pool
     const amount = BigInt(0)
     return {cpep, swapPool, amount}
-  } else if (poolCreateEvent.isV32) {
-    const [cpep, pool] = poolCreateEvent.asV32
+  } else if (event.isV32) {
+    const [cpep, pool] = event.asV32
     let swapPool = pool as Pool
     const amount = BigInt(0)
     return {cpep, swapPool, amount}
-  } else if (poolCreateEvent.isV35) {
-    const [cpep, pool, amount] = poolCreateEvent.asV35
+  } else if (event.isV35) {
+    const [cpep, pool, amount] = event.asV35
     let swapPool = pool as Pool
     return {cpep, swapPool, amount}
-  } else if (poolCreateEvent.isV36) {
-    const [cpep, pool, amount] = poolCreateEvent.asV36
+  } else if (event.isV36) {
+    const [cpep, pool, amount] = event.asV36
     let swapPool = pool as Pool
     return {cpep, swapPool, amount}
-  } else if (poolCreateEvent.isV37) {
-    const [cpep, swapPool, amount] = poolCreateEvent.asV37
+  } else if (event.isV37) {
+    const [cpep, swapPool, amount] = event.asV37
     return {cpep, swapPool, amount}
-  } else if (poolCreateEvent.isV39) {
-    const [cpep, swapPool, amount] = poolCreateEvent.asV39
+  } else if (event.isV39) {
+    const [cpep, swapPool, amount] = event.asV39
     return {cpep, swapPool, amount}
-  } else if (poolCreateEvent.isV41) {
-    const [cpep, swapPool, amount] = poolCreateEvent.asV41
+  } else if (event.isV41) {
+    const [cpep, swapPool, amount] = event.asV41
     return {cpep, swapPool, amount}
   } else {
     const [cpep, swapPool, amount] = ctx.event.args
@@ -66,23 +66,23 @@ export function getPoolCreateEvent(ctx: EventContext): PoolCreateEvent {
 }
 
 export function getPoolJoinEvent(ctx: EventContext): PoolJoinEvent {
-  const poolJoinEvent = new SwapsPoolJoinEvent(ctx)
-  if (poolJoinEvent.isV23) {
+  const event = new SwapsPoolJoinEvent(ctx)
+  if (event.isV23) {
     let pae = ctx.event.args as PoolAssetsEvent
     pae.poolAmount = BigInt(0)
     const walletId = encodeAddress(pae.cpep.who, 73)
     return {pae, walletId}
-  } else if (poolJoinEvent.isV32) {
+  } else if (event.isV32) {
     let pae = ctx.event.args as PoolAssetsEvent
     pae.poolAmount = BigInt(0)
     const walletId = encodeAddress(pae.cpep.who, 73)
     return {pae, walletId}
-  } else if (poolJoinEvent.isV35) {
-    const pae = poolJoinEvent.asV35
+  } else if (event.isV35) {
+    const pae = event.asV35
     const walletId = ss58.codec('zeitgeist').encode(pae.cpep.who)
     return {pae, walletId}
-  } else if (poolJoinEvent.isV41) {
-    const pae = poolJoinEvent.asV41
+  } else if (event.isV41) {
+    const pae = event.asV41
     const walletId = ss58.codec('zeitgeist').encode(pae.cpep.who)
     return {pae, walletId}
   } else {
@@ -93,23 +93,23 @@ export function getPoolJoinEvent(ctx: EventContext): PoolJoinEvent {
 }
 
 export function getPoolExitEvent(ctx: EventContext): PoolExitEvent {
-  const poolExitEvent = new SwapsPoolExitEvent(ctx)
-  if (poolExitEvent.isV23) {
+  const event = new SwapsPoolExitEvent(ctx)
+  if (event.isV23) {
     let pae = ctx.event.args as PoolAssetsEvent
     pae.poolAmount = BigInt(0)
     const walletId = encodeAddress(pae.cpep.who, 73)
     return {pae, walletId}
-  } else if (poolExitEvent.isV32) {
+  } else if (event.isV32) {
     let pae = ctx.event.args as PoolAssetsEvent
     pae.poolAmount = BigInt(0)
     const walletId = encodeAddress(pae.cpep.who, 73)
     return {pae, walletId}
-  } else if (poolExitEvent.isV35) {
-    const pae = poolExitEvent.asV35
+  } else if (event.isV35) {
+    const pae = event.asV35
     const walletId = ss58.codec('zeitgeist').encode(pae.cpep.who)
     return {pae, walletId}
-  } else if (poolExitEvent.isV41) {
-    const pae = poolExitEvent.asV41
+  } else if (event.isV41) {
+    const pae = event.asV41
     const walletId = ss58.codec('zeitgeist').encode(pae.cpep.who)
     return {pae, walletId}
   } else {
@@ -120,21 +120,21 @@ export function getPoolExitEvent(ctx: EventContext): PoolExitEvent {
 }
 
 export function getSwapExactAmountInEvent(ctx: EventContext): SwapExactAmountInEvent {
-  const swapExactAmountInEvent = new SwapsSwapExactAmountInEvent(ctx)
-  if (swapExactAmountInEvent.isV23) {
+  const event = new SwapsSwapExactAmountInEvent(ctx)
+  if (event.isV23) {
     let swapEvent = ctx.event.args as SwapEvent
     const walletId = encodeAddress(swapEvent.cpep.who, 73)
     return {swapEvent, walletId}
-  } else if (swapExactAmountInEvent.isV32) {
+  } else if (event.isV32) {
     let swapEvent = ctx.event.args as SwapEvent
     const walletId = encodeAddress(swapEvent.cpep.who, 73)
     return {swapEvent, walletId}
-  } else if (swapExactAmountInEvent.isV37) {
-    const swapEvent = swapExactAmountInEvent.asV37
+  } else if (event.isV37) {
+    const swapEvent = event.asV37
     const walletId = ss58.codec('zeitgeist').encode(swapEvent.cpep.who)
     return {swapEvent, walletId}
-  } else if (swapExactAmountInEvent.isV41) {
-    const swapEvent = swapExactAmountInEvent.asV41
+  } else if (event.isV41) {
+    const swapEvent = event.asV41
     const walletId = ss58.codec('zeitgeist').encode(swapEvent.cpep.who)
     return {swapEvent, walletId}
   } else {
@@ -145,21 +145,21 @@ export function getSwapExactAmountInEvent(ctx: EventContext): SwapExactAmountInE
 }
 
 export function getSwapExactAmountOutEvent(ctx: EventContext): SwapExactAmountOutEvent {
-  const swapExactAmountOutEvent = new SwapsSwapExactAmountOutEvent(ctx)
-  if (swapExactAmountOutEvent.isV23) {
+  const event = new SwapsSwapExactAmountOutEvent(ctx)
+  if (event.isV23) {
     let swapEvent = ctx.event.args as SwapEvent
     const walletId = encodeAddress(swapEvent.cpep.who, 73)
     return {swapEvent, walletId}
-  } else if (swapExactAmountOutEvent.isV32) {
+  } else if (event.isV32) {
     let swapEvent = ctx.event.args as SwapEvent
     const walletId = encodeAddress(swapEvent.cpep.who, 73)
     return {swapEvent, walletId}
-  } else if (swapExactAmountOutEvent.isV37) {
-    const swapEvent = swapExactAmountOutEvent.asV37
+  } else if (event.isV37) {
+    const swapEvent = event.asV37
     const walletId = ss58.codec('zeitgeist').encode(swapEvent.cpep.who)
     return {swapEvent, walletId}
-  } else if (swapExactAmountOutEvent.isV41) {
-    const swapEvent = swapExactAmountOutEvent.asV41
+  } else if (event.isV41) {
+    const swapEvent = event.asV41
     const walletId = ss58.codec('zeitgeist').encode(swapEvent.cpep.who)
     return {swapEvent, walletId}
   } else {
