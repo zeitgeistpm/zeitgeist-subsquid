@@ -279,7 +279,7 @@ export async function marketCreated(ctx: EventHandlerContext<Store, {event: {arg
   let disputeMechanism = new MarketDisputeMechanism()
   const d = market.disputeMechanism
   if (d.__kind == 'Authorized') {
-    disputeMechanism.authorized = encodeAddress(d.value, 73)
+    disputeMechanism.authorized = d.value ? encodeAddress(d.value, 73) : null
   } else if (d.__kind == 'Court') {
     disputeMechanism.court = true
   } else if (d.__kind == 'SimpleDisputes') {

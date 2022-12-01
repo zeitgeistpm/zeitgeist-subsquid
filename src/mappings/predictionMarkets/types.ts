@@ -88,7 +88,7 @@ export function getMarketCreatedEvent(ctx: EventHandlerContext<Store, {event: {a
     market.period.start = market.period.value.start
     market.period.end = market.period.value.end
     return { marketId, marketAccountId, market }
-  } else if (event.isV38 || event.isV40) {
+  } else if (event.isV38 || event.isV40 || event.isV41) {
     const marketAccountId = encodeAddress(param1, 73)
     const market = param2 as any
     market.period.start = market.period.value.start
@@ -167,14 +167,19 @@ export function getMarketInsufficientSubsidyEvent(ctx: EventContext): MarketInsu
 }
 
 export function getMarketRejectedEvent(ctx: EventContext): MarketRejectedEvent {
-  const marketRejectedEvent = new PredictionMarketsMarketRejectedEvent(ctx)
-  if (marketRejectedEvent.isV23) {
-    const marketId = Number(marketRejectedEvent.asV23)
-    return {marketId}
-  } else {
-    const [mId] = ctx.event.args
+  const event = new PredictionMarketsMarketRejectedEvent(ctx)
+  if (event.isV23) {
+    const marketId = Number(event.asV23)
+    const reason = new Uint8Array(0)
+    return {marketId, reason}
+  } else if (event.isV41) {
+    const [mId, reason] = event.asV41
     const marketId = Number(mId)
-    return {marketId}
+    return {marketId, reason}
+  } else {
+    const [mId, reason] = ctx.event.args
+    const marketId = Number(mId)
+    return {marketId, reason}
   }
 }
 
@@ -263,10 +268,14 @@ export function getSoldCompleteSetEvent(ctx: EventContext): SoldCompleteSetEvent
 }
 
 export function getTokensRedeemedEvent(ctx: EventContext): TokensRedeemedEvent {
-  const tokensRedeemedEvent = new PredictionMarketsTokensRedeemedEvent(ctx)
+  const event = new PredictionMarketsTokensRedeemedEvent(ctx)
   let mId, marketId, currencyId, amtRedeemed, payout, who, walletId
-  if (tokensRedeemedEvent.isV35) {
-    [mId, currencyId, amtRedeemed, payout, who] = tokensRedeemedEvent.asV35
+  if (event.isV35) {
+    [mId, currencyId, amtRedeemed, payout, who] = event.asV35
+    marketId = Number(mId)
+    walletId = ss58.codec('zeitgeist').encode(who)
+  } else if (event.isV41) {
+    [mId, currencyId, amtRedeemed, payout, who] = event.asV41
     marketId = Number(mId)
     walletId = ss58.codec('zeitgeist').encode(who)
   } else {
@@ -320,6 +329,7 @@ interface MarketInsufficientSubsidyEvent {
 
 interface MarketRejectedEvent {
   marketId: number
+  reason: Uint8Array
 }
 
 interface MarketReportedEvent {
