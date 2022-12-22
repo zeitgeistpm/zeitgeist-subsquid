@@ -1,19 +1,20 @@
 /**
  * Script to validate spot price of an asset against on-chain price
- * Run using `ts-node scripts/validate/spotPrices.ts`
+ * Run using `ts-node scripts/validate/spotPrices.ts wss://bsr.zeitgeist.pm processor.bsr.zeitgeist.pm`
  */
+import { AssetIdFromString } from '@zeitgeistpm/sdk/dist/util';
 import https from 'https';
 import { Tools } from '../../src/mappings/util';
 
 // Modify values as per requirement
-const NODE_URL = `wss://bsr.zeitgeist.pm`;
-const QUERY_NODE_HOSTNAME = `processor.bsr.zeitgeist.pm`;
+const NODE_URL = process.argv[2];
+const QUERY_NODE_HOSTNAME = process.argv[3];
 const ASSETS_LIMIT = 100; // Number of assets that need to be validated
 
 // GraphQL query for retrieving price of assets
 const query = JSON.stringify({
   query: `{
-    assets(limit: ${ASSETS_LIMIT}, orderBy: id_DESC) {
+    assets(limit: ${ASSETS_LIMIT}, orderBy: id_DESC, where: {price_gt: 0}) {
       assetId
       price
       poolId
