@@ -63,9 +63,13 @@ const req = https.request(options, (res) => {
       if (assets[i].assetId.includes('scalar')) continue;
       if (assets[i].price == 0 || assets[i].price == 1) continue;
 
-      const pool = await sdk.models.fetchPoolData(Number(assets[i].poolId));
       //@ts-ignore
-      let price = await pool.getSpotPrice({ ztg: null }, assets[i].assetId, blockHash);
+      let price = await sdk.api.rpc.swaps.getSpotPrice(
+        Number(assets[i].poolId),
+        AssetIdFromString({ ztg: null }),
+        AssetIdFromString(assets[i].assetId),
+        blockHash
+      );
       price = Number(price) / Math.pow(10, 10);
 
       const chainPrice = Math.round(price * 10); //Round to one decimal place
