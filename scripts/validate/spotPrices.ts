@@ -63,16 +63,22 @@ const req = https.request(options, (res) => {
       //Remove exceptions
       if (assets[i].assetId.includes('scalar')) continue;
       if (assets[i].price == 0 || assets[i].price == 1) continue;
+      
+      let price;
+      try {
+        //@ts-ignore
+        price = await sdk.api.rpc.swaps.getSpotPrice(
+          Number(assets[i].poolId),
+          AssetIdFromString({ ztg: null }),
+          AssetIdFromString(assets[i].assetId),
+          blockHash
+        );
+      } catch (err) {
+        console.log(`Error found for asset ` + assets[i].assetId);
+        continue;
+      }
 
-      //@ts-ignore
-      let price = await sdk.api.rpc.swaps.getSpotPrice(
-        Number(assets[i].poolId),
-        AssetIdFromString({ ztg: null }),
-        AssetIdFromString(assets[i].assetId),
-        blockHash
-      );
       price = Number(price) / Math.pow(10, 10);
-
       const chainPrice = Math.round(price * 10); //Round to one decimal place
       const squidPrice = Math.round(assets[i].price * 10) ?? 0;
       if (chainPrice !== squidPrice) {
