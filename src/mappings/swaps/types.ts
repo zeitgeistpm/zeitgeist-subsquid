@@ -1,14 +1,15 @@
 import { encodeAddress } from '@polkadot/keyring'
 import * as ss58 from '@subsquid/ss58'
-import { SwapsPoolActiveEvent, SwapsPoolClosedEvent, SwapsPoolCreateEvent, SwapsPoolExitEvent, 
-  SwapsPoolJoinEvent, SwapsSwapExactAmountInEvent, SwapsSwapExactAmountOutEvent} from '../../types/events'
+import { SwapsPoolActiveEvent, SwapsPoolClosedEvent, SwapsPoolCreateEvent, SwapsPoolDestroyedEvent, 
+  SwapsPoolExitEvent, SwapsPoolJoinEvent, SwapsSwapExactAmountInEvent, SwapsSwapExactAmountOutEvent
+} from '../../types/events'
 import { EventContext } from '../../types/support'
 import { PoolAssetsEvent } from '../../types/v41'
 import { SwapEvent } from '../../types/v41'
 import { CommonPoolEventParams, Pool } from '../../types/v41'
 
 
-export function getPoolActiveEvent(ctx: EventContext): PoolActiveEvent {
+export function getPoolActiveEvent(ctx: EventContext): PoolEvent {
   const poolActiveEvent = new SwapsPoolActiveEvent(ctx)
   if (poolActiveEvent.isV39) {
     const poolId = poolActiveEvent.asV39
@@ -19,7 +20,7 @@ export function getPoolActiveEvent(ctx: EventContext): PoolActiveEvent {
   }
 }
 
-export function getPoolClosedEvent(ctx: EventContext): PoolClosedEvent {
+export function getPoolClosedEvent(ctx: EventContext): PoolEvent {
   const poolCloseEvent = new SwapsPoolClosedEvent(ctx)
   if (poolCloseEvent.isV37) {
     const poolId = poolCloseEvent.asV37
@@ -65,8 +66,19 @@ export function getPoolCreateEvent(ctx: EventContext): PoolCreateEvent {
   }
 }
 
-export function getPoolJoinEvent(ctx: EventContext): PoolJoinEvent {
-  const event = new SwapsPoolJoinEvent(ctx)
+export function getPoolDestroyedEvent(ctx: EventContext): PoolEvent {
+  const event = new SwapsPoolDestroyedEvent(ctx)
+  if (event.isV36) {
+    const poolId = event.asV36
+    return {poolId}
+  } else {
+    const [poolId] = ctx.event.args
+    return {poolId}
+  }
+}
+
+export function getPoolExitEvent(ctx: EventContext): PoolExitEvent {
+  const event = new SwapsPoolExitEvent(ctx)
   if (event.isV23) {
     let pae = ctx.event.args as PoolAssetsEvent
     pae.poolAmount = BigInt(0)
@@ -92,8 +104,8 @@ export function getPoolJoinEvent(ctx: EventContext): PoolJoinEvent {
   }
 }
 
-export function getPoolExitEvent(ctx: EventContext): PoolExitEvent {
-  const event = new SwapsPoolExitEvent(ctx)
+export function getPoolJoinEvent(ctx: EventContext): PoolJoinEvent {
+  const event = new SwapsPoolJoinEvent(ctx)
   if (event.isV23) {
     let pae = ctx.event.args as PoolAssetsEvent
     pae.poolAmount = BigInt(0)
@@ -170,11 +182,7 @@ export function getSwapExactAmountOutEvent(ctx: EventContext): SwapExactAmountOu
 }
 
 
-interface PoolActiveEvent {
-  poolId: bigint
-}
-
-interface PoolClosedEvent {
+interface PoolEvent {
   poolId: bigint
 }
 
