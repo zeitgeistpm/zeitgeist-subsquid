@@ -14,7 +14,7 @@ import { boughtCompleteSet, marketApproved, marketClosed, marketCreated, marketD
   marketExpired, marketInsufficientSubsidy, marketRejected, marketReported, marketResolved, 
   marketStartedWithSubsidy, soldCompleteSet, tokensRedeemed} from './mappings/predictionMarkets';
 import { accountCrossed } from './mappings/styx';
-import { poolActive, poolClosed, poolCreate, poolExit, poolJoin, swapExactAmountIn, 
+import { poolActive, poolClosed, poolCreate, poolDestroyed, poolExit, poolJoin, swapExactAmountIn, 
   swapExactAmountOut } from './mappings/swaps';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensEndowed, tokensTransfer } from './mappings/tokens';
@@ -66,6 +66,7 @@ processor.addEventHandler('Styx.AccountCrossed', ctx => accountCrossed(ctx))
 processor.addEventHandler('Swaps.PoolActive', ctx => poolActive(ctx))
 processor.addEventHandler('Swaps.PoolClosed', ctx => poolClosed(ctx))
 processor.addEventHandler('Swaps.PoolCreate', ctx => poolCreate(ctx))
+processor.addEventHandler('Swaps.PoolDestroyed', ctx => poolDestroyed(ctx))
 processor.addEventHandler('Swaps.PoolExit', ctx => poolExit(ctx))
 processor.addEventHandler('Swaps.PoolJoin', ctx => poolJoin(ctx))
 processor.addEventHandler('Swaps.SwapExactAmountIn', ctx => swapExactAmountIn(ctx))
