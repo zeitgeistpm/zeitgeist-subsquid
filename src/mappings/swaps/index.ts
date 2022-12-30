@@ -4,8 +4,8 @@ import * as ss58 from '@subsquid/ss58'
 import { Account, AccountBalance, Asset, HistoricalAccountBalance, HistoricalAsset, 
   HistoricalMarket, HistoricalPool, Market, Pool, Weight } from '../../model'
 import { calcSpotPrice, getAssetId } from '../helper'
-import { getPoolActiveEvent, getPoolClosedEvent, getPoolCreateEvent, getPoolExitEvent, getPoolJoinEvent, 
-  getSwapExactAmountInEvent, getSwapExactAmountOutEvent} from './types'
+import { getPoolActiveEvent, getPoolClosedEvent, getPoolCreateEvent, getPoolDestroyedEvent, getPoolExitEvent, 
+  getPoolJoinEvent, getSwapExactAmountInEvent, getSwapExactAmountOutEvent} from './types'
 
 
 export async function poolActive(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
@@ -153,6 +153,28 @@ export async function poolCreate(ctx: EventHandlerContext<Store, {event: {args: 
     console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
     await store.save<HistoricalMarket>(hm)
   }
+}
+
+export async function poolDestroyed(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
+  const {store, block, event} = ctx
+  const {poolId} = getPoolDestroyedEvent(ctx)
+
+  let pool = await store.get(Pool, { where: { poolId: +poolId.toString() } })
+  if (!pool) return
+
+  pool.poolStatus = 'Destroyed'
+  console.log(`[${event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`)
+  await store.save<Pool>(pool)
+
+  let hp = new HistoricalPool()
+  hp.id = event.id + '-' + pool.poolId
+  hp.poolId = pool.poolId
+  hp.poolStatus = pool.poolStatus
+  hp.event = event.name.split('.')[1]
+  hp.blockNumber = block.height
+  hp.timestamp = new Date(block.timestamp)
+  console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
+  await store.save<HistoricalPool>(hp)
 }
 
 export async function poolExit(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
