@@ -1492,6 +1492,35 @@ export class SwapsPoolCreateEvent {
   }
 }
 
+export class SwapsPoolDestroyedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Swaps.PoolDestroyed')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * Pool was manually destroyed. \[pool_id\]
+   */
+  get isV36(): boolean {
+    return this._chain.getEventHash('Swaps.PoolDestroyed') === '47b59f698451e50cce59979f0121e842fa3f8b2bcef2e388222dbd69849514f9'
+  }
+
+  /**
+   * Pool was manually destroyed. \[pool_id\]
+   */
+  get asV36(): bigint {
+    assert(this.isV36)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class SwapsPoolExitEvent {
   private readonly _chain: Chain
   private readonly event: Event
