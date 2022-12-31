@@ -163,6 +163,7 @@ export async function poolDestroyed(ctx: EventHandlerContext<Store, {event: {arg
   if (!pool) return
 
   pool.poolStatus = 'Destroyed'
+  pool.ztgQty = BigInt(0)
   console.log(`[${event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`)
   await store.save<Pool>(pool)
 
@@ -170,6 +171,7 @@ export async function poolDestroyed(ctx: EventHandlerContext<Store, {event: {arg
   hp.id = event.id + '-' + pool.poolId
   hp.poolId = pool.poolId
   hp.poolStatus = pool.poolStatus
+  hp.ztgQty = pool.ztgQty
   hp.event = event.name.split('.')[1]
   hp.blockNumber = block.height
   hp.timestamp = new Date(block.timestamp)
