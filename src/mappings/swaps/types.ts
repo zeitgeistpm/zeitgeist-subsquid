@@ -33,36 +33,42 @@ export function getPoolClosedEvent(ctx: EventContext): PoolEvent {
 
 export function getPoolCreateEvent(ctx: EventContext): PoolCreateEvent {
   const event = new SwapsPoolCreateEvent(ctx)
+  let accountId = ``;
   if (event.isV23) {
     const [cpep, pool] = event.asV23
     let swapPool = pool as Pool
     const amount = BigInt(0)
-    return {cpep, swapPool, amount}
+    return {cpep, swapPool, amount, accountId}
   } else if (event.isV32) {
     const [cpep, pool] = event.asV32
     let swapPool = pool as Pool
     const amount = BigInt(0)
-    return {cpep, swapPool, amount}
+    return {cpep, swapPool, amount, accountId}
   } else if (event.isV35) {
     const [cpep, pool, amount] = event.asV35
     let swapPool = pool as Pool
-    return {cpep, swapPool, amount}
+    return {cpep, swapPool, amount, accountId}
   } else if (event.isV36) {
-    const [cpep, pool, amount] = event.asV36
+    const [cpep, pool, amount, account] = event.asV36
     let swapPool = pool as Pool
-    return {cpep, swapPool, amount}
+    accountId = ss58.codec('zeitgeist').encode(account)
+    return {cpep, swapPool, amount, accountId}
   } else if (event.isV37) {
-    const [cpep, swapPool, amount] = event.asV37
-    return {cpep, swapPool, amount}
+    const [cpep, swapPool, amount, account] = event.asV37
+    accountId = ss58.codec('zeitgeist').encode(account)
+    return {cpep, swapPool, amount, accountId}
   } else if (event.isV39) {
-    const [cpep, swapPool, amount] = event.asV39
-    return {cpep, swapPool, amount}
+    const [cpep, swapPool, amount, account] = event.asV39
+    accountId = ss58.codec('zeitgeist').encode(account)
+    return {cpep, swapPool, amount, accountId}
   } else if (event.isV41) {
-    const [cpep, swapPool, amount] = event.asV41
-    return {cpep, swapPool, amount}
+    const [cpep, swapPool, amount, account] = event.asV41
+    accountId = ss58.codec('zeitgeist').encode(account)
+    return {cpep, swapPool, amount, accountId}
   } else {
-    const [cpep, swapPool, amount] = ctx.event.args
-    return {cpep, swapPool, amount}
+    const [cpep, swapPool, amount, account] = ctx.event.args
+    accountId = encodeAddress(account, 73)
+    return {cpep, swapPool, amount, accountId}
   }
 }
 
@@ -190,6 +196,7 @@ interface PoolCreateEvent {
   cpep: CommonPoolEventParams
   swapPool: Pool
   amount: bigint
+  accountId: string
 }
 
 interface PoolJoinEvent {

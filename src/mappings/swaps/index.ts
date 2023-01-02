@@ -54,15 +54,18 @@ export async function poolClosed(ctx: EventHandlerContext<Store, {event: {args: 
 
 export async function poolCreate(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
   const {store, block, event} = ctx
-  const {cpep, swapPool, amount} = getPoolCreateEvent(ctx)
+  let {cpep, swapPool, amount, accountId} = getPoolCreateEvent(ctx)
 
-  const hab = await store.get(HistoricalAccountBalance, { where: { assetId: 'Ztg', event: 'NewAccount', 
-    blockNumber: block.height } })
+  if (accountId.length === 0) {
+    const hab = await store.find(HistoricalAccountBalance, { where: { assetId: 'Ztg', event: 'NewAccount', 
+      blockNumber: block.height } })
+    accountId = hab[hab.length - 1].accountId
+  }
 
   let pool = new Pool()
   pool.id = event.id + '-' + cpep.poolId 
   pool.poolId = +cpep.poolId.toString()
-  pool.accountId = hab ? hab.accountId : null
+  pool.accountId = accountId
   pool.marketId = +swapPool.marketId.toString()
   pool.poolStatus = swapPool.poolStatus.__kind
   pool.scoringRule = swapPool.scoringRule.__kind
@@ -75,7 +78,7 @@ export async function poolCreate(ctx: EventHandlerContext<Store, {event: {args: 
   pool.createdAt = new Date(block.timestamp)
   pool.baseAsset = swapPool.baseAsset.__kind
 
-  let acc = await store.get(Account, { where: { accountId: hab?.accountId } })
+  let acc = await store.get(Account, { where: { accountId: pool.accountId } })
   if (acc) {
     acc.poolId = pool.poolId
     console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
