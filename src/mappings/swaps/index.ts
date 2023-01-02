@@ -56,9 +56,8 @@ export async function poolCreate(ctx: EventHandlerContext<Store, {event: {args: 
   const {store, block, event} = ctx
   let {cpep, swapPool, amount, accountId} = getPoolCreateEvent(ctx)
 
-  let hab = []
   if (accountId.length === 0) {
-    hab = await store.find(HistoricalAccountBalance, { where: { assetId: 'Ztg', event: 'NewAccount', 
+    const hab = await store.find(HistoricalAccountBalance, { where: { assetId: 'Ztg', event: 'NewAccount', 
       blockNumber: block.height } })
     accountId = hab[hab.length - 1].accountId
   }
