@@ -156,8 +156,8 @@ type Market @entity {
   report: MarketReport
   "Resolved outcome for the market"
   resolvedOutcome: String
-  "Can be `authorized` or `court` or `simpleDisputes`"
-  disputeMechanism: MarketDisputeMechanism!
+  "Can be `Authorized` or `Court` or `SimpleDisputes`"
+  disputeMechanism: String!
 }
 
 """
