@@ -280,7 +280,7 @@ export async function marketCreated(ctx: EventHandlerContext<Store, {event: {arg
   newMarket.disputeMechanism = d.__kind
   if (d.__kind === 'Authorized') {
     const accountId = d.value ? `:${encodeAddress(d.value, 73)}` : ``
-    newMarket.disputeMechanism = d.__kind + accountId
+    newMarket.disputeMechanism += accountId
   }
   console.log(`[${event.name}] Saving market: ${JSON.stringify(newMarket, null, 2)}`)
   await store.save<Market>(newMarket)
