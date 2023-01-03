@@ -6,7 +6,6 @@ import {MarketType} from "./_marketType"
 import {MarketPeriod} from "./_marketPeriod"
 import {Pool} from "./pool.model"
 import {MarketReport} from "./_marketReport"
-import {MarketDisputeMechanism} from "./_marketDisputeMechanism"
 
 /**
  * Prediction market details
@@ -157,8 +156,8 @@ export class Market {
   resolvedOutcome!: string | undefined | null
 
   /**
-   * Can be `authorized` or `court` or `simpleDisputes`
+   * Can be `Authorized` or `Court` or `SimpleDisputes`
    */
-  @Column_("jsonb", {transformer: {to: obj => obj.toJSON(), from: obj => new MarketDisputeMechanism(undefined, marshal.nonNull(obj))}, nullable: false})
-  disputeMechanism!: MarketDisputeMechanism
+  @Column_("text", {nullable: false})
+  disputeMechanism!: string
 }
