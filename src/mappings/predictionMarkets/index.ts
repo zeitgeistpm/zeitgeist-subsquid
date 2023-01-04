@@ -498,15 +498,6 @@ export async function marketResolved(ctx: EventHandlerContext<Store, {event: {ar
   const market = await store.get(Market, { where: { marketId: marketId } })
   if (!market) return
 
-  let ocr = new OutcomeReport()
-  if (report.__kind && market.report) {
-    if (report.__kind == 'Categorical') {
-      ocr.categorical = report.value
-    } else if (report.__kind == 'Scalar') {
-      ocr.scalar = report.value
-    }
-    market.report.outcome = ocr
-  }
   market.resolvedOutcome = report.value.toString()
 
   const numOfOutcomeAssets = market.outcomeAssets.length;
