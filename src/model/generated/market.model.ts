@@ -160,4 +160,10 @@ export class Market {
    */
   @Column_("text", {nullable: false})
   disputeMechanism!: string
+
+  /**
+   * Address responsible for authorizing disputes. Null if Adv Comm is the authority
+   */
+  @Column_("text", {nullable: true})
+  authorizedAddress!: string | undefined | null
 }
