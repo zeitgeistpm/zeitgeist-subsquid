@@ -158,6 +158,8 @@ type Market @entity {
   resolvedOutcome: String
   "Can be `Authorized` or `Court` or `SimpleDisputes`"
   disputeMechanism: String!
+  "Address responsible for authorizing disputes. Null if Adv Comm is the authority"
+  authorizedAddress: String
 }
 
 """
