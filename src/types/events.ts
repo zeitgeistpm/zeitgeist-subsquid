@@ -2112,6 +2112,50 @@ export class SystemNewAccountEvent {
   }
 }
 
+export class TokensDepositedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Tokens.Deposited')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * Deposited some balance into an account
+   */
+  get isV36(): boolean {
+    return this._chain.getEventHash('Tokens.Deposited') === 'a4f1c201945cdbe991182662e3e9964553c56bb38739bf247036896397e7d07d'
+  }
+
+  /**
+   * Deposited some balance into an account
+   */
+  get asV36(): {currencyId: v36.Asset, who: Uint8Array, amount: bigint} {
+    assert(this.isV36)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Deposited some balance into an account
+   */
+  get isV41(): boolean {
+    return this._chain.getEventHash('Tokens.Deposited') === '27a10440ff180980c89f27bf3e4fdbe6561b18dc14dabab1bcce3be2753df5e7'
+  }
+
+  /**
+   * Deposited some balance into an account
+   */
+  get asV41(): {currencyId: v41.Asset, who: Uint8Array, amount: bigint} {
+    assert(this.isV41)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class TokensEndowedEvent {
   private readonly _chain: Chain
   private readonly event: Event
@@ -2259,6 +2303,50 @@ export class TokensTransferEvent {
    * Transfer succeeded.
    */
   get asV41(): {currencyId: v41.Asset, from: Uint8Array, to: Uint8Array, amount: bigint} {
+    assert(this.isV41)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class TokensWithdrawnEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Tokens.Withdrawn')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * Some balances were withdrawn (e.g. pay for transaction fee)
+   */
+  get isV36(): boolean {
+    return this._chain.getEventHash('Tokens.Withdrawn') === 'a4f1c201945cdbe991182662e3e9964553c56bb38739bf247036896397e7d07d'
+  }
+
+  /**
+   * Some balances were withdrawn (e.g. pay for transaction fee)
+   */
+  get asV36(): {currencyId: v36.Asset, who: Uint8Array, amount: bigint} {
+    assert(this.isV36)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Some balances were withdrawn (e.g. pay for transaction fee)
+   */
+  get isV41(): boolean {
+    return this._chain.getEventHash('Tokens.Withdrawn') === '27a10440ff180980c89f27bf3e4fdbe6561b18dc14dabab1bcce3be2753df5e7'
+  }
+
+  /**
+   * Some balances were withdrawn (e.g. pay for transaction fee)
+   */
+  get asV41(): {currencyId: v41.Asset, who: Uint8Array, amount: bigint} {
     assert(this.isV41)
     return this._chain.decodeEvent(this.event)
   }

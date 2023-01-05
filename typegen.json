@@ -44,8 +44,10 @@
     "System.NewAccount",
     "System.ExtrinsicSuccess",
     "System.ExtrinsicFailed",
+    "Tokens.Deposited",
     "Tokens.Endowed",
-    "Tokens.Transfer"
+    "Tokens.Transfer",
+    "Tokens.Withdrawn"
   ],
   "calls": []
 }
