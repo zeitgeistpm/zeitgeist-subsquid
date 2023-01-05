@@ -4,9 +4,108 @@ import * as ss58 from '@subsquid/ss58'
 import { Account, AccountBalance, Asset, HistoricalAccountBalance, HistoricalAsset, 
   HistoricalMarket, HistoricalPool, Market, Pool, Weight } from '../../model'
 import { calcSpotPrice, getAssetId } from '../helper'
-import { getPoolActiveEvent, getPoolClosedEvent, getPoolCreateEvent, getPoolDestroyedEvent, getPoolExitEvent, 
-  getPoolJoinEvent, getSwapExactAmountInEvent, getSwapExactAmountOutEvent} from './types'
+import { getArbitrageBuyBurnEvent, getArbitrageMintSellEvent, getPoolActiveEvent, 
+  getPoolClosedEvent, getPoolCreateEvent, getPoolDestroyedEvent, getPoolExitEvent, 
+  getPoolJoinEvent, getSwapExactAmountInEvent, getSwapExactAmountOutEvent } from './types'
 
+
+export async function arbitrageBuyBurn(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
+  const {store, block, event} = ctx
+  const {poolId, amount} = getArbitrageBuyBurnEvent(ctx)
+
+  let pool = await store.get(Pool, { where: { poolId: +poolId.toString() } })
+  if (!pool) return
+
+  pool.ztgQty = pool.ztgQty + amount
+  console.log(`[${event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`)
+  await store.save<Pool>(pool)
+
+  let hp = new HistoricalPool()
+  hp.id = event.id + '-' + pool.poolId
+  hp.poolId = pool.poolId
+  hp.event = event.name.split('.')[1]
+  hp.ztgQty = pool.ztgQty
+  hp.blockNumber = block.height
+  hp.timestamp = new Date(block.timestamp)
+  console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
+  await store.save<HistoricalPool>(hp)
+
+  await Promise.all(
+    pool.weights.map(async wt => {
+      if (!wt) return
+      const asset = await store.get(Asset, { where: { assetId: wt.assetId } })
+      if (!asset || !asset.amountInPool) return
+
+      const oldAssetQty = asset.amountInPool
+      let newAssetQty = oldAssetQty - amount
+      asset.amountInPool = newAssetQty
+      console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
+      await store.save<Asset>(asset)
+
+      let ha = new HistoricalAsset()
+      ha.id = event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-')+1)
+      ha.assetId = asset.assetId
+      ha.newPrice = asset.price
+      ha.newAmountInPool = asset.amountInPool
+      ha.dPrice = 0
+      ha.dAmountInPool = newAssetQty - oldAssetQty
+      ha.event = event.name.split('.')[1]
+      ha.blockNumber = block.height
+      ha.timestamp = new Date(block.timestamp)
+      console.log(`[${event.name}] Saving historical asset: ${JSON.stringify(ha, null, 2)}`)
+      await store.save<HistoricalAsset>(ha)
+    })
+  )
+}
+
+export async function arbitrageMintSell(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
+  const {store, block, event} = ctx
+  const {poolId, amount} = getArbitrageMintSellEvent(ctx)
+
+  let pool = await store.get(Pool, { where: { poolId: +poolId.toString() } })
+  if (!pool) return
+
+  pool.ztgQty = pool.ztgQty - amount
+  console.log(`[${event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`)
+  await store.save<Pool>(pool)
+
+  let hp = new HistoricalPool()
+  hp.id = event.id + '-' + pool.poolId
+  hp.poolId = pool.poolId
+  hp.event = event.name.split('.')[1]
+  hp.ztgQty = pool.ztgQty
+  hp.blockNumber = block.height
+  hp.timestamp = new Date(block.timestamp)
+  console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
+  await store.save<HistoricalPool>(hp)
+
+  await Promise.all(
+    pool.weights.map(async wt => {
+      if (!wt) return
+      const asset = await store.get(Asset, { where: { assetId: wt.assetId } })
+      if (!asset || !asset.amountInPool) return
+
+      const oldAssetQty = asset.amountInPool
+      let newAssetQty = oldAssetQty + amount
+      asset.amountInPool = newAssetQty
+      console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
+      await store.save<Asset>(asset)
+
+      let ha = new HistoricalAsset()
+      ha.id = event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-')+1)
+      ha.assetId = asset.assetId
+      ha.newPrice = asset.price
+      ha.newAmountInPool = asset.amountInPool
+      ha.dPrice = 0
+      ha.dAmountInPool = newAssetQty - oldAssetQty
+      ha.event = event.name.split('.')[1]
+      ha.blockNumber = block.height
+      ha.timestamp = new Date(block.timestamp)
+      console.log(`[${event.name}] Saving historical asset: ${JSON.stringify(ha, null, 2)}`)
+      await store.save<HistoricalAsset>(ha)
+    })
+  )
+}
 
 export async function poolActive(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
   const {store, block, event} = ctx
