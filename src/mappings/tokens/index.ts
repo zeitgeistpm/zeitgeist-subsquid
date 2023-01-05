@@ -2,8 +2,62 @@ import { EventHandlerContext, SubstrateEvent } from '@subsquid/substrate-process
 import { Store } from '@subsquid/typeorm-store'
 import { Account, AccountBalance, Asset, HistoricalAccountBalance } from '../../model'
 import { initBalance } from '../helper'
-import { getTokensEndowedEvent, getTokensTransferEvent } from './types'
+import { getTokensDepositedEvent, getTokensEndowedEvent, getTokensTransferEvent, 
+  getTokensWithdrawnEvent } from './types'
 
+
+export async function tokensDeposited(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
+  const { store, block, event } = ctx 
+  const { assetId, walletId, amount } = getTokensDepositedEvent(ctx)
+  
+  let acc = await store.get(Account, { where: { accountId: walletId } })
+  if (!acc) {
+    acc = new Account()
+    acc.id = event.id + '-' + walletId.substring(walletId.length - 5)
+    acc.accountId = walletId
+    acc.pvalue = 0
+    console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+    await store.save<Account>(acc)
+    await initBalance(acc, store, block, event as SubstrateEvent)
+  }
+
+  const asset = await store.get(Asset, { where: { assetId: assetId } })
+  
+  let ab = await store.findOneBy(AccountBalance, { account: { accountId: walletId }, assetId: assetId })
+  let oldValue = 0
+  if (ab && ab.value) {
+    ab.balance = ab.balance + amount
+    oldValue = ab.value
+  } else {
+    ab = new AccountBalance()
+    ab.id = event.id + '-' + walletId.substring(walletId.length - 5)
+    ab.account = acc
+    ab.assetId = assetId
+    ab.balance = amount
+  }
+  ab.value = asset ? asset.price ? Number(ab.balance) * asset.price : 0 : null
+  console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
+  await store.save<AccountBalance>(ab)
+
+  acc.pvalue = ab.value ? acc.pvalue - oldValue + ab.value : acc.pvalue
+  console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+  await store.save<Account>(acc)
+
+  let hab = new HistoricalAccountBalance()
+  hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
+  hab.accountId = acc.accountId
+  hab.event = event.name.split('.')[1]
+  hab.assetId = ab.assetId
+  hab.dBalance = amount
+  hab.balance = ab.balance
+  hab.dValue = ab.value ? ab.value - oldValue : 0
+  hab.value = ab.value
+  hab.pvalue = acc.pvalue
+  hab.blockNumber = block.height
+  hab.timestamp = new Date(block.timestamp)
+  console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
+  await store.save<HistoricalAccountBalance>(hab)
+}
 
 export async function tokensEndowed(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
   const { store, block, event } = ctx
@@ -152,4 +206,57 @@ export async function tokensTransfer(ctx: EventHandlerContext<Store, {event: {ar
   toHab.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(toHab, null, 2)}`)
   await store.save<HistoricalAccountBalance>(toHab)
+}
+
+export async function tokensWithdrawn(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
+  const { store, block, event } = ctx
+  const { assetId, walletId, amount } = getTokensWithdrawnEvent(ctx)
+  
+  let acc = await store.get(Account, { where: { accountId: walletId } })
+  if (!acc) {
+    acc = new Account()
+    acc.id = event.id + '-' + walletId.substring(walletId.length - 5)
+    acc.accountId = walletId
+    acc.pvalue = 0
+    console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+    await store.save<Account>(acc)
+    await initBalance(acc, store, block, event as SubstrateEvent)
+  }
+
+  const asset = await store.get(Asset, { where: { assetId: assetId } })
+  
+  let ab = await store.findOneBy(AccountBalance, { account: { accountId: walletId }, assetId: assetId })
+  let oldValue = 0
+  if (ab && ab.value) {
+    ab.balance = ab.balance - amount
+    oldValue = ab.value
+  } else {
+    ab = new AccountBalance()
+    ab.id = event.id + '-' + walletId.substring(walletId.length - 5)
+    ab.account = acc
+    ab.assetId = assetId
+    ab.balance = - amount
+  }
+  ab.value = asset ? asset.price ? Number(ab.balance) * asset.price : 0 : null
+  console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
+  await store.save<AccountBalance>(ab)
+
+  acc.pvalue = ab.value ? acc.pvalue - oldValue + ab.value : acc.pvalue
+  console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+  await store.save<Account>(acc)
+
+  let hab = new HistoricalAccountBalance()
+  hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
+  hab.accountId = acc.accountId
+  hab.event = event.name.split('.')[1]
+  hab.assetId = ab.assetId
+  hab.dBalance = - amount
+  hab.balance = ab.balance
+  hab.dValue = ab.value ? ab.value - oldValue : 0
+  hab.value = ab.value
+  hab.pvalue = acc.pvalue
+  hab.blockNumber = block.height
+  hab.timestamp = new Date(block.timestamp)
+  console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
+  await store.save<HistoricalAccountBalance>(hab)
 }
