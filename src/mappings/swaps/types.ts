@@ -1,13 +1,36 @@
 import { encodeAddress } from '@polkadot/keyring'
 import * as ss58 from '@subsquid/ss58'
-import { SwapsPoolActiveEvent, SwapsPoolClosedEvent, SwapsPoolCreateEvent, SwapsPoolDestroyedEvent, 
-  SwapsPoolExitEvent, SwapsPoolJoinEvent, SwapsSwapExactAmountInEvent, SwapsSwapExactAmountOutEvent
+import { SwapsArbitrageBuyBurnEvent, SwapsArbitrageMintSellEvent, SwapsPoolActiveEvent, 
+  SwapsPoolClosedEvent, SwapsPoolCreateEvent, SwapsPoolDestroyedEvent, SwapsPoolExitEvent, 
+  SwapsPoolJoinEvent, SwapsSwapExactAmountInEvent, SwapsSwapExactAmountOutEvent 
 } from '../../types/events'
 import { EventContext } from '../../types/support'
 import { PoolAssetsEvent } from '../../types/v41'
 import { SwapEvent } from '../../types/v41'
 import { CommonPoolEventParams, Pool } from '../../types/v41'
 
+
+export function getArbitrageBuyBurnEvent(ctx: EventContext): ArbitrageEvent {
+  const event = new SwapsArbitrageBuyBurnEvent(ctx)
+  if (event.isV41) {
+    const [poolId, amount] = event.asV41
+    return {poolId, amount}
+  } else {
+    const [poolId, amount] = ctx.event.args
+    return {poolId, amount}
+  }
+}
+
+export function getArbitrageMintSellEvent(ctx: EventContext): ArbitrageEvent {
+  const event = new SwapsArbitrageMintSellEvent(ctx)
+  if (event.isV41) {
+    const [poolId, amount] = event.asV41
+    return {poolId, amount}
+  } else {
+    const [poolId, amount] = ctx.event.args
+    return {poolId, amount}
+  }
+}
 
 export function getPoolActiveEvent(ctx: EventContext): PoolEvent {
   const poolActiveEvent = new SwapsPoolActiveEvent(ctx)
@@ -187,6 +210,11 @@ export function getSwapExactAmountOutEvent(ctx: EventContext): SwapExactAmountOu
   }
 }
 
+
+interface ArbitrageEvent {
+  poolId: bigint
+  amount: bigint
+}
 
 interface PoolEvent {
   poolId: bigint
