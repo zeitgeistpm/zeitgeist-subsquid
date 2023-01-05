@@ -1,11 +1,31 @@
 import { encodeAddress } from '@polkadot/keyring'
 import * as ss58 from '@subsquid/ss58'
 import { EventContext } from '../../types/support'
-import { TokensEndowedEvent, TokensTransferEvent } from '../../types/events'
+import { TokensDepositedEvent, TokensEndowedEvent, TokensTransferEvent,
+   TokensWithdrawnEvent } from '../../types/events'
 import { getAssetId } from '../helper'
 
 
-export function getTokensEndowedEvent(ctx: EventContext): EndowedEvent {
+export function getTokensDepositedEvent(ctx: EventContext): TokensEvent {
+  const event = new TokensDepositedEvent(ctx)
+  let currencyId, walletId, who, amount
+  if (event.isV36) {
+    currencyId = event.asV36.currencyId
+    walletId = ss58.codec('zeitgeist').encode(event.asV36.who)
+    amount = event.asV36.amount
+  } else if (event.isV41) {
+    currencyId = event.asV41.currencyId
+    walletId = ss58.codec('zeitgeist').encode(event.asV41.who)
+    amount = event.asV41.amount
+  } else {
+    [currencyId, who, amount] = ctx.event.args
+    walletId = encodeAddress(who, 73)
+  }
+  const assetId = getAssetId(currencyId)
+  return {assetId, walletId, amount}
+}
+
+export function getTokensEndowedEvent(ctx: EventContext): TokensEvent {
   const event = new TokensEndowedEvent(ctx)
   let currencyId, walletId, who, amount
   if (event.isV23) {
@@ -60,7 +80,26 @@ export function getTokensTransferEvent(ctx: EventContext): TransferEvent {
   return {assetId, fromId, toId, amount}
 }
 
-interface EndowedEvent {
+export function getTokensWithdrawnEvent(ctx: EventContext): TokensEvent {
+  const event = new TokensWithdrawnEvent(ctx)
+  let currencyId, walletId, who, amount
+  if (event.isV36) {
+    currencyId = event.asV36.currencyId
+    walletId = ss58.codec('zeitgeist').encode(event.asV36.who)
+    amount = event.asV36.amount
+  } else if (event.isV41) {
+    currencyId = event.asV41.currencyId
+    walletId = ss58.codec('zeitgeist').encode(event.asV41.who)
+    amount = event.asV41.amount
+  } else {
+    [currencyId, who, amount] = ctx.event.args
+    walletId = encodeAddress(who, 73)
+  }
+  const assetId = getAssetId(currencyId)
+  return {assetId, walletId, amount}
+}
+
+interface TokensEvent {
   assetId: any
   walletId: string
   amount: bigint
