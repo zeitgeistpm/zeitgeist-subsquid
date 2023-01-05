@@ -12,10 +12,10 @@ import {
 import { destroyMarkets } from './mappings/postHooks/marketDestroyed';
 import { boughtCompleteSet, marketApproved, marketClosed, marketCreated, marketDestroyed, marketDisputed, 
   marketExpired, marketInsufficientSubsidy, marketRejected, marketReported, marketResolved, 
-  marketStartedWithSubsidy, soldCompleteSet, tokensRedeemed} from './mappings/predictionMarkets';
+  marketStartedWithSubsidy, soldCompleteSet, tokensRedeemed } from './mappings/predictionMarkets';
 import { accountCrossed } from './mappings/styx';
-import { poolActive, poolClosed, poolCreate, poolDestroyed, poolExit, poolJoin, swapExactAmountIn, 
-  swapExactAmountOut } from './mappings/swaps';
+import { arbitrageBuyBurn, arbitrageMintSell, poolActive, poolClosed, poolCreate, poolDestroyed, poolExit, 
+  poolJoin, swapExactAmountIn, swapExactAmountOut } from './mappings/swaps';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensEndowed, tokensTransfer } from './mappings/tokens';
 
@@ -63,6 +63,8 @@ processor.addEventHandler('PredictionMarkets.TokensRedeemed', ctx => tokensRedee
 
 processor.addEventHandler('Styx.AccountCrossed', ctx => accountCrossed(ctx))
 
+processor.addEventHandler('Swaps.ArbitrageBuyBurn', ctx => arbitrageBuyBurn(ctx))
+processor.addEventHandler('Swaps.ArbitrageMintSell', ctx => arbitrageMintSell(ctx))
 processor.addEventHandler('Swaps.PoolActive', ctx => poolActive(ctx))
 processor.addEventHandler('Swaps.PoolClosed', ctx => poolClosed(ctx))
 processor.addEventHandler('Swaps.PoolCreate', ctx => poolCreate(ctx))
