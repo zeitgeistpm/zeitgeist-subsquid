@@ -1315,6 +1315,64 @@ export class StyxAccountCrossedEvent {
   }
 }
 
+export class SwapsArbitrageBuyBurnEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Swaps.ArbitrageBuyBurn')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * Buy-burn arbitrage was executed on a CPMM pool. \[pool_id, amount\]
+   */
+  get isV41(): boolean {
+    return this._chain.getEventHash('Swaps.ArbitrageBuyBurn') === 'f7d5bd1431cb954502149f64a8137986d660e0729a3d9731d421496b4298be52'
+  }
+
+  /**
+   * Buy-burn arbitrage was executed on a CPMM pool. \[pool_id, amount\]
+   */
+  get asV41(): [bigint, bigint] {
+    assert(this.isV41)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class SwapsArbitrageMintSellEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Swaps.ArbitrageMintSell')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * Mint-sell arbitrage was executed on a CPMM pool. \[pool_id, amount\]
+   */
+  get isV41(): boolean {
+    return this._chain.getEventHash('Swaps.ArbitrageMintSell') === 'f7d5bd1431cb954502149f64a8137986d660e0729a3d9731d421496b4298be52'
+  }
+
+  /**
+   * Mint-sell arbitrage was executed on a CPMM pool. \[pool_id, amount\]
+   */
+  get asV41(): [bigint, bigint] {
+    assert(this.isV41)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class SwapsPoolActiveEvent {
   private readonly _chain: Chain
   private readonly event: Event

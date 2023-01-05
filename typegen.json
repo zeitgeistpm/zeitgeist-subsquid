@@ -31,6 +31,8 @@
     "PredictionMarkets.SoldCompleteSet",
     "PredictionMarkets.TokensRedeemed",
     "Styx.AccountCrossed",
+    "Swaps.ArbitrageBuyBurn",
+    "Swaps.ArbitrageMintSell",
     "Swaps.PoolActive",
     "Swaps.PoolClosed",
     "Swaps.PoolCreate",
