@@ -84,6 +84,31 @@ export interface DispatchInfo {
   paysFee: Pays
 }
 
+export type Asset = Asset_CategoricalOutcome | Asset_ScalarOutcome | Asset_CombinatorialOutcome | Asset_PoolShare | Asset_Ztg
+
+export interface Asset_CategoricalOutcome {
+  __kind: 'CategoricalOutcome'
+  value: [bigint, number]
+}
+
+export interface Asset_ScalarOutcome {
+  __kind: 'ScalarOutcome'
+  value: [bigint, ScalarPosition]
+}
+
+export interface Asset_CombinatorialOutcome {
+  __kind: 'CombinatorialOutcome'
+}
+
+export interface Asset_PoolShare {
+  __kind: 'PoolShare'
+  value: bigint
+}
+
+export interface Asset_Ztg {
+  __kind: 'Ztg'
+}
+
 export type MarketCreation = MarketCreation_Permissionless | MarketCreation_Advised
 
 export interface MarketCreation_Permissionless {
@@ -199,31 +224,6 @@ export interface MarketDisputeMechanism_SimpleDisputes {
   __kind: 'SimpleDisputes'
 }
 
-export type Asset = Asset_CategoricalOutcome | Asset_ScalarOutcome | Asset_CombinatorialOutcome | Asset_PoolShare | Asset_Ztg
-
-export interface Asset_CategoricalOutcome {
-  __kind: 'CategoricalOutcome'
-  value: [bigint, number]
-}
-
-export interface Asset_ScalarOutcome {
-  __kind: 'ScalarOutcome'
-  value: [bigint, ScalarPosition]
-}
-
-export interface Asset_CombinatorialOutcome {
-  __kind: 'CombinatorialOutcome'
-}
-
-export interface Asset_PoolShare {
-  __kind: 'PoolShare'
-  value: bigint
-}
-
-export interface Asset_Ztg {
-  __kind: 'Ztg'
-}
-
 export type PoolStatus = PoolStatus_Active | PoolStatus_CollectingSubsidy | PoolStatus_Stale
 
 export interface PoolStatus_Active {
@@ -321,16 +321,6 @@ export interface Pays_No {
   __kind: 'No'
 }
 
-export interface RangeInclusive {
-  start: bigint
-  end: bigint
-}
-
-export interface Range {
-  start: bigint
-  end: bigint
-}
-
 export type ScalarPosition = ScalarPosition_Long | ScalarPosition_Short
 
 export interface ScalarPosition_Long {
@@ -339,4 +329,14 @@ export interface ScalarPosition_Long {
 
 export interface ScalarPosition_Short {
   __kind: 'Short'
+}
+
+export interface RangeInclusive {
+  start: bigint
+  end: bigint
+}
+
+export interface Range {
+  start: bigint
+  end: bigint
 }
