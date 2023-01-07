@@ -16,7 +16,9 @@ export async function arbitrageBuyBurn(ctx: EventHandlerContext<Store, {event: {
   let pool = await store.get(Pool, { where: { poolId: +poolId.toString() } })
   if (!pool) return
 
-  pool.ztgQty = pool.ztgQty + amount
+  const oldZtgQty = pool.ztgQty
+  const newZtgQty = oldZtgQty + amount
+  pool.ztgQty = newZtgQty
   console.log(`[${event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`)
   await store.save<Pool>(pool)
 
@@ -30,32 +32,41 @@ export async function arbitrageBuyBurn(ctx: EventHandlerContext<Store, {event: {
   console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
   await store.save<HistoricalPool>(hp)
 
-  await Promise.all(
-    pool.weights.map(async wt => {
-      if (!wt) return
-      const asset = await store.get(Asset, { where: { assetId: wt.assetId } })
-      if (!asset || !asset.amountInPool) return
+  const numOfPoolWts = pool.weights.length
+  if (numOfPoolWts > 0 && pool.weights[numOfPoolWts-1]!.assetId == 'Ztg') {
+    const ztgWeight = +pool.weights[numOfPoolWts-1]!.len.toString()
+    await Promise.all(
+      pool.weights.map(async wt => {
+        if (!wt) return
+        const asset = await store.get(Asset, { where: { assetId: wt.assetId } })
+        if (!asset || !asset.amountInPool || !asset.price) return
 
-      const oldAssetQty = asset.amountInPool
-      let newAssetQty = oldAssetQty - amount
-      asset.amountInPool = newAssetQty
-      console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
-      await store.save<Asset>(asset)
+        const assetWeight = +wt!.len.toString()
+        const oldAssetQty = asset.amountInPool
+        const newAssetQty = oldAssetQty - amount
+        const oldPrice = asset.price
+        const newPrice = calcSpotPrice(+newZtgQty.toString(), ztgWeight, +newAssetQty.toString(), assetWeight)
 
-      let ha = new HistoricalAsset()
-      ha.id = event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-')+1)
-      ha.assetId = asset.assetId
-      ha.newPrice = asset.price
-      ha.newAmountInPool = asset.amountInPool
-      ha.dPrice = 0
-      ha.dAmountInPool = newAssetQty - oldAssetQty
-      ha.event = event.name.split('.')[1]
-      ha.blockNumber = block.height
-      ha.timestamp = new Date(block.timestamp)
-      console.log(`[${event.name}] Saving historical asset: ${JSON.stringify(ha, null, 2)}`)
-      await store.save<HistoricalAsset>(ha)
-    })
-  )
+        asset.price = newPrice
+        asset.amountInPool = newAssetQty
+        console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
+        await store.save<Asset>(asset)
+
+        let ha = new HistoricalAsset()
+        ha.id = event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-')+1)
+        ha.assetId = asset.assetId
+        ha.newPrice = asset.price
+        ha.newAmountInPool = asset.amountInPool
+        ha.dPrice = newPrice - oldPrice
+        ha.dAmountInPool = newAssetQty - oldAssetQty
+        ha.event = event.name.split('.')[1]
+        ha.blockNumber = block.height
+        ha.timestamp = new Date(block.timestamp)
+        console.log(`[${event.name}] Saving historical asset: ${JSON.stringify(ha, null, 2)}`)
+        await store.save<HistoricalAsset>(ha)
+      })
+    )
+  }
 }
 
 export async function arbitrageMintSell(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
@@ -65,7 +76,9 @@ export async function arbitrageMintSell(ctx: EventHandlerContext<Store, {event: 
   let pool = await store.get(Pool, { where: { poolId: +poolId.toString() } })
   if (!pool) return
 
-  pool.ztgQty = pool.ztgQty - amount
+  const oldZtgQty = pool.ztgQty
+  const newZtgQty = oldZtgQty - amount
+  pool.ztgQty = newZtgQty
   console.log(`[${event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`)
   await store.save<Pool>(pool)
 
@@ -79,32 +92,41 @@ export async function arbitrageMintSell(ctx: EventHandlerContext<Store, {event: 
   console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
   await store.save<HistoricalPool>(hp)
 
-  await Promise.all(
-    pool.weights.map(async wt => {
-      if (!wt) return
-      const asset = await store.get(Asset, { where: { assetId: wt.assetId } })
-      if (!asset || !asset.amountInPool) return
+  const numOfPoolWts = pool.weights.length
+  if (numOfPoolWts > 0 && pool.weights[numOfPoolWts-1]!.assetId == 'Ztg') {
+    const ztgWeight = +pool.weights[numOfPoolWts-1]!.len.toString()
+    await Promise.all(
+      pool.weights.map(async wt => {
+        if (!wt) return
+        const asset = await store.get(Asset, { where: { assetId: wt.assetId } })
+        if (!asset || !asset.amountInPool || !asset.price) return
 
-      const oldAssetQty = asset.amountInPool
-      let newAssetQty = oldAssetQty + amount
-      asset.amountInPool = newAssetQty
-      console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
-      await store.save<Asset>(asset)
+        const assetWeight = +wt!.len.toString()
+        const oldAssetQty = asset.amountInPool
+        const newAssetQty = oldAssetQty + amount
+        const oldPrice = asset.price
+        const newPrice = calcSpotPrice(+newZtgQty.toString(), ztgWeight, +newAssetQty.toString(), assetWeight)
 
-      let ha = new HistoricalAsset()
-      ha.id = event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-')+1)
-      ha.assetId = asset.assetId
-      ha.newPrice = asset.price
-      ha.newAmountInPool = asset.amountInPool
-      ha.dPrice = 0
-      ha.dAmountInPool = newAssetQty - oldAssetQty
-      ha.event = event.name.split('.')[1]
-      ha.blockNumber = block.height
-      ha.timestamp = new Date(block.timestamp)
-      console.log(`[${event.name}] Saving historical asset: ${JSON.stringify(ha, null, 2)}`)
-      await store.save<HistoricalAsset>(ha)
-    })
-  )
+        asset.price = newPrice
+        asset.amountInPool = newAssetQty
+        console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
+        await store.save<Asset>(asset)
+
+        let ha = new HistoricalAsset()
+        ha.id = event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-')+1)
+        ha.assetId = asset.assetId
+        ha.newPrice = asset.price
+        ha.newAmountInPool = asset.amountInPool
+        ha.dPrice = newPrice - oldPrice
+        ha.dAmountInPool = newAssetQty - oldAssetQty
+        ha.event = event.name.split('.')[1]
+        ha.blockNumber = block.height
+        ha.timestamp = new Date(block.timestamp)
+        console.log(`[${event.name}] Saving historical asset: ${JSON.stringify(ha, null, 2)}`)
+        await store.save<HistoricalAsset>(ha)
+      })
+    )
+  }
 }
 
 export async function poolActive(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
