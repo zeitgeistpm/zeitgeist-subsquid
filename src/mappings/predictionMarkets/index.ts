@@ -4,8 +4,8 @@ import { Store } from '@subsquid/typeorm-store'
 import * as ss58 from '@subsquid/ss58'
 import { Like } from 'typeorm'
 import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBalance, HistoricalAsset, 
-  HistoricalMarket, Market, MarketDeadlines, MarketDisputeMechanism, MarketPeriod, MarketReport, 
-  MarketType, OutcomeReport } from '../../model'
+  HistoricalMarket, Market, MarketDeadlines, MarketPeriod, MarketReport, MarketType, OutcomeReport 
+} from '../../model'
 import { createAssetsForMarket, decodeMarketMetadata } from '../helper'
 import { Tools } from '../util'
 import { getBoughtCompleteSetEvent, getMarketApprovedEvent, getMarketClosedEvent, getMarketCreatedEvent, 
@@ -276,17 +276,11 @@ export async function marketCreated(ctx: EventHandlerContext<Store, {event: {arg
   }
   newMarket.period = period
 
-  let disputeMechanism = new MarketDisputeMechanism()
   const d = market.disputeMechanism
-  if (d.__kind == 'Authorized') {
-    disputeMechanism.authorized = d.value ? encodeAddress(d.value, 73) : null
-  } else if (d.__kind == 'Court') {
-    disputeMechanism.court = true
-  } else if (d.__kind == 'SimpleDisputes') {
-    disputeMechanism.simpleDisputes = true
+  newMarket.disputeMechanism = d.__kind
+  if (d.__kind === 'Authorized') {
+    newMarket.authorizedAddress = d.value ? encodeAddress(d.value, 73) : null
   }
-  newMarket.disputeMechanism = disputeMechanism
-
   console.log(`[${event.name}] Saving market: ${JSON.stringify(newMarket, null, 2)}`)
   await store.save<Market>(newMarket)
 
