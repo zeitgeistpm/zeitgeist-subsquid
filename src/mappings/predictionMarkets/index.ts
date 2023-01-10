@@ -537,8 +537,8 @@ export async function marketResolved(ctx: EventHandlerContext<Store, {event: {ar
       await Promise.all(
         abs.map(async ab => {
           const keyword = ab.id.substring(ab.id.lastIndexOf('-')+1, ab.id.length)
-          let acc = await store.get(Account, { where: { id: Like(`%${keyword}%`), poolId: undefined}})
-          if (acc != null && ab.balance > BigInt(0)) {
+          let acc = await store.get(Account, { where: { id: Like(`%${keyword}%`)}})
+          if (acc != null && ab.balance > BigInt(0) && !acc.poolId) {
             const oldBalance = ab.balance
             const oldValue = ab.value
             
