@@ -30,6 +30,9 @@ export async function boughtCompleteSet(ctx: EventHandlerContext<Store>) {
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
   await store.save<HistoricalMarket>(hm)
 
+  const specVersion = +ctx.block.specId.substring(ctx.block.specId.indexOf('@') + 1)
+  if (specVersion > 35) return
+
   let acc = await store.get(Account, { where: { accountId: walletId } })
   if (!acc) { return }
 
