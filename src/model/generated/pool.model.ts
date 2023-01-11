@@ -17,6 +17,7 @@ export class Pool {
   /**
    * Zeitgeist's identifier for pool
    */
+  @Index_()
   @Column_("int4", {nullable: false})
   poolId!: number
 

@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_} from "typeorm"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_} from "typeorm"
 import * as marshal from "./marshal"
 
 /**
@@ -26,6 +26,7 @@ export class Asset {
   /**
    * Zeitgeist's identifier for pool
    */
+  @Index_()
   @Column_("int4", {nullable: true})
   poolId!: number | undefined | null
 
