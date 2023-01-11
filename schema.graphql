@@ -113,7 +113,7 @@ type Market @entity {
   "Unique identifier of the object"
   id: ID!
   "Zeitgeist's identifier for market"
-  marketId: Int!
+  marketId: Int! @index
   "Account address of the market creator" 
   creator: String!
   "Can be `Permissionless` or `Advised`"
@@ -195,7 +195,7 @@ type Pool @entity {
   accountId: String
   "Zeitgeist's identifier for pool"
   baseAsset: String!
-  marketId: Int!
+  marketId: Int! @index
   "Status of the pool"
   poolStatus: String!
   "Scoring rule used for the pool"
