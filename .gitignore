@@ -7,3 +7,5 @@
 .env.m1
 .env.m2
 .vscode
+
+.yarn

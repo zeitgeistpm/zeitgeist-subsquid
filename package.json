@@ -1,6 +1,6 @@
 {
   "name": "zeitgeist-squid",
-  "private": "true",
+  "private": true,
   "version": "0.0.1",
   "description": "Zeitgeist chain block indexer and graphql server",
   "author": "",
