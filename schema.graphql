@@ -39,7 +39,7 @@ type HistoricalAccountBalance @entity {
   "Unique identifier of the object"
   id: ID!
   "Account address"
-  accountId: String!
+  accountId: String! @index
   "Zeitgeist's identifier for asset"
   assetId: String!
   "Balance difference"
@@ -70,7 +70,7 @@ type Asset @entity {
   "Zeitgeist's identifier for asset"
   assetId: String!
   "Zeitgeist's identifier for pool"
-  poolId: Int
+  poolId: Int @index
   "Spot price of the asset in the pool"
   price: Float
   "Balance of the asset present in the pool account"
@@ -85,11 +85,11 @@ type HistoricalAsset @entity {
   "Unique identifier of the object"
   id: ID!
   "Account which executed the trade"
-  accountId: String
+  accountId: String @index
   "Amount of ZTG which user spent/redeemed for swap trade"
   ztgTraded: BigInt
   "Zeitgeist's identifier for asset"
-  assetId: String!
+  assetId: String! @index
   "Price of the asset has decreased if -ve and +ve if increased"
   dPrice: Float
   "Units of asset user bought (-ve) or sold (+ve)"
@@ -114,7 +114,7 @@ type Market @entity {
   id: ID!
   "Zeitgeist's identifier for market"
   marketId: Int! @index
-  "Account address of the market creator" 
+  "Account address of the market creator"
   creator: String!
   "Can be `Permissionless` or `Advised`"
   creation: String!
@@ -190,7 +190,7 @@ Liquidity pool details
 """
 type Pool @entity {
   "Zeitgeist's identifier for pool"
-  poolId: Int!
+  poolId: Int! @index
   "Zeitgeist's identifier for account"
   accountId: String
   "Zeitgeist's identifier for pool"
@@ -300,12 +300,12 @@ type MarketPeriod @jsonField {
 Market's status options
 """
 enum MarketStatus {
-  Active,
-  CollectingSubsidy,
-  InsufficientSubsidy,
-  Reported,
-  Disputed,
-  Rejected,
+  Active
+  CollectingSubsidy
+  InsufficientSubsidy
+  Reported
+  Disputed
+  Rejected
   Cancelled
 }
 
