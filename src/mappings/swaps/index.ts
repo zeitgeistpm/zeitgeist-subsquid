@@ -1,6 +1,7 @@
 import { EventHandlerContext } from '@subsquid/substrate-processor'
 import { Store } from '@subsquid/typeorm-store'
 import * as ss58 from '@subsquid/ss58'
+import { Like } from 'typeorm/find-options/operator/Like'
 import { Account, AccountBalance, Asset, HistoricalAccountBalance, HistoricalAsset, 
   HistoricalMarket, HistoricalPool, Market, Pool, Weight } from '../../model'
 import { calcSpotPrice, getAssetId } from '../helper'
@@ -308,17 +309,16 @@ export async function poolDestroyed(ctx: EventHandlerContext<Store, {event: {arg
   let ab = await store.findOneBy(AccountBalance, { account: { accountId: acc.accountId }, assetId: 'Ztg' })
   if (!ab) return
 
-  let oldBalance = ab.balance
-  let newBalance = BigInt(0)
-
-  acc.pvalue = Number(acc.pvalue) - Number(oldBalance)
-  console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
-  await store.save<Account>(acc)
-
+  const oldBalance = ab.balance
+  const newBalance = BigInt(0)
   ab.balance = newBalance
   ab.value = Number(ab.balance)
   console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
   await store.save<AccountBalance>(ab)
+
+  acc.pvalue = Number(acc.pvalue) - Number(oldBalance)
+  console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+  await store.save<Account>(acc)
 
   let hab = new HistoricalAccountBalance()
   hab.id = event.id + '-' + acc.accountId.substring(acc.accountId.length - 5)
@@ -334,6 +334,77 @@ export async function poolDestroyed(ctx: EventHandlerContext<Store, {event: {arg
   hab.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
   await store.save<HistoricalAccountBalance>(hab)
+
+  const market = await store.findOneBy(Market, { pool: { poolId: Number(poolId) }})
+  if (!market) return
+
+  const numOfOutcomeAssets = market.outcomeAssets.length;
+  if (numOfOutcomeAssets > 0) {
+    for (let i = 0; i < numOfOutcomeAssets; i++) {
+      let asset = await store.get(Asset, { where: { assetId: market.outcomeAssets[i]! } })
+      if (!asset) return
+      const oldPrice = asset.price
+      const oldAssetQty = asset.amountInPool
+      const newPrice = 0
+      const newAssetQty = BigInt(0)
+
+      asset.price = newPrice
+      asset.amountInPool = newAssetQty
+      console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
+      await store.save<Asset>(asset)
+
+      let ha = new HistoricalAsset()
+      ha.id = event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-')+1)
+      ha.assetId = asset.assetId
+      ha.newPrice = newPrice
+      ha.newAmountInPool = newAssetQty
+      ha.dPrice = oldPrice ? newPrice - oldPrice : null
+      ha.dAmountInPool = oldAssetQty ? newAssetQty - oldAssetQty : null
+      ha.event = event.name.split('.')[1]
+      ha.blockNumber = block.height
+      ha.timestamp = new Date(block.timestamp)
+      console.log(`[${event.name}] Saving historical asset: ${JSON.stringify(ha, null, 2)}`)
+      await store.save<HistoricalAsset>(ha)
+
+      const abs = await store.find(AccountBalance, { where: { assetId: market.outcomeAssets[i]! } })
+      await Promise.all(
+        abs.map(async ab => {
+          const keyword = ab.id.substring(ab.id.lastIndexOf('-')+1, ab.id.length)
+          let acc = await store.get(Account, { where: { id: Like(`%${keyword}%`)}})
+          if (acc != null && ab.balance > BigInt(0)) {
+            const oldBalance = ab.balance
+            const oldValue = ab.value
+            const newBalance = BigInt(0)
+            const newValue = Number(ab.balance)
+
+            ab.balance = newBalance
+            ab.value = newValue
+            console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
+            await store.save<AccountBalance>(ab)
+
+            acc.pvalue = oldValue ? acc.pvalue - oldValue + newValue : acc.pvalue
+            console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+            await store.save<Account>(acc)
+
+            let hab = new HistoricalAccountBalance()
+            hab.id = event.id + '-' + acc.accountId.substring(acc.accountId.length - 5)
+            hab.accountId = acc.accountId
+            hab.event = event.name.split('.')[1]
+            hab.assetId = ab.assetId
+            hab.dBalance = newBalance - oldBalance
+            hab.balance = newBalance
+            hab.dValue = oldValue ? newValue - oldValue : null
+            hab.value = newValue
+            hab.pvalue = acc.pvalue
+            hab.blockNumber = block.height
+            hab.timestamp = new Date(block.timestamp)
+            console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
+            await store.save<HistoricalAccountBalance>(hab)
+          }
+        })
+      );
+    }
+  }
 }
 
 export async function poolExit(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
