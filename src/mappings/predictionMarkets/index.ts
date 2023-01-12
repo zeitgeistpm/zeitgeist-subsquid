@@ -544,7 +544,7 @@ export async function marketResolved(ctx: EventHandlerContext<Store, {event: {ar
 
             const specVersion = +ctx.block.specId.substring(ctx.block.specId.indexOf('@') + 1)
             if (market.marketType.categorical) {
-              if (specVersion < 40 || acc.poolId) {
+              if (specVersion < 40) {
                 ab.balance = (i == +market.resolvedOutcome!) ? ab.balance : BigInt(0)
               }
             }
