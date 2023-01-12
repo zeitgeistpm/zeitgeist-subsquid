@@ -541,8 +541,8 @@ export async function marketResolved(ctx: EventHandlerContext<Store, {event: {ar
           if (acc != null && ab.balance > BigInt(0)) {
             const oldBalance = ab.balance
             const oldValue = ab.value
-            
-            if (market.marketType.categorical) {
+
+            if (market.marketType.categorical && acc.poolId) {
               ab.balance = (i == +market.resolvedOutcome!) ? ab.balance : BigInt(0)
             }
             ab.value = asset!.price ? Number(ab.balance) * asset!.price : null
