@@ -542,8 +542,11 @@ export async function marketResolved(ctx: EventHandlerContext<Store, {event: {ar
             const oldBalance = ab.balance
             const oldValue = ab.value
 
-            if (market.marketType.categorical && acc.poolId) {
-              ab.balance = (i == +market.resolvedOutcome!) ? ab.balance : BigInt(0)
+            const specVersion = +ctx.block.specId.substring(ctx.block.specId.indexOf('@') + 1)
+            if (market.marketType.categorical) {
+              if (specVersion < 40 || acc.poolId) {
+                ab.balance = (i == +market.resolvedOutcome!) ? ab.balance : BigInt(0)
+              }
             }
             ab.value = asset!.price ? Number(ab.balance) * asset!.price : null
             console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
