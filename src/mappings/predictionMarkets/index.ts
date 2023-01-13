@@ -491,6 +491,7 @@ export async function marketReported(ctx: EventHandlerContext<Store, {event: {ar
 export async function marketResolved(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
   const {store, block, event} = ctx
   const {marketId, status, report} = getMarketResolvedEvent(ctx)
+  const specVersion = +block.specId.substring(ctx.block.specId.indexOf('@') + 1)
 
   const market = await store.get(Market, { where: { marketId: marketId } })
   if (!market) return
@@ -501,76 +502,78 @@ export async function marketResolved(ctx: EventHandlerContext<Store, {event: {ar
   if (market.resolvedOutcome && numOfOutcomeAssets > 0) {
     for (let i = 0; i < numOfOutcomeAssets; i++) {
       let asset = await store.get(Asset, { where: { assetId: market.outcomeAssets[i]! } })
-      if (!asset) return
+      if (!asset || !asset.price || !asset.amountInPool) return
       const oldPrice = asset.price
       const oldAssetQty = asset.amountInPool
-
+      let newPrice = oldPrice
+      let newAssetQty = oldAssetQty
       if (market.marketType.scalar && asset.assetId.includes('Long')) {
         const upperRange = Number(market.marketType.scalar!.split(',')[1])
         const lowerRange = Number(market.marketType.scalar!.split(',')[0])
-        asset.price = (+market.resolvedOutcome - lowerRange)/(upperRange - lowerRange)
+        newPrice = (+market.resolvedOutcome - lowerRange)/(upperRange - lowerRange)
       } else if (market.marketType.scalar && asset.assetId.includes('Short')) {
         const upperRange = Number(market.marketType.scalar!.split(',')[1])
         const lowerRange = Number(market.marketType.scalar!.split(',')[0])
-        asset.price = (upperRange - +market.resolvedOutcome)/(upperRange - lowerRange)
+        newPrice = (upperRange - +market.resolvedOutcome)/(upperRange - lowerRange)
       } else {
-        asset.price = (i == +market.resolvedOutcome) ? 1 : 0
-        asset.amountInPool = (i == +market.resolvedOutcome) ? oldAssetQty : BigInt(0)
+        newPrice = (i == +market.resolvedOutcome) ? 1 : 0
+        if (specVersion < 40) {
+          newAssetQty = (i == +market.resolvedOutcome) ? oldAssetQty : BigInt(0)
+        }
       }
+      asset.price = newPrice
+      asset.amountInPool = newAssetQty
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
       await store.save<Asset>(asset)
 
       let ha = new HistoricalAsset()
       ha.id = event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-')+1)
       ha.assetId = asset.assetId
-      ha.newPrice = asset.price
-      ha.newAmountInPool = asset.amountInPool
-      ha.dPrice = oldPrice ? ha.newPrice - oldPrice : null
-      ha.dAmountInPool = oldAssetQty && ha.newAmountInPool ? ha.newAmountInPool - oldAssetQty : null
+      ha.newPrice = newPrice
+      ha.newAmountInPool = newAssetQty
+      ha.dPrice = newPrice - oldPrice
+      ha.dAmountInPool = newAssetQty - oldAssetQty
       ha.event = event.name.split('.')[1]
       ha.blockNumber = block.height
       ha.timestamp = new Date(block.timestamp)
       console.log(`[${event.name}] Saving historical asset: ${JSON.stringify(ha, null, 2)}`)
       await store.save<HistoricalAsset>(ha)
 
-      const abs = await store.find(AccountBalance, { where: { assetId: market.outcomeAssets[i]! } })
+      const abs = await store.find(AccountBalance, { where: { assetId: asset.assetId } })
       await Promise.all(
         abs.map(async ab => {
           const keyword = ab.id.substring(ab.id.lastIndexOf('-')+1, ab.id.length)
           let acc = await store.get(Account, { where: { id: Like(`%${keyword}%`)}})
-          if (acc != null && ab.balance > BigInt(0)) {
-            const oldBalance = ab.balance
-            const oldValue = ab.value
+          if (!acc || ab.balance < BigInt(0) || !ab.value) return
 
-            const specVersion = +ctx.block.specId.substring(ctx.block.specId.indexOf('@') + 1)
-            if (market.marketType.categorical) {
-              if (specVersion < 40) {
-                ab.balance = (i == +market.resolvedOutcome!) ? ab.balance : BigInt(0)
-              }
-            }
-            ab.value = asset!.price ? Number(ab.balance) * asset!.price : null
-            console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
-            await store.save<AccountBalance>(ab)
+          const oldBalance = ab.balance
+          const oldValue = ab.value
 
-            acc.pvalue = oldValue && ab.value ? acc.pvalue - oldValue + ab.value : acc.pvalue
-            console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
-            await store.save<Account>(acc)
-
-            let hab = new HistoricalAccountBalance()
-            hab.id = event.id + '-' + acc.accountId.substring(acc.accountId.length - 5)
-            hab.accountId = acc.accountId
-            hab.event = event.name.split('.')[1]
-            hab.assetId = ab.assetId
-            hab.dBalance = ab.balance - oldBalance
-            hab.balance = ab.balance
-            hab.dValue = oldValue && ab.value ? ab.value - oldValue : null
-            hab.value = ab.value
-            hab.pvalue = acc.pvalue
-            hab.blockNumber = block.height
-            hab.timestamp = new Date(block.timestamp)
-            console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
-            await store.save<HistoricalAccountBalance>(hab)
+          if (market.marketType.categorical && specVersion < 40) {
+            ab.balance = (i == +market.resolvedOutcome!) ? ab.balance : BigInt(0)
           }
+          ab.value = Number(ab.balance) * newPrice
+          console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
+          await store.save<AccountBalance>(ab)
+
+          acc.pvalue = acc.pvalue - oldValue + ab.value
+          console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+          await store.save<Account>(acc)
+
+          let hab = new HistoricalAccountBalance()
+          hab.id = event.id + '-' + acc.accountId.substring(acc.accountId.length - 5)
+          hab.accountId = acc.accountId
+          hab.event = event.name.split('.')[1]
+          hab.assetId = ab.assetId
+          hab.dBalance = ab.balance - oldBalance
+          hab.balance = ab.balance
+          hab.dValue = ab.value - oldValue
+          hab.value = ab.value
+          hab.pvalue = acc.pvalue
+          hab.blockNumber = block.height
+          hab.timestamp = new Date(block.timestamp)
+          console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
+          await store.save<HistoricalAccountBalance>(hab)
         })
       );
     }
