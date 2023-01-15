@@ -443,8 +443,10 @@ export async function poolExit(ctx: EventHandlerContext<Store, {event: {args: tr
         const oldAssetQty = asset.amountInPool
         const newAssetQty = oldAssetQty - BigInt(pae.transferred[idx].toString())
         const oldPrice = asset.price
-        const newPrice = calcSpotPrice(+newZtgQty.toString(), tokenWeightIn, +newAssetQty.toString(), assetWt)
-
+        let newPrice = oldPrice
+        if (oldPrice > 0 && oldPrice < 1) {
+          newPrice = calcSpotPrice(+newZtgQty.toString(), tokenWeightIn, +newAssetQty.toString(), assetWt)
+        }
         asset.price = newPrice
         asset.amountInPool = newAssetQty
         console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
