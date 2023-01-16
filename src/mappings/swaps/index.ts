@@ -430,22 +430,69 @@ export async function poolExit(ctx: EventHandlerContext<Store, {event: {args: tr
   console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
   await store.save<HistoricalPool>(hp)
 
-  const numOfPoolWts = pool.weights.length
-  if (numOfPoolWts > 0 && pool.weights[numOfPoolWts-1]!.assetId == 'Ztg') {
-    const tokenWeightIn = +pool.weights[numOfPoolWts-1]!.len.toString()
+  const numOfPoolWts = pool.weights.length;
+  const ztgWeight = +pool.weights[numOfPoolWts - 1]!.len.toString();
+  if (pae.assets) {
+    await Promise.all(
+      pae.assets.map(async (a, idx) => {
+        const assetId = getAssetId(a);
+        if (assetId == 'Ztg') return
+
+        let asset = await store.get(Asset, { where: { assetId: assetId } })
+        if (!asset || !asset.amountInPool || !asset.price) return
+
+        let assetWeight = 0;
+        for (let i = 0; i < numOfPoolWts; i++) {
+          if (pool!.weights[i]!.assetId == assetId) {
+            assetWeight = +pool!.weights[i]!.len.toString();
+          }
+        }
+        if (assetWeight == 0) {
+          console.error(`Coudn't find weight for the asset: ${assetId}`)
+          return
+        }
+
+        const oldAssetQty = asset.amountInPool
+        const newAssetQty = oldAssetQty - BigInt(pae.transferred[idx].toString())
+        const oldPrice = asset.price
+        let newPrice = oldPrice
+        if (oldPrice > 0 && oldPrice < 1) {
+          newPrice = calcSpotPrice(+newZtgQty.toString(), ztgWeight, +newAssetQty.toString(), assetWeight)
+        }
+        asset.price = newPrice
+        asset.amountInPool = newAssetQty
+        console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
+        await store.save<Asset>(asset)
+
+        let ha = new HistoricalAsset()
+        ha.id = event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-')+1)
+        ha.accountId = walletId
+        ha.assetId = asset.assetId
+        ha.newPrice = asset.price
+        ha.newAmountInPool = asset.amountInPool
+        ha.dPrice = newPrice - oldPrice
+        ha.dAmountInPool = newAssetQty - oldAssetQty 
+        ha.event = event.name.split('.')[1]
+        ha.blockNumber = block.height
+        ha.timestamp = new Date(block.timestamp)
+        console.log(`[${event.name}] Saving historical asset: ${JSON.stringify(ha, null, 2)}`)
+        await store.save<HistoricalAsset>(ha)
+      })
+    );
+  } else {
     await Promise.all(
       pool.weights.map(async (wt, idx) => {
         if (idx >= pae.transferred.length - 1) return
         let asset = await store.get(Asset, { where: { assetId: wt!.assetId } })
         if (!asset || !asset.amountInPool || !asset.price) return
 
-        const assetWt = +wt!.len.toString()
+        const assetWeight = +wt!.len.toString()
         const oldAssetQty = asset.amountInPool
         const newAssetQty = oldAssetQty - BigInt(pae.transferred[idx].toString())
         const oldPrice = asset.price
         let newPrice = oldPrice
         if (oldPrice > 0 && oldPrice < 1) {
-          newPrice = calcSpotPrice(+newZtgQty.toString(), tokenWeightIn, +newAssetQty.toString(), assetWt)
+          newPrice = calcSpotPrice(+newZtgQty.toString(), ztgWeight, +newAssetQty.toString(), assetWeight)
         }
         asset.price = newPrice
         asset.amountInPool = newAssetQty
