@@ -505,7 +505,11 @@ export async function marketResolved(ctx: EventHandlerContext<Store, {event: {ar
   const market = await store.get(Market, { where: { marketId: marketId } })
   if (!market) return
 
-  market.resolvedOutcome = report.value.toString()
+  if (specVersion < 41) {
+    market.resolvedOutcome = (+report.value.toString() * (10**10)).toString();
+  } else {
+    market.resolvedOutcome = report.value.toString();
+  }
 
   const numOfOutcomeAssets = market.outcomeAssets.length;
   if (market.resolvedOutcome && numOfOutcomeAssets > 0) {
