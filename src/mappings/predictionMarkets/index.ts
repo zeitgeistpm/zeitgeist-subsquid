@@ -148,6 +148,7 @@ export async function marketClosed(ctx: EventHandlerContext<Store, {event: {args
 export async function marketCreated(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
   const {store, event, block} = ctx
   const {marketId, marketAccountId, market} = getMarketCreatedEvent(ctx)
+  const specVersion = +block.specId.substring(ctx.block.specId.indexOf('@') + 1)
 
   if (marketAccountId.length > 2) {
     let acc = await store.findOneBy(Account, { accountId: marketAccountId })
@@ -247,10 +248,18 @@ export async function marketCreated(ctx: EventHandlerContext<Store, {event: {arg
   if (type.__kind == 'Categorical') {
     marketType.categorical = type.value.toString()
   } else if (type.__kind == 'Scalar') {
-    if (type.value.start) {
-      marketType.scalar = type.value.start.toString() + ',' + type.value.end.toString()
+    if (specVersion < 41) {
+      let upperRange, lowerRange;
+      if (type.value.start) {
+        upperRange = +type.value.start.toString() * (10**10);
+        lowerRange = +type.value.end.toString() * (10**10);
+      } else {
+        upperRange = +type.value.toString().substring(`,`)[0].toString() * (10**10);
+        lowerRange = +type.value.toString().substring(`,`)[1].toString() * (10**10);
+      }
+      marketType.scalar = upperRange + `,` + lowerRange;
     } else {
-      marketType.scalar = type.value.toString()
+      marketType.scalar = type.value.start.toString() + `,` + type.value.end.toString()
     }
   }
   newMarket.marketType = marketType
