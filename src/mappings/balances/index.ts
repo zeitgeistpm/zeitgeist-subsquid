@@ -105,18 +105,31 @@ export async function balancesDustLost(ctx: EventHandlerContext<Store, {event: {
   const { store, block, event } = ctx
   const { walletId, amount } = getDustLostEvent(ctx)
 
-  const ab = await store.findOneBy(AccountBalance, { account: { accountId: walletId }, assetId: 'Ztg' })
-  if (!ab || ab.balance == BigInt(0)) return
+  let acc = await store.get(Account, { where: { accountId: walletId } })
+  if (!acc) return
+
+  let ab = await store.findOneBy(AccountBalance, { account: { accountId: walletId }, assetId: 'Ztg' })
+  if (!ab) return
+
+  ab.balance = ab.balance - amount
+  ab.value = Number(ab.balance)
+  console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
+  await store.save<AccountBalance>(ab)
+
+  acc.pvalue = Number(acc.pvalue) - Number(amount)
+  console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
+  await store.save<Account>(acc)
 
   let hab = new HistoricalAccountBalance()
   hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
   hab.accountId = walletId
   hab.event = event.name.split('.')[1]
   hab.assetId = ab.assetId
-  hab.dBalance = amount
-  hab.balance = BigInt(0)
+  hab.dBalance = - amount
+  hab.balance = ab.balance
   hab.dValue = Number(hab.dBalance)
   hab.value = Number(hab.balance)
+  hab.pvalue = acc.pvalue
   hab.blockNumber = block.height
   hab.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
@@ -292,26 +305,6 @@ export async function balancesTransfer(ctx: EventHandlerContext<Store, {event: {
     fromHab.timestamp = new Date(block.timestamp)
     console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(fromHab, null, 2)}`)
     await store.save<HistoricalAccountBalance>(fromHab)
-
-    let dHab = await store.get(HistoricalAccountBalance, { where: 
-      { accountId: fromAcc.accountId, assetId: 'Ztg', event: 'DustLost', blockNumber: block.height } })
-    if (dHab) {
-      fromAb.balance = fromAb.balance - dHab.dBalance
-      console.log(`[${event.name}] Saving account balance: ${JSON.stringify(fromAb, null, 2)}`)
-      await store.save<AccountBalance>(fromAb)
-
-      fromAcc.pvalue = Number(fromAcc.pvalue) - Number(dHab.dBalance)
-      console.log(`[${event.name}] Saving account: ${JSON.stringify(fromAcc, null, 2)}`)
-      await store.save<Account>(fromAcc)
-
-      dHab.dBalance = - dHab.dBalance
-      dHab.balance = fromAb.balance
-      dHab.dValue = Number(dHab.dBalance)
-      dHab.value = Number(dHab.balance)
-      dHab.pvalue = fromAcc.pvalue
-      console.log(`[${event.name}] Updating historical asset balance: ${JSON.stringify(dHab, null, 2)}`)
-      await store.save<HistoricalAccountBalance>(dHab)
-    }
   } 
     
   let toAcc = await store.get(Account, { where: { accountId: toId } })

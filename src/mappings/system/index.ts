@@ -98,26 +98,6 @@ export async function systemExtrinsicSuccess(ctx: EventHandlerContext<Store>) {
     hab.timestamp = new Date(block.timestamp)
     console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
     await store.save<HistoricalAccountBalance>(hab)
-
-    let dHab = await store.get(HistoricalAccountBalance, { where: 
-      { accountId: acc.accountId, assetId: 'Ztg', event: 'DustLost', blockNumber: block.height } })
-    if (dHab) {
-      acc.pvalue = Number(acc.pvalue) - Number(dHab.dBalance)
-      console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
-      await store.save<Account>(acc)
-
-      ab.balance = ab.balance - dHab.dBalance
-      console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
-      await store.save<AccountBalance>(ab)
-
-      dHab.dBalance = - dHab.dBalance
-      dHab.balance = ab.balance
-      dHab.dValue = Number(dHab.dBalance)
-      dHab.value = Number(dHab.balance)
-      dHab.pvalue = acc.pvalue
-      console.log(`[${event.name}] Updating historical account balance: ${JSON.stringify(dHab, null, 2)}`)
-      await store.save<HistoricalAccountBalance>(dHab)
-    }
   }
 }
 
