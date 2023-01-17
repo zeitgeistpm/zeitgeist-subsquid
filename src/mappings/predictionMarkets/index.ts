@@ -6,7 +6,7 @@ import { Like } from 'typeorm'
 import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBalance, HistoricalAsset, 
   HistoricalMarket, Market, MarketDeadlines, MarketPeriod, MarketReport, MarketType, OutcomeReport 
 } from '../../model'
-import { createAssetsForMarket, decodeMarketMetadata, scaled } from '../helper'
+import { createAssetsForMarket, decodeMarketMetadata, rescale } from '../helper'
 import { Tools } from '../util'
 import { getBoughtCompleteSetEvent, getMarketApprovedEvent, getMarketClosedEvent, getMarketCreatedEvent, 
   getMarketDestroyedEvent, getMarketDisputedEvent, getMarketExpiredEvent, getMarketInsufficientSubsidyEvent, 
@@ -251,12 +251,12 @@ export async function marketCreated(ctx: EventHandlerContext<Store, {event: {arg
     marketType.scalar = []
     if (specVersion < 41) {
       if (type.value.start) {
-        marketType.scalar.push(scaled(type.value.start.toString()));
-        marketType.scalar.push(scaled(type.value.end.toString()));
+        marketType.scalar.push(rescale(type.value.start.toString()));
+        marketType.scalar.push(rescale(type.value.end.toString()));
       } else {
         const [start, end] = type.value.toString().split(`,`);
-        marketType.scalar.push(scaled(start));
-        marketType.scalar.push(scaled(end));
+        marketType.scalar.push(rescale(start));
+        marketType.scalar.push(rescale(end));
       }
     } else {
       marketType.scalar.push(type.value.start.toString());
@@ -507,7 +507,7 @@ export async function marketResolved(ctx: EventHandlerContext<Store, {event: {ar
   if (!market) return
 
   if (market.marketType.scalar && specVersion < 41) {
-    market.resolvedOutcome = scaled(report.value.toString());
+    market.resolvedOutcome = rescale(report.value.toString());
   } else {
     market.resolvedOutcome = report.value.toString();
   }

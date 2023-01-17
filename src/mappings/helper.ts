@@ -131,7 +131,7 @@ export async function initBalance(acc: Account, store: Store, block: SubstrateBl
   await store.save<HistoricalAccountBalance>(hab)
 }
 
-export function scaled(value: string): string {
+export function rescale(value: string): string {
   return (BigInt(value) * BigInt(10**10)).toString();
 }
 
