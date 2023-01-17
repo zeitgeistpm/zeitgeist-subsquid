@@ -6,7 +6,7 @@ import { Like } from 'typeorm'
 import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBalance, HistoricalAsset, 
   HistoricalMarket, Market, MarketDeadlines, MarketPeriod, MarketReport, MarketType, OutcomeReport 
 } from '../../model'
-import { createAssetsForMarket, decodeMarketMetadata } from '../helper'
+import { createAssetsForMarket, decodeMarketMetadata, scaled } from '../helper'
 import { Tools } from '../util'
 import { getBoughtCompleteSetEvent, getMarketApprovedEvent, getMarketClosedEvent, getMarketCreatedEvent, 
   getMarketDestroyedEvent, getMarketDisputedEvent, getMarketExpiredEvent, getMarketInsufficientSubsidyEvent, 
@@ -248,18 +248,19 @@ export async function marketCreated(ctx: EventHandlerContext<Store, {event: {arg
   if (type.__kind == 'Categorical') {
     marketType.categorical = type.value.toString()
   } else if (type.__kind == 'Scalar') {
+    marketType.scalar = []
     if (specVersion < 41) {
-      let upperRange, lowerRange;
       if (type.value.start) {
-        upperRange = +type.value.start.toString() * (10**10);
-        lowerRange = +type.value.end.toString() * (10**10);
+        marketType.scalar.push(scaled(type.value.start.toString()));
+        marketType.scalar.push(scaled(type.value.end.toString()));
       } else {
-        upperRange = +type.value.toString().substring(`,`)[0].toString() * (10**10);
-        lowerRange = +type.value.toString().substring(`,`)[1].toString() * (10**10);
+        const [start, end] = type.value.toString().split(`,`);
+        marketType.scalar.push(scaled(start));
+        marketType.scalar.push(scaled(end));
       }
-      marketType.scalar = upperRange + `,` + lowerRange;
     } else {
-      marketType.scalar = type.value.start.toString() + `,` + type.value.end.toString()
+      marketType.scalar.push(type.value.start.toString());
+      marketType.scalar.push(type.value.end.toString());
     }
   }
   newMarket.marketType = marketType
@@ -505,29 +506,26 @@ export async function marketResolved(ctx: EventHandlerContext<Store, {event: {ar
   const market = await store.get(Market, { where: { marketId: marketId } })
   if (!market) return
 
-  if (specVersion < 41) {
-    market.resolvedOutcome = (+report.value.toString() * (10**10)).toString();
-  } else {
-    market.resolvedOutcome = report.value.toString();
-  }
-
+  market.resolvedOutcome = specVersion < 41 ? scaled(report.value.toString()) : report.value.toString();
   const numOfOutcomeAssets = market.outcomeAssets.length;
   if (market.resolvedOutcome && numOfOutcomeAssets > 0) {
     for (let i = 0; i < numOfOutcomeAssets; i++) {
       let asset = await store.get(Asset, { where: { assetId: market.outcomeAssets[i]! } })
       if (!asset || !asset.price || !asset.amountInPool) return
+
       const oldPrice = asset.price
       const oldAssetQty = asset.amountInPool
       let newPrice = oldPrice
       let newAssetQty = oldAssetQty
-      if (market.marketType.scalar && asset.assetId.includes('Long')) {
-        const upperRange = Number(market.marketType.scalar!.split(',')[1])
-        const lowerRange = Number(market.marketType.scalar!.split(',')[0])
-        newPrice = (+market.resolvedOutcome - lowerRange)/(upperRange - lowerRange)
-      } else if (market.marketType.scalar && asset.assetId.includes('Short')) {
-        const upperRange = Number(market.marketType.scalar!.split(',')[1])
-        const lowerRange = Number(market.marketType.scalar!.split(',')[0])
-        newPrice = (upperRange - +market.resolvedOutcome)/(upperRange - lowerRange)
+
+      if (market.marketType.scalar) {
+        const lowerBound = Number(market.marketType.scalar[0])
+        const upperBound = Number(market.marketType.scalar[1])
+        if (asset.assetId.includes('Long')) {
+          newPrice = (+market.resolvedOutcome - lowerBound)/(upperBound - lowerBound)
+        } else if (asset.assetId.includes('Short')) {
+          newPrice = (upperBound - +market.resolvedOutcome)/(upperBound - lowerBound)
+        }
       } else {
         newPrice = (i == +market.resolvedOutcome) ? 1 : 0
         if (specVersion < 40) {
