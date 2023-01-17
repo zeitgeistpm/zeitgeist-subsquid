@@ -279,7 +279,7 @@ type MarketType @jsonField {
   "Number of categories if categorical market"
   categorical: String
   "Range of values if scalar market"
-  scalar: String
+  scalar: [String]
 }
 
 """
