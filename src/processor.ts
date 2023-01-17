@@ -74,7 +74,7 @@ processor.addEventHandler('Swaps.PoolJoin', ctx => poolJoin(ctx))
 processor.addEventHandler('Swaps.SwapExactAmountIn', ctx => swapExactAmountIn(ctx))
 processor.addEventHandler('Swaps.SwapExactAmountOut', ctx => swapExactAmountOut(ctx))
 
-processor.addEventHandler('System.KilledAccount', ctx => systemKilledAccount(ctx))
+//processor.addEventHandler('System.KilledAccount', ctx => systemKilledAccount(ctx))
 processor.addEventHandler('System.NewAccount', ctx => systemNewAccount(ctx))
 
 processor.addEventHandler('Tokens.Deposited', ctx => tokensDeposited(ctx))
