@@ -106,7 +106,7 @@ export async function balancesDustLost(ctx: EventHandlerContext<Store, {event: {
   const { walletId, amount } = getDustLostEvent(ctx)
 
   const ab = await store.findOneBy(AccountBalance, { account: { accountId: walletId }, assetId: 'Ztg' })
-  if (!ab) { return }
+  if (!ab || ab.balance == BigInt(0)) return
 
   let hab = new HistoricalAccountBalance()
   hab.id = event.id + '-' + walletId.substring(walletId.length - 5)
