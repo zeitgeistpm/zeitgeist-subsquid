@@ -2,8 +2,7 @@ import { encodeAddress } from '@polkadot/keyring'
 import * as ss58 from '@subsquid/ss58'
 import { EventContext } from '../../types/support'
 import { DispatchInfo } from '../../types/v23'
-import { SystemExtrinsicFailedEvent, SystemExtrinsicSuccessEvent, SystemKilledAccountEvent, 
-  SystemNewAccountEvent } from '../../types/events'
+import { SystemExtrinsicFailedEvent, SystemExtrinsicSuccessEvent, SystemNewAccountEvent } from '../../types/events'
 
 
 export function getExtrinsicFailedEvent(ctx: EventContext): ExtrinsicEvent {
@@ -31,23 +30,6 @@ export function getExtrinsicSuccessEvent(ctx: EventContext): ExtrinsicEvent {
   } else {
     const [dispatchInfo] = ctx.event.args
     return { dispatchInfo }
-  }
-}
-
-export function getKilledAccountEvent(ctx: EventContext): AccountEvent {
-  const event = new SystemKilledAccountEvent(ctx)
-  if (event.isV23) {
-    const accountId = event.asV23
-    const walletId = ss58.codec('zeitgeist').encode(accountId)
-    return { walletId }
-  } else if (event.isV34) {
-    const  { account } = event.asV34
-    const walletId = ss58.codec('zeitgeist').encode(account)
-    return { walletId }
-  } else {
-    const [accountId] = ctx.event.args
-    const walletId = encodeAddress(accountId, 73)
-    return { walletId }
   }
 }
 
