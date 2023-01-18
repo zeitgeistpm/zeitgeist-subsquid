@@ -16,7 +16,7 @@ import { boughtCompleteSet, marketApproved, marketClosed, marketCreated, marketD
 import { accountCrossed } from './mappings/styx';
 import { arbitrageBuyBurn, arbitrageMintSell, poolActive, poolClosed, poolCreate, poolDestroyed, poolExit, 
   poolJoin, swapExactAmountIn, swapExactAmountOut } from './mappings/swaps';
-import { systemExtrinsicFailed, systemExtrinsicSuccess, systemKilledAccount, systemNewAccount } from './mappings/system';
+import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensDeposited, tokensEndowed, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
 
 (BigInt.prototype as any).toJSON = function () {

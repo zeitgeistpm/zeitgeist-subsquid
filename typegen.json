@@ -44,7 +44,6 @@
     "System.NewAccount",
     "System.ExtrinsicSuccess",
     "System.ExtrinsicFailed",
-    "System.KilledAccount",
     "Tokens.Deposited",
     "Tokens.Endowed",
     "Tokens.Transfer",
