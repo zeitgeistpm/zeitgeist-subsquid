@@ -434,12 +434,13 @@ export async function marketInsufficientSubsidy(ctx: EventHandlerContext<Store, 
 
 export async function marketRejected(ctx: EventHandlerContext<Store, {event: {args: true}}>) {
   const {store, block, event} = ctx
-  const {marketId} = getMarketRejectedEvent(ctx)
+  const {marketId, reason} = getMarketRejectedEvent(ctx)
 
   let market = await store.get(Market, { where: { marketId: marketId } })
   if (!market) return
 
   market.status = 'Rejected'
+  market.rejectReason = reason.toString()
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`)
   await store.save<Market>(market)
 
