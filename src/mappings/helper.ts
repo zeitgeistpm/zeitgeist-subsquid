@@ -131,6 +131,10 @@ export async function initBalance(acc: Account, store: Store, block: SubstrateBl
   await store.save<HistoricalAccountBalance>(hab)
 }
 
+export function rescale(value: string): string {
+  return (BigInt(value) * BigInt(10**10)).toString();
+}
+
 interface DecodedMarketMetadata {
   slug: string
   question: string
