@@ -459,7 +459,7 @@ export async function poolExit(ctx: EventHandlerContext<Store, {event: {args: tr
         const newAssetQty = oldAssetQty - BigInt(pae.transferred[idx].toString())
         const oldPrice = asset.price
         let newPrice = oldPrice
-        if (oldPrice > 0 && oldPrice < 1) {
+        if (!market.resolvedOutcome) {
           newPrice = calcSpotPrice(+newZtgQty.toString(), ztgWeight, +newAssetQty.toString(), assetWeight)
         }
         asset.price = newPrice
