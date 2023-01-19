@@ -414,6 +414,9 @@ export async function poolExit(ctx: EventHandlerContext<Store, {event: {args: tr
   let pool = await store.get(Pool, { where: { poolId: +pae.cpep.poolId.toString() } })
   if (!pool) return
 
+  const market = await store.get(Market, { where: { pool: { poolId: pool.poolId } } })
+  if (!market) return
+
   const oldZtgQty = pool.ztgQty
   const newZtgQty = oldZtgQty - BigInt(pae.transferred[pae.transferred.length - 1].toString()) 
   pool.ztgQty = newZtgQty
