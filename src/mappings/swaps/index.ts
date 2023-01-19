@@ -568,10 +568,8 @@ export async function poolJoin(ctx: EventHandlerContext<Store, {event: {args: tr
         const oldAssetQty = asset.amountInPool
         const newAssetQty = oldAssetQty + BigInt(pae.transferred[idx].toString())
         const oldPrice = asset.price
-        let newPrice = oldPrice
-        if (oldPrice > 0 && oldPrice < 1) {
-          newPrice = calcSpotPrice(+newZtgQty.toString(), ztgWeight, +newAssetQty.toString(), assetWeight)
-        }
+        const newPrice = calcSpotPrice(+newZtgQty.toString(), ztgWeight, +newAssetQty.toString(), assetWeight)
+
         asset.price = newPrice
         asset.amountInPool = newAssetQty
         console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
