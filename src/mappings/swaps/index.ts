@@ -414,6 +414,9 @@ export async function poolExit(ctx: EventHandlerContext<Store, {event: {args: tr
   let pool = await store.get(Pool, { where: { poolId: +pae.cpep.poolId.toString() } })
   if (!pool) return
 
+  const market = await store.get(Market, { where: { pool: { poolId: pool.poolId } } })
+  if (!market) return
+
   const oldZtgQty = pool.ztgQty
   const newZtgQty = oldZtgQty - BigInt(pae.transferred[pae.transferred.length - 1].toString()) 
   pool.ztgQty = newZtgQty
@@ -456,7 +459,7 @@ export async function poolExit(ctx: EventHandlerContext<Store, {event: {args: tr
         const newAssetQty = oldAssetQty - BigInt(pae.transferred[idx].toString())
         const oldPrice = asset.price
         let newPrice = oldPrice
-        if (oldPrice > 0 && oldPrice < 1) {
+        if (!market.resolvedOutcome) {
           newPrice = calcSpotPrice(+newZtgQty.toString(), ztgWeight, +newAssetQty.toString(), assetWeight)
         }
         asset.price = newPrice
@@ -565,10 +568,8 @@ export async function poolJoin(ctx: EventHandlerContext<Store, {event: {args: tr
         const oldAssetQty = asset.amountInPool
         const newAssetQty = oldAssetQty + BigInt(pae.transferred[idx].toString())
         const oldPrice = asset.price
-        let newPrice = oldPrice
-        if (oldPrice > 0 && oldPrice < 1) {
-          newPrice = calcSpotPrice(+newZtgQty.toString(), ztgWeight, +newAssetQty.toString(), assetWeight)
-        }
+        const newPrice = calcSpotPrice(+newZtgQty.toString(), ztgWeight, +newAssetQty.toString(), assetWeight)
+
         asset.price = newPrice
         asset.amountInPool = newAssetQty
         console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
