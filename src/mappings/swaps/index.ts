@@ -28,6 +28,7 @@ export async function arbitrageBuyBurn(ctx: EventHandlerContext<Store, {event: {
   hp.poolId = pool.poolId
   hp.event = event.name.split('.')[1]
   hp.ztgQty = pool.ztgQty
+  hp.poolStatus = pool.poolStatus
   hp.blockNumber = block.height
   hp.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
@@ -88,6 +89,7 @@ export async function arbitrageMintSell(ctx: EventHandlerContext<Store, {event: 
   hp.poolId = pool.poolId
   hp.event = event.name.split('.')[1]
   hp.ztgQty = pool.ztgQty
+  hp.poolStatus = pool.poolStatus
   hp.blockNumber = block.height
   hp.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
@@ -257,6 +259,7 @@ export async function poolCreate(ctx: EventHandlerContext<Store, {event: {args: 
   hp.ztgQty = pool.ztgQty
   hp.dVolume = pool.volume
   hp.volume = pool.volume
+  hp.poolStatus = pool.poolStatus
   hp.blockNumber = block.height
   hp.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
@@ -298,6 +301,7 @@ export async function poolDestroyed(ctx: EventHandlerContext<Store, {event: {arg
   hp.poolStatus = pool.poolStatus
   hp.ztgQty = pool.ztgQty
   hp.event = event.name.split('.')[1]
+  hp.poolStatus = pool.poolStatus
   hp.blockNumber = block.height
   hp.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
@@ -428,6 +432,7 @@ export async function poolExit(ctx: EventHandlerContext<Store, {event: {args: tr
   hp.poolId = pool.poolId
   hp.event = event.name.split('.')[1]
   hp.ztgQty = pool.ztgQty
+  hp.poolStatus = pool.poolStatus
   hp.blockNumber = block.height
   hp.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
@@ -538,6 +543,7 @@ export async function poolJoin(ctx: EventHandlerContext<Store, {event: {args: tr
   hp.poolId = pool.poolId
   hp.event = event.name.split('.')[1]
   hp.ztgQty = pool.ztgQty
+  hp.poolStatus = pool.poolStatus
   hp.blockNumber = block.height
   hp.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
@@ -679,6 +685,7 @@ export async function swapExactAmountIn(ctx: EventHandlerContext<Store>) {
     hp.ztgQty = pool.ztgQty
     hp.dVolume = newVolume - oldVolume
     hp.volume = newVolume
+    hp.poolStatus = pool.poolStatus
     hp.blockNumber = block.height
     hp.timestamp = new Date(block.timestamp)
     console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
@@ -783,6 +790,7 @@ export async function swapExactAmountOut(ctx: EventHandlerContext<Store>) {
     hp.ztgQty = pool.ztgQty
     hp.dVolume = newVolume - oldVolume
     hp.volume = newVolume
+    hp.poolStatus = pool.poolStatus
     hp.blockNumber = block.height
     hp.timestamp = new Date(block.timestamp)
     console.log(`[${event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`)
