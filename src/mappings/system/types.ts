@@ -33,7 +33,7 @@ export function getExtrinsicSuccessEvent(ctx: EventContext): ExtrinsicEvent {
   }
 }
 
-export function getNewAccountEvent(ctx: EventContext): NewAccountEvent {
+export function getNewAccountEvent(ctx: EventContext): AccountEvent {
   const newAccountEvent = new SystemNewAccountEvent(ctx)
   if (newAccountEvent.isV23) {
     const accountId = newAccountEvent.asV23
@@ -50,10 +50,10 @@ export function getNewAccountEvent(ctx: EventContext): NewAccountEvent {
   }
 }
 
-interface ExtrinsicEvent {
-  dispatchInfo: DispatchInfo
+interface AccountEvent {
+  walletId: string
 }
 
-interface NewAccountEvent {
-  walletId: string
+interface ExtrinsicEvent {
+  dispatchInfo: DispatchInfo
 }

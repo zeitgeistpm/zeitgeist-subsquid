@@ -167,4 +167,10 @@ export class Market {
    */
   @Column_("text", {nullable: true})
   authorizedAddress!: string | undefined | null
+
+  /**
+   * Reasoning for market rejection
+   */
+  @Column_("text", {nullable: true})
+  rejectReason!: string | undefined | null
 }

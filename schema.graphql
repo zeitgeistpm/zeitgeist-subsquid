@@ -160,6 +160,8 @@ type Market @entity {
   disputeMechanism: String!
   "Address responsible for authorizing disputes. Null if Adv Comm is the authority"
   authorizedAddress: String
+  "Reasoning for market rejection"
+  rejectReason: String
 }
 
 """
@@ -279,7 +281,7 @@ type MarketType @jsonField {
   "Number of categories if categorical market"
   categorical: String
   "Range of values if scalar market"
-  scalar: String
+  scalar: [String]
 }
 
 """
