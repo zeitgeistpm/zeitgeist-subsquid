@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_} from "typeorm"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_} from "typeorm"
 import * as marshal from "./marshal"
 
 /**
@@ -20,6 +20,7 @@ export class HistoricalAsset {
   /**
    * Account which executed the trade
    */
+  @Index_()
   @Column_("text", {nullable: true})
   accountId!: string | undefined | null
 
@@ -32,6 +33,7 @@ export class HistoricalAsset {
   /**
    * Zeitgeist's identifier for asset
    */
+  @Index_()
   @Column_("text", {nullable: false})
   assetId!: string
 
