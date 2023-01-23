@@ -21,10 +21,10 @@ export class HistoricalPool {
   poolId!: number
 
   /**
-   * New status of the pool
+   * Current status of the pool
    */
-  @Column_("text", {nullable: true})
-  poolStatus!: string | undefined | null
+  @Column_("text", {nullable: false})
+  poolStatus!: string
 
   /**
    * New amount of ZTG present in the pool
