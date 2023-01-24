@@ -22,7 +22,7 @@ export function getTokensBalanceSetEvent(ctx: EventContext): TokensEvent {
   } else if (event.isV41) {
     currencyId = event.asV41.currencyId
     walletId = ss58.codec('zeitgeist').encode(event.asV41.who)
-    amount = event.asV41.currencyId
+    amount = event.asV41.free
   } else {
     [currencyId, who, amount] = ctx.event.args
     walletId = encodeAddress(who, 73)
