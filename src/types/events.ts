@@ -2112,6 +2112,80 @@ export class SystemNewAccountEvent {
   }
 }
 
+export class TokensBalanceSetEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Tokens.BalanceSet')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   *  A balance was set by root. \[who, free, reserved\]
+   */
+  get isV23(): boolean {
+    return this._chain.getEventHash('Tokens.BalanceSet') === '915b035d7c3a4b3752a013e8ce3e7e5752d22401decf9a4d33c09421e6df11c1'
+  }
+
+  /**
+   *  A balance was set by root. \[who, free, reserved\]
+   */
+  get asV23(): [v23.CurrencyId, Uint8Array, bigint, bigint] {
+    assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * A balance was set by root. \[who, free, reserved\]
+   */
+  get isV32(): boolean {
+    return this._chain.getEventHash('Tokens.BalanceSet') === 'c0b74996cf5ceff3e57f7cc655d9d42a6f57b91af649c151fa4e4fccd365004f'
+  }
+
+  /**
+   * A balance was set by root. \[who, free, reserved\]
+   */
+  get asV32(): [v32.Asset, Uint8Array, bigint, bigint] {
+    assert(this.isV32)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * A balance was set by root.
+   */
+  get isV34(): boolean {
+    return this._chain.getEventHash('Tokens.BalanceSet') === '86661c1810efe875aebe598d2f2d37a22c8f3b2efd18f9c5c5f081247697bd4b'
+  }
+
+  /**
+   * A balance was set by root.
+   */
+  get asV34(): {currencyId: v34.Asset, who: Uint8Array, free: bigint, reserved: bigint} {
+    assert(this.isV34)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * A balance was set by root.
+   */
+  get isV41(): boolean {
+    return this._chain.getEventHash('Tokens.BalanceSet') === '3fd136418049f8f76770e0d0b091953f04e61b4e5faf99fad0af02b62ace7e8e'
+  }
+
+  /**
+   * A balance was set by root.
+   */
+  get asV41(): {currencyId: v41.Asset, who: Uint8Array, free: bigint, reserved: bigint} {
+    assert(this.isV41)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class TokensDepositedEvent {
   private readonly _chain: Chain
   private readonly event: Event

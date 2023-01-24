@@ -17,7 +17,7 @@ import { accountCrossed } from './mappings/styx';
 import { arbitrageBuyBurn, arbitrageMintSell, poolActive, poolClosed, poolCreate, poolDestroyed, poolExit, 
   poolJoin, swapExactAmountIn, swapExactAmountOut } from './mappings/swaps';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
-import { tokensDeposited, tokensEndowed, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
+import { tokensBalanceSet, tokensDeposited, tokensEndowed, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -76,6 +76,7 @@ processor.addEventHandler('Swaps.SwapExactAmountOut', ctx => swapExactAmountOut(
 
 processor.addEventHandler('System.NewAccount', ctx => systemNewAccount(ctx))
 
+processor.addEventHandler('Tokens.BalanceSet', ctx => tokensBalanceSet(ctx))
 processor.addEventHandler('Tokens.Deposited', ctx => tokensDeposited(ctx))
 processor.addEventHandler('Tokens.Endowed', ctx => tokensEndowed(ctx))
 processor.addEventHandler('Tokens.Transfer', ctx => tokensTransfer(ctx))
