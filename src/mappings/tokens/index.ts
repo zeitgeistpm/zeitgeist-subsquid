@@ -25,9 +25,9 @@ export async function tokensDeposited(ctx: EventHandlerContext<Store, {event: {a
   
   let ab = await store.findOneBy(AccountBalance, { account: { accountId: walletId }, assetId: assetId })
   let oldValue = 0
-  if (ab && ab.value) {
+  if (ab) {
     ab.balance = ab.balance + amount
-    oldValue = ab.value
+    oldValue = ab.value ?? 0
   } else {
     ab = new AccountBalance()
     ab.id = event.id + '-' + walletId.substring(walletId.length - 5)
