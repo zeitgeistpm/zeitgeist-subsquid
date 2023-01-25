@@ -181,10 +181,10 @@ export async function poolCreate(ctx: EventHandlerContext<Store, {event: {args: 
   const {store, block, event} = ctx
   let {cpep, swapPool, amount, accountId} = getPoolCreateEvent(ctx)
 
-  if (accountId.length === 0) {
-    const hab = await store.find(HistoricalAccountBalance, { where: { assetId: 'Ztg', event: 'NewAccount', 
-      blockNumber: block.height } })
-    accountId = hab[hab.length - 1].accountId
+  if (accountId.length === 0 && swapPool.weights) {
+    const hab = await store.findOneBy(HistoricalAccountBalance, { assetId: getAssetId(swapPool.weights[0][0]), 
+      event: 'EndowedTransferred', blockNumber: block.height })
+    accountId = hab ? hab.accountId : accountId
   }
 
   let pool = new Pool()
@@ -198,7 +198,7 @@ export async function poolCreate(ctx: EventHandlerContext<Store, {event: {args: 
   pool.totalSubsidy = swapPool.totalSubsidy ? swapPool.totalSubsidy.toString() : ''
   pool.totalWeight = swapPool.totalWeight ? swapPool.totalWeight.toString() : ''
   pool.weights = []
-  pool.ztgQty = amount !== BigInt(0) ? amount : BigInt(1000000000000)
+  pool.ztgQty = amount !== BigInt(0) ? amount : BigInt(10**12)
   pool.volume = BigInt(0)
   pool.createdAt = new Date(block.timestamp)
   pool.baseAsset = swapPool.baseAsset.__kind
@@ -211,7 +211,7 @@ export async function poolCreate(ctx: EventHandlerContext<Store, {event: {args: 
   }
 
   if (swapPool.weights && swapPool.weights[swapPool.weights.length - 1][0].__kind == 'Ztg') {
-    const tokenWeightIn = +swapPool.weights[swapPool.weights.length - 1][1].toString()
+    const ztgWeight = +swapPool.weights[swapPool.weights.length - 1][1].toString()
     await Promise.all(
       swapPool.weights.map(async wt => {
         let weight = new Weight()
@@ -221,15 +221,15 @@ export async function poolCreate(ctx: EventHandlerContext<Store, {event: {args: 
       
         if (weight.assetId.length > 5) {
           let asset = await store.get(Asset, { where: { assetId: weight.assetId } })
-          if (!asset) { return }
+          if (!asset) return
+
+          const ab = await store.findOneBy(AccountBalance, { account: { accountId: accountId }, assetId: asset.assetId })
+          const assetQty = ab ? +ab.balance.toString() : 10**12
       
-          let ab = await store.findOneBy(AccountBalance, { account: { accountId: acc?.accountId }, assetId: asset.assetId })
-          const tokenBalanceOut = ab ? +ab.balance.toString() : 1000000000000
-      
-          const spotPrice = calcSpotPrice(+pool.ztgQty.toString(),tokenWeightIn,tokenBalanceOut,+weight.len.toString())
+          const spotPrice = calcSpotPrice(+pool.ztgQty.toString(),ztgWeight,assetQty,+weight.len.toString())
           asset.poolId = pool.poolId
           asset.price = +spotPrice.toString()
-          asset.amountInPool = BigInt(tokenBalanceOut)
+          asset.amountInPool = BigInt(ztgWeight)
           console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
           await store.save<Asset>(asset)
 
