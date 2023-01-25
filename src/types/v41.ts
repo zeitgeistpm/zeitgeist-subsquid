@@ -71,6 +71,14 @@ export interface PoolAssetsEvent {
   poolAmount: bigint
 }
 
+export interface PoolAssetEvent {
+  asset: Asset
+  bound: bigint
+  cpep: CommonPoolEventParams
+  transferred: bigint
+  poolAmount: bigint
+}
+
 export interface SwapEvent {
   assetAmountIn: bigint
   assetAmountOut: bigint
