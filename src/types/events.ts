@@ -1757,6 +1757,95 @@ export class SwapsPoolJoinEvent {
   }
 }
 
+export class SwapsPoolJoinWithExactAssetAmountEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Swaps.PoolJoinWithExactAssetAmount')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   *  Joins a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get isV23(): boolean {
+    return this._chain.getEventHash('Swaps.PoolJoinWithExactAssetAmount') === '2c64913e1fb29a6eeb9571a8d090105f9122ed42d8800fa6f40d1e645168b10e'
+  }
+
+  /**
+   *  Joins a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get asV23(): v23.PoolAssetEvent {
+    assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   *  Joins a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get isV26(): boolean {
+    return this._chain.getEventHash('Swaps.PoolJoinWithExactAssetAmount') === '7e9bf306fcce1d32b2d54ed690a76f7480447ebe5b618db3b1f16fcb0937a3e3'
+  }
+
+  /**
+   *  Joins a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get asV26(): v26.PoolAssetEvent {
+    assert(this.isV26)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Joins a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get isV32(): boolean {
+    return this._chain.getEventHash('Swaps.PoolJoinWithExactAssetAmount') === 'afcfc5fbe99da7e5bc294edf0988025a07d65f57facac5ce92d338ab5e593097'
+  }
+
+  /**
+   * Joins a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get asV32(): v32.PoolAssetEvent {
+    assert(this.isV32)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Joins a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get isV35(): boolean {
+    return this._chain.getEventHash('Swaps.PoolJoinWithExactAssetAmount') === '168a235ed1acfe6e093bdb5d0d35bdda9ec503d5e8deeedcafa09200b28b8c56'
+  }
+
+  /**
+   * Joins a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get asV35(): v35.PoolAssetEvent {
+    assert(this.isV35)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Joins a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get isV41(): boolean {
+    return this._chain.getEventHash('Swaps.PoolJoinWithExactAssetAmount') === '06175dac7f1fc4166ac099e051beea1350d973e1ee5c891df6521482ec3dbfca'
+  }
+
+  /**
+   * Joins a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get asV41(): v41.PoolAssetEvent {
+    assert(this.isV41)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class SwapsSwapExactAmountInEvent {
   private readonly _chain: Chain
   private readonly event: Event

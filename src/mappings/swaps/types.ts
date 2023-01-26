@@ -2,10 +2,10 @@ import { encodeAddress } from '@polkadot/keyring'
 import * as ss58 from '@subsquid/ss58'
 import { SwapsArbitrageBuyBurnEvent, SwapsArbitrageMintSellEvent, SwapsPoolActiveEvent, 
   SwapsPoolClosedEvent, SwapsPoolCreateEvent, SwapsPoolDestroyedEvent, SwapsPoolExitEvent, 
-  SwapsPoolJoinEvent, SwapsSwapExactAmountInEvent, SwapsSwapExactAmountOutEvent 
-} from '../../types/events'
+  SwapsPoolJoinEvent, SwapsPoolJoinWithExactAssetAmountEvent, SwapsSwapExactAmountInEvent, 
+  SwapsSwapExactAmountOutEvent } from '../../types/events'
 import { EventContext } from '../../types/support'
-import { PoolAssetsEvent } from '../../types/v41'
+import { PoolAssetEvent, PoolAssetsEvent } from '../../types/v41'
 import { SwapEvent } from '../../types/v41'
 import { CommonPoolEventParams, Pool } from '../../types/v41'
 
@@ -160,6 +160,38 @@ export function getPoolJoinEvent(ctx: EventContext): PoolJoinEvent {
   }
 }
 
+export function getPoolJoinWithExactAssetAmountEvent(ctx: EventContext): PoolJoinWithExactAssetAmountEvent {
+  const event = new SwapsPoolJoinWithExactAssetAmountEvent(ctx)
+  if (event.isV23) {
+    let pae = ctx.event.args as PoolAssetEvent
+    pae.poolAmount = BigInt(0)
+    const walletId = encodeAddress(pae.cpep.who, 73)
+    return {pae, walletId}
+  } else if (event.isV26) {
+    let pae = ctx.event.args as PoolAssetEvent
+    pae.poolAmount = BigInt(0)
+    const walletId = encodeAddress(pae.cpep.who, 73)
+    return {pae, walletId}
+  } else if (event.isV32) {
+    let pae = ctx.event.args as PoolAssetEvent
+    pae.poolAmount = BigInt(0)
+    const walletId = encodeAddress(pae.cpep.who, 73)
+    return {pae, walletId}
+  } else if (event.isV35) {
+    const pae = event.asV35
+    const walletId = ss58.codec('zeitgeist').encode(pae.cpep.who)
+    return {pae, walletId}
+  } else if (event.isV41) {
+    const pae = event.asV41
+    const walletId = ss58.codec('zeitgeist').encode(pae.cpep.who)
+    return {pae, walletId}
+  } else {
+    const pae = ctx.event.args
+    const walletId = encodeAddress(pae.cpep.who, 73)
+    return {pae, walletId}
+  }
+}
+
 export function getSwapExactAmountInEvent(ctx: EventContext): SwapExactAmountInEvent {
   const event = new SwapsSwapExactAmountInEvent(ctx)
   if (event.isV23) {
@@ -229,6 +261,11 @@ interface PoolCreateEvent {
 
 interface PoolJoinEvent {
   pae: PoolAssetsEvent
+  walletId: string
+}
+
+interface PoolJoinWithExactAssetAmountEvent {
+  pae: PoolAssetEvent
   walletId: string
 }
 
