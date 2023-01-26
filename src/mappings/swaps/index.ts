@@ -229,7 +229,7 @@ export async function poolCreate(ctx: EventHandlerContext<Store, {event: {args: 
           const spotPrice = calcSpotPrice(+pool.ztgQty.toString(),ztgWeight,assetQty,+weight.len.toString())
           asset.poolId = pool.poolId
           asset.price = +spotPrice.toString()
-          asset.amountInPool = BigInt(ztgWeight)
+          asset.amountInPool = BigInt(assetQty)
           console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`)
           await store.save<Asset>(asset)
 
