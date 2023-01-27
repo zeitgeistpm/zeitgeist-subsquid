@@ -1,15 +1,19 @@
 /**
  * Script to validate Ztg balance of an account against on-chain balance
- * Run using `ts-node scripts/validate/ztgBalances.ts wss://bsr.zeitgeist.pm processor.bsr.zeitgeist.pm`
+ * Run using `ts-node scripts/validate/ztgBalances.ts wss://bsr.zeitgeist.pm`
  */
+import axios from 'axios';
 import { AccountInfo } from '@polkadot/types/interfaces/system';
-import https from 'https';
 import { Tools } from '../../src/mappings/util';
+import { AccountBalance } from '../../src/model';
 
-const WS_NODE_URL = process.argv[2];
-const QUERY_NODE_HOSTNAME = process.argv[3];
+const PROGRESS = false; // true or false for viewing running logs
+const NODE_URL = process.argv[2];
+const GRAPHQL_HOSTNAME = NODE_URL.includes(`bs`)
+  ? 'processor.bsr.zeitgeist.pm'
+  : 'processor.rpc-0.zeitgeist.pm';
 
-const query = JSON.stringify({
+const query = {
   query: `{
     accountBalances(where: {assetId_eq: "Ztg"}) {
       account {
@@ -21,87 +25,82 @@ const query = JSON.stringify({
       height
     }
   }`,
-});
-
-const options = {
-  hostname: QUERY_NODE_HOSTNAME,
-  path: '/graphql',
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Content-Length': query.length,
-    'User-Agent': 'Node',
-  },
 };
 
-const req = https.request(options, (res) => {
-  let data = '';
-  res.on('data', (d) => {
-    data += d;
-  });
-  res.on('end', async () => {
-    if (res.statusCode == 200) {
-      console.log(`Validating response received from ${options.hostname}`);
-    } else {
-      console.log(JSON.parse(data).errors[0].message);
-      return;
-    }
-    const accounts = JSON.parse(data).data.accountBalances;
-    console.log(`Number of accounts fetched : ${accounts.length}`);
+const validateZtgBalances = async () => {
+  const res = await axios.post(`https://${GRAPHQL_HOSTNAME}/graphql`, query);
+  const accountBalances = res.data.data.accountBalances as AccountBalance[];
+  const squidHeight = res.data.data.squidStatus.height as bigint;
 
-    const sdk = await Tools.getSDK(WS_NODE_URL);
-    const blockHash = await sdk.api.rpc.chain.getBlockHash(
-      JSON.parse(data).data.squidStatus.height
+  const outliers = await getOutliers(accountBalances, squidHeight);
+  console.log(
+    `\nAccounts validated via ${GRAPHQL_HOSTNAME}: ${accountBalances.length}`
+  );
+  if (outliers.length > 0) {
+    console.log(
+      `Ztg balances don't match for ${outliers.length} account(s) 🔴`
     );
+    outliers.map((accountId, idx) => {
+      console.log(`${idx + 1}. ` + accountId);
+    });
+    return;
+  }
+  console.log(`Ztg balances match for all accounts ✅`);
+  return;
+};
 
-    let falseCounter = 0,
-      trueCounter = 0,
-      falseAccs = ``;
-    for (let i = 0; i < accounts.length; i++) {
-      const {
-        data: { free: amt },
-      } = (await sdk.api.query.system.account.at(
-        blockHash,
-        accounts[i].account.accountId
-      )) as AccountInfo;
-      if (amt.toString() !== accounts[i].balance.toString()) {
-        falseCounter++;
-        falseAccs += accounts[i].account.accountId + `,`;
-        console.log(
-          `\n${trueCounter + falseCounter}. Balances don't match for ` +
-            accounts[i].account.accountId
-        );
-        console.log(`On Chain: ` + amt.toBigInt());
-        console.log(`On Subsquid: ` + accounts[i].balance);
-        console.log();
-      } else {
-        trueCounter++;
-        console.log(
-          `${trueCounter + falseCounter}. Balances match for ` +
-            accounts[i].account.accountId
-        );
+const getOutliers = async (
+  accountBalances: AccountBalance[],
+  squidHeight: bigint
+): Promise<string[]> => {
+  const outliers: string[] = [];
+  const sdk = await Tools.getSDK(NODE_URL);
+  const blockHash = await sdk.api.rpc.chain.getBlockHash(squidHeight);
+
+  await Promise.all(
+    accountBalances.map(async (ab) => {
+      try {
+        const {
+          data: { free },
+        } = (await sdk.api.query.system.account.at(
+          blockHash,
+          ab.account.accountId
+        )) as AccountInfo;
+
+        if (!validateBalances(free, ab)) {
+          outliers.push(ab.account.accountId);
+        }
+      } catch (err) {
+        console.error(err);
+        sdk.api.disconnect();
+        return outliers;
       }
-    }
-    sdk.api.disconnect();
+    })
+  );
+  sdk.api.disconnect();
+  return outliers;
+};
 
-    console.log(`\nTotal accounts checked: ${trueCounter + falseCounter}`);
-    console.log(`Balances match for ${trueCounter} accounts`);
-    if (falseCounter > 0) {
-      const falseAccsList = falseAccs.split(',');
-      console.log(
-        `Balances don't match for the below ${falseCounter} account(s):`
-      );
-      for (let a in falseAccsList) {
-        console.log(falseAccsList[a]);
-      }
-    }
-    process.exit(1);
-  });
-});
+const validateBalances = (chainBal: any, squidAB: AccountBalance): boolean => {
+  if (chainBal.toString() !== squidAB.balance.toString()) {
+    console.log(
+      `\nZtg balance don't match for ${squidAB.account.accountId}`
+    );
+    console.log(
+      `On Chain: ${chainBal.toBigInt()}, On Subsquid: ${squidAB.balance}`
+    );
+    return false;
+  }
 
-req.on('error', (error) => {
-  console.error(error);
-});
+  if (PROGRESS) {
+    console.log(
+      `Ztg balance match for ${squidAB.account.accountId}`
+    );
+    console.log(
+      `On Chain: ${chainBal.toBigInt()}, On Subsquid: ${squidAB.balance}`
+    );
+  }
+  return true;
+};
 
-req.write(query);
-req.end();
+validateZtgBalances();
