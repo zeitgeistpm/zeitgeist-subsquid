@@ -1,5 +1,5 @@
 /**
- * Script to validate token balance of all subsquid accounts against on-chain balance
+ * Script to validate token balance of all squid accounts against on-chain balance
  * Run using `ts-node scripts/validate/tokenBalances.ts wss://bsr.zeitgeist.pm`
  */
 import axios from 'axios';

@@ -1,5 +1,5 @@
 /**
- * Script to validate Ztg balance of an account against on-chain balance
+ * Script to validate Ztg balance of all squid accounts against on-chain balance
  * Run using `ts-node scripts/validate/ztgBalances.ts wss://bsr.zeitgeist.pm`
  */
 import axios from 'axios';
