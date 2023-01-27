@@ -33,6 +33,8 @@ const validateZtgBalances = async () => {
   const squidHeight = res.data.data.squidStatus.height as bigint;
 
   const outliers = await getOutliers(accountBalances, squidHeight);
+  if (!outliers) return;
+
   console.log(
     `\nAccounts validated via ${GRAPHQL_HOSTNAME}: ${accountBalances.length}`
   );
@@ -52,7 +54,7 @@ const validateZtgBalances = async () => {
 const getOutliers = async (
   accountBalances: AccountBalance[],
   squidHeight: bigint
-): Promise<string[]> => {
+): Promise<string[] | undefined> => {
   const outliers: string[] = [];
   const sdk = await Tools.getSDK(NODE_URL);
   const blockHash = await sdk.api.rpc.chain.getBlockHash(squidHeight);
@@ -73,19 +75,17 @@ const getOutliers = async (
       } catch (err) {
         console.error(err);
         sdk.api.disconnect();
-        return outliers;
+        return;
       }
     })
   );
   sdk.api.disconnect();
-  return outliers;
+  return;
 };
 
 const validateBalances = (chainBal: any, squidAB: AccountBalance): boolean => {
   if (chainBal.toString() !== squidAB.balance.toString()) {
-    console.log(
-      `\nZtg balance don't match for ${squidAB.account.accountId}`
-    );
+    console.log(`\nZtg balance don't match for ${squidAB.account.accountId}`);
     console.log(
       `On Chain: ${chainBal.toBigInt()}, On Subsquid: ${squidAB.balance}`
     );
@@ -93,9 +93,7 @@ const validateBalances = (chainBal: any, squidAB: AccountBalance): boolean => {
   }
 
   if (PROGRESS) {
-    console.log(
-      `Ztg balance match for ${squidAB.account.accountId}`
-    );
+    console.log(`Ztg balance match for ${squidAB.account.accountId}`);
     console.log(
       `On Chain: ${chainBal.toBigInt()}, On Subsquid: ${squidAB.balance}`
     );

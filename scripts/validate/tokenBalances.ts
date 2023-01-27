@@ -34,6 +34,8 @@ const validateTokenBalances = async () => {
   const squidHeight = res.data.data.squidStatus.height as bigint;
 
   const outlierMap = await getOutliers(accountBalances, squidHeight);
+  if (!outlierMap) return;
+
   console.log(
     `\nAccount balances validated via ${GRAPHQL_HOSTNAME}: ${accountBalances.length}`
   );
@@ -54,7 +56,7 @@ const validateTokenBalances = async () => {
 const getOutliers = async (
   accountBalances: AccountBalance[],
   squidHeight: bigint
-): Promise<Map<string, string[]>> => {
+): Promise<Map<string, string[]> | undefined> => {
   const outlierMap = new Map<string, string[]>();
   const sdk = await Tools.getSDK(NODE_URL);
   const blockHash = await sdk.api.rpc.chain.getBlockHash(squidHeight);
@@ -77,12 +79,12 @@ const getOutliers = async (
       } catch (err) {
         console.error(err);
         sdk.api.disconnect();
-        return outlierMap;
+        return;
       }
     })
   );
   sdk.api.disconnect();
-  return outlierMap;
+  return;
 };
 
 const validateBalances = (chainBal: any, squidAB: AccountBalance): boolean => {
