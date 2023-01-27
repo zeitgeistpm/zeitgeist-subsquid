@@ -10,8 +10,8 @@ import { AccountBalance } from '../../src/model';
 const PROGRESS = false; // true or false for viewing running logs
 const NODE_URL = process.argv[2];
 const GRAPHQL_HOSTNAME = NODE_URL.includes(`bs`)
-  ? 'processor.bsr.zeitgeist.pm'
-  : 'processor.rpc-0.zeitgeist.pm';
+  ? `processor.bsr.zeitgeist.pm`
+  : `processor.rpc-0.zeitgeist.pm`;
 
 const query = {
   query: `{
@@ -69,7 +69,7 @@ const getOutliers = async (
           ab.account.accountId
         )) as AccountInfo;
 
-        if (!validateBalances(free, ab)) {
+        if (!compare(free, ab)) {
           outliers.push(ab.account.accountId);
         }
       } catch (err) {
@@ -83,7 +83,7 @@ const getOutliers = async (
   return;
 };
 
-const validateBalances = (chainBal: any, squidAB: AccountBalance): boolean => {
+const compare = (chainBal: any, squidAB: AccountBalance): boolean => {
   if (chainBal.toString() !== squidAB.balance.toString()) {
     console.log(`\nZtg balance don't match for ${squidAB.account.accountId}`);
     console.log(
