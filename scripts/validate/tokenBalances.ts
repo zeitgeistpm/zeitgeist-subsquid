@@ -1,107 +1,110 @@
 /**
- * Script to validate token balance of an account against on-chain balance
- * Run using `ts-node scripts/validate/tokenBalances.ts wss://bsr.zeitgeist.pm processor.bsr.zeitgeist.pm 1000`
+ * Script to validate token balance of all subsquid accounts against on-chain balance
+ * Run using `ts-node scripts/validate/tokenBalances.ts wss://bsr.zeitgeist.pm`
  */
-import { Tools } from '../../src/mappings/util';
+import axios from 'axios';
 import { util } from '@zeitgeistpm/sdk';
-import https from 'https';
+import { Tools } from '../../src/mappings/util';
+import { AccountBalance } from '../../src/model';
 
-const WS_NODE_URL = process.argv[2];
-const QUERY_NODE_HOSTNAME = process.argv[3];
-const AB_LIMIT = process.argv[4];
+const PROGRESS = false; // true or false for viewing running logs
+const NODE_URL = process.argv[2];
+const GRAPHQL_HOSTNAME = NODE_URL.includes(`bs`)
+  ? 'processor.bsr.zeitgeist.pm'
+  : 'processor.rpc-0.zeitgeist.pm';
 
-const query = JSON.stringify({
+const query = {
   query: `{
-     accountBalances(limit: ${AB_LIMIT}, where: {assetId_contains: "categorical"}, orderBy: id_DESC) {
-       account {
-         accountId
-       }
-       assetId
-       balance
-     }
-     squidStatus {
-       height
-     }
-   }`,
-});
-
-const options = {
-  hostname: QUERY_NODE_HOSTNAME,
-  path: '/graphql',
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Content-Length': query.length,
-    'User-Agent': 'Node',
-  },
+    accountBalances(where: {assetId_not_contains: "Ztg"}) {
+      account {
+        accountId
+      }
+      assetId
+      balance
+    }
+    squidStatus {
+      height
+    }
+  }`,
 };
 
-const req = https.request(options, (res) => {
-  let data = '';
-  res.on('data', (d) => {
-    data += d;
-  });
-  res.on('end', async () => {
-    if (res.statusCode == 200) {
-      console.log(`Validating response received from ${options.hostname}`);
-    } else {
-      console.log(JSON.parse(data).errors[0].message);
-      return;
-    }
+const validateTokenBalances = async () => {
+  const res = await axios.post(`https://${GRAPHQL_HOSTNAME}/graphql`, query);
+  const accountBalances = res.data.data.accountBalances as AccountBalance[];
+  const squidHeight = res.data.data.squidStatus.height as bigint;
 
-    const accountBalances = JSON.parse(data).data.accountBalances;
-    const sdk = await Tools.getSDK(WS_NODE_URL);
-    const blockHash = await sdk.api.rpc.chain.getBlockHash(
-      JSON.parse(data).data.squidStatus.height
-    );
-    console.log();
-
-    let outlierMap = new Map<string, string[]>();
-    for (let i = 0; i < accountBalances.length; i++) {
-      const { free: amt } = (await sdk.api.query.tokens.accounts.at(
-        blockHash,
-        accountBalances[i].account.accountId,
-        util.AssetIdFromString(accountBalances[i].assetId)
-      )) as any;
-
-      if (amt.toString() !== accountBalances[i].balance.toString()) {
-        let assets = outlierMap.get(accountBalances[i].account.accountId) || [];
-        assets.push(accountBalances[i].assetId);
-        outlierMap.set(accountBalances[i].account.accountId, assets);
-        console.log(
-          `\n${i + 1}. ${accountBalances[i].assetId} balance don't match for ${
-            accountBalances[i].account.accountId
-          }`
-        );
-        console.log(
-          `On Chain: ${amt.toBigInt()}, On Subsquid: ${
-            accountBalances[i].balance
-          }\n`
-        );
-      } else {
-        console.log(
-          `${i + 1}. ${accountBalances[i].assetId} balance match for ${
-            accountBalances[i].account.accountId
-          }`
-        );
-      }
-    }
-    sdk.api.disconnect();
-
+  const outlierMap = await getOutliers(accountBalances, squidHeight);
+  console.log(
+    `\nAccount balances validated via ${GRAPHQL_HOSTNAME}: ${accountBalances.length}`
+  );
+  if (outlierMap.size > 0) {
     console.log(
-      `\nToken balances don't match for ${outlierMap.size} account(s)`
+      `Token balances don't match for ${outlierMap.size} account(s) 🔴`
     );
     [...outlierMap.entries()].map(([accountId, assets], idx) => {
       console.log(`${idx + 1}. ` + accountId);
       console.log(assets);
     });
-    process.exit(1);
-  });
-});
+    return;
+  }
+  console.log(`Token balances match for all accounts ✅`);
+  return;
+};
 
-req.on('error', (error) => {
-  console.error(error);
-});
+const getOutliers = async (
+  accountBalances: AccountBalance[],
+  squidHeight: bigint
+): Promise<Map<string, string[]>> => {
+  const outlierMap = new Map<string, string[]>();
+  const sdk = await Tools.getSDK(NODE_URL);
+  const blockHash = await sdk.api.rpc.chain.getBlockHash(squidHeight);
 
-req.write(query);
-req.end();
+  await Promise.all(
+    accountBalances.map(async (ab) => {
+      try {
+        const { free } = (await sdk.api.query.tokens.accounts.at(
+          blockHash,
+          ab.account.accountId,
+          util.AssetIdFromString(ab.assetId)
+        )) as any;
+
+        const valid = validateBalances(free, ab);
+        if (!valid) {
+          let assets = outlierMap.get(ab.account.accountId) || [];
+          assets.push(ab.assetId);
+          outlierMap.set(ab.account.accountId, assets);
+        }
+      } catch (err) {
+        console.error(err);
+        sdk.api.disconnect();
+        return outlierMap;
+      }
+    })
+  );
+  sdk.api.disconnect();
+  return outlierMap;
+};
+
+const validateBalances = (chainBal: any, squidAB: AccountBalance): boolean => {
+  if (chainBal.toString() !== squidAB.balance.toString()) {
+    console.log(
+      `\n${squidAB.assetId} balance don't match for ${squidAB.account.accountId}`
+    );
+    console.log(
+      `On Chain: ${chainBal.toBigInt()}, On Subsquid: ${squidAB.balance}`
+    );
+    return false;
+  }
+
+  if (PROGRESS) {
+    console.log(
+      `${squidAB.assetId} balance match for ${squidAB.account.accountId}`
+    );
+    console.log(
+      `On Chain: ${chainBal.toBigInt()}, On Subsquid: ${squidAB.balance}`
+    );
+  }
+  return true;
+};
+
+validateTokenBalances();
