@@ -69,7 +69,7 @@ const getOutliers = async (
           ab.account.accountId
         )) as AccountInfo;
 
-        if (!compare(free, ab)) {
+        if (!isSame(free, ab)) {
           outliers.push(ab.account.accountId);
         }
       } catch (err) {
@@ -83,7 +83,7 @@ const getOutliers = async (
   return;
 };
 
-const compare = (chainBal: any, squidAB: AccountBalance): boolean => {
+const isSame = (chainBal: any, squidAB: AccountBalance): boolean => {
   if (chainBal.toString() !== squidAB.balance.toString()) {
     console.log(`\nZtg balance don't match for ${squidAB.account.accountId}`);
     console.log(

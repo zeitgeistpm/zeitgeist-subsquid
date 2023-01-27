@@ -70,8 +70,7 @@ const getOutliers = async (
           util.AssetIdFromString(ab.assetId)
         )) as any;
 
-        const valid = compare(free, ab);
-        if (!valid) {
+        if (!isSame(free, ab)) {
           let assets = outlierMap.get(ab.account.accountId) || [];
           assets.push(ab.assetId);
           outlierMap.set(ab.account.accountId, assets);
@@ -87,7 +86,7 @@ const getOutliers = async (
   return;
 };
 
-const compare = (chainBal: any, squidAB: AccountBalance): boolean => {
+const isSame = (chainBal: any, squidAB: AccountBalance): boolean => {
   if (chainBal.toString() !== squidAB.balance.toString()) {
     console.log(
       `\n${squidAB.assetId} balance don't match for ${squidAB.account.accountId}`
