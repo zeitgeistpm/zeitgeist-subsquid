@@ -6,13 +6,13 @@ import * as marshal from "./marshal"
  */
 export class MarketType {
   private _categorical!: string | undefined | null
-  private _scalar!: string | undefined | null
+  private _scalar!: (string | undefined | null)[] | undefined | null
 
   constructor(props?: Partial<Omit<MarketType, 'toJSON'>>, json?: any) {
     Object.assign(this, props)
     if (json != null) {
       this._categorical = json.categorical == null ? undefined : marshal.string.fromJSON(json.categorical)
-      this._scalar = json.scalar == null ? undefined : marshal.string.fromJSON(json.scalar)
+      this._scalar = json.scalar == null ? undefined : marshal.fromList(json.scalar, val => val == null ? undefined : marshal.string.fromJSON(val))
     }
   }
 
@@ -30,11 +30,11 @@ export class MarketType {
   /**
    * Range of values if scalar market
    */
-  get scalar(): string | undefined | null {
+  get scalar(): (string | undefined | null)[] | undefined | null {
     return this._scalar
   }
 
-  set scalar(value: string | undefined | null) {
+  set scalar(value: (string | undefined | null)[] | undefined | null) {
     this._scalar = value
   }
 

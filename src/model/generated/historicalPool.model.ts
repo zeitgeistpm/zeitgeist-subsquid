@@ -21,10 +21,10 @@ export class HistoricalPool {
   poolId!: number
 
   /**
-   * New status of the pool
+   * Current status of the pool
    */
-  @Column_("text", {nullable: true})
-  poolStatus!: string | undefined | null
+  @Column_("text", {nullable: false})
+  poolStatus!: string
 
   /**
    * New amount of ZTG present in the pool
@@ -37,6 +37,12 @@ export class HistoricalPool {
    */
   @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
   volume!: bigint | undefined | null
+
+  /**
+   * Volume difference
+   */
+  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
+  dVolume!: bigint | undefined | null
 
   /**
    * Event method which initiated this change

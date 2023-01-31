@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_} from "typeorm"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_} from "typeorm"
 import * as marshal from "./marshal"
 import {Weight} from "./_weight"
 
@@ -17,6 +17,7 @@ export class Pool {
   /**
    * Zeitgeist's identifier for pool
    */
+  @Index_()
   @Column_("int4", {nullable: false})
   poolId!: number
 
@@ -32,6 +33,7 @@ export class Pool {
   @Column_("text", {nullable: false})
   baseAsset!: string
 
+  @Index_()
   @Column_("int4", {nullable: false})
   marketId!: number
 
