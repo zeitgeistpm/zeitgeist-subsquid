@@ -66,8 +66,9 @@ export function getMarketClosedEvent(ctx: EventContext): MarketClosedEvent {
 
 export function getMarketCreatedEvent(ctx: EventHandlerContext<Store, {event: {args: true}}>): MarketCreatedEvent {
   const event = new PredictionMarketsMarketCreatedEvent(ctx)
+  const specVersion = +ctx.block.specId.substring(ctx.block.specId.indexOf('@') + 1);
   const [marketId, param1, param2] = ctx.event.args
-  if (event.isV23 || event.isV29) {
+  if (specVersion < 32) {
     const marketAccountId = ''
     let market = param1 as any
     market.disputeMechanism = market.mdm
