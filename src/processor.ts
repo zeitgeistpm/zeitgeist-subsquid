@@ -14,8 +14,10 @@ import { boughtCompleteSet, marketApproved, marketClosed, marketCreated, marketD
   marketExpired, marketInsufficientSubsidy, marketRejected, marketReported, marketResolved, 
   marketStartedWithSubsidy, soldCompleteSet, tokensRedeemed } from './mappings/predictionMarkets';
 import { accountCrossed } from './mappings/styx';
-import { arbitrageBuyBurn, arbitrageMintSell, poolActive, poolClosed, poolCreate, poolDestroyed, poolExit, 
-  poolJoin, poolJoinWithExactAssetAmount, swapExactAmountIn, swapExactAmountOut } from './mappings/swaps';
+import { 
+  arbitrageBuyBurn, arbitrageMintSell, poolActive, poolClosed, poolCreate, poolDestroyed, poolExit, 
+  poolExitWithExactAssetAmount, poolJoin, poolJoinWithExactAssetAmount, swapExactAmountIn, swapExactAmountOut 
+} from './mappings/swaps';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensBalanceSet, tokensDeposited, tokensEndowed, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
 
@@ -70,6 +72,7 @@ processor.addEventHandler('Swaps.PoolClosed', ctx => poolClosed(ctx))
 processor.addEventHandler('Swaps.PoolCreate', ctx => poolCreate(ctx))
 processor.addEventHandler('Swaps.PoolDestroyed', ctx => poolDestroyed(ctx))
 processor.addEventHandler('Swaps.PoolExit', ctx => poolExit(ctx))
+processor.addEventHandler('Swaps.PoolExitWithExactAssetAmount', ctx => poolExitWithExactAssetAmount(ctx))
 processor.addEventHandler('Swaps.PoolJoin', ctx => poolJoin(ctx))
 processor.addEventHandler('Swaps.PoolJoinWithExactAssetAmount', ctx => poolJoinWithExactAssetAmount(ctx))
 processor.addEventHandler('Swaps.SwapExactAmountIn', ctx => swapExactAmountIn(ctx))
