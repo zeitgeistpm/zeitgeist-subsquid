@@ -2,8 +2,8 @@ import { encodeAddress } from '@polkadot/keyring'
 import * as ss58 from '@subsquid/ss58'
 import { SwapsArbitrageBuyBurnEvent, SwapsArbitrageMintSellEvent, SwapsPoolActiveEvent, 
   SwapsPoolClosedEvent, SwapsPoolCreateEvent, SwapsPoolDestroyedEvent, SwapsPoolExitEvent, 
-  SwapsPoolJoinEvent, SwapsPoolJoinWithExactAssetAmountEvent, SwapsSwapExactAmountInEvent, 
-  SwapsSwapExactAmountOutEvent } from '../../types/events'
+  SwapsPoolExitWithExactAssetAmountEvent, SwapsPoolJoinEvent, SwapsPoolJoinWithExactAssetAmountEvent, 
+  SwapsSwapExactAmountInEvent, SwapsSwapExactAmountOutEvent } from '../../types/events'
 import { EventContext } from '../../types/support'
 import { PoolAssetEvent, PoolAssetsEvent } from '../../types/v41'
 import { SwapEvent } from '../../types/v41'
@@ -133,6 +133,38 @@ export function getPoolExitEvent(ctx: EventContext): PoolExitEvent {
   }
 }
 
+export function getPoolExitWithExactAssetAmountEvent(ctx: EventContext): ExactAssetAmountEvent {
+  const event = new SwapsPoolExitWithExactAssetAmountEvent(ctx)
+  if (event.isV23) {
+    let pae = ctx.event.args as PoolAssetEvent
+    pae.poolAmount = BigInt(0)
+    const walletId = encodeAddress(pae.cpep.who, 73)
+    return {pae, walletId}
+  } else if (event.isV26) {
+    let pae = ctx.event.args as PoolAssetEvent
+    pae.poolAmount = BigInt(0)
+    const walletId = encodeAddress(pae.cpep.who, 73)
+    return {pae, walletId}
+  } else if (event.isV32) {
+    let pae = ctx.event.args as PoolAssetEvent
+    pae.poolAmount = BigInt(0)
+    const walletId = encodeAddress(pae.cpep.who, 73)
+    return {pae, walletId}
+  } else if (event.isV35) {
+    const pae = event.asV35
+    const walletId = ss58.codec('zeitgeist').encode(pae.cpep.who)
+    return {pae, walletId}
+  } else if (event.isV41) {
+    const pae = event.asV41
+    const walletId = ss58.codec('zeitgeist').encode(pae.cpep.who)
+    return {pae, walletId}
+  } else {
+    const pae = ctx.event.args
+    const walletId = encodeAddress(pae.cpep.who, 73)
+    return {pae, walletId}
+  }
+}
+
 export function getPoolJoinEvent(ctx: EventContext): PoolJoinEvent {
   const event = new SwapsPoolJoinEvent(ctx)
   if (event.isV23) {
@@ -160,7 +192,7 @@ export function getPoolJoinEvent(ctx: EventContext): PoolJoinEvent {
   }
 }
 
-export function getPoolJoinWithExactAssetAmountEvent(ctx: EventContext): PoolJoinWithExactAssetAmountEvent {
+export function getPoolJoinWithExactAssetAmountEvent(ctx: EventContext): ExactAssetAmountEvent {
   const event = new SwapsPoolJoinWithExactAssetAmountEvent(ctx)
   if (event.isV23) {
     let pae = ctx.event.args as PoolAssetEvent
@@ -264,7 +296,7 @@ interface PoolJoinEvent {
   walletId: string
 }
 
-interface PoolJoinWithExactAssetAmountEvent {
+interface ExactAssetAmountEvent {
   pae: PoolAssetEvent
   walletId: string
 }
