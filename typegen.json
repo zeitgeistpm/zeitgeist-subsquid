@@ -38,6 +38,7 @@
     "Swaps.PoolCreate",
     "Swaps.PoolDestroyed",
     "Swaps.PoolExit",
+    "Swaps.PoolExitWithExactAssetAmount",
     "Swaps.PoolJoin",
     "Swaps.PoolJoinWithExactAssetAmount",
     "Swaps.SwapExactAmountIn",
