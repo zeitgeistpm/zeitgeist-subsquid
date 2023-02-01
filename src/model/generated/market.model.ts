@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_} from "typeorm"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_, ManyToOne as ManyToOne_} from "typeorm"
 import * as marshal from "./marshal"
 import {CategoryMetadata} from "./_categoryMetadata"
 import {MarketDeadlines} from "./_marketDeadlines"
@@ -6,7 +6,6 @@ import {MarketType} from "./_marketType"
 import {MarketPeriod} from "./_marketPeriod"
 import {Pool} from "./pool.model"
 import {MarketReport} from "./_marketReport"
-import {MarketDisputeMechanism} from "./_marketDisputeMechanism"
 
 /**
  * Prediction market details
@@ -26,6 +25,7 @@ export class Market {
   /**
    * Zeitgeist's identifier for market
    */
+  @Index_()
   @Column_("int4", {nullable: false})
   marketId!: number
 
@@ -157,8 +157,20 @@ export class Market {
   resolvedOutcome!: string | undefined | null
 
   /**
-   * Can be `authorized` or `court` or `simpleDisputes`
+   * Can be `Authorized` or `Court` or `SimpleDisputes`
    */
-  @Column_("jsonb", {transformer: {to: obj => obj.toJSON(), from: obj => new MarketDisputeMechanism(undefined, marshal.nonNull(obj))}, nullable: false})
-  disputeMechanism!: MarketDisputeMechanism
+  @Column_("text", {nullable: false})
+  disputeMechanism!: string
+
+  /**
+   * Address responsible for authorizing disputes. Null if Adv Comm is the authority
+   */
+  @Column_("text", {nullable: true})
+  authorizedAddress!: string | undefined | null
+
+  /**
+   * Reasoning for market rejection
+   */
+  @Column_("text", {nullable: true})
+  rejectReason!: string | undefined | null
 }

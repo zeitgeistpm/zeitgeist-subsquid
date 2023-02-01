@@ -1,6 +1,6 @@
 /** 
  * Script to find change in on-chain Ztg balance of an account between two block numbers
- * Run using `ts-node scripts/detect/changeInBalance.ts`
+ * Run using `ts-node scripts/detect/changeInZtgBalance.ts`
  */
 import { AccountInfo } from "@polkadot/types/interfaces/system";
 import SDK from "@zeitgeistpm/sdk";
@@ -12,7 +12,7 @@ const ACCOUNT_ID = `dE4NbK6XC4dJEkjU5erpDNj2ydMh1fMNw8ug7xNgzTxqFo5iW`;
 const FROM_BLOCK_NUM = 729171;
 const TO_BLOCK_NUM = 736371;
 
-const findChangeInBalance = async () => {
+const findChangeInZtgBalance = async () => {
   const sdk = await Tools.getSDK(WS_NODE_URL);
   let fromBlockNum = FROM_BLOCK_NUM;
   let toBlockNum = TO_BLOCK_NUM + 1; // Includes `TO_BLOCK_NUM` for querying
@@ -53,4 +53,4 @@ const getBalanceAt = async (sdk: SDK, blockNumber: number) => {
   return amt;
 }
 
-findChangeInBalance();
+findChangeInZtgBalance();

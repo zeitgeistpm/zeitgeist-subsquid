@@ -1315,6 +1315,64 @@ export class StyxAccountCrossedEvent {
   }
 }
 
+export class SwapsArbitrageBuyBurnEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Swaps.ArbitrageBuyBurn')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * Buy-burn arbitrage was executed on a CPMM pool. \[pool_id, amount\]
+   */
+  get isV41(): boolean {
+    return this._chain.getEventHash('Swaps.ArbitrageBuyBurn') === 'f7d5bd1431cb954502149f64a8137986d660e0729a3d9731d421496b4298be52'
+  }
+
+  /**
+   * Buy-burn arbitrage was executed on a CPMM pool. \[pool_id, amount\]
+   */
+  get asV41(): [bigint, bigint] {
+    assert(this.isV41)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class SwapsArbitrageMintSellEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Swaps.ArbitrageMintSell')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * Mint-sell arbitrage was executed on a CPMM pool. \[pool_id, amount\]
+   */
+  get isV41(): boolean {
+    return this._chain.getEventHash('Swaps.ArbitrageMintSell') === 'f7d5bd1431cb954502149f64a8137986d660e0729a3d9731d421496b4298be52'
+  }
+
+  /**
+   * Mint-sell arbitrage was executed on a CPMM pool. \[pool_id, amount\]
+   */
+  get asV41(): [bigint, bigint] {
+    assert(this.isV41)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class SwapsPoolActiveEvent {
   private readonly _chain: Chain
   private readonly event: Event
@@ -1492,6 +1550,35 @@ export class SwapsPoolCreateEvent {
   }
 }
 
+export class SwapsPoolDestroyedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Swaps.PoolDestroyed')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * Pool was manually destroyed. \[pool_id\]
+   */
+  get isV36(): boolean {
+    return this._chain.getEventHash('Swaps.PoolDestroyed') === '47b59f698451e50cce59979f0121e842fa3f8b2bcef2e388222dbd69849514f9'
+  }
+
+  /**
+   * Pool was manually destroyed. \[pool_id\]
+   */
+  get asV36(): bigint {
+    assert(this.isV36)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class SwapsPoolExitEvent {
   private readonly _chain: Chain
   private readonly event: Event
@@ -1581,6 +1668,95 @@ export class SwapsPoolExitEvent {
   }
 }
 
+export class SwapsPoolExitWithExactAssetAmountEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Swaps.PoolExitWithExactAssetAmount')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   *  Exits a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get isV23(): boolean {
+    return this._chain.getEventHash('Swaps.PoolExitWithExactAssetAmount') === '2c64913e1fb29a6eeb9571a8d090105f9122ed42d8800fa6f40d1e645168b10e'
+  }
+
+  /**
+   *  Exits a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get asV23(): v23.PoolAssetEvent {
+    assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   *  Exits a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get isV26(): boolean {
+    return this._chain.getEventHash('Swaps.PoolExitWithExactAssetAmount') === '7e9bf306fcce1d32b2d54ed690a76f7480447ebe5b618db3b1f16fcb0937a3e3'
+  }
+
+  /**
+   *  Exits a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get asV26(): v26.PoolAssetEvent {
+    assert(this.isV26)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Exits a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get isV32(): boolean {
+    return this._chain.getEventHash('Swaps.PoolExitWithExactAssetAmount') === 'afcfc5fbe99da7e5bc294edf0988025a07d65f57facac5ce92d338ab5e593097'
+  }
+
+  /**
+   * Exits a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get asV32(): v32.PoolAssetEvent {
+    assert(this.isV32)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Exits a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get isV35(): boolean {
+    return this._chain.getEventHash('Swaps.PoolExitWithExactAssetAmount') === '168a235ed1acfe6e093bdb5d0d35bdda9ec503d5e8deeedcafa09200b28b8c56'
+  }
+
+  /**
+   * Exits a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get asV35(): v35.PoolAssetEvent {
+    assert(this.isV35)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Exits a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get isV41(): boolean {
+    return this._chain.getEventHash('Swaps.PoolExitWithExactAssetAmount') === '06175dac7f1fc4166ac099e051beea1350d973e1ee5c891df6521482ec3dbfca'
+  }
+
+  /**
+   * Exits a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get asV41(): v41.PoolAssetEvent {
+    assert(this.isV41)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class SwapsPoolJoinEvent {
   private readonly _chain: Chain
   private readonly event: Event
@@ -1665,6 +1841,95 @@ export class SwapsPoolJoinEvent {
    * Someone has joined a pool. \[PoolAssetsEvent\]
    */
   get asV41(): v41.PoolAssetsEvent {
+    assert(this.isV41)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class SwapsPoolJoinWithExactAssetAmountEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Swaps.PoolJoinWithExactAssetAmount')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   *  Joins a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get isV23(): boolean {
+    return this._chain.getEventHash('Swaps.PoolJoinWithExactAssetAmount') === '2c64913e1fb29a6eeb9571a8d090105f9122ed42d8800fa6f40d1e645168b10e'
+  }
+
+  /**
+   *  Joins a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get asV23(): v23.PoolAssetEvent {
+    assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   *  Joins a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get isV26(): boolean {
+    return this._chain.getEventHash('Swaps.PoolJoinWithExactAssetAmount') === '7e9bf306fcce1d32b2d54ed690a76f7480447ebe5b618db3b1f16fcb0937a3e3'
+  }
+
+  /**
+   *  Joins a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get asV26(): v26.PoolAssetEvent {
+    assert(this.isV26)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Joins a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get isV32(): boolean {
+    return this._chain.getEventHash('Swaps.PoolJoinWithExactAssetAmount') === 'afcfc5fbe99da7e5bc294edf0988025a07d65f57facac5ce92d338ab5e593097'
+  }
+
+  /**
+   * Joins a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get asV32(): v32.PoolAssetEvent {
+    assert(this.isV32)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Joins a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get isV35(): boolean {
+    return this._chain.getEventHash('Swaps.PoolJoinWithExactAssetAmount') === '168a235ed1acfe6e093bdb5d0d35bdda9ec503d5e8deeedcafa09200b28b8c56'
+  }
+
+  /**
+   * Joins a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get asV35(): v35.PoolAssetEvent {
+    assert(this.isV35)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Joins a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get isV41(): boolean {
+    return this._chain.getEventHash('Swaps.PoolJoinWithExactAssetAmount') === '06175dac7f1fc4166ac099e051beea1350d973e1ee5c891df6521482ec3dbfca'
+  }
+
+  /**
+   * Joins a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get asV41(): v41.PoolAssetEvent {
     assert(this.isV41)
     return this._chain.decodeEvent(this.event)
   }
@@ -2025,6 +2290,124 @@ export class SystemNewAccountEvent {
   }
 }
 
+export class TokensBalanceSetEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Tokens.BalanceSet')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   *  A balance was set by root. \[who, free, reserved\]
+   */
+  get isV23(): boolean {
+    return this._chain.getEventHash('Tokens.BalanceSet') === '915b035d7c3a4b3752a013e8ce3e7e5752d22401decf9a4d33c09421e6df11c1'
+  }
+
+  /**
+   *  A balance was set by root. \[who, free, reserved\]
+   */
+  get asV23(): [v23.CurrencyId, Uint8Array, bigint, bigint] {
+    assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * A balance was set by root. \[who, free, reserved\]
+   */
+  get isV32(): boolean {
+    return this._chain.getEventHash('Tokens.BalanceSet') === 'c0b74996cf5ceff3e57f7cc655d9d42a6f57b91af649c151fa4e4fccd365004f'
+  }
+
+  /**
+   * A balance was set by root. \[who, free, reserved\]
+   */
+  get asV32(): [v32.Asset, Uint8Array, bigint, bigint] {
+    assert(this.isV32)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * A balance was set by root.
+   */
+  get isV34(): boolean {
+    return this._chain.getEventHash('Tokens.BalanceSet') === '86661c1810efe875aebe598d2f2d37a22c8f3b2efd18f9c5c5f081247697bd4b'
+  }
+
+  /**
+   * A balance was set by root.
+   */
+  get asV34(): {currencyId: v34.Asset, who: Uint8Array, free: bigint, reserved: bigint} {
+    assert(this.isV34)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * A balance was set by root.
+   */
+  get isV41(): boolean {
+    return this._chain.getEventHash('Tokens.BalanceSet') === '3fd136418049f8f76770e0d0b091953f04e61b4e5faf99fad0af02b62ace7e8e'
+  }
+
+  /**
+   * A balance was set by root.
+   */
+  get asV41(): {currencyId: v41.Asset, who: Uint8Array, free: bigint, reserved: bigint} {
+    assert(this.isV41)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class TokensDepositedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Tokens.Deposited')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * Deposited some balance into an account
+   */
+  get isV36(): boolean {
+    return this._chain.getEventHash('Tokens.Deposited') === 'a4f1c201945cdbe991182662e3e9964553c56bb38739bf247036896397e7d07d'
+  }
+
+  /**
+   * Deposited some balance into an account
+   */
+  get asV36(): {currencyId: v36.Asset, who: Uint8Array, amount: bigint} {
+    assert(this.isV36)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Deposited some balance into an account
+   */
+  get isV41(): boolean {
+    return this._chain.getEventHash('Tokens.Deposited') === '27a10440ff180980c89f27bf3e4fdbe6561b18dc14dabab1bcce3be2753df5e7'
+  }
+
+  /**
+   * Deposited some balance into an account
+   */
+  get asV41(): {currencyId: v41.Asset, who: Uint8Array, amount: bigint} {
+    assert(this.isV41)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class TokensEndowedEvent {
   private readonly _chain: Chain
   private readonly event: Event
@@ -2172,6 +2555,50 @@ export class TokensTransferEvent {
    * Transfer succeeded.
    */
   get asV41(): {currencyId: v41.Asset, from: Uint8Array, to: Uint8Array, amount: bigint} {
+    assert(this.isV41)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class TokensWithdrawnEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Tokens.Withdrawn')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * Some balances were withdrawn (e.g. pay for transaction fee)
+   */
+  get isV36(): boolean {
+    return this._chain.getEventHash('Tokens.Withdrawn') === 'a4f1c201945cdbe991182662e3e9964553c56bb38739bf247036896397e7d07d'
+  }
+
+  /**
+   * Some balances were withdrawn (e.g. pay for transaction fee)
+   */
+  get asV36(): {currencyId: v36.Asset, who: Uint8Array, amount: bigint} {
+    assert(this.isV36)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Some balances were withdrawn (e.g. pay for transaction fee)
+   */
+  get isV41(): boolean {
+    return this._chain.getEventHash('Tokens.Withdrawn') === '27a10440ff180980c89f27bf3e4fdbe6561b18dc14dabab1bcce3be2753df5e7'
+  }
+
+  /**
+   * Some balances were withdrawn (e.g. pay for transaction fee)
+   */
+  get asV41(): {currencyId: v41.Asset, who: Uint8Array, amount: bigint} {
     assert(this.isV41)
     return this._chain.decodeEvent(this.event)
   }

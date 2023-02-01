@@ -50,6 +50,14 @@ export interface PoolAssetsEvent {
   poolAmount: bigint
 }
 
+export interface PoolAssetEvent {
+  asset: Asset
+  bound: bigint
+  cpep: CommonPoolEventParams
+  transferred: bigint
+  poolAmount: bigint
+}
+
 export type DispatchError = DispatchError_Other | DispatchError_CannotLookup | DispatchError_BadOrigin | DispatchError_Module | DispatchError_ConsumerRemaining | DispatchError_NoProviders | DispatchError_TooManyConsumers | DispatchError_Token | DispatchError_Arithmetic
 
 export interface DispatchError_Other {

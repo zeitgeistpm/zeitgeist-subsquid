@@ -12,12 +12,14 @@ import {
 import { destroyMarkets } from './mappings/postHooks/marketDestroyed';
 import { boughtCompleteSet, marketApproved, marketClosed, marketCreated, marketDestroyed, marketDisputed, 
   marketExpired, marketInsufficientSubsidy, marketRejected, marketReported, marketResolved, 
-  marketStartedWithSubsidy, soldCompleteSet, tokensRedeemed} from './mappings/predictionMarkets';
+  marketStartedWithSubsidy, soldCompleteSet, tokensRedeemed } from './mappings/predictionMarkets';
 import { accountCrossed } from './mappings/styx';
-import { poolActive, poolClosed, poolCreate, poolExit, poolJoin, swapExactAmountIn, 
-  swapExactAmountOut } from './mappings/swaps';
+import { 
+  arbitrageBuyBurn, arbitrageMintSell, poolActive, poolClosed, poolCreate, poolDestroyed, poolExit, 
+  poolExitWithExactAssetAmount, poolJoin, poolJoinWithExactAssetAmount, swapExactAmountIn, swapExactAmountOut 
+} from './mappings/swaps';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
-import { tokensEndowed, tokensTransfer } from './mappings/tokens';
+import { tokensBalanceSet, tokensDeposited, tokensEndowed, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -63,18 +65,26 @@ processor.addEventHandler('PredictionMarkets.TokensRedeemed', ctx => tokensRedee
 
 processor.addEventHandler('Styx.AccountCrossed', ctx => accountCrossed(ctx))
 
+processor.addEventHandler('Swaps.ArbitrageBuyBurn', ctx => arbitrageBuyBurn(ctx))
+processor.addEventHandler('Swaps.ArbitrageMintSell', ctx => arbitrageMintSell(ctx))
 processor.addEventHandler('Swaps.PoolActive', ctx => poolActive(ctx))
 processor.addEventHandler('Swaps.PoolClosed', ctx => poolClosed(ctx))
 processor.addEventHandler('Swaps.PoolCreate', ctx => poolCreate(ctx))
+processor.addEventHandler('Swaps.PoolDestroyed', ctx => poolDestroyed(ctx))
 processor.addEventHandler('Swaps.PoolExit', ctx => poolExit(ctx))
+processor.addEventHandler('Swaps.PoolExitWithExactAssetAmount', ctx => poolExitWithExactAssetAmount(ctx))
 processor.addEventHandler('Swaps.PoolJoin', ctx => poolJoin(ctx))
+processor.addEventHandler('Swaps.PoolJoinWithExactAssetAmount', ctx => poolJoinWithExactAssetAmount(ctx))
 processor.addEventHandler('Swaps.SwapExactAmountIn', ctx => swapExactAmountIn(ctx))
 processor.addEventHandler('Swaps.SwapExactAmountOut', ctx => swapExactAmountOut(ctx))
 
 processor.addEventHandler('System.NewAccount', ctx => systemNewAccount(ctx))
 
+processor.addEventHandler('Tokens.BalanceSet', ctx => tokensBalanceSet(ctx))
+processor.addEventHandler('Tokens.Deposited', ctx => tokensDeposited(ctx))
 processor.addEventHandler('Tokens.Endowed', ctx => tokensEndowed(ctx))
 processor.addEventHandler('Tokens.Transfer', ctx => tokensTransfer(ctx))
+processor.addEventHandler('Tokens.Withdrawn', ctx => tokensWithdrawn(ctx))
 
 if (!process.env.WS_NODE_URL?.includes(`bs`)) {
   processor.addEventHandler('Balances.Transfer', ctx => balancesTransfer(ctx))
