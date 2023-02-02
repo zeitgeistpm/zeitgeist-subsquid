@@ -1,5 +1,6 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_, ManyToOne as ManyToOne_} from "typeorm"
 import * as marshal from "./marshal"
+import {MarketBonds} from "./_marketBonds"
 import {CategoryMetadata} from "./_categoryMetadata"
 import {MarketDeadlines} from "./_marketDeadlines"
 import {MarketType} from "./_marketType"
@@ -17,10 +18,76 @@ export class Market {
   }
 
   /**
+   * Address responsible for authorizing disputes. Null if Adv Comm is the authority
+   */
+  @Column_("text", {nullable: true})
+  authorizedAddress!: string | undefined | null
+
+  /**
+   * The base asset in the market swap pool (usually a currency)
+   */
+  @Column_("text", {nullable: false})
+  baseAsset!: string
+
+  /**
+   * Tracks the status of the advisory, oracle and validity bonds
+   */
+  @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new MarketBonds(undefined, obj)}, nullable: true})
+  bonds!: MarketBonds | undefined | null
+
+  /**
+   * Share details
+   */
+  @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.map((val: any) => val == null ? undefined : val.toJSON()), from: obj => obj == null ? undefined : marshal.fromList(obj, val => val == null ? undefined : new CategoryMetadata(undefined, val))}, nullable: true})
+  categories!: (CategoryMetadata | undefined | null)[] | undefined | null
+
+  /**
+   * Can be `Permissionless` or `Advised`
+   */
+  @Column_("text", {nullable: false})
+  creation!: string
+
+  /**
+   * Account address of the market creator
+   */
+  @Column_("text", {nullable: false})
+  creator!: string
+
+  /**
+   * The creator's fee
+   */
+  @Column_("int4", {nullable: true})
+  creatorFee!: number | undefined | null
+
+  /**
+   * Deadlines for the market represented in blocks
+   */
+  @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new MarketDeadlines(undefined, obj)}, nullable: true})
+  deadlines!: MarketDeadlines | undefined | null
+
+  /**
+   * Description of the market
+   */
+  @Column_("text", {nullable: true})
+  description!: string | undefined | null
+
+  /**
+   * Can be `Authorized` or `Court` or `SimpleDisputes`
+   */
+  @Column_("text", {nullable: false})
+  disputeMechanism!: string
+
+  /**
    * Unique identifier of the object
    */
   @PrimaryColumn_()
   id!: string
+
+  /**
+   * Image for the market
+   */
+  @Column_("text", {nullable: true})
+  img!: string | undefined | null
 
   /**
    * Zeitgeist's identifier for market
@@ -30,22 +97,16 @@ export class Market {
   marketId!: number
 
   /**
-   * Account address of the market creator
+   * Type of the market
    */
-  @Column_("text", {nullable: false})
-  creator!: string
+  @Column_("jsonb", {transformer: {to: obj => obj.toJSON(), from: obj => new MarketType(undefined, marshal.nonNull(obj))}, nullable: false})
+  marketType!: MarketType
 
   /**
-   * Can be `Permissionless` or `Advised`
+   * IPFS cid for market metadata
    */
   @Column_("text", {nullable: false})
-  creation!: string
-
-  /**
-   * The creator's fee
-   */
-  @Column_("int4", {nullable: true})
-  creatorFee!: number | undefined | null
+  metadata!: string
 
   /**
    * Account designated to report on the market
@@ -60,82 +121,10 @@ export class Market {
   outcomeAssets!: (string | undefined | null)[]
 
   /**
-   * Short name for the market
-   */
-  @Column_("text", {nullable: true})
-  slug!: string | undefined | null
-
-  /**
-   * Market question
-   */
-  @Column_("text", {nullable: true})
-  question!: string | undefined | null
-
-  /**
-   * Description of the market
-   */
-  @Column_("text", {nullable: true})
-  description!: string | undefined | null
-
-  /**
-   * Share details
-   */
-  @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.map((val: any) => val == null ? undefined : val.toJSON()), from: obj => obj == null ? undefined : marshal.fromList(obj, val => val == null ? undefined : new CategoryMetadata(undefined, val))}, nullable: true})
-  categories!: (CategoryMetadata | undefined | null)[] | undefined | null
-
-  /**
-   * Type of scalar range if market is of type scalar
-   */
-  @Column_("text", {nullable: true})
-  scalarType!: string | undefined | null
-
-  /**
-   * Deadlines for the market represented in blocks
-   */
-  @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new MarketDeadlines(undefined, obj)}, nullable: true})
-  deadlines!: MarketDeadlines | undefined | null
-
-  /**
-   * Market tags
-   */
-  @Column_("text", {array: true, nullable: true})
-  tags!: (string | undefined | null)[] | undefined | null
-
-  /**
-   * Image for the market
-   */
-  @Column_("text", {nullable: true})
-  img!: string | undefined | null
-
-  /**
-   * IPFS cid for market metadata
-   */
-  @Column_("text", {nullable: false})
-  metadata!: string
-
-  /**
-   * Type of the market
-   */
-  @Column_("jsonb", {transformer: {to: obj => obj.toJSON(), from: obj => new MarketType(undefined, marshal.nonNull(obj))}, nullable: false})
-  marketType!: MarketType
-
-  /**
    * Time period expressed in block numbers or timestamps
    */
   @Column_("jsonb", {transformer: {to: obj => obj.toJSON(), from: obj => new MarketPeriod(undefined, marshal.nonNull(obj))}, nullable: false})
   period!: MarketPeriod
-
-  /**
-   * Scoring rule used for the market
-   */
-  @Column_("text", {nullable: false})
-  scoringRule!: string
-
-  /**
-   * Status of the market
-   */
-  @Column_("text", {nullable: false})
-  status!: string
 
   /**
    * Market's liquidity pool details
@@ -143,6 +132,12 @@ export class Market {
   @Index_()
   @ManyToOne_(() => Pool, {nullable: true})
   pool!: Pool | undefined | null
+
+  /**
+   * Reasoning for market rejection
+   */
+  @Column_("text", {nullable: true})
+  rejectReason!: string | undefined | null
 
   /**
    * Reported outcome of the market. Null if the market is not reported yet
@@ -157,20 +152,38 @@ export class Market {
   resolvedOutcome!: string | undefined | null
 
   /**
-   * Can be `Authorized` or `Court` or `SimpleDisputes`
+   * Type of scalar range if market is of type scalar
+   */
+  @Column_("text", {nullable: true})
+  scalarType!: string | undefined | null
+
+  /**
+   * Scoring rule used for the market
    */
   @Column_("text", {nullable: false})
-  disputeMechanism!: string
+  scoringRule!: string
 
   /**
-   * Address responsible for authorizing disputes. Null if Adv Comm is the authority
+   * Short name for the market
    */
   @Column_("text", {nullable: true})
-  authorizedAddress!: string | undefined | null
+  slug!: string | undefined | null
 
   /**
-   * Reasoning for market rejection
+   * Status of the market
+   */
+  @Column_("text", {nullable: false})
+  status!: string
+
+  /**
+   * Market tags
+   */
+  @Column_("text", {array: true, nullable: true})
+  tags!: (string | undefined | null)[] | undefined | null
+
+  /**
+   * Market question
    */
   @Column_("text", {nullable: true})
-  rejectReason!: string | undefined | null
+  question!: string | undefined | null
 }
