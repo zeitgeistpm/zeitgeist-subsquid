@@ -110,58 +110,62 @@ type HistoricalAsset @entity {
 Prediction market details
 """
 type Market @entity {
-  "Unique identifier of the object"
-  id: ID!
-  "Zeitgeist's identifier for market"
-  marketId: Int! @index
-  "Account address of the market creator"
-  creator: String!
+  "Address responsible for authorizing disputes. Null if Adv Comm is the authority"
+  authorizedAddress: String
+  "The base asset in the market swap pool (usually a currency)"
+  baseAsset: String!
+  "Tracks the status of the advisory, oracle and validity bonds"
+  bonds: MarketBonds
+  "Share details"
+  categories: [CategoryMetadata]
   "Can be `Permissionless` or `Advised`"
   creation: String!
+  "Account address of the market creator"
+  creator: String!
   "The creator's fee"
   creatorFee: Int
+  "Deadlines for the market represented in blocks"
+  deadlines: MarketDeadlines
+  "Description of the market"
+  description: String
+  "Can be `Authorized` or `Court` or `SimpleDisputes`"
+  disputeMechanism: String!
+  "Unique identifier of the object"
+  id: ID!
+  "Image for the market"
+  img: String
+  "Zeitgeist's identifier for market"
+  marketId: Int! @index
+  "Type of the market"
+  marketType: MarketType!
+  "IPFS cid for market metadata"
+  metadata: String!
   "Account designated to report on the market"
   oracle: String!
   "Share identifiers"
   outcomeAssets: [String]!
-  "Short name for the market"
-  slug: String
-  "Market question"
-  question: String
-  "Description of the market"
-  description: String
-  "Share details"
-  categories: [CategoryMetadata]
-  "Type of scalar range if market is of type scalar"
-  scalarType: String
-  "Deadlines for the market represented in blocks"
-  deadlines: MarketDeadlines
-  "Market tags"
-  tags: [String]
-  "Image for the market"
-  img: String
-  "IPFS cid for market metadata"
-  metadata: String!
-  "Type of the market"
-  marketType: MarketType!
   "Time period expressed in block numbers or timestamps"
   period: MarketPeriod!
-  "Scoring rule used for the market"
-  scoringRule: String!
-  "Status of the market"
-  status: String!
   "Market's liquidity pool details"
   pool: Pool
+  "Reasoning for market rejection"
+  rejectReason: String
   "Reported outcome of the market. Null if the market is not reported yet"
   report: MarketReport
   "Resolved outcome for the market"
   resolvedOutcome: String
-  "Can be `Authorized` or `Court` or `SimpleDisputes`"
-  disputeMechanism: String!
-  "Address responsible for authorizing disputes. Null if Adv Comm is the authority"
-  authorizedAddress: String
-  "Reasoning for market rejection"
-  rejectReason: String
+  "Type of scalar range if market is of type scalar"
+  scalarType: String
+  "Scoring rule used for the market"
+  scoringRule: String!
+  "Short name for the market"
+  slug: String
+  "Status of the market"
+  status: String!
+  "Market tags"
+  tags: [String]
+  "Market question"
+  question: String
 }
 
 """
@@ -195,7 +199,7 @@ type Pool @entity {
   poolId: Int! @index
   "Zeitgeist's identifier for account"
   accountId: String
-  "Zeitgeist's identifier for pool"
+  "The base asset in the market swap pool (usually a currency)"
   baseAsset: String!
   marketId: Int! @index
   "Status of the pool"
@@ -249,6 +253,30 @@ type Weight @jsonField {
   assetId: String!
   "Length or weight of the asset"
   len: BigInt!
+}
+
+"""
+Amount reserved for creation of markets, selecting oracles, joining the council, 
+making treasury proposals, setting on-chain identities, voting, 
+creating DAOs, and other parts of the protocol.
+"""
+type MarketBonds @jsonField {
+  "Bond associated with creation of markets"
+  creation: MarketBond
+  "Bond associated with oracle selection"
+  oracle: MarketBond
+}
+
+"""
+Market's bond details
+"""
+type MarketBond @jsonField {
+  "The flag which determines if the bond was already unreserved and/or (partially) slashed"
+  isSettled: Boolean!
+  "Amount reserved"
+  value: BigInt!
+  "The account that reserved the bond"
+  who: String!
 }
 
 """
