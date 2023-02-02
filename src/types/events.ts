@@ -12,6 +12,7 @@ import * as v38 from './v38'
 import * as v39 from './v39'
 import * as v40 from './v40'
 import * as v41 from './v41'
+import * as v42 from './v42'
 
 export class BalancesBalanceSetEvent {
   private readonly _chain: Chain
@@ -868,6 +869,21 @@ export class PredictionMarketsMarketCreatedEvent {
    */
   get asV41(): [bigint, Uint8Array, v41.Market] {
     assert(this.isV41)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * A market has been created \[market_id, market_account, market\]
+   */
+  get isV42(): boolean {
+    return this._chain.getEventHash('PredictionMarkets.MarketCreated') === '4a31b4ee002e93b8d83a62664998cd9f04fb49555260e932c1ffabc3d73e7126'
+  }
+
+  /**
+   * A market has been created \[market_id, market_account, market\]
+   */
+  get asV42(): [bigint, Uint8Array, v42.Market] {
+    assert(this.isV42)
     return this._chain.decodeEvent(this.event)
   }
 }
@@ -2200,6 +2216,21 @@ export class SystemExtrinsicFailedEvent {
     assert(this.isV36)
     return this._chain.decodeEvent(this.event)
   }
+
+  /**
+   * An extrinsic failed.
+   */
+  get isV42(): boolean {
+    return this._chain.getEventHash('System.ExtrinsicFailed') === '7a219a9eae41ad22651fdcb4f6a7453254b0ecc7be4b30821be2ab5b44e5f1b4'
+  }
+
+  /**
+   * An extrinsic failed.
+   */
+  get asV42(): {dispatchError: v42.DispatchError, dispatchInfo: v42.DispatchInfo} {
+    assert(this.isV42)
+    return this._chain.decodeEvent(this.event)
+  }
 }
 
 export class SystemExtrinsicSuccessEvent {
@@ -2242,6 +2273,21 @@ export class SystemExtrinsicSuccessEvent {
    */
   get asV34(): {dispatchInfo: v34.DispatchInfo} {
     assert(this.isV34)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * An extrinsic completed successfully.
+   */
+  get isV42(): boolean {
+    return this._chain.getEventHash('System.ExtrinsicSuccess') === '6fc1e5ad9f5b3851c6e301764b8507ebb0861fd57381e6bc020a47f2b710167d'
+  }
+
+  /**
+   * An extrinsic completed successfully.
+   */
+  get asV42(): {dispatchInfo: v42.DispatchInfo} {
+    assert(this.isV42)
     return this._chain.decodeEvent(this.event)
   }
 }
