@@ -1,6 +1,6 @@
 # zeitgeist-subsquid
 
-[Subsquid](https://www.subsquid.io/) is used to index and provide a graphql interface on top of Zeitgeist. 
+[Subsquid](https://www.subsquid.io/) is used to index and provides a graphql interface on top of Zeitgeist. 
 
 Click [here](https://processor.zeitgeist.pm/graphql) to start querying on the data available with Zeitgeist.
 
@@ -83,7 +83,7 @@ Hydra tools expect a certain directory layout:
 - INDEXER_ENDPOINT_URL - Url for indexer graphql api to be processed (default: https://indexer.zeitgeist.pm/v1/graphql).
 - IPFS_CLIENT_URL - Shouldn't be manually set most of the time. Used for development / local environment.
 
-Those three environment variables are overriden when running `yarn processor:local:start` with urls for services provided by docker.
+Those three environment variables are overridden when running `yarn processor:local:start` with urls for services provided by docker.
 
 ## Development flow
 
@@ -100,7 +100,7 @@ yarn db:create-migration # add -n "myName" to skip the migration name prompt
 yarn db:migrate
 ```
 
-You might want update the `Initial` migration instead of creating a new one (e.g. during the development phase when the production database is not yet set up). In that case it convenient to reset the database schema and start afresh:
+You might want update the `Initial` migration instead of creating a new one (e.g. during the development phase when the production database is not yet set up). In that case it is convenient to reset the database schema and start afresh:
 
 ```bash
 yarn db:reset
@@ -129,7 +129,7 @@ and `manifest.yml`. For more details see https://docs.subsquid.io.
 
 Running an indexer is required. The indexer can be found in the [indexer folder](./indexer).
 
-It is recommeded to use already set up indexer if available, as new indexer typically
+It is recommended to use already set up indexer if available, as new indexer typically
 requires some time to catch up with interesting events.
 
 Have a look at `./indexer/docker-compose.yml` for example of how you can set up a self-hosted version.
