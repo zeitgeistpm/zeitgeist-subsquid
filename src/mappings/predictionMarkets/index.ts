@@ -4,9 +4,9 @@ import { Store } from '@subsquid/typeorm-store'
 import * as ss58 from '@subsquid/ss58'
 import { Like } from 'typeorm'
 import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBalance, HistoricalAsset, 
-  HistoricalMarket, Market, MarketDeadlines, MarketPeriod, MarketReport, MarketType, OutcomeReport 
-} from '../../model'
-import { createAssetsForMarket, decodeMarketMetadata, rescale } from '../helper'
+  HistoricalMarket, Market, MarketBond, MarketBonds, MarketDeadlines, MarketPeriod, MarketReport, 
+  MarketType, OutcomeReport } from '../../model'
+import { createAssetsForMarket, decodeMarketMetadata, getAssetId, rescale } from '../helper'
 import { Tools } from '../util'
 import { getBoughtCompleteSetEvent, getMarketApprovedEvent, getMarketClosedEvent, getMarketCreatedEvent, 
   getMarketDestroyedEvent, getMarketDisputedEvent, getMarketExpiredEvent, getMarketInsufficientSubsidyEvent, 
@@ -150,7 +150,7 @@ export async function marketCreated(ctx: EventHandlerContext<Store, {event: {arg
   const {marketId, marketAccountId, market} = getMarketCreatedEvent(ctx)
   const specVersion = +block.specId.substring(ctx.block.specId.indexOf('@') + 1)
 
-  if (marketAccountId.length > 2) {
+  if (marketAccountId.length > 0) {
     let acc = await store.findOneBy(Account, { accountId: marketAccountId })
     if (acc) {
       acc.marketId = +marketId.toString()
@@ -194,6 +194,7 @@ export async function marketCreated(ctx: EventHandlerContext<Store, {event: {arg
   let newMarket = new Market()
   newMarket.id = event.id + '-' + marketId
   newMarket.marketId = +marketId
+  newMarket.baseAsset = market.baseAsset ? getAssetId(market.baseAsset) : 'Ztg'
   newMarket.creator = encodeAddress(market.creator, 73)
   newMarket.creation = market.creation.__kind;
   newMarket.creatorFee = +market.creatorFee.toString()
@@ -202,6 +203,12 @@ export async function marketCreated(ctx: EventHandlerContext<Store, {event: {arg
   newMarket.status = market.status.__kind
   newMarket.outcomeAssets = (await createAssetsForMarket(marketId, market.marketType)) as string[]
   newMarket.metadata = market.metadata.toString()
+
+  const d = market.disputeMechanism
+  newMarket.disputeMechanism = d.__kind
+  if (d.__kind === 'Authorized') {
+    newMarket.authorizedAddress = d.value ? encodeAddress(d.value, 73) : null
+  }
 
   const metadata = await decodeMarketMetadata(market.metadata.toString())
   if (metadata) {
@@ -289,10 +296,25 @@ export async function marketCreated(ctx: EventHandlerContext<Store, {event: {arg
   }
   newMarket.period = period
 
-  const d = market.disputeMechanism
-  newMarket.disputeMechanism = d.__kind
-  if (d.__kind === 'Authorized') {
-    newMarket.authorizedAddress = d.value ? encodeAddress(d.value, 73) : null
+  if (market.bonds) {
+    const marketBonds = new MarketBonds()
+    if (market.bonds.creation) {
+      const creationBond = market.bonds.creation
+      const bond = new MarketBond()
+      bond.who = encodeAddress(creationBond.who, 73)
+      bond.value = creationBond.value
+      bond.isSettled = creationBond.isSettled
+      marketBonds.creation = bond
+    }
+    if (market.bonds.oracle) {
+      const oracleBond = market.bonds.oracle
+      const bond = new MarketBond()
+      bond.who = encodeAddress(oracleBond.who, 73)
+      bond.value = oracleBond.value
+      bond.isSettled = oracleBond.isSettled
+      marketBonds.oracle = bond
+    }
+    newMarket.bonds = marketBonds
   }
   console.log(`[${event.name}] Saving market: ${JSON.stringify(newMarket, null, 2)}`)
   await store.save<Market>(newMarket)
