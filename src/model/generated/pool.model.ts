@@ -28,7 +28,7 @@ export class Pool {
   accountId!: string | undefined | null
 
   /**
-   * Zeitgeist's identifier for pool
+   * The base asset in the market swap pool (usually a currency)
    */
   @Column_("text", {nullable: false})
   baseAsset!: string

@@ -88,7 +88,7 @@ export function getMarketCreatedEvent(ctx: EventHandlerContext<Store, {event: {a
     market.period.start = market.period.value.start
     market.period.end = market.period.value.end
     return { marketId, marketAccountId, market }
-  } else if (event.isV38 || event.isV40 || event.isV41) {
+  } else if (event.isV38 || event.isV40 || event.isV41 || event.isV42) {
     const marketAccountId = encodeAddress(param1, 73)
     const market = param2 as any
     market.period.start = market.period.value.start
