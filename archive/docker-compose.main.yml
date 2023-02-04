@@ -4,14 +4,20 @@ services:
     volumes:
       - /cockroach/cockroach-data
     command: start-single-node --insecure
-    
+
   ingest:
     volumes:
       - "../typesBundle.json:/config/typesBundle.json"
+    ports:
+      - 9090:9090
     command: [
       "--types-bundle", "/config/typesBundle.json",
-      "-e", "wss://bsr.zeitgeist.pm",
-      "-c", "20", # allow up to 20 pending requests for the above endpoint (default is 5)
+      "-e", "${WS_MAIN_URL}",
+      "-c", "20",
+      "-e", "${WS_MAIN_URL2}",
+      "-c", "20",
+      "-e", "${WS_MAIN_URL3}",
+      "-c", "20",
       "--out", "postgres://root@db:26257/defaultdb"
     ]
 
@@ -19,6 +25,6 @@ services:
     environment:
       DATABASE_MAX_CONNECTIONS: 5
       RUST_LOG: "actix_web=info,actix_server=info"
-    command: [ "--database-url", "postgres://root@db:26257/defaultdb" ]
     ports:
       - 8888:8000
+    command: [ "--database-url", "postgres://root@db:26257/defaultdb" ]
