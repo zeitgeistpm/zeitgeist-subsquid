@@ -29,6 +29,7 @@ services:
   
   explorer:
     image: subsquid/substrate-explorer:firesquid
+    container_name: explorer
     restart: unless-stopped
     depends_on:
       - db
