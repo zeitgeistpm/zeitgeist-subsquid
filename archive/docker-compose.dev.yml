@@ -8,6 +8,8 @@ services:
   ingest:
     volumes:
       - "../typesBundle.json:/config/typesBundle.json"
+    ports:
+      - 9090:9090
     command: [
       "--types-bundle", "/config/typesBundle.json",
       "-e", "${WS_TEST_URL}",
@@ -16,16 +18,14 @@ services:
       "-c", "20",
       "--out", "postgres://root@db:26257/defaultdb"
     ]
-    ports:
-      - 9090:9090
 
   gateway:
     environment:
       DATABASE_MAX_CONNECTIONS: 5
       RUST_LOG: "actix_web=info,actix_server=info"
-    command: [ "--database-url", "postgres://root@db:26257/defaultdb" ]
     ports:
       - 8888:8000
+    command: [ "--database-url", "postgres://root@db:26257/defaultdb" ]
   
   explorer:
     image: subsquid/substrate-explorer:firesquid
