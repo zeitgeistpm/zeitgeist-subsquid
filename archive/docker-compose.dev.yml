@@ -29,6 +29,9 @@ services:
   
   explorer:
     image: subsquid/substrate-explorer:firesquid
+    restart: unless-stopped
+    depends_on:
+      - db
     environment:
       DB_TYPE: cockroach
       DB_HOST: db
@@ -37,5 +40,3 @@ services:
       DB_USER: root
     ports:
       - 4444:3000
-    depends_on:
-      - db
