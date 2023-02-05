@@ -12,12 +12,6 @@ export class AccountBalance {
   }
 
   /**
-   * Unique identifier of the object
-   */
-  @PrimaryColumn_()
-  id!: string
-
-  /**
    * Connected account
    */
   @Index_()
@@ -37,8 +31,8 @@ export class AccountBalance {
   balance!: bigint
 
   /**
-   * Computed based on the spot price of the asset
+   * Unique identifier of the object
    */
-  @Column_("numeric", {nullable: true})
-  value!: number | undefined | null
+  @PrimaryColumn_()
+  id!: string
 }
