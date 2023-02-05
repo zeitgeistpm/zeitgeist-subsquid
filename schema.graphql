@@ -1,34 +1,30 @@
 """
 A type that has ss58 address format of the account. As soon as the chain
-encounters any new address, they get registered here as user or pool account.
+encounters any new address, they get registered here as user/pool/market account.
 """
 type Account @entity {
-  "Unique identifier of the object"
-  id: ID!
   "Account address"
   accountId: String!
+  "Unique identifier of the object"
+  id: ID!
   "Zeitgeist's identifier for market. Valid only for market account."
   marketId: Int
   "Zeitgeist's identifier for pool. Valid only for pool account."
   poolId: Int
-  "Sum of all asset values"
-  pvalue: Float!
 }
 
 """
 Balance of a particular asset denoted by assetId present in the account
 """
 type AccountBalance @entity {
-  "Unique identifier of the object"
-  id: ID!
   "Connected account"
   account: Account!
   "Zeitgeist's identifier for asset"
   assetId: String!
   "Balance of the asset"
   balance: BigInt!
-  "Computed based on the spot price of the asset"
-  value: Float
+  "Unique identifier of the object"
+  id: ID!
 }
 
 """
@@ -36,26 +32,20 @@ Balance history of a particular asset in an account. Records all transactions
 associated with the account.
 """
 type HistoricalAccountBalance @entity {
-  "Unique identifier of the object"
-  id: ID!
   "Account address"
   accountId: String! @index
   "Zeitgeist's identifier for asset"
   assetId: String!
-  "Balance difference"
-  dBalance: BigInt!
   "Balance of the asset"
   balance: BigInt!
-  "Value difference"
-  dValue: Float
-  "Computed based on the spot price of the asset"
-  value: Float
-  "Portfolio value or sum of all asset values in an account"
-  pvalue: Float
-  "Event method which initiated this change"
-  event: String!
   "Height of the block"
   blockNumber: Int!
+  "Balance difference"
+  dBalance: BigInt!
+  "Event method which initiated this change"
+  event: String!
+  "Unique identifier of the object"
+  id: ID!
   "Timestamp of the block"
   timestamp: DateTime!
 }
