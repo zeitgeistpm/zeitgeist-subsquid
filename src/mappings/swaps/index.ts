@@ -317,13 +317,8 @@ export async function poolDestroyed(ctx: EventHandlerContext<Store, {event: {arg
   const oldBalance = ab.balance
   const newBalance = BigInt(0)
   ab.balance = newBalance
-  ab.value = Number(ab.balance)
   console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
   await store.save<AccountBalance>(ab)
-
-  acc.pvalue = Number(acc.pvalue) - Number(oldBalance)
-  console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
-  await store.save<Account>(acc)
 
   let hab = new HistoricalAccountBalance()
   hab.id = event.id + '-' + acc.accountId.substring(acc.accountId.length - 5)
@@ -332,9 +327,6 @@ export async function poolDestroyed(ctx: EventHandlerContext<Store, {event: {arg
   hab.assetId = ab.assetId
   hab.dBalance = newBalance - oldBalance
   hab.balance = newBalance
-  hab.dValue = Number(hab.dBalance)
-  hab.value = Number(hab.balance)
-  hab.pvalue = acc.pvalue
   hab.blockNumber = block.height
   hab.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
@@ -378,18 +370,11 @@ export async function poolDestroyed(ctx: EventHandlerContext<Store, {event: {arg
           let acc = await store.get(Account, { where: { id: Like(`%${keyword}%`)}})
           if (acc != null && ab.balance > BigInt(0)) {
             const oldBalance = ab.balance
-            const oldValue = ab.value
             const newBalance = BigInt(0)
-            const newValue = Number(ab.balance)
 
             ab.balance = newBalance
-            ab.value = newValue
             console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
             await store.save<AccountBalance>(ab)
-
-            acc.pvalue = oldValue ? acc.pvalue - oldValue + newValue : acc.pvalue
-            console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
-            await store.save<Account>(acc)
 
             let hab = new HistoricalAccountBalance()
             hab.id = event.id + '-' + acc.accountId.substring(acc.accountId.length - 5)
@@ -398,9 +383,6 @@ export async function poolDestroyed(ctx: EventHandlerContext<Store, {event: {arg
             hab.assetId = ab.assetId
             hab.dBalance = newBalance - oldBalance
             hab.balance = newBalance
-            hab.dValue = oldValue ? newValue - oldValue : null
-            hab.value = newValue
-            hab.pvalue = acc.pvalue
             hab.blockNumber = block.height
             hab.timestamp = new Date(block.timestamp)
             console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
