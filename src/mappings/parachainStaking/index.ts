@@ -13,7 +13,6 @@ export const parachainStakingRewarded = async(ctx: EventHandlerContext<Store, {e
     acc = new Account()
     acc.id = event.id + '-' + walletId.substring(walletId.length - 5)
     acc.accountId = walletId
-    acc.pvalue = 0
     console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
     await store.save<Account>(acc)
     await initBalance(acc, store, block, event as SubstrateEvent)
@@ -22,7 +21,6 @@ export const parachainStakingRewarded = async(ctx: EventHandlerContext<Store, {e
   let ab = await store.findOneBy(AccountBalance, { account: { accountId: walletId }, assetId: 'Ztg' })
   if (ab) {
     ab.balance = ab.balance + rewards
-    ab.value = Number(ab.balance)
     console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`)
     await store.save<AccountBalance>(ab)
 
@@ -33,13 +31,9 @@ export const parachainStakingRewarded = async(ctx: EventHandlerContext<Store, {e
     hab.assetId = ab.assetId
     hab.dBalance = rewards
     hab.balance = ab.balance
-    hab.dValue = Number(hab.dBalance)
-    hab.value = Number(hab.balance)
-    hab.pvalue = acc.pvalue
     hab.blockNumber = block.height
     hab.timestamp = new Date(block.timestamp)
     console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
     await store.save<HistoricalAccountBalance>(hab)
   }
 }
-
