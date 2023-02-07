@@ -4,14 +4,17 @@ services:
     volumes:
       - /cockroach/cockroach-data
     command: start-single-node --insecure
-
+    
   ingest:
-    depends_on:
-      - node
+    volumes:
+      - "../typesBundle.json:/config/typesBundle.json"
     ports:
-      - 9091:9090
+      - 9090:9090
     command: [
-      "-e", "ws://node:9944/0",
+      "--types-bundle", "/config/typesBundle.json",
+      "-e", "${WS_TEST_URL}",
+      "-c", "20",
+      "-e", "${WS_TEST_URL2}",
       "-c", "20",
       "--out", "postgres://root@db:26257/defaultdb"
     ]
@@ -23,7 +26,7 @@ services:
     ports:
       - 8888:8000
     command: [ "--database-url", "postgres://root@db:26257/defaultdb" ]
-
+  
   explorer:
     image: subsquid/substrate-explorer:firesquid
     container_name: explorer
@@ -38,14 +41,3 @@ services:
       DB_USER: root
     ports:
       - 4444:3000
-      
-  node:
-    image: zeitgeistpm/zeitgeist-node:v0.3.6
-    container_name: node
-    restart: unless-stopped
-    environment:
-      - PORT=9944
-      - NODE_URI=ws://node:9944/0
-    ports:
-      - 9944:9944
-    command: --dev --ws-external --pruning archive

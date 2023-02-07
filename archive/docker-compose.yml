@@ -1,19 +1,20 @@
 version: "3.4"
 services:
   db:
-    image: postgres:14
+    image: cockroachdb/cockroach:v22.2.2
     container_name: db
-    restart: always
+    restart: unless-stopped
 
   ingest:
-    image: subsquid/substrate-ingest:firesquid
+    image: subsquid/substrate-ingest:1
     container_name: ingest
-    restart: on-failure
+    restart: unless-stopped
     depends_on:
       - db
 
   gateway:
-    image: subsquid/substrate-gateway:firesquid
+    image: subsquid/substrate-gateway:2.5.0
     container_name: gateway
+    restart: unless-stopped
     depends_on:
       - db

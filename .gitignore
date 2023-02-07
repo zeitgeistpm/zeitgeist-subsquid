@@ -1,11 +1,13 @@
 /node_modules
 /lib
 /db/cache
+
+/archive/.env
 .env.d
 .env.t1
 .env.t2
 .env.m1
 .env.m2
-.vscode
 
+.vscode
 .yarn
