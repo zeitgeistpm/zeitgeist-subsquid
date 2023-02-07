@@ -32,12 +32,14 @@ const validateZtgBalances = async () => {
   const accountBalances = res.data.data.accountBalances as AccountBalance[];
   const squidHeight = res.data.data.squidStatus.height as bigint;
 
-  const outliers = await getOutliers(accountBalances, squidHeight);
-  if (!outliers) return;
-
-  console.log(
-    `\nAccounts validated via ${GRAPHQL_HOSTNAME}: ${accountBalances.length}`
+  const { outliers, validatedCount } = await getOutliers(
+    accountBalances,
+    squidHeight
   );
+  console.log(
+    `\nAccounts validated via ${GRAPHQL_HOSTNAME}: ${validatedCount}`
+  );
+  if (validatedCount === 0) return;
   if (outliers.length > 0) {
     console.log(
       `Ztg balances don't match for ${outliers.length} account(s) 🔴`
@@ -54,7 +56,8 @@ const validateZtgBalances = async () => {
 const getOutliers = async (
   accountBalances: AccountBalance[],
   squidHeight: bigint
-): Promise<string[] | undefined> => {
+): Promise<{ outliers: string[]; validatedCount: number }> => {
+  let validatedCount = 0;
   const outliers: string[] = [];
   const sdk = await Tools.getSDK(NODE_URL);
   const blockHash = await sdk.api.rpc.chain.getBlockHash(squidHeight);
@@ -72,15 +75,16 @@ const getOutliers = async (
         if (!isSame(free, ab)) {
           outliers.push(ab.account.accountId);
         }
+        validatedCount++;
       } catch (err) {
         console.error(err);
         sdk.api.disconnect();
-        return;
+        return { outliers, validatedCount };
       }
     })
   );
   sdk.api.disconnect();
-  return;
+  return { outliers, validatedCount };
 };
 
 const isSame = (chainBal: any, squidAB: AccountBalance): boolean => {
