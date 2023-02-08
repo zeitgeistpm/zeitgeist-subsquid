@@ -40,7 +40,7 @@ export class HistoricalAsset {
   /**
    * Price of the asset has decreased if -ve and +ve if increased
    */
-  @Column_("numeric", {nullable: true})
+  @Column_("numeric", {transformer: marshal.floatTransformer, nullable: true})
   dPrice!: number | undefined | null
 
   /**
@@ -52,7 +52,7 @@ export class HistoricalAsset {
   /**
    * Price of the asset after trade execution/market resolution
    */
-  @Column_("numeric", {nullable: true})
+  @Column_("numeric", {transformer: marshal.floatTransformer, nullable: true})
   newPrice!: number | undefined | null
 
   /**

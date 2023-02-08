@@ -33,7 +33,7 @@ export class Asset {
   /**
    * Spot price of the asset in the pool
    */
-  @Column_("numeric", {nullable: true})
+  @Column_("numeric", {transformer: marshal.floatTransformer, nullable: true})
   price!: number | undefined | null
 
   /**

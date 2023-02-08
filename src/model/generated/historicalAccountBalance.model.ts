@@ -12,12 +12,6 @@ export class HistoricalAccountBalance {
   }
 
   /**
-   * Unique identifier of the object
-   */
-  @PrimaryColumn_()
-  id!: string
-
-  /**
    * Account address
    */
   @Index_()
@@ -31,34 +25,22 @@ export class HistoricalAccountBalance {
   assetId!: string
 
   /**
-   * Balance difference
-   */
-  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
-  dBalance!: bigint
-
-  /**
    * Balance of the asset
    */
   @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
   balance!: bigint
 
   /**
-   * Value difference
+   * Height of the block
    */
-  @Column_("numeric", {nullable: true})
-  dValue!: number | undefined | null
+  @Column_("int4", {nullable: false})
+  blockNumber!: number
 
   /**
-   * Computed based on the spot price of the asset
+   * Balance difference
    */
-  @Column_("numeric", {nullable: true})
-  value!: number | undefined | null
-
-  /**
-   * Portfolio value or sum of all asset values in an account
-   */
-  @Column_("numeric", {nullable: true})
-  pvalue!: number | undefined | null
+  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+  dBalance!: bigint
 
   /**
    * Event method which initiated this change
@@ -67,10 +49,10 @@ export class HistoricalAccountBalance {
   event!: string
 
   /**
-   * Height of the block
+   * Unique identifier of the object
    */
-  @Column_("int4", {nullable: false})
-  blockNumber!: number
+  @PrimaryColumn_()
+  id!: string
 
   /**
    * Timestamp of the block

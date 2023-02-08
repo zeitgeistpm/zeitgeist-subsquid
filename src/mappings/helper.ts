@@ -105,10 +105,6 @@ export async function initBalance(acc: Account, store: Store, block: SubstrateBl
     acc.accountId
   )) as AccountInfo;
 
-  acc.pvalue = Number(acc.pvalue) + Number(amt)
-  console.log(`[${event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`)
-  await store.save<Account>(acc)
-
   let ab = new AccountBalance()
   ab.id = event.id + '-' + acc.accountId.substring(acc.accountId.length - 5)
   ab.account = acc
@@ -124,7 +120,6 @@ export async function initBalance(acc: Account, store: Store, block: SubstrateBl
   hab.assetId = ab.assetId
   hab.dBalance = amt.toBigInt()
   hab.balance = ab.balance
-  hab.pvalue = acc.pvalue
   hab.blockNumber = 0
   hab.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`)
