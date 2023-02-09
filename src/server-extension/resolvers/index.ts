@@ -4,6 +4,9 @@ import { HistoricalAsset } from '../../model/generated';
 
 @ObjectType()
 export class StatsResult {
+  @Field(() => Number, { nullable: false, name: 'marketId' })
+  market_id!: number;
+
   @Field(() => Number)
   participants!: number;
 
@@ -18,15 +21,21 @@ export class StatsResolver {
 
   @Query(() => [StatsResult])
   async stats(
-    @Arg('marketId', { nullable: false }) marketId: number
-  ): Promise<StatsResult> {
+    @Arg('marketIds', () => [String!], { nullable: false }) marketIds: string[]
+  ): Promise<StatsResult[]> {
     const manager = await this.tx();
-    const result = await manager.getRepository(HistoricalAsset)
-      .query(`SELECT COUNT(DISTINCT account_id) as participants
-        FROM historical_asset
-        WHERE event LIKE '%Swap%'
-        AND asset_id LIKE '%[${marketId},%'
-        AND account_id != '';`);
+    const result = await manager.getRepository(HistoricalAsset).query(`
+      SELECT 
+        m.market_id, 
+        COUNT(DISTINCT ha.account_id) as participants
+      FROM
+        market m
+      JOIN
+        historical_asset ha ON ha.asset_id = ANY (m.outcome_assets)
+      WHERE
+        m.market_id in (${marketIds})
+      GROUP BY
+        m.market_id;`);
 
     return result;
   }
