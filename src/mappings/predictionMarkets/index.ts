@@ -372,6 +372,9 @@ export async function marketDisputed(ctx: EventHandlerContext<Store, {event: {ar
   let market = await store.get(Market, { where: { marketId:  marketId } })
   if (!market) return
 
+  if (!market.disputes) 
+    market.disputes = [];
+
   let ocr = new OutcomeReport()
   if (report.outcome.__kind == 'Categorical') {
     ocr.categorical = report.outcome.value
@@ -380,20 +383,19 @@ export async function marketDisputed(ctx: EventHandlerContext<Store, {event: {ar
   }
 
   let mr = new MarketReport()
-  if (report.at) {
-    mr.at = +report.at.toString()
-  }
-  if (report.by) {
-    mr.by = ss58.codec('zeitgeist').encode(report.by)
-  }
   mr.outcome = ocr
+  if (report.at)
+    mr.at = +report.at.toString()
+  if (report.by)
+    mr.by = ss58.codec('zeitgeist').encode(report.by)
 
   if (status.length < 2) {
     market.status = 'Disputed'
   } else {
     market.status = status
   }
-  market.report = mr
+  
+  market.disputes.push(mr);
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`)
   await store.save<Market>(market)
 
@@ -402,7 +404,6 @@ export async function marketDisputed(ctx: EventHandlerContext<Store, {event: {ar
   hm.marketId = market.marketId
   hm.event = event.name.split('.')[1]
   hm.status = market.status
-  hm.report = market.report
   hm.blockNumber = block.height
   hm.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
@@ -517,7 +518,6 @@ export async function marketReported(ctx: EventHandlerContext<Store, {event: {ar
   hm.marketId = market.marketId
   hm.event = event.name.split('.')[1]
   hm.status = market.status
-  hm.report = market.report
   hm.blockNumber = block.height
   hm.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
@@ -620,7 +620,6 @@ export async function marketResolved(ctx: EventHandlerContext<Store, {event: {ar
   hm.marketId = market.marketId
   hm.event = event.name.split('.')[1]
   hm.status = market.status
-  hm.report = market.report
   hm.resolvedOutcome = market.resolvedOutcome
   hm.blockNumber = block.height
   hm.timestamp = new Date(block.timestamp)
