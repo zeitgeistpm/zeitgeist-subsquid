@@ -1,6 +1,6 @@
 import { Arg, Field, ObjectType, Query, Resolver } from 'type-graphql';
 import type { EntityManager } from 'typeorm';
-import { HistoricalAsset } from '../../model/generated';
+import { Market } from '../../model/generated';
 
 @ObjectType()
 export class StatsResult {
@@ -24,7 +24,7 @@ export class StatsResolver {
     @Arg('marketIds', () => [String!], { nullable: false }) marketIds: string[]
   ): Promise<StatsResult[]> {
     const manager = await this.tx();
-    const result = await manager.getRepository(HistoricalAsset).query(`
+    const result = await manager.getRepository(Market).query(`
       SELECT 
         m.market_id, 
         COUNT(DISTINCT ha.account_id) as participants
