@@ -36,6 +36,7 @@
     "@types/redis": "^2.8.27",
     "@zeitgeistpm/sdk": "^0.9.1",
     "axios": "^1.2.5",
+    "class-validator": "^0.14.0",
     "dotenv": "^16.0.0",
     "ipfs-http-client": "^49.0.4",
     "it-all": "^1.0.4",
@@ -43,6 +44,7 @@
     "mem-fs-editor": "^8.1.2",
     "redis": "^3.0.2",
     "tslib": "^2.0.0",
+    "type-graphql": "^1.1.1",
     "typeorm": "^0.3.9",
     "uint8arrays": "^2.1.4"
   },
