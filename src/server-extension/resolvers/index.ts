@@ -20,8 +20,8 @@ export class StatsResolver {
   constructor(private tx: () => Promise<EntityManager>) {}
 
   @Query(() => [StatsResult])
-  async stats(
-    @Arg('marketIds', () => [String!], { nullable: false }) marketIds: string[]
+  async marketStats(
+    @Arg('ids', () => [String!], { nullable: false }) ids: string[]
   ): Promise<StatsResult[]> {
     const manager = await this.tx();
     const result = await manager.getRepository(Market).query(`
@@ -33,7 +33,7 @@ export class StatsResolver {
       JOIN
         historical_asset ha ON ha.asset_id = ANY (m.outcome_assets)
       WHERE
-        m.market_id in (${marketIds})
+        m.market_id in (${ids})
       GROUP BY
         m.market_id;`);
 
