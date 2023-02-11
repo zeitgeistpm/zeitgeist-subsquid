@@ -3,10 +3,10 @@ import * as marshal from "./marshal"
 import {MarketBonds} from "./_marketBonds"
 import {CategoryMetadata} from "./_categoryMetadata"
 import {MarketDeadlines} from "./_marketDeadlines"
+import {MarketReport} from "./_marketReport"
 import {MarketType} from "./_marketType"
 import {MarketPeriod} from "./_marketPeriod"
 import {Pool} from "./pool.model"
-import {MarketReport} from "./_marketReport"
 
 /**
  * Prediction market details
@@ -70,6 +70,12 @@ export class Market {
    */
   @Column_("text", {nullable: true})
   description!: string | undefined | null
+
+  /**
+   * The dispute information for each dispute that's been issued
+   */
+  @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.map((val: any) => val == null ? undefined : val.toJSON()), from: obj => obj == null ? undefined : marshal.fromList(obj, val => val == null ? undefined : new MarketReport(undefined, val))}, nullable: true})
+  disputes!: (MarketReport | undefined | null)[] | undefined | null
 
   /**
    * Can be `Authorized` or `Court` or `SimpleDisputes`

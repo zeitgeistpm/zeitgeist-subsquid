@@ -118,6 +118,8 @@ type Market @entity {
   deadlines: MarketDeadlines
   "Description of the market"
   description: String
+  "The dispute information for each dispute that's been issued"
+  disputes: [MarketReport]
   "Can be `Authorized` or `Court` or `SimpleDisputes`"
   disputeMechanism: String!
   "Unique identifier of the object"
@@ -163,20 +165,18 @@ Market history of a particular market. Records all transactions
 associated with the market.
 """
 type HistoricalMarket @entity {
+  "Height of the block"
+  blockNumber: Int!
+  "Event method which initiated this change"
+  event: String!
   "Zeitgeist's identifier for market"
   marketId: Int!
   "Zeitgeist's identifier for pool"
   poolId: Int
-  "New status. Null if no change"
-  status: String
-  "New market report. Null if no change"
-  report: MarketReport
-  "New resolved outcome. Null if no change"
+  "Latest resolved outcome"
   resolvedOutcome: String
-  "Event method which initiated this change"
-  event: String!
-  "Height of the block"
-  blockNumber: Int!
+  "Latest market status"
+  status: String
   "Timestamp of the block"
   timestamp: DateTime!
 }
