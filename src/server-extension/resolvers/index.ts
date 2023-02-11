@@ -1,42 +1,42 @@
 import { Arg, Field, ObjectType, Query, Resolver } from 'type-graphql';
 import type { EntityManager } from 'typeorm';
 import { Market } from '../../model/generated';
+import { marketLiquidity, marketParticipants } from '../query';
 
 @ObjectType()
-export class StatsResult {
-  @Field(() => Number, { nullable: false, name: 'marketId' })
+export class MarketStats {
+  @Field(() => Number, { name: 'marketId' })
   market_id!: number;
 
   @Field(() => Number)
   participants!: number;
 
-  constructor(props: Partial<StatsResult>) {
+  @Field(() => BigInt)
+  liquidity!: bigint;
+
+  constructor(props: Partial<MarketStats>) {
     Object.assign(this, props);
   }
 }
 
 @Resolver()
-export class StatsResolver {
+export class MarketStatsResolver {
   constructor(private tx: () => Promise<EntityManager>) {}
 
-  @Query(() => [StatsResult])
+  @Query(() => [MarketStats])
   async marketStats(
     @Arg('ids', () => [String!], { nullable: false }) ids: string[]
-  ): Promise<StatsResult[]> {
+  ): Promise<MarketStats[]> {
     const manager = await this.tx();
-    const result = await manager.getRepository(Market).query(`
-      SELECT 
-        m.market_id, 
-        COUNT(DISTINCT ha.account_id) as participants
-      FROM
-        market m
-      JOIN
-        historical_asset ha ON ha.asset_id = ANY (m.outcome_assets)
-      WHERE
-        m.market_id in (${ids})
-      GROUP BY
-        m.market_id;`);
+    const participants = await manager.getRepository(Market).query(marketParticipants(ids));
+    const liquidity = await manager.getRepository(Market).query(marketLiquidity(ids));
 
+    const mergeByMarketId = (participants: any[], liquidity: any[]) =>
+    participants.map(p => ({
+      ...liquidity.find(l => (l.market_id === p.market_id) && l),
+      ...p
+    }));
+    const result = mergeByMarketId(participants, liquidity);
     return result;
   }
 }
