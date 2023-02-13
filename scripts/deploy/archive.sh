@@ -6,7 +6,6 @@ Usage: ./scripts/deploy/archive.sh <first> <second>
 
 Options for <first>:
   local       Index data from local chain
-  dev         Index and explore data from battery-station
   test        Index data from battery-station
   main        Index data from main node
 

@@ -6,7 +6,6 @@
   "author": "",
   "license": "ISC",
   "scripts": {
-    "api:dev:start": "./scripts/deploy/api.sh dev start",
     "api:start": "squid-graphql-server --subscriptions",
     "api:stop": "./scripts/deploy/api.sh stop",
     "archive:start": "./scripts/deploy/archive.sh local up",
@@ -17,8 +16,6 @@
     "migration:apply": "squid-typeorm-migration apply",
     "migration:generate": "squid-typeorm-migration generate",
     "migration:revert": "npx squid-typeorm-migration revert",
-    "processor:dev:resume": "./scripts/deploy/processor.sh dev resume",
-    "processor:dev:start": "./scripts/deploy/processor.sh dev start",
     "processor:stop": "./scripts/deploy/processor.sh stop",
     "redis:up": "docker-compose up -d redis",
     "squid:mac:start": "yarn archive:start && ./scripts/deploy/processor.sh mlocal start && ./scripts/deploy/api.sh mlocal start",
