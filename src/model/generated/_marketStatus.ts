@@ -1,0 +1,15 @@
+export enum MarketStatus {
+  Active = "Active",
+  Cancelled = "Cancelled",
+  Closed = "Closed",
+  CollectingSubsidy = "CollectingSubsidy",
+  Destroyed = "Destroyed",
+  Disputed = "Disputed",
+  Expired = "Expired",
+  InsufficientSubsidy = "InsufficientSubsidy",
+  Proposed = "Proposed",
+  Rejected = "Rejected",
+  Reported = "Reported",
+  Resolved = "Resolved",
+  Suspended = "Suspended",
+}

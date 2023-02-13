@@ -7,6 +7,7 @@ import {MarketReport} from "./_marketReport"
 import {MarketType} from "./_marketType"
 import {MarketPeriod} from "./_marketPeriod"
 import {Pool} from "./pool.model"
+import {MarketStatus} from "./_marketStatus"
 
 /**
  * Prediction market details
@@ -178,8 +179,8 @@ export class Market {
   /**
    * Status of the market
    */
-  @Column_("text", {nullable: false})
-  status!: string
+  @Column_("varchar", {length: 19, nullable: false})
+  status!: MarketStatus
 
   /**
    * Market tags
