@@ -1,4 +1,5 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_} from "typeorm"
+import {MarketStatus} from "./_marketStatus"
 
 /**
  * Market history of a particular market. Records all transactions
@@ -46,8 +47,8 @@ export class HistoricalMarket {
   /**
    * Latest market status
    */
-  @Column_("text", {nullable: true})
-  status!: string | undefined | null
+  @Column_("varchar", {length: 19, nullable: true})
+  status!: MarketStatus | undefined | null
 
   /**
    * Timestamp of the block

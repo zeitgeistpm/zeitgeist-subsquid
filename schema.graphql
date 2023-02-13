@@ -176,7 +176,7 @@ type HistoricalMarket @entity {
   "Latest resolved outcome"
   resolvedOutcome: String
   "Latest market status"
-  status: String
+  status: MarketStatus
   "Timestamp of the block"
   timestamp: DateTime!
 }
