@@ -47,8 +47,8 @@ export class HistoricalMarket {
   /**
    * Latest market status
    */
-  @Column_("varchar", {length: 19, nullable: true})
-  status!: MarketStatus | undefined | null
+  @Column_("varchar", {length: 19, nullable: false})
+  status!: MarketStatus
 
   /**
    * Timestamp of the block
