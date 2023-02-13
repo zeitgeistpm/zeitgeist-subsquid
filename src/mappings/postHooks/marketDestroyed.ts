@@ -1,6 +1,6 @@
 import { BlockHandlerContext } from '@subsquid/substrate-processor';
 import { Store } from '@subsquid/typeorm-store';
-import { HistoricalMarket, Market } from '../../model';
+import { HistoricalMarket, Market, MarketStatus } from '../../model';
 
 export async function destroyMarkets(ctx: BlockHandlerContext<Store>) {
   const mIds = [
@@ -14,7 +14,7 @@ export async function destroyMarkets(ctx: BlockHandlerContext<Store>) {
       let market = await ctx.store.get(Market, { where: { marketId: mId } });
       if (!market) return;
   
-      market.status = 'Destroyed';
+      market.status = MarketStatus.Destroyed;
       console.log(`[postHooks.destroyMarkets] Saving market: ${JSON.stringify(market, null, 2)}`);
       await ctx.store.save<Market>(market);
   
