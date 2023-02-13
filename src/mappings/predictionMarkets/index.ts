@@ -24,6 +24,7 @@ export async function boughtCompleteSet(ctx: EventHandlerContext<Store>) {
   let hm = new HistoricalMarket()
   hm.id = event.id + '-' + market.marketId
   hm.marketId = market.marketId
+  hm.status = market.status
   hm.event = event.name.split('.')[1]
   hm.blockNumber = block.height
   hm.timestamp = new Date(block.timestamp)
@@ -98,8 +99,8 @@ export async function marketApproved(ctx: EventHandlerContext<Store, {event: {ar
   let hm = new HistoricalMarket()
   hm.id = event.id + '-' + market.marketId
   hm.marketId = market.marketId
-  hm.event = event.name.split('.')[1]
   hm.status = market.status
+  hm.event = event.name.split('.')[1]
   hm.blockNumber = block.height
   hm.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
@@ -120,8 +121,8 @@ export async function marketClosed(ctx: EventHandlerContext<Store, {event: {args
   let hm = new HistoricalMarket()
   hm.id = event.id + '-' + market.marketId
   hm.marketId = market.marketId
-  hm.event = event.name.split('.')[1]
   hm.status = market.status
+  hm.event = event.name.split('.')[1]
   hm.blockNumber = block.height
   hm.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
@@ -178,7 +179,7 @@ export async function marketCreated(ctx: EventHandlerContext<Store, {event: {arg
   newMarket.creatorFee = +market.creatorFee.toString()
   newMarket.oracle = encodeAddress(market.oracle, 73)
   newMarket.scoringRule = market.scoringRule.__kind
-  newMarket.status = market.status.__kind
+  newMarket.status = getMarketStatus(market.status)
   newMarket.outcomeAssets = (await createAssetsForMarket(marketId, market.marketType)) as string[]
   newMarket.metadata = market.metadata.toString()
 
@@ -300,8 +301,8 @@ export async function marketCreated(ctx: EventHandlerContext<Store, {event: {arg
   let hm = new HistoricalMarket()
   hm.id = event.id + '-' + newMarket.marketId
   hm.marketId = newMarket.marketId
-  hm.event = event.name.split('.')[1]
   hm.status = newMarket.status
+  hm.event = event.name.split('.')[1]
   hm.blockNumber = block.height
   hm.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
@@ -332,8 +333,8 @@ export async function marketDestroyed(ctx: EventHandlerContext<Store, {event: {a
   let hm = new HistoricalMarket()
   hm.id = event.id + '-' + market.marketId
   hm.marketId = market.marketId
-  hm.event = event.name.split('.')[1]
   hm.status = market.status
+  hm.event = event.name.split('.')[1]
   hm.blockNumber = block.height
   hm.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
@@ -395,8 +396,8 @@ export async function marketDisputed(ctx: EventHandlerContext<Store, {event: {ar
   let hm = new HistoricalMarket()
   hm.id = event.id + '-' + market.marketId
   hm.marketId = market.marketId
-  hm.event = event.name.split('.')[1]
   hm.status = market.status
+  hm.event = event.name.split('.')[1]
   hm.blockNumber = block.height
   hm.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
@@ -417,8 +418,8 @@ export async function marketExpired(ctx: EventHandlerContext<Store, {event: {arg
   let hm = new HistoricalMarket()
   hm.id = event.id + '-' + market.marketId
   hm.marketId = market.marketId
-  hm.event = event.name.split('.')[1]
   hm.status = market.status
+  hm.event = event.name.split('.')[1]
   hm.blockNumber = block.height
   hm.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
@@ -439,8 +440,8 @@ export async function marketInsufficientSubsidy(ctx: EventHandlerContext<Store, 
   let hm = new HistoricalMarket()
   hm.id = event.id + '-' + market.marketId
   hm.marketId = market.marketId
-  hm.event = event.name.split('.')[1]
   hm.status = market.status
+  hm.event = event.name.split('.')[1]
   hm.blockNumber = block.height
   hm.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
@@ -462,8 +463,8 @@ export async function marketRejected(ctx: EventHandlerContext<Store, {event: {ar
   let hm = new HistoricalMarket()
   hm.id = event.id + '-' + market.marketId
   hm.marketId = market.marketId
-  hm.event = event.name.split('.')[1]
   hm.status = market.status
+  hm.event = event.name.split('.')[1]
   hm.blockNumber = block.height
   hm.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
@@ -499,8 +500,8 @@ export async function marketReported(ctx: EventHandlerContext<Store, {event: {ar
   let hm = new HistoricalMarket()
   hm.id = event.id + '-' + market.marketId
   hm.marketId = market.marketId
-  hm.event = event.name.split('.')[1]
   hm.status = market.status
+  hm.event = event.name.split('.')[1]
   hm.blockNumber = block.height
   hm.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
@@ -601,9 +602,9 @@ export async function marketResolved(ctx: EventHandlerContext<Store, {event: {ar
   let hm = new HistoricalMarket()
   hm.id = event.id + '-' + market.marketId
   hm.marketId = market.marketId
-  hm.event = event.name.split('.')[1]
   hm.status = market.status
   hm.resolvedOutcome = market.resolvedOutcome
+  hm.event = event.name.split('.')[1]
   hm.blockNumber = block.height
   hm.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
@@ -624,8 +625,8 @@ export async function marketStartedWithSubsidy(ctx: EventHandlerContext<Store, {
   let hm = new HistoricalMarket()
   hm.id = event.id + '-' + market.marketId
   hm.marketId = market.marketId
-  hm.event = event.name.split('.')[1]
   hm.status = market.status
+  hm.event = event.name.split('.')[1]
   hm.blockNumber = block.height
   hm.timestamp = new Date(block.timestamp)
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
@@ -642,6 +643,7 @@ export async function soldCompleteSet(ctx: EventHandlerContext<Store>) {
   let hm = new HistoricalMarket()
   hm.id = event.id + '-' + market.marketId
   hm.marketId = market.marketId
+  hm.status = market.status
   hm.event = event.name.split('.')[1]
   hm.blockNumber = block.height
   hm.timestamp = new Date(block.timestamp)
