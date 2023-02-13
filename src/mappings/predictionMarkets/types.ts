@@ -3,12 +3,13 @@ import { EventHandlerContext } from '@subsquid/substrate-processor'
 import * as ss58 from '@subsquid/ss58'
 import { Store } from '@subsquid/typeorm-store'
 import { EventContext } from '../../types/support'
-import { MarketDispute, OutcomeReport, Report } from '../../types/v29'
 import { PredictionMarketsBoughtCompleteSetEvent, PredictionMarketsMarketApprovedEvent, PredictionMarketsMarketClosedEvent, 
   PredictionMarketsMarketCreatedEvent, PredictionMarketsMarketDestroyedEvent, PredictionMarketsMarketDisputedEvent, 
   PredictionMarketsMarketExpiredEvent, PredictionMarketsMarketInsufficientSubsidyEvent, PredictionMarketsMarketRejectedEvent, 
   PredictionMarketsMarketReportedEvent, PredictionMarketsMarketResolvedEvent, PredictionMarketsMarketStartedWithSubsidyEvent, 
   PredictionMarketsSoldCompleteSetEvent, PredictionMarketsTokensRedeemedEvent } from '../../types/events'
+import { MarketDispute, OutcomeReport, Report } from '../../types/v29'
+import { MarketStatus } from '../../types/v42';
 import { getAssetId } from '../helper'
 
 
@@ -38,17 +39,14 @@ export function getMarketApprovedEvent(ctx: EventContext): MarketApprovedEvent {
   if (marketApprovedEvent.isV23) {
     const mId = marketApprovedEvent.asV23
     const marketId = Number(mId)
-    const status = ''
-    return {marketId, status}
+    return {marketId}
   } else if (marketApprovedEvent.isV29) {
-    const [mId, marketStatus] = marketApprovedEvent.asV29
+    const [mId, status] = marketApprovedEvent.asV29
     const marketId = Number(mId)
-    const status = marketStatus.__kind
     return {marketId, status}
   } else {
-    const [mId, marketStatus] = ctx.event.args
+    const [mId, status] = ctx.event.args
     const marketId = Number(mId)
-    const status = marketStatus.__kind
     return {marketId, status}
   }
 }
@@ -120,18 +118,15 @@ export function getMarketDisputedEvent(ctx: EventContext): MarketDisputedEvent {
     const [mId, dispute] = marketDisputedEvent.asV23
     let report = {} as any
     const marketId = Number(mId)
-    const status = ''
     report.outcome = dispute
-    return {marketId, status, report}
+    return {marketId, report}
   } else if (marketDisputedEvent.isV29) {
-    const [mId, marketStatus, report] = marketDisputedEvent.asV29
+    const [mId, status, report] = marketDisputedEvent.asV29
     const marketId = Number(mId)
-    const status = marketStatus.__kind
     return {marketId, status, report}
   } else {
-    const [mId, marketStatus, report] = ctx.event.args
+    const [mId, status, report] = ctx.event.args
     const marketId = Number(mId)
-    const status = marketStatus.__kind
     return {marketId, status, report}
   }
 }
@@ -147,21 +142,18 @@ export function getMarketExpiredEvent(ctx: EventContext): MarketExpiredEvent {
   }
 }
 
-export function getMarketInsufficientSubsidyEvent(ctx: EventContext): MarketInsufficientSubsidyEvent {
+export function getMarketInsufficientSubsidyEvent(ctx: EventContext): MarketSubsidyEvent {
   const marketInsufficientSubsidyEvent = new PredictionMarketsMarketInsufficientSubsidyEvent(ctx)
   if (marketInsufficientSubsidyEvent.isV23) {
     const marketId = Number(marketInsufficientSubsidyEvent.asV23)
-    const status = ''
-    return {marketId, status}
+    return {marketId}
   } else if (marketInsufficientSubsidyEvent.isV29) {
-    const [mId, marketStatus] = marketInsufficientSubsidyEvent.asV29
+    const [mId, status] = marketInsufficientSubsidyEvent.asV29
     const marketId = Number(mId)
-    const status = marketStatus.__kind
     return {marketId, status}
   } else {
-    const [mId, marketStatus] = ctx.event.args
+    const [mId, status] = ctx.event.args
     const marketId = Number(mId)
-    const status = marketStatus.__kind
     return {marketId, status}
   }
 }
@@ -189,18 +181,15 @@ export function getMarketReportedEvent(ctx: EventContext): MarketReportedEvent {
     const [mId, marketReport] = marketReportedEvent.asV23
     let report = {} as any
     const marketId = Number(mId)
-    const status = ''
     report.outcome = marketReport
-    return {marketId, status, report}
+    return {marketId, report}
   } else if (marketReportedEvent.isV29) {
-    const [mId, marketStatus, report] = marketReportedEvent.asV29
+    const [mId, status, report] = marketReportedEvent.asV29
     const marketId = Number(mId)
-    const status = marketStatus.__kind
     return {marketId, status, report}
   } else {
-    const [mId, marketStatus, report] = ctx.event.args
+    const [mId, status, report] = ctx.event.args
     const marketId = Number(mId)
-    const status = marketStatus.__kind
     return {marketId, status, report}
   }
 }
@@ -211,37 +200,31 @@ export function getMarketResolvedEvent(ctx: EventContext): MarketResolvedEvent {
     const [mId, outcome] = marketResolvedEvent.asV23
     let report = {} as any
     const marketId = Number(mId)
-    const status = ''
     report.value = outcome
-    return {marketId, status, report}
+    return {marketId, report}
   } else if (marketResolvedEvent.isV29) {
-    const [mId, marketStatus, report] = marketResolvedEvent.asV29
+    const [mId, status, report] = marketResolvedEvent.asV29
     const marketId = Number(mId)
-    const status = marketStatus.__kind
     return {marketId, status, report}
   } else {
-    const [mId, marketStatus, report] = ctx.event.args
+    const [mId, status, report] = ctx.event.args
     const marketId = Number(mId)
-    const status = marketStatus.__kind
     return {marketId, status, report}
   }
 }
 
-export function getMarketStartedWithSubsidyEvent(ctx: EventContext): MarketStartedWithSubsidyEvent {
+export function getMarketStartedWithSubsidyEvent(ctx: EventContext): MarketSubsidyEvent {
   const marketStartedWithSubsidyEvent = new PredictionMarketsMarketStartedWithSubsidyEvent(ctx)
   if (marketStartedWithSubsidyEvent.isV23) {
     const marketId = Number(marketStartedWithSubsidyEvent.asV23)
-    const status = ''
-    return {marketId, status}
+    return {marketId}
   } else if (marketStartedWithSubsidyEvent.isV29) {
-    const [mId, marketStatus] = marketStartedWithSubsidyEvent.asV29
+    const [mId, status] = marketStartedWithSubsidyEvent.asV29
     const marketId = Number(mId)
-    const status = marketStatus.__kind
     return {marketId, status}
   } else {
-    const [mId, marketStatus] = ctx.event.args
+    const [mId, status] = ctx.event.args
     const marketId = Number(mId)
-    const status = marketStatus.__kind
     return {marketId, status}
   }
 }
@@ -295,7 +278,7 @@ interface BoughtCompleteSetEvent {
 
 interface MarketApprovedEvent {
   marketId: number
-  status: string
+  status?: MarketStatus
 }
 
 interface MarketClosedEvent {
@@ -314,17 +297,12 @@ interface MarketDestroyedEvent {
 
 interface MarketDisputedEvent {
   marketId: number
-  status: string
+  status?: MarketStatus
   report: MarketDispute
 }
 
 interface MarketExpiredEvent {
   marketId: number
-}
-
-interface MarketInsufficientSubsidyEvent {
-  marketId: number
-  status: string
 }
 
 interface MarketRejectedEvent {
@@ -334,19 +312,19 @@ interface MarketRejectedEvent {
 
 interface MarketReportedEvent {
   marketId: number
-  status: string
+  status?: MarketStatus
   report: Report
 }
 
 interface MarketResolvedEvent {
   marketId: number
-  status: string
+  status?: MarketStatus
   report: OutcomeReport
 }
 
-interface MarketStartedWithSubsidyEvent {
+interface MarketSubsidyEvent {
   marketId: number
-  status: string
+  status?: MarketStatus
 }
 
 interface SoldCompleteSetEvent {
