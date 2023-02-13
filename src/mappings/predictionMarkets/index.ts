@@ -5,8 +5,8 @@ import * as ss58 from '@subsquid/ss58'
 import { Like } from 'typeorm'
 import { Account, AccountBalance, Asset, CategoryMetadata, HistoricalAccountBalance, HistoricalAsset, 
   HistoricalMarket, Market, MarketBond, MarketBonds, MarketDeadlines, MarketPeriod, MarketReport, 
-  MarketType, OutcomeReport } from '../../model'
-import { createAssetsForMarket, decodeMarketMetadata, getAssetId, rescale } from '../helper'
+  MarketStatus, MarketType, OutcomeReport } from '../../model'
+import { createAssetsForMarket, decodeMarketMetadata, getAssetId, getMarketStatus, rescale } from '../helper'
 import { Tools } from '../util'
 import { getBoughtCompleteSetEvent, getMarketApprovedEvent, getMarketClosedEvent, getMarketCreatedEvent, 
   getMarketDestroyedEvent, getMarketDisputedEvent, getMarketExpiredEvent, getMarketInsufficientSubsidyEvent, 
@@ -90,11 +90,8 @@ export async function marketApproved(ctx: EventHandlerContext<Store, {event: {ar
   let market = await store.get(Market, { where: { marketId: marketId } })
   if (!market) return
 
-  if (status.length < 2) {
-    market.status = market.scoringRule === 'CPMM' ? 'Active' : 'CollectingSubsidy'
-  } else {
-    market.status = status
-  }
+  market.status = status ? getMarketStatus(status) : 
+    market.scoringRule === 'CPMM' ? MarketStatus.Active : MarketStatus.CollectingSubsidy
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`)
   await store.save<Market>(market)
 
@@ -116,7 +113,7 @@ export async function marketClosed(ctx: EventHandlerContext<Store, {event: {args
   let market = await store.get(Market, { where: { marketId: marketId } })
   if (!market) return
 
-  market.status = 'Closed'
+  market.status = MarketStatus.Closed
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`)
   await store.save<Market>(market)
 
@@ -327,7 +324,8 @@ export async function marketDestroyed(ctx: EventHandlerContext<Store, {event: {a
 
   let market = await store.get(Market, { where: { marketId: marketId } })
   if (!market) return
-  market.status = 'Destroyed'
+
+  market.status = MarketStatus.Destroyed
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`)
   await store.save<Market>(market)
 
@@ -388,13 +386,8 @@ export async function marketDisputed(ctx: EventHandlerContext<Store, {event: {ar
     mr.at = +report.at.toString()
   if (report.by)
     mr.by = ss58.codec('zeitgeist').encode(report.by)
-
-  if (status.length < 2) {
-    market.status = 'Disputed'
-  } else {
-    market.status = status
-  }
   
+  market.status = status ? getMarketStatus(status) : MarketStatus.Disputed
   market.disputes.push(mr);
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`)
   await store.save<Market>(market)
@@ -417,7 +410,7 @@ export async function marketExpired(ctx: EventHandlerContext<Store, {event: {arg
   let market = await store.get(Market, { where: { marketId: marketId } })
   if (!market) return
 
-  market.status = 'Expired'
+  market.status = MarketStatus.Expired
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`)
   await store.save<Market>(market)
 
@@ -439,11 +432,7 @@ export async function marketInsufficientSubsidy(ctx: EventHandlerContext<Store, 
   let market = await store.get(Market, { where: { marketId: marketId } })
   if (!market) return
 
-  if (status.length < 2) {
-    market.status = 'Insufficient Subsidy'
-  } else {
-    market.status = status
-  }
+  market.status = status ? getMarketStatus(status) : MarketStatus.InsufficientSubsidy
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`)
   await store.save<Market>(market)
 
@@ -465,7 +454,7 @@ export async function marketRejected(ctx: EventHandlerContext<Store, {event: {ar
   let market = await store.get(Market, { where: { marketId: marketId } })
   if (!market) return
 
-  market.status = 'Rejected'
+  market.status = MarketStatus.Rejected
   market.rejectReason = reason.toString()
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`)
   await store.save<Market>(market)
@@ -496,19 +485,13 @@ export async function marketReported(ctx: EventHandlerContext<Store, {event: {ar
   }
 
   let mr = new MarketReport()
-  if (report.at) {
+  if (report.at)
     mr.at = +report.at.toString()
-  }
-  if (report.by) {
+  if (report.by)
     mr.by = ss58.codec('zeitgeist').encode(report.by)
-  }
   mr.outcome = ocr
 
-  if (status.length < 2) {
-    market.status = 'Reported'
-  } else {
-    market.status = status
-  }
+  market.status = status ? getMarketStatus(status) : MarketStatus.Reported
   market.report = mr
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`)
   await store.save<Market>(market)
@@ -611,7 +594,7 @@ export async function marketResolved(ctx: EventHandlerContext<Store, {event: {ar
       );
     }
   }
-  market.status = status.length < 2 ? 'Resolved' : status
+  market.status = status ? getMarketStatus(status) : MarketStatus.Resolved
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`)
   await store.save<Market>(market)
 
@@ -634,11 +617,7 @@ export async function marketStartedWithSubsidy(ctx: EventHandlerContext<Store, {
   let market = await store.get(Market, { where: { marketId: marketId } })
   if (!market) return
 
-  if (status.length < 2) {
-    market.status = 'Active'
-  } else {
-    market.status = status
-  }
+  market.status = status ? getMarketStatus(status) : MarketStatus.Active
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`)
   await store.save<Market>(market)
 
