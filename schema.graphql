@@ -153,7 +153,7 @@ type Market @entity {
   "Short name for the market"
   slug: String
   "Status of the market"
-  status: String!
+  status: MarketStatus!
   "Market tags"
   tags: [String]
   "Market question"
@@ -321,12 +321,18 @@ Market's status options
 """
 enum MarketStatus {
   Active
-  CollectingSubsidy
-  InsufficientSubsidy
-  Reported
-  Disputed
-  Rejected
   Cancelled
+  Closed
+  CollectingSubsidy
+  Destroyed
+  Disputed
+  Expired
+  InsufficientSubsidy
+  Proposed
+  Rejected
+  Reported
+  Resolved
+  Suspended
 }
 
 """
