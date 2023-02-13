@@ -321,7 +321,6 @@ Market's status options
 """
 enum MarketStatus {
   Active
-  Cancelled
   Closed
   CollectingSubsidy
   Destroyed

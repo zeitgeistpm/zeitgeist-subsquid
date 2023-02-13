@@ -1,6 +1,5 @@
 export enum MarketStatus {
   Active = "Active",
-  Cancelled = "Cancelled",
   Closed = "Closed",
   CollectingSubsidy = "CollectingSubsidy",
   Destroyed = "Destroyed",
