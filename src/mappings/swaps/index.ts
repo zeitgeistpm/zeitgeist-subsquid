@@ -275,8 +275,9 @@ export async function poolCreate(ctx: EventHandlerContext<Store, {event: {args: 
     let hm = new HistoricalMarket()
     hm.id = event.id + '-' + market.marketId
     hm.marketId = market.marketId
-    hm.event = event.name.split('.')[1]
+    hm.status = market.status
     hm.poolId = market.pool.poolId
+    hm.event = event.name.split('.')[1]
     hm.blockNumber = block.height
     hm.timestamp = new Date(block.timestamp)
     console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`)
