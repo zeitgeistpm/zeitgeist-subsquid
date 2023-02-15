@@ -2,8 +2,8 @@ import { AccountInfo } from '@polkadot/types/interfaces/system';
 import { SubstrateBlock, SubstrateEvent, SubstrateExtrinsic } from '@subsquid/substrate-processor';
 import { Store } from '@subsquid/typeorm-store';
 import { util } from '@zeitgeistpm/sdk';
-import { Account, AccountBalance, HistoricalAccountBalance } from '../model'
-import { SwapEvent } from '../types/v37';
+import { Account, AccountBalance, HistoricalAccountBalance, MarketStatus } from '../model'
+import { MarketStatus as status } from '../types/v42';
 import { Cache, IPFS, Tools } from './util';
 
 
@@ -93,6 +93,29 @@ export async function getFees(block: SubstrateBlock, extrinsic: SubstrateExtrins
   }
   await (await Cache.init()).setFee(block.hash+id, totalFees.toString())
   return totalFees
+}
+
+export function getMarketStatus(status: status): MarketStatus {
+  switch(status.__kind) {
+    case "Active":
+      return MarketStatus.Active;
+    case "Closed":
+      return MarketStatus.Closed;
+    case "CollectingSubsidy":
+      return MarketStatus.CollectingSubsidy;
+    case "Disputed":
+      return MarketStatus.Disputed;
+    case "InsufficientSubsidy":
+      return MarketStatus.InsufficientSubsidy;
+    case "Proposed":
+      return MarketStatus.Proposed;
+    case "Reported":
+      return MarketStatus.Reported;
+    case "Resolved":
+      return MarketStatus.Resolved;
+    case "Suspended":
+      return MarketStatus.Suspended;
+  }
 }
 
 export async function initBalance(acc: Account, store: Store, block: SubstrateBlock, event: SubstrateEvent) {
