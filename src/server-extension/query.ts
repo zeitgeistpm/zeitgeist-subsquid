@@ -31,7 +31,7 @@ export const marketLiquidity = (ids: string[]) => `
 
 export const totalLiquidity = () => `
   SELECT
-    ROUND(SUM(liquidity),0) AS totalliquidity 
+    ROUND(SUM(liquidity),0) AS total_liquidity 
   FROM (
     SELECT
       SUM(a.price*a.amount_in_pool)+p.ztg_qty AS liquidity
@@ -43,5 +43,5 @@ export const totalLiquidity = () => `
       pool p ON p.id = m.pool_id
     GROUP BY
       p.ztg_qty
-  ) AS liquidity;
+  ) AS market_liquidity;
 `;

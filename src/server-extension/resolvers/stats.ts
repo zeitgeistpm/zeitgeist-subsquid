@@ -5,8 +5,8 @@ import { totalLiquidity } from '../query';
 
 @ObjectType()
 export class Stats {
-  @Field(() => BigInt)
-  totalLiquidity!: bigint;
+  @Field(() => BigInt, { name: 'totalLiquidity' })
+  total_liquidity!: bigint;
 
   constructor(props: Partial<Stats>) {
     Object.assign(this, props);
