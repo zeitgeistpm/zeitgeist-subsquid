@@ -23,8 +23,10 @@ services:
 
   gateway:
     environment:
-      DATABASE_MAX_CONNECTIONS: 5
       RUST_LOG: "actix_web=info,actix_server=info"
     ports:
       - 8888:8000
-    command: [ "--database-url", "postgres://root@db:26257/defaultdb" ]
+    command: [ 
+      "--database-url", "postgres://root@db:26257/defaultdb",
+      "--database-max-connections", "10",
+    ]
