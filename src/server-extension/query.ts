@@ -29,19 +29,24 @@ export const marketLiquidity = (ids: string[]) => `
     p.ztg_qty;
 `;
 
-export const totalLiquidity = () => `
+export const totalLiquidityAndVolume = () => `
   SELECT
-    ROUND(SUM(liquidity),0) AS total_liquidity 
+    ROUND(SUM(liquidity),0) AS total_liquidity,
+    SUM(volume) AS total_volume
   FROM (
     SELECT
-      SUM(a.price*a.amount_in_pool)+p.ztg_qty AS liquidity
+      m.market_id,
+      SUM(a.price*a.amount_in_pool)+p.ztg_qty AS liquidity,
+      p.volume
     FROM
       market m
     JOIN
       asset a ON a.asset_id = ANY (m.outcome_assets)
-    LEFT JOIN
+    JOIN
       pool p ON p.id = m.pool_id
     GROUP BY
-      p.ztg_qty
-  ) AS market_liquidity;
+      m.market_id,
+      p.ztg_qty,
+      p.volume
+  ) AS market_stats;
 `;
