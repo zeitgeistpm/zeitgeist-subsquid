@@ -20,8 +20,8 @@ export class Stats {
 export class StatsResolver {
   constructor(private tx: () => Promise<EntityManager>) {}
 
-  @Query(() => Stats)
-  async stats(): Promise<Stats> {
+  @Query(() => [Stats])
+  async stats(): Promise<Stats[]> {
     const manager = await this.tx();
     const result = await manager.getRepository(Market).query(totalLiquidityAndVolume());
     return result;
