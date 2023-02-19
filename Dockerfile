@@ -9,7 +9,7 @@ ADD package.json .
 ADD yarn.lock .
 RUN yarn install --frozen-lockfile
 ADD tsconfig.json .
-ADD src src
+ADD src2 src2
 RUN yarn build
 
 FROM node-with-gyp AS deps
