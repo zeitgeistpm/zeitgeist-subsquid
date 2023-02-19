@@ -12,6 +12,7 @@ import * as v38 from './v38'
 import * as v39 from './v39'
 import * as v40 from './v40'
 import * as v41 from './v41'
+import * as v42 from './v42'
 
 export class BalancesBalanceSetEvent {
   private readonly _chain: Chain
@@ -870,6 +871,21 @@ export class PredictionMarketsMarketCreatedEvent {
     assert(this.isV41)
     return this._chain.decodeEvent(this.event)
   }
+
+  /**
+   * A market has been created \[market_id, market_account, market\]
+   */
+  get isV42(): boolean {
+    return this._chain.getEventHash('PredictionMarkets.MarketCreated') === '4a31b4ee002e93b8d83a62664998cd9f04fb49555260e932c1ffabc3d73e7126'
+  }
+
+  /**
+   * A market has been created \[market_id, market_account, market\]
+   */
+  get asV42(): [bigint, Uint8Array, v42.Market] {
+    assert(this.isV42)
+    return this._chain.decodeEvent(this.event)
+  }
 }
 
 export class PredictionMarketsMarketDestroyedEvent {
@@ -1668,6 +1684,95 @@ export class SwapsPoolExitEvent {
   }
 }
 
+export class SwapsPoolExitWithExactAssetAmountEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Swaps.PoolExitWithExactAssetAmount')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   *  Exits a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get isV23(): boolean {
+    return this._chain.getEventHash('Swaps.PoolExitWithExactAssetAmount') === '2c64913e1fb29a6eeb9571a8d090105f9122ed42d8800fa6f40d1e645168b10e'
+  }
+
+  /**
+   *  Exits a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get asV23(): v23.PoolAssetEvent {
+    assert(this.isV23)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   *  Exits a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get isV26(): boolean {
+    return this._chain.getEventHash('Swaps.PoolExitWithExactAssetAmount') === '7e9bf306fcce1d32b2d54ed690a76f7480447ebe5b618db3b1f16fcb0937a3e3'
+  }
+
+  /**
+   *  Exits a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get asV26(): v26.PoolAssetEvent {
+    assert(this.isV26)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Exits a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get isV32(): boolean {
+    return this._chain.getEventHash('Swaps.PoolExitWithExactAssetAmount') === 'afcfc5fbe99da7e5bc294edf0988025a07d65f57facac5ce92d338ab5e593097'
+  }
+
+  /**
+   * Exits a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get asV32(): v32.PoolAssetEvent {
+    assert(this.isV32)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Exits a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get isV35(): boolean {
+    return this._chain.getEventHash('Swaps.PoolExitWithExactAssetAmount') === '168a235ed1acfe6e093bdb5d0d35bdda9ec503d5e8deeedcafa09200b28b8c56'
+  }
+
+  /**
+   * Exits a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get asV35(): v35.PoolAssetEvent {
+    assert(this.isV35)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * Exits a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get isV41(): boolean {
+    return this._chain.getEventHash('Swaps.PoolExitWithExactAssetAmount') === '06175dac7f1fc4166ac099e051beea1350d973e1ee5c891df6521482ec3dbfca'
+  }
+
+  /**
+   * Exits a pool given an exact amount of an asset. \[PoolAssetEvent\]
+   */
+  get asV41(): v41.PoolAssetEvent {
+    assert(this.isV41)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class SwapsPoolJoinEvent {
   private readonly _chain: Chain
   private readonly event: Event
@@ -2111,6 +2216,21 @@ export class SystemExtrinsicFailedEvent {
     assert(this.isV36)
     return this._chain.decodeEvent(this.event)
   }
+
+  /**
+   * An extrinsic failed.
+   */
+  get isV42(): boolean {
+    return this._chain.getEventHash('System.ExtrinsicFailed') === '7a219a9eae41ad22651fdcb4f6a7453254b0ecc7be4b30821be2ab5b44e5f1b4'
+  }
+
+  /**
+   * An extrinsic failed.
+   */
+  get asV42(): {dispatchError: v42.DispatchError, dispatchInfo: v42.DispatchInfo} {
+    assert(this.isV42)
+    return this._chain.decodeEvent(this.event)
+  }
 }
 
 export class SystemExtrinsicSuccessEvent {
@@ -2153,6 +2273,21 @@ export class SystemExtrinsicSuccessEvent {
    */
   get asV34(): {dispatchInfo: v34.DispatchInfo} {
     assert(this.isV34)
+    return this._chain.decodeEvent(this.event)
+  }
+
+  /**
+   * An extrinsic completed successfully.
+   */
+  get isV42(): boolean {
+    return this._chain.getEventHash('System.ExtrinsicSuccess') === '6fc1e5ad9f5b3851c6e301764b8507ebb0861fd57381e6bc020a47f2b710167d'
+  }
+
+  /**
+   * An extrinsic completed successfully.
+   */
+  get asV42(): {dispatchInfo: v42.DispatchInfo} {
+    assert(this.isV42)
     return this._chain.decodeEvent(this.event)
   }
 }
