@@ -128,27 +128,27 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
 const handlePostHooks = async (ctx: Ctx, block: SubstrateBlock) => {
   switch (block.height) {
     case 92128:
-      await unreserveBalances_92128(ctx, block);
+      return unreserveBalances_92128(ctx, block);
     case 108949:
-      await unreserveBalances_108949(ctx, block);
+      return unreserveBalances_108949(ctx, block);
     case 155917:
-      await unreserveBalances_155917(ctx, block);
+      return unreserveBalances_155917(ctx, block);
     case 168378:
-      await unreserveBalances_168378(ctx, block);
+      return unreserveBalances_168378(ctx, block);
     case 175178:
-      await unreserveBalances_175178(ctx, block);
+      return unreserveBalances_175178(ctx, block);
     case 176408:
-      await unreserveBalances_176408(ctx, block);
+      return unreserveBalances_176408(ctx, block);
     case 178290:
-      await unreserveBalances_178290(ctx, block);
+      return unreserveBalances_178290(ctx, block);
     case 179524:
-      await unreserveBalances_179524(ctx, block);
+      return unreserveBalances_179524(ctx, block);
     case 184820:
-      await unreserveBalances_184820(ctx, block);
+      return unreserveBalances_184820(ctx, block);
     case 204361:
-      await unreserveBalances_204361(ctx, block);
+      return unreserveBalances_204361(ctx, block);
     case 211391:
-      await unreserveBalances_211391(ctx, block);
+      return unreserveBalances_211391(ctx, block);
   }
 };
 
