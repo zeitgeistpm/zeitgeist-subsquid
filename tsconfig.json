@@ -3,7 +3,7 @@
     "module": "commonjs",
     "target": "es2021",
     "outDir": "lib",
-    "rootDir": "src",
+    "rootDir": "src2",
     "strict": true,
     "declaration": false,
     "sourceMap": true,
@@ -12,7 +12,7 @@
     "emitDecoratorMetadata": true,
     "skipLibCheck": true
   },
-  "include": ["src"],
+  "include": ["src2"],
   "exclude": [
     "node_modules"
   ]
