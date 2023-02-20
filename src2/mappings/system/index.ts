@@ -12,11 +12,14 @@ import {
 export const systemExtrinsicFailed = async (
   ctx: Ctx,
   block: SubstrateBlock,
-  item: any
+  item: EventItem
 ) => {
   if (
+    // @ts-ignore
     !item.event.extrinsic ||
+    // @ts-ignore
     !item.event.extrinsic.signature ||
+    // @ts-ignore
     !item.event.extrinsic.signature.address
   )
     return;
@@ -25,6 +28,7 @@ export const systemExtrinsicFailed = async (
   if (dispatchInfo.paysFee.__kind == 'No') return;
 
   const walletId = encodeAddress(
+    // @ts-ignore
     item.event.extrinsic.signature.address['value'],
     73
   );
@@ -42,6 +46,7 @@ export const systemExtrinsicFailed = async (
     await initBalance(acc, ctx.store, block, item);
   }
 
+  // @ts-ignore
   const txnFees = await getFees(block, item.event.extrinsic);
   let ab = await ctx.store.findOneBy(AccountBalance, {
     account: { accountId: walletId },
@@ -81,11 +86,14 @@ export const systemExtrinsicFailed = async (
 export const systemExtrinsicSuccess = async (
   ctx: Ctx,
   block: SubstrateBlock,
-  item: any
+  item: EventItem
 ) => {
   if (
+    // @ts-ignore
     !item.event.extrinsic ||
+    // @ts-ignore
     !item.event.extrinsic.signature ||
+    // @ts-ignore
     !item.event.extrinsic.signature.address
   )
     return;
@@ -94,6 +102,7 @@ export const systemExtrinsicSuccess = async (
   if (dispatchInfo.paysFee.__kind == 'No') return;
 
   const walletId = encodeAddress(
+    // @ts-ignore
     item.event.extrinsic.signature.address['value'],
     73
   );
@@ -109,6 +118,7 @@ export const systemExtrinsicSuccess = async (
     await initBalance(acc, ctx.store, block, item);
   }
 
+  // @ts-ignore
   const txnFees = await getFees(block, item.event.extrinsic);
   let ab = await ctx.store.findOneBy(AccountBalance, {
     account: { accountId: walletId },
