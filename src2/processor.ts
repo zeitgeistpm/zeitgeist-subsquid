@@ -32,6 +32,22 @@ import {
   unreserveBalances_211391,
   unreserveBalances_92128,
 } from './mappings/postHooks/balancesUnreserved';
+import {
+  boughtCompleteSet,
+  marketApproved,
+  marketClosed,
+  marketCreated,
+  marketDestroyed,
+  marketDisputed,
+  marketExpired,
+  marketInsufficientSubsidy,
+  marketRejected,
+  marketReported,
+  marketResolved,
+  marketStartedWithSubsidy,
+  soldCompleteSet,
+  tokensRedeemed,
+} from './mappings/predictionMarkets';
 import { accountCrossed } from './mappings/styx';
 import {
   systemExtrinsicFailed,
@@ -50,6 +66,15 @@ const eventOptions = {
   data: {
     event: {
       args: true,
+    },
+  },
+} as const;
+
+const eventExtrinsicOptions = {
+  data: {
+    event: {
+      args: true,
+      extrinsic: true,
     },
   },
 } as const;
@@ -81,6 +106,20 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Balances.Unreserved', eventOptions)
   .addEvent('Balances.Withdraw', eventOptions)
   .addEvent('ParachainStaking.Rewarded', eventRangeOptions)
+  .addEvent('PredictionMarkets.BoughtCompleteSet', eventExtrinsicOptions)
+  .addEvent('PredictionMarkets.MarketApproved', eventOptions)
+  .addEvent('PredictionMarkets.MarketClosed', eventOptions)
+  .addEvent('PredictionMarkets.MarketCreated', eventOptions)
+  .addEvent('PredictionMarkets.MarketDestroyed', eventOptions)
+  .addEvent('PredictionMarkets.MarketDisputed', eventOptions)
+  .addEvent('PredictionMarkets.MarketExpired', eventOptions)
+  .addEvent('PredictionMarkets.MarketInsufficientSubsidy', eventOptions)
+  .addEvent('PredictionMarkets.MarketRejected', eventOptions)
+  .addEvent('PredictionMarkets.MarketReported', eventOptions)
+  .addEvent('PredictionMarkets.MarketResolved', eventOptions)
+  .addEvent('PredictionMarkets.MarketStartedWithSubsidy', eventOptions)
+  .addEvent('PredictionMarkets.SoldCompleteSet', eventExtrinsicOptions)
+  .addEvent('PredictionMarkets.TokensRedeemed', eventOptions)
   .addEvent('Styx.AccountCrossed', eventOptions)
   .addEvent('System.ExtrinsicFailed', eventRangeOptions)
   .addEvent('System.ExtrinsicSuccess', eventRangeOptions)
@@ -114,6 +153,34 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
       return balancesWithdraw(ctx, block, item);
     case 'ParachainStaking.Rewarded':
       return parachainStakingRewarded(ctx, block, item);
+    case 'PredictionMarkets.BoughtCompleteSet':
+      return boughtCompleteSet(ctx, block, item);
+    case 'PredictionMarkets.MarketApproved':
+      return marketApproved(ctx, block, item);
+    case 'PredictionMarkets.MarketClosed':
+      return marketClosed(ctx, block, item);
+    case 'PredictionMarkets.MarketCreated':
+      return marketCreated(ctx, block, item);
+    case 'PredictionMarkets.MarketDestroyed':
+      return marketDestroyed(ctx, block, item);
+    case 'PredictionMarkets.MarketDisputed':
+      return marketDisputed(ctx, block, item);
+    case 'PredictionMarkets.MarketExpired':
+      return marketExpired(ctx, block, item);
+    case 'PredictionMarkets.MarketInsufficientSubsidy':
+      return marketInsufficientSubsidy(ctx, block, item);
+    case 'PredictionMarkets.MarketRejected':
+      return marketRejected(ctx, block, item);
+    case 'PredictionMarkets.MarketReported':
+      return marketReported(ctx, block, item);
+    case 'PredictionMarkets.MarketResolved':
+      return marketResolved(ctx, block, item);
+    case 'PredictionMarkets.MarketStartedWithSubsidy':
+      return marketStartedWithSubsidy(ctx, block, item);
+    case 'PredictionMarkets.SoldCompleteSet':
+      return soldCompleteSet(ctx, block, item);
+    case 'PredictionMarkets.TokensRedeemed':
+      return tokensRedeemed(ctx, block, item);
     case 'Styx.AccountCrossed':
       return accountCrossed(ctx, block, item);
     case 'System.NewAccount':
