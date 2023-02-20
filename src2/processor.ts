@@ -18,6 +18,11 @@ import {
   balancesUnreserved,
   balancesWithdraw,
 } from './mappings/balances';
+import {
+  currencyTransferred,
+  currencyDeposited,
+  currencyWithdrawn,
+} from './mappings/currency';
 import { parachainStakingRewarded } from './mappings/parachainStaking';
 import {
   unreserveBalances_108949,
@@ -112,6 +117,9 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Balances.Transfer', eventOptions)
   .addEvent('Balances.Unreserved', eventOptions)
   .addEvent('Balances.Withdraw', eventOptions)
+  .addEvent('Currency.Transferred', eventOptions)
+  .addEvent('Currency.Deposited', eventOptions)
+  .addEvent('Currency.Withdrawn', eventOptions)
   .addEvent('ParachainStaking.Rewarded', eventRangeOptions)
   .addEvent('PredictionMarkets.BoughtCompleteSet', eventExtrinsicOptions)
   .addEvent('PredictionMarkets.MarketApproved', eventOptions)
@@ -163,6 +171,12 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
       return balancesUnreserved(ctx, block, item);
     case 'Balances.Withdraw':
       return balancesWithdraw(ctx, block, item);
+    case 'Currency.Transferred':
+      return currencyTransferred(ctx, block, item);
+    case 'Currency.Deposited':
+      return currencyDeposited(ctx, block, item);
+    case 'Currency.Withdrawn':
+      return currencyWithdrawn(ctx, block, item);
     case 'ParachainStaking.Rewarded':
       return parachainStakingRewarded(ctx, block, item);
     case 'PredictionMarkets.BoughtCompleteSet':
