@@ -54,6 +54,13 @@ import {
   systemExtrinsicSuccess,
   systemNewAccount,
 } from './mappings/system';
+import {
+  tokensBalanceSet,
+  tokensDeposited,
+  tokensEndowed,
+  tokensTransfer,
+  tokensWithdrawn,
+} from './mappings/tokens';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -123,7 +130,12 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Styx.AccountCrossed', eventOptions)
   .addEvent('System.ExtrinsicFailed', eventRangeOptions)
   .addEvent('System.ExtrinsicSuccess', eventRangeOptions)
-  .addEvent('System.NewAccount', eventOptions);
+  .addEvent('System.NewAccount', eventOptions)
+  .addEvent('Tokens.BalanceSet', eventOptions)
+  .addEvent('Tokens.Deposited', eventOptions)
+  .addEvent('Tokens.Endowed', eventOptions)
+  .addEvent('Tokens.Transfer', eventOptions)
+  .addEvent('Tokens.Withdrawn', eventOptions);
 
 export type Item = BatchProcessorItem<typeof processor>;
 export type Ctx = BatchContext<Store, Item>;
@@ -189,6 +201,16 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
       return systemExtrinsicFailed(ctx, block, item);
     case 'System.ExtrinsicSuccess':
       return systemExtrinsicSuccess(ctx, block, item);
+    case 'Tokens.BalanceSet':
+      return tokensBalanceSet(ctx, block, item);
+    case 'Tokens.Deposited':
+      return tokensDeposited(ctx, block, item);
+    case 'Tokens.Endowed':
+      return tokensEndowed(ctx, block, item);
+    case 'Tokens.Transfer':
+      return tokensTransfer(ctx, block, item);
+    case 'Tokens.Withdrawn':
+      return tokensWithdrawn(ctx, block, item);
   }
 };
 
