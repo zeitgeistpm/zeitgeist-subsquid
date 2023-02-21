@@ -1,5 +1,6 @@
 import { encodeAddress } from '@polkadot/keyring';
 import * as ss58 from '@subsquid/ss58';
+import { Ctx, EventItem } from '../../processor';
 import {
   PredictionMarketsBoughtCompleteSetEvent,
   PredictionMarketsMarketApprovedEvent,
@@ -19,7 +20,6 @@ import {
 import { MarketDispute, OutcomeReport, Report } from '../../types/v29';
 import { MarketStatus } from '../../types/v42';
 import { getAssetId } from '../helper';
-import { Ctx, EventItem } from '../../processor';
 
 export const getBoughtCompleteSetEvent = (ctx: Ctx, item: EventItem): BoughtCompleteSetEvent => {
   const boughtCompleteSetEvent = new PredictionMarketsBoughtCompleteSetEvent(ctx, item.event);

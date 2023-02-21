@@ -1,4 +1,4 @@
-import { EventHandlerContext, SubstrateBlock, SubstrateEvent } from '@subsquid/substrate-processor';
+import { SubstrateBlock } from '@subsquid/substrate-processor';
 import { Account, AccountBalance, HistoricalAccountBalance } from '../../model';
 import { Ctx, EventItem } from '../../processor';
 import { initBalance } from '../helper';

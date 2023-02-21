@@ -2,6 +2,7 @@ import { encodeAddress } from '@polkadot/keyring';
 import { SubstrateBlock } from '@subsquid/substrate-processor';
 import * as ss58 from '@subsquid/ss58';
 import { Like } from 'typeorm';
+import { Ctx, EventItem } from '../../processor';
 import {
   Account,
   AccountBalance,
@@ -38,7 +39,6 @@ import {
   getSoldCompleteSetEvent,
   getTokensRedeemedEvent,
 } from './types';
-import { Ctx, EventItem } from '../../processor';
 
 export const boughtCompleteSet = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
   const { marketId, amount, walletId } = getBoughtCompleteSetEvent(ctx, item);

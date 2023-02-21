@@ -15,9 +15,7 @@ import {
   SwapsSwapExactAmountInEvent,
   SwapsSwapExactAmountOutEvent,
 } from '../../types/events';
-import { PoolAssetEvent, PoolAssetsEvent } from '../../types/v41';
-import { SwapEvent } from '../../types/v41';
-import { CommonPoolEventParams, Pool } from '../../types/v41';
+import { CommonPoolEventParams, Pool, PoolAssetEvent, PoolAssetsEvent, SwapEvent } from '../../types/v41';
 
 export const getArbitrageBuyBurnEvent = (ctx: Ctx, item: EventItem): ArbitrageEvent => {
   const event = new SwapsArbitrageBuyBurnEvent(ctx, item.event);

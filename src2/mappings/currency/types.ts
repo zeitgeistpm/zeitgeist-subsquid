@@ -1,8 +1,8 @@
 import { encodeAddress } from '@polkadot/keyring';
 import * as ss58 from '@subsquid/ss58';
+import { Ctx, EventItem } from '../../processor';
 import { CurrencyDepositedEvent, CurrencyTransferredEvent, CurrencyWithdrawnEvent } from '../../types/events';
 import { getAssetId } from '../helper';
-import { Ctx, EventItem } from '../../processor';
 
 export const getDepositedEvent = (ctx: Ctx, item: EventItem): DepositedEvent => {
   const event = new CurrencyDepositedEvent(ctx, item.event);

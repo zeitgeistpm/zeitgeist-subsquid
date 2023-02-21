@@ -1,5 +1,6 @@
 import { encodeAddress } from '@polkadot/keyring';
 import * as ss58 from '@subsquid/ss58';
+import { Ctx, EventItem } from '../../processor';
 import {
   TokensBalanceSetEvent,
   TokensDepositedEvent,
@@ -8,7 +9,6 @@ import {
   TokensWithdrawnEvent,
 } from '../../types/events';
 import { getAssetId } from '../helper';
-import { Ctx, EventItem } from '../../processor';
 
 export const getTokensBalanceSetEvent = (ctx: Ctx, item: EventItem): TokensEvent => {
   const event = new TokensBalanceSetEvent(ctx, item.event);

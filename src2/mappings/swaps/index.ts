@@ -13,6 +13,7 @@ import {
   Pool,
   Weight,
 } from '../../model';
+import { Ctx, EventItem } from '../../processor';
 import { calcSpotPrice, getAssetId } from '../helper';
 import {
   getArbitrageBuyBurnEvent,
@@ -28,7 +29,6 @@ import {
   getSwapExactAmountInEvent,
   getSwapExactAmountOutEvent,
 } from './types';
-import { Ctx, EventItem } from '../../processor';
 
 export const arbitrageBuyBurn = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
   const { poolId, amount } = getArbitrageBuyBurnEvent(ctx, item);

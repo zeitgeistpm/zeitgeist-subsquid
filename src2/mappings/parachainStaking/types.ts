@@ -1,7 +1,7 @@
 import { encodeAddress } from '@polkadot/keyring';
 import * as ss58 from '@subsquid/ss58';
-import { ParachainStakingRewardedEvent } from '../../types/events';
 import { Ctx, EventItem } from '../../processor';
+import { ParachainStakingRewardedEvent } from '../../types/events';
 
 export const getRewardedEvent = (ctx: Ctx, item: EventItem): RewardedEvent => {
   const event = new ParachainStakingRewardedEvent(ctx, item.event);

@@ -1,5 +1,6 @@
 import { encodeAddress } from '@polkadot/keyring';
 import * as ss58 from '@subsquid/ss58';
+import { Ctx, EventItem } from '../../processor';
 import {
   BalancesBalanceSetEvent,
   BalancesDepositEvent,
@@ -11,7 +12,6 @@ import {
   BalancesUnreservedEvent,
   BalancesWithdrawEvent,
 } from '../../types/events';
-import { Ctx, EventItem } from '../../processor';
 
 export const getBalanceSetEvent = (ctx: Ctx, item: EventItem): BalanceSetEvent => {
   // @ts-ignore
