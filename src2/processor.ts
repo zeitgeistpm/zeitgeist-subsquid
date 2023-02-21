@@ -63,6 +63,7 @@ import {
   poolJoin,
   poolJoinWithExactAssetAmount,
   swapExactAmountIn,
+  swapExactAmountOut,
 } from './mappings/swaps';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensBalanceSet, tokensDeposited, tokensEndowed, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
@@ -239,6 +240,8 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
       return poolJoinWithExactAssetAmount(ctx, block, item);
     case 'Swaps.SwapExactAmountIn':
       return swapExactAmountIn(ctx, block, item);
+    case 'Swaps.SwapExactAmountOut':
+      return swapExactAmountOut(ctx, block, item);
     case 'System.NewAccount':
       return systemNewAccount(ctx, block, item);
     case 'System.ExtrinsicFailed':
