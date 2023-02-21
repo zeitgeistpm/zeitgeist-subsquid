@@ -110,7 +110,6 @@ const processor = new SubstrateBatchProcessor()
   })
   .setTypesBundle('typesBundle.json')
   .addEvent('Balances.BalanceSet', eventOptions)
-  .addEvent('Balances.Deposit', eventOptions)
   .addEvent('Balances.DustLost', eventOptions)
   .addEvent('Balances.Endowed', eventOptions)
   .addEvent('Balances.Reserved', eventOptions)
@@ -120,7 +119,6 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Currency.Transferred', eventOptions)
   .addEvent('Currency.Deposited', eventOptions)
   .addEvent('Currency.Withdrawn', eventOptions)
-  .addEvent('ParachainStaking.Rewarded', eventRangeOptions)
   .addEvent('PredictionMarkets.BoughtCompleteSet', eventExtrinsicOptions)
   .addEvent('PredictionMarkets.MarketApproved', eventOptions)
   .addEvent('PredictionMarkets.MarketClosed', eventOptions)
@@ -148,14 +146,23 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Swaps.PoolJoinWithExactAssetAmount', eventOptions)
   .addEvent('Swaps.SwapExactAmountIn', eventExtrinsicOptions)
   .addEvent('Swaps.SwapExactAmountOut', eventExtrinsicOptions)
-  .addEvent('System.ExtrinsicFailed', eventRangeOptions)
-  .addEvent('System.ExtrinsicSuccess', eventRangeOptions)
   .addEvent('System.NewAccount', eventOptions)
   .addEvent('Tokens.BalanceSet', eventOptions)
   .addEvent('Tokens.Deposited', eventOptions)
   .addEvent('Tokens.Endowed', eventOptions)
   .addEvent('Tokens.Transfer', eventOptions)
   .addEvent('Tokens.Withdrawn', eventOptions);
+
+if (process.env.WS_NODE_URL?.includes(`bs`)) {
+  // @ts-ignore
+  processor.addEvent('Balances.Deposit', eventOptions);
+  // @ts-ignore
+  processor.addEvent('ParachainStaking.Rewarded', eventRangeOptions);
+  // @ts-ignore
+  processor.addEvent('System.ExtrinsicFailed', eventRangeOptions);
+  // @ts-ignore
+  processor.addEvent('System.ExtrinsicSuccess', eventRangeOptions);
+}
 
 export type Item = BatchProcessorItem<typeof processor>;
 export type Ctx = BatchContext<Store, Item>;
@@ -165,6 +172,7 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
   switch (item.name) {
     case 'Balances.BalanceSet':
       return balancesBalanceSet(ctx, block, item);
+    // @ts-ignore
     case 'Balances.Deposit':
       return balancesDeposit(ctx, block, item);
     case 'Balances.DustLost':
@@ -173,9 +181,11 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
       return balancesEndowed(ctx, block, item);
     case 'Balances.Reserved':
       return balancesReserved(ctx, block, item);
-    case 'Balances.Transfer':
+    case 'Balances.Transfer': {
+      if (!process.env.WS_NODE_URL?.includes(`bs`)) return balancesTransfer(ctx, block, item);
       if (block.height < 588249) return balancesTransferOld(ctx, block, item);
       else return balancesTransfer(ctx, block, item);
+    }
     case 'Balances.Unreserved':
       return balancesUnreserved(ctx, block, item);
     case 'Balances.Withdraw':
@@ -186,6 +196,7 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
       return currencyDeposited(ctx, block, item);
     case 'Currency.Withdrawn':
       return currencyWithdrawn(ctx, block, item);
+    // @ts-ignore
     case 'ParachainStaking.Rewarded':
       return parachainStakingRewarded(ctx, block, item);
     case 'PredictionMarkets.BoughtCompleteSet':
@@ -244,8 +255,10 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
       return swapExactAmountOut(ctx, block, item);
     case 'System.NewAccount':
       return systemNewAccount(ctx, block, item);
+    // @ts-ignore
     case 'System.ExtrinsicFailed':
       return systemExtrinsicFailed(ctx, block, item);
+    // @ts-ignore
     case 'System.ExtrinsicSuccess':
       return systemExtrinsicSuccess(ctx, block, item);
     case 'Tokens.BalanceSet':
@@ -296,6 +309,10 @@ processor.run(new TypeormDatabase(), async (ctx) => {
     for (let item of block.items) {
       if (item.kind === 'event') await handleEvents(ctx, block.header, item);
     }
-    if (block.header.height < 215000 || block.header.height === 579140) await handlePostHooks(ctx, block.header);
+    if (process.env.WS_NODE_URL?.includes(`bs`)) {
+      if (block.header.height < 215000 || block.header.height === 579140) {
+        await handlePostHooks(ctx, block.header);
+      }
+    }
   }
 });
