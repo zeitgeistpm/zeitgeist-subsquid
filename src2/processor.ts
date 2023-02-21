@@ -33,6 +33,7 @@ import {
   unreserveBalances_211391,
   unreserveBalances_92128,
 } from './mappings/postHooks/balancesUnreserved';
+import { destroyMarkets } from './mappings/postHooks/marketDestroyed';
 import {
   boughtCompleteSet,
   marketApproved,
@@ -280,6 +281,8 @@ const handlePostHooks = async (ctx: Ctx, block: SubstrateBlock) => {
       return unreserveBalances_204361(ctx, block);
     case 211391:
       return unreserveBalances_211391(ctx, block);
+    case 579140:
+      return destroyMarkets(ctx, block);
   }
 };
 
@@ -288,6 +291,6 @@ processor.run(new TypeormDatabase(), async (ctx) => {
     for (let item of block.items) {
       if (item.kind === 'event') await handleEvents(ctx, block.header, item);
     }
-    if (block.header.height < 215000) await handlePostHooks(ctx, block.header);
+    if (block.header.height < 215000 || block.header.height === 579140) await handlePostHooks(ctx, block.header);
   }
 });
