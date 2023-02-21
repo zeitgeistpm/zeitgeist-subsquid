@@ -14,6 +14,7 @@ import {
 import { Ctx, EventItem } from '../../processor';
 
 export const getBalanceSetEvent = (ctx: Ctx, item: EventItem): BalanceSetEvent => {
+  // @ts-ignore
   const event = new BalancesBalanceSetEvent(ctx, item.event);
   if (event.isV23) {
     const [who, free] = event.asV23;

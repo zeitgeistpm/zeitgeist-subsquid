@@ -126,7 +126,8 @@ export const getMarketStatus = (status: status): MarketStatus => {
   }
 };
 
-export async function initBalance(acc: Account, store: Store, block: SubstrateBlock, item: EventItem) {
+// @ts-ignore
+export const initBalance = async (acc: Account, store: Store, block: SubstrateBlock, item: EventItem) => {
   const sdk = await Tools.getSDK();
   const blockZero = await sdk.api.rpc.chain.getBlockHash(0);
   const {
@@ -152,7 +153,7 @@ export async function initBalance(acc: Account, store: Store, block: SubstrateBl
   hab.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
   await store.save<HistoricalAccountBalance>(hab);
-}
+};
 
 export function rescale(value: string): string {
   return (BigInt(value) * BigInt(10 ** 10)).toString();

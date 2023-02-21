@@ -101,6 +101,7 @@ const eventRangeOptions = {
   },
 } as const;
 
+// @ts-ignore
 const processor = new SubstrateBatchProcessor()
   .setDataSource({
     archive: process.env.INDEXER_ENDPOINT_URL ?? 'https://indexer.zeitgeist.pm/graphql',
@@ -286,6 +287,7 @@ const handlePostHooks = async (ctx: Ctx, block: SubstrateBlock) => {
   }
 };
 
+// @ts-ignore
 processor.run(new TypeormDatabase(), async (ctx) => {
   for (let block of ctx.blocks) {
     for (let item of block.items) {
