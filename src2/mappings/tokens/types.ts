@@ -10,10 +10,7 @@ import {
 import { getAssetId } from '../helper';
 import { Ctx, EventItem } from '../../processor';
 
-export const getTokensBalanceSetEvent = (
-  ctx: Ctx,
-  item: EventItem
-): TokensEvent => {
+export const getTokensBalanceSetEvent = (ctx: Ctx, item: EventItem): TokensEvent => {
   const event = new TokensBalanceSetEvent(ctx, item.event);
   let currencyId, who, walletId, amount;
   if (event.isV23) {
@@ -38,10 +35,7 @@ export const getTokensBalanceSetEvent = (
   return { assetId, walletId, amount };
 };
 
-export const getTokensDepositedEvent = (
-  ctx: Ctx,
-  item: EventItem
-): TokensEvent => {
+export const getTokensDepositedEvent = (ctx: Ctx, item: EventItem): TokensEvent => {
   const event = new TokensDepositedEvent(ctx, item.event);
   let currencyId, walletId, who, amount;
   if (event.isV36) {
@@ -60,10 +54,7 @@ export const getTokensDepositedEvent = (
   return { assetId, walletId, amount };
 };
 
-export const getTokensEndowedEvent = (
-  ctx: Ctx,
-  item: EventItem
-): TokensEvent => {
+export const getTokensEndowedEvent = (ctx: Ctx, item: EventItem): TokensEvent => {
   const event = new TokensEndowedEvent(ctx, item.event);
   let currencyId, walletId, who, amount;
   if (event.isV23) {
@@ -88,10 +79,7 @@ export const getTokensEndowedEvent = (
   return { assetId, walletId, amount };
 };
 
-export const getTokensTransferEvent = (
-  ctx: Ctx,
-  item: EventItem
-): TransferEvent => {
+export const getTokensTransferEvent = (ctx: Ctx, item: EventItem): TransferEvent => {
   const event = new TokensTransferEvent(ctx, item.event);
   let currencyId, from, fromId, to, toId, amount;
   if (event.isV23) {
@@ -121,10 +109,7 @@ export const getTokensTransferEvent = (
   return { assetId, fromId, toId, amount };
 };
 
-export const getTokensWithdrawnEvent = (
-  ctx: Ctx,
-  item: EventItem
-): TokensEvent => {
+export const getTokensWithdrawnEvent = (ctx: Ctx, item: EventItem): TokensEvent => {
   const event = new TokensWithdrawnEvent(ctx, item.event);
   let currencyId, walletId, who, amount;
   if (event.isV36) {

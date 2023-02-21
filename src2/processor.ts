@@ -18,11 +18,7 @@ import {
   balancesUnreserved,
   balancesWithdraw,
 } from './mappings/balances';
-import {
-  currencyTransferred,
-  currencyDeposited,
-  currencyWithdrawn,
-} from './mappings/currency';
+import { currencyTransferred, currencyDeposited, currencyWithdrawn } from './mappings/currency';
 import { parachainStakingRewarded } from './mappings/parachainStaking';
 import {
   unreserveBalances_108949,
@@ -67,18 +63,8 @@ import {
   poolJoinWithExactAssetAmount,
   swapExactAmountIn,
 } from './mappings/swaps';
-import {
-  systemExtrinsicFailed,
-  systemExtrinsicSuccess,
-  systemNewAccount,
-} from './mappings/system';
-import {
-  tokensBalanceSet,
-  tokensDeposited,
-  tokensEndowed,
-  tokensTransfer,
-  tokensWithdrawn,
-} from './mappings/tokens';
+import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
+import { tokensBalanceSet, tokensDeposited, tokensEndowed, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -116,9 +102,7 @@ const eventRangeOptions = {
 
 const processor = new SubstrateBatchProcessor()
   .setDataSource({
-    archive:
-      process.env.INDEXER_ENDPOINT_URL ??
-      'https://indexer.zeitgeist.pm/graphql',
+    archive: process.env.INDEXER_ENDPOINT_URL ?? 'https://indexer.zeitgeist.pm/graphql',
     chain: process.env.WS_NODE_URL ?? 'wss://bsr.zeitgeist.pm',
   })
   .setTypesBundle('typesBundle.json')
@@ -172,10 +156,7 @@ const processor = new SubstrateBatchProcessor()
 
 export type Item = BatchProcessorItem<typeof processor>;
 export type Ctx = BatchContext<Store, Item>;
-export type EventItem = Exclude<
-  BatchProcessorEventItem<typeof processor>,
-  _EventItem<'*', false>
->;
+export type EventItem = Exclude<BatchProcessorEventItem<typeof processor>, _EventItem<'*', false>>;
 
 const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
   switch (item.name) {

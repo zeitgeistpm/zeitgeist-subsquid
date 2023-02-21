@@ -21,14 +21,8 @@ import { MarketStatus } from '../../types/v42';
 import { getAssetId } from '../helper';
 import { Ctx, EventItem } from '../../processor';
 
-export const getBoughtCompleteSetEvent = (
-  ctx: Ctx,
-  item: EventItem
-): BoughtCompleteSetEvent => {
-  const boughtCompleteSetEvent = new PredictionMarketsBoughtCompleteSetEvent(
-    ctx,
-    item.event
-  );
+export const getBoughtCompleteSetEvent = (ctx: Ctx, item: EventItem): BoughtCompleteSetEvent => {
+  const boughtCompleteSetEvent = new PredictionMarketsBoughtCompleteSetEvent(ctx, item.event);
   if (boughtCompleteSetEvent.isV23) {
     const [mId, accountId] = boughtCompleteSetEvent.asV23;
     const marketId = Number(mId);
@@ -48,14 +42,8 @@ export const getBoughtCompleteSetEvent = (
   }
 };
 
-export const getMarketApprovedEvent = (
-  ctx: Ctx,
-  item: EventItem
-): MarketApprovedEvent => {
-  const marketApprovedEvent = new PredictionMarketsMarketApprovedEvent(
-    ctx,
-    item.event
-  );
+export const getMarketApprovedEvent = (ctx: Ctx, item: EventItem): MarketApprovedEvent => {
+  const marketApprovedEvent = new PredictionMarketsMarketApprovedEvent(ctx, item.event);
   if (marketApprovedEvent.isV23) {
     const mId = marketApprovedEvent.asV23;
     const marketId = Number(mId);
@@ -71,10 +59,7 @@ export const getMarketApprovedEvent = (
   }
 };
 
-export const getMarketClosedEvent = (
-  ctx: Ctx,
-  item: EventItem
-): MarketClosedEvent => {
+export const getMarketClosedEvent = (ctx: Ctx, item: EventItem): MarketClosedEvent => {
   const event = new PredictionMarketsMarketClosedEvent(ctx, item.event);
   if (event.isV37) {
     const marketId = Number(event.asV37);
@@ -85,10 +70,7 @@ export const getMarketClosedEvent = (
   }
 };
 
-export const getMarketCreatedEvent = (
-  ctx: Ctx,
-  item: EventItem
-): MarketCreatedEvent => {
+export const getMarketCreatedEvent = (ctx: Ctx, item: EventItem): MarketCreatedEvent => {
   const event = new PredictionMarketsMarketCreatedEvent(ctx, item.event);
   const [marketId, param1, param2] = item.event.args;
   if (event.isV23 || event.isV29) {
@@ -127,10 +109,7 @@ export const getMarketCreatedEvent = (
   }
 };
 
-export const getMarketDestroyedEvent = (
-  ctx: Ctx,
-  item: EventItem
-): MarketDestroyedEvent => {
+export const getMarketDestroyedEvent = (ctx: Ctx, item: EventItem): MarketDestroyedEvent => {
   const event = new PredictionMarketsMarketDestroyedEvent(ctx, item.event);
   if (event.isV32) {
     const marketId = Number(event.asV32);
@@ -141,14 +120,8 @@ export const getMarketDestroyedEvent = (
   }
 };
 
-export const getMarketDisputedEvent = (
-  ctx: Ctx,
-  item: EventItem
-): MarketDisputedEvent => {
-  const marketDisputedEvent = new PredictionMarketsMarketDisputedEvent(
-    ctx,
-    item.event
-  );
+export const getMarketDisputedEvent = (ctx: Ctx, item: EventItem): MarketDisputedEvent => {
+  const marketDisputedEvent = new PredictionMarketsMarketDisputedEvent(ctx, item.event);
   if (marketDisputedEvent.isV23) {
     const [mId, dispute] = marketDisputedEvent.asV23;
     let report = {} as any;
@@ -166,10 +139,7 @@ export const getMarketDisputedEvent = (
   }
 };
 
-export const getMarketExpiredEvent = (
-  ctx: Ctx,
-  item: EventItem
-): MarketExpiredEvent => {
+export const getMarketExpiredEvent = (ctx: Ctx, item: EventItem): MarketExpiredEvent => {
   const event = new PredictionMarketsMarketExpiredEvent(ctx, item.event);
   if (event.isV37) {
     const marketId = Number(event.asV37);
@@ -180,12 +150,8 @@ export const getMarketExpiredEvent = (
   }
 };
 
-export const getMarketInsufficientSubsidyEvent = (
-  ctx: Ctx,
-  item: EventItem
-): MarketSubsidyEvent => {
-  const marketInsufficientSubsidyEvent =
-    new PredictionMarketsMarketInsufficientSubsidyEvent(ctx, item.event);
+export const getMarketInsufficientSubsidyEvent = (ctx: Ctx, item: EventItem): MarketSubsidyEvent => {
+  const marketInsufficientSubsidyEvent = new PredictionMarketsMarketInsufficientSubsidyEvent(ctx, item.event);
   if (marketInsufficientSubsidyEvent.isV23) {
     const marketId = Number(marketInsufficientSubsidyEvent.asV23);
     return { marketId };
@@ -200,10 +166,7 @@ export const getMarketInsufficientSubsidyEvent = (
   }
 };
 
-export const getMarketRejectedEvent = (
-  ctx: Ctx,
-  item: EventItem
-): MarketRejectedEvent => {
+export const getMarketRejectedEvent = (ctx: Ctx, item: EventItem): MarketRejectedEvent => {
   const event = new PredictionMarketsMarketRejectedEvent(ctx, item.event);
   if (event.isV23) {
     const marketId = Number(event.asV23);
@@ -220,14 +183,8 @@ export const getMarketRejectedEvent = (
   }
 };
 
-export const getMarketReportedEvent = (
-  ctx: Ctx,
-  item: EventItem
-): MarketReportedEvent => {
-  const marketReportedEvent = new PredictionMarketsMarketReportedEvent(
-    ctx,
-    item.event
-  );
+export const getMarketReportedEvent = (ctx: Ctx, item: EventItem): MarketReportedEvent => {
+  const marketReportedEvent = new PredictionMarketsMarketReportedEvent(ctx, item.event);
   if (marketReportedEvent.isV23) {
     const [mId, marketReport] = marketReportedEvent.asV23;
     let report = {} as any;
@@ -245,14 +202,8 @@ export const getMarketReportedEvent = (
   }
 };
 
-export const getMarketResolvedEvent = (
-  ctx: Ctx,
-  item: EventItem
-): MarketResolvedEvent => {
-  const marketResolvedEvent = new PredictionMarketsMarketResolvedEvent(
-    ctx,
-    item.event
-  );
+export const getMarketResolvedEvent = (ctx: Ctx, item: EventItem): MarketResolvedEvent => {
+  const marketResolvedEvent = new PredictionMarketsMarketResolvedEvent(ctx, item.event);
   if (marketResolvedEvent.isV23) {
     const [mId, outcome] = marketResolvedEvent.asV23;
     let report = {} as any;
@@ -270,12 +221,8 @@ export const getMarketResolvedEvent = (
   }
 };
 
-export const getMarketStartedWithSubsidyEvent = (
-  ctx: Ctx,
-  item: EventItem
-): MarketSubsidyEvent => {
-  const marketStartedWithSubsidyEvent =
-    new PredictionMarketsMarketStartedWithSubsidyEvent(ctx, item.event);
+export const getMarketStartedWithSubsidyEvent = (ctx: Ctx, item: EventItem): MarketSubsidyEvent => {
+  const marketStartedWithSubsidyEvent = new PredictionMarketsMarketStartedWithSubsidyEvent(ctx, item.event);
   if (marketStartedWithSubsidyEvent.isV23) {
     const marketId = Number(marketStartedWithSubsidyEvent.asV23);
     return { marketId };
@@ -290,14 +237,8 @@ export const getMarketStartedWithSubsidyEvent = (
   }
 };
 
-export const getSoldCompleteSetEvent = (
-  ctx: Ctx,
-  item: EventItem
-): SoldCompleteSetEvent => {
-  const soldCompleteSetEvent = new PredictionMarketsSoldCompleteSetEvent(
-    ctx,
-    item.event
-  );
+export const getSoldCompleteSetEvent = (ctx: Ctx, item: EventItem): SoldCompleteSetEvent => {
+  const soldCompleteSetEvent = new PredictionMarketsSoldCompleteSetEvent(ctx, item.event);
   if (soldCompleteSetEvent.isV23) {
     const [mId, accountId] = soldCompleteSetEvent.asV23;
     const marketId = Number(mId);
@@ -317,10 +258,7 @@ export const getSoldCompleteSetEvent = (
   }
 };
 
-export const getTokensRedeemedEvent = (
-  ctx: Ctx,
-  item: EventItem
-): TokensRedeemedEvent => {
+export const getTokensRedeemedEvent = (ctx: Ctx, item: EventItem): TokensRedeemedEvent => {
   const event = new PredictionMarketsTokensRedeemedEvent(ctx, item.event);
   let mId, marketId, currencyId, amtRedeemed, payout, who, walletId;
   if (event.isV35) {

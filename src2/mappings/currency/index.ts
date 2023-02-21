@@ -2,17 +2,9 @@ import { SubstrateBlock } from '@subsquid/substrate-processor';
 import { Account, AccountBalance, HistoricalAccountBalance } from '../../model';
 import { Ctx, EventItem } from '../../processor';
 import { initBalance } from '../helper';
-import {
-  getDepositedEvent,
-  getTransferredEvent,
-  getWithdrawnEvent,
-} from './types';
+import { getDepositedEvent, getTransferredEvent, getWithdrawnEvent } from './types';
 
-export const currencyDeposited = async (
-  ctx: Ctx,
-  block: SubstrateBlock,
-  item: EventItem
-) => {
+export const currencyDeposited = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
   const { assetId, walletId, amount } = getDepositedEvent(ctx, item);
 
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
@@ -20,9 +12,7 @@ export const currencyDeposited = async (
     acc = new Account();
     acc.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
     acc.accountId = walletId;
-    console.log(
-      `[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`
-    );
+    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
     await ctx.store.save<Account>(acc);
     await initBalance(acc, ctx.store, block, item);
   }
@@ -45,23 +35,11 @@ export const currencyDeposited = async (
   });
   if (!eHab) {
     ab.balance = ab.balance + amount;
-    console.log(
-      `[${item.event.name}] Saving account balance: ${JSON.stringify(
-        ab,
-        null,
-        2
-      )}`
-    );
+    console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
     await ctx.store.save<AccountBalance>(ab);
   } else {
     eHab.event = eHab.event.concat(item.event.name.split('.')[1]);
-    console.log(
-      `[${item.event.name}] Saving historical account balance: ${JSON.stringify(
-        eHab,
-        null,
-        2
-      )}`
-    );
+    console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(eHab, null, 2)}`);
     await ctx.store.save<HistoricalAccountBalance>(eHab);
     return;
   }
@@ -75,21 +53,11 @@ export const currencyDeposited = async (
   hab.balance = ab.balance;
   hab.blockNumber = block.height;
   hab.timestamp = new Date(block.timestamp);
-  console.log(
-    `[${item.event.name}] Saving historical account balance: ${JSON.stringify(
-      hab,
-      null,
-      2
-    )}`
-  );
+  console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
   await ctx.store.save<HistoricalAccountBalance>(hab);
 };
 
-export const currencyTransferred = async (
-  ctx: Ctx,
-  block: SubstrateBlock,
-  item: EventItem
-) => {
+export const currencyTransferred = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
   const { assetId, fromId, toId, amount } = getTransferredEvent(ctx, item);
   if (assetId === 'Ztg') {
     return;
@@ -100,9 +68,7 @@ export const currencyTransferred = async (
     fromAcc = new Account();
     fromAcc.id = item.event.id + '-' + fromId.substring(fromId.length - 5);
     fromAcc.accountId = fromId;
-    console.log(
-      `[${item.event.name}] Saving account: ${JSON.stringify(fromAcc, null, 2)}`
-    );
+    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(fromAcc, null, 2)}`);
     await ctx.store.save<Account>(fromAcc);
     await initBalance(fromAcc, ctx.store, block, item);
   }
@@ -120,13 +86,7 @@ export const currencyTransferred = async (
     fromAb.assetId = assetId;
     fromAb.balance = -amount;
   }
-  console.log(
-    `[${item.event.name}] Saving account balance: ${JSON.stringify(
-      fromAb,
-      null,
-      2
-    )}`
-  );
+  console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(fromAb, null, 2)}`);
   await ctx.store.save<AccountBalance>(fromAb);
 
   let fromHab = new HistoricalAccountBalance();
@@ -138,13 +98,7 @@ export const currencyTransferred = async (
   fromHab.balance = fromAb.balance;
   fromHab.blockNumber = block.height;
   fromHab.timestamp = new Date(block.timestamp);
-  console.log(
-    `[${item.event.name}] Saving historical account balance: ${JSON.stringify(
-      fromHab,
-      null,
-      2
-    )}`
-  );
+  console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(fromHab, null, 2)}`);
   await ctx.store.save<HistoricalAccountBalance>(fromHab);
 
   let toAcc = await ctx.store.get(Account, { where: { accountId: toId } });
@@ -152,9 +106,7 @@ export const currencyTransferred = async (
     toAcc = new Account();
     toAcc.id = item.event.id + '-' + toId.substring(toId.length - 5);
     toAcc.accountId = toId;
-    console.log(
-      `[${item.event.name}] Saving account: ${JSON.stringify(toAcc, null, 2)}`
-    );
+    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(toAcc, null, 2)}`);
     await ctx.store.save<Account>(toAcc);
     await initBalance(toAcc, ctx.store, block, item);
   }
@@ -177,23 +129,11 @@ export const currencyTransferred = async (
   });
   if (!hab) {
     toAb.balance = toAb.balance + amount;
-    console.log(
-      `[${item.event.name}] Saving account balance: ${JSON.stringify(
-        toAb,
-        null,
-        2
-      )}`
-    );
+    console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(toAb, null, 2)}`);
     await ctx.store.save<AccountBalance>(toAb);
   } else {
     hab.event = hab.event.concat(item.event.name.split('.')[1]);
-    console.log(
-      `[${item.event.name}] Saving historical account balance: ${JSON.stringify(
-        hab,
-        null,
-        2
-      )}`
-    );
+    console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
     await ctx.store.save<HistoricalAccountBalance>(hab);
     return;
   }
@@ -207,21 +147,11 @@ export const currencyTransferred = async (
   toHab.balance = toAb.balance;
   toHab.blockNumber = block.height;
   toHab.timestamp = new Date(block.timestamp);
-  console.log(
-    `[${item.event.name}] Saving historical account balance: ${JSON.stringify(
-      toHab,
-      null,
-      2
-    )}`
-  );
+  console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(toHab, null, 2)}`);
   await ctx.store.save<HistoricalAccountBalance>(toHab);
 };
 
-export const currencyWithdrawn = async (
-  ctx: Ctx,
-  block: SubstrateBlock,
-  item: EventItem
-) => {
+export const currencyWithdrawn = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
   const { assetId, walletId, amount } = getWithdrawnEvent(ctx, item);
 
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
@@ -229,9 +159,7 @@ export const currencyWithdrawn = async (
     acc = new Account();
     acc.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
     acc.accountId = walletId;
-    console.log(
-      `[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`
-    );
+    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
     await ctx.store.save<Account>(acc);
     await initBalance(acc, ctx.store, block, item);
   }
@@ -249,13 +177,7 @@ export const currencyWithdrawn = async (
   } else {
     ab.balance = ab.balance - amount;
   }
-  console.log(
-    `[${item.event.name}] Saving account balance: ${JSON.stringify(
-      ab,
-      null,
-      2
-    )}`
-  );
+  console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
   await ctx.store.save<AccountBalance>(ab);
 
   let hab = new HistoricalAccountBalance();
@@ -267,12 +189,6 @@ export const currencyWithdrawn = async (
   hab.balance = ab.balance;
   hab.blockNumber = block.height;
   hab.timestamp = new Date(block.timestamp);
-  console.log(
-    `[${item.event.name}] Saving historical account balance: ${JSON.stringify(
-      hab,
-      null,
-      2
-    )}`
-  );
+  console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
   await ctx.store.save<HistoricalAccountBalance>(hab);
 };

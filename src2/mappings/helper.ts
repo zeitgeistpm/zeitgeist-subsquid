@@ -1,16 +1,8 @@
 import { AccountInfo } from '@polkadot/types/interfaces/system';
-import {
-  SubstrateBlock,
-  SubstrateExtrinsic,
-} from '@subsquid/substrate-processor';
+import { SubstrateBlock, SubstrateExtrinsic } from '@subsquid/substrate-processor';
 import { Store } from '@subsquid/typeorm-store';
 import { util } from '@zeitgeistpm/sdk';
-import {
-  Account,
-  AccountBalance,
-  HistoricalAccountBalance,
-  MarketStatus,
-} from '../model';
+import { Account, AccountBalance, HistoricalAccountBalance, MarketStatus } from '../model';
 import { EventItem } from '../processor';
 import { MarketStatus as status } from '../types/v42';
 import { Cache, IPFS, Tools } from './util';
@@ -28,10 +20,7 @@ export function calcSpotPrice(
   return spotPrice;
 }
 
-export async function createAssetsForMarket(
-  marketId: string,
-  marketType: any
-): Promise<any> {
+export async function createAssetsForMarket(marketId: string, marketType: any): Promise<any> {
   const sdk = await Tools.getSDK();
   return marketType.__kind == 'Categorical'
     ? [...Array(marketType.value).keys()].map((catIdx) => {
@@ -47,9 +36,7 @@ export async function createAssetsForMarket(
       });
 }
 
-export async function decodeMarketMetadata(
-  metadata: string
-): Promise<DecodedMarketMetadata | undefined> {
+export async function decodeMarketMetadata(metadata: string): Promise<DecodedMarketMetadata | undefined> {
   if (metadata.startsWith('0x1530fa0bb52e67d0d9f89bf26552e1')) return undefined;
   let raw = await (await Cache.init()).getMeta(metadata);
   if (raw && !(process.env.NODE_ENV == 'local')) {
@@ -73,9 +60,7 @@ export async function decodeMarketMetadata(
 
 export function getAssetId(currencyId: any): string {
   if (currencyId.__kind == 'CategoricalOutcome') {
-    return JSON.stringify(
-      util.AssetIdFromString('[' + currencyId.value.toString() + ']')
-    );
+    return JSON.stringify(util.AssetIdFromString('[' + currencyId.value.toString() + ']'));
   } else if (currencyId.__kind == 'ScalarOutcome') {
     const scale = new Array();
     scale.push(+currencyId.value[0].toString());
@@ -84,18 +69,13 @@ export function getAssetId(currencyId: any): string {
   } else if (currencyId.__kind == 'Ztg') {
     return 'Ztg';
   } else if (currencyId.__kind == 'PoolShare') {
-    return JSON.stringify(
-      util.AssetIdFromString('pool' + currencyId.value.toString())
-    );
+    return JSON.stringify(util.AssetIdFromString('pool' + currencyId.value.toString()));
   } else {
     return '';
   }
 }
 
-export async function getFees(
-  block: SubstrateBlock,
-  extrinsic: SubstrateExtrinsic
-): Promise<bigint> {
+export async function getFees(block: SubstrateBlock, extrinsic: SubstrateExtrinsic): Promise<bigint> {
   const id = extrinsic.indexInBlock;
   let fees = await (await Cache.init()).getFee(block.hash + id);
   if (fees) {
@@ -104,9 +84,7 @@ export async function getFees(
 
   let totalFees = BigInt(0);
   const sdk = await Tools.getSDK();
-  fees = JSON.stringify(
-    await sdk.api.rpc.payment.queryFeeDetails(extrinsic.hash, block.hash)
-  );
+  fees = JSON.stringify(await sdk.api.rpc.payment.queryFeeDetails(extrinsic.hash, block.hash));
   if (fees) {
     const feesFormatted = JSON.parse(fees);
     const inclusionFee = feesFormatted.inclusionFee;
@@ -148,39 +126,23 @@ export const getMarketStatus = (status: status): MarketStatus => {
   }
 };
 
-export async function initBalance(
-  acc: Account,
-  store: Store,
-  block: SubstrateBlock,
-  item: EventItem
-) {
+export async function initBalance(acc: Account, store: Store, block: SubstrateBlock, item: EventItem) {
   const sdk = await Tools.getSDK();
   const blockZero = await sdk.api.rpc.chain.getBlockHash(0);
   const {
     data: { free: amt },
-  } = (await sdk.api.query.system.account.at(
-    blockZero,
-    acc.accountId
-  )) as AccountInfo;
+  } = (await sdk.api.query.system.account.at(blockZero, acc.accountId)) as AccountInfo;
 
   let ab = new AccountBalance();
-  ab.id =
-    item.event.id + '-' + acc.accountId.substring(acc.accountId.length - 5);
+  ab.id = item.event.id + '-' + acc.accountId.substring(acc.accountId.length - 5);
   ab.account = acc;
   ab.assetId = 'Ztg';
   ab.balance = amt.toBigInt();
-  console.log(
-    `[${item.event.name}] Saving account balance: ${JSON.stringify(
-      ab,
-      null,
-      2
-    )}`
-  );
+  console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
   await store.save<AccountBalance>(ab);
 
   let hab = new HistoricalAccountBalance();
-  hab.id =
-    item.event.id + '-000-' + acc.accountId.substring(acc.accountId.length - 5);
+  hab.id = item.event.id + '-000-' + acc.accountId.substring(acc.accountId.length - 5);
   hab.accountId = acc.accountId;
   hab.event = 'Initialised';
   hab.assetId = ab.assetId;
@@ -188,13 +150,7 @@ export async function initBalance(
   hab.balance = ab.balance;
   hab.blockNumber = 0;
   hab.timestamp = new Date(block.timestamp);
-  console.log(
-    `[${item.event.name}] Saving historical account balance: ${JSON.stringify(
-      hab,
-      null,
-      2
-    )}`
-  );
+  console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
   await store.save<HistoricalAccountBalance>(hab);
 }
 

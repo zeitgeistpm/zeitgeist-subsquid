@@ -13,10 +13,7 @@ import {
 } from '../../types/events';
 import { Ctx, EventItem } from '../../processor';
 
-export const getBalanceSetEvent = (
-  ctx: Ctx,
-  item: EventItem
-): BalanceSetEvent => {
+export const getBalanceSetEvent = (ctx: Ctx, item: EventItem): BalanceSetEvent => {
   const event = new BalancesBalanceSetEvent(ctx, item.event);
   if (event.isV23) {
     const [who, free] = event.asV23;
@@ -138,10 +135,7 @@ export const getTransferEvent = (ctx: Ctx, item: EventItem): TransferEvent => {
   }
 };
 
-export const getUnreservedEvent = (
-  ctx: Ctx,
-  item: EventItem
-): BalancesEvent => {
+export const getUnreservedEvent = (ctx: Ctx, item: EventItem): BalancesEvent => {
   const event = new BalancesUnreservedEvent(ctx, item.event);
   if (event.isV23) {
     const [who, amount] = event.asV23;

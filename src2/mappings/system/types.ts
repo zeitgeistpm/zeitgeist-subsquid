@@ -1,17 +1,10 @@
 import { encodeAddress } from '@polkadot/keyring';
 import * as ss58 from '@subsquid/ss58';
 import { DispatchInfo } from '../../types/v23';
-import {
-  SystemExtrinsicFailedEvent,
-  SystemExtrinsicSuccessEvent,
-  SystemNewAccountEvent,
-} from '../../types/events';
+import { SystemExtrinsicFailedEvent, SystemExtrinsicSuccessEvent, SystemNewAccountEvent } from '../../types/events';
 import { Ctx, EventItem } from '../../processor';
 
-export const getExtrinsicFailedEvent = (
-  ctx: Ctx,
-  item: EventItem
-): ExtrinsicEvent => {
+export const getExtrinsicFailedEvent = (ctx: Ctx, item: EventItem): ExtrinsicEvent => {
   const event = new SystemExtrinsicFailedEvent(ctx, item.event);
   if (event.isV23) {
     const [, dispatchInfo] = event.asV23;
@@ -25,10 +18,7 @@ export const getExtrinsicFailedEvent = (
   }
 };
 
-export const getExtrinsicSuccessEvent = (
-  ctx: Ctx,
-  item: EventItem
-): ExtrinsicEvent => {
+export const getExtrinsicSuccessEvent = (ctx: Ctx, item: EventItem): ExtrinsicEvent => {
   const event = new SystemExtrinsicSuccessEvent(ctx, item.event);
   if (event.isV23) {
     const dispatchInfo = event.asV23;

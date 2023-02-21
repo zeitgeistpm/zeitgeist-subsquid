@@ -19,10 +19,7 @@ import { PoolAssetEvent, PoolAssetsEvent } from '../../types/v41';
 import { SwapEvent } from '../../types/v41';
 import { CommonPoolEventParams, Pool } from '../../types/v41';
 
-export const getArbitrageBuyBurnEvent = (
-  ctx: Ctx,
-  item: EventItem
-): ArbitrageEvent => {
+export const getArbitrageBuyBurnEvent = (ctx: Ctx, item: EventItem): ArbitrageEvent => {
   const event = new SwapsArbitrageBuyBurnEvent(ctx, item.event);
   if (event.isV41) {
     const [poolId, amount] = event.asV41;
@@ -33,10 +30,7 @@ export const getArbitrageBuyBurnEvent = (
   }
 };
 
-export const getArbitrageMintSellEvent = (
-  ctx: Ctx,
-  item: EventItem
-): ArbitrageEvent => {
+export const getArbitrageMintSellEvent = (ctx: Ctx, item: EventItem): ArbitrageEvent => {
   const event = new SwapsArbitrageMintSellEvent(ctx, item.event);
   if (event.isV41) {
     const [poolId, amount] = event.asV41;
@@ -69,10 +63,7 @@ export const getPoolClosedEvent = (ctx: Ctx, item: EventItem): PoolEvent => {
   }
 };
 
-export const getPoolCreateEvent = (
-  ctx: Ctx,
-  item: EventItem
-): PoolCreateEvent => {
+export const getPoolCreateEvent = (ctx: Ctx, item: EventItem): PoolCreateEvent => {
   const event = new SwapsPoolCreateEvent(ctx, item.event);
   let accountId = ``;
   if (event.isV23) {
@@ -151,10 +142,7 @@ export const getPoolExitEvent = (ctx: Ctx, item: EventItem): PoolExitEvent => {
   }
 };
 
-export const getPoolExitWithExactAssetAmountEvent = (
-  ctx: Ctx,
-  item: EventItem
-): ExactAssetAmountEvent => {
+export const getPoolExitWithExactAssetAmountEvent = (ctx: Ctx, item: EventItem): ExactAssetAmountEvent => {
   const event = new SwapsPoolExitWithExactAssetAmountEvent(ctx, item.event);
   if (event.isV23) {
     let pae = item.event.args as PoolAssetEvent;
@@ -213,10 +201,7 @@ export const getPoolJoinEvent = (ctx: Ctx, item: EventItem): PoolJoinEvent => {
   }
 };
 
-export const getPoolJoinWithExactAssetAmountEvent = (
-  ctx: Ctx,
-  item: EventItem
-): ExactAssetAmountEvent => {
+export const getPoolJoinWithExactAssetAmountEvent = (ctx: Ctx, item: EventItem): ExactAssetAmountEvent => {
   const event = new SwapsPoolJoinWithExactAssetAmountEvent(ctx, item.event);
   if (event.isV23) {
     let pae = item.event.args as PoolAssetEvent;
@@ -248,10 +233,7 @@ export const getPoolJoinWithExactAssetAmountEvent = (
   }
 };
 
-export const getSwapExactAmountInEvent = (
-  ctx: Ctx,
-  item: EventItem
-): SwapExactAmountInEvent => {
+export const getSwapExactAmountInEvent = (ctx: Ctx, item: EventItem): SwapExactAmountInEvent => {
   const event = new SwapsSwapExactAmountInEvent(ctx, item.event);
   if (event.isV23) {
     let swapEvent = item.event.args as SwapEvent;
@@ -276,10 +258,7 @@ export const getSwapExactAmountInEvent = (
   }
 };
 
-export const getSwapExactAmountOutEvent = (
-  ctx: Ctx,
-  item: EventItem
-): SwapExactAmountOutEvent => {
+export const getSwapExactAmountOutEvent = (ctx: Ctx, item: EventItem): SwapExactAmountOutEvent => {
   const event = new SwapsSwapExactAmountOutEvent(ctx, item.event);
   if (event.isV23) {
     let swapEvent = item.event.args as SwapEvent;

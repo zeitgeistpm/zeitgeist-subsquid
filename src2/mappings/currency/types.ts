@@ -1,17 +1,10 @@
 import { encodeAddress } from '@polkadot/keyring';
 import * as ss58 from '@subsquid/ss58';
-import {
-  CurrencyDepositedEvent,
-  CurrencyTransferredEvent,
-  CurrencyWithdrawnEvent,
-} from '../../types/events';
+import { CurrencyDepositedEvent, CurrencyTransferredEvent, CurrencyWithdrawnEvent } from '../../types/events';
 import { getAssetId } from '../helper';
 import { Ctx, EventItem } from '../../processor';
 
-export const getDepositedEvent = (
-  ctx: Ctx,
-  item: EventItem
-): DepositedEvent => {
+export const getDepositedEvent = (ctx: Ctx, item: EventItem): DepositedEvent => {
   const event = new CurrencyDepositedEvent(ctx, item.event);
   let currencyId, who, walletId, amount;
   if (event.isV23) {
@@ -32,10 +25,7 @@ export const getDepositedEvent = (
   return { assetId, walletId, amount };
 };
 
-export const getTransferredEvent = (
-  ctx: Ctx,
-  item: EventItem
-): TransferredEvent => {
+export const getTransferredEvent = (ctx: Ctx, item: EventItem): TransferredEvent => {
   const event = new CurrencyTransferredEvent(ctx, item.event);
   let currencyId, from, fromId, to, toId, amount;
   if (event.isV23) {
@@ -60,10 +50,7 @@ export const getTransferredEvent = (
   return { assetId, fromId, toId, amount };
 };
 
-export const getWithdrawnEvent = (
-  ctx: Ctx,
-  item: EventItem
-): WithdrawnEvent => {
+export const getWithdrawnEvent = (ctx: Ctx, item: EventItem): WithdrawnEvent => {
   const event = new CurrencyWithdrawnEvent(ctx, item.event);
   let currencyId, who, walletId, amount;
   if (event.isV23) {
