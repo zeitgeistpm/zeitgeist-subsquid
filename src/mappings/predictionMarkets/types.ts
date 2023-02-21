@@ -22,15 +22,15 @@ import { MarketStatus } from '../../types/v42';
 import { getAssetId } from '../helper';
 
 export const getBoughtCompleteSetEvent = (ctx: Ctx, item: EventItem): BoughtCompleteSetEvent => {
-  const boughtCompleteSetEvent = new PredictionMarketsBoughtCompleteSetEvent(ctx, item.event);
-  if (boughtCompleteSetEvent.isV23) {
-    const [mId, accountId] = boughtCompleteSetEvent.asV23;
+  const event = new PredictionMarketsBoughtCompleteSetEvent(ctx, item.event);
+  if (event.isV23) {
+    const [mId, accountId] = event.asV23;
     const marketId = Number(mId);
     const amount = BigInt(0);
     const walletId = ss58.codec('zeitgeist').encode(accountId);
     return { marketId, amount, walletId };
-  } else if (boughtCompleteSetEvent.isV34) {
-    const [mId, amount, accountId] = boughtCompleteSetEvent.asV34;
+  } else if (event.isV34) {
+    const [mId, amount, accountId] = event.asV34;
     const marketId = Number(mId);
     const walletId = ss58.codec('zeitgeist').encode(accountId);
     return { marketId, amount, walletId };
@@ -43,13 +43,13 @@ export const getBoughtCompleteSetEvent = (ctx: Ctx, item: EventItem): BoughtComp
 };
 
 export const getMarketApprovedEvent = (ctx: Ctx, item: EventItem): MarketApprovedEvent => {
-  const marketApprovedEvent = new PredictionMarketsMarketApprovedEvent(ctx, item.event);
-  if (marketApprovedEvent.isV23) {
-    const mId = marketApprovedEvent.asV23;
+  const event = new PredictionMarketsMarketApprovedEvent(ctx, item.event);
+  if (event.isV23) {
+    const mId = event.asV23;
     const marketId = Number(mId);
     return { marketId };
-  } else if (marketApprovedEvent.isV29) {
-    const [mId, status] = marketApprovedEvent.asV29;
+  } else if (event.isV29) {
+    const [mId, status] = event.asV29;
     const marketId = Number(mId);
     return { marketId, status };
   } else {
@@ -121,15 +121,15 @@ export const getMarketDestroyedEvent = (ctx: Ctx, item: EventItem): MarketDestro
 };
 
 export const getMarketDisputedEvent = (ctx: Ctx, item: EventItem): MarketDisputedEvent => {
-  const marketDisputedEvent = new PredictionMarketsMarketDisputedEvent(ctx, item.event);
-  if (marketDisputedEvent.isV23) {
-    const [mId, dispute] = marketDisputedEvent.asV23;
+  const event = new PredictionMarketsMarketDisputedEvent(ctx, item.event);
+  if (event.isV23) {
+    const [mId, dispute] = event.asV23;
     let report = {} as any;
     const marketId = Number(mId);
     report.outcome = dispute;
     return { marketId, report };
-  } else if (marketDisputedEvent.isV29) {
-    const [mId, status, report] = marketDisputedEvent.asV29;
+  } else if (event.isV29) {
+    const [mId, status, report] = event.asV29;
     const marketId = Number(mId);
     return { marketId, status, report };
   } else {
@@ -151,12 +151,12 @@ export const getMarketExpiredEvent = (ctx: Ctx, item: EventItem): MarketExpiredE
 };
 
 export const getMarketInsufficientSubsidyEvent = (ctx: Ctx, item: EventItem): MarketSubsidyEvent => {
-  const marketInsufficientSubsidyEvent = new PredictionMarketsMarketInsufficientSubsidyEvent(ctx, item.event);
-  if (marketInsufficientSubsidyEvent.isV23) {
-    const marketId = Number(marketInsufficientSubsidyEvent.asV23);
+  const event = new PredictionMarketsMarketInsufficientSubsidyEvent(ctx, item.event);
+  if (event.isV23) {
+    const marketId = Number(event.asV23);
     return { marketId };
-  } else if (marketInsufficientSubsidyEvent.isV29) {
-    const [mId, status] = marketInsufficientSubsidyEvent.asV29;
+  } else if (event.isV29) {
+    const [mId, status] = event.asV29;
     const marketId = Number(mId);
     return { marketId, status };
   } else {
@@ -184,15 +184,15 @@ export const getMarketRejectedEvent = (ctx: Ctx, item: EventItem): MarketRejecte
 };
 
 export const getMarketReportedEvent = (ctx: Ctx, item: EventItem): MarketReportedEvent => {
-  const marketReportedEvent = new PredictionMarketsMarketReportedEvent(ctx, item.event);
-  if (marketReportedEvent.isV23) {
-    const [mId, marketReport] = marketReportedEvent.asV23;
+  const event = new PredictionMarketsMarketReportedEvent(ctx, item.event);
+  if (event.isV23) {
+    const [mId, marketReport] = event.asV23;
     let report = {} as any;
     const marketId = Number(mId);
     report.outcome = marketReport;
     return { marketId, report };
-  } else if (marketReportedEvent.isV29) {
-    const [mId, status, report] = marketReportedEvent.asV29;
+  } else if (event.isV29) {
+    const [mId, status, report] = event.asV29;
     const marketId = Number(mId);
     return { marketId, status, report };
   } else {
@@ -203,15 +203,15 @@ export const getMarketReportedEvent = (ctx: Ctx, item: EventItem): MarketReporte
 };
 
 export const getMarketResolvedEvent = (ctx: Ctx, item: EventItem): MarketResolvedEvent => {
-  const marketResolvedEvent = new PredictionMarketsMarketResolvedEvent(ctx, item.event);
-  if (marketResolvedEvent.isV23) {
-    const [mId, outcome] = marketResolvedEvent.asV23;
+  const event = new PredictionMarketsMarketResolvedEvent(ctx, item.event);
+  if (event.isV23) {
+    const [mId, outcome] = event.asV23;
     let report = {} as any;
     const marketId = Number(mId);
     report.value = outcome;
     return { marketId, report };
-  } else if (marketResolvedEvent.isV29) {
-    const [mId, status, report] = marketResolvedEvent.asV29;
+  } else if (event.isV29) {
+    const [mId, status, report] = event.asV29;
     const marketId = Number(mId);
     return { marketId, status, report };
   } else {
@@ -222,12 +222,12 @@ export const getMarketResolvedEvent = (ctx: Ctx, item: EventItem): MarketResolve
 };
 
 export const getMarketStartedWithSubsidyEvent = (ctx: Ctx, item: EventItem): MarketSubsidyEvent => {
-  const marketStartedWithSubsidyEvent = new PredictionMarketsMarketStartedWithSubsidyEvent(ctx, item.event);
-  if (marketStartedWithSubsidyEvent.isV23) {
-    const marketId = Number(marketStartedWithSubsidyEvent.asV23);
+  const event = new PredictionMarketsMarketStartedWithSubsidyEvent(ctx, item.event);
+  if (event.isV23) {
+    const marketId = Number(event.asV23);
     return { marketId };
-  } else if (marketStartedWithSubsidyEvent.isV29) {
-    const [mId, status] = marketStartedWithSubsidyEvent.asV29;
+  } else if (event.isV29) {
+    const [mId, status] = event.asV29;
     const marketId = Number(mId);
     return { marketId, status };
   } else {
@@ -238,15 +238,15 @@ export const getMarketStartedWithSubsidyEvent = (ctx: Ctx, item: EventItem): Mar
 };
 
 export const getSoldCompleteSetEvent = (ctx: Ctx, item: EventItem): SoldCompleteSetEvent => {
-  const soldCompleteSetEvent = new PredictionMarketsSoldCompleteSetEvent(ctx, item.event);
-  if (soldCompleteSetEvent.isV23) {
-    const [mId, accountId] = soldCompleteSetEvent.asV23;
+  const event = new PredictionMarketsSoldCompleteSetEvent(ctx, item.event);
+  if (event.isV23) {
+    const [mId, accountId] = event.asV23;
     const marketId = Number(mId);
     const amount = BigInt(0);
     const walletId = ss58.codec('zeitgeist').encode(accountId);
     return { marketId, amount, walletId };
-  } else if (soldCompleteSetEvent.isV34) {
-    const [mId, amount, accountId] = soldCompleteSetEvent.asV34;
+  } else if (event.isV34) {
+    const [mId, amount, accountId] = event.asV34;
     const marketId = Number(mId);
     const walletId = ss58.codec('zeitgeist').encode(accountId);
     return { marketId, amount, walletId };

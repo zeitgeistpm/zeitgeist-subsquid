@@ -40,9 +40,9 @@ export const getArbitrageMintSellEvent = (ctx: Ctx, item: EventItem): ArbitrageE
 };
 
 export const getPoolActiveEvent = (ctx: Ctx, item: EventItem): PoolEvent => {
-  const poolActiveEvent = new SwapsPoolActiveEvent(ctx, item.event);
-  if (poolActiveEvent.isV39) {
-    const poolId = poolActiveEvent.asV39;
+  const event = new SwapsPoolActiveEvent(ctx, item.event);
+  if (event.isV39) {
+    const poolId = event.asV39;
     return { poolId };
   } else {
     const [poolId] = item.event.args;
@@ -51,9 +51,9 @@ export const getPoolActiveEvent = (ctx: Ctx, item: EventItem): PoolEvent => {
 };
 
 export const getPoolClosedEvent = (ctx: Ctx, item: EventItem): PoolEvent => {
-  const poolCloseEvent = new SwapsPoolClosedEvent(ctx, item.event);
-  if (poolCloseEvent.isV37) {
-    const poolId = poolCloseEvent.asV37;
+  const event = new SwapsPoolClosedEvent(ctx, item.event);
+  if (event.isV37) {
+    const poolId = event.asV37;
     return { poolId };
   } else {
     const [poolId] = item.event.args;
