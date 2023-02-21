@@ -55,6 +55,19 @@ import {
 } from './mappings/predictionMarkets';
 import { accountCrossed } from './mappings/styx';
 import {
+  arbitrageBuyBurn,
+  arbitrageMintSell,
+  poolActive,
+  poolClosed,
+  poolCreate,
+  poolDestroyed,
+  poolExit,
+  poolExitWithExactAssetAmount,
+  poolJoin,
+  poolJoinWithExactAssetAmount,
+  swapExactAmountIn,
+} from './mappings/swaps';
+import {
   systemExtrinsicFailed,
   systemExtrinsicSuccess,
   systemNewAccount,
@@ -136,6 +149,18 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('PredictionMarkets.SoldCompleteSet', eventExtrinsicOptions)
   .addEvent('PredictionMarkets.TokensRedeemed', eventOptions)
   .addEvent('Styx.AccountCrossed', eventOptions)
+  .addEvent('Swaps.ArbitrageBuyBurn', eventOptions)
+  .addEvent('Swaps.ArbitrageMintSell', eventOptions)
+  .addEvent('Swaps.PoolActive', eventOptions)
+  .addEvent('Swaps.PoolClosed', eventOptions)
+  .addEvent('Swaps.PoolCreate', eventOptions)
+  .addEvent('Swaps.PoolDestroyed', eventOptions)
+  .addEvent('Swaps.PoolExit', eventOptions)
+  .addEvent('Swaps.PoolExitWithExactAssetAmount', eventOptions)
+  .addEvent('Swaps.PoolJoin', eventOptions)
+  .addEvent('Swaps.PoolJoinWithExactAssetAmount', eventOptions)
+  .addEvent('Swaps.SwapExactAmountIn', eventExtrinsicOptions)
+  .addEvent('Swaps.SwapExactAmountOut', eventExtrinsicOptions)
   .addEvent('System.ExtrinsicFailed', eventRangeOptions)
   .addEvent('System.ExtrinsicSuccess', eventRangeOptions)
   .addEvent('System.NewAccount', eventOptions)
@@ -209,6 +234,28 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
       return tokensRedeemed(ctx, block, item);
     case 'Styx.AccountCrossed':
       return accountCrossed(ctx, block, item);
+    case 'Swaps.ArbitrageBuyBurn':
+      return arbitrageBuyBurn(ctx, block, item);
+    case 'Swaps.ArbitrageMintSell':
+      return arbitrageMintSell(ctx, block, item);
+    case 'Swaps.PoolActive':
+      return poolActive(ctx, block, item);
+    case 'Swaps.PoolClosed':
+      return poolClosed(ctx, block, item);
+    case 'Swaps.PoolCreate':
+      return poolCreate(ctx, block, item);
+    case 'Swaps.PoolDestroyed':
+      return poolDestroyed(ctx, block, item);
+    case 'Swaps.PoolExit':
+      return poolExit(ctx, block, item);
+    case 'Swaps.PoolExitWithExactAssetAmount':
+      return poolExitWithExactAssetAmount(ctx, block, item);
+    case 'Swaps.PoolJoin':
+      return poolJoin(ctx, block, item);
+    case 'Swaps.PoolJoinWithExactAssetAmount':
+      return poolJoinWithExactAssetAmount(ctx, block, item);
+    case 'Swaps.SwapExactAmountIn':
+      return swapExactAmountIn(ctx, block, item);
     case 'System.NewAccount':
       return systemNewAccount(ctx, block, item);
     case 'System.ExtrinsicFailed':
