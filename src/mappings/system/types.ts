@@ -1,59 +1,58 @@
-import { encodeAddress } from '@polkadot/keyring'
-import * as ss58 from '@subsquid/ss58'
-import { EventContext } from '../../types/support'
-import { DispatchInfo } from '../../types/v23'
-import { SystemExtrinsicFailedEvent, SystemExtrinsicSuccessEvent, SystemNewAccountEvent } from '../../types/events'
+import { encodeAddress } from '@polkadot/keyring';
+import * as ss58 from '@subsquid/ss58';
+import { Ctx, EventItem } from '../../processor';
+import { SystemExtrinsicFailedEvent, SystemExtrinsicSuccessEvent, SystemNewAccountEvent } from '../../types/events';
+import { DispatchInfo } from '../../types/v23';
 
-
-export function getExtrinsicFailedEvent(ctx: EventContext): ExtrinsicEvent {
-  const extrinsicFailedEvent = new SystemExtrinsicFailedEvent(ctx)
-  if (extrinsicFailedEvent.isV23) {
-    const [, dispatchInfo ] = extrinsicFailedEvent.asV23
-    return { dispatchInfo }
-  } else if (extrinsicFailedEvent.isV32) {
-    const [, dispatchInfo ] = extrinsicFailedEvent.asV32
-    return { dispatchInfo }
+export const getExtrinsicFailedEvent = (ctx: Ctx, item: EventItem): ExtrinsicEvent => {
+  const event = new SystemExtrinsicFailedEvent(ctx, item.event);
+  if (event.isV23) {
+    const [, dispatchInfo] = event.asV23;
+    return { dispatchInfo };
+  } else if (event.isV32) {
+    const [, dispatchInfo] = event.asV32;
+    return { dispatchInfo };
   } else {
-    const [, dispatchInfo ] = ctx.event.args
-    return { dispatchInfo }
+    const [, dispatchInfo] = item.event.args;
+    return { dispatchInfo };
   }
-}
+};
 
-export function getExtrinsicSuccessEvent(ctx: EventContext): ExtrinsicEvent {
-  const extrinsicSuccessEvent = new SystemExtrinsicSuccessEvent(ctx)
-  if (extrinsicSuccessEvent.isV23) {
-    const dispatchInfo = extrinsicSuccessEvent.asV23
-    return { dispatchInfo }
-  } else if (extrinsicSuccessEvent.isV34) {
-    const { dispatchInfo } = extrinsicSuccessEvent.asV34
-    return { dispatchInfo }
+export const getExtrinsicSuccessEvent = (ctx: Ctx, item: EventItem): ExtrinsicEvent => {
+  const event = new SystemExtrinsicSuccessEvent(ctx, item.event);
+  if (event.isV23) {
+    const dispatchInfo = event.asV23;
+    return { dispatchInfo };
+  } else if (event.isV34) {
+    const { dispatchInfo } = event.asV34;
+    return { dispatchInfo };
   } else {
-    const [dispatchInfo] = ctx.event.args
-    return { dispatchInfo }
+    const [dispatchInfo] = item.event.args;
+    return { dispatchInfo };
   }
-}
+};
 
-export function getNewAccountEvent(ctx: EventContext): AccountEvent {
-  const newAccountEvent = new SystemNewAccountEvent(ctx)
-  if (newAccountEvent.isV23) {
-    const accountId = newAccountEvent.asV23
-    const walletId = ss58.codec('zeitgeist').encode(accountId)
-    return { walletId }
-  } else if (newAccountEvent.isV34) {
-    const  { account } = newAccountEvent.asV34
-    const walletId = ss58.codec('zeitgeist').encode(account)
-    return { walletId }
+export const getNewAccountEvent = (ctx: Ctx, item: EventItem): AccountEvent => {
+  const event = new SystemNewAccountEvent(ctx, item.event);
+  if (event.isV23) {
+    const accountId = event.asV23;
+    const walletId = ss58.codec('zeitgeist').encode(accountId);
+    return { walletId };
+  } else if (event.isV34) {
+    const { account } = event.asV34;
+    const walletId = ss58.codec('zeitgeist').encode(account);
+    return { walletId };
   } else {
-    const [accountId] = ctx.event.args
-    const walletId = encodeAddress(accountId, 73)
-    return { walletId }
+    const [accountId] = item.event.args;
+    const walletId = encodeAddress(accountId, 73);
+    return { walletId };
   }
-}
+};
 
 interface AccountEvent {
-  walletId: string
+  walletId: string;
 }
 
 interface ExtrinsicEvent {
-  dispatchInfo: DispatchInfo
+  dispatchInfo: DispatchInfo;
 }

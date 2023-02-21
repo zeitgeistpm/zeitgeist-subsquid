@@ -1,5 +1,5 @@
 {
-  "outDir": "src2/types",
+  "outDir": "src/types",
   "specVersions": "zeitgeistVersions.jsonl",
   "typesBundle": "typesBundle.json",
   "events": [

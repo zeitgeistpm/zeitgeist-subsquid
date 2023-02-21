@@ -24,18 +24,16 @@ export class MarketStatsResolver {
   constructor(private tx: () => Promise<EntityManager>) {}
 
   @Query(() => [MarketStats])
-  async marketStats(
-    @Arg('ids', () => [String!], { nullable: false }) ids: string[]
-  ): Promise<MarketStats[]> {
+  async marketStats(@Arg('ids', () => [String!], { nullable: false }) ids: string[]): Promise<MarketStats[]> {
     const manager = await this.tx();
     const participants = await manager.getRepository(Market).query(marketParticipants(ids));
     const liquidity = await manager.getRepository(Market).query(marketLiquidity(ids));
 
     const mergeByMarketId = (participants: any[], liquidity: any[]) =>
-    participants.map(p => ({
-      ...liquidity.find(l => (l.market_id === p.market_id) && l),
-      ...p
-    }));
+      participants.map((p) => ({
+        ...liquidity.find((l) => l.market_id === p.market_id && l),
+        ...p,
+      }));
     const result = mergeByMarketId(participants, liquidity);
     return result;
   }
