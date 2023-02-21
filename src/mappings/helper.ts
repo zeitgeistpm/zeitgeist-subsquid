@@ -7,20 +7,20 @@ import { EventItem } from '../processor';
 import { MarketStatus as status } from '../types/v42';
 import { Cache, IPFS, Tools } from './util';
 
-export function calcSpotPrice(
+export const calcSpotPrice = (
   tokenBalanceIn: number,
   tokenWeightIn: number,
   tokenBalanceOut: number,
   tokenWeightOut: number
-): number {
+): number => {
   if (tokenBalanceOut == 0) return 0;
   const numer = tokenBalanceIn / tokenWeightIn;
   const denom = tokenBalanceOut / tokenWeightOut;
   const spotPrice = numer / denom;
   return spotPrice;
-}
+};
 
-export async function createAssetsForMarket(marketId: string, marketType: any): Promise<any> {
+export const createAssetsForMarket = async (marketId: string, marketType: any): Promise<any> => {
   const sdk = await Tools.getSDK();
   return marketType.__kind == 'Categorical'
     ? [...Array(marketType.value).keys()].map((catIdx) => {
@@ -34,9 +34,9 @@ export async function createAssetsForMarket(marketId: string, marketType: any): 
           scalarOutcome: [marketId, position.toString()],
         });
       });
-}
+};
 
-export async function decodeMarketMetadata(metadata: string): Promise<DecodedMarketMetadata | undefined> {
+export const decodeMarketMetadata = async (metadata: string): Promise<DecodedMarketMetadata | undefined> => {
   if (metadata.startsWith('0x1530fa0bb52e67d0d9f89bf26552e1')) return undefined;
   let raw = await (await Cache.init()).getMeta(metadata);
   if (raw && !(process.env.NODE_ENV == 'local')) {
@@ -56,9 +56,9 @@ export async function decodeMarketMetadata(metadata: string): Promise<DecodedMar
       return undefined;
     }
   }
-}
+};
 
-export function getAssetId(currencyId: any): string {
+export const getAssetId = (currencyId: any): string => {
   if (currencyId.__kind == 'CategoricalOutcome') {
     return JSON.stringify(util.AssetIdFromString('[' + currencyId.value.toString() + ']'));
   } else if (currencyId.__kind == 'ScalarOutcome') {
@@ -73,9 +73,9 @@ export function getAssetId(currencyId: any): string {
   } else {
     return '';
   }
-}
+};
 
-export async function getFees(block: SubstrateBlock, extrinsic: SubstrateExtrinsic): Promise<bigint> {
+export const getFees = async (block: SubstrateBlock, extrinsic: SubstrateExtrinsic): Promise<bigint> => {
   const id = extrinsic.indexInBlock;
   let fees = await (await Cache.init()).getFee(block.hash + id);
   if (fees) {
@@ -99,7 +99,7 @@ export async function getFees(block: SubstrateBlock, extrinsic: SubstrateExtrins
   }
   await (await Cache.init()).setFee(block.hash + id, totalFees.toString());
   return totalFees;
-}
+};
 
 export const getMarketStatus = (status: status): MarketStatus => {
   switch (status.__kind) {
@@ -155,9 +155,9 @@ export const initBalance = async (acc: Account, store: Store, block: SubstrateBl
   await store.save<HistoricalAccountBalance>(hab);
 };
 
-export function rescale(value: string): string {
+export const rescale = (value: string): string => {
   return (BigInt(value) * BigInt(10 ** 10)).toString();
-}
+};
 
 interface DecodedMarketMetadata {
   slug: string;
