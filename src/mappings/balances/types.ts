@@ -1,209 +1,192 @@
-import { encodeAddress } from '@polkadot/keyring'
-import * as ss58 from '@subsquid/ss58'
-import { EventContext } from '../../types/support'
-import { BalancesBalanceSetEvent, BalancesDepositEvent, BalancesDustLostEvent, BalancesEndowedEvent, 
-  BalancesReservedEvent, BalancesSlashedEvent, BalancesTransferEvent, BalancesUnreservedEvent, 
-  BalancesWithdrawEvent } from '../../types/events'
+import { encodeAddress } from '@polkadot/keyring';
+import * as ss58 from '@subsquid/ss58';
+import { Ctx, EventItem } from '../../processor';
+import {
+  BalancesBalanceSetEvent,
+  BalancesDepositEvent,
+  BalancesDustLostEvent,
+  BalancesEndowedEvent,
+  BalancesReservedEvent,
+  BalancesSlashedEvent,
+  BalancesTransferEvent,
+  BalancesUnreservedEvent,
+  BalancesWithdrawEvent,
+} from '../../types/events';
 
-
-export function getBalanceSetEvent(ctx: EventContext): BalanceSetEvent {
-  const balanceSetEvent = new BalancesBalanceSetEvent(ctx)
-  if (balanceSetEvent.isV23) {
-    const [who, free] = balanceSetEvent.asV23
-    const walletId = ss58.codec('zeitgeist').encode(who)
-    return {walletId, free}
-  } else if (balanceSetEvent.isV34) {
-    const {who, free} = balanceSetEvent.asV34
-    const walletId = ss58.codec('zeitgeist').encode(who)
-    return {walletId, free}
-  } else {
-    const [account, free] = ctx.event.args
-    const walletId = encodeAddress(account, 73)
-    return {walletId, free}
-  }
-}
-
-export function getDepositEvent(ctx: EventContext): DepositEvent {
-  const event = new BalancesDepositEvent(ctx)
+export const getBalanceSetEvent = (ctx: Ctx, item: EventItem): BalanceSetEvent => {
+  // @ts-ignore
+  const event = new BalancesBalanceSetEvent(ctx, item.event);
   if (event.isV23) {
-    const [who, amount] = event.asV23
-    const walletId = ss58.codec('zeitgeist').encode(who)
-    return {walletId, amount}
+    const [who, free] = event.asV23;
+    const walletId = ss58.codec('zeitgeist').encode(who);
+    return { walletId, free };
   } else if (event.isV34) {
-    const {who, amount} = event.asV34
-    const walletId = ss58.codec('zeitgeist').encode(who)
-    return {walletId, amount}
+    const { who, free } = event.asV34;
+    const walletId = ss58.codec('zeitgeist').encode(who);
+    return { walletId, free };
   } else {
-    const [who, amount] = ctx.event.args
-    const walletId = encodeAddress(who, 73)
-    return {walletId, amount}
+    const [account, free] = item.event.args;
+    const walletId = encodeAddress(account, 73);
+    return { walletId, free };
   }
-}
+};
 
-export function getDustLostEvent(ctx: EventContext): DustLostEvent {
-  const dustLostEvent = new BalancesDustLostEvent(ctx)
-  if (dustLostEvent.isV23) {
-    const [account, amount] = dustLostEvent.asV23
-    const walletId = ss58.codec('zeitgeist').encode(account)
-    return {walletId, amount}
-  } else if (dustLostEvent.isV34) {
-    const {account, amount} = dustLostEvent.asV34
-    const walletId = ss58.codec('zeitgeist').encode(account)
-    return {walletId, amount}
+export const getDepositEvent = (ctx: Ctx, item: EventItem): BalancesEvent => {
+  const event = new BalancesDepositEvent(ctx, item.event);
+  if (event.isV23) {
+    const [who, amount] = event.asV23;
+    const walletId = ss58.codec('zeitgeist').encode(who);
+    return { walletId, amount };
+  } else if (event.isV34) {
+    const { who, amount } = event.asV34;
+    const walletId = ss58.codec('zeitgeist').encode(who);
+    return { walletId, amount };
   } else {
-    const [account, amount] = ctx.event.args
-    const walletId = encodeAddress(account, 73)
-    return {walletId, amount}
+    const [who, amount] = item.event.args;
+    const walletId = encodeAddress(who, 73);
+    return { walletId, amount };
   }
-}
+};
 
-export function getEndowedEvent(ctx: EventContext): EndowedEvent {
-  const endowedEvent = new BalancesEndowedEvent(ctx)
-  if (endowedEvent.isV23) {
-    const [account, freeBalance] = endowedEvent.asV23
-    const walletId = ss58.codec('zeitgeist').encode(account)
-    return {walletId, freeBalance}
-  } else if (endowedEvent.isV34) {
-    const {account, freeBalance} = endowedEvent.asV34
-    const walletId = ss58.codec('zeitgeist').encode(account)
-    return {walletId, freeBalance}
+export const getDustLostEvent = (ctx: Ctx, item: EventItem): BalancesEvent => {
+  const event = new BalancesDustLostEvent(ctx, item.event);
+  if (event.isV23) {
+    const [account, amount] = event.asV23;
+    const walletId = ss58.codec('zeitgeist').encode(account);
+    return { walletId, amount };
+  } else if (event.isV34) {
+    const { account, amount } = event.asV34;
+    const walletId = ss58.codec('zeitgeist').encode(account);
+    return { walletId, amount };
   } else {
-    const [account, freeBalance] = ctx.event.args
-    const walletId = encodeAddress(account, 73)
-    return {walletId, freeBalance}
+    const [account, amount] = item.event.args;
+    const walletId = encodeAddress(account, 73);
+    return { walletId, amount };
   }
-}
+};
 
-export function getReservedEvent(ctx: EventContext): ReservedEvent {
-  const reservedEvent = new BalancesReservedEvent(ctx)
-  if (reservedEvent.isV23) {
-    const [who, amount] = reservedEvent.asV23
-    const walletId = ss58.codec('zeitgeist').encode(who)
-    return {walletId, amount}
-  } else if (reservedEvent.isV34) {
-    const {who, amount} = reservedEvent.asV34
-    const walletId = ss58.codec('zeitgeist').encode(who)
-    return {walletId, amount}
+export const getEndowedEvent = (ctx: Ctx, item: EventItem): EndowedEvent => {
+  const event = new BalancesEndowedEvent(ctx, item.event);
+  if (event.isV23) {
+    const [account, freeBalance] = event.asV23;
+    const walletId = ss58.codec('zeitgeist').encode(account);
+    return { walletId, freeBalance };
+  } else if (event.isV34) {
+    const { account, freeBalance } = event.asV34;
+    const walletId = ss58.codec('zeitgeist').encode(account);
+    return { walletId, freeBalance };
   } else {
-    const [who, amount] = ctx.event.args
-    const walletId = encodeAddress(who, 73)
-    return {walletId, amount}
+    const [account, freeBalance] = item.event.args;
+    const walletId = encodeAddress(account, 73);
+    return { walletId, freeBalance };
   }
-}
+};
 
-export function getSlashedEvent(ctx: EventContext): SlashedEvent {
-  const event = new BalancesSlashedEvent(ctx)
+export const getReservedEvent = (ctx: Ctx, item: EventItem): BalancesEvent => {
+  const event = new BalancesReservedEvent(ctx, item.event);
+  if (event.isV23) {
+    const [who, amount] = event.asV23;
+    const walletId = ss58.codec('zeitgeist').encode(who);
+    return { walletId, amount };
+  } else if (event.isV34) {
+    const { who, amount } = event.asV34;
+    const walletId = ss58.codec('zeitgeist').encode(who);
+    return { walletId, amount };
+  } else {
+    const [who, amount] = item.event.args;
+    const walletId = encodeAddress(who, 73);
+    return { walletId, amount };
+  }
+};
+
+export const getSlashedEvent = (ctx: Ctx, item: EventItem): BalancesEvent => {
+  const event = new BalancesSlashedEvent(ctx, item.event);
   if (event.isV33) {
-    const [who, amount] = event.asV33
-    const walletId = ss58.codec('zeitgeist').encode(who)
-    return {walletId, amount}
+    const [who, amount] = event.asV33;
+    const walletId = ss58.codec('zeitgeist').encode(who);
+    return { walletId, amount };
   } else if (event.isV34) {
-    const {who, amount} = event.asV34
-    const walletId = ss58.codec('zeitgeist').encode(who)
-    return {walletId, amount}
+    const { who, amount } = event.asV34;
+    const walletId = ss58.codec('zeitgeist').encode(who);
+    return { walletId, amount };
   } else {
-    const [who, amount] = ctx.event.args
-    const walletId = encodeAddress(who, 73)
-    return {walletId, amount}
+    const [who, amount] = item.event.args;
+    const walletId = encodeAddress(who, 73);
+    return { walletId, amount };
   }
-}
+};
 
-export function getTransferEvent(ctx: EventContext): TransferEvent {
-  const transferEvent = new BalancesTransferEvent(ctx)
-  if (transferEvent.isV23) {
-    const [from, to, amount] = transferEvent.asV23
-    const fromId = ss58.codec('zeitgeist').encode(from)
-    const toId = ss58.codec('zeitgeist').encode(to)
-    return {fromId, toId, amount}
-  } else if (transferEvent.isV34) {
-    const {from, to, amount} = transferEvent.asV34
-    const fromId = ss58.codec('zeitgeist').encode(from)
-    const toId = ss58.codec('zeitgeist').encode(to)
-    return {fromId, toId, amount}
+export const getTransferEvent = (ctx: Ctx, item: EventItem): TransferEvent => {
+  const event = new BalancesTransferEvent(ctx, item.event);
+  if (event.isV23) {
+    const [from, to, amount] = event.asV23;
+    const fromId = ss58.codec('zeitgeist').encode(from);
+    const toId = ss58.codec('zeitgeist').encode(to);
+    return { fromId, toId, amount };
+  } else if (event.isV34) {
+    const { from, to, amount } = event.asV34;
+    const fromId = ss58.codec('zeitgeist').encode(from);
+    const toId = ss58.codec('zeitgeist').encode(to);
+    return { fromId, toId, amount };
   } else {
-    const [from, to, amount] = ctx.event.args
-    const fromId = encodeAddress(from, 73)
-    const toId = encodeAddress(to, 73)
-    return {fromId, toId, amount}
+    const [from, to, amount] = item.event.args;
+    const fromId = encodeAddress(from, 73);
+    const toId = encodeAddress(to, 73);
+    return { fromId, toId, amount };
   }
-}
+};
 
-export function getUnreservedEvent(ctx: EventContext): UnreservedEvent {
-  const unreservedEvent = new BalancesUnreservedEvent(ctx)
-  if (unreservedEvent.isV23) {
-    const [who, amount] = unreservedEvent.asV23
-    const walletId = ss58.codec('zeitgeist').encode(who)
-    return {walletId, amount}
-  } else if (unreservedEvent.isV34) {
-    const {who, amount} = unreservedEvent.asV34
-    const walletId = ss58.codec('zeitgeist').encode(who)
-    return {walletId, amount}
+export const getUnreservedEvent = (ctx: Ctx, item: EventItem): BalancesEvent => {
+  const event = new BalancesUnreservedEvent(ctx, item.event);
+  if (event.isV23) {
+    const [who, amount] = event.asV23;
+    const walletId = ss58.codec('zeitgeist').encode(who);
+    return { walletId, amount };
+  } else if (event.isV34) {
+    const { who, amount } = event.asV34;
+    const walletId = ss58.codec('zeitgeist').encode(who);
+    return { walletId, amount };
   } else {
-    const [who, amount] = ctx.event.args
-    const walletId = encodeAddress(who, 73)
-    return {walletId, amount}
+    const [who, amount] = item.event.args;
+    const walletId = encodeAddress(who, 73);
+    return { walletId, amount };
   }
-}
+};
 
-export function getWithdrawEvent(ctx: EventContext): WithdrawEvent {
-  const withdrawEvent = new BalancesWithdrawEvent(ctx)
-  if (withdrawEvent.isV33) {
-    const [who, amount] = withdrawEvent.asV33
-    const walletId = ss58.codec('zeitgeist').encode(who)
-    return {walletId, amount}
-  } else if (withdrawEvent.isV34) {
-    const {who, amount} = withdrawEvent.asV34
-    const walletId = ss58.codec('zeitgeist').encode(who)
-    return {walletId, amount}
+export const getWithdrawEvent = (ctx: Ctx, item: EventItem): BalancesEvent => {
+  const event = new BalancesWithdrawEvent(ctx, item.event);
+  if (event.isV33) {
+    const [who, amount] = event.asV33;
+    const walletId = ss58.codec('zeitgeist').encode(who);
+    return { walletId, amount };
+  } else if (event.isV34) {
+    const { who, amount } = event.asV34;
+    const walletId = ss58.codec('zeitgeist').encode(who);
+    return { walletId, amount };
   } else {
-    const [who, amount] = ctx.event.args
-    const walletId = encodeAddress(who, 73)
-    return {walletId, amount}
+    const [who, amount] = item.event.args;
+    const walletId = encodeAddress(who, 73);
+    return { walletId, amount };
   }
+};
+
+interface BalancesEvent {
+  walletId: string;
+  amount: bigint;
 }
 
 interface BalanceSetEvent {
-  walletId: string
-  free: bigint
-}
-
-interface DepositEvent {
-  walletId: string
-  amount: bigint
-}
-
-interface DustLostEvent {
-  walletId: string
-  amount: bigint
+  walletId: string;
+  free: bigint;
 }
 
 interface EndowedEvent {
-  walletId: string
-  freeBalance: bigint
-}
-
-interface ReservedEvent {
-  walletId: string
-  amount: bigint
-}
-
-interface SlashedEvent {
-  walletId: string
-  amount: bigint
+  walletId: string;
+  freeBalance: bigint;
 }
 
 interface TransferEvent {
-  fromId: string
-  toId: string
-  amount: bigint
-}
-
-interface UnreservedEvent {
-  walletId: string
-  amount: bigint
-}
-
-interface WithdrawEvent {
-  walletId: string
-  amount: bigint
+  fromId: string;
+  toId: string;
+  amount: bigint;
 }
