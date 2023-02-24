@@ -1,3 +1,16 @@
+export const assetPriceHistory = (assetId: string) => `
+  SELECT
+    DISTINCT ON (timestamp) timestamp,
+    new_price as price
+  FROM
+    historical_asset
+  WHERE
+    asset_id LIKE '%${assetId}%'
+  ORDER BY
+    timestamp,
+    id DESC;
+`;
+
 export const marketParticipants = (ids: string[]) => `
   SELECT
     m.market_id,
