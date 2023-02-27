@@ -1,11 +1,13 @@
+import { decodedAssetId } from './helper';
+
 export const assetPriceHistory = (assetId: string) => `
   SELECT
     DISTINCT ON (timestamp) timestamp,
-    new_price as price
+    new_price AS "${assetId}"
   FROM
     historical_asset
   WHERE
-    asset_id LIKE '%${assetId}%'
+    asset_id LIKE '%${decodedAssetId(assetId)}%'
   ORDER BY
     timestamp,
     id DESC;
@@ -40,6 +42,15 @@ export const marketLiquidity = (ids: string[]) => `
   GROUP BY
     m.market_id,
     p.ztg_qty;
+`;
+
+export const outcomeAssets = (marketId: number) => `
+  SELECT
+    outcome_assets as assets
+  FROM
+    market m
+  WHERE 
+    m.market_id=${marketId};
 `;
 
 export const totalLiquidityAndVolume = () => `
