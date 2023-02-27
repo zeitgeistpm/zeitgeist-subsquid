@@ -40,9 +40,9 @@ export class PriceHistoryResolver {
     const marketAssets = await manager.query(outcomeAssets(marketId));
 
     let merged = [];
-    let priceHistory = await manager.query(assetPriceHistory(encodedAssetId(marketAssets[0].assets[0])));
+    let priceHistory = await manager.query(assetPriceHistory(marketAssets[0].assets[0]));
     for (let i = 1; i < marketAssets[0].assets.length; i++) {
-      let priceHistory2 = await manager.query(assetPriceHistory(encodedAssetId(marketAssets[0].assets[i])));
+      let priceHistory2 = await manager.query(assetPriceHistory(marketAssets[0].assets[i]));
       merged = mergeByField(priceHistory, priceHistory2, 'timestamp');
       priceHistory = merged;
     }

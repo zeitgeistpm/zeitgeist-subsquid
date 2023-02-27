@@ -1,13 +1,13 @@
-import { decodedAssetId } from './helper';
+import { encodedAssetId } from './helper';
 
 export const assetPriceHistory = (assetId: string) => `
   SELECT
     DISTINCT ON (timestamp) timestamp,
-    new_price AS "${assetId}"
+    new_price AS "${encodedAssetId(assetId)}"
   FROM
     historical_asset
   WHERE
-    asset_id LIKE '%${decodedAssetId(assetId)}%'
+    asset_id LIKE '%${assetId}%'
   ORDER BY
     timestamp,
     id DESC;
