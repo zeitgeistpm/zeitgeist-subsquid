@@ -173,7 +173,6 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
   switch (item.name) {
     case 'Balances.BalanceSet':
       return balancesBalanceSet(ctx, block, item);
-    // @ts-ignore
     case 'Balances.Deposit':
       return balancesDeposit(ctx, block, item);
     case 'Balances.DustLost':
