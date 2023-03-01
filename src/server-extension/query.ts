@@ -1,16 +1,55 @@
 import { encodedAssetId } from './helper';
 
-export const assetPriceHistory = (assetId: string) => `
+export const assetPriceHistory = (
+  assetId: string,
+  poolCreateTime: string,
+  startTime: string,
+  endTime: string,
+  interval: string
+) => `
   SELECT
-    DISTINCT ON (timestamp) timestamp,
-    new_price AS "${encodedAssetId(assetId)}"
-  FROM
-    historical_asset
-  WHERE
-    asset_id LIKE '%${assetId}%'
-  ORDER BY
-    timestamp,
-    id DESC;
+    x.generate_series AS timestamp,
+    y.latest_value AS "${encodedAssetId(assetId)}"
+  FROM (
+    SELECT
+      GENERATE_SERIES (
+        TIMEZONE('UTC', '${startTime}'::TIMESTAMP),
+        TIMEZONE('UTC', '${endTime}'::TIMESTAMP),
+        '${interval}'::INTERVAL
+      )
+  ) x
+  LEFT JOIN (
+    SELECT
+      generate_series,
+      FIRST_VALUE(new_price) OVER (PARTITION BY value_partition ORDER BY generate_series) AS latest_value
+    FROM (
+      SELECT
+        *,
+        SUM(CASE WHEN new_price IS NULL THEN 0 ELSE 1 END) OVER (ORDER BY generate_series) AS value_partition
+      FROM (
+        SELECT
+          GENERATE_SERIES (
+            TIMEZONE('UTC', '${poolCreateTime}'::TIMESTAMP),
+            TIMEZONE('UTC', '${endTime}'::TIMESTAMP),
+            '10 SECONDS'::INTERVAL
+          )
+      ) a
+      LEFT JOIN (
+        SELECT
+          DISTINCT ON (timestamp) DATE_TRUNC('SECOND', ha.timestamp::timestamp),
+          ha.new_price
+        FROM
+          historical_asset ha
+        WHERE
+          ha.asset_id LIKE '%${assetId}%'
+        ORDER BY
+          ha.timestamp,
+          ha.id DESC
+      ) b
+      ON b.date_trunc = a.generate_series
+    ) AS q
+  ) y
+  ON y.generate_series = x.generate_series;
 `;
 
 export const marketParticipants = (ids: string[]) => `
@@ -44,13 +83,20 @@ export const marketLiquidity = (ids: string[]) => `
     p.ztg_qty;
 `;
 
-export const outcomeAssets = (marketId: number) => `
+export const marketInfo = (marketId: number) => `
   SELECT
-    outcome_assets as assets
+    hm.timestamp,
+    m.outcome_assets
   FROM
     market m
-  WHERE 
-    m.market_id=${marketId};
+  JOIN
+    historical_market hm ON hm.market_id = m.market_id
+  WHERE
+    m.market_id=${marketId}
+    AND hm.event~'(Pool|Resolved)'
+  GROUP BY
+    m.outcome_assets,
+    hm.timestamp;
 `;
 
 export const totalLiquidityAndVolume = () => `
