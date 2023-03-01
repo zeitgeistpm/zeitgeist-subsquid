@@ -31,7 +31,7 @@ export const assetPriceHistory = (
           GENERATE_SERIES (
             TIMEZONE('UTC', '${poolCreateTime}'::TIMESTAMP),
             TIMEZONE('UTC', '${endTime}'::TIMESTAMP),
-            '10 SECONDS'::INTERVAL
+            '5 SECONDS'::INTERVAL
           )
       ) a
       LEFT JOIN (
