@@ -34,24 +34,27 @@ class Price {
 export class PriceHistoryResolver {
   constructor(private tx: () => Promise<EntityManager>) {}
 
-  @Query(() => [PriceHistory])
+  @Query(() => [PriceHistory], { nullable: true })
   async priceHistory(
     @Arg('marketId', () => Number!, { nullable: false }) marketId: number,
     @Arg('startTime', () => String, { nullable: true }) startTime: string,
     @Arg('endTime', () => String, { nullable: true }) endTime: string,
     @Arg('interval', { nullable: true, defaultValue: '1 DAY' }) interval: string
-  ): Promise<PriceHistory[]> {
+  ): Promise<PriceHistory[] | undefined> {
     const manager = await this.tx();
     const market = await manager.query(marketInfo(marketId));
+    if (!market[0]) return;
+
     const poolCreateTime = market[0].timestamp.toISOString().replace('T', ' ').split('.')[0];
-    if (!startTime) {
-      startTime = poolCreateTime;
-    }
-    if (!endTime) {
+    if (!startTime) startTime = poolCreateTime;
+    if (!endTime && market[1]) {
       let marketResolvedTime = new Date(market[1].timestamp.toISOString());
       marketResolvedTime.setDate(marketResolvedTime.getDate() + 1);
       endTime = marketResolvedTime.toISOString().replace('T', ' ').split('.')[0];
+    } else {
+      endTime = new Date().toISOString().replace('T', ' ').split('.')[0];
     }
+
     let merged = [];
     let priceHistory = await manager.query(
       assetPriceHistory(market[0].outcome_assets[0], poolCreateTime, startTime, endTime, interval)
