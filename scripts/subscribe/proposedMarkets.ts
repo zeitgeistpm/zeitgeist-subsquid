@@ -15,7 +15,7 @@ const GRAPHQL_WS_URL = NODE_URL.includes(`bs`)
 
 const client = createClient({
   webSocketImpl: WebSocket,
-  url: `ws://localhost:4350/graphql`,
+  url: GRAPHQL_WS_URL,
 });
 
 client.subscribe(
@@ -41,7 +41,7 @@ client.subscribe(
   {
     next: ({ data }) => {
       const { markets } = data as any;
-      postMessage(markets[0]);
+      postDiscordAlert(markets[0]);
     },
     error: (error) => {
       console.error('error', error);
@@ -52,9 +52,8 @@ client.subscribe(
   }
 );
 
-const postMessage = async (market: Market) => {
-  if (!market.description) return;
-  const res = await axios.post(process.env.DISCORD_WEBHOOK_URL!, {
+const postDiscordAlert = async (market: Market) => {
+  const res = await axios.post(WEBHOOK_URL, {
     username: 'Market Proposed Alert',
     content: '',
     embeds: [
@@ -65,7 +64,7 @@ const postMessage = async (market: Market) => {
         fields: [
           {
             name: 'Description',
-            value: market.description.replace(/<[^>]+>/g, ''),
+            value: market.description!.replace(/<[^>]+>/g, ''),
           },
           {
             name: 'MarketType',
@@ -83,5 +82,4 @@ const postMessage = async (market: Market) => {
       },
     ],
   });
-  console.log(res);
 };
