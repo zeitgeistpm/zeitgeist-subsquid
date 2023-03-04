@@ -1,6 +1,6 @@
 /**
  * Script to subscribe to new market proposals
- * Run using `ts-node scripts/subscribe/proposedMarkets.ts wss://bsr.zeitgeist.pm`
+ * Run using `ts-node scripts/subscribe/proposedMarkets.ts wss://bsr.zeitgeist.pm <webhook-url>`
  */
 import { createClient } from 'graphql-ws';
 import WebSocket from 'ws';
@@ -53,8 +53,8 @@ client.subscribe(
 );
 
 const postDiscordAlert = async (market: Market) => {
-  const res = await axios.post(WEBHOOK_URL, {
-    username: 'Market Proposed Alert',
+  await axios.post(WEBHOOK_URL, {
+    username: 'Market Proposed Alert!',
     content: '',
     embeds: [
       {
