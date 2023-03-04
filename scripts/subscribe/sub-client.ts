@@ -1,4 +1,4 @@
-import { Market } from '../src/model';
+import { Market } from '../../src/model';
 import WebSocket from 'ws';
 import { createClient } from 'graphql-ws';
 import axios from 'axios';
