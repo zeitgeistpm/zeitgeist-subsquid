@@ -1,7 +1,17 @@
-import { Market } from '../../src/model';
-import WebSocket from 'ws';
+/**
+ * Script to subscribe to new market proposals
+ * Run using `ts-node scripts/subscribe/proposedMarkets.ts wss://bsr.zeitgeist.pm`
+ */
 import { createClient } from 'graphql-ws';
+import WebSocket from 'ws';
 import axios from 'axios';
+import { Market } from '../../src/model';
+
+const NODE_URL = process.argv[2];
+const WEBHOOK_URL = process.argv[3];
+const GRAPHQL_WS_URL = NODE_URL.includes(`bs`)
+  ? `wss://processor.bsr.zeitgeist.pm/graphql`
+  : `wss://processor.rpc-0.zeitgeist.pm/graphql`;
 
 const client = createClient({
   webSocketImpl: WebSocket,
