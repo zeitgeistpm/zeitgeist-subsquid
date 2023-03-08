@@ -45,23 +45,25 @@ export class PriceHistoryResolver {
     const market = await manager.query(marketInfo(marketId));
     if (!market[0]) return;
 
-    const poolCreateTime = market[0].timestamp.toISOString().replace('T', ' ').split('.')[0];
-    if (!startTime) startTime = poolCreateTime;
+    if (!startTime) {
+      let poolCreateTime = market[0].timestamp.toISOString();
+      startTime = poolCreateTime;
+    }
     if (!endTime && market[1]) {
       let marketResolvedTime = new Date(market[1].timestamp.toISOString());
       marketResolvedTime.setDate(marketResolvedTime.getDate() + 1);
-      endTime = marketResolvedTime.toISOString().replace('T', ' ').split('.')[0];
+      endTime = marketResolvedTime.toISOString();
     } else {
-      endTime = new Date().toISOString().replace('T', ' ').split('.')[0];
+      endTime = new Date().toISOString();
     }
 
     let merged = [];
     let priceHistory = await manager.query(
-      assetPriceHistory(market[0].outcome_assets[0], poolCreateTime, startTime, endTime, interval)
+      assetPriceHistory(market[0].outcome_assets[0], startTime, endTime, interval)
     );
     for (let i = 1; i < market[0].outcome_assets.length; i++) {
       let priceHistory2 = await manager.query(
-        assetPriceHistory(market[0].outcome_assets[i], poolCreateTime, startTime, endTime, interval)
+        assetPriceHistory(market[0].outcome_assets[i], startTime, endTime, interval)
       );
       merged = mergeByField(priceHistory, priceHistory2, 'timestamp');
       priceHistory = merged;
