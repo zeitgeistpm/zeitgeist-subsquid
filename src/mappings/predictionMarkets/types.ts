@@ -70,10 +70,10 @@ export const getMarketClosedEvent = (ctx: Ctx, item: EventItem): MarketClosedEve
   }
 };
 
-export const getMarketCreatedEvent = (ctx: Ctx, item: EventItem): MarketCreatedEvent => {
+export const getMarketCreatedEvent = (ctx: Ctx, item: EventItem, specVersion: number): MarketCreatedEvent => {
   const event = new PredictionMarketsMarketCreatedEvent(ctx, item.event);
   const [marketId, param1, param2] = item.event.args;
-  if (event.isV23 || event.isV29) {
+  if (event.isV23 || event.isV29 || specVersion === 23 || specVersion === 29) {
     const marketAccountId = '';
     let market = param1 as any;
     market.disputeMechanism = market.mdm;

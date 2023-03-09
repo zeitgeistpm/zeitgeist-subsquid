@@ -177,8 +177,8 @@ export const marketClosed = async (ctx: Ctx, block: SubstrateBlock, item: EventI
 };
 
 export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
-  const { marketId, marketAccountId, market } = getMarketCreatedEvent(ctx, item);
   const specVersion = +block.specId.substring(block.specId.indexOf('@') + 1);
+  const { marketId, marketAccountId, market } = getMarketCreatedEvent(ctx, item, specVersion);
 
   if (marketAccountId.length > 0) {
     let acc = await ctx.store.findOneBy(Account, {
