@@ -24,7 +24,7 @@ export const assetPriceHistory = (assetId: string, startTime: string, endTime: s
       asset_id LIKE '%${assetId}%'
       AND timestamp <= timestamp_t0
     ORDER BY
-      timestamp DESC
+      id DESC
     LIMIT 1
   ) a
   ON 1 = 1;
