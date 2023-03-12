@@ -50,7 +50,7 @@ if [ "$1" = "local" ]; then
   docker run -d --network=host --rm -e NODE_ENV=local --env-file=.env.local --name=zeitgeist-processor processor
 elif [ "$1" = "mlocal" ]; then
   docker run -d -p 9090:9090 --rm -e NODE_ENV=mlocal --env-file=.env.mlocal --name=zeitgeist-processor processor
-elif [ "$1" = "dev" ] || [ "$1" = "t1" ] || [ "$1" = "t2" ] || [ "$1" = "m1" ] || [ "$1" = "m2" ]; then
+elif [ "$1" = "test" ] || [ "$1" = "main" ]; then
   docker run -d --network=host --rm -e NODE_ENV=$1 --env-file=.env.$1 --name=zeitgeist-processor processor
 else
   echo "$__usage"
