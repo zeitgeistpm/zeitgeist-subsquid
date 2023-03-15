@@ -1,55 +1,33 @@
 import { encodedAssetId } from './helper';
 
-export const assetPriceHistory = (
-  assetId: string,
-  poolCreateTime: string,
-  startTime: string,
-  endTime: string,
-  interval: string
-) => `
-  SELECT
-    x.generate_series AS timestamp,
-    y.latest_value AS "${encodedAssetId(assetId)}"
-  FROM (
+export const assetPriceHistory = (assetId: string, startTime: string, endTime: string, interval: string) => `
+  WITH t0 AS (
     SELECT
       GENERATE_SERIES (
-        TIMEZONE('UTC', '${startTime}'::TIMESTAMP),
-        TIMEZONE('UTC', '${endTime}'::TIMESTAMP),
+        '${startTime}'::TIMESTAMP,
+        '${endTime}'::TIMESTAMP,
         '${interval}'::INTERVAL
-      )
-  ) x
-  LEFT JOIN (
+      ) AS timestamp_t0
+  )
+  SELECT
+    timestamp_t0 AS timestamp,
+    new_price AS "${encodedAssetId(assetId)}"
+  FROM
+    t0
+  LEFT JOIN LATERAL (
     SELECT
-      generate_series,
-      FIRST_VALUE(new_price) OVER (PARTITION BY value_partition ORDER BY generate_series) AS latest_value
-    FROM (
-      SELECT
-        *,
-        SUM(CASE WHEN new_price IS NULL THEN 0 ELSE 1 END) OVER (ORDER BY generate_series) AS value_partition
-      FROM (
-        SELECT
-          GENERATE_SERIES (
-            TIMEZONE('UTC', '${poolCreateTime}'::TIMESTAMP),
-            TIMEZONE('UTC', '${endTime}'::TIMESTAMP),
-            '1 SECOND'::INTERVAL
-          )
-      ) a
-      LEFT JOIN (
-        SELECT
-          DISTINCT ON (timestamp) DATE_TRUNC('SECOND', ha.timestamp::timestamp),
-          ha.new_price
-        FROM
-          historical_asset ha
-        WHERE
-          ha.asset_id LIKE '%${assetId}%'
-        ORDER BY
-          ha.timestamp,
-          ha.id DESC
-      ) b
-      ON b.date_trunc = a.generate_series
-    ) AS q
-  ) y
-  ON y.generate_series = x.generate_series;
+      timestamp,
+      new_price
+    FROM
+      historical_asset
+    WHERE
+      asset_id LIKE '%${assetId}%'
+      AND timestamp <= timestamp_t0
+    ORDER BY
+      id DESC
+    LIMIT 1
+  ) a
+  ON 1 = 1;
 `;
 
 export const marketParticipants = (ids: string[]) => `

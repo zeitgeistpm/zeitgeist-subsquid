@@ -2,11 +2,8 @@
 /lib
 /db/cache
 
-.env.dev
-.env.t1
-.env.t2
-.env.m1
-.env.m2
+.env.test
+.env.main
 /archive/.env
 
 .vscode
