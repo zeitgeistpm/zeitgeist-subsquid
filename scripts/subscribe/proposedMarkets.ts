@@ -54,7 +54,7 @@ client.subscribe(
 
 const postDiscordAlert = async (market: Market) => {
   await axios.post(WEBHOOK_URL, {
-    username: 'Market Proposed Alert!',
+    username: 'Market Proposed Alert',
     content: '',
     embeds: [
       {
