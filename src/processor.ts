@@ -14,7 +14,6 @@ import {
   balancesEndowed,
   balancesReserved,
   balancesTransfer,
-  balancesTransferOld,
   balancesUnreserved,
   balancesWithdraw,
 } from './mappings/balances';
@@ -181,11 +180,8 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
       return balancesEndowed(ctx, block, item);
     case 'Balances.Reserved':
       return balancesReserved(ctx, block, item);
-    case 'Balances.Transfer': {
-      if (!process.env.WS_NODE_URL?.includes(`bs`)) return balancesTransfer(ctx, block, item);
-      if (block.height < 588249) return balancesTransferOld(ctx, block, item);
-      else return balancesTransfer(ctx, block, item);
-    }
+    case 'Balances.Transfer':
+      return balancesTransfer(ctx, block, item);
     case 'Balances.Unreserved':
       return balancesUnreserved(ctx, block, item);
     case 'Balances.Withdraw':
