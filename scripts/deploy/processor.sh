@@ -20,7 +20,7 @@ if [ "$1" = "stop" ]; then
   exit
 elif [ "$2" = "start" ]; then
   echo "Starting services..."
-  yarn db:up && yarn redis:up
+  yarn db:up
   docker build . --target processor -t processor
   yarn migration:apply
   echo "Starting processor..."
@@ -37,7 +37,7 @@ elif [ "$2" = "restart" ]; then
   echo "Stopping services..."
   docker-compose down
   echo "Starting services..."
-  yarn db:up && yarn redis:up && yarn migration:apply
+  yarn db:up && yarn migration:apply
   echo "Building processor..."
   docker build . --target processor -t processor
   echo "Starting processor..."
