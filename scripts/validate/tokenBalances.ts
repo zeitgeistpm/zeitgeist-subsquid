@@ -9,9 +9,7 @@ import { AccountBalance } from '../../src/model';
 
 const PROGRESS = false; // true or false for viewing running logs
 const NODE_URL = process.argv[2];
-const GRAPHQL_HOSTNAME = NODE_URL.includes(`bs`)
-  ? `processor.bsr.zeitgeist.pm`
-  : `processor.rpc-0.zeitgeist.pm`;
+const GRAPHQL_HOSTNAME = NODE_URL.includes(`bs`) ? `processor.bsr.zeitgeist.pm` : `processor.rpc-0.zeitgeist.pm`;
 
 const query = {
   query: `{
@@ -33,26 +31,19 @@ const validateTokenBalances = async () => {
   const accountBalances = res.data.data.accountBalances as AccountBalance[];
   const squidHeight = res.data.data.squidStatus.height as bigint;
 
-  const { outlierMap, validatedCount } = await getOutliers(
-    accountBalances,
-    squidHeight
-  );
-  console.log(
-    `\nAccount balances validated via ${GRAPHQL_HOSTNAME}: ${validatedCount}`
-  );
-  if (validatedCount === 0) return;
+  const { outlierMap, validatedCount } = await getOutliers(accountBalances, squidHeight);
+  console.log(`\nAccount balances validated via ${GRAPHQL_HOSTNAME}: ${validatedCount}`);
+  if (validatedCount === 0) process.exit();
   if (outlierMap.size > 0) {
-    console.log(
-      `Token balances don't match for ${outlierMap.size} account(s) 🔴`
-    );
+    console.log(`Token balances don't match for ${outlierMap.size} account(s) 🔴`);
     [...outlierMap.entries()].map(([accountId, assets], idx) => {
       console.log(`${idx + 1}. ` + accountId);
       console.log(assets);
     });
-    return;
+    process.exit();
   }
   console.log(`Token balances match for all accounts ✅`);
-  return;
+  process.exit();
 };
 
 const getOutliers = async (
@@ -81,33 +72,23 @@ const getOutliers = async (
         validatedCount++;
       } catch (err) {
         console.error(err);
-        sdk.api.disconnect();
         return { outlierMap, validatedCount };
       }
     })
   );
-  sdk.api.disconnect();
   return { outlierMap, validatedCount };
 };
 
 const isSame = (chainBal: any, squidAB: AccountBalance): boolean => {
   if (chainBal.toString() !== squidAB.balance.toString()) {
-    console.log(
-      `\n${squidAB.assetId} balance don't match for ${squidAB.account.accountId}`
-    );
-    console.log(
-      `On Chain: ${chainBal.toBigInt()}, On Subsquid: ${squidAB.balance}`
-    );
+    console.log(`\n${squidAB.assetId} balance don't match for ${squidAB.account.accountId}`);
+    console.log(`On Chain: ${chainBal.toBigInt()}, On Subsquid: ${squidAB.balance}`);
     return false;
   }
 
   if (PROGRESS) {
-    console.log(
-      `${squidAB.assetId} balance match for ${squidAB.account.accountId}`
-    );
-    console.log(
-      `On Chain: ${chainBal.toBigInt()}, On Subsquid: ${squidAB.balance}`
-    );
+    console.log(`${squidAB.assetId} balance match for ${squidAB.account.accountId}`);
+    console.log(`On Chain: ${chainBal.toBigInt()}, On Subsquid: ${squidAB.balance}`);
   }
   return true;
 };
