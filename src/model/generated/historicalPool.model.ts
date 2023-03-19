@@ -7,58 +7,58 @@ import * as marshal from "./marshal"
  */
 @Entity_()
 export class HistoricalPool {
-  constructor(props?: Partial<HistoricalPool>) {
-    Object.assign(this, props)
-  }
+    constructor(props?: Partial<HistoricalPool>) {
+        Object.assign(this, props)
+    }
 
-  @PrimaryColumn_()
-  id!: string
+    @PrimaryColumn_()
+    id!: string
 
-  /**
-   * Zeitgeist's identifier for pool
-   */
-  @Column_("int4", {nullable: false})
-  poolId!: number
+    /**
+     * Zeitgeist's identifier for pool
+     */
+    @Column_("int4", {nullable: false})
+    poolId!: number
 
-  /**
-   * Current status of the pool
-   */
-  @Column_("text", {nullable: false})
-  poolStatus!: string
+    /**
+     * Current status of the pool
+     */
+    @Column_("text", {nullable: false})
+    poolStatus!: string
 
-  /**
-   * New amount of ZTG present in the pool
-   */
-  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
-  ztgQty!: bigint | undefined | null
+    /**
+     * New amount of ZTG present in the pool
+     */
+    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
+    ztgQty!: bigint | undefined | null
 
-  /**
-   * New updated volume
-   */
-  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
-  volume!: bigint | undefined | null
+    /**
+     * New updated volume
+     */
+    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
+    volume!: bigint | undefined | null
 
-  /**
-   * Volume difference
-   */
-  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
-  dVolume!: bigint | undefined | null
+    /**
+     * Volume difference
+     */
+    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
+    dVolume!: bigint | undefined | null
 
-  /**
-   * Event method which initiated this change
-   */
-  @Column_("text", {nullable: false})
-  event!: string
+    /**
+     * Event method which initiated this change
+     */
+    @Column_("text", {nullable: false})
+    event!: string
 
-  /**
-   * Height of the block
-   */
-  @Column_("int4", {nullable: false})
-  blockNumber!: number
+    /**
+     * Height of the block
+     */
+    @Column_("int4", {nullable: false})
+    blockNumber!: number
 
-  /**
-   * Timestamp of the block
-   */
-  @Column_("timestamp with time zone", {nullable: false})
-  timestamp!: Date
+    /**
+     * Timestamp of the block
+     */
+    @Column_("timestamp with time zone", {nullable: false})
+    timestamp!: Date
 }
