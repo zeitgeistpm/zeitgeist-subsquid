@@ -1,6 +1,7 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_} from "typeorm"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_, OneToMany as OneToMany_} from "typeorm"
 import * as marshal from "./marshal"
 import {Weight} from "./_weight"
+import {Asset} from "./asset.model"
 
 /**
  * Liquidity pool details
@@ -72,6 +73,12 @@ export class Pool {
      */
     @Column_("jsonb", {transformer: {to: obj => obj.map((val: any) => val == null ? undefined : val.toJSON()), from: obj => obj == null ? undefined : marshal.fromList(obj, val => val == null ? undefined : new Weight(undefined, val))}, nullable: false})
     weights!: (Weight | undefined | null)[]
+
+    /**
+     * List of assets connected to the pool
+     */
+    @OneToMany_(() => Asset, e => e.pool)
+    assets!: Asset[]
 
     /**
      * Amount of ZTG present in the pool

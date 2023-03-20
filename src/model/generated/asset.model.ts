@@ -1,5 +1,6 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_} from "typeorm"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_} from "typeorm"
 import * as marshal from "./marshal"
+import {Pool} from "./pool.model"
 
 /**
  * A type that has detail of the outcome asset. It is initialised as soon as the
@@ -24,11 +25,11 @@ export class Asset {
     assetId!: string
 
     /**
-     * Zeitgeist's identifier for pool
+     * Connected pool
      */
     @Index_()
-    @Column_("int4", {nullable: true})
-    poolId!: number | undefined | null
+    @ManyToOne_(() => Pool, {nullable: true})
+    pool!: Pool | undefined | null
 
     /**
      * Spot price of the asset in the pool
