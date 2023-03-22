@@ -34,12 +34,12 @@ elif [ "$2" = "restart" ]; then
   echo "Stopping api..."
   docker stop api
   docker stop sub-api
-  echo "Stopping services..."
+  echo "Restarting database..."
   docker-compose down
-  echo "Starting services..."
-  yarn db:up && yarn migration:apply
+  yarn db:up
   echo "Building processor..."
   docker build . --target processor -t processor
+  yarn migration:apply
   echo "Starting processor..."
 else
   echo "$__usage"

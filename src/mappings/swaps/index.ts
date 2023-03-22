@@ -263,7 +263,6 @@ export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
           const assetQty = ab ? +ab.balance.toString() : 10 ** 12;
 
           const spotPrice = calcSpotPrice(+pool.ztgQty.toString(), ztgWeight, assetQty, +weight.len.toString());
-          asset.poolId = pool.poolId;
           asset.price = +spotPrice.toString();
           asset.amountInPool = BigInt(assetQty);
           console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
@@ -288,6 +287,24 @@ export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
   }
   console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
   await ctx.store.save<Pool>(pool);
+
+  const savedPool = await ctx.store.get(Pool, {
+    where: { poolId: pool.poolId },
+  });
+  if (!savedPool) return;
+  await Promise.all(
+    savedPool.weights.map(async (weight) => {
+      if (weight && weight.assetId.length > 5) {
+        let asset = await ctx.store.get(Asset, {
+          where: { assetId: weight.assetId },
+        });
+        if (!asset) return;
+        asset.pool = savedPool;
+        console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
+        await ctx.store.save<Asset>(asset);
+      }
+    })
+  );
 
   let hp = new HistoricalPool();
   hp.id = item.event.id + '-' + pool.poolId;

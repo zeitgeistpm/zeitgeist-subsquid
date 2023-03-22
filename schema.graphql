@@ -59,8 +59,8 @@ type Asset @entity {
   id: ID!
   "Zeitgeist's identifier for asset"
   assetId: String!
-  "Zeitgeist's identifier for pool"
-  poolId: Int @index
+  "Connected pool"
+  pool: Pool
   "Spot price of the asset in the pool"
   price: Float
   "Balance of the asset present in the pool account"
@@ -204,6 +204,8 @@ type Pool @entity {
   totalWeight: String!
   "List of lengths for each asset"
   weights: [Weight]!
+  "List of assets connected to the pool"
+  assets: [Asset]! @derivedFrom(field: "pool")
   "Amount of ZTG present in the pool"
   ztgQty: BigInt!
   "Total amount of ZTG that has moved through a market's liquidity pool"
