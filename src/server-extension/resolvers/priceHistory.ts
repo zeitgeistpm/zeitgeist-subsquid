@@ -57,7 +57,7 @@ export class PriceHistoryResolver {
 
   @Query(() => [PriceHistory], { nullable: true })
   async priceHistory(
-    @Arg('marketId', () => Number!, { nullable: false }) marketId: number,
+    @Arg('marketId', () => Int, { nullable: false }) marketId: number,
     @Arg('startTime', () => String, { nullable: true }) startTime: string,
     @Arg('endTime', () => String, { nullable: true }) endTime: string,
     @Arg('interval', { nullable: true, defaultValue: '1 DAY' }) interval: string
