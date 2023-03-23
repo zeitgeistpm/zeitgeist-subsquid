@@ -60,7 +60,7 @@ export class PriceHistoryResolver {
     @Arg('marketId', () => Int, { nullable: false }) marketId: number,
     @Arg('startTime', () => String, { nullable: true }) startTime: string,
     @Arg('endTime', () => String, { nullable: true }) endTime: string,
-    @Arg('interval', { nullable: true, defaultValue: '1 DAY' }) interval: string
+    @Arg('interval', () => IntervalArgs, { nullable: true }) interval: IntervalArgs
   ): Promise<PriceHistory[] | undefined> {
     const manager = await this.tx();
     const market = await manager.query(marketInfo(marketId));
