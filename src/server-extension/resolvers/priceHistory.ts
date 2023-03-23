@@ -42,6 +42,15 @@ registerEnumType(Unit, {
   description: 'Unit for the interval',
 });
 
+@InputType()
+class IntervalArgs {
+  @Field(() => Unit, { nullable: true, defaultValue: Unit.Day })
+  unit!: Unit;
+
+  @Field(() => Int, { nullable: true, defaultValue: 7 })
+  value!: number;
+}
+
 @Resolver()
 export class PriceHistoryResolver {
   constructor(private tx: () => Promise<EntityManager>) {}
