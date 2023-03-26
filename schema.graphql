@@ -60,11 +60,11 @@ type Asset @entity {
   "Zeitgeist's identifier for asset"
   assetId: String!
   "Connected pool"
-  pool: Pool
+  pool: Pool!
   "Spot price of the asset in the pool"
-  price: Float
+  price: Float!
   "Balance of the asset present in the pool account"
-  amountInPool: BigInt
+  amountInPool: BigInt!
 }
 
 """
@@ -248,8 +248,8 @@ type Weight @jsonField {
 }
 
 """
-Amount reserved for creation of markets, selecting oracles, joining the council, 
-making treasury proposals, setting on-chain identities, voting, 
+Amount reserved for creation of markets, selecting oracles, joining the council,
+making treasury proposals, setting on-chain identities, voting,
 creating DAOs, and other parts of the protocol.
 """
 type MarketBonds @jsonField {
