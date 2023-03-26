@@ -64,8 +64,7 @@ export const arbitrageBuyBurn = async (ctx: Ctx, block: SubstrateBlock, item: Ev
         const asset = await ctx.store.get(Asset, {
           where: { assetId: wt.assetId },
         });
-        if (!asset || !asset.amountInPool || !asset.price) return;
-
+        if (!asset) return;
         const assetWeight = +wt!.len.toString();
         const oldAssetQty = asset.amountInPool;
         const newAssetQty = oldAssetQty - amount;
@@ -128,8 +127,7 @@ export const arbitrageMintSell = async (ctx: Ctx, block: SubstrateBlock, item: E
         const asset = await ctx.store.get(Asset, {
           where: { assetId: wt.assetId },
         });
-        if (!asset || !asset.amountInPool || !asset.price) return;
-
+        if (!asset) return;
         const assetWeight = +wt!.len.toString();
         const oldAssetQty = asset.amountInPool;
         const newAssetQty = oldAssetQty + amount;
@@ -485,7 +483,7 @@ export const poolExit = async (ctx: Ctx, block: SubstrateBlock, item: EventItem)
         if (assetId == 'Ztg') return;
 
         let asset = await ctx.store.get(Asset, { where: { assetId: assetId } });
-        if (!asset || !asset.amountInPool || !asset.price) return;
+        if (!asset) return;
 
         let assetWeight = 0;
         for (let i = 0; i < numOfPoolWts; i++) {
@@ -532,7 +530,7 @@ export const poolExit = async (ctx: Ctx, block: SubstrateBlock, item: EventItem)
         let asset = await ctx.store.get(Asset, {
           where: { assetId: wt!.assetId },
         });
-        if (!asset || !asset.amountInPool || !asset.price) return;
+        if (!asset) return;
 
         const assetWeight = +wt!.len.toString();
         const oldAssetQty = asset.amountInPool;
@@ -598,8 +596,7 @@ export const poolExitWithExactAssetAmount = async (ctx: Ctx, block: SubstrateBlo
       let asset = await ctx.store.get(Asset, {
         where: { assetId: wt.assetId },
       });
-      if (!asset || !asset.amountInPool || !asset.price) return;
-
+      if (!asset) return;
       const assetWeight = +wt.len.toString();
       const oldAssetQty = asset.amountInPool;
       const newAssetQty = oldAssetQty;
@@ -662,7 +659,7 @@ export const poolJoin = async (ctx: Ctx, block: SubstrateBlock, item: EventItem)
         if (assetId == 'Ztg') return;
 
         let asset = await ctx.store.get(Asset, { where: { assetId: assetId } });
-        if (!asset || !asset.amountInPool || !asset.price) return;
+        if (!asset) return;
 
         let assetWeight = 0;
         for (let i = 0; i < numOfPoolWts; i++) {
@@ -707,8 +704,7 @@ export const poolJoin = async (ctx: Ctx, block: SubstrateBlock, item: EventItem)
         let asset = await ctx.store.get(Asset, {
           where: { assetId: wt!.assetId },
         });
-        if (!asset || !asset.amountInPool || !asset.price) return;
-
+        if (!asset) return;
         const assetWeight = +wt!.len.toString();
         const oldAssetQty = asset.amountInPool;
         const newAssetQty = oldAssetQty + BigInt(pae.transferred[idx].toString());
@@ -771,8 +767,7 @@ export const poolJoinWithExactAssetAmount = async (ctx: Ctx, block: SubstrateBlo
       let asset = await ctx.store.get(Asset, {
         where: { assetId: wt.assetId },
       });
-      if (!asset || !asset.amountInPool || !asset.price) return;
-
+      if (!asset) return;
       const assetWeight = +wt.len.toString();
       const oldAssetQty = asset.amountInPool;
       const newAssetQty = oldAssetQty;
@@ -889,8 +884,7 @@ export const swapExactAmountIn = async (ctx: Ctx, block: SubstrateBlock, item: E
         const asset = await ctx.store.get(Asset, {
           where: { assetId: wt.assetId },
         });
-        if (!asset || !asset.amountInPool || !asset.price) return;
-
+        if (!asset) return;
         const assetWeight = +wt.len.toString();
         const oldAssetQty = asset.amountInPool;
         const oldPrice = asset.price;
@@ -1015,8 +1009,7 @@ export const swapExactAmountOut = async (ctx: Ctx, block: SubstrateBlock, item: 
         const asset = await ctx.store.get(Asset, {
           where: { assetId: wt.assetId },
         });
-        if (!asset || !asset.amountInPool || !asset.price) return;
-
+        if (!asset) return;
         const assetWeight = +wt.len.toString();
         const oldAssetQty = asset.amountInPool;
         const oldPrice = asset.price;

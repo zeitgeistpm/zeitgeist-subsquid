@@ -559,8 +559,7 @@ export const marketResolved = async (ctx: Ctx, block: SubstrateBlock, item: Even
       let asset = await ctx.store.get(Asset, {
         where: { assetId: market.outcomeAssets[i]! },
       });
-      if (!asset || !asset.price || !asset.amountInPool) return;
-
+      if (!asset) return;
       const oldPrice = asset.price;
       const oldAssetQty = asset.amountInPool;
       let newPrice = oldPrice;
