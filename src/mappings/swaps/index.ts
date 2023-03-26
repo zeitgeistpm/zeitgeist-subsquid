@@ -231,6 +231,8 @@ export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
   pool.volume = BigInt(0);
   pool.createdAt = new Date(block.timestamp);
   pool.baseAsset = swapPool.baseAsset.__kind;
+  console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
+  await ctx.store.save<Pool>(pool);
 
   let acc = await ctx.store.get(Account, {
     where: { accountId: pool.accountId },
@@ -244,27 +246,26 @@ export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
   if (swapPool.weights && swapPool.weights[swapPool.weights.length - 1][0].__kind == 'Ztg') {
     const ztgWeight = +swapPool.weights[swapPool.weights.length - 1][1].toString();
     await Promise.all(
-      swapPool.weights.map(async (wt) => {
+      swapPool.weights.map(async (wt, i) => {
         let weight = new Weight();
         weight.assetId = getAssetId(wt[0]);
         weight.len = wt[1];
         pool.weights.push(weight);
 
         if (weight.assetId.length > 5) {
-          let asset = await ctx.store.get(Asset, {
-            where: { assetId: weight.assetId },
-          });
-          if (!asset) return;
-
           const ab = await ctx.store.findOneBy(AccountBalance, {
             account: { accountId: accountId },
-            assetId: asset.assetId,
+            assetId: weight.assetId,
           });
           const assetQty = ab ? +ab.balance.toString() : 10 ** 12;
-
           const spotPrice = calcSpotPrice(+pool.ztgQty.toString(), ztgWeight, assetQty, +weight.len.toString());
+
+          let asset = new Asset();
+          asset.id = item.event.id + '-' + pool.marketId + i;
+          asset.assetId = weight.assetId;
           asset.price = +spotPrice.toString();
           asset.amountInPool = BigInt(assetQty);
+          asset.pool = pool;
           console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
           await ctx.store.save<Asset>(asset);
 
@@ -288,24 +289,6 @@ export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
   console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
   await ctx.store.save<Pool>(pool);
 
-  const savedPool = await ctx.store.get(Pool, {
-    where: { poolId: pool.poolId },
-  });
-  if (!savedPool) return;
-  await Promise.all(
-    savedPool.weights.map(async (weight) => {
-      if (weight && weight.assetId.length > 5) {
-        let asset = await ctx.store.get(Asset, {
-          where: { assetId: weight.assetId },
-        });
-        if (!asset) return;
-        asset.pool = savedPool;
-        console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
-        await ctx.store.save<Asset>(asset);
-      }
-    })
-  );
-
   let hp = new HistoricalPool();
   hp.id = item.event.id + '-' + pool.poolId;
   hp.poolId = pool.poolId;
@@ -322,22 +305,21 @@ export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
   let market = await ctx.store.get(Market, {
     where: { marketId: pool.marketId },
   });
-  if (market) {
-    market.pool = pool;
-    console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
-    await ctx.store.save<Market>(market);
+  if (!market) return;
+  market.pool = pool;
+  console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
+  await ctx.store.save<Market>(market);
 
-    let hm = new HistoricalMarket();
-    hm.id = item.event.id + '-' + market.marketId;
-    hm.marketId = market.marketId;
-    hm.status = market.status;
-    hm.poolId = market.pool.poolId;
-    hm.event = item.event.name.split('.')[1];
-    hm.blockNumber = block.height;
-    hm.timestamp = new Date(block.timestamp);
-    console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
-    await ctx.store.save<HistoricalMarket>(hm);
-  }
+  let hm = new HistoricalMarket();
+  hm.id = item.event.id + '-' + market.marketId;
+  hm.marketId = market.marketId;
+  hm.status = market.status;
+  hm.poolId = market.pool.poolId;
+  hm.event = item.event.name.split('.')[1];
+  hm.blockNumber = block.height;
+  hm.timestamp = new Date(block.timestamp);
+  console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
+  await ctx.store.save<HistoricalMarket>(hm);
 };
 
 export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
