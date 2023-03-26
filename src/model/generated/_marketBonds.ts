@@ -3,8 +3,8 @@ import * as marshal from "./marshal"
 import {MarketBond} from "./_marketBond"
 
 /**
- * Amount reserved for creation of markets, selecting oracles, joining the council, 
- * making treasury proposals, setting on-chain identities, voting, 
+ * Amount reserved for creation of markets, selecting oracles, joining the council,
+ * making treasury proposals, setting on-chain identities, voting,
  * creating DAOs, and other parts of the protocol.
  */
 export class MarketBonds {
