@@ -547,11 +547,22 @@ export const marketResolved = async (ctx: Ctx, block: SubstrateBlock, item: Even
   const market = await ctx.store.get(Market, { where: { marketId: marketId } });
   if (!market) return;
 
-  if (market.marketType.scalar && specVersion < 41) {
-    market.resolvedOutcome = rescale(report.value.toString());
-  } else {
-    market.resolvedOutcome = report.value.toString();
-  }
+  market.resolvedOutcome =
+    market.marketType.scalar && specVersion < 41 ? rescale(report.value.toString()) : report.value.toString();
+  market.status = status ? getMarketStatus(status) : MarketStatus.Resolved;
+  console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
+  await ctx.store.save<Market>(market);
+
+  let hm = new HistoricalMarket();
+  hm.id = item.event.id + '-' + market.marketId;
+  hm.marketId = market.marketId;
+  hm.status = market.status;
+  hm.resolvedOutcome = market.resolvedOutcome;
+  hm.event = item.event.name.split('.')[1];
+  hm.blockNumber = block.height;
+  hm.timestamp = new Date(block.timestamp);
+  console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
+  await ctx.store.save<HistoricalMarket>(hm);
 
   const numOfOutcomeAssets = market.outcomeAssets.length;
   if (market.resolvedOutcome && numOfOutcomeAssets > 0) {
