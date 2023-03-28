@@ -29,17 +29,17 @@ export class Asset {
      */
     @Index_()
     @ManyToOne_(() => Pool, {nullable: true})
-    pool!: Pool | undefined | null
+    pool!: Pool
 
     /**
      * Spot price of the asset in the pool
      */
-    @Column_("numeric", {transformer: marshal.floatTransformer, nullable: true})
-    price!: number | undefined | null
+    @Column_("numeric", {transformer: marshal.floatTransformer, nullable: false})
+    price!: number
 
     /**
      * Balance of the asset present in the pool account
      */
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
-    amountInPool!: bigint | undefined | null
+    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+    amountInPool!: bigint
 }

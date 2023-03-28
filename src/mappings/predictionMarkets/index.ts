@@ -355,16 +355,6 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
   await ctx.store.save<HistoricalMarket>(hm);
-
-  if (newMarket.outcomeAssets && newMarket.outcomeAssets.length) {
-    for (let i = 0; i < newMarket.outcomeAssets.length; i++) {
-      let asset = new Asset();
-      asset.id = item.event.id + '-' + newMarket.marketId + i;
-      asset.assetId = newMarket.outcomeAssets[i]!;
-      console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
-      await ctx.store.save<Asset>(asset);
-    }
-  }
 };
 
 export const marketDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
@@ -569,8 +559,7 @@ export const marketResolved = async (ctx: Ctx, block: SubstrateBlock, item: Even
       let asset = await ctx.store.get(Asset, {
         where: { assetId: market.outcomeAssets[i]! },
       });
-      if (!asset || !asset.price || !asset.amountInPool) return;
-
+      if (!asset) return;
       const oldPrice = asset.price;
       const oldAssetQty = asset.amountInPool;
       let newPrice = oldPrice;
