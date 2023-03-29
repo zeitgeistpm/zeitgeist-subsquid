@@ -564,7 +564,6 @@ export const marketResolved = async (ctx: Ctx, block: SubstrateBlock, item: Even
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
   await ctx.store.save<HistoricalMarket>(hm);
 
-  if (!market.pool || market.outcomeAssets.length === 0) return;
   for (let i = 0; i < market.outcomeAssets.length; i++) {
     let asset = await ctx.store.get(Asset, {
       where: { assetId: market.outcomeAssets[i]! },
