@@ -22,7 +22,7 @@ client.subscribe(
   {
     query: `
       subscription {
-        markets(where: {status_eq: Proposed}) {
+        markets(where: {status_eq: Proposed}, limit: 1, orderBy: marketId_DESC) {
           description
           marketId
           marketType {
@@ -34,7 +34,7 @@ client.subscribe(
             start
           }
           question
-        }  
+        }
       }  
     `,
   },
