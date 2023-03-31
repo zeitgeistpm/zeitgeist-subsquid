@@ -42,6 +42,7 @@ client.subscribe(
     next: ({ data }) => {
       const { markets } = data as any;
       if (markets.length > 0) {
+        console.log(markets[0]);
         postDiscordAlert(markets[0]);
       }
     },
@@ -55,7 +56,6 @@ client.subscribe(
 );
 
 const postDiscordAlert = async (market: Market) => {
-  console.log(market);
   await axios.post(WEBHOOK_URL, {
     username: 'Market Proposed Alert',
     content: '',
