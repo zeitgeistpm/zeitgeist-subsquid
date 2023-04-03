@@ -25,12 +25,6 @@ export class HistoricalAccountBalance {
     assetId!: string
 
     /**
-     * Balance of the asset
-     */
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
-    balance!: bigint
-
-    /**
      * Height of the block
      */
     @Column_("int4", {nullable: false})
