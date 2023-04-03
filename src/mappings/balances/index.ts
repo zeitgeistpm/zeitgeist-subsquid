@@ -338,6 +338,7 @@ export const balancesUnreserved = async (ctx: Ctx, block: SubstrateBlock, item: 
     hab.event = item.event.name.split('.')[1];
     hab.assetId = ab.assetId;
     hab.dBalance = amount;
+    hab.blockNumber = block.height;
     hab.timestamp = new Date(block.timestamp);
     console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
     await ctx.store.save<HistoricalAccountBalance>(hab);
