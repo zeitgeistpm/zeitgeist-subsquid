@@ -148,7 +148,6 @@ export const initBalance = async (acc: Account, store: Store, block: SubstrateBl
   hab.event = 'Initialised';
   hab.assetId = ab.assetId;
   hab.dBalance = amt.toBigInt();
-  hab.balance = ab.balance;
   hab.blockNumber = 0;
   hab.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);

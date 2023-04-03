@@ -53,7 +53,6 @@ export const systemExtrinsicFailed = async (ctx: Ctx, block: SubstrateBlock, ite
     hab.event = item.event.name.split('.')[1];
     hab.assetId = ab.assetId;
     hab.dBalance = -txnFees;
-    hab.balance = ab.balance;
     hab.blockNumber = block.height;
     hab.timestamp = new Date(block.timestamp);
     console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
@@ -107,7 +106,6 @@ export const systemExtrinsicSuccess = async (ctx: Ctx, block: SubstrateBlock, it
     hab.event = item.event.name.split('.')[1];
     hab.assetId = ab.assetId;
     hab.dBalance = -txnFees;
-    hab.balance = ab.balance;
     hab.blockNumber = block.height;
     hab.timestamp = new Date(block.timestamp);
     console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
@@ -141,7 +139,6 @@ export const systemNewAccount = async (ctx: Ctx, block: SubstrateBlock, item: Ev
   hab.event = item.event.name.split('.')[1];
   hab.assetId = ab.assetId;
   hab.dBalance = BigInt(0);
-  hab.balance = ab.balance;
   hab.blockNumber = block.height;
   hab.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
