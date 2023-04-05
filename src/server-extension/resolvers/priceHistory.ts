@@ -49,6 +49,10 @@ class IntervalArgs {
 
   @Field(() => Int, { nullable: true, defaultValue: 7 })
   value!: number;
+
+  toString(): string {
+    return `${this.value} ${this.unit}`;
+  }
 }
 
 @Resolver()
@@ -80,11 +84,11 @@ export class PriceHistoryResolver {
 
     let merged = [];
     let priceHistory = await manager.query(
-      assetPriceHistory(market[0].outcome_assets[0], startTime, endTime, interval)
+      assetPriceHistory(market[0].outcome_assets[0], startTime, endTime, interval.toString())
     );
     for (let i = 1; i < market[0].outcome_assets.length; i++) {
       let priceHistory2 = await manager.query(
-        assetPriceHistory(market[0].outcome_assets[i], startTime, endTime, interval)
+        assetPriceHistory(market[0].outcome_assets[i], startTime, endTime, interval.toString())
       );
       merged = mergeByField(priceHistory, priceHistory2, 'timestamp');
       priceHistory = merged;
