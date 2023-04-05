@@ -121,7 +121,6 @@ export const boughtCompleteSet = async (ctx: Ctx, block: SubstrateBlock, item: E
       hab.event = item.event.name.split('.')[1];
       hab.assetId = ab.assetId;
       hab.dBalance = amt;
-      hab.balance = ab.balance;
       hab.blockNumber = block.height;
       hab.timestamp = new Date(block.timestamp);
       console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
@@ -210,7 +209,6 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
       hab.event = item.event.name.split('.')[1];
       hab.assetId = ab.assetId;
       hab.dBalance = BigInt(0);
-      hab.balance = ab.balance;
       hab.blockNumber = block.height;
       hab.timestamp = new Date(block.timestamp);
       console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
@@ -399,7 +397,6 @@ export const marketDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Eve
   hab.event = item.event.name.split('.')[1];
   hab.assetId = ab.assetId;
   hab.dBalance = newBalance - oldBalance;
-  hab.balance = newBalance;
   hab.blockNumber = block.height;
   hab.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
@@ -631,7 +628,6 @@ export const marketResolved = async (ctx: Ctx, block: SubstrateBlock, item: Even
         hab.event = item.event.name.split('.')[1];
         hab.assetId = ab.assetId;
         hab.dBalance = ab.balance - oldBalance;
-        hab.balance = ab.balance;
         hab.blockNumber = block.height;
         hab.timestamp = new Date(block.timestamp);
         console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
@@ -733,7 +729,6 @@ export const soldCompleteSet = async (ctx: Ctx, block: SubstrateBlock, item: Eve
     hab.event = item.event.name.split('.')[1];
     hab.assetId = ab.assetId;
     hab.dBalance = -amt;
-    hab.balance = ab.balance;
     hab.blockNumber = block.height;
     hab.timestamp = new Date(block.timestamp);
     console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
@@ -777,7 +772,6 @@ export const tokensRedeemed = async (ctx: Ctx, block: SubstrateBlock, item: Even
   hab.event = item.event.name.split('.')[1];
   hab.assetId = ab.assetId;
   hab.dBalance = ab.balance - oldBalance;
-  hab.balance = ab.balance;
   hab.blockNumber = block.height;
   hab.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);

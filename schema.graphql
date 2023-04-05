@@ -36,8 +36,6 @@ type HistoricalAccountBalance @entity {
   accountId: String! @index
   "Zeitgeist's identifier for asset"
   assetId: String!
-  "Balance of the asset"
-  balance: BigInt!
   "Height of the block"
   blockNumber: Int!
   "Balance difference"
