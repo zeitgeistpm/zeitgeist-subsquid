@@ -44,11 +44,15 @@ registerEnumType(Unit, {
 
 @InputType()
 class IntervalArgs {
-  @Field(() => Unit, { nullable: true, defaultValue: Unit.Day })
+  @Field(() => Unit)
   unit!: Unit;
 
-  @Field(() => Int, { nullable: true, defaultValue: 7 })
+  @Field(() => Int)
   value!: number;
+
+  constructor(props: Partial<IntervalArgs>) {
+    Object.assign(this, props);
+  }
 
   toString(): string {
     return `${this.value} ${this.unit}`;
@@ -70,10 +74,6 @@ export class PriceHistoryResolver {
     const market = await manager.query(marketInfo(marketId));
     if (!market[0]) return;
 
-    if (!startTime) {
-      let poolCreateTime = market[0].timestamp.toISOString();
-      startTime = poolCreateTime;
-    }
     if (!endTime && market[1]) {
       let marketResolvedTime = new Date(market[1].timestamp.toISOString());
       marketResolvedTime.setDate(marketResolvedTime.getDate() + 1);
@@ -81,6 +81,8 @@ export class PriceHistoryResolver {
     } else {
       endTime = new Date().toISOString();
     }
+    startTime = startTime ?? market[0].timestamp.toISOString();
+    interval = interval ?? new IntervalArgs({ unit: Unit.Day, value: 1 });
 
     let merged = [];
     let priceHistory = await manager.query(
