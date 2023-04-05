@@ -32,7 +32,6 @@ export const parachainStakingRewarded = async (ctx: Ctx, block: SubstrateBlock, 
     hab.event = item.event.name.split('.')[1];
     hab.assetId = ab.assetId;
     hab.dBalance = rewards;
-    hab.balance = ab.balance;
     hab.blockNumber = block.height;
     hab.timestamp = new Date(block.timestamp);
     console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);

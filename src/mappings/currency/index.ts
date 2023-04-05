@@ -50,7 +50,6 @@ export const currencyDeposited = async (ctx: Ctx, block: SubstrateBlock, item: E
   hab.event = item.event.name.split('.')[1];
   hab.assetId = ab.assetId;
   hab.dBalance = amount;
-  hab.balance = ab.balance;
   hab.blockNumber = block.height;
   hab.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
@@ -95,7 +94,6 @@ export const currencyTransferred = async (ctx: Ctx, block: SubstrateBlock, item:
   fromHab.event = item.event.name.split('.')[1];
   fromHab.assetId = fromAb.assetId;
   fromHab.dBalance = -amount;
-  fromHab.balance = fromAb.balance;
   fromHab.blockNumber = block.height;
   fromHab.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(fromHab, null, 2)}`);
@@ -144,7 +142,6 @@ export const currencyTransferred = async (ctx: Ctx, block: SubstrateBlock, item:
   toHab.event = item.event.name.split('.')[1];
   toHab.assetId = toAb.assetId;
   toHab.dBalance = amount;
-  toHab.balance = toAb.balance;
   toHab.blockNumber = block.height;
   toHab.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(toHab, null, 2)}`);
@@ -186,7 +183,6 @@ export const currencyWithdrawn = async (ctx: Ctx, block: SubstrateBlock, item: E
   hab.event = item.event.name.split('.')[1];
   hab.assetId = ab.assetId;
   hab.dBalance = -amount;
-  hab.balance = ab.balance;
   hab.blockNumber = block.height;
   hab.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
