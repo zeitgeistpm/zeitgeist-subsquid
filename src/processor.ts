@@ -155,8 +155,6 @@ const processor = new SubstrateBatchProcessor()
 
 if (process.env.WS_NODE_URL?.includes(`bs`)) {
   // @ts-ignore
-  processor.addEvent('Balances.Deposit', eventOptions);
-  // @ts-ignore
   processor.addEvent('ParachainStaking.Rewarded', eventRangeOptions);
   // @ts-ignore
   processor.addEvent('System.ExtrinsicFailed', eventRangeOptions);
@@ -172,8 +170,6 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
   switch (item.name) {
     case 'Balances.BalanceSet':
       return balancesBalanceSet(ctx, block, item);
-    case 'Balances.Deposit':
-      return balancesDeposit(ctx, block, item);
     case 'Balances.DustLost':
       return balancesDustLost(ctx, block, item);
     case 'Balances.Endowed':
@@ -308,6 +304,14 @@ processor.run(new TypeormDatabase(), async (ctx) => {
     if (process.env.WS_NODE_URL?.includes(`bs`)) {
       if (block.header.height < 215000 || block.header.height === 579140) {
         await handlePostHooks(ctx, block.header);
+      }
+    }
+  }
+
+  for (let block of ctx.blocks) {
+    for (let item of block.items) {
+      if (item.name === 'Balances.Deposit') {
+        await balancesDeposit(ctx, block.header, item);
       }
     }
   }
