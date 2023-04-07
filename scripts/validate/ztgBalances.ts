@@ -9,9 +9,7 @@ import { AccountBalance } from '../../src/model';
 
 const PROGRESS = false; // true or false for viewing running logs
 const NODE_URL = process.argv[2];
-const GRAPHQL_HOSTNAME = NODE_URL.includes(`bs`)
-  ? `processor.bsr.zeitgeist.pm`
-  : `processor.rpc-0.zeitgeist.pm`;
+const GRAPHQL_HOSTNAME = NODE_URL.includes(`bs`) ? `processor.bsr.zeitgeist.pm` : `processor.rpc-0.zeitgeist.pm`;
 
 const query = {
   query: `{
@@ -32,25 +30,18 @@ const validateZtgBalances = async () => {
   const accountBalances = res.data.data.accountBalances as AccountBalance[];
   const squidHeight = res.data.data.squidStatus.height as bigint;
 
-  const { outliers, validatedCount } = await getOutliers(
-    accountBalances,
-    squidHeight
-  );
-  console.log(
-    `\nAccounts validated via ${GRAPHQL_HOSTNAME}: ${validatedCount}`
-  );
+  const { outliers, validatedCount } = await getOutliers(accountBalances, squidHeight);
+  console.log(`\nAccounts validated via ${GRAPHQL_HOSTNAME}: ${validatedCount}`);
   if (validatedCount === 0) return;
   if (outliers.length > 0) {
-    console.log(
-      `Ztg balances don't match for ${outliers.length} account(s) 🔴`
-    );
+    console.log(`Ztg balances don't match for ${outliers.length} account(s) 🔴`);
     outliers.map((accountId, idx) => {
       console.log(`${idx + 1}. ` + accountId);
     });
-    return;
+    process.exit();
   }
   console.log(`Ztg balances match for all accounts ✅`);
-  return;
+  process.exit();
 };
 
 const getOutliers = async (
@@ -67,10 +58,7 @@ const getOutliers = async (
       try {
         const {
           data: { free },
-        } = (await sdk.api.query.system.account.at(
-          blockHash,
-          ab.account.accountId
-        )) as AccountInfo;
+        } = (await sdk.api.query.system.account.at(blockHash, ab.account.accountId)) as AccountInfo;
 
         if (!isSame(free, ab)) {
           outliers.push(ab.account.accountId);
@@ -78,29 +66,23 @@ const getOutliers = async (
         validatedCount++;
       } catch (err) {
         console.error(err);
-        sdk.api.disconnect();
         return { outliers, validatedCount };
       }
     })
   );
-  sdk.api.disconnect();
   return { outliers, validatedCount };
 };
 
 const isSame = (chainBal: any, squidAB: AccountBalance): boolean => {
   if (chainBal.toString() !== squidAB.balance.toString()) {
     console.log(`\nZtg balance don't match for ${squidAB.account.accountId}`);
-    console.log(
-      `On Chain: ${chainBal.toBigInt()}, On Subsquid: ${squidAB.balance}`
-    );
+    console.log(`On Chain: ${chainBal.toBigInt()}, On Subsquid: ${squidAB.balance}`);
     return false;
   }
 
   if (PROGRESS) {
     console.log(`Ztg balance match for ${squidAB.account.accountId}`);
-    console.log(
-      `On Chain: ${chainBal.toBigInt()}, On Subsquid: ${squidAB.balance}`
-    );
+    console.log(`On Chain: ${chainBal.toBigInt()}, On Subsquid: ${squidAB.balance}`);
   }
   return true;
 };

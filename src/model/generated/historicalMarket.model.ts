@@ -7,52 +7,52 @@ import {MarketStatus} from "./_marketStatus"
  */
 @Entity_()
 export class HistoricalMarket {
-  constructor(props?: Partial<HistoricalMarket>) {
-    Object.assign(this, props)
-  }
+    constructor(props?: Partial<HistoricalMarket>) {
+        Object.assign(this, props)
+    }
 
-  @PrimaryColumn_()
-  id!: string
+    @PrimaryColumn_()
+    id!: string
 
-  /**
-   * Height of the block
-   */
-  @Column_("int4", {nullable: false})
-  blockNumber!: number
+    /**
+     * Height of the block
+     */
+    @Column_("int4", {nullable: false})
+    blockNumber!: number
 
-  /**
-   * Event method which initiated this change
-   */
-  @Column_("text", {nullable: false})
-  event!: string
+    /**
+     * Event method which initiated this change
+     */
+    @Column_("text", {nullable: false})
+    event!: string
 
-  /**
-   * Zeitgeist's identifier for market
-   */
-  @Column_("int4", {nullable: false})
-  marketId!: number
+    /**
+     * Zeitgeist's identifier for market
+     */
+    @Column_("int4", {nullable: false})
+    marketId!: number
 
-  /**
-   * Zeitgeist's identifier for pool
-   */
-  @Column_("int4", {nullable: true})
-  poolId!: number | undefined | null
+    /**
+     * Zeitgeist's identifier for pool
+     */
+    @Column_("int4", {nullable: true})
+    poolId!: number | undefined | null
 
-  /**
-   * Latest resolved outcome
-   */
-  @Column_("text", {nullable: true})
-  resolvedOutcome!: string | undefined | null
+    /**
+     * Latest resolved outcome
+     */
+    @Column_("text", {nullable: true})
+    resolvedOutcome!: string | undefined | null
 
-  /**
-   * Latest market status
-   */
-  @Column_("varchar", {length: 19, nullable: false})
-  status!: MarketStatus
+    /**
+     * Latest market status
+     */
+    @Column_("varchar", {length: 19, nullable: false})
+    status!: MarketStatus
 
-  /**
-   * Timestamp of the block
-   */
-  @Column_("timestamp with time zone", {nullable: false})
-  timestamp!: Date
+    /**
+     * Timestamp of the block
+     */
+    @Column_("timestamp with time zone", {nullable: false})
+    timestamp!: Date
 }

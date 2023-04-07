@@ -24,7 +24,6 @@ export const unreserveBalances_92128 = async (ctx: Ctx, block: SubstrateBlock) =
     hab.event = 'Unreserved';
     hab.assetId = ab.assetId;
     hab.dBalance = BigInt(50000000000);
-    hab.balance = ab.balance;
     hab.blockNumber = block.height;
     hab.timestamp = new Date(block.timestamp);
     console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
@@ -54,7 +53,6 @@ export const unreserveBalances_108949 = async (ctx: Ctx, block: SubstrateBlock) 
     hab.event = 'Unreserved';
     hab.assetId = ab.assetId;
     hab.dBalance = BigInt(5000000000);
-    hab.balance = ab.balance;
     hab.blockNumber = block.height;
     hab.timestamp = new Date(block.timestamp);
     console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
@@ -84,7 +82,6 @@ export const unreserveBalances_155917 = async (ctx: Ctx, block: SubstrateBlock) 
     hab.event = 'Unreserved';
     hab.assetId = ab.assetId;
     hab.dBalance = BigInt(5000000000);
-    hab.balance = ab.balance;
     hab.blockNumber = block.height;
     hab.timestamp = new Date(block.timestamp);
     console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
@@ -120,7 +117,6 @@ export const unreserveBalances_168378 = async (ctx: Ctx, block: SubstrateBlock) 
         hab.event = 'Unreserved';
         hab.assetId = ab.assetId;
         hab.dBalance = BigInt(70000000000);
-        hab.balance = ab.balance;
         hab.blockNumber = block.height;
         hab.timestamp = new Date(block.timestamp);
         console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
@@ -152,7 +148,6 @@ export const unreserveBalances_175178 = async (ctx: Ctx, block: SubstrateBlock) 
     hab.event = 'Unreserved';
     hab.assetId = ab.assetId;
     hab.dBalance = BigInt(50000000000);
-    hab.balance = ab.balance;
     hab.blockNumber = block.height;
     hab.timestamp = new Date(block.timestamp);
     console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
@@ -182,7 +177,6 @@ export const unreserveBalances_176408 = async (ctx: Ctx, block: SubstrateBlock) 
     hab.event = 'Unreserved';
     hab.assetId = ab.assetId;
     hab.dBalance = BigInt(5000000000);
-    hab.balance = ab.balance;
     hab.blockNumber = block.height;
     hab.timestamp = new Date(block.timestamp);
     console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
@@ -212,7 +206,6 @@ export const unreserveBalances_178290 = async (ctx: Ctx, block: SubstrateBlock) 
     hab.event = 'Unreserved';
     hab.assetId = ab.assetId;
     hab.dBalance = BigInt(50000000000);
-    hab.balance = ab.balance;
     hab.blockNumber = block.height;
     hab.timestamp = new Date(block.timestamp);
     console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
@@ -242,7 +235,6 @@ export const unreserveBalances_179524 = async (ctx: Ctx, block: SubstrateBlock) 
     hab.event = 'Unreserved';
     hab.assetId = ab.assetId;
     hab.dBalance = BigInt(50000000000);
-    hab.balance = ab.balance;
     hab.blockNumber = block.height;
     hab.timestamp = new Date(block.timestamp);
     console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
@@ -272,7 +264,6 @@ export const unreserveBalances_184820 = async (ctx: Ctx, block: SubstrateBlock) 
     hab.event = 'Unreserved';
     hab.assetId = ab.assetId;
     hab.dBalance = BigInt(50000000000);
-    hab.balance = ab.balance;
     hab.blockNumber = block.height;
     hab.timestamp = new Date(block.timestamp);
     console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
@@ -307,7 +298,6 @@ export const unreserveBalances_204361 = async (ctx: Ctx, block: SubstrateBlock) 
         hab.event = 'Unreserved';
         hab.assetId = ab.assetId;
         hab.dBalance = BigInt(82500000000);
-        hab.balance = ab.balance;
         hab.blockNumber = block.height;
         hab.timestamp = new Date(block.timestamp);
         console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
@@ -339,7 +329,6 @@ export const unreserveBalances_211391 = async (ctx: Ctx, block: SubstrateBlock) 
     hab.event = 'Unreserved';
     hab.assetId = ab.assetId;
     hab.dBalance = BigInt(5000000000);
-    hab.balance = ab.balance;
     hab.blockNumber = block.height;
     hab.timestamp = new Date(block.timestamp);
     console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
