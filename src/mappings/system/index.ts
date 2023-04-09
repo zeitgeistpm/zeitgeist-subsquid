@@ -67,7 +67,9 @@ export const systemExtrinsicSuccess = async (ctx: Ctx, block: SubstrateBlock, it
     // @ts-ignore
     !item.event.extrinsic.signature ||
     // @ts-ignore
-    !item.event.extrinsic.signature.address
+    !item.event.extrinsic.signature.address ||
+    // @ts-ignore
+    item.event.extrinsic.call.name.split('.')[0] == 'Sudo'
   )
     return;
 
