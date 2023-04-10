@@ -32,23 +32,36 @@ export const balancesBalanceSet = async (ctx: Ctx, block: SubstrateBlock, item: 
     assetId: 'Ztg',
   });
   if (!ab) return;
+  const oldBalance = ab.balance;
+  const newBalance = free;
+  let eHab = await ctx.store.get(HistoricalAccountBalance, {
+    where: {
+      accountId: acc.accountId,
+      assetId: 'Ztg',
+      event: 'Endowed',
+      blockNumber: block.height,
+    },
+  });
+  if (!eHab) {
+    ab.balance = newBalance;
+    console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
+    await ctx.store.save<AccountBalance>(ab);
 
-      let hab = new HistoricalAccountBalance();
-      hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
-      hab.accountId = acc.accountId;
-      hab.event = item.event.name.split('.')[1];
-      hab.assetId = ab.assetId;
-      hab.dBalance = free;
-      hab.blockNumber = block.height;
-      hab.timestamp = new Date(block.timestamp);
-      console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
-      await ctx.store.save<HistoricalAccountBalance>(hab);
-    } else {
-      eHab.event = eHab.event.concat(item.event.name.split('.')[1]);
-      console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(eHab, null, 2)}`);
-      await ctx.store.save<HistoricalAccountBalance>(eHab);
-      return;
-    }
+    let hab = new HistoricalAccountBalance();
+    hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
+    hab.accountId = acc.accountId;
+    hab.event = item.event.name.split('.')[1];
+    hab.assetId = ab.assetId;
+    hab.dBalance = newBalance - oldBalance;
+    hab.blockNumber = block.height;
+    hab.timestamp = new Date(block.timestamp);
+    console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
+    await ctx.store.save<HistoricalAccountBalance>(hab);
+  } else {
+    eHab.event = eHab.event.concat(item.event.name.split('.')[1]);
+    console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(eHab, null, 2)}`);
+    await ctx.store.save<HistoricalAccountBalance>(eHab);
+    return;
   }
 };
 
