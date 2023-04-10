@@ -31,19 +31,7 @@ export const balancesBalanceSet = async (ctx: Ctx, block: SubstrateBlock, item: 
     account: { accountId: walletId },
     assetId: 'Ztg',
   });
-  if (ab) {
-    let eHab = await ctx.store.get(HistoricalAccountBalance, {
-      where: {
-        accountId: acc.accountId,
-        assetId: 'Ztg',
-        event: 'Endowed',
-        blockNumber: block.height,
-      },
-    });
-    if (!eHab) {
-      ab.balance = free;
-      console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-      await ctx.store.save<AccountBalance>(ab);
+  if (!ab) return;
 
       let hab = new HistoricalAccountBalance();
       hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
