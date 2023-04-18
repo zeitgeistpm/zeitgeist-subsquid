@@ -1,5 +1,5 @@
 import { util } from '@zeitgeistpm/sdk';
-import { Arg, Field, ObjectType, Query, Resolver } from 'type-graphql';
+import { Field, Int, ObjectType, Query, registerEnumType, Resolver, InputType, Arg } from 'type-graphql';
 import { EntityManager } from 'typeorm';
 import { decodedAssetId, mergeByField } from '../helper';
 import { assetPriceHistory, marketInfo } from '../query';
@@ -30,25 +30,50 @@ class Price {
   }
 }
 
+enum Unit {
+  Day = 'DAYS',
+  Hour = 'HOURS',
+  Minute = 'MINUTES',
+  Second = 'SECONDS',
+}
+
+registerEnumType(Unit, {
+  name: 'Unit',
+  description: 'Unit for the interval',
+});
+
+@InputType()
+class IntervalArgs {
+  @Field(() => Unit)
+  unit!: Unit;
+
+  @Field(() => Int)
+  value!: number;
+
+  constructor(props: Partial<IntervalArgs>) {
+    Object.assign(this, props);
+  }
+
+  toString(): string {
+    return `${this.value} ${this.unit}`;
+  }
+}
+
 @Resolver()
 export class PriceHistoryResolver {
   constructor(private tx: () => Promise<EntityManager>) {}
 
   @Query(() => [PriceHistory], { nullable: true })
   async priceHistory(
-    @Arg('marketId', () => Number!, { nullable: false }) marketId: number,
+    @Arg('marketId', () => Int, { nullable: false }) marketId: number,
     @Arg('startTime', () => String, { nullable: true }) startTime: string,
     @Arg('endTime', () => String, { nullable: true }) endTime: string,
-    @Arg('interval', { nullable: true, defaultValue: '1 DAY' }) interval: string
+    @Arg('interval', () => IntervalArgs, { nullable: true }) interval: IntervalArgs
   ): Promise<PriceHistory[] | undefined> {
     const manager = await this.tx();
     const market = await manager.query(marketInfo(marketId));
     if (!market[0]) return;
 
-    if (!startTime) {
-      let poolCreateTime = market[0].timestamp.toISOString();
-      startTime = poolCreateTime;
-    }
     if (!endTime && market[1]) {
       let marketResolvedTime = new Date(market[1].timestamp.toISOString());
       marketResolvedTime.setDate(marketResolvedTime.getDate() + 1);
@@ -56,14 +81,16 @@ export class PriceHistoryResolver {
     } else {
       endTime = new Date().toISOString();
     }
+    startTime = startTime ?? market[0].timestamp.toISOString();
+    interval = interval ?? new IntervalArgs({ unit: Unit.Day, value: 1 });
 
     let merged = [];
     let priceHistory = await manager.query(
-      assetPriceHistory(market[0].outcome_assets[0], startTime, endTime, interval)
+      assetPriceHistory(market[0].outcome_assets[0], startTime, endTime, interval.toString())
     );
     for (let i = 1; i < market[0].outcome_assets.length; i++) {
       let priceHistory2 = await manager.query(
-        assetPriceHistory(market[0].outcome_assets[i], startTime, endTime, interval)
+        assetPriceHistory(market[0].outcome_assets[i], startTime, endTime, interval.toString())
       );
       merged = mergeByField(priceHistory, priceHistory2, 'timestamp');
       priceHistory = merged;
