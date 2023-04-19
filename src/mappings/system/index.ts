@@ -67,7 +67,11 @@ export const systemExtrinsicSuccess = async (ctx: Ctx, block: SubstrateBlock, it
     // @ts-ignore
     !item.event.extrinsic.signature ||
     // @ts-ignore
-    !item.event.extrinsic.signature.address
+    !item.event.extrinsic.signature.address ||
+    // @ts-ignore
+    item.event.extrinsic.call.name.split('.')[0] == 'Sudo' ||
+    // @ts-ignore
+    item.event.extrinsic.call.name.split('.')[0] == 'ParachainSystem'
   )
     return;
 
@@ -95,22 +99,21 @@ export const systemExtrinsicSuccess = async (ctx: Ctx, block: SubstrateBlock, it
     account: { accountId: walletId },
     assetId: 'Ztg',
   });
-  if (ab) {
-    ab.balance = ab.balance - txnFees;
-    console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-    await ctx.store.save<AccountBalance>(ab);
+  if (!ab) return;
+  ab.balance = ab.balance - txnFees;
+  console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
+  await ctx.store.save<AccountBalance>(ab);
 
-    let hab = new HistoricalAccountBalance();
-    hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
-    hab.accountId = acc.accountId;
-    hab.event = item.event.name.split('.')[1];
-    hab.assetId = ab.assetId;
-    hab.dBalance = -txnFees;
-    hab.blockNumber = block.height;
-    hab.timestamp = new Date(block.timestamp);
-    console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
-    await ctx.store.save<HistoricalAccountBalance>(hab);
-  }
+  let hab = new HistoricalAccountBalance();
+  hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
+  hab.accountId = acc.accountId;
+  hab.event = item.event.name.split('.')[1];
+  hab.assetId = ab.assetId;
+  hab.dBalance = -txnFees;
+  hab.blockNumber = block.height;
+  hab.timestamp = new Date(block.timestamp);
+  console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
+  await ctx.store.save<HistoricalAccountBalance>(hab);
 };
 
 export const systemNewAccount = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
