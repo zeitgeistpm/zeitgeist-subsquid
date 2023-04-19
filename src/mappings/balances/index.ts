@@ -103,12 +103,21 @@ export const balancesDeposit = async (ctx: Ctx, block: SubstrateBlock, item: Eve
 export const balancesDustLost = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
   const { walletId, amount } = getDustLostEvent(ctx, item);
 
+  let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
+  if (!acc) {
+    acc = new Account();
+    acc.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
+    acc.accountId = walletId;
+    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
+    await ctx.store.save<Account>(acc);
+    await initBalance(acc, ctx.store, block, item);
+  }
+
   let ab = await ctx.store.findOneBy(AccountBalance, {
     account: { accountId: walletId },
     assetId: 'Ztg',
   });
   if (!ab) return;
-
   ab.balance = ab.balance - amount;
   console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
   await ctx.store.save<AccountBalance>(ab);
