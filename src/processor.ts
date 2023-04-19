@@ -66,6 +66,7 @@ import {
 } from './mappings/swaps';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensBalanceSet, tokensDeposited, tokensEndowed, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
+import { HistoricalAccountBalance } from './model';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -297,9 +298,18 @@ const handlePostHooks = async (ctx: Ctx, block: SubstrateBlock) => {
 
 // @ts-ignore
 processor.run(new TypeormDatabase(), async (ctx) => {
+  let historicalAccountBalances: HistoricalAccountBalance[] = [];
+
   for (let block of ctx.blocks) {
     for (let item of block.items) {
-      if (item.kind === 'event') await handleEvents(ctx, block.header, item);
+      if (item.kind === 'event') {
+        if (item.name == 'Balances.Deposit') {
+          const hab = await balancesDeposit(ctx, block.header, item);
+          if (hab) historicalAccountBalances.push(hab);
+        } else {
+          await handleEvents(ctx, block.header, item);
+        }
+      }
     }
     if (process.env.WS_NODE_URL?.includes(`bs`)) {
       if (block.header.height < 215000 || block.header.height === 579140) {
@@ -308,11 +318,5 @@ processor.run(new TypeormDatabase(), async (ctx) => {
     }
   }
 
-  for (let block of ctx.blocks) {
-    for (let item of block.items) {
-      if (item.name === 'Balances.Deposit') {
-        await balancesDeposit(ctx, block.header, item);
-      }
-    }
-  }
+  await ctx.store.save(historicalAccountBalances);
 });
