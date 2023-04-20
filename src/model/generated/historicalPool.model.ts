@@ -33,6 +33,12 @@ export class HistoricalPool {
     ztgQty!: bigint | undefined | null
 
     /**
+     * New amount of market's base asset present in the pool
+     */
+    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
+    baseAssetQty!: bigint | undefined | null
+
+    /**
      * New updated volume
      */
     @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
