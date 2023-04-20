@@ -70,6 +70,8 @@ export const getAssetId = (currencyId: any): string => {
     return 'Ztg';
   } else if (currencyId.__kind == 'PoolShare') {
     return JSON.stringify(util.AssetIdFromString('pool' + currencyId.value.toString()));
+  } else if (currencyId.__kind == 'ForeignAsset') {
+    return JSON.stringify({ foreignAsset: Number(currencyId.value) });
   } else {
     return '';
   }
