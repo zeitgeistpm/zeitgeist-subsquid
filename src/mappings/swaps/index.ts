@@ -241,8 +241,12 @@ export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
     await ctx.store.save<Account>(acc);
   }
 
-  if (swapPool.weights && swapPool.weights[swapPool.weights.length - 1][0].__kind == 'Ztg') {
-    const ztgWeight = +swapPool.weights[swapPool.weights.length - 1][1].toString();
+  if (
+    swapPool.weights &&
+    (swapPool.weights[swapPool.weights.length - 1][0].__kind == 'Ztg' ||
+      swapPool.weights[swapPool.weights.length - 1][0].__kind == 'ForeignAsset')
+  ) {
+    const baseAssetWeight = +swapPool.weights[swapPool.weights.length - 1][1].toString();
     await Promise.all(
       swapPool.weights.map(async (wt, i) => {
         let weight = new Weight();
@@ -256,7 +260,7 @@ export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
             assetId: weight.assetId,
           });
           const assetQty = ab ? +ab.balance.toString() : 10 ** 12;
-          const spotPrice = calcSpotPrice(+pool.ztgQty.toString(), ztgWeight, assetQty, +weight.len.toString());
+          const spotPrice = calcSpotPrice(+pool.ztgQty.toString(), baseAssetWeight, assetQty, +weight.len.toString());
 
           let asset = new Asset();
           asset.id = item.event.id + '-' + pool.marketId + i;
