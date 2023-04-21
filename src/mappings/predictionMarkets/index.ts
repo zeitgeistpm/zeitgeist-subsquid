@@ -360,7 +360,6 @@ export const marketDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Eve
 
   let market = await ctx.store.get(Market, { where: { marketId: marketId } });
   if (!market) return;
-
   market.status = MarketStatus.Destroyed;
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
@@ -382,7 +381,7 @@ export const marketDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Eve
 
   let ab = await ctx.store.findOneBy(AccountBalance, {
     account: { accountId: acc.accountId },
-    assetId: 'Ztg',
+    assetId: market.baseAsset,
   });
   if (!ab) return;
   const oldBalance = ab.balance;
