@@ -66,6 +66,7 @@ import {
 } from './mappings/swaps';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensBalanceSet, tokensDeposited, tokensEndowed, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
+import { HistoricalAccountBalance } from './model';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -109,6 +110,7 @@ const processor = new SubstrateBatchProcessor()
   })
   .setTypesBundle('typesBundle.json')
   .addEvent('Balances.BalanceSet', eventOptions)
+  .addEvent('Balances.Deposit', eventOptions)
   .addEvent('Balances.DustLost', eventOptions)
   .addEvent('Balances.Endowed', eventOptions)
   .addEvent('Balances.Reserved', eventOptions)
@@ -154,8 +156,6 @@ const processor = new SubstrateBatchProcessor()
 
 if (process.env.WS_NODE_URL?.includes(`bs`)) {
   // @ts-ignore
-  processor.addEvent('Balances.Deposit', eventOptions);
-  // @ts-ignore
   processor.addEvent('ParachainStaking.Rewarded', eventRangeOptions);
   // @ts-ignore
   processor.addEvent('System.ExtrinsicFailed', eventRangeOptions);
@@ -171,9 +171,6 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
   switch (item.name) {
     case 'Balances.BalanceSet':
       return balancesBalanceSet(ctx, block, item);
-    // @ts-ignore
-    case 'Balances.Deposit':
-      return balancesDeposit(ctx, block, item);
     case 'Balances.DustLost':
       return balancesDustLost(ctx, block, item);
     case 'Balances.Endowed':
@@ -301,9 +298,18 @@ const handlePostHooks = async (ctx: Ctx, block: SubstrateBlock) => {
 
 // @ts-ignore
 processor.run(new TypeormDatabase(), async (ctx) => {
+  let historicalAccountBalances: HistoricalAccountBalance[] = [];
+
   for (let block of ctx.blocks) {
     for (let item of block.items) {
-      if (item.kind === 'event') await handleEvents(ctx, block.header, item);
+      if (item.kind === 'event') {
+        if (item.name == 'Balances.Deposit') {
+          const hab = await balancesDeposit(ctx, block.header, item);
+          if (hab) historicalAccountBalances.push(hab);
+        } else {
+          await handleEvents(ctx, block.header, item);
+        }
+      }
     }
     if (process.env.WS_NODE_URL?.includes(`bs`)) {
       if (block.header.height < 215000 || block.header.height === 579140) {
@@ -311,4 +317,6 @@ processor.run(new TypeormDatabase(), async (ctx) => {
       }
     }
   }
+
+  await ctx.store.save(historicalAccountBalances);
 });
