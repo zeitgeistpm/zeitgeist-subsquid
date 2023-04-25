@@ -1,6 +1,5 @@
 import { SubstrateBlock } from '@subsquid/substrate-processor';
 import * as ss58 from '@subsquid/ss58';
-import { Like } from 'typeorm/find-options/operator/Like';
 import {
   Account,
   AccountBalance,
