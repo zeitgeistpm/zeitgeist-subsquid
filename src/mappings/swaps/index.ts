@@ -1,5 +1,6 @@
 import { SubstrateBlock } from '@subsquid/substrate-processor';
 import * as ss58 from '@subsquid/ss58';
+import { Like } from 'typeorm/find-options/operator/Like';
 import {
   Account,
   AccountBalance,
@@ -428,7 +429,11 @@ export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Event
     });
     await Promise.all(
       abs.map(async (ab) => {
-        if (ab.balance === BigInt(0)) return;
+        const accLookupKey = ab.id.substring(ab.id.lastIndexOf('-') + 1, ab.id.length);
+        let acc = await ctx.store.get(Account, {
+          where: { id: Like(`%${accLookupKey}%`) },
+        });
+        if (acc == null || ab.balance === BigInt(0)) return;
         const oldBalance = ab.balance;
         const newBalance = BigInt(0);
         ab.balance = newBalance;
@@ -436,8 +441,8 @@ export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Event
         await ctx.store.save<AccountBalance>(ab);
 
         let hab = new HistoricalAccountBalance();
-        hab.id = item.event.id + '-' + ab.account.accountId.substring(ab.account.accountId.length - 5);
-        hab.accountId = ab.account.accountId;
+        hab.id = item.event.id + '-' + acc.accountId.substring(acc.accountId.length - 5);
+        hab.accountId = acc.accountId;
         hab.event = item.event.name.split('.')[1];
         hab.assetId = ab.assetId;
         hab.dBalance = newBalance - oldBalance;
