@@ -76,6 +76,8 @@ type HistoricalAsset @entity {
   accountId: String @index
   "Amount of ZTG which user spent/redeemed for swap trade"
   ztgTraded: BigInt
+  "Amount of base asset which user spent/redeemed for swap trade"
+  baseAssetTraded: BigInt
   "Zeitgeist's identifier for asset"
   assetId: String! @index
   "Price of the asset has decreased if -ve and +ve if increased"
