@@ -1,5 +1,5 @@
-module.exports = class Data1682002234889 {
-    name = 'Data1682002234889'
+module.exports = class Data1682400128837 {
+    name = 'Data1682400128837'
 
     async up(db) {
         await db.query(`CREATE TABLE "account" ("account_id" text NOT NULL, "id" character varying NOT NULL, "market_id" integer, "pool_id" integer, CONSTRAINT "PK_54115ee388cdb6d86bb4bf5b2ea" PRIMARY KEY ("id"))`)
@@ -12,7 +12,7 @@ module.exports = class Data1682002234889 {
         await db.query(`CREATE INDEX "IDX_7ae36e79b02d471a94b311dfbb" ON "pool" ("market_id") `)
         await db.query(`CREATE TABLE "asset" ("id" character varying NOT NULL, "asset_id" text NOT NULL, "price" numeric NOT NULL, "amount_in_pool" numeric NOT NULL, "pool_id" character varying, CONSTRAINT "PK_1209d107fe21482beaea51b745e" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_55d87b88a0e01b25819b9d4d5a" ON "asset" ("pool_id") `)
-        await db.query(`CREATE TABLE "historical_asset" ("id" character varying NOT NULL, "account_id" text, "ztg_traded" numeric, "asset_id" text NOT NULL, "d_price" numeric, "d_amount_in_pool" numeric, "new_price" numeric, "new_amount_in_pool" numeric, "event" text NOT NULL, "block_number" integer NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_24bfbff0fb73bae4960d7301293" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "historical_asset" ("id" character varying NOT NULL, "account_id" text, "ztg_traded" numeric, "base_asset_traded" numeric, "asset_id" text NOT NULL, "d_price" numeric, "d_amount_in_pool" numeric, "new_price" numeric, "new_amount_in_pool" numeric, "event" text NOT NULL, "block_number" integer NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_24bfbff0fb73bae4960d7301293" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_a80a99f03b440bfec08b2926d6" ON "historical_asset" ("account_id") `)
         await db.query(`CREATE INDEX "IDX_d9ec182f218dc183716b8807cf" ON "historical_asset" ("asset_id") `)
         await db.query(`CREATE TABLE "market" ("authorized_address" text, "base_asset" text NOT NULL, "bonds" jsonb, "categories" jsonb, "creation" text NOT NULL, "creator" text NOT NULL, "creator_fee" integer, "deadlines" jsonb, "description" text, "disputes" jsonb, "dispute_mechanism" text NOT NULL, "id" character varying NOT NULL, "img" text, "market_id" integer NOT NULL, "market_type" jsonb NOT NULL, "metadata" text NOT NULL, "oracle" text NOT NULL, "outcome_assets" text array NOT NULL, "period" jsonb NOT NULL, "reject_reason" text, "report" jsonb, "resolved_outcome" text, "scalar_type" text, "scoring_rule" text NOT NULL, "slug" text, "status" character varying(19) NOT NULL, "tags" text array, "question" text, "pool_id" character varying, CONSTRAINT "PK_1e9a2963edfd331d92018e3abac" PRIMARY KEY ("id"))`)
