@@ -188,7 +188,7 @@ type Pool @entity {
   "Zeitgeist's identifier for pool"
   poolId: Int! @index
   "Zeitgeist's identifier for account"
-  accountId: String
+  accountId: String!
   "The base asset in the market swap pool (usually a currency)"
   baseAsset: String!
   marketId: Int! @index
