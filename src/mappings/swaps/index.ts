@@ -406,7 +406,6 @@ export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Event
     const oldAssetQty = asset.amountInPool;
     const newPrice = 0;
     const newAssetQty = BigInt(0);
-
     asset.price = newPrice;
     asset.amountInPool = newAssetQty;
     console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
@@ -430,29 +429,23 @@ export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Event
     });
     await Promise.all(
       abs.map(async (ab) => {
-        const keyword = ab.id.substring(ab.id.lastIndexOf('-') + 1, ab.id.length);
-        let acc = await ctx.store.get(Account, {
-          where: { id: Like(`%${keyword}%`) },
-        });
-        if (acc != null && ab.balance > BigInt(0)) {
-          const oldBalance = ab.balance;
-          const newBalance = BigInt(0);
+        if (ab.balance === BigInt(0)) return;
+        const oldBalance = ab.balance;
+        const newBalance = BigInt(0);
+        ab.balance = newBalance;
+        console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
+        await ctx.store.save<AccountBalance>(ab);
 
-          ab.balance = newBalance;
-          console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-          await ctx.store.save<AccountBalance>(ab);
-
-          let hab = new HistoricalAccountBalance();
-          hab.id = item.event.id + '-' + acc.accountId.substring(acc.accountId.length - 5);
-          hab.accountId = acc.accountId;
-          hab.event = item.event.name.split('.')[1];
-          hab.assetId = ab.assetId;
-          hab.dBalance = newBalance - oldBalance;
-          hab.blockNumber = block.height;
-          hab.timestamp = new Date(block.timestamp);
-          console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
-          await ctx.store.save<HistoricalAccountBalance>(hab);
-        }
+        let hab = new HistoricalAccountBalance();
+        hab.id = item.event.id + '-' + ab.account.accountId.substring(ab.account.accountId.length - 5);
+        hab.accountId = ab.account.accountId;
+        hab.event = item.event.name.split('.')[1];
+        hab.assetId = ab.assetId;
+        hab.dBalance = newBalance - oldBalance;
+        hab.blockNumber = block.height;
+        hab.timestamp = new Date(block.timestamp);
+        console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
+        await ctx.store.save<HistoricalAccountBalance>(hab);
       })
     );
   }
