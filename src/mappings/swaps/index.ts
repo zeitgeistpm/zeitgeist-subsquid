@@ -895,15 +895,15 @@ export const swapExactAmountIn = async (ctx: Ctx, block: SubstrateBlock, item: E
   const assetBoughtQty = BigInt(swapEvent.assetAmountOut.toString());
   const assetSoldQty = BigInt(swapEvent.assetAmountIn.toString());
 
-  let ztgQty = pool.baseAssetQty;
+  let baseAssetQty = pool.baseAssetQty;
   let oldVolume = pool.volume;
   let newVolume = oldVolume;
   if (isBaseAsset(assetBought) || isBaseAsset(assetSold)) {
-    ztgQty = isBaseAsset(assetBought) ? ztgQty - assetBoughtQty : ztgQty + assetSoldQty;
+    baseAssetQty = isBaseAsset(assetBought) ? baseAssetQty - assetBoughtQty : baseAssetQty + assetSoldQty;
     newVolume = isBaseAsset(assetBought) ? oldVolume + assetBoughtQty : oldVolume + assetSoldQty;
 
-    pool.ztgQty = ztgQty;
-    pool.baseAssetQty = ztgQty;
+    pool.ztgQty = baseAssetQty;
+    pool.baseAssetQty = baseAssetQty;
     pool.volume = newVolume;
     console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
     await ctx.store.save<Pool>(pool);
@@ -944,7 +944,7 @@ export const swapExactAmountIn = async (ctx: Ctx, block: SubstrateBlock, item: E
           newAssetQty = oldAssetQty + assetSoldQty;
         }
 
-        const newPrice = calcSpotPrice(+ztgQty.toString(), baseAssetWeight, +newAssetQty.toString(), assetWeight);
+        const newPrice = calcSpotPrice(+baseAssetQty.toString(), baseAssetWeight, +newAssetQty.toString(), assetWeight);
         asset.price = newPrice;
         asset.amountInPool = newAssetQty;
         console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
@@ -955,6 +955,7 @@ export const swapExactAmountIn = async (ctx: Ctx, block: SubstrateBlock, item: E
         ha.accountId = newAssetQty == oldAssetQty ? null : walletId;
         ha.assetId = asset.assetId;
         ha.ztgTraded = newAssetQty == oldAssetQty ? BigInt(0) : newVolume - oldVolume;
+        ha.baseAssetTraded = newAssetQty == oldAssetQty ? BigInt(0) : newVolume - oldVolume;
         ha.newPrice = asset.price;
         ha.newAmountInPool = asset.amountInPool;
         ha.dPrice = newPrice - oldPrice;
@@ -1022,15 +1023,15 @@ export const swapExactAmountOut = async (ctx: Ctx, block: SubstrateBlock, item: 
   const assetBoughtQty = BigInt(swapEvent.assetAmountOut.toString());
   const assetSoldQty = BigInt(swapEvent.assetAmountIn.toString());
 
-  let ztgQty = pool.baseAssetQty;
+  let baseAssetQty = pool.baseAssetQty;
   let oldVolume = pool.volume;
   let newVolume = oldVolume;
   if (isBaseAsset(assetBought) || isBaseAsset(assetSold)) {
-    ztgQty = isBaseAsset(assetBought) ? ztgQty - assetBoughtQty : ztgQty + assetSoldQty;
+    baseAssetQty = isBaseAsset(assetBought) ? baseAssetQty - assetBoughtQty : baseAssetQty + assetSoldQty;
     newVolume = isBaseAsset(assetBought) ? oldVolume + assetBoughtQty : oldVolume + assetSoldQty;
 
-    pool.ztgQty = ztgQty;
-    pool.baseAssetQty = ztgQty;
+    pool.ztgQty = baseAssetQty;
+    pool.baseAssetQty = baseAssetQty;
     pool.volume = newVolume;
     console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
     await ctx.store.save<Pool>(pool);
@@ -1071,7 +1072,7 @@ export const swapExactAmountOut = async (ctx: Ctx, block: SubstrateBlock, item: 
           newAssetQty = oldAssetQty + assetSoldQty;
         }
 
-        const newPrice = calcSpotPrice(+ztgQty.toString(), baseAssetWeight, +newAssetQty.toString(), assetWeight);
+        const newPrice = calcSpotPrice(+baseAssetQty.toString(), baseAssetWeight, +newAssetQty.toString(), assetWeight);
         asset.price = newPrice;
         asset.amountInPool = newAssetQty;
         console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
@@ -1082,6 +1083,7 @@ export const swapExactAmountOut = async (ctx: Ctx, block: SubstrateBlock, item: 
         ha.accountId = newAssetQty == oldAssetQty ? null : walletId;
         ha.assetId = asset.assetId;
         ha.ztgTraded = newAssetQty == oldAssetQty ? BigInt(0) : newVolume - oldVolume;
+        ha.baseAssetTraded = newAssetQty == oldAssetQty ? BigInt(0) : newVolume - oldVolume;
         ha.newPrice = asset.price;
         ha.newAmountInPool = asset.amountInPool;
         ha.dPrice = newPrice - oldPrice;
