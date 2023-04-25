@@ -4,7 +4,7 @@ import { Store } from '@subsquid/typeorm-store';
 import { util } from '@zeitgeistpm/sdk';
 import { Account, AccountBalance, HistoricalAccountBalance, MarketStatus } from '../model';
 import { EventItem } from '../processor';
-import { MarketStatus as status } from '../types/v42';
+import { Asset, MarketStatus as status } from '../types/v42';
 import { Cache, IPFS, Tools } from './util';
 
 export const calcSpotPrice = (
@@ -70,6 +70,8 @@ export const getAssetId = (currencyId: any): string => {
     return 'Ztg';
   } else if (currencyId.__kind == 'PoolShare') {
     return JSON.stringify(util.AssetIdFromString('pool' + currencyId.value.toString()));
+  } else if (currencyId.__kind == 'ForeignAsset') {
+    return JSON.stringify({ foreignAsset: Number(currencyId.value) });
   } else {
     return '';
   }
@@ -152,6 +154,13 @@ export const initBalance = async (acc: Account, store: Store, block: SubstrateBl
   hab.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
   await store.save<HistoricalAccountBalance>(hab);
+};
+
+export const isBaseAsset = (currencyId: Asset | string): boolean => {
+  if (typeof currencyId === 'string') {
+    return currencyId.includes('Ztg') || currencyId.includes('foreignAsset');
+  }
+  return currencyId.__kind.includes('Ztg') || currencyId.__kind.includes('ForeignAsset');
 };
 
 export const rescale = (value: string): string => {

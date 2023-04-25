@@ -206,6 +206,8 @@ type Pool @entity {
   assets: [Asset]! @derivedFrom(field: "pool")
   "Amount of ZTG present in the pool"
   ztgQty: BigInt!
+  "Amount of market's base asset present in the pool"
+  baseAssetQty: BigInt!
   "Total amount of ZTG that has moved through a market's liquidity pool"
   volume: BigInt!
   "Timestamp of pool creation"
@@ -223,6 +225,8 @@ type HistoricalPool @entity {
   poolStatus: String!
   "New amount of ZTG present in the pool"
   ztgQty: BigInt
+  "New amount of market's base asset present in the pool"
+  baseAssetQty: BigInt
   "New updated volume"
   volume: BigInt
   "Volume difference"
@@ -243,6 +247,8 @@ type Weight @jsonField {
   assetId: String!
   "Length or weight of the asset"
   len: BigInt!
+  "Length or weight of the asset"
+  weight: BigInt!
 }
 
 """

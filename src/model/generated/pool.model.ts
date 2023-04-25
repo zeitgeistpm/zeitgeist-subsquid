@@ -87,6 +87,12 @@ export class Pool {
     ztgQty!: bigint
 
     /**
+     * Amount of market's base asset present in the pool
+     */
+    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+    baseAssetQty!: bigint
+
+    /**
      * Total amount of ZTG that has moved through a market's liquidity pool
      */
     @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
