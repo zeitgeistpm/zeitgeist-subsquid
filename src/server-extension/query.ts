@@ -50,7 +50,7 @@ export const marketLiquidity = (ids: string[]) => `
     COALESCE(ROUND(SUM(a.price*a.amount_in_pool)+p.ztg_qty, 0), 0) AS liquidity
   FROM
     market m
-  JOIN
+  LEFT JOIN
     asset a ON a.asset_id = ANY (m.outcome_assets)
   LEFT JOIN
     pool p ON p.id = m.pool_id
