@@ -30,7 +30,7 @@ export const assetPriceHistory = (assetId: string, startTime: string, endTime: s
   ON 1 = 1;
 `;
 
-export const marketParticipants = (ids: string[]) => `
+export const marketParticipants = (ids: number[]) => `
   SELECT
     m.market_id,
     COALESCE(COUNT(DISTINCT ha.account_id), 0) AS participants
@@ -44,7 +44,7 @@ export const marketParticipants = (ids: string[]) => `
     m.market_id;
 `;
 
-export const marketLiquidity = (ids: string[]) => `
+export const marketLiquidity = (ids: number[]) => `
   SELECT
     m.market_id,
     COALESCE(ROUND(SUM(a.price*a.amount_in_pool)+p.ztg_qty, 0), 0) AS liquidity
