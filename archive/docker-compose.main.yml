@@ -10,23 +10,35 @@ services:
       - "../typesBundle.json:/config/typesBundle.json"
     ports:
       - 9090:9090
-    command: [
-      "--types-bundle", "/config/typesBundle.json",
-      "-e", "${WS_MAIN_URL}",
-      "-c", "20",
-      "-e", "${WS_MAIN_URL2}",
-      "-c", "20",
-      "-e", "${WS_MAIN_URL3}",
-      "-c", "20",
-      "--out", "postgres://root@db:26257/defaultdb"
-    ]
+    command:
+      [
+        "--types-bundle",
+        "/config/typesBundle.json",
+        "-e",
+        "${WS_MAIN_URL}",
+        "-c",
+        "20",
+        "-e",
+        "${WS_MAIN_URL2}",
+        "-c",
+        "20",
+        "-e",
+        "${WS_MAIN_URL3}",
+        "-c",
+        "20",
+        "--out",
+        "postgres://root@db:26257/defaultdb"
+      ]
 
   gateway:
     environment:
       RUST_LOG: "actix_web=info,actix_server=info"
     ports:
       - 8888:8000
-    command: [ 
-      "--database-url", "postgres://root@db:26257/defaultdb",
-      "--database-max-connections", "10",
-    ]
+    command:
+      [
+        "--database-url",
+        "postgres://root@db:26257/defaultdb",
+        "--database-max-connections",
+        "10"
+      ]
