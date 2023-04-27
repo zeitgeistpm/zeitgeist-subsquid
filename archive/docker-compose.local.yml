@@ -15,7 +15,7 @@ services:
         "-e",
         "ws://node:9944/0",
         "-c",
-        "20",
+        "5",
         "--out",
         "postgres://root@db:26257/defaultdb"
       ]

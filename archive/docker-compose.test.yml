@@ -17,7 +17,7 @@ services:
         "-e",
         "${WS_TEST_URL}",
         "-c",
-        "20",
+        "5",
         "--out",
         "postgres://root@db:26257/defaultdb"
       ]

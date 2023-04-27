@@ -17,15 +17,15 @@ services:
         "-e",
         "${WS_MAIN_URL}",
         "-c",
-        "20",
+        "5",
         "-e",
         "${WS_MAIN_URL2}",
         "-c",
-        "20",
+        "5",
         "-e",
         "${WS_MAIN_URL3}",
         "-c",
-        "20",
+        "5",
         "--out",
         "postgres://root@db:26257/defaultdb"
       ]
