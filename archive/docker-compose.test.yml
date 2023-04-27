@@ -6,6 +6,8 @@ services:
     command: start-single-node --insecure
 
   ingest:
+    environment:
+      SQD_DEBUG: "*"
     volumes:
       - "../typesBundle.json:/config/typesBundle.json"
     ports:
