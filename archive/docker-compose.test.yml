@@ -14,8 +14,6 @@ services:
       "--types-bundle", "/config/typesBundle.json",
       "-e", "${WS_TEST_URL}",
       "-c", "20",
-      "-e", "${WS_TEST_URL2}",
-      "-c", "20",
       "--out", "postgres://root@db:26257/defaultdb"
     ]
 
@@ -28,3 +26,18 @@ services:
       "--database-url", "postgres://root@db:26257/defaultdb",
       "--database-max-connections", "10",
     ]
+
+  explorer:
+    image: subsquid/substrate-explorer:firesquid
+    container_name: explorer
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      DB_TYPE: cockroach
+      DB_HOST: db
+      DB_PORT: 26257
+      DB_NAME: defaultdb
+      DB_USER: root
+    ports:
+      - 4444:3000
