@@ -308,6 +308,8 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           depositHabs.push(deposit.hab);
         } else if (item.name == 'Balances.BalanceSet') {
           await saveDeposits(ctx, depositAccounts, depositHabs);
+          depositAccounts.clear();
+          depositHabs = [];
           await balancesBalanceSet(ctx, block.header, item);
         } else {
           await handleEvents(ctx, block.header, item);
