@@ -4,7 +4,6 @@
 
 .env.test
 .env.main
-/archive/.env
 
 .vscode
 .yarn

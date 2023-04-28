@@ -10,21 +10,28 @@ services:
       - node
     ports:
       - 9091:9090
-    command: [
-      "-e", "ws://node:9944/0",
-      "-c", "20",
-      "--out", "postgres://root@db:26257/defaultdb"
-    ]
+    command:
+      [
+        "-e",
+        "ws://node:9944/0",
+        "-c",
+        "5",
+        "--out",
+        "postgres://root@db:26257/defaultdb"
+      ]
 
   gateway:
     environment:
       RUST_LOG: "actix_web=info,actix_server=info"
     ports:
       - 8888:8000
-    command: [ 
-      "--database-url", "postgres://root@db:26257/defaultdb",
-      "--database-max-connections", "10",
-    ]
+    command:
+      [
+        "--database-url",
+        "postgres://root@db:26257/defaultdb",
+        "--database-max-connections",
+        "10"
+      ]
 
   explorer:
     image: subsquid/substrate-explorer:firesquid
@@ -40,7 +47,7 @@ services:
       DB_USER: root
     ports:
       - 4444:3000
-      
+
   node:
     image: zeitgeistpm/zeitgeist-node:v0.3.6
     container_name: node
