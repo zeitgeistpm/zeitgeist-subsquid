@@ -126,6 +126,10 @@ export const balancesDustLost = async (ctx: Ctx, block: SubstrateBlock, item: Ev
 export const balancesEndowed = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
   const { walletId, freeBalance } = getEndowedEvent(ctx, item);
 
+  // Since endowed changes have already been cached at balancesDeposit
+  // To be removed post complete disconnection of BalancesEndowedEvent
+  if (walletId === 'dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ') return;
+
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
   if (!acc) {
     acc = new Account();
