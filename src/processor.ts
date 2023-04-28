@@ -66,7 +66,7 @@ import {
 } from './mappings/swaps';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensBalanceSet, tokensDeposited, tokensEndowed, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
-import { HistoricalAccountBalance } from './model';
+import { AccountBalance, HistoricalAccountBalance } from './model';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -298,14 +298,16 @@ const handlePostHooks = async (ctx: Ctx, block: SubstrateBlock) => {
 
 // @ts-ignore
 processor.run(new TypeormDatabase(), async (ctx) => {
-  let historicalAccountBalances: HistoricalAccountBalance[] = [];
+  let depositAccounts = new Map<string, bigint>();
+  let depositHabs: HistoricalAccountBalance[] = [];
 
   for (let block of ctx.blocks) {
     for (let item of block.items) {
       if (item.kind === 'event') {
         if (item.name == 'Balances.Deposit') {
-          const hab = await balancesDeposit(ctx, block.header, item);
-          if (hab) historicalAccountBalances.push(hab);
+          const deposit = await balancesDeposit(ctx, block.header, item);
+          depositAccounts.set(deposit.walletId, (depositAccounts.get(deposit.walletId) || BigInt(0)) + deposit.amount);
+          depositHabs.push(deposit.hab);
         } else {
           await handleEvents(ctx, block.header, item);
         }
@@ -318,5 +320,16 @@ processor.run(new TypeormDatabase(), async (ctx) => {
     }
   }
 
-  await ctx.store.save(historicalAccountBalances);
+  for (let [walletId, amount] of depositAccounts) {
+    let ab = await ctx.store.findOneBy(AccountBalance, {
+      account: { accountId: walletId },
+      assetId: 'Ztg',
+    });
+    if (!ab) return;
+    ab.balance = ab.balance + amount;
+    console.log(`[Balances.Deposit] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
+    await ctx.store.save<AccountBalance>(ab);
+  }
+  console.log(`[Balances.Deposit] Saving historical account balances: ${JSON.stringify(depositHabs, null, 2)}`);
+  await ctx.store.save(depositHabs);
 });
