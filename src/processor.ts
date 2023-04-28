@@ -169,8 +169,6 @@ export type EventItem = Exclude<BatchProcessorEventItem<typeof processor>, _Even
 
 const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
   switch (item.name) {
-    case 'Balances.BalanceSet':
-      return balancesBalanceSet(ctx, block, item);
     case 'Balances.DustLost':
       return balancesDustLost(ctx, block, item);
     case 'Balances.Endowed':
@@ -308,6 +306,9 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           const deposit = await balancesDeposit(ctx, block.header, item);
           depositAccounts.set(deposit.walletId, (depositAccounts.get(deposit.walletId) || BigInt(0)) + deposit.amount);
           depositHabs.push(deposit.hab);
+        } else if (item.name == 'Balances.BalanceSet') {
+          await saveDeposits(ctx, depositAccounts, depositHabs);
+          await balancesBalanceSet(ctx, block.header, item);
         } else {
           await handleEvents(ctx, block.header, item);
         }
@@ -319,7 +320,14 @@ processor.run(new TypeormDatabase(), async (ctx) => {
       }
     }
   }
+  await saveDeposits(ctx, depositAccounts, depositHabs);
+});
 
+const saveDeposits = async (
+  ctx: Ctx,
+  depositAccounts: Map<string, bigint>,
+  depositHabs: HistoricalAccountBalance[]
+) => {
   for (let [walletId, amount] of depositAccounts) {
     let ab = await ctx.store.findOneBy(AccountBalance, {
       account: { accountId: walletId },
@@ -332,4 +340,4 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   }
   console.log(`[Balances.Deposit] Saving historical account balances: ${JSON.stringify(depositHabs, null, 2)}`);
   await ctx.store.save(depositHabs);
-});
+};
