@@ -183,3 +183,9 @@ interface CategoryData {
   img?: string;
   color?: string;
 }
+
+export interface Deposit {
+  walletId: string;
+  amount: bigint;
+  hab: HistoricalAccountBalance;
+}
