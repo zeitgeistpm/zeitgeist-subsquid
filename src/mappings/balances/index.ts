@@ -128,19 +128,15 @@ export const balancesEndowed = async (ctx: Ctx, block: SubstrateBlock, item: Eve
 
   // Since endowed changes have already been cached at balancesDeposit
   // To be removed post complete disconnection of BalancesEndowedEvent
-  const accountIds = [
-    'dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ',
-    'dE1hJugxYsvUK6bQDpsF671TCoVVa7LQjZpkG1t22VjAzJRKi',
-    'dDzAsaUSTQgc3cDwphdcLAt6m4rPFbYUt1a3yPqt1yWDtpWMu',
-    'dE2jq2Naexf4uajZgwXaZLBGRjTK2YhG7Y9y2jf9515pu6LhA',
-    'dE3RmcM3Jmqagtr5N5eMvQkUN8AocBy92DDwknqjkmgNHhSkW',
-    'dE3LKKpquw7id4KFHYGa85vNcHBaKQYkG2d6hCDV7WBaHtQCi',
-  ];
-  await Promise.all(
-    accountIds.map(async (accId) => {
-      if (walletId === accId) return;
-    })
-  );
+  if (
+    walletId === 'dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ' ||
+    walletId === 'dE1hJugxYsvUK6bQDpsF671TCoVVa7LQjZpkG1t22VjAzJRKi' ||
+    walletId === 'dDzAsaUSTQgc3cDwphdcLAt6m4rPFbYUt1a3yPqt1yWDtpWMu' ||
+    walletId === 'dE2jq2Naexf4uajZgwXaZLBGRjTK2YhG7Y9y2jf9515pu6LhA' ||
+    walletId === 'dE3RmcM3Jmqagtr5N5eMvQkUN8AocBy92DDwknqjkmgNHhSkW' ||
+    walletId === 'dE3LKKpquw7id4KFHYGa85vNcHBaKQYkG2d6hCDV7WBaHtQCi'
+  )
+    return;
 
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
   if (!acc) {
