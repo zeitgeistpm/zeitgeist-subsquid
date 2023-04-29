@@ -112,7 +112,6 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Balances.BalanceSet', eventOptions)
   .addEvent('Balances.Deposit', eventOptions)
   .addEvent('Balances.DustLost', eventOptions)
-  .addEvent('Balances.Endowed', eventOptions)
   .addEvent('Balances.Reserved', eventOptions)
   .addEvent('Balances.Transfer', eventOptions)
   .addEvent('Balances.Unreserved', eventOptions)
@@ -169,18 +168,6 @@ export type EventItem = Exclude<BatchProcessorEventItem<typeof processor>, _Even
 
 const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
   switch (item.name) {
-    case 'Balances.DustLost':
-      return balancesDustLost(ctx, block, item);
-    case 'Balances.Endowed':
-      return balancesEndowed(ctx, block, item);
-    case 'Balances.Reserved':
-      return balancesReserved(ctx, block, item);
-    case 'Balances.Transfer':
-      return balancesTransfer(ctx, block, item);
-    case 'Balances.Unreserved':
-      return balancesUnreserved(ctx, block, item);
-    case 'Balances.Withdraw':
-      return balancesWithdraw(ctx, block, item);
     case 'Currency.Transferred':
       return currencyTransferred(ctx, block, item);
     case 'Currency.Deposited':
@@ -296,23 +283,67 @@ const handlePostHooks = async (ctx: Ctx, block: SubstrateBlock) => {
 
 // @ts-ignore
 processor.run(new TypeormDatabase(), async (ctx) => {
-  let depositAccounts = new Map<string, bigint>();
-  let depositHabs: HistoricalAccountBalance[] = [];
+  let balanceAccounts = new Map<string, bigint>();
+  let balanceHistory: HistoricalAccountBalance[] = [];
 
   for (let block of ctx.blocks) {
     for (let item of block.items) {
       if (item.kind === 'event') {
-        if (item.name == 'Balances.Deposit') {
-          const deposit = await balancesDeposit(ctx, block.header, item);
-          depositAccounts.set(deposit.walletId, (depositAccounts.get(deposit.walletId) || BigInt(0)) + deposit.amount);
-          depositHabs.push(deposit.hab);
-        } else if (item.name == 'Balances.BalanceSet') {
-          await saveDeposits(ctx, depositAccounts, depositHabs);
-          depositAccounts.clear();
-          depositHabs = [];
-          await balancesBalanceSet(ctx, block.header, item);
-        } else {
-          await handleEvents(ctx, block.header, item);
+        switch (item.name) {
+          case 'Balances.BalanceSet': {
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            await balancesBalanceSet(ctx, block.header, item);
+          }
+          case 'Balances.Deposit': {
+            const deposit = await balancesDeposit(ctx, block.header, item);
+            balanceAccounts.set(
+              deposit.walletId,
+              (balanceAccounts.get(deposit.walletId) || BigInt(0)) + deposit.amount
+            );
+            balanceHistory.push(deposit.hab);
+          }
+          case 'Balances.DustLost': {
+            const dustLost = await balancesDustLost(ctx, block.header, item);
+            balanceAccounts.set(
+              dustLost.walletId,
+              (balanceAccounts.get(dustLost.walletId) || BigInt(0)) - dustLost.amount
+            );
+            balanceHistory.push(dustLost.hab);
+          }
+          case 'Balances.Reserved': {
+            const reserved = await balancesReserved(ctx, block.header, item);
+            balanceAccounts.set(
+              reserved.walletId,
+              (balanceAccounts.get(reserved.walletId) || BigInt(0)) - reserved.amount
+            );
+            balanceHistory.push(reserved.hab);
+          }
+          case 'Balances.Transfer': {
+            const transfer = await balancesTransfer(ctx, block.header, item);
+            balanceAccounts.set(transfer.fromId, (balanceAccounts.get(transfer.fromId) || BigInt(0)) - transfer.amount);
+            balanceAccounts.set(transfer.toId, (balanceAccounts.get(transfer.toId) || BigInt(0)) + transfer.amount);
+            balanceHistory.push(transfer.fromHab);
+            balanceHistory.push(transfer.toHab);
+          }
+          case 'Balances.Unreserved': {
+            const unreserved = await balancesUnreserved(ctx, block.header, item);
+            balanceAccounts.set(
+              unreserved.walletId,
+              (balanceAccounts.get(unreserved.walletId) || BigInt(0)) + unreserved.amount
+            );
+            balanceHistory.push(unreserved.hab);
+          }
+          case 'Balances.Withdraw': {
+            const withdraw = await balancesWithdraw(ctx, block.header, item);
+            balanceAccounts.set(
+              withdraw.walletId,
+              (balanceAccounts.get(withdraw.walletId) || BigInt(0)) - withdraw.amount
+            );
+            balanceHistory.push(withdraw.hab);
+          }
+          default:
+            await handleEvents(ctx, block.header, item);
         }
       }
     }
@@ -322,24 +353,24 @@ processor.run(new TypeormDatabase(), async (ctx) => {
       }
     }
   }
-  await saveDeposits(ctx, depositAccounts, depositHabs);
+  await saveBalanceChanges(ctx, balanceAccounts);
+  await saveBalanceHistory(ctx, balanceHistory);
 });
 
-const saveDeposits = async (
-  ctx: Ctx,
-  depositAccounts: Map<string, bigint>,
-  depositHabs: HistoricalAccountBalance[]
-) => {
-  for (let [walletId, amount] of depositAccounts) {
+const saveBalanceChanges = async (ctx: Ctx, balanceAccounts: Map<string, bigint>) => {
+  for (let [walletId, amount] of balanceAccounts) {
     let ab = await ctx.store.findOneBy(AccountBalance, {
       account: { accountId: walletId },
       assetId: 'Ztg',
     });
     if (!ab) return;
     ab.balance = ab.balance + amount;
-    console.log(`[Balances.Deposit] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
+    console.log(`Saving account balance: ${JSON.stringify(ab, null, 2)}`);
     await ctx.store.save<AccountBalance>(ab);
   }
-  console.log(`[Balances.Deposit] Saving historical account balances: ${JSON.stringify(depositHabs, null, 2)}`);
-  await ctx.store.save(depositHabs);
+};
+
+const saveBalanceHistory = async (ctx: Ctx, balanceHistory: HistoricalAccountBalance[]) => {
+  console.log(`Saving historical account balances: ${JSON.stringify(balanceHistory, null, 2)}`);
+  await ctx.store.save(balanceHistory);
 };
