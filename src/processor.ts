@@ -294,6 +294,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
             await balancesBalanceSet(ctx, block.header, item);
+            break;
           }
           case 'Balances.Deposit': {
             const deposit = await balancesDeposit(ctx, block.header, item);
@@ -302,6 +303,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
               (balanceAccounts.get(deposit.walletId) || BigInt(0)) + deposit.amount
             );
             balanceHistory.push(deposit.hab);
+            break;
           }
           case 'Balances.DustLost': {
             const dustLost = await balancesDustLost(ctx, block.header, item);
@@ -310,6 +312,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
               (balanceAccounts.get(dustLost.walletId) || BigInt(0)) - dustLost.amount
             );
             balanceHistory.push(dustLost.hab);
+            break;
           }
           case 'Balances.Reserved': {
             const reserved = await balancesReserved(ctx, block.header, item);
@@ -318,6 +321,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
               (balanceAccounts.get(reserved.walletId) || BigInt(0)) - reserved.amount
             );
             balanceHistory.push(reserved.hab);
+            break;
           }
           case 'Balances.Transfer': {
             const transfer = await balancesTransfer(ctx, block.header, item);
@@ -325,6 +329,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             balanceAccounts.set(transfer.toId, (balanceAccounts.get(transfer.toId) || BigInt(0)) + transfer.amount);
             balanceHistory.push(transfer.fromHab);
             balanceHistory.push(transfer.toHab);
+            break;
           }
           case 'Balances.Unreserved': {
             const unreserved = await balancesUnreserved(ctx, block.header, item);
@@ -333,6 +338,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
               (balanceAccounts.get(unreserved.walletId) || BigInt(0)) + unreserved.amount
             );
             balanceHistory.push(unreserved.hab);
+            break;
           }
           case 'Balances.Withdraw': {
             const withdraw = await balancesWithdraw(ctx, block.header, item);
@@ -341,9 +347,12 @@ processor.run(new TypeormDatabase(), async (ctx) => {
               (balanceAccounts.get(withdraw.walletId) || BigInt(0)) - withdraw.amount
             );
             balanceHistory.push(withdraw.hab);
+            break;
           }
-          default:
+          default: {
             await handleEvents(ctx, block.header, item);
+            break;
+          }
         }
       }
     }
