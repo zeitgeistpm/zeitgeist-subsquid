@@ -46,4 +46,22 @@ export class HistoricalSwap {
      */
     @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
     assetAmountOut!: bigint
+
+    /**
+     * Event method which initiated this swap
+     */
+    @Column_("text", {nullable: false})
+    event!: string
+
+    /**
+     * Height of the block
+     */
+    @Column_("int4", {nullable: false})
+    blockNumber!: number
+
+    /**
+     * Timestamp of the block
+     */
+    @Column_("timestamp with time zone", {nullable: false})
+    timestamp!: Date
 }

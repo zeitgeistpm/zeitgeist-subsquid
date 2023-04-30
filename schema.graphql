@@ -111,6 +111,12 @@ type HistoricalSwap @entity {
   assetAmountIn: BigInt!
   "Units of asset user bought"
   assetAmountOut: BigInt!
+  "Event method which initiated this swap"
+  event: String!
+  "Height of the block"
+  blockNumber: Int!
+  "Timestamp of the block"
+  timestamp: DateTime!
 }
 
 """
