@@ -2,7 +2,7 @@ import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, I
 import * as marshal from "./marshal"
 
 /**
- * A type that records the price history of an outcome asset
+ * A type that records the price history of an outcome asset.
  */
 @Entity_()
 export class HistoricalAsset {
