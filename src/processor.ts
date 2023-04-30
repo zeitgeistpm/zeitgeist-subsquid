@@ -380,6 +380,7 @@ const saveBalanceChanges = async (ctx: Ctx, balanceAccounts: Map<string, bigint>
 };
 
 const saveBalanceHistory = async (ctx: Ctx, balanceHistory: HistoricalAccountBalance[]) => {
+  if (balanceHistory.length === 0) return;
   console.log(`Saving historical account balances: ${JSON.stringify(balanceHistory, null, 2)}`);
   await ctx.store.save(balanceHistory);
 };
