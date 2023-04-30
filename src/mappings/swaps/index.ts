@@ -969,6 +969,9 @@ export const swapExactAmountIn = async (ctx: Ctx, block: SubstrateBlock, item: E
   sh.assetOut = getAssetId(assetBought);
   sh.assetAmountIn = swapEvent.assetAmountIn;
   sh.assetAmountOut = swapEvent.assetAmountOut;
+  sh.event = item.event.name.split('.')[1];
+  sh.blockNumber = block.height;
+  sh.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving swap history: ${JSON.stringify(sh, null, 2)}`);
   await ctx.store.save<HistoricalSwap>(sh);
 };
@@ -1107,6 +1110,9 @@ export const swapExactAmountOut = async (ctx: Ctx, block: SubstrateBlock, item: 
   sh.assetOut = getAssetId(assetBought);
   sh.assetAmountIn = swapEvent.assetAmountIn;
   sh.assetAmountOut = swapEvent.assetAmountOut;
+  sh.event = item.event.name.split('.')[1];
+  sh.blockNumber = block.height;
+  sh.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving swap history: ${JSON.stringify(sh, null, 2)}`);
   await ctx.store.save<HistoricalSwap>(sh);
 };
