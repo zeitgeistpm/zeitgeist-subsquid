@@ -9,9 +9,9 @@ import {
   HistoricalAsset,
   HistoricalMarket,
   HistoricalPool,
+  HistoricalSwap,
   Market,
   Pool,
-  SwapHistory,
   Weight,
 } from '../../model';
 import { Ctx, EventItem } from '../../processor';
@@ -962,14 +962,15 @@ export const swapExactAmountIn = async (ctx: Ctx, block: SubstrateBlock, item: E
     );
   }
 
-  const sh = new SwapHistory();
+  const sh = new HistoricalSwap();
+  sh.id = item.event.id;
   sh.accountId = walletId;
   sh.assetIn = getAssetId(assetSold);
   sh.assetOut = getAssetId(assetBought);
   sh.assetAmountIn = swapEvent.assetAmountIn;
   sh.assetAmountOut = swapEvent.assetAmountOut;
   console.log(`[${item.event.name}] Saving swap history: ${JSON.stringify(sh, null, 2)}`);
-  await ctx.store.save<SwapHistory>(sh);
+  await ctx.store.save<HistoricalSwap>(sh);
 };
 
 export const swapExactAmountOut = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
@@ -1099,12 +1100,13 @@ export const swapExactAmountOut = async (ctx: Ctx, block: SubstrateBlock, item: 
     );
   }
 
-  const sh = new SwapHistory();
+  const sh = new HistoricalSwap();
+  sh.id = item.event.id;
   sh.accountId = walletId;
   sh.assetIn = getAssetId(assetSold);
   sh.assetOut = getAssetId(assetBought);
   sh.assetAmountIn = swapEvent.assetAmountIn;
   sh.assetAmountOut = swapEvent.assetAmountOut;
   console.log(`[${item.event.name}] Saving swap history: ${JSON.stringify(sh, null, 2)}`);
-  await ctx.store.save<SwapHistory>(sh);
+  await ctx.store.save<HistoricalSwap>(sh);
 };
