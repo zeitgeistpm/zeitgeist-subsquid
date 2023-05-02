@@ -2,9 +2,10 @@ import { AccountInfo } from '@polkadot/types/interfaces/system';
 import { SubstrateBlock, SubstrateExtrinsic } from '@subsquid/substrate-processor';
 import { Store } from '@subsquid/typeorm-store';
 import { util } from '@zeitgeistpm/sdk';
-import { Account, AccountBalance, HistoricalAccountBalance, MarketStatus } from '../model';
+import { Account, AccountBalance, HistoricalAccountBalance, MarketStatus, PoolStatus } from '../model';
 import { EventItem } from '../processor';
-import { Asset, MarketStatus as status } from '../types/v42';
+import { PoolStatus as _PoolStatus } from '../types/v41';
+import { Asset, MarketStatus as _MarketStatus } from '../types/v42';
 import { Cache, IPFS, Tools } from './util';
 
 export const calcSpotPrice = (
@@ -103,7 +104,7 @@ export const getFees = async (block: SubstrateBlock, extrinsic: SubstrateExtrins
   return totalFees;
 };
 
-export const getMarketStatus = (status: status): MarketStatus => {
+export const getMarketStatus = (status: _MarketStatus): MarketStatus => {
   switch (status.__kind) {
     case 'Active':
       return MarketStatus.Active;
@@ -125,6 +126,23 @@ export const getMarketStatus = (status: status): MarketStatus => {
       return MarketStatus.Suspended;
     default:
       return MarketStatus.Active;
+  }
+};
+
+export const getPoolStatus = (status: _PoolStatus): PoolStatus => {
+  switch (status.__kind) {
+    case 'Active':
+      return PoolStatus.Active;
+    case 'Clean':
+      return PoolStatus.Clean;
+    case 'Closed':
+      return PoolStatus.Closed;
+    case 'CollectingSubsidy':
+      return PoolStatus.CollectingSubsidy;
+    case 'Initialized':
+      return PoolStatus.Initialized;
+    default:
+      return PoolStatus.Active;
   }
 };
 
