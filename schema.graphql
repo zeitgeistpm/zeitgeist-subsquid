@@ -66,8 +66,7 @@ type Asset @entity {
 }
 
 """
-A type that records the price history of an outcome asset and
-trade history of an account
+A type that records the price history of an outcome asset.
 """
 type HistoricalAsset @entity {
   "Unique identifier of the object"
@@ -89,6 +88,30 @@ type HistoricalAsset @entity {
   "Units of asset present in the pool account"
   newAmountInPool: BigInt
   "Event method which initiated this change"
+  event: String!
+  "Height of the block"
+  blockNumber: Int!
+  "Timestamp of the block"
+  timestamp: DateTime!
+}
+
+"""
+A type that records the trade history of an account.
+"""
+type HistoricalSwap @entity {
+  "Unique identifier of the object"
+  id: ID!
+  "Account which executed the trade"
+  accountId: String! @index
+  "Asset sold by the user"
+  assetIn: String!
+  "Asset bought by the user"
+  assetOut: String!
+  "Units of asset user sold"
+  assetAmountIn: BigInt!
+  "Units of asset user bought"
+  assetAmountOut: BigInt!
+  "Event method which initiated this swap"
   event: String!
   "Height of the block"
   blockNumber: Int!

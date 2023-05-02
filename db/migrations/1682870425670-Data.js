@@ -1,5 +1,5 @@
-module.exports = class Data1682401174187 {
-    name = 'Data1682401174187'
+module.exports = class Data1682870425670 {
+    name = 'Data1682870425670'
 
     async up(db) {
         await db.query(`CREATE TABLE "account" ("account_id" text NOT NULL, "id" character varying NOT NULL, "market_id" integer, "pool_id" integer, CONSTRAINT "PK_54115ee388cdb6d86bb4bf5b2ea" PRIMARY KEY ("id"))`)
@@ -15,6 +15,8 @@ module.exports = class Data1682401174187 {
         await db.query(`CREATE TABLE "historical_asset" ("id" character varying NOT NULL, "account_id" text, "ztg_traded" numeric, "base_asset_traded" numeric, "asset_id" text NOT NULL, "d_price" numeric, "d_amount_in_pool" numeric, "new_price" numeric, "new_amount_in_pool" numeric, "event" text NOT NULL, "block_number" integer NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_24bfbff0fb73bae4960d7301293" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_a80a99f03b440bfec08b2926d6" ON "historical_asset" ("account_id") `)
         await db.query(`CREATE INDEX "IDX_d9ec182f218dc183716b8807cf" ON "historical_asset" ("asset_id") `)
+        await db.query(`CREATE TABLE "historical_swap" ("id" character varying NOT NULL, "account_id" text NOT NULL, "asset_in" text NOT NULL, "asset_out" text NOT NULL, "asset_amount_in" numeric NOT NULL, "asset_amount_out" numeric NOT NULL, "event" text NOT NULL, "block_number" integer NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_fae24759f3f207b19d75d63314f" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_275903cccb306ca3529eb5bedf" ON "historical_swap" ("account_id") `)
         await db.query(`CREATE TABLE "market" ("authorized_address" text, "base_asset" text NOT NULL, "bonds" jsonb, "categories" jsonb, "creation" text NOT NULL, "creator" text NOT NULL, "creator_fee" integer, "deadlines" jsonb, "description" text, "disputes" jsonb, "dispute_mechanism" text NOT NULL, "id" character varying NOT NULL, "img" text, "market_id" integer NOT NULL, "market_type" jsonb NOT NULL, "metadata" text NOT NULL, "oracle" text NOT NULL, "outcome_assets" text array NOT NULL, "period" jsonb NOT NULL, "reject_reason" text, "report" jsonb, "resolved_outcome" text, "scalar_type" text, "scoring_rule" text NOT NULL, "slug" text, "status" character varying(19) NOT NULL, "tags" text array, "question" text, "pool_id" character varying, CONSTRAINT "PK_1e9a2963edfd331d92018e3abac" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_1a8068c93b7b3b7f483268ea11" ON "market" ("market_id") `)
         await db.query(`CREATE INDEX "IDX_190888a8e7a706187b12093c29" ON "market" ("pool_id") `)
@@ -39,6 +41,8 @@ module.exports = class Data1682401174187 {
         await db.query(`DROP TABLE "historical_asset"`)
         await db.query(`DROP INDEX "public"."IDX_a80a99f03b440bfec08b2926d6"`)
         await db.query(`DROP INDEX "public"."IDX_d9ec182f218dc183716b8807cf"`)
+        await db.query(`DROP TABLE "historical_swap"`)
+        await db.query(`DROP INDEX "public"."IDX_275903cccb306ca3529eb5bedf"`)
         await db.query(`DROP TABLE "market"`)
         await db.query(`DROP INDEX "public"."IDX_1a8068c93b7b3b7f483268ea11"`)
         await db.query(`DROP INDEX "public"."IDX_190888a8e7a706187b12093c29"`)
