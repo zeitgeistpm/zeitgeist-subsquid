@@ -12,10 +12,11 @@ import {
   HistoricalSwap,
   Market,
   Pool,
+  PoolStatus,
   Weight,
 } from '../../model';
 import { Ctx, EventItem } from '../../processor';
-import { calcSpotPrice, getAssetId, isBaseAsset } from '../helper';
+import { calcSpotPrice, getAssetId, getPoolStatus, isBaseAsset } from '../helper';
 import {
   getArbitrageBuyBurnEvent,
   getArbitrageMintSellEvent,
@@ -53,6 +54,7 @@ export const arbitrageBuyBurn = async (ctx: Ctx, block: SubstrateBlock, item: Ev
   hp.ztgQty = pool.ztgQty;
   hp.baseAssetQty = pool.baseAssetQty;
   hp.poolStatus = pool.poolStatus;
+  hp.status = pool.status;
   hp.blockNumber = block.height;
   hp.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`);
@@ -123,6 +125,7 @@ export const arbitrageMintSell = async (ctx: Ctx, block: SubstrateBlock, item: E
   hp.ztgQty = pool.ztgQty;
   hp.baseAssetQty = pool.baseAssetQty;
   hp.poolStatus = pool.poolStatus;
+  hp.status = pool.status;
   hp.blockNumber = block.height;
   hp.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`);
@@ -179,7 +182,7 @@ export const poolActive = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
   });
   if (!pool) return;
 
-  pool.poolStatus = 'Active';
+  pool.poolStatus = PoolStatus.Active;
   console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
   await ctx.store.save<Pool>(pool);
 
@@ -187,6 +190,7 @@ export const poolActive = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
   hp.id = item.event.id + '-' + pool.poolId;
   hp.poolId = pool.poolId;
   hp.poolStatus = pool.poolStatus;
+  hp.status = pool.status;
   hp.event = item.event.name.split('.')[1];
   hp.blockNumber = block.height;
   hp.timestamp = new Date(block.timestamp);
@@ -202,7 +206,7 @@ export const poolClosed = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
   });
   if (!pool) return;
 
-  pool.poolStatus = 'Closed';
+  pool.poolStatus = PoolStatus.Closed;
   console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
   await ctx.store.save<Pool>(pool);
 
@@ -210,6 +214,7 @@ export const poolClosed = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
   hp.id = item.event.id + '-' + pool.poolId;
   hp.poolId = pool.poolId;
   hp.poolStatus = pool.poolStatus;
+  hp.status = pool.status;
   hp.event = item.event.name.split('.')[1];
   hp.blockNumber = block.height;
   hp.timestamp = new Date(block.timestamp);
@@ -235,6 +240,7 @@ export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
   pool.accountId = accountId;
   pool.marketId = +swapPool.marketId.toString();
   pool.poolStatus = swapPool.poolStatus.__kind;
+  pool.status = getPoolStatus(swapPool.poolStatus);
   pool.scoringRule = swapPool.scoringRule.__kind;
   pool.swapFee = swapPool.swapFee ? swapPool.swapFee.toString() : '';
   pool.totalSubsidy = swapPool.totalSubsidy ? swapPool.totalSubsidy.toString() : '';
@@ -318,6 +324,7 @@ export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
   hp.dVolume = pool.volume;
   hp.volume = pool.volume;
   hp.poolStatus = pool.poolStatus;
+  hp.status = pool.status;
   hp.blockNumber = block.height;
   hp.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`);
@@ -350,7 +357,7 @@ export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Event
     where: { poolId: +poolId.toString() },
   });
   if (!pool) return;
-  pool.poolStatus = 'Destroyed';
+  pool.poolStatus = PoolStatus.Destroyed;
   pool.ztgQty = BigInt(0);
   pool.baseAssetQty = BigInt(0);
   console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
@@ -359,11 +366,11 @@ export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Event
   let hp = new HistoricalPool();
   hp.id = item.event.id + '-' + pool.poolId;
   hp.poolId = pool.poolId;
-  hp.poolStatus = pool.poolStatus;
   hp.ztgQty = pool.ztgQty;
   hp.baseAssetQty = pool.baseAssetQty;
   hp.event = item.event.name.split('.')[1];
   hp.poolStatus = pool.poolStatus;
+  hp.status = pool.status;
   hp.blockNumber = block.height;
   hp.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`);
@@ -483,6 +490,7 @@ export const poolExit = async (ctx: Ctx, block: SubstrateBlock, item: EventItem)
   hp.ztgQty = pool.ztgQty;
   hp.baseAssetQty = pool.baseAssetQty;
   hp.poolStatus = pool.poolStatus;
+  hp.status = pool.status;
   hp.blockNumber = block.height;
   hp.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`);
@@ -599,6 +607,7 @@ export const poolExitWithExactAssetAmount = async (ctx: Ctx, block: SubstrateBlo
   hp.ztgQty = pool.ztgQty;
   hp.baseAssetQty = pool.baseAssetQty;
   hp.poolStatus = pool.poolStatus;
+  hp.status = pool.status;
   hp.blockNumber = block.height;
   hp.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`);
@@ -668,6 +677,7 @@ export const poolJoin = async (ctx: Ctx, block: SubstrateBlock, item: EventItem)
   hp.ztgQty = pool.ztgQty;
   hp.baseAssetQty = pool.baseAssetQty;
   hp.poolStatus = pool.poolStatus;
+  hp.status = pool.status;
   hp.blockNumber = block.height;
   hp.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`);
@@ -788,6 +798,7 @@ export const poolJoinWithExactAssetAmount = async (ctx: Ctx, block: SubstrateBlo
   hp.ztgQty = pool.ztgQty;
   hp.baseAssetQty = pool.baseAssetQty;
   hp.poolStatus = pool.poolStatus;
+  hp.status = pool.status;
   hp.blockNumber = block.height;
   hp.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`);
@@ -910,6 +921,7 @@ export const swapExactAmountIn = async (ctx: Ctx, block: SubstrateBlock, item: E
     hp.dVolume = newVolume - oldVolume;
     hp.volume = newVolume;
     hp.poolStatus = pool.poolStatus;
+    hp.status = pool.status;
     hp.blockNumber = block.height;
     hp.timestamp = new Date(block.timestamp);
     console.log(`[${item.event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`);
@@ -1051,6 +1063,7 @@ export const swapExactAmountOut = async (ctx: Ctx, block: SubstrateBlock, item: 
     hp.dVolume = newVolume - oldVolume;
     hp.volume = newVolume;
     hp.poolStatus = pool.poolStatus;
+    hp.status = pool.status;
     hp.blockNumber = block.height;
     hp.timestamp = new Date(block.timestamp);
     console.log(`[${item.event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`);
