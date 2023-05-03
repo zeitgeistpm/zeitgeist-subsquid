@@ -33,6 +33,12 @@ elif [ "$1" = "mlocal" ]; then
 elif [ "$1" = "test" ] || [ "$1" = "main" ]; then
   docker run -d --network=host --rm -e NODE_ENV=$1 --env-file=.env.$1 --name=api query-node
   docker run -d --network=host --rm -e GQL_PORT=4000 -e NODE_ENV=$1 --env-file=.env.$1 --name=sub-api query-node
+
+  # Temporary fix for type-graphql issue. Follow #347 for more info.
+  docker cp node_modules/type-graphql/dist/resolvers/validate-arg.js api:/home/zeitgeist-squid/node_modules/type-graphql/dist/resolvers/validate-arg.js
+  docker cp node_modules/type-graphql/dist/resolvers/validate-arg.js sub-api:/home/zeitgeist-squid/node_modules/type-graphql/dist/resolvers/validate-arg.js
+  docker restart api
+  docker restart sub-api
 else
   echo "$__usage"
 fi
