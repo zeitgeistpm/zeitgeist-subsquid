@@ -174,9 +174,6 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
       return currencyDeposited(ctx, block, item);
     case 'Currency.Withdrawn':
       return currencyWithdrawn(ctx, block, item);
-    // @ts-ignore
-    case 'ParachainStaking.Rewarded':
-      return parachainStakingRewarded(ctx, block, item);
     case 'PredictionMarkets.BoughtCompleteSet':
       return boughtCompleteSet(ctx, block, item);
     case 'PredictionMarkets.MarketApproved':
@@ -334,6 +331,14 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           }
           case 'Balances.Withdraw': {
             const hab = await balancesWithdraw(ctx, block.header, item);
+            const key = makeKey(hab.accountId, hab.assetId);
+            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+            balanceHistory.push(hab);
+            break;
+          }
+          // @ts-ignore
+          case 'ParachainStaking.Rewarded': {
+            const hab = await parachainStakingRewarded(ctx, block.header, item);
             const key = makeKey(hab.accountId, hab.assetId);
             balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
             balanceHistory.push(hab);
