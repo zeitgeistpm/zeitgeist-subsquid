@@ -235,8 +235,11 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
     newMarket.authorizedAddress = d.value ? encodeAddress(d.value, 73) : null;
   }
 
+  let isMetaComplete = true;
   const metadata = await decodeMarketMetadata(market.metadata.toString());
-  if (metadata) {
+  if (!metadata) {
+    isMetaComplete = false;
+  } else {
     newMarket.slug = metadata.slug;
     newMarket.question = metadata.question;
     newMarket.description = metadata.description;
@@ -246,9 +249,10 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
       newMarket.scalarType = metadata.scalarType;
     }
 
-    if (metadata.categories) {
+    if (!metadata.categories) {
+      isMetaComplete = false;
+    } else {
       newMarket.categories = [];
-
       for (let i = 0; i < metadata.categories.length; i++) {
         let cm = new CategoryMetadata();
         cm.name = metadata.categories[i].name;
@@ -256,6 +260,7 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
         cm.img = metadata.categories[i].img;
         cm.color = metadata.categories[i].color;
         newMarket.categories.push(cm);
+        if (!cm.name) isMetaComplete = false;
       }
     }
 
@@ -266,6 +271,7 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
       }
     }
   }
+  newMarket.isMetaComplete = isMetaComplete;
 
   if (market.deadlines) {
     let deadlines = new MarketDeadlines();
