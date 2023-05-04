@@ -149,6 +149,8 @@ type Market @entity {
   id: ID!
   "Image for the market"
   img: String
+  "Checks if metadata is compatible for display on Zeitgeist App"
+  isMetaComplete: Boolean!
   "Zeitgeist's identifier for market"
   marketId: Int! @index
   "Type of the market"
