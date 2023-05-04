@@ -281,6 +281,10 @@ const handlePostHooks = async (ctx: Ctx, block: SubstrateBlock) => {
   }
 };
 
+const makeKey = (walletId: string, assetId: string): string => {
+  return walletId + '|' + assetId;
+};
+
 // @ts-ignore
 processor.run(new TypeormDatabase(), async (ctx) => {
   let balanceAccounts = new Map<string, bigint>();
@@ -297,56 +301,48 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             break;
           }
           case 'Balances.Deposit': {
-            const deposit = await balancesDeposit(ctx, block.header, item);
-            balanceAccounts.set(
-              deposit.walletId,
-              (balanceAccounts.get(deposit.walletId) || BigInt(0)) + deposit.amount
-            );
-            balanceHistory.push(deposit.hab);
+            const hab = await balancesDeposit(ctx, block.header, item);
+            const key = makeKey(hab.accountId, hab.assetId);
+            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+            balanceHistory.push(hab);
             break;
           }
           case 'Balances.DustLost': {
-            const dustLost = await balancesDustLost(ctx, block.header, item);
-            balanceAccounts.set(
-              dustLost.walletId,
-              (balanceAccounts.get(dustLost.walletId) || BigInt(0)) - dustLost.amount
-            );
-            balanceHistory.push(dustLost.hab);
+            const hab = await balancesDustLost(ctx, block.header, item);
+            const key = makeKey(hab.accountId, hab.assetId);
+            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+            balanceHistory.push(hab);
             break;
           }
           case 'Balances.Reserved': {
-            const reserved = await balancesReserved(ctx, block.header, item);
-            balanceAccounts.set(
-              reserved.walletId,
-              (balanceAccounts.get(reserved.walletId) || BigInt(0)) - reserved.amount
-            );
-            balanceHistory.push(reserved.hab);
+            const hab = await balancesReserved(ctx, block.header, item);
+            const key = makeKey(hab.accountId, hab.assetId);
+            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+            balanceHistory.push(hab);
             break;
           }
           case 'Balances.Transfer': {
-            const transfer = await balancesTransfer(ctx, block.header, item);
-            balanceAccounts.set(transfer.fromId, (balanceAccounts.get(transfer.fromId) || BigInt(0)) - transfer.amount);
-            balanceAccounts.set(transfer.toId, (balanceAccounts.get(transfer.toId) || BigInt(0)) + transfer.amount);
-            balanceHistory.push(transfer.fromHab);
-            balanceHistory.push(transfer.toHab);
+            const res = await balancesTransfer(ctx, block.header, item);
+            const fromKey = makeKey(res.fromHab.accountId, res.fromHab.assetId);
+            const toKey = makeKey(res.toHab.accountId, res.toHab.assetId);
+            balanceAccounts.set(fromKey, (balanceAccounts.get(fromKey) || BigInt(0)) + res.fromHab.dBalance);
+            balanceAccounts.set(toKey, (balanceAccounts.get(toKey) || BigInt(0)) + res.toHab.dBalance);
+            balanceHistory.push(res.fromHab);
+            balanceHistory.push(res.toHab);
             break;
           }
           case 'Balances.Unreserved': {
-            const unreserved = await balancesUnreserved(ctx, block.header, item);
-            balanceAccounts.set(
-              unreserved.walletId,
-              (balanceAccounts.get(unreserved.walletId) || BigInt(0)) + unreserved.amount
-            );
-            balanceHistory.push(unreserved.hab);
+            const hab = await balancesUnreserved(ctx, block.header, item);
+            const key = makeKey(hab.accountId, hab.assetId);
+            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+            balanceHistory.push(hab);
             break;
           }
           case 'Balances.Withdraw': {
-            const withdraw = await balancesWithdraw(ctx, block.header, item);
-            balanceAccounts.set(
-              withdraw.walletId,
-              (balanceAccounts.get(withdraw.walletId) || BigInt(0)) - withdraw.amount
-            );
-            balanceHistory.push(withdraw.hab);
+            const hab = await balancesWithdraw(ctx, block.header, item);
+            const key = makeKey(hab.accountId, hab.assetId);
+            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+            balanceHistory.push(hab);
             break;
           }
           default: {
@@ -367,10 +363,11 @@ processor.run(new TypeormDatabase(), async (ctx) => {
 });
 
 const saveBalanceChanges = async (ctx: Ctx, balanceAccounts: Map<string, bigint>) => {
-  for (let [walletId, amount] of balanceAccounts) {
+  for (let [key, amount] of balanceAccounts) {
+    const [walletId, assetId] = key.split('|');
     let ab = await ctx.store.findOneBy(AccountBalance, {
       account: { accountId: walletId },
-      assetId: 'Ztg',
+      assetId: assetId,
     });
     if (!ab) return;
     ab.balance = ab.balance + amount;
