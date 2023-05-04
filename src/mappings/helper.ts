@@ -202,16 +202,7 @@ interface CategoryData {
   color?: string;
 }
 
-export interface Balance {
-  walletId: string;
-  amount: bigint;
-  hab: HistoricalAccountBalance;
-}
-
 export interface Transfer {
-  fromId: string;
-  toId: string;
-  amount: bigint;
   fromHab: HistoricalAccountBalance;
   toHab: HistoricalAccountBalance;
 }
