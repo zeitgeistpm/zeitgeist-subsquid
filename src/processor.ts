@@ -233,12 +233,6 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
       return swapExactAmountOut(ctx, block, item);
     case 'System.NewAccount':
       return systemNewAccount(ctx, block, item);
-    // @ts-ignore
-    case 'System.ExtrinsicFailed':
-      return systemExtrinsicFailed(ctx, block, item);
-    // @ts-ignore
-    case 'System.ExtrinsicSuccess':
-      return systemExtrinsicSuccess(ctx, block, item);
     case 'Tokens.BalanceSet':
       return tokensBalanceSet(ctx, block, item);
     case 'Tokens.Deposited':
@@ -343,6 +337,26 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             const key = makeKey(hab.accountId, hab.assetId);
             balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
             balanceHistory.push(hab);
+            break;
+          }
+          // @ts-ignore
+          case 'System.ExtrinsicFailed': {
+            const hab = await systemExtrinsicFailed(ctx, block.header, item);
+            if (hab) {
+              const key = makeKey(hab.accountId, hab.assetId);
+              balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+              balanceHistory.push(hab);
+            }
+            break;
+          }
+          // @ts-ignore
+          case 'System.ExtrinsicSuccess': {
+            const hab = await systemExtrinsicSuccess(ctx, block.header, item);
+            if (hab) {
+              const key = makeKey(hab.accountId, hab.assetId);
+              balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+              balanceHistory.push(hab);
+            }
             break;
           }
           default: {
