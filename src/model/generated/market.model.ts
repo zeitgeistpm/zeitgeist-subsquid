@@ -97,6 +97,12 @@ export class Market {
     img!: string | undefined | null
 
     /**
+     * Checks if metadata is compatible for display on Zeitgeist App
+     */
+    @Column_("bool", {nullable: false})
+    isMetaComplete!: boolean
+
+    /**
      * Zeitgeist's identifier for market
      */
     @Index_()
