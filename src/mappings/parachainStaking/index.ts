@@ -1,5 +1,5 @@
 import { SubstrateBlock } from '@subsquid/substrate-processor';
-import { Account, AccountBalance, HistoricalAccountBalance } from '../../model';
+import { Account, HistoricalAccountBalance } from '../../model';
 import { Ctx, EventItem } from '../../processor';
 import { initBalance } from '../helper';
 import { getRewardedEvent } from './types';
