@@ -382,17 +382,20 @@ processor.run(new TypeormDatabase(), async (ctx) => {
 });
 
 const saveBalanceChanges = async (ctx: Ctx, balanceAccounts: Map<string, bigint>) => {
-  for (let [key, amount] of balanceAccounts) {
-    const [walletId, assetId] = key.split('|');
-    let ab = await ctx.store.findOneBy(AccountBalance, {
-      account: { accountId: walletId },
-      assetId: assetId,
-    });
-    if (!ab) return;
-    ab.balance = ab.balance + amount;
-    console.log(`Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-    await ctx.store.save<AccountBalance>(ab);
-  }
+  const balanceAccountsArr = Array.from(balanceAccounts);
+  await Promise.all(
+    balanceAccountsArr.map(async ([key, amount]) => {
+      const [walletId, assetId] = key.split('|');
+      let ab = await ctx.store.findOneBy(AccountBalance, {
+        account: { accountId: walletId },
+        assetId: assetId,
+      });
+      if (!ab) return;
+      ab.balance = ab.balance + amount;
+      console.log(`Saving account balance: ${JSON.stringify(ab, null, 2)}`);
+      await ctx.store.save<AccountBalance>(ab);
+    })
+  );
 };
 
 const saveBalanceHistory = async (ctx: Ctx, balanceHistory: HistoricalAccountBalance[]) => {
