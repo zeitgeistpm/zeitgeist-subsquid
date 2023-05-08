@@ -1,7 +1,7 @@
 import { SubstrateBlock } from '@subsquid/substrate-processor';
 import { Account, AccountBalance, HistoricalAccountBalance } from '../../model';
 import { Ctx, EventItem } from '../../processor';
-import { Balance, initBalance, Transfer } from '../helper';
+import { initBalance, Transfer } from '../helper';
 import {
   getBalanceSetEvent,
   getDepositEvent,
@@ -65,7 +65,11 @@ export const balancesBalanceSet = async (ctx: Ctx, block: SubstrateBlock, item: 
   }
 };
 
-export const balancesDeposit = async (ctx: Ctx, block: SubstrateBlock, item: EventItem): Promise<Balance> => {
+export const balancesDeposit = async (
+  ctx: Ctx,
+  block: SubstrateBlock,
+  item: EventItem
+): Promise<HistoricalAccountBalance> => {
   const { walletId, amount } = getDepositEvent(ctx, item);
 
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
@@ -87,10 +91,14 @@ export const balancesDeposit = async (ctx: Ctx, block: SubstrateBlock, item: Eve
   hab.blockNumber = block.height;
   hab.timestamp = new Date(block.timestamp);
 
-  return { walletId, amount, hab };
+  return hab;
 };
 
-export const balancesDustLost = async (ctx: Ctx, block: SubstrateBlock, item: EventItem): Promise<Balance> => {
+export const balancesDustLost = async (
+  ctx: Ctx,
+  block: SubstrateBlock,
+  item: EventItem
+): Promise<HistoricalAccountBalance> => {
   const { walletId, amount } = getDustLostEvent(ctx, item);
 
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
@@ -112,7 +120,7 @@ export const balancesDustLost = async (ctx: Ctx, block: SubstrateBlock, item: Ev
   hab.blockNumber = block.height;
   hab.timestamp = new Date(block.timestamp);
 
-  return { walletId, amount, hab };
+  return hab;
 };
 
 export const balancesEndowed = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
@@ -162,7 +170,11 @@ export const balancesEndowed = async (ctx: Ctx, block: SubstrateBlock, item: Eve
   }
 };
 
-export const balancesReserved = async (ctx: Ctx, block: SubstrateBlock, item: EventItem): Promise<Balance> => {
+export const balancesReserved = async (
+  ctx: Ctx,
+  block: SubstrateBlock,
+  item: EventItem
+): Promise<HistoricalAccountBalance> => {
   const { walletId, amount } = getReservedEvent(ctx, item);
 
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
@@ -184,7 +196,7 @@ export const balancesReserved = async (ctx: Ctx, block: SubstrateBlock, item: Ev
   hab.blockNumber = block.height;
   hab.timestamp = new Date(block.timestamp);
 
-  return { walletId, amount, hab };
+  return hab;
 };
 
 export const balancesSlashed = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
@@ -263,10 +275,14 @@ export const balancesTransfer = async (ctx: Ctx, block: SubstrateBlock, item: Ev
   toHab.blockNumber = block.height;
   toHab.timestamp = new Date(block.timestamp);
 
-  return { fromId, toId, amount, fromHab, toHab };
+  return { fromHab, toHab };
 };
 
-export const balancesUnreserved = async (ctx: Ctx, block: SubstrateBlock, item: EventItem): Promise<Balance> => {
+export const balancesUnreserved = async (
+  ctx: Ctx,
+  block: SubstrateBlock,
+  item: EventItem
+): Promise<HistoricalAccountBalance> => {
   const { walletId, amount } = getUnreservedEvent(ctx, item);
 
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
@@ -288,10 +304,14 @@ export const balancesUnreserved = async (ctx: Ctx, block: SubstrateBlock, item: 
   hab.blockNumber = block.height;
   hab.timestamp = new Date(block.timestamp);
 
-  return { walletId, amount, hab };
+  return hab;
 };
 
-export const balancesWithdraw = async (ctx: Ctx, block: SubstrateBlock, item: EventItem): Promise<Balance> => {
+export const balancesWithdraw = async (
+  ctx: Ctx,
+  block: SubstrateBlock,
+  item: EventItem
+): Promise<HistoricalAccountBalance> => {
   const { walletId, amount } = getWithdrawEvent(ctx, item);
 
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
@@ -313,5 +333,5 @@ export const balancesWithdraw = async (ctx: Ctx, block: SubstrateBlock, item: Ev
   hab.blockNumber = block.height;
   hab.timestamp = new Date(block.timestamp);
 
-  return { walletId, amount, hab };
+  return hab;
 };
