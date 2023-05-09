@@ -1,4 +1,5 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_} from "typeorm"
+import {MarketEvent} from "./_marketEvent"
 import {MarketStatus} from "./_marketStatus"
 
 /**
@@ -23,8 +24,8 @@ export class HistoricalMarket {
     /**
      * Event method which initiated this change
      */
-    @Column_("text", {nullable: false})
-    event!: string
+    @Column_("varchar", {length: 15, nullable: false})
+    event!: MarketEvent
 
     /**
      * Zeitgeist's identifier for market
