@@ -104,28 +104,27 @@ export const getFees = async (block: SubstrateBlock, extrinsic: SubstrateExtrins
   return totalFees;
 };
 
-export const getMarketEvent = (status: string): MarketEvent => {
-  status = status.split('.')[1];
-  switch (status) {
-    case 'MarketApproved':
+export const getMarketEvent = (eventName: string): MarketEvent => {
+  switch (eventName) {
+    case 'PredictionMarkets.MarketApproved':
       return MarketEvent.MarketApproved;
-    case 'MarketClosed':
+    case 'PredictionMarkets.MarketClosed':
       return MarketEvent.MarketClosed;
-    case 'MarketCreated':
+    case 'PredictionMarkets.MarketCreated':
       return MarketEvent.MarketCreated;
-    case 'MarketDestroyed':
+    case 'PredictionMarkets.MarketDestroyed':
       return MarketEvent.MarketDestroyed;
-    case 'MarketDisputed':
+    case 'PredictionMarkets.MarketDisputed':
       return MarketEvent.MarketDisputed;
-    case 'MarketExpired':
+    case 'PredictionMarkets.MarketExpired':
       return MarketEvent.MarketExpired;
-    case 'MarketRejected':
+    case 'PredictionMarkets.MarketRejected':
       return MarketEvent.MarketRejected;
-    case 'MarketReported':
+    case 'PredictionMarkets.MarketReported':
       return MarketEvent.MarketReported;
-    case 'MarketResolved':
+    case 'PredictionMarkets.MarketResolved':
       return MarketEvent.MarketResolved;
-    case 'PoolCreate':
+    case 'Swaps.PoolCreate':
       return MarketEvent.PoolCreate;
     default:
       return MarketEvent.MarketCreated;
