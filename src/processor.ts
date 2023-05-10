@@ -119,6 +119,7 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Currency.Transferred', eventOptions)
   .addEvent('Currency.Deposited', eventOptions)
   .addEvent('Currency.Withdrawn', eventOptions)
+  .addEvent('ParachainStaking.Rewarded', eventOptions)
   .addEvent('PredictionMarkets.BoughtCompleteSet', eventExtrinsicOptions)
   .addEvent('PredictionMarkets.MarketApproved', eventOptions)
   .addEvent('PredictionMarkets.MarketClosed', eventOptions)
@@ -154,8 +155,6 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Tokens.Withdrawn', eventOptions);
 
 if (process.env.WS_NODE_URL?.includes(`bs`)) {
-  // @ts-ignore
-  processor.addEvent('ParachainStaking.Rewarded', eventRangeOptions);
   // @ts-ignore
   processor.addEvent('System.ExtrinsicFailed', eventRangeOptions);
   // @ts-ignore
