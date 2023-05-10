@@ -336,14 +336,17 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             break;
           }
           case 'ParachainStaking.Rewarded': {
-            const hab = await parachainStakingRewarded(ctx, block.header, item);
             if (process.env.WS_NODE_URL?.includes(`bs`) && block.header.height < 588249) {
+              const hab = await parachainStakingRewarded(ctx, block.header, item);
               const key = makeKey(hab.accountId, hab.assetId);
               balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
             } else {
-              balanceHistory.pop();
+              const hab = balanceHistory.pop();
+              if (hab && hab.event === 'Deposit') {
+                hab.event = item.event.name.split('.')[1];
+                balanceHistory.push(hab);
+              }
             }
-            balanceHistory.push(hab);
             break;
           }
           // @ts-ignore
