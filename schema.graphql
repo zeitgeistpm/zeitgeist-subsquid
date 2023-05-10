@@ -193,7 +193,7 @@ type HistoricalMarket @entity {
   "Height of the block"
   blockNumber: Int!
   "Event method which initiated this change"
-  event: String!
+  event: MarketEvent!
   "Zeitgeist's identifier for market"
   marketId: Int!
   "Zeitgeist's identifier for pool"
@@ -386,6 +386,22 @@ type MarketDisputeMechanism @jsonField {
   court: Boolean
   "True if mechanism is simple-disputes else null"
   simpleDisputes: Boolean
+}
+
+"""
+Market's event options
+"""
+enum MarketEvent {
+  MarketApproved
+  MarketClosed
+  MarketCreated
+  MarketDestroyed
+  MarketDisputed
+  MarketExpired
+  MarketRejected
+  MarketReported
+  MarketResolved
+  PoolCreate
 }
 
 """

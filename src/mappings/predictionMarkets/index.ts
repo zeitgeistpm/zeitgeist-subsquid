@@ -21,7 +21,14 @@ import {
   MarketType,
   OutcomeReport,
 } from '../../model';
-import { createAssetsForMarket, decodeMarketMetadata, getAssetId, getMarketStatus, rescale } from '../helper';
+import {
+  createAssetsForMarket,
+  decodeMarketMetadata,
+  getAssetId,
+  getMarketEvent,
+  getMarketStatus,
+  rescale,
+} from '../helper';
 import { Tools } from '../util';
 import {
   getBoughtCompleteSetEvent,
@@ -46,16 +53,6 @@ export const boughtCompleteSet = async (ctx: Ctx, block: SubstrateBlock, item: E
   const market = await ctx.store.get(Market, { where: { marketId: marketId } });
   if (!market) return;
 
-  let hm = new HistoricalMarket();
-  hm.id = item.event.id + '-' + market.marketId;
-  hm.marketId = market.marketId;
-  hm.status = market.status;
-  hm.event = item.event.name.split('.')[1];
-  hm.blockNumber = block.height;
-  hm.timestamp = new Date(block.timestamp);
-  console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
-  await ctx.store.save<HistoricalMarket>(hm);
-
   const specVersion = +block.specId.substring(block.specId.indexOf('@') + 1);
   if (specVersion > 35) return;
 
@@ -66,9 +63,7 @@ export const boughtCompleteSet = async (ctx: Ctx, block: SubstrateBlock, item: E
       account: { accountId: walletId },
       assetId: currencyId,
     });
-    if (!ab) {
-      return;
-    }
+    if (!ab) return;
 
     let hab = await ctx.store.get(HistoricalAccountBalance, {
       where: {
@@ -134,7 +129,6 @@ export const marketApproved = async (ctx: Ctx, block: SubstrateBlock, item: Even
 
   let market = await ctx.store.get(Market, { where: { marketId: marketId } });
   if (!market) return;
-
   market.status = status
     ? getMarketStatus(status)
     : market.scoringRule === 'CPMM'
@@ -147,7 +141,7 @@ export const marketApproved = async (ctx: Ctx, block: SubstrateBlock, item: Even
   hm.id = item.event.id + '-' + market.marketId;
   hm.marketId = market.marketId;
   hm.status = market.status;
-  hm.event = item.event.name.split('.')[1];
+  hm.event = getMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -159,7 +153,6 @@ export const marketClosed = async (ctx: Ctx, block: SubstrateBlock, item: EventI
 
   let market = await ctx.store.get(Market, { where: { marketId: marketId } });
   if (!market) return;
-
   market.status = MarketStatus.Closed;
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
@@ -168,7 +161,7 @@ export const marketClosed = async (ctx: Ctx, block: SubstrateBlock, item: EventI
   hm.id = item.event.id + '-' + market.marketId;
   hm.marketId = market.marketId;
   hm.status = market.status;
-  hm.event = item.event.name.split('.')[1];
+  hm.event = getMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -354,7 +347,7 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
   hm.id = item.event.id + '-' + newMarket.marketId;
   hm.marketId = newMarket.marketId;
   hm.status = newMarket.status;
-  hm.event = item.event.name.split('.')[1];
+  hm.event = getMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -374,7 +367,7 @@ export const marketDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Eve
   hm.id = item.event.id + '-' + market.marketId;
   hm.marketId = market.marketId;
   hm.status = market.status;
-  hm.event = item.event.name.split('.')[1];
+  hm.event = getMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -413,7 +406,6 @@ export const marketDisputed = async (ctx: Ctx, block: SubstrateBlock, item: Even
 
   let market = await ctx.store.get(Market, { where: { marketId: marketId } });
   if (!market) return;
-
   if (!market.disputes) market.disputes = [];
 
   let ocr = new OutcomeReport();
@@ -437,7 +429,7 @@ export const marketDisputed = async (ctx: Ctx, block: SubstrateBlock, item: Even
   hm.id = item.event.id + '-' + market.marketId;
   hm.marketId = market.marketId;
   hm.status = market.status;
-  hm.event = item.event.name.split('.')[1];
+  hm.event = getMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -449,7 +441,6 @@ export const marketExpired = async (ctx: Ctx, block: SubstrateBlock, item: Event
 
   let market = await ctx.store.get(Market, { where: { marketId: marketId } });
   if (!market) return;
-
   market.status = MarketStatus.Expired;
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
@@ -458,7 +449,7 @@ export const marketExpired = async (ctx: Ctx, block: SubstrateBlock, item: Event
   hm.id = item.event.id + '-' + market.marketId;
   hm.marketId = market.marketId;
   hm.status = market.status;
-  hm.event = item.event.name.split('.')[1];
+  hm.event = getMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -470,7 +461,6 @@ export const marketInsufficientSubsidy = async (ctx: Ctx, block: SubstrateBlock,
 
   let market = await ctx.store.get(Market, { where: { marketId: marketId } });
   if (!market) return;
-
   market.status = status ? getMarketStatus(status) : MarketStatus.InsufficientSubsidy;
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
@@ -479,7 +469,7 @@ export const marketInsufficientSubsidy = async (ctx: Ctx, block: SubstrateBlock,
   hm.id = item.event.id + '-' + market.marketId;
   hm.marketId = market.marketId;
   hm.status = market.status;
-  hm.event = item.event.name.split('.')[1];
+  hm.event = getMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -491,7 +481,6 @@ export const marketRejected = async (ctx: Ctx, block: SubstrateBlock, item: Even
 
   let market = await ctx.store.get(Market, { where: { marketId: marketId } });
   if (!market) return;
-
   market.status = MarketStatus.Rejected;
   market.rejectReason = reason.toString();
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
@@ -501,7 +490,7 @@ export const marketRejected = async (ctx: Ctx, block: SubstrateBlock, item: Even
   hm.id = item.event.id + '-' + market.marketId;
   hm.marketId = market.marketId;
   hm.status = market.status;
-  hm.event = item.event.name.split('.')[1];
+  hm.event = getMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -535,7 +524,7 @@ export const marketReported = async (ctx: Ctx, block: SubstrateBlock, item: Even
   hm.id = item.event.id + '-' + market.marketId;
   hm.marketId = market.marketId;
   hm.status = market.status;
-  hm.event = item.event.name.split('.')[1];
+  hm.event = getMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -548,7 +537,6 @@ export const marketResolved = async (ctx: Ctx, block: SubstrateBlock, item: Even
 
   const market = await ctx.store.get(Market, { where: { marketId: marketId } });
   if (!market) return;
-
   market.resolvedOutcome =
     market.marketType.scalar && specVersion < 41 ? rescale(report.value.toString()) : report.value.toString();
   market.status = status ? getMarketStatus(status) : MarketStatus.Resolved;
@@ -560,7 +548,7 @@ export const marketResolved = async (ctx: Ctx, block: SubstrateBlock, item: Even
   hm.marketId = market.marketId;
   hm.status = market.status;
   hm.resolvedOutcome = market.resolvedOutcome;
-  hm.event = item.event.name.split('.')[1];
+  hm.event = getMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -647,7 +635,6 @@ export const marketStartedWithSubsidy = async (ctx: Ctx, block: SubstrateBlock, 
 
   let market = await ctx.store.get(Market, { where: { marketId: marketId } });
   if (!market) return;
-
   market.status = status ? getMarketStatus(status) : MarketStatus.Active;
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
@@ -656,7 +643,7 @@ export const marketStartedWithSubsidy = async (ctx: Ctx, block: SubstrateBlock, 
   hm.id = item.event.id + '-' + market.marketId;
   hm.marketId = market.marketId;
   hm.status = market.status;
-  hm.event = item.event.name.split('.')[1];
+  hm.event = getMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -670,16 +657,6 @@ export const soldCompleteSet = async (ctx: Ctx, block: SubstrateBlock, item: Eve
     where: { marketId: +marketId.toString() },
   });
   if (!market) return;
-
-  let hm = new HistoricalMarket();
-  hm.id = item.event.id + '-' + market.marketId;
-  hm.marketId = market.marketId;
-  hm.status = market.status;
-  hm.event = item.event.name.split('.')[1];
-  hm.blockNumber = block.height;
-  hm.timestamp = new Date(block.timestamp);
-  console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
-  await ctx.store.save<HistoricalMarket>(hm);
 
   const len = market.outcomeAssets.length;
   for (let i = 0; i < len; i++) {
@@ -748,9 +725,7 @@ export const tokensRedeemed = async (ctx: Ctx, block: SubstrateBlock, item: Even
     account: { accountId: walletId },
     assetId: assetId,
   });
-  if (!ab) {
-    return;
-  }
+  if (!ab) return;
 
   let tHab = await ctx.store.get(HistoricalAccountBalance, {
     where: {

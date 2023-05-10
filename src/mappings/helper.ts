@@ -2,7 +2,7 @@ import { AccountInfo } from '@polkadot/types/interfaces/system';
 import { SubstrateBlock, SubstrateExtrinsic } from '@subsquid/substrate-processor';
 import { Store } from '@subsquid/typeorm-store';
 import { util } from '@zeitgeistpm/sdk';
-import { Account, AccountBalance, HistoricalAccountBalance, MarketStatus, PoolStatus } from '../model';
+import { Account, AccountBalance, HistoricalAccountBalance, MarketEvent, MarketStatus, PoolStatus } from '../model';
 import { EventItem } from '../processor';
 import { PoolStatus as _PoolStatus } from '../types/v41';
 import { Asset, MarketStatus as _MarketStatus } from '../types/v42';
@@ -102,6 +102,33 @@ export const getFees = async (block: SubstrateBlock, extrinsic: SubstrateExtrins
   }
   await (await Cache.init()).setFee(block.hash + id, totalFees.toString());
   return totalFees;
+};
+
+export const getMarketEvent = (eventName: string): MarketEvent => {
+  switch (eventName) {
+    case 'PredictionMarkets.MarketApproved':
+      return MarketEvent.MarketApproved;
+    case 'PredictionMarkets.MarketClosed':
+      return MarketEvent.MarketClosed;
+    case 'PredictionMarkets.MarketCreated':
+      return MarketEvent.MarketCreated;
+    case 'PredictionMarkets.MarketDestroyed':
+      return MarketEvent.MarketDestroyed;
+    case 'PredictionMarkets.MarketDisputed':
+      return MarketEvent.MarketDisputed;
+    case 'PredictionMarkets.MarketExpired':
+      return MarketEvent.MarketExpired;
+    case 'PredictionMarkets.MarketRejected':
+      return MarketEvent.MarketRejected;
+    case 'PredictionMarkets.MarketReported':
+      return MarketEvent.MarketReported;
+    case 'PredictionMarkets.MarketResolved':
+      return MarketEvent.MarketResolved;
+    case 'Swaps.PoolCreate':
+      return MarketEvent.PoolCreate;
+    default:
+      return MarketEvent.MarketCreated;
+  }
 };
 
 export const getMarketStatus = (status: _MarketStatus): MarketStatus => {

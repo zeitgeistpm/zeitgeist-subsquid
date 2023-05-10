@@ -1,5 +1,5 @@
 import { SubstrateBlock } from '@subsquid/substrate-processor';
-import { HistoricalMarket, Market, MarketStatus } from '../../model';
+import { HistoricalMarket, Market, MarketEvent, MarketStatus } from '../../model';
 import { Ctx } from '../../processor';
 
 export const destroyMarkets = async (ctx: Ctx, block: SubstrateBlock) => {
@@ -21,7 +21,7 @@ export const destroyMarkets = async (ctx: Ctx, block: SubstrateBlock) => {
       let hm = new HistoricalMarket();
       hm.id = '0000579140-000000-9634e-' + market.marketId;
       hm.marketId = market.marketId;
-      hm.event = 'MarketDestroyed';
+      hm.event = MarketEvent.MarketDestroyed;
       hm.status = market.status;
       hm.blockNumber = block.height;
       hm.timestamp = new Date(block.timestamp);
