@@ -341,6 +341,8 @@ processor.run(new TypeormDatabase(), async (ctx) => {
               const key = makeKey(hab.accountId, hab.assetId);
               balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
             } else {
+              // Since now Balances.Deposit is always emitted with ParachainStaking.Rewarded
+              // To avoid redundant addition, DepositEvent is being utilised for recording rewards
               const hab = balanceHistory.pop();
               if (hab && hab.event === 'Deposit') {
                 hab.id = item.event.id + hab.id.slice(-6);
