@@ -343,6 +343,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             } else {
               const hab = balanceHistory.pop();
               if (hab && hab.event === 'Deposit') {
+                hab.id = item.event.id + hab.id.slice(-6);
                 hab.event = item.event.name.split('.')[1];
                 balanceHistory.push(hab);
               }
