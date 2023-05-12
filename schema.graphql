@@ -73,8 +73,6 @@ type HistoricalAsset @entity {
   id: ID!
   "Account which executed the trade"
   accountId: String @index
-  "Amount of ZTG which user spent/redeemed for swap trade"
-  ztgTraded: BigInt
   "Amount of base asset which user spent/redeemed for swap trade"
   baseAssetTraded: BigInt
   "Zeitgeist's identifier for asset"
@@ -240,8 +238,6 @@ type Pool @entity {
   volume: BigInt!
   "List of lengths for each asset"
   weights: [Weight]!
-  "Amount of ZTG present in the pool"
-  ztgQty: BigInt!
 }
 
 """
@@ -267,8 +263,6 @@ type HistoricalPool @entity {
   timestamp: DateTime!
   "New updated volume"
   volume: BigInt
-  "New amount of ZTG present in the pool"
-  ztgQty: BigInt
 }
 
 """
@@ -277,9 +271,7 @@ Asset weightage details
 type Weight @jsonField {
   "Zeitgeist's identifier for asset"
   assetId: String!
-  "Length or weight of the asset"
-  len: BigInt!
-  "Length or weight of the asset"
+  "Weight of the asset"
   weight: BigInt!
 }
 
