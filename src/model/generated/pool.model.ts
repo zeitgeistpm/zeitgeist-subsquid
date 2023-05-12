@@ -107,10 +107,4 @@ export class Pool {
      */
     @Column_("jsonb", {transformer: {to: obj => obj.map((val: any) => val == null ? undefined : val.toJSON()), from: obj => obj == null ? undefined : marshal.fromList(obj, val => val == null ? undefined : new Weight(undefined, val))}, nullable: false})
     weights!: (Weight | undefined | null)[]
-
-    /**
-     * Amount of ZTG present in the pool
-     */
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
-    ztgQty!: bigint
 }

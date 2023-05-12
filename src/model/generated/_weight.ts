@@ -6,14 +6,12 @@ import * as marshal from "./marshal"
  */
 export class Weight {
     private _assetId!: string
-    private _len!: bigint
     private _weight!: bigint
 
     constructor(props?: Partial<Omit<Weight, 'toJSON'>>, json?: any) {
         Object.assign(this, props)
         if (json != null) {
             this._assetId = marshal.string.fromJSON(json.assetId)
-            this._len = marshal.bigint.fromJSON(json.len)
             this._weight = marshal.bigint.fromJSON(json.weight)
         }
     }
@@ -31,19 +29,7 @@ export class Weight {
     }
 
     /**
-     * Length or weight of the asset
-     */
-    get len(): bigint {
-        assert(this._len != null, 'uninitialized access')
-        return this._len
-    }
-
-    set len(value: bigint) {
-        this._len = value
-    }
-
-    /**
-     * Length or weight of the asset
+     * Weight of the asset
      */
     get weight(): bigint {
         assert(this._weight != null, 'uninitialized access')
@@ -57,7 +43,6 @@ export class Weight {
     toJSON(): object {
         return {
             assetId: this.assetId,
-            len: marshal.bigint.toJSON(this.len),
             weight: marshal.bigint.toJSON(this.weight),
         }
     }

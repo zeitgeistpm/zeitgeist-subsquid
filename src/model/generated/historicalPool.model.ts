@@ -68,10 +68,4 @@ export class HistoricalPool {
      */
     @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
     volume!: bigint | undefined | null
-
-    /**
-     * New amount of ZTG present in the pool
-     */
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
-    ztgQty!: bigint | undefined | null
 }
