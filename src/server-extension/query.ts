@@ -47,7 +47,7 @@ export const marketParticipants = (ids: number[]) => `
 export const marketLiquidity = (ids: number[]) => `
   SELECT
     m.market_id,
-    COALESCE(ROUND(SUM(a.price*a.amount_in_pool)+p.ztg_qty, 0), 0) AS liquidity
+    COALESCE(ROUND(SUM(a.price*a.amount_in_pool)+p.base_asset_qty, 0), 0) AS liquidity
   FROM
     market m
   LEFT JOIN
@@ -58,7 +58,7 @@ export const marketLiquidity = (ids: number[]) => `
     m.market_id in (${ids})
   GROUP BY
     m.market_id,
-    p.ztg_qty;
+    p.base_asset_qty;
 `;
 
 export const marketInfo = (marketId: number) => `
@@ -84,7 +84,7 @@ export const totalLiquidityAndVolume = () => `
   FROM (
     SELECT
       m.market_id,
-      SUM(a.price*a.amount_in_pool)+p.ztg_qty AS liquidity,
+      SUM(a.price*a.amount_in_pool)+p.base_asset_qty AS liquidity,
       p.volume
     FROM
       market m
@@ -94,7 +94,7 @@ export const totalLiquidityAndVolume = () => `
       pool p ON p.id = m.pool_id
     GROUP BY
       m.market_id,
-      p.ztg_qty,
+      p.base_asset_qty,
       p.volume
   ) AS market_stats;
 `;
