@@ -11,7 +11,6 @@ import {
   balancesBalanceSet,
   balancesDeposit,
   balancesDustLost,
-  balancesEndowed,
   balancesReserved,
   balancesTransfer,
   balancesUnreserved,

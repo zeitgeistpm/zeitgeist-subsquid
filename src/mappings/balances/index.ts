@@ -6,7 +6,6 @@ import {
   getBalanceSetEvent,
   getDepositEvent,
   getDustLostEvent,
-  getEndowedEvent,
   getReservedEvent,
   getSlashedEvent,
   getTransferEvent,
@@ -121,53 +120,6 @@ export const balancesDustLost = async (
   hab.timestamp = new Date(block.timestamp);
 
   return hab;
-};
-
-export const balancesEndowed = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
-  const { walletId, freeBalance } = getEndowedEvent(ctx, item);
-
-  // Since endowed changes have already been cached at balancesDeposit
-  // To be removed post complete disconnection of BalancesEndowedEvent
-  if (
-    walletId === 'dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ' ||
-    walletId === 'dE1hJugxYsvUK6bQDpsF671TCoVVa7LQjZpkG1t22VjAzJRKi' ||
-    walletId === 'dDzAsaUSTQgc3cDwphdcLAt6m4rPFbYUt1a3yPqt1yWDtpWMu' ||
-    walletId === 'dE2jq2Naexf4uajZgwXaZLBGRjTK2YhG7Y9y2jf9515pu6LhA' ||
-    walletId === 'dE3RmcM3Jmqagtr5N5eMvQkUN8AocBy92DDwknqjkmgNHhSkW' ||
-    walletId === 'dE3LKKpquw7id4KFHYGa85vNcHBaKQYkG2d6hCDV7WBaHtQCi'
-  )
-    return;
-
-  let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
-  if (!acc) {
-    acc = new Account();
-    acc.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
-    acc.accountId = walletId;
-    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
-    await ctx.store.save<Account>(acc);
-    await initBalance(acc, ctx.store, block, item);
-  }
-
-  let ab = await ctx.store.findOneBy(AccountBalance, {
-    account: { accountId: walletId },
-    assetId: 'Ztg',
-  });
-  if (ab && ab.balance === BigInt(0)) {
-    ab.balance = ab.balance + freeBalance;
-    console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-    await ctx.store.save<AccountBalance>(ab);
-
-    let hab = new HistoricalAccountBalance();
-    hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
-    hab.accountId = acc.accountId;
-    hab.event = item.event.name.split('.')[1];
-    hab.assetId = ab.assetId;
-    hab.dBalance = freeBalance;
-    hab.blockNumber = block.height;
-    hab.timestamp = new Date(block.timestamp);
-    console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
-    await ctx.store.save<HistoricalAccountBalance>(hab);
-  }
 };
 
 export const balancesReserved = async (
