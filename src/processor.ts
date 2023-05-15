@@ -119,6 +119,7 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Currency.Transferred', eventOptions)
   .addEvent('Currency.Deposited', eventOptions)
   .addEvent('Currency.Withdrawn', eventOptions)
+  .addEvent('ParachainStaking.Rewarded', eventOptions)
   .addEvent('PredictionMarkets.BoughtCompleteSet', eventExtrinsicOptions)
   .addEvent('PredictionMarkets.MarketApproved', eventOptions)
   .addEvent('PredictionMarkets.MarketClosed', eventOptions)
@@ -154,8 +155,6 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Tokens.Withdrawn', eventOptions);
 
 if (process.env.WS_NODE_URL?.includes(`bs`)) {
-  // @ts-ignore
-  processor.addEvent('ParachainStaking.Rewarded', eventRangeOptions);
   // @ts-ignore
   processor.addEvent('System.ExtrinsicFailed', eventRangeOptions);
   // @ts-ignore
@@ -336,12 +335,21 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             balanceHistory.push(hab);
             break;
           }
-          // @ts-ignore
           case 'ParachainStaking.Rewarded': {
-            const hab = await parachainStakingRewarded(ctx, block.header, item);
-            const key = makeKey(hab.accountId, hab.assetId);
-            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-            balanceHistory.push(hab);
+            if (process.env.WS_NODE_URL?.includes(`bs`) && block.header.height < 588249) {
+              const hab = await parachainStakingRewarded(ctx, block.header, item);
+              const key = makeKey(hab.accountId, hab.assetId);
+              balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+            } else {
+              // Since specVersion:33, Balances.Deposit is always emitted with ParachainStaking.Rewarded
+              // To avoid redundant addition, DepositEvent is being utilised for recording rewards
+              const hab = balanceHistory.pop();
+              if (hab && hab.event === 'Deposit') {
+                hab.id = item.event.id + hab.id.slice(-6);
+                hab.event = item.event.name.split('.')[1];
+                balanceHistory.push(hab);
+              }
+            }
             break;
           }
           // @ts-ignore
