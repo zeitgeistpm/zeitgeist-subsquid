@@ -24,12 +24,6 @@ export class HistoricalAsset {
     accountId!: string | undefined | null
 
     /**
-     * Amount of ZTG which user spent/redeemed for swap trade
-     */
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
-    ztgTraded!: bigint | undefined | null
-
-    /**
      * Amount of base asset which user spent/redeemed for swap trade
      */
     @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
