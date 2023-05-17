@@ -5,7 +5,6 @@ import {
   BalancesBalanceSetEvent,
   BalancesDepositEvent,
   BalancesDustLostEvent,
-  BalancesEndowedEvent,
   BalancesReservedEvent,
   BalancesSlashedEvent,
   BalancesTransferEvent,
@@ -62,23 +61,6 @@ export const getDustLostEvent = (ctx: Ctx, item: EventItem): BalancesEvent => {
     const [account, amount] = item.event.args;
     const walletId = encodeAddress(account, 73);
     return { walletId, amount };
-  }
-};
-
-export const getEndowedEvent = (ctx: Ctx, item: EventItem): EndowedEvent => {
-  const event = new BalancesEndowedEvent(ctx, item.event);
-  if (event.isV23) {
-    const [account, freeBalance] = event.asV23;
-    const walletId = ss58.codec('zeitgeist').encode(account);
-    return { walletId, freeBalance };
-  } else if (event.isV34) {
-    const { account, freeBalance } = event.asV34;
-    const walletId = ss58.codec('zeitgeist').encode(account);
-    return { walletId, freeBalance };
-  } else {
-    const [account, freeBalance] = item.event.args;
-    const walletId = encodeAddress(account, 73);
-    return { walletId, freeBalance };
   }
 };
 

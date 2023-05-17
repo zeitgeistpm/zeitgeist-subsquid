@@ -6,7 +6,6 @@
     "Balances.BalanceSet",
     "Balances.Deposit",
     "Balances.DustLost",
-    "Balances.Endowed",
     "Balances.Reserved",
     "Balances.Slashed",
     "Balances.Transfer",
