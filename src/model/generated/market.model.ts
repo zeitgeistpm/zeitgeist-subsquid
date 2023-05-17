@@ -85,6 +85,12 @@ export class Market {
     disputeMechanism!: string
 
     /**
+     * Checks if metadata has valid categories for display on Zeitgeist App
+     */
+    @Column_("bool", {nullable: false})
+    hasValidMetaCategories!: boolean
+
+    /**
      * Unique identifier of the object
      */
     @PrimaryColumn_()
