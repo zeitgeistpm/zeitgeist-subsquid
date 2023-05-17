@@ -143,6 +143,8 @@ type Market @entity {
   disputes: [MarketReport]
   "Can be `Authorized` or `Court` or `SimpleDisputes`"
   disputeMechanism: String!
+  "Checks if metadata has valid categories for display on Zeitgeist App"
+  hasValidMetaCategories: Boolean!
   "Unique identifier of the object"
   id: ID!
   "Image for the market"
