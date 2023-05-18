@@ -67,6 +67,10 @@ import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from 
 import { tokensBalanceSet, tokensDeposited, tokensEndowed, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
 import { AccountBalance, HistoricalAccountBalance } from './model';
 import {
+  resolveMarkets_114289,
+  resolveMarkets_133189,
+  resolveMarkets_134565,
+  resolveMarkets_155917,
   resolveMarkets_164057,
   resolveMarkets_167323,
   resolveMarkets_168378,
@@ -74,6 +78,7 @@ import {
   resolveMarkets_176408,
   resolveMarkets_178290,
   resolveMarkets_179524,
+  resolveMarkets_182096,
   resolveMarkets_184820,
   resolveMarkets_204361,
   resolveMarkets_206797,
@@ -260,8 +265,16 @@ const handlePostHooks = async (ctx: Ctx, block: SubstrateBlock) => {
       return unreserveBalances_92128(ctx, block);
     case 108949:
       return unreserveBalances_108949(ctx, block);
+    case 114289:
+      return resolveMarkets_114289(ctx, block);
+    case 133189:
+      return resolveMarkets_133189(ctx, block);
+    case 134565:
+      return resolveMarkets_134565(ctx, block);
     case 155917:
-      return unreserveBalances_155917(ctx, block);
+      await unreserveBalances_155917(ctx, block);
+      await resolveMarkets_155917(ctx, block);
+      return;
     case 164057:
       return resolveMarkets_164057(ctx, block);
     case 167323:
@@ -286,6 +299,8 @@ const handlePostHooks = async (ctx: Ctx, block: SubstrateBlock) => {
       await unreserveBalances_179524(ctx, block);
       await resolveMarkets_179524(ctx, block);
       return;
+    case 182096:
+      return resolveMarkets_182096(ctx, block);
     case 184820:
       await unreserveBalances_184820(ctx, block);
       await resolveMarkets_184820(ctx, block);
@@ -295,8 +310,7 @@ const handlePostHooks = async (ctx: Ctx, block: SubstrateBlock) => {
       await resolveMarkets_204361(ctx, block);
       return;
     case 206797:
-      await resolveMarkets_206797(ctx, block);
-      return;
+      return resolveMarkets_206797(ctx, block);
     case 211391:
       await unreserveBalances_211391(ctx, block);
       await resolveMarkets_211391(ctx, block);

@@ -13,6 +13,58 @@ import {
 } from '../../model';
 import { Ctx } from '../../processor';
 
+export const resolveMarkets_114289 = async (ctx: Ctx, block: SubstrateBlock) => {
+  await resolveMarket(
+    ctx,
+    block,
+    {
+      id: '0000114289-000000-668e7',
+      name: 'PostHooks.MarketResolved',
+    },
+    97,
+    '1'
+  );
+};
+
+export const resolveMarkets_133189 = async (ctx: Ctx, block: SubstrateBlock) => {
+  await resolveMarket(
+    ctx,
+    block,
+    {
+      id: '0000133189-000000-11b83',
+      name: 'PostHooks.MarketResolved',
+    },
+    150,
+    '1'
+  );
+};
+
+export const resolveMarkets_134565 = async (ctx: Ctx, block: SubstrateBlock) => {
+  await resolveMarket(
+    ctx,
+    block,
+    {
+      id: '0000134565-000000-bb859',
+      name: 'PostHooks.MarketResolved',
+    },
+    149,
+    '1'
+  );
+};
+
+export const resolveMarkets_155917 = async (ctx: Ctx, block: SubstrateBlock) => {
+  await resolveMarket(
+    ctx,
+    block,
+    {
+      id: '0000155917-000000-3f61f',
+      name: 'PostHooks.MarketResolved',
+    },
+    129,
+    '0'
+  );
+};
+
 export const resolveMarkets_164057 = async (ctx: Ctx, block: SubstrateBlock) => {
   await resolveMarket(
     ctx,
@@ -100,6 +152,19 @@ export const resolveMarkets_179524 = async (ctx: Ctx, block: SubstrateBlock) => 
       name: 'PostHooks.MarketResolved',
     },
     22,
+    '1'
+  );
+};
+
+export const resolveMarkets_182096 = async (ctx: Ctx, block: SubstrateBlock) => {
+  await resolveMarket(
+    ctx,
+    block,
+    {
+      id: '0000182096-000000-38a0a',
+      name: 'PostHooks.MarketResolved',
+    },
+    14,
     '1'
   );
 };
