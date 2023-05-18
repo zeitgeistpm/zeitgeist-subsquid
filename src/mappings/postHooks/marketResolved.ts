@@ -39,6 +39,45 @@ export const resolveMarkets_167323 = async (ctx: Ctx, block: SubstrateBlock) => 
   );
 };
 
+export const resolveMarkets_168378 = async (ctx: Ctx, block: SubstrateBlock) => {
+  await resolveMarket(
+    ctx,
+    block,
+    {
+      id: '0000168378-000000-e544d',
+      name: 'PostHooks.MarketResolved',
+    },
+    167,
+    '0'
+  );
+};
+
+export const resolveMarkets_175178 = async (ctx: Ctx, block: SubstrateBlock) => {
+  await resolveMarket(
+    ctx,
+    block,
+    {
+      id: '0000175178-000000-df5fd',
+      name: 'PostHooks.MarketResolved',
+    },
+    155,
+    '0'
+  );
+};
+
+export const resolveMarkets_176408 = async (ctx: Ctx, block: SubstrateBlock) => {
+  await resolveMarket(
+    ctx,
+    block,
+    {
+      id: '0000176408-000000-6059b',
+      name: 'PostHooks.MarketResolved',
+    },
+    56,
+    '2'
+  );
+};
+
 export const resolveMarkets_178290 = async (ctx: Ctx, block: SubstrateBlock) => {
   await resolveMarket(
     ctx,
@@ -48,7 +87,7 @@ export const resolveMarkets_178290 = async (ctx: Ctx, block: SubstrateBlock) => 
       name: 'PostHooks.MarketResolved',
     },
     222,
-    '2'
+    '1'
   );
 };
 

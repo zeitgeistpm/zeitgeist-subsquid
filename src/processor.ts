@@ -69,6 +69,9 @@ import { AccountBalance, HistoricalAccountBalance } from './model';
 import {
   resolveMarkets_164057,
   resolveMarkets_167323,
+  resolveMarkets_168378,
+  resolveMarkets_175178,
+  resolveMarkets_176408,
   resolveMarkets_178290,
   resolveMarkets_179524,
   resolveMarkets_184820,
@@ -264,11 +267,17 @@ const handlePostHooks = async (ctx: Ctx, block: SubstrateBlock) => {
     case 167323:
       return resolveMarkets_167323(ctx, block);
     case 168378:
-      return unreserveBalances_168378(ctx, block);
+      await unreserveBalances_168378(ctx, block);
+      await resolveMarkets_168378(ctx, block);
+      return;
     case 175178:
-      return unreserveBalances_175178(ctx, block);
+      await unreserveBalances_175178(ctx, block);
+      await resolveMarkets_175178(ctx, block);
+      return;
     case 176408:
-      return unreserveBalances_176408(ctx, block);
+      await unreserveBalances_176408(ctx, block);
+      await resolveMarkets_176408(ctx, block);
+      return;
     case 178290:
       await unreserveBalances_178290(ctx, block);
       await resolveMarkets_178290(ctx, block);
