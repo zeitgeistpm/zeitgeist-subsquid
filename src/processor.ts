@@ -66,7 +66,14 @@ import {
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensBalanceSet, tokensDeposited, tokensEndowed, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
 import { AccountBalance, HistoricalAccountBalance } from './model';
-import { resolveMarkets } from './mappings/postHooks/marketResolved';
+import {
+  resolveMarkets_167323,
+  resolveMarkets_178290,
+  resolveMarkets_179524,
+  resolveMarkets_204361,
+  resolveMarkets_206797,
+  resolveMarkets_211391,
+} from './mappings/postHooks/marketResolved';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -250,6 +257,8 @@ const handlePostHooks = async (ctx: Ctx, block: SubstrateBlock) => {
       return unreserveBalances_108949(ctx, block);
     case 155917:
       return unreserveBalances_155917(ctx, block);
+    case 167323:
+      return resolveMarkets_167323(ctx, block);
     case 168378:
       return unreserveBalances_168378(ctx, block);
     case 175178:
@@ -257,17 +266,26 @@ const handlePostHooks = async (ctx: Ctx, block: SubstrateBlock) => {
     case 176408:
       return unreserveBalances_176408(ctx, block);
     case 178290:
-      return unreserveBalances_178290(ctx, block);
+      await unreserveBalances_178290(ctx, block);
+      await resolveMarkets_178290(ctx, block);
+      return;
     case 179524:
-      return unreserveBalances_179524(ctx, block);
+      await unreserveBalances_179524(ctx, block);
+      await resolveMarkets_179524(ctx, block);
+      return;
     case 184820:
       return unreserveBalances_184820(ctx, block);
     case 204361:
       await unreserveBalances_204361(ctx, block);
-      await resolveMarkets(ctx, block);
+      await resolveMarkets_204361(ctx, block);
+      return;
+    case 206797:
+      await resolveMarkets_206797(ctx, block);
       return;
     case 211391:
-      return unreserveBalances_211391(ctx, block);
+      await unreserveBalances_211391(ctx, block);
+      await resolveMarkets_211391(ctx, block);
+      return;
     case 579140:
       return destroyMarkets(ctx, block);
   }
