@@ -67,9 +67,11 @@ import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from 
 import { tokensBalanceSet, tokensDeposited, tokensEndowed, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
 import { AccountBalance, HistoricalAccountBalance } from './model';
 import {
+  resolveMarkets_164057,
   resolveMarkets_167323,
   resolveMarkets_178290,
   resolveMarkets_179524,
+  resolveMarkets_184820,
   resolveMarkets_204361,
   resolveMarkets_206797,
   resolveMarkets_211391,
@@ -257,6 +259,8 @@ const handlePostHooks = async (ctx: Ctx, block: SubstrateBlock) => {
       return unreserveBalances_108949(ctx, block);
     case 155917:
       return unreserveBalances_155917(ctx, block);
+    case 164057:
+      return resolveMarkets_164057(ctx, block);
     case 167323:
       return resolveMarkets_167323(ctx, block);
     case 168378:
@@ -274,7 +278,9 @@ const handlePostHooks = async (ctx: Ctx, block: SubstrateBlock) => {
       await resolveMarkets_179524(ctx, block);
       return;
     case 184820:
-      return unreserveBalances_184820(ctx, block);
+      await unreserveBalances_184820(ctx, block);
+      await resolveMarkets_184820(ctx, block);
+      return;
     case 204361:
       await unreserveBalances_204361(ctx, block);
       await resolveMarkets_204361(ctx, block);
