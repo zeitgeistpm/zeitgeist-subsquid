@@ -66,6 +66,7 @@ import {
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensBalanceSet, tokensDeposited, tokensEndowed, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
 import { AccountBalance, HistoricalAccountBalance } from './model';
+import { resolveMarkets } from './mappings/postHooks/marketResolved';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -262,7 +263,9 @@ const handlePostHooks = async (ctx: Ctx, block: SubstrateBlock) => {
     case 184820:
       return unreserveBalances_184820(ctx, block);
     case 204361:
-      return unreserveBalances_204361(ctx, block);
+      await unreserveBalances_204361(ctx, block);
+      await resolveMarkets(ctx, block);
+      return;
     case 211391:
       return unreserveBalances_211391(ctx, block);
     case 579140:
