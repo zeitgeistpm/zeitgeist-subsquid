@@ -6,23 +6,23 @@ import { createClient } from 'graphql-ws';
 import WebSocket from 'ws';
 import axios from 'axios';
 import { Market } from '../../src/model';
+import Db from './db';
 
 const NODE_URL = process.argv[2];
 const WEBHOOK_URL = process.argv[3];
 const GRAPHQL_WS_URL = NODE_URL.includes(`bs`)
   ? `wss://processor.bsr.zeitgeist.pm/graphql`
   : `wss://processor.rpc-0.zeitgeist.pm/graphql`;
+const CACHE_DB_PATH = `subscribe-db.db`;
 
-const client = createClient({
-  webSocketImpl: WebSocket,
-  url: GRAPHQL_WS_URL,
-});
+const client = createClient({ webSocketImpl: WebSocket, url: GRAPHQL_WS_URL });
+const db = new Db(CACHE_DB_PATH);
 
 client.subscribe(
   {
     query: `
       subscription {
-        markets(where: {status_in: [Closed, Reported, Disputed, Resolved]}, limit: 1, orderBy: marketId_DESC) {
+        markets(where: {status_in: [Closed, Reported, Disputed, Resolved]}) {
           marketId
           question
           status
@@ -31,11 +31,13 @@ client.subscribe(
     `,
   },
   {
-    next: ({ data }) => {
-      const { markets } = data as any;
-      if (markets.length > 0) {
-        console.log(markets[0]);
-        postDiscordAlert(markets[0]);
+    next: async ({ data }) => {
+      const markets = { data } as unknown as Market[];
+      for (let i = 0; i < markets.length; i++) {
+        const entry = await db.getMarketWithId(markets[i].marketId);
+        if (entry && entry.status === markets[i].status) break;
+        postDiscordAlert(markets[i]);
+        await db.saveOrUpdateMarket(markets[i].marketId, markets[i].status);
       }
     },
     error: (error) => {
@@ -48,6 +50,7 @@ client.subscribe(
 );
 
 const postDiscordAlert = async (market: Market) => {
+  console.log(`Posting ${market.status} alert for marketId: ${market.marketId}`);
   await axios.post(WEBHOOK_URL, {
     username: `Market ${market.status} Alert`,
     content: '',
