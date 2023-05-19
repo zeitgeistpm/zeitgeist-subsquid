@@ -229,6 +229,7 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
   }
 
   let isMetaComplete = true;
+  let hasValidMetaCategories = true;
   const metadata = await decodeMarketMetadata(market.metadata.toString());
   if (!metadata) {
     isMetaComplete = false;
@@ -253,7 +254,10 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
         cm.img = metadata.categories[i].img;
         cm.color = metadata.categories[i].color;
         newMarket.categories.push(cm);
-        if (!cm.name) isMetaComplete = false;
+        if (!cm.name) {
+          isMetaComplete = false;
+          hasValidMetaCategories = false;
+        }
       }
     }
 
@@ -265,6 +269,7 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
     }
   }
   newMarket.isMetaComplete = isMetaComplete;
+  newMarket.hasValidMetaCategories = hasValidMetaCategories;
 
   if (market.deadlines) {
     let deadlines = new MarketDeadlines();

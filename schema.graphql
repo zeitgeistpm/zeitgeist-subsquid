@@ -143,6 +143,8 @@ type Market @entity {
   disputes: [MarketReport]
   "Can be `Authorized` or `Court` or `SimpleDisputes`"
   disputeMechanism: String!
+  "Checks if each category has a name for display on UI"
+  hasValidMetaCategories: Boolean!
   "Unique identifier of the object"
   id: ID!
   "Image for the market"
