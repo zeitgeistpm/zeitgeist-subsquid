@@ -1,6 +1,10 @@
 # zeitgeist-subsquid
 
-[Subsquid](https://www.subsquid.io/) is used to index and provide a graphql interface on top of Zeitgeist. 
+[Subsquid](https://www.subsquid.io/) is used to index and provide a graphql interface on top of Zeitgeist.
+
+Dev Processor: https://processor.zeitgeist.pm/graphql
+Testnet Processor: https://processor.bsr.zeitgeist.pm/graphql
+Mainnet Processor: https://processor.rpc-0.zeitgeist.pm/graphql
 
 Click [here](https://processor.zeitgeist.pm/graphql) to start querying on the data available with Zeitgeist.
 
@@ -10,72 +14,65 @@ Types are defined  in  `schema.graphql` file.
 
 The substrate events are processed in a multi-step pipeline:
 
-    Zeitgeist Chain => Hydra Indexer => Indexer GraphQL gateway => Hydra Processor => Database => Query Node GraphQL endpoint
+    Zeitgeist Chain => Subsquid Archive => Archive GraphQL gateway => Subsquid Processor => Database => Query Node GraphQL endpoint
 
-![Bird eye overview](https://docs.subsquid.io/~/files/v0/b/gitbook-28427.appspot.com/o/assets%2F-MdI-MAyz-csivC8mmdb%2Fsync%2Fe587479ff22ad79886861487b2734b6556302d10.png?generation=1624891459661016&alt=media)
 
 ## Prerequisites
 
-* Node v14x
+* Node 16.x
 * Docker
-* Docker compose (https://docs.docker.com/compose/install/)
 
 ## Scripts
 
 ```bash
 # The dependencies setup
-yarn install
+yarn install --frozen-lockfile
 
 # Run fresh development Zeitgeist PM node (accessible from
-# ws://localhost:9944) from docker image and start indexing it
-yarn indexer:start
+# ws://localhost:9944) from docker image and start all subsquid resources
+For Mac users: yarn squid:mac:start
+For Non-mac users: yarn squid:start
 
-# Start services needed for processor
-yarn db:up && yarn redis:up
+# Stop local subsquid docker resources
+yarn squid:stop
+
+# Commands to run testnet processor locally without docker
+
+# Start processor db and redis cache db
+yarn db:up
+
+# Compile processor code
+yarn build
 
 # Processor's database operations
 
-# Create initial project's migration - removes everything under `db/migrations`
-# folder if existing and creates initial migration
-# Will reset database with db:reset
-yarn db:create-migration
+# Removes all existing migrations under `db/migrations` folde
+rm -r db/migrations
+
+# Creates initial migration
+yarn migration:create
 
 # Drop database
-yarn db:drop
-
-# Create database
-yarn db:create
-
-# Reset the processor database (db:drop and db:create scripts are ran sequentially)
-yarn db:reset
+yarn db:down
 
 # Run existing migrations onto database
-yarn db:migrate
+yarn migration:apply
 
-# Now you can start processing chain data
-yarn processor:resume
+# Now you can start processing test chain data
+REDIS_HOST=localhost DB_HOST=localhost NODE_ENV=test node lib/processor.js
 
-# If `yarn indexer:start` is used for indexer, processor is started this way
-# Will override following environment variables:
-#  - WS_NODE_URL
-#  - IPFS_CLIENT_URL
-#  - INDEXER_ENDPOINT_URL
-yarn processor:local:start
-
-# Following will start services for processor, reset database, run migrations and start processor (testnet only)
-yarn processor:start
-
-# The above command will block
 # Open a separate terminal and launch the graphql server to query the processed data
-yarn query-node:start
+yarn api:start
+
+# Stop query-node
+yarn api:stop
 ```
 
 ## Project structure
 
-Hydra tools expect a certain directory layout:
+Subsquid tools expect a certain directory layout:
 
-* `generated` - model/server definitions created by `codegen`. Do not alter the contents of this directory manually.
-* `.env` - hydra tools are heavily driven by environment variables defined here or supplied by a shell.
+* `generated` - model/generated definitions created by `yarn codegen`. Do not alter the contents of this directory manually.
 
 ## Important environment variables (.env file)
 
