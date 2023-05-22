@@ -41,7 +41,7 @@ yarn squid:start
 
 ### Using testnet node (wss://bsr.zeitgeist.pm)
 
-#### 1. Start processor db and redis cache db
+#### 1. Start processor services
 
 ```bash
 yarn db:up
@@ -95,7 +95,7 @@ yarn archive:start
 # Stop local indexer
 yarn archive:stop
 
-# Generate necessary entity classes based on definitions at `schema.graphql`
+# Generate necessary entity classes based on definitions at schema.graphql
 yarn codegen
 
 # Stop local processor services
@@ -114,6 +114,6 @@ yarn processor:stop
 # Stop local subsquid running on docker
 yarn squid:stop
 
-# Generate types for events defined at `typegen.json`
+# Generate types for events defined at typegen.json
 yarn typegen
 ```
