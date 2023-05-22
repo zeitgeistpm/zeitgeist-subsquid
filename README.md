@@ -117,3 +117,8 @@ yarn squid:stop
 # Generate types for events defined at typegen.json
 yarn typegen
 ```
+
+
+## Misc
+
+For more details, please check out https://docs.zeitgeist.pm & https://docs.subsquid.io.
