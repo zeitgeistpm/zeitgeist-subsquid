@@ -3,6 +3,7 @@ Types are defined  in  `schema.graphql` file.
 
 
 ## Zeitgeist's Self-Hosted Squids
+
 * Dev Processor: https://processor.zeitgeist.pm/graphql
 * Testnet Processor: https://processor.bsr.zeitgeist.pm/graphql
 * Mainnet Processor: https://processor.rpc-0.zeitgeist.pm/graphql
@@ -12,7 +13,7 @@ Types are defined  in  `schema.graphql` file.
 
 The substrate events are processed in a multi-step pipeline:
 
-    Zeitgeist Chain => Subsquid Archive => Archive GraphQL gateway => Subsquid Processor => Database => Query Node GraphQL endpoint
+    Zeitgeist Chain => Subsquid Archive => Archive GraphQL Gateway => Subsquid Processor => Query Node API
 
 
 ## Prerequisites
@@ -66,13 +67,19 @@ yarn api:start
 yarn api:stop
 ```
 
+
 ## Project Structure
 
 Subsquid tools expect a certain directory layout:
 
-* `generated` - model/generated definitions created by `yarn codegen`. Do not alter the contents of this directory manually.
+* `src/generated` - model/server definitions created by `codegen`. Do not alter the contents of this directory manually.
+* `src/server-extension` - module with custom `type-graphql` based resolvers
+* `src/types` - data type definitions for chain events and extrinsics created by `typegen`.
+* `src/mappings` - mapping module.
+* `lib` - compiled js files. The structure of this directory must reflect `src`.
 
-## Important Environment Variables (.env file)
+If you do not plan to extend GraphQl server you can delete `server-extension` module and then remove 
+`type-graphql` and `class-validator` dependencies.
 
 
 ## Development Flow
