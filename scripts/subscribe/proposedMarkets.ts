@@ -44,7 +44,7 @@ client.subscribe(
       const m = markets as Market[];
       for (let i = 0; i < m.length; i++) {
         const entry = await db.getMarketWithId(m[i].marketId);
-        if (entry && entry.status === m[i].status) break;
+        if (entry && entry.status === m[i].status) continue;
         postDiscordAlert(m[i]);
         await db.saveOrUpdateMarket(m[i].marketId, m[i].status);
       }
