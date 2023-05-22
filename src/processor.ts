@@ -66,6 +66,7 @@ import {
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensBalanceSet, tokensDeposited, tokensEndowed, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
 import { AccountBalance, HistoricalAccountBalance } from './model';
+import { resolveMarket } from './mappings/postHooks/marketResolved';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -243,28 +244,68 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
 
 const handlePostHooks = async (ctx: Ctx, block: SubstrateBlock) => {
   switch (block.height) {
+    case 72589:
+      return resolveMarket(ctx, block, '0000072589-000000-55dfd', 1, '0');
+    case 72601:
+      return resolveMarket(ctx, block, '0000072601-000000-9be06', 2, '2');
+    case 72609:
+      return resolveMarket(ctx, block, '0000072609-000000-1fc2b', 3, '2');
+    case 78711:
+      return resolveMarket(ctx, block, '0000078711-000000-637a0', 4, '1');
     case 92128:
       return unreserveBalances_92128(ctx, block);
     case 108949:
       return unreserveBalances_108949(ctx, block);
+    case 114289:
+      return resolveMarket(ctx, block, '0000114289-000000-668e7', 97, '1');
+    case 133189:
+      return resolveMarket(ctx, block, '0000133189-000000-11b83', 150, '1');
+    case 134565:
+      return resolveMarket(ctx, block, '0000134565-000000-bb859', 149, '1');
     case 155917:
-      return unreserveBalances_155917(ctx, block);
+      await unreserveBalances_155917(ctx, block);
+      await resolveMarket(ctx, block, '0000155917-000000-3f61f', 129, '0');
+      return;
+    case 164057:
+      return resolveMarket(ctx, block, '0000164057-000000-6c01e', 169, '1');
+    case 167323:
+      return resolveMarket(ctx, block, '0000167323-000000-04acf', 224, '2');
     case 168378:
-      return unreserveBalances_168378(ctx, block);
+      await unreserveBalances_168378(ctx, block);
+      await resolveMarket(ctx, block, '0000168378-000000-e544d', 167, '0');
+      return;
     case 175178:
-      return unreserveBalances_175178(ctx, block);
+      await unreserveBalances_175178(ctx, block);
+      await resolveMarket(ctx, block, '0000175178-000000-df5fd', 155, '0');
+      return;
     case 176408:
-      return unreserveBalances_176408(ctx, block);
+      await unreserveBalances_176408(ctx, block);
+      await resolveMarket(ctx, block, '0000176408-000000-6059b', 56, '2');
+      return;
     case 178290:
-      return unreserveBalances_178290(ctx, block);
+      await unreserveBalances_178290(ctx, block);
+      await resolveMarket(ctx, block, '0000178290-000000-58224', 222, '1');
+      return;
     case 179524:
-      return unreserveBalances_179524(ctx, block);
+      await unreserveBalances_179524(ctx, block);
+      await resolveMarket(ctx, block, '0000179524-000000-79a82', 22, '1');
+      return;
+    case 182096:
+      return resolveMarket(ctx, block, '0000182096-000000-38a0a', 14, '1');
     case 184820:
-      return unreserveBalances_184820(ctx, block);
+      await unreserveBalances_184820(ctx, block);
+      await resolveMarket(ctx, block, '0000184820-000000-d843f', 15, '1');
+      return;
     case 204361:
-      return unreserveBalances_204361(ctx, block);
+      await unreserveBalances_204361(ctx, block);
+      await resolveMarket(ctx, block, '0000204361-000000-e6cc2', 176, '0');
+      return;
+    case 206797:
+      return resolveMarket(ctx, block, '0000206797-000000-c79df', 264, '1');
     case 211391:
-      return unreserveBalances_211391(ctx, block);
+      await unreserveBalances_211391(ctx, block);
+      await resolveMarket(ctx, block, '0000211391-000000-f8b9f', 317, '1');
+      return;
     case 579140:
       return destroyMarkets(ctx, block);
   }
