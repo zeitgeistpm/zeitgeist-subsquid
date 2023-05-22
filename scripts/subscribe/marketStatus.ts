@@ -32,12 +32,13 @@ client.subscribe(
   },
   {
     next: async ({ data }) => {
-      const markets = { data } as unknown as Market[];
-      for (let i = 0; i < markets.length; i++) {
-        const entry = await db.getMarketWithId(markets[i].marketId);
-        if (entry && entry.status === markets[i].status) break;
-        postDiscordAlert(markets[i]);
-        await db.saveOrUpdateMarket(markets[i].marketId, markets[i].status);
+      const { markets } = data as any;
+      const m = markets as Market[];
+      for (let i = 0; i < m.length; i++) {
+        const entry = await db.getMarketWithId(m[i].marketId);
+        if (entry && entry.status === m[i].status) continue;
+        postDiscordAlert(m[i]);
+        await db.saveOrUpdateMarket(m[i].marketId, m[i].status);
       }
     },
     error: (error) => {
