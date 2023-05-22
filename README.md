@@ -1,13 +1,12 @@
-# zeitgeist-subsquid
-
 [Subsquid](https://www.subsquid.io/) is used to index and provide a graphql interface on top of Zeitgeist.
+Types are defined  in  `schema.graphql` file.
 
-## To start hovering over Zeitgeist's self-hosted squids
+
+## Zeitgeist's Self-Hosted Squids
 * Dev Processor: https://processor.zeitgeist.pm/graphql
 * Testnet Processor: https://processor.bsr.zeitgeist.pm/graphql
 * Mainnet Processor: https://processor.rpc-0.zeitgeist.pm/graphql
 
-Types are defined  in  `schema.graphql` file.
 
 ## Concept
 
@@ -67,13 +66,13 @@ yarn api:start
 yarn api:stop
 ```
 
-## Project structure
+## Project Structure
 
 Subsquid tools expect a certain directory layout:
 
 * `generated` - model/generated definitions created by `yarn codegen`. Do not alter the contents of this directory manually.
 
-## Important environment variables (.env file)
+## Important Environment Variables (.env file)
 
 - WS_NODE_URL - Url of the Substrate node for indexing (default: wss://bsr.zeitgeist.pm).
 - INDEXER_ENDPOINT_URL - Url for indexer graphql api to be processed (default: https://indexer.zeitgeist.pm/v1/graphql).
@@ -81,7 +80,7 @@ Subsquid tools expect a certain directory layout:
 
 Those three environment variables are overriden when running `yarn processor:local:start` with urls for services provided by docker.
 
-## Development flow
+## Development Flow
 
 If you modified `schema.graphql`:
 
