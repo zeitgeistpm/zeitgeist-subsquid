@@ -2,11 +2,10 @@
 
 [Subsquid](https://www.subsquid.io/) is used to index and provide a graphql interface on top of Zeitgeist.
 
-Dev Processor: https://processor.zeitgeist.pm/graphql
-Testnet Processor: https://processor.bsr.zeitgeist.pm/graphql
-Mainnet Processor: https://processor.rpc-0.zeitgeist.pm/graphql
-
-Click [here](https://processor.zeitgeist.pm/graphql) to start querying on the data available with Zeitgeist.
+## To start hovering over Zeitgeist's self-hosted squids
+* Dev Processor: https://processor.zeitgeist.pm/graphql
+* Testnet Processor: https://processor.bsr.zeitgeist.pm/graphql
+* Mainnet Processor: https://processor.rpc-0.zeitgeist.pm/graphql
 
 Types are defined  in  `schema.graphql` file.
 
