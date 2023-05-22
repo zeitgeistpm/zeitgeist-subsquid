@@ -1,5 +1,4 @@
 [Subsquid](https://www.subsquid.io/) is used to index and provide a graphql interface on top of Zeitgeist.
-Types are defined  in  `schema.graphql` file.
 
 
 ## Zeitgeist's Self-Hosted Squids
