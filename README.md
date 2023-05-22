@@ -21,50 +21,54 @@ The substrate events are processed in a multi-step pipeline:
 * Node 16.x
 * Docker
 
-## Scripts
+
+## Quick Run
 
 ```bash
 # The dependencies setup
 yarn install --frozen-lockfile
+```
 
-# Run fresh development Zeitgeist PM node (accessible from
-# ws://localhost:9944) from docker image and start all subsquid resources
-For Mac users: yarn squid:mac:start
-For Non-mac users: yarn squid:start
+### Using local node (ws://localhost:9944)
 
-# Stop local subsquid docker resources
-yarn squid:stop
+```bash
+# For mac users
+yarn squid:mac:start
 
-# Commands to run testnet processor locally without docker
+# For non-mac users
+yarn squid:start
+```
 
-# Start processor db and redis cache db
+### Using testnet node (wss://bsr.zeitgeist.pm)
+
+#### 1. Start processor db and redis cache db
+
+```bash
 yarn db:up
+```
 
-# Compile processor code
+#### 2. Compile processor code
+
+```bash
 yarn build
+```
 
-# Processor's database operations
+#### 3. Run existing migrations onto database
 
-# Removes all existing migrations under `db/migrations` folde
-rm -r db/migrations
-
-# Creates initial migration
-yarn migration:create
-
-# Drop database
-yarn db:down
-
-# Run existing migrations onto database
+```bash
 yarn migration:apply
+```
 
-# Now you can start processing test chain data
+#### 5. Start processing test chain data
+
+```bash
 REDIS_HOST=localhost DB_HOST=localhost NODE_ENV=test node lib/processor.js
+```
 
-# Open a separate terminal and launch the graphql server to query the processed data
+#### 6. Open a separate terminal and launch the graphql server to query the processed data
+
+```bash
 yarn api:start
-
-# Stop query-node
-yarn api:stop
 ```
 
 
