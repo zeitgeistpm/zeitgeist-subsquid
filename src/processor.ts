@@ -246,6 +246,8 @@ const handlePostHooks = async (ctx: Ctx, block: SubstrateBlock) => {
   switch (block.height) {
     case 35683:
       return resolveMarket(ctx, block, 21, '0');
+    case 49326:
+      return resolveMarket(ctx, block, 60, '1');
     case 72589:
       return resolveMarket(ctx, block, 1, '0');
     case 72601:
@@ -256,6 +258,8 @@ const handlePostHooks = async (ctx: Ctx, block: SubstrateBlock) => {
       return resolveMarket(ctx, block, 4, '1');
     case 92128:
       return unreserveBalances_92128(ctx, block);
+    case 93884:
+      return resolveMarket(ctx, block, 23, '0');
     case 108949:
       return unreserveBalances_108949(ctx, block);
     case 122186:
