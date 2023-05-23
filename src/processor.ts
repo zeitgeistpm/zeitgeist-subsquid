@@ -256,6 +256,8 @@ const handlePostHooks = async (ctx: Ctx, block: SubstrateBlock) => {
       return unreserveBalances_92128(ctx, block);
     case 108949:
       return unreserveBalances_108949(ctx, block);
+    case 122186:
+      return resolveMarket(ctx, block, '0000122186-000000-c9487', 5, '1');
     case 114289:
       return resolveMarket(ctx, block, '0000114289-000000-668e7', 97, '1');
     case 133189:
@@ -274,6 +276,8 @@ const handlePostHooks = async (ctx: Ctx, block: SubstrateBlock) => {
       await unreserveBalances_168378(ctx, block);
       await resolveMarket(ctx, block, '0000168378-000000-e544d', 167, '0');
       return;
+    case 168726:
+      return resolveMarket(ctx, block, '0000168726-000000-4c325', 7, '0');
     case 175178:
       await unreserveBalances_175178(ctx, block);
       await resolveMarket(ctx, block, '0000175178-000000-df5fd', 155, '0');
