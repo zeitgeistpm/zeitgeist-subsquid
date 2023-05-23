@@ -22,7 +22,7 @@ client.subscribe(
   {
     query: `
       subscription {
-        markets(where: {status_eq: Proposed}, orderBy: marketId_DESC) {
+        markets(where: {status_eq: Proposed}) {
           description
           marketId
           marketType {
@@ -41,11 +41,12 @@ client.subscribe(
   {
     next: async ({ data }) => {
       const { markets } = data as any;
-      for (let i = 0; i < markets.length; i++) {
-        const entry = await db.getMarketWithId(markets[i].marketId);
-        if (entry) break;
-        postDiscordAlert(markets[i]);
-        await db.saveOrUpdateMarket(markets[i].marketId, Date.now());
+      const m = markets as Market[];
+      for (let i = 0; i < m.length; i++) {
+        const entry = await db.getMarketWithId(m[i].marketId);
+        if (entry && entry.status === m[i].status) continue;
+        postDiscordAlert(m[i]);
+        await db.saveOrUpdateMarket(m[i].marketId, m[i].status);
       }
     },
     error: (error) => {
@@ -58,7 +59,7 @@ client.subscribe(
 );
 
 const postDiscordAlert = async (market: Market) => {
-  console.log(`Posting alert for market: ${JSON.stringify(market, null, 2)}`);
+  console.log(`Posting ${market.status} alert for marketId: ${market.marketId}`);
   await axios.post(WEBHOOK_URL, {
     username: 'Market Proposed Alert',
     content: '',
