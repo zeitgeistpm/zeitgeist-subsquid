@@ -28,6 +28,7 @@ import {
   getMarketEvent,
   getMarketStatus,
   rescale,
+  specVersion,
 } from '../helper';
 import { Tools } from '../util';
 import {
@@ -51,10 +52,7 @@ export const boughtCompleteSet = async (ctx: Ctx, block: SubstrateBlock, item: E
   const { marketId, amount, walletId } = getBoughtCompleteSetEvent(ctx, item);
 
   const market = await ctx.store.get(Market, { where: { marketId: marketId } });
-  if (!market) return;
-
-  const specVersion = +block.specId.substring(block.specId.indexOf('@') + 1);
-  if (specVersion > 35) return;
+  if (!market || specVersion(block.specId) > 35) return;
 
   const len = market.outcomeAssets.length;
   for (let i = 0; i < len; i++) {
@@ -169,8 +167,7 @@ export const marketClosed = async (ctx: Ctx, block: SubstrateBlock, item: EventI
 };
 
 export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
-  const specVersion = +block.specId.substring(block.specId.indexOf('@') + 1);
-  const { marketId, marketAccountId, market } = getMarketCreatedEvent(ctx, item, specVersion);
+  const { marketId, marketAccountId, market } = getMarketCreatedEvent(ctx, item, specVersion(block.specId));
 
   if (marketAccountId.length > 0) {
     let acc = await ctx.store.findOneBy(Account, {
@@ -285,7 +282,7 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
     marketType.categorical = type.value.toString();
   } else if (type.__kind == 'Scalar') {
     marketType.scalar = [];
-    if (specVersion < 41) {
+    if (specVersion(block.specId) < 41) {
       if (type.value.start) {
         marketType.scalar.push(rescale(type.value.start.toString()));
         marketType.scalar.push(rescale(type.value.end.toString()));
@@ -538,12 +535,13 @@ export const marketReported = async (ctx: Ctx, block: SubstrateBlock, item: Even
 
 export const marketResolved = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
   const { marketId, status, report } = getMarketResolvedEvent(ctx, item);
-  const specVersion = +block.specId.substring(block.specId.indexOf('@') + 1);
 
   const market = await ctx.store.get(Market, { where: { marketId: marketId } });
   if (!market) return;
   market.resolvedOutcome =
-    market.marketType.scalar && specVersion < 41 ? rescale(report.value.toString()) : report.value.toString();
+    market.marketType.scalar && specVersion(block.specId) < 41
+      ? rescale(report.value.toString())
+      : report.value.toString();
   market.status = status ? getMarketStatus(status) : MarketStatus.Resolved;
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
@@ -579,7 +577,7 @@ export const marketResolved = async (ctx: Ctx, block: SubstrateBlock, item: Even
       }
     } else {
       newPrice = i == +market.resolvedOutcome ? 1 : 0;
-      if (specVersion < 40) {
+      if (specVersion(block.specId) < 40) {
         newAssetQty = i == +market.resolvedOutcome ? oldAssetQty : BigInt(0);
       }
     }
@@ -614,7 +612,7 @@ export const marketResolved = async (ctx: Ctx, block: SubstrateBlock, item: Even
 
         const oldBalance = ab.balance;
 
-        if (market.marketType.categorical && specVersion < 40) {
+        if (market.marketType.categorical && specVersion(block.specId) < 40) {
           ab.balance = i == +market.resolvedOutcome! ? ab.balance : BigInt(0);
         }
         console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
