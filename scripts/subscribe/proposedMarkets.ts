@@ -34,6 +34,7 @@ client.subscribe(
             start
           }
           question
+          status
         }
       }  
     `,
