@@ -1,135 +1,123 @@
-# zeitgeist-subsquid
+[Subsquid](https://www.subsquid.io/) is used to index, process and query on top of Zeitgeist.
 
-[Subsquid](https://www.subsquid.io/) is used to index and provide a graphql interface on top of Zeitgeist. 
 
-Click [here](https://processor.zeitgeist.pm/graphql) to start querying on the data available with Zeitgeist.
+## Zeitgeist's Self-Hosted Squids
 
-Types are defined  in  `schema.graphql` file.
+* Dev Processor: https://processor.zeitgeist.pm/graphql
+* Testnet Processor: https://processor.bsr.zeitgeist.pm/graphql
+* Mainnet Processor: https://processor.rpc-0.zeitgeist.pm/graphql
+
 
 ## Concept
 
 The substrate events are processed in a multi-step pipeline:
 
-    Zeitgeist Chain => Hydra Indexer => Indexer GraphQL gateway => Hydra Processor => Database => Query Node GraphQL endpoint
+    Zeitgeist Chain => Subsquid Archive => Archive GraphQL Gateway => Subsquid Processor => Query Node API
 
-![Bird eye overview](https://docs.subsquid.io/~/files/v0/b/gitbook-28427.appspot.com/o/assets%2F-MdI-MAyz-csivC8mmdb%2Fsync%2Fe587479ff22ad79886861487b2734b6556302d10.png?generation=1624891459661016&alt=media)
 
 ## Prerequisites
 
-* Node v14x
+* Node 16.x
 * Docker
-* Docker compose (https://docs.docker.com/compose/install/)
+
+
+## Quick Run
+
+```bash
+# The dependencies setup
+yarn install --frozen-lockfile
+```
+
+### Using local node (ws://localhost:9944)
+
+```bash
+# For mac users
+yarn squid:mac:start
+
+# For non-mac users
+yarn squid:start
+```
+
+### Using testnet node (wss://bsr.zeitgeist.pm)
+
+#### 1. Start processor services
+
+```bash
+yarn db:up
+```
+
+#### 2. Compile processor code
+
+```bash
+yarn build
+```
+
+#### 3. Run existing migrations onto database
+
+```bash
+yarn migration:apply
+```
+
+#### 5. Start processing test chain data
+
+```bash
+REDIS_HOST=localhost DB_HOST=localhost NODE_ENV=test node lib/processor.js
+```
+
+#### 6. Open a separate terminal and launch the graphql server to query the processed data
+
+```bash
+yarn api:start
+```
+
+
+## Project Structure
+
+Subsquid tools expect a certain directory layout:
+
+* `src/generated` - model/server definitions created by `codegen`. Do not alter the contents of this directory manually.
+* `src/server-extension` - module with custom `type-graphql` based resolvers
+* `src/types` - data type definitions for chain events and extrinsics created by `typegen`.
+* `src/mappings` - mapping module.
+* `lib` - compiled js files. The structure of this directory must reflect `src`.
+  
 
 ## Scripts
 
 ```bash
-# The dependencies setup
-yarn install
+# Stop query-node
+yarn api:stop
 
-# Run fresh development Zeitgeist PM node (accessible from
-# ws://localhost:9944) from docker image and start indexing it
-yarn indexer:start
+# Index data from local node
+yarn archive:start
 
-# Start services needed for processor
-yarn db:up && yarn redis:up
+# Stop local indexer
+yarn archive:stop
 
-# Processor's database operations
-
-# Create initial project's migration - removes everything under `db/migrations`
-# folder if existing and creates initial migration
-# Will reset database with db:reset
-yarn db:create-migration
-
-# Drop database
-yarn db:drop
-
-# Create database
-yarn db:create
-
-# Reset the processor database (db:drop and db:create scripts are ran sequentially)
-yarn db:reset
-
-# Run existing migrations onto database
-yarn db:migrate
-
-# Now you can start processing chain data
-yarn processor:resume
-
-# If `yarn indexer:start` is used for indexer, processor is started this way
-# Will override following environment variables:
-#  - WS_NODE_URL
-#  - IPFS_CLIENT_URL
-#  - INDEXER_ENDPOINT_URL
-yarn processor:local:start
-
-# Following will start services for processor, reset database, run migrations and start processor (testnet only)
-yarn processor:start
-
-# The above command will block
-# Open a separate terminal and launch the graphql server to query the processed data
-yarn query-node:start
-```
-
-## Project structure
-
-Hydra tools expect a certain directory layout:
-
-* `generated` - model/server definitions created by `codegen`. Do not alter the contents of this directory manually.
-* `.env` - hydra tools are heavily driven by environment variables defined here or supplied by a shell.
-
-## Important environment variables (.env file)
-
-- WS_NODE_URL - Url of the Substrate node for indexing (default: wss://bsr.zeitgeist.pm).
-- INDEXER_ENDPOINT_URL - Url for indexer graphql api to be processed (default: https://indexer.zeitgeist.pm/v1/graphql).
-- IPFS_CLIENT_URL - Shouldn't be manually set most of the time. Used for development / local environment.
-
-Those three environment variables are overriden when running `yarn processor:local:start` with urls for services provided by docker.
-
-## Development flow
-
-If you modified `schema.graphql`:
-
-```bash
-# Run codegen to re-generate model/server files
+# Generate necessary entity classes based on definitions at schema.graphql
 yarn codegen
 
-# Analyze database state and create a new migration to match generated models
-yarn db:create-migration # add -n "myName" to skip the migration name prompt
+# Stop local processor services
+yarn db:down
 
-# Apply the migrations
-yarn db:migrate
-```
+# Generate migration to match the target schema
+# The target schema is derived from entity classes generated earlier
+yarn migration:generate
 
-You might want update the `Initial` migration instead of creating a new one (e.g. during the development phase when the production database is not yet set up). In that case it convenient to reset the database schema and start afresh:
+# Revert the last performed migration
+yarn migration:revert
 
-```bash
-yarn db:reset
-yarn db:create-migration
-yarn db:migrate
-```
+# Stop local processor
+yarn processor:stop
 
-To generate new type definitions for chain events and extrinsics:
+# Stop local subsquid running on docker
+yarn squid:stop
 
-```bash
-# Review typegen section of manifest.yml (https://docs.subsquid.io/hydra-typegen)
-
-# Delete old definitions
-rm -rf chain
-
-# Run typegen tool
+# Generate types for events defined at typegen.json
 yarn typegen
 ```
 
-## Configuration
 
-Project's configuration is driven by environment variables, defined in `.env`,
-and `manifest.yml`. For more details see https://docs.subsquid.io.
+## Misc
 
-## Indexer
-
-Running an indexer is required. The indexer can be found in the [indexer folder](./indexer).
-
-It is recommeded to use already set up indexer if available, as new indexer typically
-requires some time to catch up with interesting events.
-
-Have a look at `./indexer/docker-compose.yml` for example of how you can set up a self-hosted version.
+For more details, please check out https://docs.zeitgeist.pm & https://docs.subsquid.io.
