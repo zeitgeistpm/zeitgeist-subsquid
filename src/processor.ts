@@ -67,6 +67,7 @@ import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from 
 import { tokensBalanceSet, tokensDeposited, tokensEndowed, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
 import { AccountBalance, HistoricalAccountBalance } from './model';
 import { resolveMarket } from './mappings/postHooks/marketResolved';
+import { specVersion } from './mappings/helper';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -376,16 +377,11 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             break;
           }
           case 'ParachainStaking.Rewarded': {
-            if (process.env.WS_NODE_URL?.includes(`bs`) && block.header.height < 588249) {
+            if (specVersion(block.header.specId) < 33) {
               const hab = await parachainStakingRewarded(ctx, block.header, item);
               const key = makeKey(hab.accountId, hab.assetId);
               balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-              break;
-            }
-            if (!process.env.WS_NODE_URL?.includes(`bs`) && block.header.height < 174108) {
-              const hab = await parachainStakingRewarded(ctx, block.header, item);
-              const key = makeKey(hab.accountId, hab.assetId);
-              balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+              balanceHistory.push(hab);
               break;
             }
             // Since specVersion:33, Balances.Deposit is always emitted with ParachainStaking.Rewarded
