@@ -13,14 +13,10 @@ import {
 } from '../../model';
 import { Ctx } from '../../processor';
 
-export const resolveMarket = async (
-  ctx: Ctx,
-  block: SubstrateBlock,
-  eventId: string,
-  marketId: number,
-  resolvedOutcome: string
-) => {
+export const resolveMarket = async (ctx: Ctx, block: SubstrateBlock, marketId: number, resolvedOutcome: string) => {
   const eventName = 'PostHooks.MarketResolved';
+  const eventId = block.id.slice(0, 11) + '000000' + block.id.slice(-6);
+
   const market = await ctx.store.get(Market, { where: { marketId: marketId } });
   if (!market) return;
   market.resolvedOutcome = resolvedOutcome;
