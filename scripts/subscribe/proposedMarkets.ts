@@ -4,7 +4,7 @@
  */
 import { createClient } from 'graphql-ws';
 import WebSocket from 'ws';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import Db from './db';
 import { Market } from '../../src/model';
 
@@ -46,8 +46,10 @@ client.subscribe(
       for (let i = 0; i < m.length; i++) {
         const entry = await db.getMarketWithId(m[i].marketId);
         if (entry && entry.status === m[i].status) continue;
-        postDiscordAlert(m[i]);
-        await db.saveOrUpdateMarket(m[i].marketId, m[i].status);
+        const res = await postDiscordAlert(m[i]);
+        if (res && res.status === 204) {
+          await db.saveOrUpdateMarket(m[i].marketId, m[i].status);
+        }
       }
     },
     error: (error) => {
