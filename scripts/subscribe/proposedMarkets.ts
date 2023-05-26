@@ -4,7 +4,7 @@
  */
 import { createClient } from 'graphql-ws';
 import WebSocket from 'ws';
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import Db from './db';
 import { Market } from '../../src/model';
 
@@ -46,8 +46,8 @@ client.subscribe(
       for (let i = 0; i < m.length; i++) {
         const entry = await db.getMarketWithId(m[i].marketId);
         if (entry && entry.status === m[i].status) continue;
-        const res = await postDiscordAlert(m[i]);
-        if (res && res.status === 204) {
+        const status = await postDiscordAlert(m[i]);
+        if (status && status === 204) {
           await db.saveOrUpdateMarket(m[i].marketId, m[i].status);
         }
       }
@@ -61,7 +61,7 @@ client.subscribe(
   }
 );
 
-const postDiscordAlert = async (market: Market): Promise<AxiosResponse<any, any> | undefined> => {
+const postDiscordAlert = async (market: Market): Promise<number | undefined> => {
   console.log(`Posting ${market.status} alert for marketId: ${market.marketId}`);
   try {
     const res = await axios.post(WEBHOOK_URL, {
@@ -93,7 +93,7 @@ const postDiscordAlert = async (market: Market): Promise<AxiosResponse<any, any>
         },
       ],
     });
-    return res;
+    return res.status;
   } catch (err) {
     console.error(`Error while posting discord alert: ${err}`);
     return;
