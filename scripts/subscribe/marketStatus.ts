@@ -68,7 +68,7 @@ const postDiscordAlert = async (market: Market): Promise<number | undefined> => 
     });
     return res.status;
   } catch (err) {
-    console.error(`Error while posting discord alert: ${err}`);
+    console.error(`Error while posting discord alert for ${market.marketId}: ${err}`);
     return;
   }
 };
