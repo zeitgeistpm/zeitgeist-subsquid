@@ -53,10 +53,10 @@ client.subscribe(
       }
     },
     error: (error) => {
-      console.error('error', error);
+      console.error(`Error while subscribing to query: ${error}`);
     },
     complete: () => {
-      console.log('done!');
+      console.log('Subscription complete!');
     },
   }
 );
