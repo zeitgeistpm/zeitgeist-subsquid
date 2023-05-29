@@ -656,10 +656,12 @@ export const marketStartedWithSubsidy = async (ctx: Ctx, block: SubstrateBlock, 
 };
 
 export const redeemShares = async (ctx: Ctx, block: SubstrateBlock, call: CallItem) => {
-  const { marketId } = getRedeemSharesCall(ctx, call);
+  // @ts-ignore
+  if (!call.origin || call.origin.value) return;
   // @ts-ignore
   const walletId = encodeAddress(call.origin.value.value, 73);
 
+  const { marketId } = getRedeemSharesCall(ctx, call);
   let market = await ctx.store.get(Market, { where: { marketId: marketId } });
   if (!market) return;
 
