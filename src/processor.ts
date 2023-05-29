@@ -363,9 +363,12 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   for (let block of ctx.blocks) {
     for (let item of block.items) {
       // @ts-ignore
-      if (item.kind === 'call' && item.name === 'PredictionMarkets.redeem_shares') {
+      if (item.kind === 'call' && item.call.success) {
         // @ts-ignore
-        await redeemShares(ctx, block.header, item.call);
+        if (item.name === 'PredictionMarkets.redeem_shares') {
+          // @ts-ignore
+          await redeemShares(ctx, block.header, item.call);
+        }
       }
 
       if (item.kind === 'event') {
