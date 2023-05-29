@@ -1,11 +1,15 @@
 import {
   BatchContext,
+  BatchProcessorCallItem,
   BatchProcessorEventItem,
   BatchProcessorItem,
   SubstrateBatchProcessor,
   SubstrateBlock,
 } from '@subsquid/substrate-processor';
-import { EventItem as _EventItem } from '@subsquid/substrate-processor/lib/interfaces/dataSelection';
+import {
+  CallItem as _CallItem,
+  EventItem as _EventItem,
+} from '@subsquid/substrate-processor/lib/interfaces/dataSelection';
 import { Store, TypeormDatabase } from '@subsquid/typeorm-store';
 import {
   balancesBalanceSet,
@@ -45,6 +49,7 @@ import {
   marketReported,
   marketResolved,
   marketStartedWithSubsidy,
+  redeemShares,
   soldCompleteSet,
   tokensRedeemed,
 } from './mappings/predictionMarkets';
@@ -157,6 +162,15 @@ const processor = new SubstrateBatchProcessor()
 
 if (process.env.WS_NODE_URL?.includes(`bs`)) {
   // @ts-ignore
+  processor.addCall('PredictionMarkets.redeem_shares', {
+    range: { from: 0, to: 1089818 },
+    data: {
+      call: {
+        args: true,
+      },
+    },
+  });
+  // @ts-ignore
   processor.addEvent('System.ExtrinsicFailed', eventRangeOptions);
   // @ts-ignore
   processor.addEvent('System.ExtrinsicSuccess', eventRangeOptions);
@@ -164,6 +178,7 @@ if (process.env.WS_NODE_URL?.includes(`bs`)) {
 
 export type Item = BatchProcessorItem<typeof processor>;
 export type Ctx = BatchContext<Store, Item>;
+export type CallItem = Exclude<BatchProcessorCallItem<typeof processor>, _CallItem<'*', false>>;
 export type EventItem = Exclude<BatchProcessorEventItem<typeof processor>, _EventItem<'*', false>>;
 
 const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
@@ -347,6 +362,12 @@ processor.run(new TypeormDatabase(), async (ctx) => {
 
   for (let block of ctx.blocks) {
     for (let item of block.items) {
+      // @ts-ignore
+      if (item.kind === 'call' && item.name === 'PredictionMarkets.redeem_shares') {
+        // @ts-ignore
+        await redeemShares(ctx, block.header, item.call);
+      }
+
       if (item.kind === 'event') {
         switch (item.name) {
           case 'Balances.BalanceSet': {
