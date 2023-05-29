@@ -212,6 +212,10 @@ export const rescale = (value: string): string => {
   return (BigInt(value) * BigInt(10 ** 10)).toString();
 };
 
+export const specVersion = (specId: string): number => {
+  return +specId.substring(specId.indexOf('@') + 1);
+};
+
 interface DecodedMarketMetadata {
   slug: string;
   question: string;
