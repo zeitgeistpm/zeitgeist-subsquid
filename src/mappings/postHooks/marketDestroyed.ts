@@ -27,6 +27,36 @@ export const destroyMarkets = async (ctx: Ctx, block: SubstrateBlock) => {
       hm.timestamp = new Date(block.timestamp);
       console.log(`[postHooks.destroyMarkets] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
       await ctx.store.save<HistoricalMarket>(hm);
+
+      for (let i = 0; i < market.outcomeAssets.length; i++) {
+        const abs = await ctx.store.find(AccountBalance, {
+          where: { assetId: market.outcomeAssets[i]! },
+        });
+        await Promise.all(
+          abs.map(async (ab) => {
+            const keyword = ab.id.substring(ab.id.lastIndexOf('-') + 1, ab.id.length);
+            const acc = await ctx.store.get(Account, {
+              where: { id: Like(`%${keyword}%`) },
+            });
+            if (!acc || ab.balance === BigInt(0)) return;
+            const oldBalance = ab.balance;
+            ab.balance = BigInt(0);
+            console.log(`[${eventName}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
+            await ctx.store.save<AccountBalance>(ab);
+
+            const hab = new HistoricalAccountBalance();
+            hab.id = eventId + '-' + acc.accountId.substring(acc.accountId.length - 5);
+            hab.accountId = acc.accountId;
+            hab.event = eventName.split('.')[1];
+            hab.assetId = ab.assetId;
+            hab.dBalance = ab.balance - oldBalance;
+            hab.blockNumber = block.height;
+            hab.timestamp = new Date(block.timestamp);
+            console.log(`[${eventName}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
+            await ctx.store.save<HistoricalAccountBalance>(hab);
+          })
+        );
+      }
     })
   );
 };
