@@ -37,30 +37,38 @@ client.subscribe(
       for (let i = 0; i < m.length; i++) {
         const entry = await db.getMarketWithId(m[i].marketId);
         if (entry && entry.status === m[i].status) continue;
-        postDiscordAlert(m[i]);
-        await db.saveOrUpdateMarket(m[i].marketId, m[i].status);
+        const status = await postDiscordAlert(m[i]);
+        if (status && status === 204) {
+          await db.saveOrUpdateMarket(m[i].marketId, m[i].status);
+        }
       }
     },
     error: (error) => {
-      console.error('error', error);
+      console.error(`Error while subscribing to query: ${error}`);
     },
     complete: () => {
-      console.log('done!');
+      console.log('Subscription complete!');
     },
   }
 );
 
-const postDiscordAlert = async (market: Market) => {
+const postDiscordAlert = async (market: Market): Promise<number | undefined> => {
   console.log(`Posting ${market.status} alert for marketId: ${market.marketId}`);
-  await axios.post(WEBHOOK_URL, {
-    username: `Market ${market.status} Alert`,
-    content: '',
-    embeds: [
-      {
-        color: '11584734',
-        title: market.question,
-        url: `https://app.zeitgeist.pm/markets/${market.marketId}`,
-      },
-    ],
-  });
+  try {
+    const res = await axios.post(WEBHOOK_URL, {
+      username: `Market ${market.status} Alert`,
+      content: '',
+      embeds: [
+        {
+          color: '11584734',
+          title: market.question,
+          url: `https://app.zeitgeist.pm/markets/${market.marketId}`,
+        },
+      ],
+    });
+    return res.status;
+  } catch (err) {
+    console.error(`Error while posting discord alert for ${market.marketId}: ${err}`);
+    return;
+  }
 };
