@@ -657,7 +657,8 @@ export const marketStartedWithSubsidy = async (ctx: Ctx, block: SubstrateBlock, 
 
 export const redeemShares = async (ctx: Ctx, block: SubstrateBlock, item: any) => {
   // @ts-ignore
-  const accountId = item.call.origin !== undefined ? item.call.origin.value : item.extrinsic.signature.address.value;
+  const accountId =
+    item.call.origin !== undefined ? item.call.origin.value.value : item.extrinsic.signature.address.value;
   const walletId = encodeAddress(accountId, 73);
   // @ts-ignore
   const { marketId } = getRedeemSharesCall(ctx, item.call);
