@@ -1,6 +1,7 @@
 import { encodeAddress } from '@polkadot/keyring';
 import * as ss58 from '@subsquid/ss58';
-import { Ctx, EventItem } from '../../processor';
+import { CallItem, Ctx, EventItem } from '../../processor';
+import { PredictionMarketsRedeemSharesCall } from '../../types/calls';
 import {
   PredictionMarketsBoughtCompleteSetEvent,
   PredictionMarketsMarketApprovedEvent,
@@ -237,6 +238,18 @@ export const getMarketStartedWithSubsidyEvent = (ctx: Ctx, item: EventItem): Mar
   }
 };
 
+export const getRedeemSharesCall = (ctx: Ctx, call: CallItem): RedeemSharesCall => {
+  const redeemSharesCall = new PredictionMarketsRedeemSharesCall(ctx, call);
+  if (redeemSharesCall.isV23) {
+    const marketId = Number(redeemSharesCall.asV23.marketId);
+    return { marketId };
+  } else {
+    // @ts-ignore
+    const marketId = Number(call.args.marketId);
+    return { marketId };
+  }
+};
+
 export const getSoldCompleteSetEvent = (ctx: Ctx, item: EventItem): SoldCompleteSetEvent => {
   const event = new PredictionMarketsSoldCompleteSetEvent(ctx, item.event);
   if (event.isV23) {
@@ -333,6 +346,10 @@ interface MarketResolvedEvent {
 interface MarketSubsidyEvent {
   marketId: number;
   status?: MarketStatus;
+}
+
+interface RedeemSharesCall {
+  marketId: number;
 }
 
 interface SoldCompleteSetEvent {
