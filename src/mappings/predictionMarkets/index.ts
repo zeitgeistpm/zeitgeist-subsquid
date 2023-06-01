@@ -3,7 +3,7 @@ import { SubstrateBlock } from '@subsquid/substrate-processor';
 import * as ss58 from '@subsquid/ss58';
 import { util } from '@zeitgeistpm/sdk';
 import { Like } from 'typeorm';
-import { CallItem, Ctx, EventItem } from '../../processor';
+import { Ctx, EventItem } from '../../processor';
 import {
   Account,
   AccountBalance,
@@ -653,13 +653,13 @@ export const marketStartedWithSubsidy = async (ctx: Ctx, block: SubstrateBlock, 
   await ctx.store.save<HistoricalMarket>(hm);
 };
 
-export const redeemShares = async (ctx: Ctx, block: SubstrateBlock, call: CallItem) => {
+export const redeemShares = async (ctx: Ctx, block: SubstrateBlock, item: any) => {
   // @ts-ignore
-  if (!call.origin || !call.origin.value) return;
+  const accountId =
+    item.call.origin !== undefined ? item.call.origin.value.value : item.extrinsic.signature.address.value;
+  const walletId = encodeAddress(accountId, 73);
   // @ts-ignore
-  const walletId = encodeAddress(call.origin.value.value, 73);
-
-  const { marketId } = getRedeemSharesCall(ctx, call);
+  const { marketId } = getRedeemSharesCall(ctx, item.call);
   let market = await ctx.store.get(Market, { where: { marketId: marketId } });
   if (!market) return;
 
@@ -673,21 +673,21 @@ export const redeemShares = async (ctx: Ctx, block: SubstrateBlock, call: CallIt
   const newBalance = BigInt(0);
   ab.balance = newBalance;
   // @ts-ignore
-  console.log(`[${call.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
+  console.log(`[${item.call.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
   await ctx.store.save<AccountBalance>(ab);
 
   let hab = new HistoricalAccountBalance();
   // @ts-ignore
-  hab.id = call.id + '-' + walletId.substring(walletId.length - 5);
+  hab.id = item.call.id + '-' + walletId.substring(walletId.length - 5);
   hab.accountId = walletId;
   // @ts-ignore
-  hab.event = call.name.split('.')[1];
+  hab.event = item.call.name.split('.')[1];
   hab.assetId = ab.assetId;
   hab.dBalance = newBalance - oldBalance;
   hab.blockNumber = block.height;
   hab.timestamp = new Date(block.timestamp);
   // @ts-ignore
-  console.log(`[${call.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
+  console.log(`[${item.call.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
   await ctx.store.save<HistoricalAccountBalance>(hab);
 };
 
