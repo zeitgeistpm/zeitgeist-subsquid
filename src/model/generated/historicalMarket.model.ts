@@ -1,5 +1,7 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_} from "typeorm"
+import * as marshal from "./marshal"
 import {MarketEvent} from "./_marketEvent"
+import {OutcomeReport} from "./_outcomeReport"
 import {MarketStatus} from "./_marketStatus"
 
 /**
@@ -22,6 +24,12 @@ export class HistoricalMarket {
     blockNumber!: number
 
     /**
+     * The account that reported or disputed
+     */
+    @Column_("text", {nullable: true})
+    by!: string | undefined | null
+
+    /**
      * Event method which initiated this change
      */
     @Column_("varchar", {length: 15, nullable: false})
@@ -38,6 +46,12 @@ export class HistoricalMarket {
      */
     @Column_("int4", {nullable: true})
     poolId!: number | undefined | null
+
+    /**
+     * Reported or disputed outcome for the market
+     */
+    @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new OutcomeReport(undefined, obj)}, nullable: true})
+    outcome!: OutcomeReport | undefined | null
 
     /**
      * Latest resolved outcome
