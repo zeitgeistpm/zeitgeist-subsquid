@@ -367,7 +367,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
         // @ts-ignore
         if (item.name === 'PredictionMarkets.redeem_shares') {
           // @ts-ignore
-          await redeemShares(ctx, block.header, item.call);
+          await redeemShares(ctx, block.header, item);
         }
       }
 
