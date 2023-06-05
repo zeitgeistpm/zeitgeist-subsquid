@@ -25,6 +25,7 @@ import {
 import {
   createAssetsForMarket,
   decodeMarketMetadata,
+  formatMarketCreation,
   getAssetId,
   getMarketEvent,
   getMarketStatus,
@@ -213,7 +214,7 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
   newMarket.marketId = +marketId;
   newMarket.baseAsset = market.baseAsset ? getAssetId(market.baseAsset) : 'Ztg';
   newMarket.creator = encodeAddress(market.creator, 73);
-  newMarket.creation = market.creation.__kind;
+  newMarket.creation = formatMarketCreation(market.creation);
   newMarket.creatorFee = +market.creatorFee.toString();
   newMarket.oracle = encodeAddress(market.oracle, 73);
   newMarket.scoringRule = market.scoringRule.__kind;

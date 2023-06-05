@@ -2,10 +2,18 @@ import { AccountInfo } from '@polkadot/types/interfaces/system';
 import { SubstrateBlock, SubstrateExtrinsic } from '@subsquid/substrate-processor';
 import { Store } from '@subsquid/typeorm-store';
 import { util } from '@zeitgeistpm/sdk';
-import { Account, AccountBalance, HistoricalAccountBalance, MarketEvent, MarketStatus, PoolStatus } from '../model';
+import {
+  Account,
+  AccountBalance,
+  HistoricalAccountBalance,
+  MarketCreation,
+  MarketEvent,
+  MarketStatus,
+  PoolStatus,
+} from '../model';
 import { EventItem } from '../processor';
 import { PoolStatus as _PoolStatus } from '../types/v41';
-import { Asset, MarketStatus as _MarketStatus } from '../types/v42';
+import { Asset, MarketCreation as _MarketCreation, MarketStatus as _MarketStatus } from '../types/v42';
 import { Cache, IPFS, Tools } from './util';
 
 export const calcSpotPrice = (
@@ -56,6 +64,15 @@ export const decodeMarketMetadata = async (metadata: string): Promise<DecodedMar
       }
       return undefined;
     }
+  }
+};
+
+export const formatMarketCreation = (creation: _MarketCreation): MarketCreation => {
+  switch (creation.__kind) {
+    case 'Advised':
+      return MarketCreation.Advised;
+    case 'Permissionless':
+      return MarketCreation.Permissionless;
   }
 };
 
