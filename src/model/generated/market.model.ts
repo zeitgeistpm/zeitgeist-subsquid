@@ -2,6 +2,7 @@ import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, I
 import * as marshal from "./marshal"
 import {MarketBonds} from "./_marketBonds"
 import {CategoryMetadata} from "./_categoryMetadata"
+import {MarketCreation} from "./_marketCreation"
 import {MarketDeadlines} from "./_marketDeadlines"
 import {MarketReport} from "./_marketReport"
 import {MarketType} from "./_marketType"
@@ -45,8 +46,8 @@ export class Market {
     /**
      * Can be `Permissionless` or `Advised`
      */
-    @Column_("text", {nullable: false})
-    creation!: string
+    @Column_("varchar", {length: 14, nullable: false})
+    creation!: MarketCreation
 
     /**
      * Account address of the market creator
