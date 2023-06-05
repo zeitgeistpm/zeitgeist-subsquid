@@ -130,7 +130,7 @@ type Market @entity {
   "Share details"
   categories: [CategoryMetadata]
   "Can be `Permissionless` or `Advised`"
-  creation: String!
+  creation: MarketCreation!
   "Account address of the market creator"
   creator: String!
   "The creator's fee"
@@ -384,6 +384,14 @@ type MarketDisputeMechanism @jsonField {
   court: Boolean
   "True if mechanism is simple-disputes else null"
   simpleDisputes: Boolean
+}
+
+"""
+Market's creation options
+"""
+enum MarketCreation {
+  Advised
+  Permissionless
 }
 
 """
