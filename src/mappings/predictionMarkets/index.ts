@@ -564,6 +564,10 @@ export const marketResolved = async (ctx: Ctx, block: SubstrateBlock, item: Even
       ? rescale(report.value.toString())
       : report.value.toString();
   market.status = status ? getMarketStatus(status) : MarketStatus.Resolved;
+  if (market.bonds) {
+    if (market.creation === MarketCreation.Permissionless) market.bonds.creation.isSettled = true;
+    market.bonds.oracle.isSettled = true;
+  }
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
 
