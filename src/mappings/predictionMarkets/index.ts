@@ -369,6 +369,10 @@ export const marketDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Eve
   let market = await ctx.store.get(Market, { where: { marketId: marketId } });
   if (!market) return;
   market.status = MarketStatus.Destroyed;
+  if (market.bonds) {
+    if (market.creation === MarketCreation.Permissionless) market.bonds.creation.isSettled = true;
+    market.bonds.oracle.isSettled = true;
+  }
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
 
