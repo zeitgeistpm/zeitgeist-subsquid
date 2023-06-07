@@ -497,14 +497,17 @@ export const marketInsufficientSubsidy = async (ctx: Ctx, block: SubstrateBlock,
 export const marketRejected = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
   const { marketId, reason } = getMarketRejectedEvent(ctx, item);
 
-  let market = await ctx.store.get(Market, { where: { marketId: marketId } });
+  const market = await ctx.store.get(Market, { where: { marketId: marketId } });
   if (!market) return;
   market.status = MarketStatus.Rejected;
   market.rejectReason = reason.toString();
+  if (market.bonds && market.creation === MarketCreation.Advised) {
+    market.bonds.creation.isSettled = true;
+  }
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
 
-  let hm = new HistoricalMarket();
+  const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + market.marketId;
   hm.marketId = market.marketId;
   hm.status = market.status;
