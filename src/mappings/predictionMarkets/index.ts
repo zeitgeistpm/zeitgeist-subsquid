@@ -454,13 +454,16 @@ export const marketDisputed = async (ctx: Ctx, block: SubstrateBlock, item: Even
 export const marketExpired = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
   const { marketId } = getMarketExpiredEvent(ctx, item);
 
-  let market = await ctx.store.get(Market, { where: { marketId: marketId } });
+  const market = await ctx.store.get(Market, { where: { marketId: marketId } });
   if (!market) return;
   market.status = MarketStatus.Expired;
+  if (market.bonds && market.creation === MarketCreation.Advised) {
+    market.bonds.creation.isSettled = true;
+  }
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
 
-  let hm = new HistoricalMarket();
+  const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + market.marketId;
   hm.marketId = market.marketId;
   hm.status = market.status;
