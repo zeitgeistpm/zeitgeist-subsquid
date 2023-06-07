@@ -15,6 +15,7 @@ import {
   Market,
   MarketBond,
   MarketBonds,
+  MarketCreation,
   MarketDeadlines,
   MarketPeriod,
   MarketReport,
@@ -128,17 +129,20 @@ export const boughtCompleteSet = async (ctx: Ctx, block: SubstrateBlock, item: E
 export const marketApproved = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
   const { marketId, status } = getMarketApprovedEvent(ctx, item);
 
-  let market = await ctx.store.get(Market, { where: { marketId: marketId } });
+  const market = await ctx.store.get(Market, { where: { marketId: marketId } });
   if (!market) return;
   market.status = status
     ? getMarketStatus(status)
     : market.scoringRule === 'CPMM'
     ? MarketStatus.Active
     : MarketStatus.CollectingSubsidy;
+  if (market.bonds && market.creation === MarketCreation.Advised) {
+    market.bonds.creation.isSettled = true;
+  }
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
 
-  let hm = new HistoricalMarket();
+  const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + market.marketId;
   hm.marketId = market.marketId;
   hm.status = market.status;
