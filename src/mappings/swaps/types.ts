@@ -1,6 +1,7 @@
 import { encodeAddress } from '@polkadot/keyring';
 import * as ss58 from '@subsquid/ss58';
-import { Ctx, EventItem } from '../../processor';
+import { CallItem, Ctx, EventItem } from '../../processor';
+import { SwapsPoolExitCall } from '../../types/calls';
 import {
   SwapsArbitrageBuyBurnEvent,
   SwapsArbitrageMintSellEvent,
@@ -110,6 +111,21 @@ export const getPoolDestroyedEvent = (ctx: Ctx, item: EventItem): PoolEvent => {
   } else {
     const [poolId] = item.event.args;
     return { poolId };
+  }
+};
+
+export const getPoolExitCall = (ctx: Ctx, call: CallItem): PoolExitCall => {
+  const poolExitCall = new SwapsPoolExitCall(ctx, call);
+  if (poolExitCall.isV23) {
+    const poolId = Number(poolExitCall.asV23.poolId);
+    const poolAmount = poolExitCall.asV23.poolAmount;
+    return { poolId, poolAmount };
+  } else {
+    // @ts-ignore
+    const poolId = Number(poolExitCall.args.poolId);
+    // @ts-ignore
+    const poolAmount = poolExitCall.args.poolAmount;
+    return { poolId, poolAmount };
   }
 };
 
@@ -305,6 +321,11 @@ interface PoolJoinEvent {
 interface ExactAssetAmountEvent {
   pae: PoolAssetEvent;
   walletId: string;
+}
+
+interface PoolExitCall {
+  poolId: number;
+  poolAmount: bigint;
 }
 
 interface PoolExitEvent {
