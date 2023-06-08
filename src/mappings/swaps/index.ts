@@ -577,6 +577,10 @@ export const poolExit = async (ctx: Ctx, block: SubstrateBlock, item: EventItem)
   }
 };
 
+/**
+ * This handler is used to debit pool shares from an account
+ * When the account exits the pool via call `Swaps.pool_exit`
+ */
 export const poolExitCall = async (ctx: Ctx, block: SubstrateBlock, item: any) => {
   // @ts-ignore
   const accountId =
@@ -597,7 +601,8 @@ export const poolExitCall = async (ctx: Ctx, block: SubstrateBlock, item: any) =
   });
   if (!ab) return;
   const oldBalance = ab.balance;
-  const newBalance = ab.balance - poolAmount > BigInt(0) ? ab.balance - poolAmount : BigInt(0);
+  // Balance is fully debited only if it is less than the amount seeked
+  const newBalance = ab.balance > poolAmount ? ab.balance - poolAmount : BigInt(0);
   ab.balance = newBalance;
   console.log(`[${item.call.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
   await ctx.store.save<AccountBalance>(ab);
