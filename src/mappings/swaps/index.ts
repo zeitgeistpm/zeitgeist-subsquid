@@ -597,7 +597,7 @@ export const poolExitCall = async (ctx: Ctx, block: SubstrateBlock, item: any) =
   });
   if (!ab) return;
   const oldBalance = ab.balance;
-  const newBalance = ab.balance - poolAmount;
+  const newBalance = BigInt(0);
   ab.balance = newBalance;
   console.log(`[${item.call.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
   await ctx.store.save<AccountBalance>(ab);
