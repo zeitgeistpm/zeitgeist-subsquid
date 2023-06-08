@@ -459,6 +459,7 @@ export const marketExpired = async (ctx: Ctx, block: SubstrateBlock, item: Event
   market.status = MarketStatus.Expired;
   if (market.bonds && market.creation === MarketCreation.Advised) {
     market.bonds.creation.isSettled = true;
+    market.bonds.oracle.isSettled = true;
   }
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
@@ -503,6 +504,7 @@ export const marketRejected = async (ctx: Ctx, block: SubstrateBlock, item: Even
   market.rejectReason = reason.toString();
   if (market.bonds && market.creation === MarketCreation.Advised) {
     market.bonds.creation.isSettled = true;
+    market.bonds.oracle.isSettled = true;
   }
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
