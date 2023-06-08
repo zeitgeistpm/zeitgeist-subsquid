@@ -1,5 +1,7 @@
+import { encodeAddress } from '@polkadot/keyring';
 import { SubstrateBlock } from '@subsquid/substrate-processor';
 import * as ss58 from '@subsquid/ss58';
+import { util } from '@zeitgeistpm/sdk';
 import { Like } from 'typeorm/find-options/operator/Like';
 import {
   Account,
@@ -24,6 +26,7 @@ import {
   getPoolClosedEvent,
   getPoolCreateEvent,
   getPoolDestroyedEvent,
+  getPoolExitCall,
   getPoolExitEvent,
   getPoolExitWithExactAssetAmountEvent,
   getPoolJoinEvent,
@@ -572,6 +575,43 @@ export const poolExit = async (ctx: Ctx, block: SubstrateBlock, item: EventItem)
       })
     );
   }
+};
+
+export const poolExitCall = async (ctx: Ctx, block: SubstrateBlock, item: any) => {
+  // @ts-ignore
+  const accountId =
+    item.call.origin !== undefined ? item.call.origin.value.value : item.extrinsic.signature.address.value;
+  const walletId = encodeAddress(accountId, 73);
+  // @ts-ignore
+  const { poolId, poolAmount } = getPoolExitCall(ctx, item.call);
+
+  let pool = await ctx.store.get(Pool, {
+    where: { poolId: poolId },
+  });
+  if (!pool) return;
+
+  const assetId = JSON.stringify(util.AssetIdFromString('pool' + poolId));
+  const ab = await ctx.store.findOneBy(AccountBalance, {
+    account: { accountId: walletId },
+    assetId: assetId,
+  });
+  if (!ab) return;
+  const oldBalance = ab.balance;
+  const newBalance = ab.balance - poolAmount;
+  ab.balance = newBalance;
+  console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
+  await ctx.store.save<AccountBalance>(ab);
+
+  let hab = new HistoricalAccountBalance();
+  hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
+  hab.accountId = walletId;
+  hab.event = item.event.name.split('.')[1];
+  hab.assetId = ab.assetId;
+  hab.dBalance = newBalance - oldBalance;
+  hab.blockNumber = block.height;
+  hab.timestamp = new Date(block.timestamp);
+  console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
+  await ctx.store.save<HistoricalAccountBalance>(hab);
 };
 
 export const poolExitWithExactAssetAmount = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
