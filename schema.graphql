@@ -288,9 +288,9 @@ creating DAOs, and other parts of the protocol.
 """
 type MarketBonds @jsonField {
   "Bond associated with creation of markets"
-  creation: MarketBond
+  creation: MarketBond!
   "Bond associated with oracle selection"
-  oracle: MarketBond
+  oracle: MarketBond!
 }
 
 """
