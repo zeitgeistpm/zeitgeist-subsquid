@@ -51,5 +51,5 @@
     "Tokens.Transfer",
     "Tokens.Withdrawn"
   ],
-  "calls": ["PredictionMarkets.redeem_shares"]
+  "calls": ["PredictionMarkets.redeem_shares", "Swaps.pool_exit"]
 }
