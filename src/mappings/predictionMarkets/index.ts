@@ -86,7 +86,11 @@ export const boughtCompleteSet = async (ctx: Ctx, block: SubstrateBlock, item: E
         }
       }
     }
-  } else {
+  }
+
+  if (amt === BigInt(0)) {
+    // Setting it as default for cases where amount hasn't been retained from event or extrinsic
+    // This has been noticed for PredictionMarketsCreateCpmmMarketAndDeployAssetsCall on testnet before specVersion:34
     amt = BigInt(1000000000000);
   }
 
