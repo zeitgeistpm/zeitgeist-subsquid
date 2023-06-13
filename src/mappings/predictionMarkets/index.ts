@@ -107,7 +107,7 @@ export const boughtCompleteSet = async (ctx: Ctx, block: SubstrateBlock, item: E
     });
     if (!ab) {
       ab = new AccountBalance();
-      ab.id = item.event.id + '-' + walletId.substring(walletId.length - 5) + '-' + marketId + i;
+      ab.id = item.event.id + '-' + marketId + i + '-' + walletId.substring(walletId.length - 5);
       ab.account = acc;
       ab.assetId = assetId;
       ab.balance = amt;
@@ -120,7 +120,7 @@ export const boughtCompleteSet = async (ctx: Ctx, block: SubstrateBlock, item: E
     }
 
     const hab = new HistoricalAccountBalance();
-    hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5) + '-' + marketId + i;
+    hab.id = item.event.id + '-' + marketId + i + '-' + walletId.substring(walletId.length - 5);
     hab.accountId = walletId;
     hab.event = item.event.name.split('.')[1];
     hab.assetId = ab.assetId;
