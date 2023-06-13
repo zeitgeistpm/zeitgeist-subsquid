@@ -157,7 +157,6 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('System.NewAccount', eventOptions)
   .addEvent('Tokens.BalanceSet', eventOptions)
   .addEvent('Tokens.Deposited', eventOptions)
-  .addEvent('Tokens.Endowed', eventOptions)
   .addEvent('Tokens.Transfer', eventOptions)
   .addEvent('Tokens.Withdrawn', eventOptions);
 
@@ -249,8 +248,6 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
       return tokensBalanceSet(ctx, block, item);
     case 'Tokens.Deposited':
       return tokensDeposited(ctx, block, item);
-    case 'Tokens.Endowed':
-      return tokensEndowed(ctx, block, item);
     case 'Tokens.Transfer':
       return tokensTransfer(ctx, block, item);
     case 'Tokens.Withdrawn':
