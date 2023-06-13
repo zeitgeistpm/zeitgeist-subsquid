@@ -86,8 +86,9 @@ export const boughtCompleteSet = async (ctx: Ctx, block: SubstrateBlock, item: E
         }
       }
     }
+  } else {
+    amt = BigInt(1000000000000);
   }
-  if (amt === BigInt(0)) return;
 
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
   if (!acc) {
