@@ -22,26 +22,17 @@ export const currencyDeposited = async (ctx: Ctx, block: SubstrateBlock, item: E
     assetId: assetId,
   });
   if (!ab) {
-    return;
-  }
-
-  let eHab = await ctx.store.get(HistoricalAccountBalance, {
-    where: {
-      accountId: acc.accountId,
-      assetId: assetId,
-      event: 'Endowed',
-      blockNumber: block.height,
-    },
-  });
-  if (!eHab) {
-    ab.balance = ab.balance + amount;
+    ab = new AccountBalance();
+    ab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
+    ab.account = acc;
+    ab.assetId = assetId;
+    ab.balance = amount;
     console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
     await ctx.store.save<AccountBalance>(ab);
   } else {
-    eHab.event = eHab.event.concat(item.event.name.split('.')[1]);
-    console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(eHab, null, 2)}`);
-    await ctx.store.save<HistoricalAccountBalance>(eHab);
-    return;
+    ab.balance = ab.balance + amount;
+    console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
+    await ctx.store.save<AccountBalance>(ab);
   }
 
   let hab = new HistoricalAccountBalance();
