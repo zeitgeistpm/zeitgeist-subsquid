@@ -114,26 +114,17 @@ export const currencyTransferred = async (ctx: Ctx, block: SubstrateBlock, item:
     assetId: assetId,
   });
   if (!toAb) {
-    return;
-  }
-
-  let hab = await ctx.store.get(HistoricalAccountBalance, {
-    where: {
-      accountId: toAcc.accountId,
-      assetId: assetId,
-      event: 'Endowed',
-      blockNumber: block.height,
-    },
-  });
-  if (!hab) {
-    toAb.balance = toAb.balance + amount;
+    toAb = new AccountBalance();
+    toAb.id = item.event.id + '-' + toId.substring(toId.length - 5);
+    toAb.account = toAcc;
+    toAb.assetId = assetId;
+    toAb.balance = amount;
     console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(toAb, null, 2)}`);
     await ctx.store.save<AccountBalance>(toAb);
   } else {
-    hab.event = hab.event.concat(item.event.name.split('.')[1]);
-    console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
-    await ctx.store.save<HistoricalAccountBalance>(hab);
-    return;
+    toAb.balance = toAb.balance + amount;
+    console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(toAb, null, 2)}`);
+    await ctx.store.save<AccountBalance>(toAb);
   }
 
   let toHab = new HistoricalAccountBalance();
