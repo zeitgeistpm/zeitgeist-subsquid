@@ -5,7 +5,6 @@ import { initBalance } from '../helper';
 import {
   getTokensBalanceSetEvent,
   getTokensDepositedEvent,
-  getTokensEndowedEvent,
   getTokensTransferEvent,
   getTokensWithdrawnEvent,
 } from './types';
@@ -85,64 +84,6 @@ export const tokensDeposited = async (ctx: Ctx, block: SubstrateBlock, item: Eve
   hab.dBalance = amount;
   hab.blockNumber = block.height;
   hab.timestamp = new Date(block.timestamp);
-  console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
-  await ctx.store.save<HistoricalAccountBalance>(hab);
-};
-
-export const tokensEndowed = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
-  const { assetId, walletId, amount } = getTokensEndowedEvent(ctx, item);
-
-  let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
-  if (!acc) {
-    acc = new Account();
-    acc.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
-    acc.accountId = walletId;
-    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
-    await ctx.store.save<Account>(acc);
-    await initBalance(acc, ctx.store, block, item);
-  }
-
-  let ab = await ctx.store.findOneBy(AccountBalance, {
-    account: { accountId: walletId },
-    assetId: assetId,
-  });
-  if (!ab) {
-    const asset = await ctx.store.get(Asset, { where: { assetId: assetId } });
-
-    ab = new AccountBalance();
-    ab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
-    ab.account = acc;
-    ab.assetId = assetId;
-    ab.balance = amount;
-    console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-    await ctx.store.save<AccountBalance>(ab);
-
-    let hab = new HistoricalAccountBalance();
-    hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
-    hab.accountId = acc.accountId;
-    hab.event = item.event.name.split('.')[1];
-    hab.assetId = ab.assetId;
-    hab.dBalance = amount;
-    hab.blockNumber = block.height;
-    hab.timestamp = new Date(block.timestamp);
-    console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
-    await ctx.store.save<HistoricalAccountBalance>(hab);
-    return;
-  }
-
-  let hab = await ctx.store.get(HistoricalAccountBalance, {
-    where: {
-      accountId: acc.accountId,
-      assetId: assetId,
-      event: 'Deposited',
-      blockNumber: block.height,
-    },
-  });
-  if (!hab) {
-    console.log(`Couldn't find Deposited event for ${assetId} on ${acc.accountId} at ${block.height}`);
-    return;
-  }
-  hab.event = hab.event.concat(item.event.name.split('.')[1]);
   console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
   await ctx.store.save<HistoricalAccountBalance>(hab);
 };
