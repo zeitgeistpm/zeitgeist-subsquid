@@ -30,6 +30,7 @@ import {
   getAssetId,
   getMarketEvent,
   getMarketStatus,
+  initBalance,
   rescale,
   specVersion,
 } from '../helper';
@@ -58,71 +59,76 @@ export const boughtCompleteSet = async (ctx: Ctx, block: SubstrateBlock, item: E
   const market = await ctx.store.get(Market, { where: { marketId: marketId } });
   if (!market || specVersion(block.specId) > 35) return;
 
-  const len = market.outcomeAssets.length;
-  for (let i = 0; i < len; i++) {
-    const currencyId = market.outcomeAssets[i]!;
-    const ab = await ctx.store.findOneBy(AccountBalance, {
-      account: { accountId: walletId },
-      assetId: currencyId,
-    });
-    if (!ab) return;
-
-    const hab = await ctx.store.get(HistoricalAccountBalance, {
-      where: {
-        accountId: walletId,
-        assetId: currencyId,
-        event: 'Endowed',
-        blockNumber: block.height,
-      },
-    });
-    if (hab) {
-      hab.event = hab.event.concat(item.event.name.split('.')[1]);
-      console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
-      await ctx.store.save<HistoricalAccountBalance>(hab);
-    } else {
-      let amt = BigInt(0);
-      if (amount !== BigInt(0)) {
-        amt = amount;
-        // @ts-ignore
-      } else if (item.event.extrinsic) {
-        // @ts-ignore
-        if (item.event.extrinsic.call.args.amount) {
-          // @ts-ignore
-          const amount = item.event.extrinsic.call.args.amount.toString();
+  let amt = BigInt(0);
+  if (amount !== BigInt(0)) {
+    amt = amount;
+    // @ts-ignore
+  } else if (item.event.extrinsic) {
+    // @ts-ignore
+    if (item.event.extrinsic.call.args.amount) {
+      // @ts-ignore
+      const amount = item.event.extrinsic.call.args.amount.toString();
+      amt = BigInt(amount);
+      // @ts-ignore
+    } else if (item.event.extrinsic.call.args.calls) {
+      // @ts-ignore
+      for (let ext of item.event.extrinsic.call.args.calls as Array<{
+        __kind: string;
+        value: { __kind: string; amount: string; marketId: string };
+      }>) {
+        const {
+          __kind: extrinsic,
+          value: { __kind: method, amount: amount, marketId: id },
+        } = ext;
+        if (extrinsic == 'PredictionMarkets' && method == 'buy_complete_set' && +id == marketId) {
           amt = BigInt(amount);
-          // @ts-ignore
-        } else if (item.event.extrinsic.call.args.calls) {
-          // @ts-ignore
-          for (let ext of item.event.extrinsic.call.args.calls as Array<{
-            __kind: string;
-            value: { __kind: string; amount: string; marketId: string };
-          }>) {
-            const {
-              __kind: extrinsic,
-              value: { __kind: method, amount: amount, marketId: id },
-            } = ext;
-            if (extrinsic == 'PredictionMarkets' && method == 'buy_complete_set' && +id == marketId) {
-              amt = BigInt(amount);
-              break;
-            }
-          }
+          break;
         }
       }
+    }
+  }
+  if (amt === BigInt(0)) return;
+
+  let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
+  if (!acc) {
+    acc = new Account();
+    acc.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
+    acc.accountId = walletId;
+    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
+    await ctx.store.save<Account>(acc);
+    await initBalance(acc, ctx.store, block, item);
+  }
+
+  for (let i = 0; i < market.outcomeAssets.length; i++) {
+    const assetId = market.outcomeAssets[i]!;
+    let ab = await ctx.store.findOneBy(AccountBalance, {
+      account: { accountId: walletId },
+      assetId: assetId,
+    });
+    if (!ab) {
+      ab = new AccountBalance();
+      ab.id = item.event.id + '-' + walletId.substring(walletId.length - 5) + '-' + marketId + i;
+      ab.account = acc;
+      ab.assetId = assetId;
+      ab.balance = amt;
+      console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
+      await ctx.store.save<AccountBalance>(ab);
+    } else {
       ab.balance = ab.balance + amt;
       console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
       await ctx.store.save<AccountBalance>(ab);
-
-      const hab = new HistoricalAccountBalance();
-      hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
-      hab.accountId = walletId;
-      hab.event = item.event.name.split('.')[1];
-      hab.assetId = ab.assetId;
-      hab.dBalance = amt;
-      hab.blockNumber = block.height;
-      hab.timestamp = new Date(block.timestamp);
-      console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
-      await ctx.store.save<HistoricalAccountBalance>(hab);
     }
+
+    const hab = new HistoricalAccountBalance();
+    hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5) + '-' + marketId + i;
+    hab.accountId = walletId;
+    hab.event = item.event.name.split('.')[1];
+    hab.assetId = ab.assetId;
+    hab.dBalance = amt;
+    hab.blockNumber = block.height;
+    hab.timestamp = new Date(block.timestamp);
+    console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
+    await ctx.store.save<HistoricalAccountBalance>(hab);
   }
 };
 
