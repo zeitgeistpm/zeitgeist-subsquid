@@ -16,7 +16,7 @@ const GRAPHQL_WS_URL = NODE_URL.includes(`bs`)
   ? `wss://processor.bsr.zeitgeist.pm/graphql`
   : `wss://processor.rpc-0.zeitgeist.pm/graphql`;
 const TXN_FEES = NODE_URL.includes(`bs`) ? 9269600000 : 1326669;
-const DISBURSE_AMOUNT = 5 ** 10;
+const DISBURSE_AMOUNT = 10 ** 10 / 2;
 const PER_DAY_LIMIT = 500;
 
 const client = createClient({ webSocketImpl: WebSocket, url: GRAPHQL_WS_URL });
@@ -100,7 +100,10 @@ client.subscribe(
 
 const sendTokens = async (seed: string, dest: string, amount: string): Promise<{ status: boolean; result: string }> => {
   const sdk = (await Tools.getSDK(NODE_URL)) as any;
+  log(`Sending ${amount} to ${dest}`);
+  if (!seed) return { status: false, result: `Seed not found` };
   const keypair = util.signerFromSeed(seed);
+
   return new Promise(async (resolve) => {
     const unsub = await sdk.api.tx.balances
       .transfer(dest, amount)
