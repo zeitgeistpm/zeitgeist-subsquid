@@ -29,12 +29,22 @@ export class DisburseDb {
     this.store = Nedb.create(dbPath);
   }
 
-  async saveAccount(accountId: string, timestamp: Date): Promise<boolean> {
-    console.log(`Saving ${accountId} with ${timestamp}`);
-    return !!(await this.store.insert({ accountId, timestamp }));
+  async saveAccount(accountId: string, timestamp: string, amount: number): Promise<boolean> {
+    console.log(`Saving ${accountId} with Timestamp:${timestamp} & Amount:${amount}`);
+    return !!(await this.store.insert({ accountId, timestamp, amount }));
   }
 
-  async getAccountWithId(accountId: string): Promise<{ accountId: string; timestamp: Date } | null> {
+  async getAccountWithId(accountId: string): Promise<{ accountId: string; timestamp: string; amount: number } | null> {
     return await this.store.findOne({ accountId });
+  }
+
+  async getTotalAmount(searchString: string): Promise<number> {
+    const searchExp = new RegExp(searchString);
+    const res = await this.store.find({ timestamp: searchExp }, { amount: 1, _id: 0 });
+    const amounts = res as unknown as [{ amount: number }];
+    const total = amounts.reduce((accumulator, obj) => {
+      return accumulator + obj.amount;
+    }, 0);
+    return total / 10 ** 10;
   }
 }

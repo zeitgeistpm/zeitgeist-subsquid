@@ -1,6 +1,6 @@
 /**
  * Script to automatically disburse Ztg to eligible accounts
- * Run using `ts-node scripts/subscribe/disburseZtg.ts wss://bsr.zeitgeist.pm`
+ * Run using `ts-node scripts/subscribe/disburseZtg.ts wss://bsr.zeitgeist.pm <origin-seed>`
  */
 import { createClient } from 'graphql-ws';
 import WebSocket from 'ws';
@@ -11,14 +11,16 @@ import { HistoricalAccountBalance } from '../../src/model';
 import { DisburseDb } from './db';
 
 const NODE_URL = process.argv[2];
+const SEED = process.argv[3];
 const GRAPHQL_WS_URL = NODE_URL.includes(`bs`)
   ? `wss://processor.bsr.zeitgeist.pm/graphql`
   : `wss://processor.rpc-0.zeitgeist.pm/graphql`;
 const TXN_FEES = NODE_URL.includes(`bs`) ? 9269600000 : 1326669;
-const CACHE_DB_PATH = `disburseZtg-db.db`;
+const DISBURSE_AMOUNT = 5 ** 10;
+const PER_DAY_LIMIT = 500;
 
 const client = createClient({ webSocketImpl: WebSocket, url: GRAPHQL_WS_URL });
-const db = new DisburseDb(CACHE_DB_PATH);
+const db = new DisburseDb(`disburseZtg-db.db`);
 
 client.subscribe(
   {
@@ -47,7 +49,7 @@ client.subscribe(
         }
         const entry = await db.getAccountWithId(habs[i].accountId);
         if (entry) {
-          log(`Account has already been logged for txn on ${entry.timestamp}`, habs[i].id);
+          log(`Account has already been logged on ${entry.timestamp} with ${entry.amount} amount`, habs[i].id);
           continue;
         }
         if (BigInt(habs[i].dBalance) < BigInt(10 ** 10)) {
@@ -68,15 +70,22 @@ client.subscribe(
           const dBalance = Number((BigInt(habs[i].dBalance) * 100n) / BigInt(10 ** 10)) / 100;
           log(`By ${habs[i].accountId} of ${dBalance} ${habs[i].assetId} is eligible`, habs[i].id);
 
-          const amount = 10 ** 10;
-          const res = await sendTokens(`seed-comes-here`, habs[i].accountId, amount.toString());
+          const date = new Date().toISOString().split('T')[0];
+          const totalAmtPerDay = await db.getTotalAmount(date);
+          log(`Amount disbursed as of ${date}: ${totalAmtPerDay}`, habs[i].id);
+          if (totalAmtPerDay >= PER_DAY_LIMIT) {
+            log(`Reached per day limit of ${PER_DAY_LIMIT}`, habs[i].id);
+            continue;
+          }
+
+          const res = await sendTokens(SEED, habs[i].accountId, DISBURSE_AMOUNT.toString());
           log(res.result, habs[i].id);
           if (res.status) {
-            await db.saveAccount(habs[i].accountId, habs[i].timestamp);
+            await db.saveAccount(habs[i].accountId, new Date().toISOString(), DISBURSE_AMOUNT);
           }
         } else {
           log(`Ztg balance of ${habs[i].accountId} at #${habs[i].blockNumber} is not 0 (${balance})`, habs[i].id);
-          await db.saveAccount(habs[i].accountId, habs[i].timestamp);
+          await db.saveAccount(habs[i].accountId, new Date().toISOString(), 0);
         }
       }
     },
