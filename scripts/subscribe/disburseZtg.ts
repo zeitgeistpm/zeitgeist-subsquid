@@ -14,7 +14,7 @@ const NODE_URL = process.argv[2];
 const GRAPHQL_WS_URL = NODE_URL.includes(`bs`)
   ? `wss://processor.bsr.zeitgeist.pm/graphql`
   : `wss://processor.rpc-0.zeitgeist.pm/graphql`;
-const TXN_FEE = NODE_URL.includes(`bs`) ? BigInt(9269600000) : BigInt(1326669);
+const TXN_FEES = NODE_URL.includes(`bs`) ? 9269600000 : 1326669;
 const CACHE_DB_PATH = `disburseZtg-db.db`;
 
 const client = createClient({ webSocketImpl: WebSocket, url: GRAPHQL_WS_URL });
@@ -30,6 +30,7 @@ client.subscribe(
           assetId
           dBalance
           blockNumber
+          timestamp
         }
       }  
     `,
@@ -40,69 +41,55 @@ client.subscribe(
       const habs = historicalAccountBalances as HistoricalAccountBalance[];
 
       for (let i = 0; i < habs.length - 1; i++) {
-        if (habs[i].accountId === 'dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ') {
-          console.log(`[${new Date().toLocaleString()}] TxnID:${habs[i].id} is on treasury account`);
+        if (habs[i].accountId === `dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ`) {
+          log(`Is on treasury account`, habs[i].id);
+          continue;
+        }
+        const entry = await db.getAccountWithId(habs[i].accountId);
+        if (entry) {
+          log(`Account has already been logged for txn on ${entry.timestamp}`, habs[i].id);
           continue;
         }
         if (BigInt(habs[i].dBalance) < BigInt(10 ** 10)) {
-          console.log(
-            `[${new Date().toLocaleString()}] TxnID:${habs[i].id} has an amount which is less than 1 unit (${
-              habs[i].dBalance
-            })`
-          );
+          log(`Amount is less than 1 unit (${habs[i].dBalance})`, habs[i].id);
           continue;
         }
         if (
           habs[i].blockNumber !== habs[i + 1].blockNumber ||
-          habs[i + 1].accountId !== 'dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ' ||
-          BigInt(habs[i + 1].dBalance) !== TXN_FEE
+          habs[i + 1].accountId !== `dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ` ||
+          BigInt(habs[i + 1].dBalance) !== BigInt(TXN_FEES)
         ) {
-          console.log(`[${new Date().toLocaleString()}] TxnID:${habs[i].id} doesn't seem like a XCM transfer`);
+          log(`Doesn't seem like a XCM transfer`, habs[i].id);
           continue;
         }
 
-        const entry = await db.getTxnWithId(habs[i].id);
-        if (entry) {
-          console.log(
-            `[${new Date().toLocaleString()}] TxnID:${habs[i].id} has already been logged with '${entry.log}'`
-          );
-        } else {
-          const balance = await getBalance(habs[i]);
-          if (balance === '0') {
-            const dBalance = Number((BigInt(habs[i].dBalance) * 100n) / BigInt(10 ** 10)) / 100;
-            console.log(
-              `[${new Date().toLocaleString()}] TxnID:${habs[i].id} of ${dBalance} ${habs[i].assetId} is eligible for ${
-                habs[i].accountId
-              }`
-            );
-            const amount = 10 ** 10;
-            const result = await sendTokens('seed-comes-here', habs[i].accountId, amount.toString());
-            console.log(`[${new Date().toLocaleString()}] TxnID:${habs[i].id} ${result.log}`);
-            await db.saveOrUpdateTxn(habs[i].id, result.log);
-          } else {
-            console.log(
-              `[${new Date().toLocaleString()}] TxnID:${habs[i].id} Ztg balance of ${habs[i].accountId} at #${
-                habs[i].blockNumber
-              } is not 0 (${balance})`
-            );
-            await db.saveOrUpdateTxn(
-              habs[i].id,
-              `Ztg balance of ${habs[i].accountId} at #${habs[i].blockNumber} is ${balance}`
-            );
+        const balance = await getBalance(habs[i]);
+        if (balance === 0) {
+          const dBalance = Number((BigInt(habs[i].dBalance) * 100n) / BigInt(10 ** 10)) / 100;
+          log(`By ${habs[i].accountId} of ${dBalance} ${habs[i].assetId} is eligible`, habs[i].id);
+
+          const amount = 10 ** 10;
+          const res = await sendTokens(`seed-comes-here`, habs[i].accountId, amount.toString());
+          log(res.result, habs[i].id);
+          if (res.status) {
+            await db.saveAccount(habs[i].accountId, habs[i].timestamp);
           }
+        } else {
+          log(`Ztg balance of ${habs[i].accountId} at #${habs[i].blockNumber} is not 0 (${balance})`, habs[i].id);
+          await db.saveAccount(habs[i].accountId, habs[i].timestamp);
         }
       }
     },
     error: (error) => {
-      console.error(`[${new Date().toLocaleString()}] Error while subscribing to query: ${error}`);
+      log(`Error while subscribing to query: ${error}`);
     },
     complete: () => {
-      console.log(`[${new Date().toLocaleString()}] Subscription complete!`);
+      log(`Subscription complete!`);
     },
   }
 );
 
-const sendTokens = async (seed: string, dest: string, amount: string): Promise<{ status: boolean; log: string }> => {
+const sendTokens = async (seed: string, dest: string, amount: string): Promise<{ status: boolean; result: string }> => {
   const sdk = (await Tools.getSDK(NODE_URL)) as any;
   const keypair = util.signerFromSeed(seed);
   return new Promise(async (resolve) => {
@@ -112,20 +99,20 @@ const sendTokens = async (seed: string, dest: string, amount: string): Promise<{
         if (status.isInBlock) {
           events.forEach(({ event: { data, method, section } }) => {
             if (section === 'system' && method === 'ExtrinsicSuccess') {
-              resolve({ status: true, log: `Successfully sent ${amount} to ${dest}` });
+              resolve({ status: true, result: `Successfully sent ${amount} to ${dest}` });
             } else if (section === 'system' && method === 'ExtrinsicFailed') {
-              resolve({ status: false, log: `Failed to send ${amount} to ${dest}!` });
+              resolve({ status: false, result: `Failed to send ${amount} to ${dest}!` });
               const { index, error } = (data as any).toJSON()[0].module;
               try {
                 const { errorName, documentation } = sdk.errorTable.getEntry(
                   index,
                   parseInt(error.substring(2, 4), 16)
                 );
-                console.log(`[${new Date().toLocaleString()}] ${errorName}: ${documentation}`);
+                log(`${errorName}: ${documentation}`);
               } catch (err) {
-                console.log(`[${new Date().toLocaleString()}] ${err}`);
+                log(err);
               } finally {
-                resolve({ status: false, log: `Error while sending ${amount} to ${dest}` });
+                resolve({ status: false, result: `Error while sending ${amount} to ${dest}` });
               }
             }
           });
@@ -135,12 +122,20 @@ const sendTokens = async (seed: string, dest: string, amount: string): Promise<{
   });
 };
 
-const getBalance = async (hab: HistoricalAccountBalance): Promise<string> => {
-  console.log(`[${new Date().toLocaleString()}] TxnID:${hab.id} Checking Ztg balance of ${hab.accountId}`);
+const getBalance = async (hab: HistoricalAccountBalance): Promise<number> => {
+  log(`Checking Ztg balance of ${hab.accountId}`, hab.id);
   const sdk = (await Tools.getSDK(NODE_URL)) as any;
   const blockHash = await sdk.api.rpc.chain.getBlockHash(hab.blockNumber);
   const {
     data: { free },
   } = (await sdk.api.query.system.account.at(blockHash, hab.accountId)) as AccountInfo;
-  return free.toString();
+  return +free.toString();
+};
+
+const log = (message: string, txnId?: string) => {
+  if (txnId) {
+    console.log(`[${new Date().toLocaleString()}] [${txnId}] ${message}`);
+    return;
+  }
+  console.log(`[${new Date().toLocaleString()}] ${message}`);
 };
