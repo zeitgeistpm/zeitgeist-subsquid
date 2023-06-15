@@ -6,7 +6,7 @@ import { createClient } from 'graphql-ws';
 import WebSocket from 'ws';
 import axios from 'axios';
 import { Market } from '../../src/model';
-import Db from './db';
+import { Db } from './db';
 
 const NODE_URL = process.argv[2];
 const WEBHOOK_URL = process.argv[3];
