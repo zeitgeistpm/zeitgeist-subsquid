@@ -88,7 +88,7 @@ client.subscribe(
       }
     },
     error: (error) => {
-      log(`Error while subscribing to query: ${error}`);
+      log(`Error while subscribing to query: ${JSON.stringify(error)}`);
     },
     complete: () => {
       log(`Subscription complete!`);
@@ -120,7 +120,7 @@ const sendTokens = async (dest: string, amount: string): Promise<{ status: boole
                 );
                 log(`${errorName}: ${documentation}`);
               } catch (err) {
-                log(err);
+                log(JSON.stringify(err));
               } finally {
                 resolve({ status: false, result: `Error while sending ${amount} to ${dest}` });
               }
