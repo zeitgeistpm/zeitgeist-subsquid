@@ -43,8 +43,12 @@ client.subscribe(
       const habs = historicalAccountBalances as HistoricalAccountBalance[];
 
       for (let i = 0; i < habs.length - 1; i++) {
-        if (habs[i].accountId === `dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ`) {
-          log(`Is on treasury account`, habs[i].id);
+        if (
+          habs[i].blockNumber !== habs[i + 1].blockNumber ||
+          habs[i + 1].accountId !== `dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ` ||
+          BigInt(habs[i + 1].dBalance) !== BigInt(TXN_FEES)
+        ) {
+          log(`Doesn't seem like a XCM transfer`, habs[i].id);
           continue;
         }
         const entry = await db.getAccountWithId(habs[i].accountId);
@@ -56,12 +60,8 @@ client.subscribe(
           log(`Amount is less than 1 unit (${habs[i].dBalance})`, habs[i].id);
           continue;
         }
-        if (
-          habs[i].blockNumber !== habs[i + 1].blockNumber ||
-          habs[i + 1].accountId !== `dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ` ||
-          BigInt(habs[i + 1].dBalance) !== BigInt(TXN_FEES)
-        ) {
-          log(`Doesn't seem like a XCM transfer`, habs[i].id);
+        if (habs[i].accountId === `dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ`) {
+          log(`Deposit on treasury account`, habs[i].id);
           continue;
         }
 
