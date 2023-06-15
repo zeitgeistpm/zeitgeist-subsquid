@@ -4,7 +4,6 @@ import { Ctx, EventItem } from '../../processor';
 import {
   TokensBalanceSetEvent,
   TokensDepositedEvent,
-  TokensEndowedEvent,
   TokensTransferEvent,
   TokensWithdrawnEvent,
 } from '../../types/events';
@@ -42,31 +41,6 @@ export const getTokensDepositedEvent = (ctx: Ctx, item: EventItem): TokensEvent 
     currencyId = event.asV36.currencyId;
     walletId = ss58.codec('zeitgeist').encode(event.asV36.who);
     amount = event.asV36.amount;
-  } else if (event.isV41) {
-    currencyId = event.asV41.currencyId;
-    walletId = ss58.codec('zeitgeist').encode(event.asV41.who);
-    amount = event.asV41.amount;
-  } else {
-    [currencyId, who, amount] = item.event.args;
-    walletId = encodeAddress(who, 73);
-  }
-  const assetId = getAssetId(currencyId);
-  return { assetId, walletId, amount };
-};
-
-export const getTokensEndowedEvent = (ctx: Ctx, item: EventItem): TokensEvent => {
-  const event = new TokensEndowedEvent(ctx, item.event);
-  let currencyId, walletId, who, amount;
-  if (event.isV23) {
-    [currencyId, who, amount] = event.asV23;
-    walletId = ss58.codec('zeitgeist').encode(who);
-  } else if (event.isV32) {
-    [currencyId, who, amount] = event.asV32;
-    walletId = ss58.codec('zeitgeist').encode(who);
-  } else if (event.isV34) {
-    currencyId = event.asV34.currencyId;
-    walletId = ss58.codec('zeitgeist').encode(event.asV34.who);
-    amount = event.asV34.amount;
   } else if (event.isV41) {
     currencyId = event.asV41.currencyId;
     walletId = ss58.codec('zeitgeist').encode(event.asV41.who);
