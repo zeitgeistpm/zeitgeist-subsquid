@@ -29,16 +29,12 @@ export class DisburseDb {
     this.store = Nedb.create(dbPath);
   }
 
-  async saveOrUpdateTxn(txnId: string, log: string): Promise<boolean> {
-    const doc = await this.store.findOne({ txnId });
-    if (!doc) {
-      return !!(await this.store.insert({ txnId, log }));
-    } else {
-      return !!(await this.store.update({ txnId }, { $set: { log } }));
-    }
+  async saveAccount(accountId: string, timestamp: Date): Promise<boolean> {
+    console.log(`Saving ${accountId} with ${timestamp}`);
+    return !!(await this.store.insert({ accountId, timestamp }));
   }
 
-  async getTxnWithId(txnId: string): Promise<{ txnId: string; log: string } | null> {
-    return await this.store.findOne({ txnId });
+  async getAccountWithId(accountId: string): Promise<{ accountId: string; timestamp: Date } | null> {
+    return await this.store.findOne({ accountId });
   }
 }
