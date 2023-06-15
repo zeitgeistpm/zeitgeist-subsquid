@@ -64,28 +64,26 @@ client.subscribe(
           log(`Deposit on treasury account`, habs[i].id);
           continue;
         }
-
         const balance = await getBalance(habs[i]);
-        if (balance === 0) {
-          const dBalance = Number((BigInt(habs[i].dBalance) * 100n) / BigInt(10 ** 10)) / 100;
-          log(`${dBalance} ${habs[i].assetId} by ${habs[i].accountId} is eligible`, habs[i].id);
-
-          const date = new Date().toISOString().split('T')[0];
-          const totalAmtPerDay = await db.getTotalAmount(date);
-          log(`Amount disbursed as of ${date}: ${totalAmtPerDay}`, habs[i].id);
-          if (totalAmtPerDay >= PER_DAY_LIMIT) {
-            log(`Reached per day limit of ${PER_DAY_LIMIT}`, habs[i].id);
-            continue;
-          }
-
-          const res = await sendTokens(SEED, habs[i].accountId, DISBURSE_AMOUNT.toString());
-          log(res.result, habs[i].id);
-          if (res.status) {
-            await db.saveAccount(habs[i].accountId, new Date().toISOString(), DISBURSE_AMOUNT);
-          }
-        } else {
+        if (balance !== 0) {
           log(`Ztg balance of ${habs[i].accountId} at #${habs[i].blockNumber} is not 0 (${balance})`, habs[i].id);
           await db.saveAccount(habs[i].accountId, new Date().toISOString(), 0);
+          continue;
+        }
+
+        log(`${habs[i].dBalance} ${habs[i].assetId} by ${habs[i].accountId} is eligible`, habs[i].id);
+        const date = new Date().toISOString().split('T')[0];
+        const totalAmtPerDay = await db.getTotalAmount(date);
+        log(`Amount disbursed as of ${date}: ${totalAmtPerDay}`, habs[i].id);
+        if (totalAmtPerDay >= PER_DAY_LIMIT) {
+          log(`Reached per day limit of ${PER_DAY_LIMIT}`, habs[i].id);
+          continue;
+        }
+
+        const res = await sendTokens(habs[i].accountId, DISBURSE_AMOUNT.toString());
+        log(res.result, habs[i].id);
+        if (res.status) {
+          await db.saveAccount(habs[i].accountId, new Date().toISOString(), DISBURSE_AMOUNT);
         }
       }
     },
@@ -98,11 +96,11 @@ client.subscribe(
   }
 );
 
-const sendTokens = async (seed: string, dest: string, amount: string): Promise<{ status: boolean; result: string }> => {
+const sendTokens = async (dest: string, amount: string): Promise<{ status: boolean; result: string }> => {
   const sdk = (await Tools.getSDK(NODE_URL)) as any;
   log(`Sending ${amount} to ${dest}`);
-  if (!seed) return { status: false, result: `Seed not found` };
-  const keypair = util.signerFromSeed(seed);
+  if (!SEED) return { status: false, result: `Seed not found` };
+  const keypair = util.signerFromSeed(SEED);
 
   return new Promise(async (resolve) => {
     const unsub = await sdk.api.tx.balances
