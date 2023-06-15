@@ -68,7 +68,7 @@ client.subscribe(
         const balance = await getBalance(habs[i]);
         if (balance === 0) {
           const dBalance = Number((BigInt(habs[i].dBalance) * 100n) / BigInt(10 ** 10)) / 100;
-          log(`By ${habs[i].accountId} of ${dBalance} ${habs[i].assetId} is eligible`, habs[i].id);
+          log(`${dBalance} ${habs[i].assetId} by ${habs[i].accountId} is eligible`, habs[i].id);
 
           const date = new Date().toISOString().split('T')[0];
           const totalAmtPerDay = await db.getTotalAmount(date);
