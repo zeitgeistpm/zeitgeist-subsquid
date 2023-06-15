@@ -30,7 +30,7 @@ export class DisburseDb {
   }
 
   async saveAccount(accountId: string, timestamp: string, amount: number): Promise<boolean> {
-    console.log(`Saving ${accountId} with Timestamp:${timestamp} & Amount:${amount}`);
+    console.log(`Saving ${accountId} with timestamp ${timestamp} & amount ${amount}`);
     return !!(await this.store.insert({ accountId, timestamp, amount }));
   }
 
