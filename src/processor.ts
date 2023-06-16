@@ -71,7 +71,7 @@ import {
 } from './mappings/swaps';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensBalanceSet, tokensDeposited, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
-import { AccountBalance, HistoricalAccountBalance } from './model';
+import { Account, AccountBalance, HistoricalAccountBalance } from './model';
 import { resolveMarket } from './mappings/postHooks/marketResolved';
 import { specVersion } from './mappings/helper';
 
@@ -534,8 +534,19 @@ const saveBalanceChanges = async (ctx: Ctx, balanceAccounts: Map<string, bigint>
         account: { accountId: walletId },
         assetId: assetId,
       });
-      if (!ab) return;
-      ab.balance = ab.balance + amount;
+      if (!ab && assetId === 'Ztg') return;
+      if (ab) {
+        ab.balance = ab.balance + amount;
+      } else {
+        const acc = await ctx.store.get(Account, { where: { accountId: walletId } });
+        if (!acc) return;
+
+        ab = new AccountBalance();
+        ab.id = walletId + '-' + assetId;
+        ab.account = acc;
+        ab.assetId = assetId;
+        ab.balance = amount;
+      }
       console.log(`Saving account balance: ${JSON.stringify(ab, null, 2)}`);
       await ctx.store.save<AccountBalance>(ab);
     })
