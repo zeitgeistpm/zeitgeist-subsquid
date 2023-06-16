@@ -182,8 +182,6 @@ export type EventItem = Exclude<BatchProcessorEventItem<typeof processor>, _Even
 
 const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
   switch (item.name) {
-    case 'PredictionMarkets.BoughtCompleteSet':
-      return boughtCompleteSet(ctx, block, item);
     case 'PredictionMarkets.MarketApproved':
       return marketApproved(ctx, block, item);
     case 'PredictionMarkets.MarketClosed':
@@ -206,8 +204,6 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
       return marketResolved(ctx, block, item);
     case 'PredictionMarkets.MarketStartedWithSubsidy':
       return marketStartedWithSubsidy(ctx, block, item);
-    case 'PredictionMarkets.SoldCompleteSet':
-      return soldCompleteSet(ctx, block, item);
     case 'PredictionMarkets.TokensRedeemed':
       return tokensRedeemed(ctx, block, item);
     case 'Styx.AccountCrossed':
@@ -455,6 +451,32 @@ processor.run(new TypeormDatabase(), async (ctx) => {
               hab.id = item.event.id + hab.id.slice(-6);
               hab.event = item.event.name.split('.')[1];
               balanceHistory.push(hab);
+            }
+            break;
+          }
+          case 'PredictionMarkets.BoughtCompleteSet': {
+            const habs = await boughtCompleteSet(ctx, block.header, item);
+            if (habs) {
+              await Promise.all(
+                habs.map(async (hab) => {
+                  const key = makeKey(hab.accountId, hab.assetId);
+                  balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+                  balanceHistory.push(hab);
+                })
+              );
+            }
+            break;
+          }
+          case 'PredictionMarkets.SoldCompleteSet': {
+            const habs = await soldCompleteSet(ctx, block.header, item);
+            if (habs) {
+              await Promise.all(
+                habs.map(async (hab) => {
+                  const key = makeKey(hab.accountId, hab.assetId);
+                  balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+                  balanceHistory.push(hab);
+                })
+              );
             }
             break;
           }
