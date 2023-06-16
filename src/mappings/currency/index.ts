@@ -14,7 +14,7 @@ export const currencyDeposited = async (
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
   if (!acc) {
     acc = new Account();
-    acc.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
+    acc.id = walletId;
     acc.accountId = walletId;
     console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
     await ctx.store.save<Account>(acc);
@@ -44,7 +44,7 @@ export const currencyTransferred = async (
   let fromAcc = await ctx.store.get(Account, { where: { accountId: fromId } });
   if (!fromAcc) {
     fromAcc = new Account();
-    fromAcc.id = item.event.id + '-' + fromId.substring(fromId.length - 5);
+    fromAcc.id = fromId;
     fromAcc.accountId = fromId;
     console.log(`[${item.event.name}] Saving account: ${JSON.stringify(fromAcc, null, 2)}`);
     await ctx.store.save<Account>(fromAcc);
@@ -63,7 +63,7 @@ export const currencyTransferred = async (
   let toAcc = await ctx.store.get(Account, { where: { accountId: toId } });
   if (!toAcc) {
     toAcc = new Account();
-    toAcc.id = item.event.id + '-' + toId.substring(toId.length - 5);
+    toAcc.id = toId;
     toAcc.accountId = toId;
     console.log(`[${item.event.name}] Saving account: ${JSON.stringify(toAcc, null, 2)}`);
     await ctx.store.save<Account>(toAcc);
@@ -92,7 +92,7 @@ export const currencyWithdrawn = async (
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
   if (!acc) {
     acc = new Account();
-    acc.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
+    acc.id = walletId;
     acc.accountId = walletId;
     console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
     await ctx.store.save<Account>(acc);

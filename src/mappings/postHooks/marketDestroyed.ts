@@ -44,7 +44,7 @@ export const destroyMarkets = async (ctx: Ctx, block: SubstrateBlock) => {
         });
         await Promise.all(
           abs.map(async (ab) => {
-            const keyword = ab.id.substring(ab.id.lastIndexOf('-') + 1, ab.id.length);
+            const keyword = ab.id.substring(0, ab.id.indexOf('-'));
             const acc = await ctx.store.get(Account, {
               where: { id: Like(`%${keyword}%`) },
             });

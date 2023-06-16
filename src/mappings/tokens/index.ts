@@ -27,7 +27,7 @@ export const tokensBalanceSet = async (ctx: Ctx, block: SubstrateBlock, item: Ev
     ab.balance = amount;
   } else {
     ab = new AccountBalance();
-    ab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
+    ab.id = walletId + '-' + assetId;
     ab.account = acc;
     ab.assetId = assetId;
     ab.balance = amount;
@@ -57,7 +57,7 @@ export const tokensDeposited = async (
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
   if (!acc) {
     acc = new Account();
-    acc.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
+    acc.id = walletId;
     acc.accountId = walletId;
     console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
     await ctx.store.save<Account>(acc);
@@ -82,7 +82,7 @@ export const tokensTransfer = async (ctx: Ctx, block: SubstrateBlock, item: Even
   let fromAcc = await ctx.store.get(Account, { where: { accountId: fromId } });
   if (!fromAcc) {
     fromAcc = new Account();
-    fromAcc.id = item.event.id + '-' + fromId.substring(fromId.length - 5);
+    fromAcc.id = fromId;
     fromAcc.accountId = fromId;
     console.log(`[${item.event.name}] Saving account: ${JSON.stringify(fromAcc, null, 2)}`);
     await ctx.store.save<Account>(fromAcc);
@@ -101,7 +101,7 @@ export const tokensTransfer = async (ctx: Ctx, block: SubstrateBlock, item: Even
   let toAcc = await ctx.store.get(Account, { where: { accountId: toId } });
   if (!toAcc) {
     toAcc = new Account();
-    toAcc.id = item.event.id + '-' + toId.substring(toId.length - 5);
+    toAcc.id = toId;
     toAcc.accountId = toId;
     console.log(`[${item.event.name}] Saving account: ${JSON.stringify(toAcc, null, 2)}`);
     await ctx.store.save<Account>(toAcc);
@@ -130,7 +130,7 @@ export const tokensWithdrawn = async (
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
   if (!acc) {
     acc = new Account();
-    acc.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
+    acc.id = walletId;
     acc.accountId = walletId;
     console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
     await ctx.store.save<Account>(acc);

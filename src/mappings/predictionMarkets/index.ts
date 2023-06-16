@@ -97,7 +97,7 @@ export const boughtCompleteSet = async (ctx: Ctx, block: SubstrateBlock, item: E
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
   if (!acc) {
     acc = new Account();
-    acc.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
+    acc.id = walletId;
     acc.accountId = walletId;
     console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
     await ctx.store.save<Account>(acc);
@@ -112,7 +112,7 @@ export const boughtCompleteSet = async (ctx: Ctx, block: SubstrateBlock, item: E
     });
     if (!ab) {
       ab = new AccountBalance();
-      ab.id = item.event.id + '-' + marketId + i + '-' + walletId.substring(walletId.length - 5);
+      ab.id = walletId + '-' + assetId;
       ab.account = acc;
       ab.assetId = assetId;
       ab.balance = amt;
@@ -197,7 +197,7 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
       await ctx.store.save<Account>(acc);
     } else {
       const acc = new Account();
-      acc.id = item.event.id + '-' + marketAccountId.substring(marketAccountId.length - 5);
+      acc.id = marketAccountId.toString();
       acc.accountId = marketAccountId.toString();
       acc.marketId = +marketId.toString();
       console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
@@ -595,7 +595,7 @@ export const marketResolved = async (ctx: Ctx, block: SubstrateBlock, item: Even
           where: { assetId: outcomeAsset! },
         });
         abs.map(async (ab) => {
-          const keyword = ab.id.substring(ab.id.lastIndexOf('-') + 1, ab.id.length);
+          const keyword = ab.id.substring(0, ab.id.indexOf('-'));
           const acc = await ctx.store.get(Account, {
             where: { id: Like(`%${keyword}%`) },
           });
