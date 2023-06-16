@@ -182,12 +182,6 @@ export type EventItem = Exclude<BatchProcessorEventItem<typeof processor>, _Even
 
 const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
   switch (item.name) {
-    case 'Currency.Transferred':
-      return currencyTransferred(ctx, block, item);
-    case 'Currency.Deposited':
-      return currencyDeposited(ctx, block, item);
-    case 'Currency.Withdrawn':
-      return currencyWithdrawn(ctx, block, item);
     case 'PredictionMarkets.BoughtCompleteSet':
       return boughtCompleteSet(ctx, block, item);
     case 'PredictionMarkets.MarketApproved':
@@ -415,6 +409,32 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           }
           case 'Balances.Withdraw': {
             const hab = await balancesWithdraw(ctx, block.header, item);
+            const key = makeKey(hab.accountId, hab.assetId);
+            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+            balanceHistory.push(hab);
+            break;
+          }
+          case 'Currency.Transferred': {
+            const res = await currencyTransferred(ctx, block.header, item);
+            if (res) {
+              const fromKey = makeKey(res.fromHab.accountId, res.fromHab.assetId);
+              const toKey = makeKey(res.toHab.accountId, res.toHab.assetId);
+              balanceAccounts.set(fromKey, (balanceAccounts.get(fromKey) || BigInt(0)) + res.fromHab.dBalance);
+              balanceAccounts.set(toKey, (balanceAccounts.get(toKey) || BigInt(0)) + res.toHab.dBalance);
+              balanceHistory.push(res.fromHab);
+              balanceHistory.push(res.toHab);
+            }
+            break;
+          }
+          case 'Currency.Deposited': {
+            const hab = await currencyDeposited(ctx, block.header, item);
+            const key = makeKey(hab.accountId, hab.assetId);
+            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+            balanceHistory.push(hab);
+            break;
+          }
+          case 'Currency.Withdrawn': {
+            const hab = await currencyWithdrawn(ctx, block.header, item);
             const key = makeKey(hab.accountId, hab.assetId);
             balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
             balanceHistory.push(hab);
