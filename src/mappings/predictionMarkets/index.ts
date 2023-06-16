@@ -752,7 +752,7 @@ export const soldCompleteSet = async (
     const assetId = market.outcomeAssets[i]!;
 
     const hab = new HistoricalAccountBalance();
-    hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
+    hab.id = item.event.id + '-' + marketId + i + '-' + walletId.substring(walletId.length - 5);
     hab.accountId = walletId;
     hab.event = item.event.name.split('.')[1];
     hab.assetId = assetId;
