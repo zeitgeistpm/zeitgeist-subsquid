@@ -1,7 +1,7 @@
 import { SubstrateBlock } from '@subsquid/substrate-processor';
-import { Account, AccountBalance, Asset, HistoricalAccountBalance } from '../../model';
+import { Account, AccountBalance, HistoricalAccountBalance } from '../../model';
 import { Ctx, EventItem } from '../../processor';
-import { initBalance } from '../helper';
+import { initBalance, Transfer } from '../helper';
 import {
   getTokensBalanceSetEvent,
   getTokensDepositedEvent,
@@ -47,7 +47,11 @@ export const tokensBalanceSet = async (ctx: Ctx, block: SubstrateBlock, item: Ev
   await ctx.store.save<HistoricalAccountBalance>(hab);
 };
 
-export const tokensDeposited = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
+export const tokensDeposited = async (
+  ctx: Ctx,
+  block: SubstrateBlock,
+  item: EventItem
+): Promise<HistoricalAccountBalance> => {
   const { assetId, walletId, amount } = getTokensDepositedEvent(ctx, item);
 
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
@@ -60,35 +64,19 @@ export const tokensDeposited = async (ctx: Ctx, block: SubstrateBlock, item: Eve
     await initBalance(acc, ctx.store, block, item);
   }
 
-  let ab = await ctx.store.findOneBy(AccountBalance, {
-    account: { accountId: walletId },
-    assetId: assetId,
-  });
-  if (ab) {
-    ab.balance = ab.balance + amount;
-  } else {
-    ab = new AccountBalance();
-    ab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
-    ab.account = acc;
-    ab.assetId = assetId;
-    ab.balance = amount;
-  }
-  console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-  await ctx.store.save<AccountBalance>(ab);
-
-  let hab = new HistoricalAccountBalance();
+  const hab = new HistoricalAccountBalance();
   hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
   hab.accountId = acc.accountId;
   hab.event = item.event.name.split('.')[1];
-  hab.assetId = ab.assetId;
+  hab.assetId = assetId;
   hab.dBalance = amount;
   hab.blockNumber = block.height;
   hab.timestamp = new Date(block.timestamp);
-  console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
-  await ctx.store.save<HistoricalAccountBalance>(hab);
+
+  return hab;
 };
 
-export const tokensTransfer = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
+export const tokensTransfer = async (ctx: Ctx, block: SubstrateBlock, item: EventItem): Promise<Transfer> => {
   const { assetId, fromId, toId, amount } = getTokensTransferEvent(ctx, item);
 
   let fromAcc = await ctx.store.get(Account, { where: { accountId: fromId } });
@@ -101,32 +89,14 @@ export const tokensTransfer = async (ctx: Ctx, block: SubstrateBlock, item: Even
     await initBalance(fromAcc, ctx.store, block, item);
   }
 
-  let fromAb = await ctx.store.findOneBy(AccountBalance, {
-    account: { accountId: fromId },
-    assetId: assetId,
-  });
-  if (fromAb) {
-    fromAb.balance = fromAb.balance - amount;
-  } else {
-    fromAb = new AccountBalance();
-    fromAb.id = item.event.id + '-' + fromId.substring(fromId.length - 5);
-    fromAb.account = fromAcc;
-    fromAb.assetId = assetId;
-    fromAb.balance = -amount;
-  }
-  console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(fromAb, null, 2)}`);
-  await ctx.store.save<AccountBalance>(fromAb);
-
-  let fromHab = new HistoricalAccountBalance();
+  const fromHab = new HistoricalAccountBalance();
   fromHab.id = item.event.id + '-' + fromId.substring(fromId.length - 5);
   fromHab.accountId = fromAcc.accountId;
   fromHab.event = item.event.name.split('.')[1];
-  fromHab.assetId = fromAb.assetId;
+  fromHab.assetId = assetId;
   fromHab.dBalance = -amount;
   fromHab.blockNumber = block.height;
   fromHab.timestamp = new Date(block.timestamp);
-  console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(fromHab, null, 2)}`);
-  await ctx.store.save<HistoricalAccountBalance>(fromHab);
 
   let toAcc = await ctx.store.get(Account, { where: { accountId: toId } });
   if (!toAcc) {
@@ -138,37 +108,23 @@ export const tokensTransfer = async (ctx: Ctx, block: SubstrateBlock, item: Even
     await initBalance(toAcc, ctx.store, block, item);
   }
 
-  let toAb = await ctx.store.findOneBy(AccountBalance, {
-    account: { accountId: toId },
-    assetId: assetId,
-  });
-  if (!toAb) {
-    toAb = new AccountBalance();
-    toAb.id = item.event.id + '-' + toId.substring(toId.length - 5);
-    toAb.account = toAcc;
-    toAb.assetId = assetId;
-    toAb.balance = amount;
-    console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(toAb, null, 2)}`);
-    await ctx.store.save<AccountBalance>(toAb);
-  } else {
-    toAb.balance = toAb.balance + amount;
-    console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(toAb, null, 2)}`);
-    await ctx.store.save<AccountBalance>(toAb);
-  }
-
-  let toHab = new HistoricalAccountBalance();
+  const toHab = new HistoricalAccountBalance();
   toHab.id = item.event.id + '-' + toId.substring(toId.length - 5);
   toHab.accountId = toAcc.accountId;
   toHab.event = item.event.name.split('.')[1];
-  toHab.assetId = toAb.assetId;
+  toHab.assetId = assetId;
   toHab.dBalance = amount;
   toHab.blockNumber = block.height;
   toHab.timestamp = new Date(block.timestamp);
-  console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(toHab, null, 2)}`);
-  await ctx.store.save<HistoricalAccountBalance>(toHab);
+
+  return { fromHab, toHab };
 };
 
-export const tokensWithdrawn = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
+export const tokensWithdrawn = async (
+  ctx: Ctx,
+  block: SubstrateBlock,
+  item: EventItem
+): Promise<HistoricalAccountBalance> => {
   const { assetId, walletId, amount } = getTokensWithdrawnEvent(ctx, item);
 
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
@@ -181,30 +137,14 @@ export const tokensWithdrawn = async (ctx: Ctx, block: SubstrateBlock, item: Eve
     await initBalance(acc, ctx.store, block, item);
   }
 
-  let ab = await ctx.store.findOneBy(AccountBalance, {
-    account: { accountId: walletId },
-    assetId: assetId,
-  });
-  if (ab) {
-    ab.balance = ab.balance - amount;
-  } else {
-    ab = new AccountBalance();
-    ab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
-    ab.account = acc;
-    ab.assetId = assetId;
-    ab.balance = -amount;
-  }
-  console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-  await ctx.store.save<AccountBalance>(ab);
-
-  let hab = new HistoricalAccountBalance();
+  const hab = new HistoricalAccountBalance();
   hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
   hab.accountId = acc.accountId;
   hab.event = item.event.name.split('.')[1];
-  hab.assetId = ab.assetId;
+  hab.assetId = assetId;
   hab.dBalance = -amount;
   hab.blockNumber = block.height;
   hab.timestamp = new Date(block.timestamp);
-  console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
-  await ctx.store.save<HistoricalAccountBalance>(hab);
+
+  return hab;
 };

@@ -244,14 +244,6 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
       return swapExactAmountOut(ctx, block, item);
     case 'System.NewAccount':
       return systemNewAccount(ctx, block, item);
-    case 'Tokens.BalanceSet':
-      return tokensBalanceSet(ctx, block, item);
-    case 'Tokens.Deposited':
-      return tokensDeposited(ctx, block, item);
-    case 'Tokens.Transfer':
-      return tokensTransfer(ctx, block, item);
-    case 'Tokens.Withdrawn':
-      return tokensWithdrawn(ctx, block, item);
   }
 };
 
@@ -464,6 +456,36 @@ processor.run(new TypeormDatabase(), async (ctx) => {
               balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
               balanceHistory.push(hab);
             }
+            break;
+          }
+          case 'Tokens.BalanceSet': {
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            await tokensBalanceSet(ctx, block.header, item);
+            break;
+          }
+          case 'Tokens.Deposited': {
+            const hab = await tokensDeposited(ctx, block.header, item);
+            const key = makeKey(hab.accountId, hab.assetId);
+            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+            balanceHistory.push(hab);
+            break;
+          }
+          case 'Tokens.Transfer': {
+            const res = await tokensTransfer(ctx, block.header, item);
+            const fromKey = makeKey(res.fromHab.accountId, res.fromHab.assetId);
+            const toKey = makeKey(res.toHab.accountId, res.toHab.assetId);
+            balanceAccounts.set(fromKey, (balanceAccounts.get(fromKey) || BigInt(0)) + res.fromHab.dBalance);
+            balanceAccounts.set(toKey, (balanceAccounts.get(toKey) || BigInt(0)) + res.toHab.dBalance);
+            balanceHistory.push(res.fromHab);
+            balanceHistory.push(res.toHab);
+            break;
+          }
+          case 'Tokens.Withdrawn': {
+            const hab = await tokensWithdrawn(ctx, block.header, item);
+            const key = makeKey(hab.accountId, hab.assetId);
+            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+            balanceHistory.push(hab);
             break;
           }
           default: {
