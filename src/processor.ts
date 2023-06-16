@@ -200,12 +200,8 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
       return marketRejected(ctx, block, item);
     case 'PredictionMarkets.MarketReported':
       return marketReported(ctx, block, item);
-    case 'PredictionMarkets.MarketResolved':
-      return marketResolved(ctx, block, item);
     case 'PredictionMarkets.MarketStartedWithSubsidy':
       return marketStartedWithSubsidy(ctx, block, item);
-    case 'PredictionMarkets.TokensRedeemed':
-      return tokensRedeemed(ctx, block, item);
     case 'Styx.AccountCrossed':
       return accountCrossed(ctx, block, item);
     case 'Swaps.ArbitrageBuyBurn':
@@ -347,12 +343,14 @@ processor.run(new TypeormDatabase(), async (ctx) => {
       if (item.kind === 'call' && item.call.success) {
         // @ts-ignore
         if (item.name === 'PredictionMarkets.redeem_shares') {
-          // @ts-ignore
+          await saveBalanceChanges(ctx, balanceAccounts);
+          balanceAccounts.clear();
           await redeemShares(ctx, block.header, item);
         }
         // @ts-ignore
         if (item.name === 'Swaps.pool_exit') {
-          // @ts-ignore
+          await saveBalanceChanges(ctx, balanceAccounts);
+          balanceAccounts.clear();
           await poolExitCall(ctx, block.header, item);
         }
       }
@@ -467,6 +465,12 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             }
             break;
           }
+          case 'PredictionMarkets.MarketResolved': {
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            await marketResolved(ctx, block.header, item);
+            break;
+          }
           case 'PredictionMarkets.SoldCompleteSet': {
             const habs = await soldCompleteSet(ctx, block.header, item);
             if (habs) {
@@ -478,6 +482,13 @@ processor.run(new TypeormDatabase(), async (ctx) => {
                 })
               );
             }
+            break;
+          }
+          case 'PredictionMarkets.TokensRedeemed': {
+            const hab = await tokensRedeemed(ctx, block.header, item);
+            const key = makeKey(hab.accountId, hab.assetId);
+            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+            balanceHistory.push(hab);
             break;
           }
           // @ts-ignore
@@ -539,6 +550,8 @@ processor.run(new TypeormDatabase(), async (ctx) => {
     }
     if (process.env.WS_NODE_URL?.includes(`bs`)) {
       if (block.header.height < 215000 || block.header.height === 579140) {
+        await saveBalanceChanges(ctx, balanceAccounts);
+        balanceAccounts.clear();
         await handlePostHooks(ctx, block.header);
       }
     }

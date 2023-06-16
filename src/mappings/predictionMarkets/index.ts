@@ -765,42 +765,21 @@ export const soldCompleteSet = async (
   return habs;
 };
 
-export const tokensRedeemed = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
+export const tokensRedeemed = async (
+  ctx: Ctx,
+  block: SubstrateBlock,
+  item: EventItem
+): Promise<HistoricalAccountBalance> => {
   const { assetId, amtRedeemed, walletId } = getTokensRedeemedEvent(ctx, item);
-
-  const ab = await ctx.store.findOneBy(AccountBalance, {
-    account: { accountId: walletId },
-    assetId: assetId,
-  });
-  if (!ab) return;
-
-  const tHab = await ctx.store.get(HistoricalAccountBalance, {
-    where: {
-      accountId: walletId,
-      assetId: 'Ztg',
-      event: 'Transfer',
-      blockNumber: block.height,
-    },
-  });
-  if (tHab) {
-    tHab.event = item.event.name.split('.')[1];
-    console.log(`[${item.event.name}] Updating historical account balance: ${JSON.stringify(tHab, null, 2)}`);
-    await ctx.store.save<HistoricalAccountBalance>(tHab);
-  }
-
-  const oldBalance = ab.balance;
-  ab.balance = ab.balance - amtRedeemed;
-  console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-  await ctx.store.save<AccountBalance>(ab);
 
   const hab = new HistoricalAccountBalance();
   hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
   hab.accountId = walletId;
   hab.event = item.event.name.split('.')[1];
-  hab.assetId = ab.assetId;
-  hab.dBalance = ab.balance - oldBalance;
+  hab.assetId = assetId;
+  hab.dBalance = -amtRedeemed;
   hab.blockNumber = block.height;
   hab.timestamp = new Date(block.timestamp);
-  console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
-  await ctx.store.save<HistoricalAccountBalance>(hab);
+
+  return hab;
 };
