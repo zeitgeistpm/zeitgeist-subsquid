@@ -226,8 +226,6 @@ type Pool @entity {
   marketId: Int! @index
   "Zeitgeist's identifier for pool"
   poolId: Int! @index
-  "Status of the pool"
-  poolStatus: String!
   "Scoring rule used for the pool"
   scoringRule: String!
   "Status of the pool"
@@ -259,8 +257,6 @@ type HistoricalPool @entity {
   event: String!
   "Zeitgeist's identifier for pool"
   poolId: Int!
-  "Current status of the pool"
-  poolStatus: String!
   "Current status of the pool"
   status: PoolStatus!
   "Timestamp of the block"
