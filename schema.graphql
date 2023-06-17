@@ -128,7 +128,7 @@ type Market @entity {
   "Tracks the status of the advisory, oracle and validity bonds"
   bonds: MarketBonds
   "Share details"
-  categories: [CategoryMetadata]
+  categories: [CategoryMetadata!]
   "Can be `Permissionless` or `Advised`"
   creation: MarketCreation!
   "Account address of the market creator"
@@ -241,7 +241,7 @@ type Pool @entity {
   "Total amount of ZTG that has moved through a market's liquidity pool"
   volume: BigInt!
   "List of lengths for each asset"
-  weights: [Weight]!
+  weights: [Weight!]!
 }
 
 """
