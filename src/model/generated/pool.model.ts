@@ -61,12 +61,6 @@ export class Pool {
     poolId!: number
 
     /**
-     * Status of the pool
-     */
-    @Column_("text", {nullable: false})
-    poolStatus!: string
-
-    /**
      * Scoring rule used for the pool
      */
     @Column_("text", {nullable: false})
