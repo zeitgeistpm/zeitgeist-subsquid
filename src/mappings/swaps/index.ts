@@ -42,7 +42,6 @@ export const arbitrageBuyBurn = async (ctx: Ctx, block: SubstrateBlock, item: Ev
     where: { poolId: +poolId.toString() },
   });
   if (!pool) return;
-
   const oldBaseAssetQty = pool.baseAssetQty;
   const newBaseAssetQty = oldBaseAssetQty + amount;
   pool.baseAssetQty = newBaseAssetQty;
@@ -54,7 +53,6 @@ export const arbitrageBuyBurn = async (ctx: Ctx, block: SubstrateBlock, item: Ev
   hp.poolId = pool.poolId;
   hp.event = item.event.name.split('.')[1];
   hp.baseAssetQty = pool.baseAssetQty;
-  hp.poolStatus = pool.poolStatus;
   hp.status = pool.status;
   hp.blockNumber = block.height;
   hp.timestamp = new Date(block.timestamp);
@@ -111,7 +109,6 @@ export const arbitrageMintSell = async (ctx: Ctx, block: SubstrateBlock, item: E
     where: { poolId: +poolId.toString() },
   });
   if (!pool) return;
-
   const oldBaseAssetQty = pool.baseAssetQty;
   const newBaseAssetQty = oldBaseAssetQty - amount;
   pool.baseAssetQty = newBaseAssetQty;
@@ -123,7 +120,6 @@ export const arbitrageMintSell = async (ctx: Ctx, block: SubstrateBlock, item: E
   hp.poolId = pool.poolId;
   hp.event = item.event.name.split('.')[1];
   hp.baseAssetQty = pool.baseAssetQty;
-  hp.poolStatus = pool.poolStatus;
   hp.status = pool.status;
   hp.blockNumber = block.height;
   hp.timestamp = new Date(block.timestamp);
@@ -180,15 +176,13 @@ export const poolActive = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
     where: { poolId: +poolId.toString() },
   });
   if (!pool) return;
-
-  pool.poolStatus = PoolStatus.Active;
+  pool.status = PoolStatus.Active;
   console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
   await ctx.store.save<Pool>(pool);
 
   const hp = new HistoricalPool();
   hp.id = item.event.id + '-' + pool.poolId;
   hp.poolId = pool.poolId;
-  hp.poolStatus = pool.poolStatus;
   hp.status = pool.status;
   hp.event = item.event.name.split('.')[1];
   hp.blockNumber = block.height;
@@ -204,15 +198,13 @@ export const poolClosed = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
     where: { poolId: +poolId.toString() },
   });
   if (!pool) return;
-
-  pool.poolStatus = PoolStatus.Closed;
+  pool.status = PoolStatus.Closed;
   console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
   await ctx.store.save<Pool>(pool);
 
   const hp = new HistoricalPool();
   hp.id = item.event.id + '-' + pool.poolId;
   hp.poolId = pool.poolId;
-  hp.poolStatus = pool.poolStatus;
   hp.status = pool.status;
   hp.event = item.event.name.split('.')[1];
   hp.blockNumber = block.height;
@@ -238,7 +230,6 @@ export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
   pool.poolId = +cpep.poolId.toString();
   pool.accountId = accountId;
   pool.marketId = +swapPool.marketId.toString();
-  pool.poolStatus = swapPool.poolStatus.__kind;
   pool.status = getPoolStatus(swapPool.poolStatus);
   pool.scoringRule = swapPool.scoringRule.__kind;
   pool.swapFee = swapPool.swapFee ? swapPool.swapFee.toString() : '';
@@ -319,7 +310,6 @@ export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
   hp.baseAssetQty = pool.baseAssetQty;
   hp.dVolume = pool.volume;
   hp.volume = pool.volume;
-  hp.poolStatus = pool.poolStatus;
   hp.status = pool.status;
   hp.blockNumber = block.height;
   hp.timestamp = new Date(block.timestamp);
@@ -353,7 +343,7 @@ export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Event
     where: { poolId: +poolId.toString() },
   });
   if (!pool) return;
-  pool.poolStatus = PoolStatus.Destroyed;
+  pool.status = PoolStatus.Destroyed;
   pool.baseAssetQty = BigInt(0);
   console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
   await ctx.store.save<Pool>(pool);
@@ -363,7 +353,6 @@ export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Event
   hp.poolId = pool.poolId;
   hp.baseAssetQty = pool.baseAssetQty;
   hp.event = item.event.name.split('.')[1];
-  hp.poolStatus = pool.poolStatus;
   hp.status = pool.status;
   hp.blockNumber = block.height;
   hp.timestamp = new Date(block.timestamp);
@@ -481,7 +470,6 @@ export const poolExit = async (ctx: Ctx, block: SubstrateBlock, item: EventItem)
   hp.poolId = pool.poolId;
   hp.event = item.event.name.split('.')[1];
   hp.baseAssetQty = pool.baseAssetQty;
-  hp.poolStatus = pool.poolStatus;
   hp.status = pool.status;
   hp.blockNumber = block.height;
   hp.timestamp = new Date(block.timestamp);
@@ -626,7 +614,6 @@ export const poolExitWithExactAssetAmount = async (ctx: Ctx, block: SubstrateBlo
     where: { poolId: +pae.cpep.poolId.toString() },
   });
   if (!pool || !isBaseAsset(pae.asset)) return;
-
   const oldBaseAssetQty = pool.baseAssetQty;
   const newBaseAssetQty = oldBaseAssetQty - BigInt(pae.transferred.toString());
   pool.baseAssetQty = newBaseAssetQty;
@@ -638,7 +625,6 @@ export const poolExitWithExactAssetAmount = async (ctx: Ctx, block: SubstrateBlo
   hp.poolId = pool.poolId;
   hp.event = item.event.name.split('.')[1];
   hp.baseAssetQty = pool.baseAssetQty;
-  hp.poolStatus = pool.poolStatus;
   hp.status = pool.status;
   hp.blockNumber = block.height;
   hp.timestamp = new Date(block.timestamp);
@@ -694,7 +680,6 @@ export const poolJoin = async (ctx: Ctx, block: SubstrateBlock, item: EventItem)
     where: { poolId: +pae.cpep.poolId.toString() },
   });
   if (!pool) return;
-
   const oldBaseAssetQty = pool.baseAssetQty;
   const newBaseAssetQty = oldBaseAssetQty + BigInt(pae.transferred[pae.transferred.length - 1].toString());
   pool.baseAssetQty = newBaseAssetQty;
@@ -706,7 +691,6 @@ export const poolJoin = async (ctx: Ctx, block: SubstrateBlock, item: EventItem)
   hp.poolId = pool.poolId;
   hp.event = item.event.name.split('.')[1];
   hp.baseAssetQty = pool.baseAssetQty;
-  hp.poolStatus = pool.poolStatus;
   hp.status = pool.status;
   hp.blockNumber = block.height;
   hp.timestamp = new Date(block.timestamp);
@@ -825,7 +809,6 @@ export const poolJoinWithExactAssetAmount = async (ctx: Ctx, block: SubstrateBlo
   hp.poolId = pool.poolId;
   hp.event = item.event.name.split('.')[1];
   hp.baseAssetQty = pool.baseAssetQty;
-  hp.poolStatus = pool.poolStatus;
   hp.status = pool.status;
   hp.blockNumber = block.height;
   hp.timestamp = new Date(block.timestamp);
@@ -946,7 +929,6 @@ export const swapExactAmountIn = async (ctx: Ctx, block: SubstrateBlock, item: E
     hp.baseAssetQty = pool.baseAssetQty;
     hp.dVolume = newVolume - oldVolume;
     hp.volume = newVolume;
-    hp.poolStatus = pool.poolStatus;
     hp.status = pool.status;
     hp.blockNumber = block.height;
     hp.timestamp = new Date(block.timestamp);
@@ -1085,7 +1067,6 @@ export const swapExactAmountOut = async (ctx: Ctx, block: SubstrateBlock, item: 
     hp.baseAssetQty = pool.baseAssetQty;
     hp.dVolume = newVolume - oldVolume;
     hp.volume = newVolume;
-    hp.poolStatus = pool.poolStatus;
     hp.status = pool.status;
     hp.blockNumber = block.height;
     hp.timestamp = new Date(block.timestamp);
