@@ -44,9 +44,9 @@ export const destroyMarkets = async (ctx: Ctx, block: SubstrateBlock) => {
         });
         await Promise.all(
           abs.map(async (ab) => {
-            const keyword = ab.id.substring(ab.id.lastIndexOf('-') + 1, ab.id.length);
+            const accLookupKey = ab.id.substring(0, ab.id.indexOf('-'));
             const acc = await ctx.store.get(Account, {
-              where: { id: Like(`%${keyword}%`) },
+              where: { id: Like(`%${accLookupKey}%`) },
             });
             if (!acc || ab.balance === BigInt(0)) return;
             const oldBalance = ab.balance;
@@ -55,7 +55,7 @@ export const destroyMarkets = async (ctx: Ctx, block: SubstrateBlock) => {
             await ctx.store.save<AccountBalance>(ab);
 
             const hab = new HistoricalAccountBalance();
-            hab.id = eventId + '-' + acc.accountId.substring(acc.accountId.length - 5);
+            hab.id = eventId + '-' + market.marketId + i + '-' + acc.accountId.substring(acc.accountId.length - 5);
             hab.accountId = acc.accountId;
             hab.event = eventName.split('.')[1];
             hab.assetId = ab.assetId;
