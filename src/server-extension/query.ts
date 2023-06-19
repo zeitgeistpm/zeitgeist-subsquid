@@ -30,6 +30,20 @@ export const assetPriceHistory = (assetId: string, startTime: string, endTime: s
   ON 1 = 1;
 `;
 
+export const balanceInfo = (accountId: string, assetId: string, blockNumber: string) => `
+  SELECT
+    asset_id,
+    SUM(d_balance) AS balance
+  FROM
+    historical_account_balance
+  WHERE
+    account_id = '${accountId}'
+    AND asset_id LIKE '%${assetId}%'
+    AND block_number <= ${blockNumber}
+  GROUP BY
+    asset_id;
+`;
+
 export const marketParticipants = (ids: number[]) => `
   SELECT
     m.market_id,
