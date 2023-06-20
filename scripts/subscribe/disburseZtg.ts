@@ -41,6 +41,7 @@ client.subscribe(
     next: async ({ data }) => {
       const { historicalAccountBalances } = data as any;
       const habs = historicalAccountBalances as HistoricalAccountBalance[];
+      log(`--> Captured ${habs.length} records on ${GRAPHQL_WS_URL}`);
 
       for (let i = 0; i < habs.length - 1; i++) {
         if (
@@ -144,8 +145,8 @@ const getBalance = async (hab: HistoricalAccountBalance): Promise<number> => {
 
 const log = (message: string, txnId?: string) => {
   if (txnId) {
-    console.log(`[${new Date().toLocaleString()}] [${txnId}] ${message}`);
+    console.log(`[${txnId}] ${message}`);
     return;
   }
-  console.log(`[${new Date().toLocaleString()}] ${message}`);
+  console.log(message);
 };
