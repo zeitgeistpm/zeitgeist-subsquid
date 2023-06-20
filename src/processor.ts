@@ -71,7 +71,7 @@ import {
 } from './mappings/swaps';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensBalanceSet, tokensDeposited, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
-import { Account, AccountBalance, HistoricalAccountBalance } from './model';
+import { AccountBalance, HistoricalAccountBalance } from './model';
 import { resolveMarket } from './mappings/postHooks/marketResolved';
 import { specVersion } from './mappings/helper';
 
@@ -182,6 +182,14 @@ export type EventItem = Exclude<BatchProcessorEventItem<typeof processor>, _Even
 
 const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
   switch (item.name) {
+    case 'Currency.Transferred':
+      return currencyTransferred(ctx, block, item);
+    case 'Currency.Deposited':
+      return currencyDeposited(ctx, block, item);
+    case 'Currency.Withdrawn':
+      return currencyWithdrawn(ctx, block, item);
+    case 'PredictionMarkets.BoughtCompleteSet':
+      return boughtCompleteSet(ctx, block, item);
     case 'PredictionMarkets.MarketApproved':
       return marketApproved(ctx, block, item);
     case 'PredictionMarkets.MarketClosed':
@@ -200,8 +208,14 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
       return marketRejected(ctx, block, item);
     case 'PredictionMarkets.MarketReported':
       return marketReported(ctx, block, item);
+    case 'PredictionMarkets.MarketResolved':
+      return marketResolved(ctx, block, item);
     case 'PredictionMarkets.MarketStartedWithSubsidy':
       return marketStartedWithSubsidy(ctx, block, item);
+    case 'PredictionMarkets.SoldCompleteSet':
+      return soldCompleteSet(ctx, block, item);
+    case 'PredictionMarkets.TokensRedeemed':
+      return tokensRedeemed(ctx, block, item);
     case 'Styx.AccountCrossed':
       return accountCrossed(ctx, block, item);
     case 'Swaps.ArbitrageBuyBurn':
@@ -214,6 +228,8 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
       return poolClosed(ctx, block, item);
     case 'Swaps.PoolCreate':
       return poolCreate(ctx, block, item);
+    case 'Swaps.PoolDestroyed':
+      return poolDestroyed(ctx, block, item);
     case 'Swaps.PoolExit':
       return poolExit(ctx, block, item);
     case 'Swaps.PoolExitWithExactAssetAmount':
@@ -228,6 +244,14 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
       return swapExactAmountOut(ctx, block, item);
     case 'System.NewAccount':
       return systemNewAccount(ctx, block, item);
+    case 'Tokens.BalanceSet':
+      return tokensBalanceSet(ctx, block, item);
+    case 'Tokens.Deposited':
+      return tokensDeposited(ctx, block, item);
+    case 'Tokens.Transfer':
+      return tokensTransfer(ctx, block, item);
+    case 'Tokens.Withdrawn':
+      return tokensWithdrawn(ctx, block, item);
   }
 };
 
@@ -341,14 +365,12 @@ processor.run(new TypeormDatabase(), async (ctx) => {
       if (item.kind === 'call' && item.call.success) {
         // @ts-ignore
         if (item.name === 'PredictionMarkets.redeem_shares') {
-          await saveBalanceChanges(ctx, balanceAccounts);
-          balanceAccounts.clear();
+          // @ts-ignore
           await redeemShares(ctx, block.header, item);
         }
         // @ts-ignore
         if (item.name === 'Swaps.pool_exit') {
-          await saveBalanceChanges(ctx, balanceAccounts);
-          balanceAccounts.clear();
+          // @ts-ignore
           await poolExitCall(ctx, block.header, item);
         }
       }
@@ -406,32 +428,6 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             balanceHistory.push(hab);
             break;
           }
-          case 'Currency.Transferred': {
-            const res = await currencyTransferred(ctx, block.header, item);
-            if (res) {
-              const fromKey = makeKey(res.fromHab.accountId, res.fromHab.assetId);
-              const toKey = makeKey(res.toHab.accountId, res.toHab.assetId);
-              balanceAccounts.set(fromKey, (balanceAccounts.get(fromKey) || BigInt(0)) + res.fromHab.dBalance);
-              balanceAccounts.set(toKey, (balanceAccounts.get(toKey) || BigInt(0)) + res.toHab.dBalance);
-              balanceHistory.push(res.fromHab);
-              balanceHistory.push(res.toHab);
-            }
-            break;
-          }
-          case 'Currency.Deposited': {
-            const hab = await currencyDeposited(ctx, block.header, item);
-            const key = makeKey(hab.accountId, hab.assetId);
-            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-            balanceHistory.push(hab);
-            break;
-          }
-          case 'Currency.Withdrawn': {
-            const hab = await currencyWithdrawn(ctx, block.header, item);
-            const key = makeKey(hab.accountId, hab.assetId);
-            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-            balanceHistory.push(hab);
-            break;
-          }
           case 'ParachainStaking.Rewarded': {
             if (specVersion(block.header.specId) < 33) {
               const hab = await parachainStakingRewarded(ctx, block.header, item);
@@ -448,51 +444,6 @@ processor.run(new TypeormDatabase(), async (ctx) => {
               hab.event = item.event.name.split('.')[1];
               balanceHistory.push(hab);
             }
-            break;
-          }
-          case 'PredictionMarkets.BoughtCompleteSet': {
-            const habs = await boughtCompleteSet(ctx, block.header, item);
-            if (habs) {
-              await Promise.all(
-                habs.map(async (hab) => {
-                  const key = makeKey(hab.accountId, hab.assetId);
-                  balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-                  balanceHistory.push(hab);
-                })
-              );
-            }
-            break;
-          }
-          case 'PredictionMarkets.MarketResolved': {
-            await saveBalanceChanges(ctx, balanceAccounts);
-            balanceAccounts.clear();
-            await marketResolved(ctx, block.header, item);
-            break;
-          }
-          case 'PredictionMarkets.SoldCompleteSet': {
-            const habs = await soldCompleteSet(ctx, block.header, item);
-            if (habs) {
-              await Promise.all(
-                habs.map(async (hab) => {
-                  const key = makeKey(hab.accountId, hab.assetId);
-                  balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-                  balanceHistory.push(hab);
-                })
-              );
-            }
-            break;
-          }
-          case 'PredictionMarkets.TokensRedeemed': {
-            const hab = await tokensRedeemed(ctx, block.header, item);
-            const key = makeKey(hab.accountId, hab.assetId);
-            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-            balanceHistory.push(hab);
-            break;
-          }
-          case 'Swaps.PoolDestroyed': {
-            await saveBalanceChanges(ctx, balanceAccounts);
-            balanceAccounts.clear();
-            await poolDestroyed(ctx, block.header, item);
             break;
           }
           // @ts-ignore
@@ -515,36 +466,6 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             }
             break;
           }
-          case 'Tokens.BalanceSet': {
-            await saveBalanceChanges(ctx, balanceAccounts);
-            balanceAccounts.clear();
-            await tokensBalanceSet(ctx, block.header, item);
-            break;
-          }
-          case 'Tokens.Deposited': {
-            const hab = await tokensDeposited(ctx, block.header, item);
-            const key = makeKey(hab.accountId, hab.assetId);
-            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-            balanceHistory.push(hab);
-            break;
-          }
-          case 'Tokens.Transfer': {
-            const res = await tokensTransfer(ctx, block.header, item);
-            const fromKey = makeKey(res.fromHab.accountId, res.fromHab.assetId);
-            const toKey = makeKey(res.toHab.accountId, res.toHab.assetId);
-            balanceAccounts.set(fromKey, (balanceAccounts.get(fromKey) || BigInt(0)) + res.fromHab.dBalance);
-            balanceAccounts.set(toKey, (balanceAccounts.get(toKey) || BigInt(0)) + res.toHab.dBalance);
-            balanceHistory.push(res.fromHab);
-            balanceHistory.push(res.toHab);
-            break;
-          }
-          case 'Tokens.Withdrawn': {
-            const hab = await tokensWithdrawn(ctx, block.header, item);
-            const key = makeKey(hab.accountId, hab.assetId);
-            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-            balanceHistory.push(hab);
-            break;
-          }
           default: {
             await handleEvents(ctx, block.header, item);
             break;
@@ -554,8 +475,6 @@ processor.run(new TypeormDatabase(), async (ctx) => {
     }
     if (process.env.WS_NODE_URL?.includes(`bs`)) {
       if (block.header.height < 215000 || block.header.height === 579140) {
-        await saveBalanceChanges(ctx, balanceAccounts);
-        balanceAccounts.clear();
         await handlePostHooks(ctx, block.header);
       }
     }
@@ -573,19 +492,8 @@ const saveBalanceChanges = async (ctx: Ctx, balanceAccounts: Map<string, bigint>
         account: { accountId: walletId },
         assetId: assetId,
       });
-      if (!ab && assetId === 'Ztg') return;
-      if (ab) {
-        ab.balance = ab.balance + amount;
-      } else {
-        const acc = await ctx.store.get(Account, { where: { accountId: walletId } });
-        if (!acc) return;
-
-        ab = new AccountBalance();
-        ab.id = walletId + '-' + assetId;
-        ab.account = acc;
-        ab.assetId = assetId;
-        ab.balance = amount;
-      }
+      if (!ab) return;
+      ab.balance = ab.balance + amount;
       console.log(`Saving account balance: ${JSON.stringify(ab, null, 2)}`);
       await ctx.store.save<AccountBalance>(ab);
     })
