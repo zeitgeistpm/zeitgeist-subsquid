@@ -10,7 +10,7 @@ export const accountCrossed = async (ctx: Ctx, block: SubstrateBlock, item: Even
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
   if (!acc) {
     acc = new Account();
-    acc.id = walletId;
+    acc.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
     acc.accountId = walletId;
     console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
     await ctx.store.save<Account>(acc);

@@ -19,7 +19,7 @@ export const balancesBalanceSet = async (ctx: Ctx, block: SubstrateBlock, item: 
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
   if (!acc) {
     acc = new Account();
-    acc.id = walletId;
+    acc.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
     acc.accountId = walletId;
     console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
     await ctx.store.save<Account>(acc);
@@ -74,7 +74,7 @@ export const balancesDeposit = async (
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
   if (!acc) {
     acc = new Account();
-    acc.id = walletId;
+    acc.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
     acc.accountId = walletId;
     console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
     await ctx.store.save<Account>(acc);
@@ -103,7 +103,7 @@ export const balancesDustLost = async (
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
   if (!acc) {
     acc = new Account();
-    acc.id = walletId;
+    acc.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
     acc.accountId = walletId;
     console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
     await ctx.store.save<Account>(acc);
@@ -132,7 +132,7 @@ export const balancesReserved = async (
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
   if (!acc) {
     acc = new Account();
-    acc.id = walletId;
+    acc.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
     acc.accountId = walletId;
     console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
     await ctx.store.save<Account>(acc);
@@ -157,7 +157,7 @@ export const balancesSlashed = async (ctx: Ctx, block: SubstrateBlock, item: Eve
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
   if (!acc) {
     acc = new Account();
-    acc.id = walletId;
+    acc.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
     acc.accountId = walletId;
     console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
     await ctx.store.save<Account>(acc);
@@ -192,7 +192,7 @@ export const balancesTransfer = async (ctx: Ctx, block: SubstrateBlock, item: Ev
   let fromAcc = await ctx.store.get(Account, { where: { accountId: fromId } });
   if (!fromAcc) {
     fromAcc = new Account();
-    fromAcc.id = fromId;
+    fromAcc.id = item.event.id + '-' + fromId.substring(fromId.length - 5);
     fromAcc.accountId = fromId;
     console.log(`[${item.event.name}] Saving account: ${JSON.stringify(fromAcc, null, 2)}`);
     await ctx.store.save<Account>(fromAcc);
@@ -211,7 +211,7 @@ export const balancesTransfer = async (ctx: Ctx, block: SubstrateBlock, item: Ev
   let toAcc = await ctx.store.get(Account, { where: { accountId: toId } });
   if (!toAcc) {
     toAcc = new Account();
-    toAcc.id = toId;
+    toAcc.id = item.event.id + '-' + toId.substring(toId.length - 5);
     toAcc.accountId = toId;
     console.log(`[${item.event.name}] Saving account: ${JSON.stringify(toAcc, null, 2)}`);
     await ctx.store.save<Account>(toAcc);
@@ -240,7 +240,7 @@ export const balancesUnreserved = async (
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
   if (!acc) {
     acc = new Account();
-    acc.id = walletId;
+    acc.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
     acc.accountId = walletId;
     console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
     await ctx.store.save<Account>(acc);
@@ -269,7 +269,7 @@ export const balancesWithdraw = async (
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
   if (!acc) {
     acc = new Account();
-    acc.id = walletId;
+    acc.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
     acc.accountId = walletId;
     console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
     await ctx.store.save<Account>(acc);

@@ -42,9 +42,9 @@ export const resolveMarket = async (ctx: Ctx, block: SubstrateBlock, marketId: n
           where: { assetId: outcomeAsset! },
         });
         abs.map(async (ab) => {
-          const accLookupKey = ab.id.substring(0, ab.id.indexOf('-'));
+          const keyword = ab.id.substring(ab.id.lastIndexOf('-') + 1, ab.id.length);
           let acc = await ctx.store.get(Account, {
-            where: { id: Like(`%${accLookupKey}%`) },
+            where: { id: Like(`%${keyword}%`) },
           });
           if (!acc || ab.balance === BigInt(0)) return;
           const oldBalance = ab.balance;
@@ -54,7 +54,7 @@ export const resolveMarket = async (ctx: Ctx, block: SubstrateBlock, marketId: n
           await ctx.store.save<AccountBalance>(ab);
 
           let hab = new HistoricalAccountBalance();
-          hab.id = eventId + '-' + market.marketId + i + '-' + acc.accountId.substring(acc.accountId.length - 5);
+          hab.id = eventId + '-' + acc.accountId.substring(acc.accountId.length - 5);
           hab.accountId = acc.accountId;
           hab.event = eventName.split('.')[1];
           hab.assetId = ab.assetId;
