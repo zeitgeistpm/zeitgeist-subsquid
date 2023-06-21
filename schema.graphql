@@ -128,7 +128,7 @@ type Market @entity {
   "Tracks the status of the advisory, oracle and validity bonds"
   bonds: MarketBonds
   "Share details"
-  categories: [CategoryMetadata]
+  categories: [CategoryMetadata!]
   "Can be `Permissionless` or `Advised`"
   creation: MarketCreation!
   "Account address of the market creator"
@@ -226,8 +226,6 @@ type Pool @entity {
   marketId: Int! @index
   "Zeitgeist's identifier for pool"
   poolId: Int! @index
-  "Status of the pool"
-  poolStatus: String!
   "Scoring rule used for the pool"
   scoringRule: String!
   "Status of the pool"
@@ -241,7 +239,7 @@ type Pool @entity {
   "Total amount of ZTG that has moved through a market's liquidity pool"
   volume: BigInt!
   "List of lengths for each asset"
-  weights: [Weight]!
+  weights: [Weight!]!
 }
 
 """
@@ -259,8 +257,6 @@ type HistoricalPool @entity {
   event: String!
   "Zeitgeist's identifier for pool"
   poolId: Int!
-  "Current status of the pool"
-  poolStatus: String!
   "Current status of the pool"
   status: PoolStatus!
   "Timestamp of the block"

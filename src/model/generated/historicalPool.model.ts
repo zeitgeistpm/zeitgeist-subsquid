@@ -48,12 +48,6 @@ export class HistoricalPool {
     /**
      * Current status of the pool
      */
-    @Column_("text", {nullable: false})
-    poolStatus!: string
-
-    /**
-     * Current status of the pool
-     */
     @Column_("varchar", {length: 17, nullable: false})
     status!: PoolStatus
 

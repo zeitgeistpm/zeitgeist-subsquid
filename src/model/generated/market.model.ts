@@ -40,8 +40,8 @@ export class Market {
     /**
      * Share details
      */
-    @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.map((val: any) => val == null ? undefined : val.toJSON()), from: obj => obj == null ? undefined : marshal.fromList(obj, val => val == null ? undefined : new CategoryMetadata(undefined, val))}, nullable: true})
-    categories!: (CategoryMetadata | undefined | null)[] | undefined | null
+    @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.map((val: any) => val.toJSON()), from: obj => obj == null ? undefined : marshal.fromList(obj, val => new CategoryMetadata(undefined, marshal.nonNull(val)))}, nullable: true})
+    categories!: (CategoryMetadata)[] | undefined | null
 
     /**
      * Can be `Permissionless` or `Advised`
