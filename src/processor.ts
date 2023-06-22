@@ -212,8 +212,6 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
       return poolActive(ctx, block, item);
     case 'Swaps.PoolClosed':
       return poolClosed(ctx, block, item);
-    case 'Swaps.PoolCreate':
-      return poolCreate(ctx, block, item);
     case 'Swaps.PoolExit':
       return poolExit(ctx, block, item);
     case 'Swaps.PoolExitWithExactAssetAmount':
@@ -487,6 +485,12 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             const key = makeKey(hab.accountId, hab.assetId);
             balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
             balanceHistory.push(hab);
+            break;
+          }
+          case 'Swaps.PoolCreate': {
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            await poolCreate(ctx, block.header, item);
             break;
           }
           case 'Swaps.PoolDestroyed': {
