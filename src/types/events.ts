@@ -13,6 +13,7 @@ import * as v39 from './v39'
 import * as v40 from './v40'
 import * as v41 from './v41'
 import * as v42 from './v42'
+import * as v46 from './v46'
 
 export class BalancesBalanceSetEvent {
     private readonly _chain: Chain
@@ -840,6 +841,21 @@ export class PredictionMarketsMarketCreatedEvent {
      */
     get asV42(): [bigint, Uint8Array, v42.Market] {
         assert(this.isV42)
+        return this._chain.decodeEvent(this.event)
+    }
+
+    /**
+     * A market has been created. \[market_id, market_account, market\]
+     */
+    get isV46(): boolean {
+        return this._chain.getEventHash('PredictionMarkets.MarketCreated') === '8a1856bf3e540eda844210e0b265ed5193ffe9c3fecdc196fcb22a1f8c9f0d45'
+    }
+
+    /**
+     * A market has been created. \[market_id, market_account, market\]
+     */
+    get asV46(): [bigint, Uint8Array, v46.Market] {
+        assert(this.isV46)
         return this._chain.decodeEvent(this.event)
     }
 }
@@ -2187,6 +2203,21 @@ export class SystemExtrinsicFailedEvent {
         assert(this.isV42)
         return this._chain.decodeEvent(this.event)
     }
+
+    /**
+     * An extrinsic failed.
+     */
+    get isV46(): boolean {
+        return this._chain.getEventHash('System.ExtrinsicFailed') === '36c29895cd15b6f845bb064a671635ce07ef9de9648695c2803020e8510d0fb3'
+    }
+
+    /**
+     * An extrinsic failed.
+     */
+    get asV46(): {dispatchError: v46.DispatchError, dispatchInfo: v46.DispatchInfo} {
+        assert(this.isV46)
+        return this._chain.decodeEvent(this.event)
+    }
 }
 
 export class SystemExtrinsicSuccessEvent {
@@ -2244,6 +2275,21 @@ export class SystemExtrinsicSuccessEvent {
      */
     get asV42(): {dispatchInfo: v42.DispatchInfo} {
         assert(this.isV42)
+        return this._chain.decodeEvent(this.event)
+    }
+
+    /**
+     * An extrinsic completed successfully.
+     */
+    get isV46(): boolean {
+        return this._chain.getEventHash('System.ExtrinsicSuccess') === '6b78214e1591ecc2de1662ebf5ca93838612414a62415cde1cdd2962f8235a92'
+    }
+
+    /**
+     * An extrinsic completed successfully.
+     */
+    get asV46(): {dispatchInfo: v46.DispatchInfo} {
+        assert(this.isV46)
         return this._chain.decodeEvent(this.event)
     }
 }
