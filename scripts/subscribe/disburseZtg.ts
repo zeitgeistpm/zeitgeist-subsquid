@@ -40,8 +40,14 @@ client.subscribe(
   {
     next: async ({ data }) => {
       const { historicalAccountBalances } = data as any;
-      const habs = historicalAccountBalances as HistoricalAccountBalance[];
-      log(`--> Captured ${habs.length} records on ${GRAPHQL_WS_URL}`);
+      let habs = historicalAccountBalances as HistoricalAccountBalance[];
+
+      // Filter txns that occured in the last 72 hours
+      const fromDate = new Date(new Date().getTime() - 72 * 60 * 60 * 1000);
+      habs = habs.filter((hab) => {
+        return new Date(hab.timestamp) >= fromDate;
+      });
+      log(`--> Captured ${habs.length} records after ${fromDate.toISOString()} on ${GRAPHQL_WS_URL}`);
 
       for (let i = 0; i < habs.length - 1; i++) {
         if (
