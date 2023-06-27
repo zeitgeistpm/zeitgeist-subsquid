@@ -286,7 +286,7 @@ type MarketBonds @jsonField {
   "Bond associated with oracle selection"
   oracle: MarketBond!
   "A bond for an outcome reporter, who is not the oracle"
-  outsider: MarketBond!
+  outsider: MarketBond
 }
 
 """
