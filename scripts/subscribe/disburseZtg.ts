@@ -42,7 +42,7 @@ client.subscribe(
       const { historicalAccountBalances } = data as any;
       let habs = historicalAccountBalances as HistoricalAccountBalance[];
 
-      // Filter txns that occured in the last 72 hours
+      // Filter txns that occurred in the last 72 hours
       const fromDate = new Date(new Date().getTime() - 72 * 60 * 60 * 1000);
       habs = habs.filter((hab) => {
         return new Date(hab.timestamp) >= fromDate;
