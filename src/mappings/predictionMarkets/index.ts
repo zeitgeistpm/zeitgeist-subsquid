@@ -4,6 +4,7 @@ import * as ss58 from '@subsquid/ss58';
 import { util } from '@zeitgeistpm/sdk';
 import { Like } from 'typeorm';
 import { Ctx, EventItem } from '../../processor';
+import { MarketCommonsMarketsStorage } from '../../types/storage';
 import {
   Account,
   AccountBalance,
@@ -351,14 +352,6 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
       bond.isSettled = oracleBond.isSettled;
       marketBonds.oracle = bond;
     }
-    if (market.bonds.outsider) {
-      const outsiderBond = market.bonds.outsider;
-      const bond = new MarketBond();
-      bond.who = encodeAddress(outsiderBond.who, 73);
-      bond.value = outsiderBond.value;
-      bond.isSettled = outsiderBond.isSettled;
-      marketBonds.outsider = bond;
-    }
     newMarket.bonds = marketBonds;
   }
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(newMarket, null, 2)}`);
@@ -384,6 +377,7 @@ export const marketDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Eve
   if (market.bonds) {
     market.bonds.creation.isSettled = true;
     market.bonds.oracle.isSettled = true;
+    if (market.bonds.outsider) market.bonds.outsider.isSettled = true;
   }
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
@@ -550,6 +544,19 @@ export const marketReported = async (ctx: Ctx, block: SubstrateBlock, item: Even
   if (report.by) mr.by = ss58.codec('zeitgeist').encode(report.by);
   mr.outcome = ocr;
 
+  if (mr.by !== market.oracle && specVersion(block.specId) >= 46) {
+    const storage = new MarketCommonsMarketsStorage(ctx, block);
+    const onChainMarket = await storage.asV46.get(BigInt(marketId));
+    if (onChainMarket && onChainMarket.bonds.outsider && market.bonds) {
+      const outsiderBond = onChainMarket.bonds.outsider;
+      const bond = new MarketBond();
+      bond.who = encodeAddress(outsiderBond.who, 73);
+      bond.value = outsiderBond.value;
+      bond.isSettled = outsiderBond.isSettled;
+      market.bonds.outsider = bond;
+    }
+  }
+
   market.status = status ? getMarketStatus(status) : MarketStatus.Reported;
   market.report = mr;
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
@@ -581,6 +588,7 @@ export const marketResolved = async (ctx: Ctx, block: SubstrateBlock, item: Even
   if (market.bonds) {
     if (market.creation === MarketCreation.Permissionless) market.bonds.creation.isSettled = true;
     market.bonds.oracle.isSettled = true;
+    if (market.bonds.outsider) market.bonds.outsider.isSettled = true;
   }
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
