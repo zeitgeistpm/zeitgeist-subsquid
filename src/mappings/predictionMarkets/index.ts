@@ -351,6 +351,14 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
       bond.isSettled = oracleBond.isSettled;
       marketBonds.oracle = bond;
     }
+    if (market.bonds.outsider) {
+      const outsiderBond = market.bonds.outsider;
+      const bond = new MarketBond();
+      bond.who = encodeAddress(outsiderBond.who, 73);
+      bond.value = outsiderBond.value;
+      bond.isSettled = outsiderBond.isSettled;
+      marketBonds.outsider = bond;
+    }
     newMarket.bonds = marketBonds;
   }
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(newMarket, null, 2)}`);
