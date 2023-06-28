@@ -1,7 +1,7 @@
 import Nedb from 'nedb-promises';
 import { MarketStatus } from '../../src/model';
 
-export class Db {
+export class StatusDb {
   private store: Nedb;
 
   constructor(dbPath: string) {
