@@ -14,6 +14,7 @@ const GRAPHQL_WS_URL = NODE_URL.includes(`bs`)
   ? `wss://processor.bsr.zeitgeist.pm/graphql`
   : `wss://processor.rpc-0.zeitgeist.pm/graphql`;
 const LOG_DB_PATH = NODE_URL.includes(`bs`) ? `marketStatus-testnet.db` : `marketStatus-mainnet.db`;
+const DOMAIN_PREFIX = NODE_URL.includes(`bs`) ? `test.staging` : `app`;
 
 const client = createClient({ webSocketImpl: WebSocket, url: GRAPHQL_WS_URL });
 const db = new StatusDb(LOG_DB_PATH);
@@ -102,7 +103,7 @@ const postDiscordAlert = async (market: Market): Promise<{ status: boolean; resu
         {
           color,
           title: market.question,
-          url: `https://app.zeitgeist.pm/markets/${market.marketId}`,
+          url: `https://${DOMAIN_PREFIX}.zeitgeist.pm/markets/${market.marketId}`,
           fields: fields,
         },
       ],
