@@ -5,25 +5,35 @@
 import { createClient } from 'graphql-ws';
 import WebSocket from 'ws';
 import axios from 'axios';
-import { Market } from '../../src/model';
-import { Db } from './db';
+import { Market, MarketStatus } from '../../src/model';
+import { StatusDb } from './db';
 
 const NODE_URL = process.argv[2];
 const WEBHOOK_URL = process.argv[3];
 const GRAPHQL_WS_URL = NODE_URL.includes(`bs`)
   ? `wss://processor.bsr.zeitgeist.pm/graphql`
   : `wss://processor.rpc-0.zeitgeist.pm/graphql`;
-const CACHE_DB_PATH = `subscribe-db.db`;
+const LOG_DB_PATH = NODE_URL.includes(`bs`) ? `marketStatus-testnet.db` : `marketStatus-mainnet.db`;
 
 const client = createClient({ webSocketImpl: WebSocket, url: GRAPHQL_WS_URL });
-const db = new Db(CACHE_DB_PATH);
+const db = new StatusDb(LOG_DB_PATH);
 
 client.subscribe(
   {
     query: `
       subscription {
-        markets(where: {status_in: [Closed, Reported, Disputed, Resolved]}) {
+        markets(where: {status_in: [Proposed, Active, Closed, Reported, Disputed, Resolved]}, orderBy: marketId_DESC) {
+          id
+          description
           marketId
+          marketType {
+            categorical
+            scalar
+          }
+          period {
+            start
+            end
+          }
           question
           status
         }
@@ -34,20 +44,25 @@ client.subscribe(
     next: async ({ data }) => {
       const { markets } = data as any;
       const m = markets as Market[];
+
       for (let i = 0; i < m.length; i++) {
+        // Skip the market if its status is already logged
         const entry = await db.getMarketWithId(m[i].marketId);
         if (entry && entry.status === m[i].status) continue;
-        const status = await postDiscordAlert(m[i]);
-        if (status && status === 204) {
+
+        log(`--> Captured ${m[i].status} status on marketId:${m[i].marketId}`);
+        const res = await postDiscordAlert(m[i]);
+        log(res.result, m[i].id);
+        if (res.status) {
           await db.saveOrUpdateMarket(m[i].marketId, m[i].status);
         }
       }
     },
     error: (error) => {
-      console.error(`Error while subscribing to query: ${error}`);
+      log(`Error while subscribing to query: ${JSON.stringify(error)}`);
     },
     complete: () => {
-      console.log('Subscription complete!');
+      log(`Subscription complete`);
     },
   }
 );
