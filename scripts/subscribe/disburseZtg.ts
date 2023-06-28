@@ -58,6 +58,9 @@ client.subscribe(
           log(`Doesn't seem like a XCM transfer`, habs[i].id);
           continue;
         }
+        // Txn is a valid XCM transfer if it reaches here
+        i++; // Skip accompanying fee deposit on treasury account
+
         const entry = await db.getAccountWithId(habs[i].accountId);
         if (entry) {
           log(`Account has already been logged on ${entry.timestamp} with ${entry.amount} amount`, habs[i].id);
@@ -65,10 +68,6 @@ client.subscribe(
         }
         if (BigInt(habs[i].dBalance) < BigInt(10 ** 10)) {
           log(`Amount is less than 1 unit (${habs[i].dBalance})`, habs[i].id);
-          continue;
-        }
-        if (habs[i].accountId === `dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ`) {
-          log(`Deposit on treasury account`, habs[i].id);
           continue;
         }
         const balance = await getBalance(habs[i]);
