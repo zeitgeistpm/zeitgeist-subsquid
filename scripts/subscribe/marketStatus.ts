@@ -103,7 +103,7 @@ const postDiscordAlert = async (market: Market): Promise<{ status: boolean; resu
           color,
           title: market.question,
           url: `https://app.zeitgeist.pm/markets/${market.marketId}`,
-          fields,
+          fields: fields,
         },
       ],
     });
