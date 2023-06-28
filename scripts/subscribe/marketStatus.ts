@@ -110,7 +110,6 @@ const postDiscordAlert = async (market: Market): Promise<{ status: boolean; resu
     return { status: true, result: `Successfully posted discord alert` };
   } catch (err) {
     log(JSON.stringify(err));
-  } finally {
     return { status: false, result: `Error while posting discord alert` };
   }
 };
