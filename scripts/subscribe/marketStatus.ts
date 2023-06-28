@@ -52,23 +52,58 @@ client.subscribe(
   }
 );
 
-const postDiscordAlert = async (market: Market): Promise<number | undefined> => {
-  console.log(`Posting ${market.status} alert for marketId: ${market.marketId}`);
+const postDiscordAlert = async (market: Market): Promise<{ status: boolean; result: string }> => {
+  if (!WEBHOOK_URL) return { status: false, result: `Web-hook url not found` };
+
+  let color = `11584734`;
+  let fields = [] as any;
+  if (market.status === MarketStatus.Proposed) {
+    color = `16766720`;
+    fields = [
+      {
+        name: `Description`,
+        value: market.description!.replace(/<[^>]+>/g, ``),
+      },
+      {
+        name: `MarketType`,
+        value: market.marketType.categorical
+          ? `Categorical : ${market.marketType.categorical}`
+          : `Scalar : ${market.marketType.scalar}`,
+      },
+      {
+        name: `Period`,
+        value: `${new Date(+market.period.start.toString()).toUTCString()} - ${new Date(
+          +market.period.end.toString()
+        ).toUTCString()}`,
+      },
+    ];
+  }
+
   try {
-    const res = await axios.post(WEBHOOK_URL, {
+    await axios.post(WEBHOOK_URL, {
       username: `Market ${market.status} Alert`,
-      content: '',
+      content: ``,
       embeds: [
         {
-          color: '11584734',
+          color,
           title: market.question,
           url: `https://app.zeitgeist.pm/markets/${market.marketId}`,
+          fields,
         },
       ],
     });
-    return res.status;
+    return { status: true, result: `Successfully posted discord alert` };
   } catch (err) {
-    console.error(`Error while posting discord alert for ${market.marketId}: ${err}`);
+    log(JSON.stringify(err));
+  } finally {
+    return { status: false, result: `Error while posting discord alert` };
+  }
+};
+
+const log = (message: string, marketObjID?: string) => {
+  if (marketObjID) {
+    console.log(`[${marketObjID}] ${message}`);
     return;
   }
+  console.log(message);
 };
