@@ -70,16 +70,19 @@ client.subscribe(
 
 const postDiscordAlert = async (market: Market): Promise<{ status: boolean; result: string }> => {
   if (!WEBHOOK_URL) return { status: false, result: `Web-hook url not found` };
+  if (!market.question) return { status: false, result: `Market's question not found` };
 
   let color = `11584734`;
   let fields = [] as any;
   if (market.status === MarketStatus.Proposed) {
     color = `16766720`;
-    fields = [
-      {
+    if (market.description) {
+      fields.push({
         name: `Description`,
-        value: market.description!.replace(/<[^>]+>/g, ``),
-      },
+        value: market.description.replace(/<[^>]+>/g, ``),
+      });
+    }
+    fields.push(
       {
         name: `MarketType`,
         value: market.marketType.categorical
@@ -91,8 +94,8 @@ const postDiscordAlert = async (market: Market): Promise<{ status: boolean; resu
         value: `${new Date(+market.period.start.toString()).toUTCString()} - ${new Date(
           +market.period.end.toString()
         ).toUTCString()}`,
-      },
-    ];
+      }
+    );
   }
 
   try {
