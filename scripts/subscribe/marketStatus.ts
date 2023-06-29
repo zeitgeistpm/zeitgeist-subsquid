@@ -70,7 +70,7 @@ client.subscribe(
 
 const postDiscordAlert = async (market: Market): Promise<{ status: boolean; result: string }> => {
   if (!WEBHOOK_URL) return { status: false, result: `Web-hook url not found` };
-  if (!market.question) return { status: false, result: `Market's question not found` };
+  if (!market.question) return { status: true, result: `Market's question not found` };
 
   let color = `11584734`;
   let fields = [] as any;
@@ -98,24 +98,27 @@ const postDiscordAlert = async (market: Market): Promise<{ status: boolean; resu
     );
   }
 
-  try {
-    await axios.post(WEBHOOK_URL, {
-      username: `Market ${market.status} Alert`,
-      content: ``,
-      embeds: [
-        {
-          color,
-          title: market.question,
-          url: `https://${DOMAIN_PREFIX}.zeitgeist.pm/markets/${market.marketId}`,
-          fields: fields,
-        },
-      ],
-    });
-    return { status: true, result: `Successfully posted discord alert` };
-  } catch (err) {
-    log(JSON.stringify(err));
-    return { status: false, result: `Error while posting discord alert` };
-  }
+  return new Promise((resolve) => {
+    setTimeout(async () => {
+      try {
+        const res = await axios.post(WEBHOOK_URL, {
+          username: `Market ${market.status} Alert`,
+          embeds: [
+            {
+              color,
+              title: market.question,
+              url: `https://${DOMAIN_PREFIX}.zeitgeist.pm/markets/${market.marketId}`,
+              fields,
+            },
+          ],
+        });
+        resolve({ status: true, result: `Successfully posted discord alert with status ${res.status}` });
+      } catch (err) {
+        log(JSON.stringify(err));
+        resolve({ status: false, result: `Error while posting discord alert` });
+      }
+    }, 5000);
+  });
 };
 
 const log = (message: string, marketObjID?: string) => {
