@@ -47,9 +47,8 @@ client.subscribe(
       const m = markets as Market[];
 
       for (let i = 0; i < m.length; i++) {
-        // Skip the market if its status is already logged
         const entry = await db.getMarketWithId(m[i].marketId);
-        if (entry && entry.status === m[i].status) continue;
+        if (entry && entry.status === m[i].status) continue; // Skip the market if its status is already logged
 
         log(`--> Captured ${m[i].status} status on marketId:${m[i].marketId}`);
         const res = await postDiscordAlert(m[i]);
@@ -118,7 +117,7 @@ const postDiscordAlert = async (market: Market): Promise<{ status: boolean; resu
         });
         resolve({ status: true, result: `Successfully posted discord alert with status ${res.status}` });
       } catch (err) {
-        log(JSON.stringify(err));
+        log(JSON.stringify(err, null, 2));
         resolve({ status: false, result: `Error while posting discord alert` });
       }
     }, 5000);
