@@ -77,9 +77,13 @@ const postDiscordAlert = async (market: Market): Promise<{ status: boolean; resu
   if (market.status === MarketStatus.Proposed) {
     color = `16766720`;
     if (market.description) {
+      let description = market.description.replace(/<[^>]+>/g, ``); // Strip HTML tags
+      if (description.length > 1000) {
+        description = description.substring(0, 997) + `...`; // Limit characters in field.value to 1000
+      }
       fields.push({
         name: `Description`,
-        value: market.description.replace(/<[^>]+>/g, ``),
+        value: description,
       });
     }
     fields.push(
