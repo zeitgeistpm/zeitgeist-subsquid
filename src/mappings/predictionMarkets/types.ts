@@ -95,16 +95,10 @@ export const getMarketCreatedEvent = (ctx: Ctx, item: EventItem, specVersion: nu
     market.period.start = market.period.value.start;
     market.period.end = market.period.value.end;
     return { marketId, marketAccountId, market };
-  } else if (event.isV38 || event.isV40 || event.isV41 || event.isV42) {
-    const marketAccountId = encodeAddress(param1, 73);
-    const market = param2 as any;
-    market.period.start = market.period.value.start;
-    market.period.end = market.period.value.end;
-    return { marketId, marketAccountId, market };
   } else {
     const marketAccountId = encodeAddress(param1, 73);
     const market = param2 as any;
-    market.period.start = param2.period.value.start;
+    market.period.start = market.period.value.start;
     market.period.end = market.period.value.end;
     return { marketId, marketAccountId, market };
   }
