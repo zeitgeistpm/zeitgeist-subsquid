@@ -58,23 +58,23 @@ client.subscribe(
           log(`Doesn't seem like a XCM transfer`, habs[i].id);
           continue;
         }
+        // Txn is a valid XCM transfer if it reaches here
         const entry = await db.getAccountWithId(habs[i].accountId);
         if (entry) {
           log(`Account has already been logged on ${entry.timestamp} with ${entry.amount} amount`, habs[i].id);
+          i++; // Skip accompanying fee deposit on treasury account
           continue;
         }
         if (BigInt(habs[i].dBalance) < BigInt(10 ** 10)) {
           log(`Amount is less than 1 unit (${habs[i].dBalance})`, habs[i].id);
-          continue;
-        }
-        if (habs[i].accountId === `dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ`) {
-          log(`Deposit on treasury account`, habs[i].id);
+          i++; // Skip accompanying fee deposit on treasury account
           continue;
         }
         const balance = await getBalance(habs[i]);
         if (balance !== 0) {
           log(`Ztg balance of ${habs[i].accountId} at #${habs[i].blockNumber} is not 0 (${balance})`, habs[i].id);
           await db.saveAccount(habs[i].accountId, new Date().toISOString(), 0);
+          i++; // Skip accompanying fee deposit on treasury account
           continue;
         }
 
@@ -84,6 +84,7 @@ client.subscribe(
         log(`Amount disbursed as of ${date}: ${totalAmtPerDay}`, habs[i].id);
         if (totalAmtPerDay >= PER_DAY_LIMIT) {
           log(`Reached per day limit of ${PER_DAY_LIMIT}`, habs[i].id);
+          i++; // Skip accompanying fee deposit on treasury account
           continue;
         }
 
@@ -91,6 +92,7 @@ client.subscribe(
         log(res.result, habs[i].id);
         if (res.status) {
           await db.saveAccount(habs[i].accountId, new Date().toISOString(), DISBURSE_AMOUNT);
+          i++; // Skip accompanying fee deposit on treasury account
         }
       }
     },
