@@ -420,7 +420,7 @@ export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Event
     });
     await Promise.all(
       abs.map(async (ab) => {
-        const accLookupKey = ab.id.substring(ab.id.lastIndexOf('-') + 1, ab.id.length);
+        const accLookupKey = ab.id.substring(0, ab.id.indexOf('-'));
         const acc = await ctx.store.get(Account, {
           where: { id: Like(`%${accLookupKey}%`) },
         });
@@ -432,7 +432,7 @@ export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Event
         await ctx.store.save<AccountBalance>(ab);
 
         const hab = new HistoricalAccountBalance();
-        hab.id = item.event.id + '-' + acc.accountId.substring(acc.accountId.length - 5);
+        hab.id = item.event.id + '-' + market.marketId + i + '-' + acc.accountId.substring(acc.accountId.length - 5);
         hab.accountId = acc.accountId;
         hab.event = item.event.name.split('.')[1];
         hab.assetId = ab.assetId;

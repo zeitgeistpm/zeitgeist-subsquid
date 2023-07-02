@@ -33,7 +33,7 @@ export const systemExtrinsicFailed = async (
   });
   if (!acc) {
     acc = new Account();
-    acc.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
+    acc.id = walletId;
     acc.accountId = walletId;
     console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
     await ctx.store.save<Account>(acc);
@@ -84,7 +84,7 @@ export const systemExtrinsicSuccess = async (
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
   if (!acc) {
     acc = new Account();
-    acc.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
+    acc.id = walletId;
     acc.accountId = walletId;
     console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
     await ctx.store.save<Account>(acc);
@@ -112,7 +112,7 @@ export const systemNewAccount = async (ctx: Ctx, block: SubstrateBlock, item: Ev
   if (acc) return;
 
   let newAcc = new Account();
-  newAcc.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
+  newAcc.id = walletId;
   newAcc.accountId = walletId;
   console.log(`[${item.event.name}] Saving account: ${JSON.stringify(newAcc, null, 2)}`);
   await ctx.store.save<Account>(newAcc);
