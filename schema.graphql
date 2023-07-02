@@ -5,6 +5,8 @@ encounters any new address, they get registered here as user/pool/market account
 type Account @entity {
   "Account address"
   accountId: String!
+  "List of balances connected to the account"
+  balances: [AccountBalance]! @derivedFrom(field: "account")
   "Unique identifier of the object"
   id: ID!
   "Zeitgeist's identifier for market. Valid only for market account."

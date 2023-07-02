@@ -1,4 +1,5 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_} from "typeorm"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, OneToMany as OneToMany_} from "typeorm"
+import {AccountBalance} from "./accountBalance.model"
 
 /**
  * A type that has ss58 address format of the account. As soon as the chain
@@ -15,6 +16,12 @@ export class Account {
      */
     @Column_("text", {nullable: false})
     accountId!: string
+
+    /**
+     * List of balances connected to the account
+     */
+    @OneToMany_(() => AccountBalance, e => e.account)
+    balances!: AccountBalance[]
 
     /**
      * Unique identifier of the object
