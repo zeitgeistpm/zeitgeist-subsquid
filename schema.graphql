@@ -42,6 +42,8 @@ type HistoricalAccountBalance @entity {
   dBalance: BigInt!
   "Event method which initiated this change"
   event: String!
+  "Extrinsic responsible for this change"
+  extrinsic: Extrinsic!
   "Unique identifier of the object"
   id: ID!
   "Timestamp of the block"
@@ -263,6 +265,16 @@ type HistoricalPool @entity {
   timestamp: DateTime!
   "New updated volume"
   volume: BigInt
+}
+
+"""
+Extrinsic data
+"""
+type Extrinsic @jsonField {
+  "Extrinsic hash"
+  hash: String!
+  "Name of the extrinsic"
+  name: String!
 }
 
 """
