@@ -68,7 +68,8 @@ export const decodeMarketMetadata = async (metadata: string): Promise<DecodedMar
   }
 };
 
-export const extrinsicFromEvent = (event: any): Extrinsic => {
+export const extrinsicFromEvent = (event: any): Extrinsic | null => {
+  if (!event.extrinsic) return null;
   return new Extrinsic({
     name: event.extrinsic.call.name,
     hash: event.extrinsic.hash,
