@@ -4,6 +4,7 @@ import {
   Account,
   AccountBalance,
   Asset,
+  Extrinsic,
   HistoricalAccountBalance,
   HistoricalAsset,
   HistoricalMarket,
@@ -57,6 +58,7 @@ export const resolveMarket = async (ctx: Ctx, block: SubstrateBlock, marketId: n
           hab.id = eventId + '-' + market.marketId + i + '-' + acc.accountId.substring(acc.accountId.length - 5);
           hab.accountId = acc.accountId;
           hab.event = eventName.split('.')[1];
+          hab.extrinsic = new Extrinsic({ name: eventName, hash: eventId });
           hab.assetId = ab.assetId;
           hab.dBalance = newBalance - oldBalance;
           hab.blockNumber = block.height;

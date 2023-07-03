@@ -18,7 +18,7 @@ import {
   Weight,
 } from '../../model';
 import { Ctx, EventItem } from '../../processor';
-import { calcSpotPrice, getAssetId, getMarketEvent, getPoolStatus, isBaseAsset } from '../helper';
+import { calcSpotPrice, extrinsicFromEvent, getAssetId, getMarketEvent, getPoolStatus, isBaseAsset } from '../helper';
 import {
   getArbitrageBuyBurnEvent,
   getArbitrageMintSellEvent,
@@ -374,6 +374,7 @@ export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Event
   hab.id = item.event.id + '-' + pool.accountId.substring(pool.accountId.length - 5);
   hab.accountId = pool.accountId;
   hab.event = item.event.name.split('.')[1];
+  hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = ab.assetId;
   hab.dBalance = newBalance - oldBalance;
   hab.blockNumber = block.height;
@@ -435,6 +436,7 @@ export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Event
         hab.id = item.event.id + '-' + market.marketId + i + '-' + acc.accountId.substring(acc.accountId.length - 5);
         hab.accountId = acc.accountId;
         hab.event = item.event.name.split('.')[1];
+        hab.extrinsic = extrinsicFromEvent(item.event);
         hab.assetId = ab.assetId;
         hab.dBalance = newBalance - oldBalance;
         hab.blockNumber = block.height;
@@ -599,6 +601,7 @@ export const poolExitCall = async (ctx: Ctx, block: SubstrateBlock, item: any) =
   hab.id = item.call.id + '-' + walletId.substring(walletId.length - 5);
   hab.accountId = walletId;
   hab.event = item.call.name.split('.')[1];
+  hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = ab.assetId;
   hab.dBalance = newBalance - oldBalance;
   hab.blockNumber = block.height;

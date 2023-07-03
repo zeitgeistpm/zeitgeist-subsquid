@@ -3,6 +3,7 @@ import { Like } from 'typeorm';
 import {
   Account,
   AccountBalance,
+  Extrinsic,
   HistoricalAccountBalance,
   HistoricalMarket,
   Market,
@@ -58,6 +59,7 @@ export const destroyMarkets = async (ctx: Ctx, block: SubstrateBlock) => {
             hab.id = eventId + '-' + market.marketId + i + '-' + acc.accountId.substring(acc.accountId.length - 5);
             hab.accountId = acc.accountId;
             hab.event = eventName.split('.')[1];
+            hab.extrinsic = new Extrinsic({ name: eventName, hash: eventId });
             hab.assetId = ab.assetId;
             hab.dBalance = ab.balance - oldBalance;
             hab.blockNumber = block.height;

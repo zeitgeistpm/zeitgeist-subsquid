@@ -27,6 +27,7 @@ import {
 import {
   createAssetsForMarket,
   decodeMarketMetadata,
+  extrinsicFromEvent,
   formatMarketCreation,
   getAssetId,
   getMarketEvent,
@@ -113,6 +114,7 @@ export const boughtCompleteSet = async (
     hab.id = item.event.id + '-' + marketId + i + '-' + walletId.substring(walletId.length - 5);
     hab.accountId = walletId;
     hab.event = item.event.name.split('.')[1];
+    hab.extrinsic = extrinsicFromEvent(item.event);
     hab.assetId = assetId;
     hab.dBalance = amt;
     hab.blockNumber = block.height;
@@ -201,6 +203,7 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
       hab.id = item.event.id + '-' + marketAccountId.substring(marketAccountId.length - 5);
       hab.accountId = acc.accountId;
       hab.event = item.event.name.split('.')[1];
+      hab.extrinsic = extrinsicFromEvent(item.event);
       hab.assetId = ab.assetId;
       hab.dBalance = BigInt(0);
       hab.blockNumber = block.height;
@@ -397,6 +400,7 @@ export const marketDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Eve
   hab.id = item.event.id + '-' + acc.accountId.substring(acc.accountId.length - 5);
   hab.accountId = acc.accountId;
   hab.event = item.event.name.split('.')[1];
+  hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = ab.assetId;
   hab.dBalance = newBalance - oldBalance;
   hab.blockNumber = block.height;
@@ -611,6 +615,7 @@ export const marketResolved = async (ctx: Ctx, block: SubstrateBlock, item: Even
           hab.id = item.event.id + '-' + market.marketId + i + '-' + acc.accountId.substring(acc.accountId.length - 5);
           hab.accountId = acc.accountId;
           hab.event = item.event.name.split('.')[1];
+          hab.extrinsic = extrinsicFromEvent(item.event);
           hab.assetId = ab.assetId;
           hab.dBalance = newBalance - oldBalance;
           hab.blockNumber = block.height;
@@ -713,6 +718,7 @@ export const redeemShares = async (ctx: Ctx, block: SubstrateBlock, item: any) =
   hab.accountId = walletId;
   // @ts-ignore
   hab.event = item.call.name.split('.')[1];
+  hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = ab.assetId;
   hab.dBalance = newBalance - oldBalance;
   hab.blockNumber = block.height;
@@ -771,6 +777,7 @@ export const soldCompleteSet = async (
     hab.id = item.event.id + '-' + marketId + i + '-' + walletId.substring(walletId.length - 5);
     hab.accountId = walletId;
     hab.event = item.event.name.split('.')[1];
+    hab.extrinsic = extrinsicFromEvent(item.event);
     hab.assetId = assetId;
     hab.dBalance = -amt;
     hab.blockNumber = block.height;
@@ -792,6 +799,7 @@ export const tokensRedeemed = async (
   hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
   hab.accountId = walletId;
   hab.event = item.event.name.split('.')[1];
+  hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = assetId;
   hab.dBalance = -amtRedeemed;
   hab.blockNumber = block.height;
