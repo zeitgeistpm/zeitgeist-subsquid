@@ -719,7 +719,7 @@ export const redeemSharesCall = async (ctx: Ctx, block: SubstrateBlock, item: an
   hab.accountId = walletId;
   // @ts-ignore
   hab.event = item.call.name.split('.')[1];
-  hab.extrinsic = new Extrinsic({ name: item.call.name, hash: item.extrinsic.hash });
+  hab.extrinsic = item.extrinsic ? new Extrinsic({ name: item.call.name, hash: item.extrinsic.hash }) : null;
   hab.assetId = ab.assetId;
   hab.dBalance = newBalance - oldBalance;
   hab.blockNumber = block.height;
