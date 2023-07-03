@@ -164,22 +164,10 @@ if (process.env.WS_NODE_URL?.includes(`bs`)) {
   // @ts-ignore
   processor.addCall('PredictionMarkets.redeem_shares', {
     range: { from: 0, to: 1089818 },
-    data: {
-      event: {
-        args: true,
-        extrinsic: true,
-      },
-    },
   });
   // @ts-ignore
   processor.addCall('Swaps.pool_exit', {
     range: { from: 0, to: 1089818 },
-    data: {
-      event: {
-        args: true,
-        extrinsic: true,
-      },
-    },
   });
   // @ts-ignore
   processor.addEvent('System.ExtrinsicFailed', eventRangeOptions);
