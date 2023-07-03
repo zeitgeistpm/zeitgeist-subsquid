@@ -1,11 +1,11 @@
-module.exports = class Data1686976504351 {
-    name = 'Data1686976504351'
+module.exports = class Data1688366912420 {
+    name = 'Data1688366912420'
 
     async up(db) {
         await db.query(`CREATE TABLE "account" ("account_id" text NOT NULL, "id" character varying NOT NULL, "market_id" integer, "pool_id" integer, CONSTRAINT "PK_54115ee388cdb6d86bb4bf5b2ea" PRIMARY KEY ("id"))`)
         await db.query(`CREATE TABLE "account_balance" ("asset_id" text NOT NULL, "balance" numeric NOT NULL, "id" character varying NOT NULL, "account_id" character varying, CONSTRAINT "PK_bd893045760f719e24a95a42562" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_029576f147e256f1f93e4865c7" ON "account_balance" ("account_id") `)
-        await db.query(`CREATE TABLE "historical_account_balance" ("account_id" text NOT NULL, "asset_id" text NOT NULL, "block_number" integer NOT NULL, "d_balance" numeric NOT NULL, "event" text NOT NULL, "id" character varying NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_bfc701998dd9e45981c88f4d1af" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "historical_account_balance" ("account_id" text NOT NULL, "asset_id" text NOT NULL, "block_number" integer NOT NULL, "d_balance" numeric NOT NULL, "event" text NOT NULL, "extrinsic" jsonb, "id" character varying NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_bfc701998dd9e45981c88f4d1af" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_082fc1e4bc8a039eab7ebc56ff" ON "historical_account_balance" ("account_id") `)
         await db.query(`CREATE TABLE "pool" ("id" character varying NOT NULL, "account_id" text NOT NULL, "base_asset" text NOT NULL, "base_asset_qty" numeric NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "market_id" integer NOT NULL, "pool_id" integer NOT NULL, "scoring_rule" text NOT NULL, "status" character varying(17) NOT NULL, "swap_fee" text NOT NULL, "total_subsidy" text NOT NULL, "total_weight" text NOT NULL, "volume" numeric NOT NULL, "weights" jsonb NOT NULL, CONSTRAINT "PK_db1bfe411e1516c01120b85f8fe" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_7ae36e79b02d471a94b311dfbb" ON "pool" ("market_id") `)

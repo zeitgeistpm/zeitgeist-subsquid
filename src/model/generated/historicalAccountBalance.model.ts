@@ -46,8 +46,8 @@ export class HistoricalAccountBalance {
     /**
      * Extrinsic responsible for this change
      */
-    @Column_("jsonb", {transformer: {to: obj => obj.toJSON(), from: obj => obj == null ? undefined : new Extrinsic(undefined, obj)}, nullable: false})
-    extrinsic!: Extrinsic
+    @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new Extrinsic(undefined, obj)}, nullable: true})
+    extrinsic!: Extrinsic | undefined | null
 
     /**
      * Unique identifier of the object

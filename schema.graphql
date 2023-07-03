@@ -43,7 +43,7 @@ type HistoricalAccountBalance @entity {
   "Event method which initiated this change"
   event: String!
   "Extrinsic responsible for this change"
-  extrinsic: Extrinsic!
+  extrinsic: Extrinsic
   "Unique identifier of the object"
   id: ID!
   "Timestamp of the block"
