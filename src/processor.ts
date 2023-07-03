@@ -82,6 +82,10 @@ import { specVersion } from './mappings/helper';
 require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` });
 console.log(`ENVIRONMENT: ${process.env.NODE_ENV}`);
 
+const callRangeOptions = {
+  range: { from: 0, to: 1089818 },
+} as const;
+
 const eventOptions = {
   data: {
     event: {
@@ -162,13 +166,9 @@ const processor = new SubstrateBatchProcessor()
 
 if (process.env.WS_NODE_URL?.includes(`bs`)) {
   // @ts-ignore
-  processor.addCall('PredictionMarkets.redeem_shares', {
-    range: { from: 0, to: 1089818 },
-  });
+  processor.addCall('PredictionMarkets.redeem_shares', callRangeOptions);
   // @ts-ignore
-  processor.addCall('Swaps.pool_exit', {
-    range: { from: 0, to: 1089818 },
-  });
+  processor.addCall('Swaps.pool_exit', callRangeOptions);
   // @ts-ignore
   processor.addEvent('System.ExtrinsicFailed', eventRangeOptions);
   // @ts-ignore
@@ -336,7 +336,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   for (let block of ctx.blocks) {
     for (let item of block.items) {
       // @ts-ignore
-      if (item.kind === 'call' && item.call.success) {
+      if (item.kind === 'call' && item.call.success && block.header.height < 1089818) {
         // @ts-ignore
         if (item.name === 'PredictionMarkets.redeem_shares') {
           await saveBalanceChanges(ctx, balanceAccounts);
