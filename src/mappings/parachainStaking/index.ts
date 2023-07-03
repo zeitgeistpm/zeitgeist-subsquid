@@ -1,7 +1,7 @@
 import { SubstrateBlock } from '@subsquid/substrate-processor';
 import { Account, HistoricalAccountBalance } from '../../model';
 import { Ctx, EventItem } from '../../processor';
-import { extrinsicFromEvent, initBalance } from '../helper';
+import { initBalance } from '../helper';
 import { getRewardedEvent } from './types';
 
 export const parachainStakingRewarded = async (
@@ -25,7 +25,6 @@ export const parachainStakingRewarded = async (
   hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
   hab.accountId = acc.accountId;
   hab.event = item.event.name.split('.')[1];
-  hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = 'Ztg';
   hab.dBalance = rewards;
   hab.blockNumber = block.height;
