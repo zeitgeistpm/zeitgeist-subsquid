@@ -7,6 +7,7 @@ import {
   Account,
   AccountBalance,
   Asset,
+  Extrinsic,
   HistoricalAccountBalance,
   HistoricalAsset,
   HistoricalMarket,
@@ -601,7 +602,7 @@ export const poolExitCall = async (ctx: Ctx, block: SubstrateBlock, item: any) =
   hab.id = item.call.id + '-' + walletId.substring(walletId.length - 5);
   hab.accountId = walletId;
   hab.event = item.call.name.split('.')[1];
-  hab.extrinsic = extrinsicFromEvent(item.event);
+  hab.extrinsic = new Extrinsic({ name: item.call.name, hash: item.extrinsic.hash });
   hab.assetId = ab.assetId;
   hab.dBalance = newBalance - oldBalance;
   hab.blockNumber = block.height;

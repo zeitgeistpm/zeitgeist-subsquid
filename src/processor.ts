@@ -49,7 +49,7 @@ import {
   marketReported,
   marketResolved,
   marketStartedWithSubsidy,
-  redeemShares,
+  redeemSharesCall,
   soldCompleteSet,
   tokensRedeemed,
 } from './mappings/predictionMarkets';
@@ -341,7 +341,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
         if (item.name === 'PredictionMarkets.redeem_shares') {
           await saveBalanceChanges(ctx, balanceAccounts);
           balanceAccounts.clear();
-          await redeemShares(ctx, block.header, item);
+          await redeemSharesCall(ctx, block.header, item);
         }
         // @ts-ignore
         if (item.name === 'Swaps.pool_exit') {

@@ -10,6 +10,7 @@ import {
   AccountBalance,
   Asset,
   CategoryMetadata,
+  Extrinsic,
   HistoricalAccountBalance,
   HistoricalAsset,
   HistoricalMarket,
@@ -689,7 +690,7 @@ export const marketStartedWithSubsidy = async (ctx: Ctx, block: SubstrateBlock, 
   await ctx.store.save<HistoricalMarket>(hm);
 };
 
-export const redeemShares = async (ctx: Ctx, block: SubstrateBlock, item: any) => {
+export const redeemSharesCall = async (ctx: Ctx, block: SubstrateBlock, item: any) => {
   // @ts-ignore
   const accountId =
     item.call.origin !== undefined ? item.call.origin.value.value : item.extrinsic.signature.address.value;
@@ -718,7 +719,7 @@ export const redeemShares = async (ctx: Ctx, block: SubstrateBlock, item: any) =
   hab.accountId = walletId;
   // @ts-ignore
   hab.event = item.call.name.split('.')[1];
-  hab.extrinsic = extrinsicFromEvent(item.event);
+  hab.extrinsic = new Extrinsic({ name: item.call.name, hash: item.extrinsic.hash });
   hab.assetId = ab.assetId;
   hab.dBalance = newBalance - oldBalance;
   hab.blockNumber = block.height;
