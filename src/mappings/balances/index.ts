@@ -1,7 +1,7 @@
 import { SubstrateBlock } from '@subsquid/substrate-processor';
 import { Account, AccountBalance, HistoricalAccountBalance } from '../../model';
 import { Ctx, EventItem } from '../../processor';
-import { initBalance, Transfer } from '../helper';
+import { extrinsicFromEvent, initBalance, Transfer } from '../helper';
 import {
   getBalanceSetEvent,
   getDepositEvent,
@@ -50,6 +50,7 @@ export const balancesBalanceSet = async (ctx: Ctx, block: SubstrateBlock, item: 
     hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
     hab.accountId = acc.accountId;
     hab.event = item.event.name.split('.')[1];
+    hab.extrinsic = extrinsicFromEvent(item.event);
     hab.assetId = ab.assetId;
     hab.dBalance = newBalance - oldBalance;
     hab.blockNumber = block.height;
@@ -85,6 +86,7 @@ export const balancesDeposit = async (
   hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
   hab.accountId = acc.accountId;
   hab.event = item.event.name.split('.')[1];
+  hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = 'Ztg';
   hab.dBalance = amount;
   hab.blockNumber = block.height;
@@ -114,6 +116,7 @@ export const balancesDustLost = async (
   hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
   hab.accountId = walletId;
   hab.event = item.event.name.split('.')[1];
+  hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = 'Ztg';
   hab.dBalance = -amount;
   hab.blockNumber = block.height;
@@ -143,6 +146,7 @@ export const balancesReserved = async (
   hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
   hab.accountId = acc.accountId;
   hab.event = item.event.name.split('.')[1];
+  hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = 'Ztg';
   hab.dBalance = -amount;
   hab.blockNumber = block.height;
@@ -177,6 +181,7 @@ export const balancesSlashed = async (ctx: Ctx, block: SubstrateBlock, item: Eve
     hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
     hab.accountId = acc.accountId;
     hab.event = item.event.name.split('.')[1];
+    hab.extrinsic = extrinsicFromEvent(item.event);
     hab.assetId = ab.assetId;
     hab.dBalance = -amount;
     hab.blockNumber = block.height;
@@ -203,6 +208,7 @@ export const balancesTransfer = async (ctx: Ctx, block: SubstrateBlock, item: Ev
   fromHab.id = item.event.id + '-' + fromId.substring(fromId.length - 5);
   fromHab.accountId = fromAcc.accountId;
   fromHab.event = item.event.name.split('.')[1];
+  fromHab.extrinsic = extrinsicFromEvent(item.event);
   fromHab.assetId = 'Ztg';
   fromHab.dBalance = -amount;
   fromHab.blockNumber = block.height;
@@ -222,6 +228,7 @@ export const balancesTransfer = async (ctx: Ctx, block: SubstrateBlock, item: Ev
   toHab.id = item.event.id + '-' + toId.substring(toId.length - 5);
   toHab.accountId = toAcc.accountId;
   toHab.event = item.event.name.split('.')[1];
+  toHab.extrinsic = extrinsicFromEvent(item.event);
   toHab.assetId = 'Ztg';
   toHab.dBalance = amount;
   toHab.blockNumber = block.height;
@@ -251,6 +258,7 @@ export const balancesUnreserved = async (
   hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
   hab.accountId = acc.accountId;
   hab.event = item.event.name.split('.')[1];
+  hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = 'Ztg';
   hab.dBalance = amount;
   hab.blockNumber = block.height;
@@ -280,6 +288,7 @@ export const balancesWithdraw = async (
   hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
   hab.accountId = acc.accountId;
   hab.event = item.event.name.split('.')[1];
+  hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = 'Ztg';
   hab.dBalance = -amount;
   hab.blockNumber = block.height;

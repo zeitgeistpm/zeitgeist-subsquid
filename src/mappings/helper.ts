@@ -5,6 +5,7 @@ import { util } from '@zeitgeistpm/sdk';
 import {
   Account,
   AccountBalance,
+  Extrinsic,
   HistoricalAccountBalance,
   MarketCreation,
   MarketEvent,
@@ -65,6 +66,14 @@ export const decodeMarketMetadata = async (metadata: string): Promise<DecodedMar
       return undefined;
     }
   }
+};
+
+export const extrinsicFromEvent = (event: any): Extrinsic | null => {
+  if (!event.extrinsic) return null;
+  return new Extrinsic({
+    name: event.extrinsic.call.name,
+    hash: event.extrinsic.hash,
+  });
 };
 
 export const formatMarketCreation = (creation: _MarketCreation): MarketCreation => {
@@ -210,6 +219,7 @@ export const initBalance = async (acc: Account, store: Store, block: SubstrateBl
   hab.id = item.event.id + '-000-' + acc.accountId.substring(acc.accountId.length - 5);
   hab.accountId = acc.accountId;
   hab.event = 'Initialised';
+  hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = ab.assetId;
   hab.dBalance = amt.toBigInt();
   hab.blockNumber = 0;

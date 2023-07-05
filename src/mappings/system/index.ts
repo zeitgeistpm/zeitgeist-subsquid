@@ -2,7 +2,7 @@ import { encodeAddress } from '@polkadot/keyring';
 import { SubstrateBlock } from '@subsquid/substrate-processor';
 import { Account, AccountBalance, HistoricalAccountBalance } from '../../model';
 import { Ctx, EventItem } from '../../processor';
-import { getFees, initBalance } from '../helper';
+import { extrinsicFromEvent, getFees, initBalance } from '../helper';
 import { getExtrinsicFailedEvent, getExtrinsicSuccessEvent, getNewAccountEvent } from './types';
 
 export const systemExtrinsicFailed = async (
@@ -46,6 +46,7 @@ export const systemExtrinsicFailed = async (
   hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
   hab.accountId = acc.accountId;
   hab.event = item.event.name.split('.')[1];
+  hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = 'Ztg';
   hab.dBalance = -txnFees;
   hab.blockNumber = block.height;
@@ -97,6 +98,7 @@ export const systemExtrinsicSuccess = async (
   hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
   hab.accountId = acc.accountId;
   hab.event = item.event.name.split('.')[1];
+  hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = 'Ztg';
   hab.dBalance = -txnFees;
   hab.blockNumber = block.height;
@@ -129,6 +131,7 @@ export const systemNewAccount = async (ctx: Ctx, block: SubstrateBlock, item: Ev
   hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
   hab.accountId = newAcc.accountId;
   hab.event = item.event.name.split('.')[1];
+  hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = ab.assetId;
   hab.dBalance = BigInt(0);
   hab.blockNumber = block.height;

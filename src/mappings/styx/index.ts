@@ -1,7 +1,7 @@
 import { SubstrateBlock } from '@subsquid/substrate-processor';
 import { Account, AccountBalance, HistoricalAccountBalance } from '../../model';
 import { Ctx, EventItem } from '../../processor';
-import { initBalance } from '../helper';
+import { extrinsicFromEvent, initBalance } from '../helper';
 import { getAccountCrossedEvent } from './types';
 
 export const accountCrossed = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
@@ -30,6 +30,7 @@ export const accountCrossed = async (ctx: Ctx, block: SubstrateBlock, item: Even
     hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
     hab.accountId = acc.accountId;
     hab.event = item.event.name.split('.')[1];
+    hab.extrinsic = extrinsicFromEvent(item.event);
     hab.assetId = ab.assetId;
     hab.dBalance = -amount;
     hab.blockNumber = block.height;

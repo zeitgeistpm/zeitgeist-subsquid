@@ -1,6 +1,7 @@
 export * from "./account.model"
 export * from "./accountBalance.model"
 export * from "./historicalAccountBalance.model"
+export * from "./_extrinsic"
 export * from "./asset.model"
 export * from "./historicalAsset.model"
 export * from "./historicalSwap.model"

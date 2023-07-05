@@ -49,7 +49,7 @@ import {
   marketReported,
   marketResolved,
   marketStartedWithSubsidy,
-  redeemShares,
+  redeemSharesCall,
   soldCompleteSet,
   tokensRedeemed,
 } from './mappings/predictionMarkets';
@@ -81,6 +81,10 @@ import { specVersion } from './mappings/helper';
 
 require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` });
 console.log(`ENVIRONMENT: ${process.env.NODE_ENV}`);
+
+const callRangeOptions = {
+  range: { from: 0, to: 1089818 },
+} as const;
 
 const eventOptions = {
   data: {
@@ -116,59 +120,55 @@ const processor = new SubstrateBatchProcessor()
     chain: process.env.WS_NODE_URL ?? 'wss://bsr.zeitgeist.pm',
   })
   .setTypesBundle('typesBundle.json')
-  .addEvent('Balances.BalanceSet', eventOptions)
-  .addEvent('Balances.Deposit', eventOptions)
-  .addEvent('Balances.DustLost', eventOptions)
-  .addEvent('Balances.Reserved', eventOptions)
-  .addEvent('Balances.Transfer', eventOptions)
-  .addEvent('Balances.Unreserved', eventOptions)
-  .addEvent('Balances.Withdraw', eventOptions)
-  .addEvent('Currency.Transferred', eventOptions)
-  .addEvent('Currency.Deposited', eventOptions)
-  .addEvent('Currency.Withdrawn', eventOptions)
+  .addEvent('Balances.BalanceSet', eventExtrinsicOptions)
+  .addEvent('Balances.Deposit', eventExtrinsicOptions)
+  .addEvent('Balances.DustLost', eventExtrinsicOptions)
+  .addEvent('Balances.Reserved', eventExtrinsicOptions)
+  .addEvent('Balances.Transfer', eventExtrinsicOptions)
+  .addEvent('Balances.Unreserved', eventExtrinsicOptions)
+  .addEvent('Balances.Withdraw', eventExtrinsicOptions)
+  .addEvent('Currency.Transferred', eventExtrinsicOptions)
+  .addEvent('Currency.Deposited', eventExtrinsicOptions)
+  .addEvent('Currency.Withdrawn', eventExtrinsicOptions)
   .addEvent('ParachainStaking.Rewarded', eventOptions)
   .addEvent('PredictionMarkets.BoughtCompleteSet', eventExtrinsicOptions)
   .addEvent('PredictionMarkets.MarketApproved', eventOptions)
   .addEvent('PredictionMarkets.MarketClosed', eventOptions)
-  .addEvent('PredictionMarkets.MarketCreated', eventOptions)
-  .addEvent('PredictionMarkets.MarketDestroyed', eventOptions)
+  .addEvent('PredictionMarkets.MarketCreated', eventExtrinsicOptions)
+  .addEvent('PredictionMarkets.MarketDestroyed', eventExtrinsicOptions)
   .addEvent('PredictionMarkets.MarketDisputed', eventOptions)
   .addEvent('PredictionMarkets.MarketExpired', eventOptions)
   .addEvent('PredictionMarkets.MarketInsufficientSubsidy', eventOptions)
   .addEvent('PredictionMarkets.MarketRejected', eventOptions)
   .addEvent('PredictionMarkets.MarketReported', eventOptions)
-  .addEvent('PredictionMarkets.MarketResolved', eventOptions)
+  .addEvent('PredictionMarkets.MarketResolved', eventExtrinsicOptions)
   .addEvent('PredictionMarkets.MarketStartedWithSubsidy', eventOptions)
   .addEvent('PredictionMarkets.SoldCompleteSet', eventExtrinsicOptions)
-  .addEvent('PredictionMarkets.TokensRedeemed', eventOptions)
-  .addEvent('Styx.AccountCrossed', eventOptions)
+  .addEvent('PredictionMarkets.TokensRedeemed', eventExtrinsicOptions)
+  .addEvent('Styx.AccountCrossed', eventExtrinsicOptions)
   .addEvent('Swaps.ArbitrageBuyBurn', eventOptions)
   .addEvent('Swaps.ArbitrageMintSell', eventOptions)
   .addEvent('Swaps.PoolActive', eventOptions)
   .addEvent('Swaps.PoolClosed', eventOptions)
   .addEvent('Swaps.PoolCreate', eventOptions)
-  .addEvent('Swaps.PoolDestroyed', eventOptions)
+  .addEvent('Swaps.PoolDestroyed', eventExtrinsicOptions)
   .addEvent('Swaps.PoolExit', eventOptions)
   .addEvent('Swaps.PoolExitWithExactAssetAmount', eventOptions)
   .addEvent('Swaps.PoolJoin', eventOptions)
   .addEvent('Swaps.PoolJoinWithExactAssetAmount', eventOptions)
   .addEvent('Swaps.SwapExactAmountIn', eventExtrinsicOptions)
   .addEvent('Swaps.SwapExactAmountOut', eventExtrinsicOptions)
-  .addEvent('System.NewAccount', eventOptions)
-  .addEvent('Tokens.BalanceSet', eventOptions)
-  .addEvent('Tokens.Deposited', eventOptions)
-  .addEvent('Tokens.Transfer', eventOptions)
-  .addEvent('Tokens.Withdrawn', eventOptions);
+  .addEvent('System.NewAccount', eventExtrinsicOptions)
+  .addEvent('Tokens.BalanceSet', eventExtrinsicOptions)
+  .addEvent('Tokens.Deposited', eventExtrinsicOptions)
+  .addEvent('Tokens.Transfer', eventExtrinsicOptions)
+  .addEvent('Tokens.Withdrawn', eventExtrinsicOptions);
 
 if (process.env.WS_NODE_URL?.includes(`bs`)) {
   // @ts-ignore
-  processor.addCall('PredictionMarkets.redeem_shares', {
-    range: { from: 0, to: 1089818 },
-  });
+  processor.addCall('PredictionMarkets.redeem_shares', callRangeOptions);
   // @ts-ignore
-  processor.addCall('Swaps.pool_exit', {
-    range: { from: 0, to: 1089818 },
-  });
+  processor.addCall('Swaps.pool_exit', callRangeOptions);
   // @ts-ignore
   processor.addEvent('System.ExtrinsicFailed', eventRangeOptions);
   // @ts-ignore
@@ -336,12 +336,12 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   for (let block of ctx.blocks) {
     for (let item of block.items) {
       // @ts-ignore
-      if (item.kind === 'call' && item.call.success) {
+      if (item.kind === 'call' && item.call.success && block.header.height < 1089818) {
         // @ts-ignore
         if (item.name === 'PredictionMarkets.redeem_shares') {
           await saveBalanceChanges(ctx, balanceAccounts);
           balanceAccounts.clear();
-          await redeemShares(ctx, block.header, item);
+          await redeemSharesCall(ctx, block.header, item);
         }
         // @ts-ignore
         if (item.name === 'Swaps.pool_exit') {

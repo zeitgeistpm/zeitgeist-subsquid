@@ -1,7 +1,7 @@
 import { SubstrateBlock } from '@subsquid/substrate-processor';
 import { Account, AccountBalance, HistoricalAccountBalance } from '../../model';
 import { Ctx, EventItem } from '../../processor';
-import { initBalance, Transfer } from '../helper';
+import { extrinsicFromEvent, initBalance, Transfer } from '../helper';
 import {
   getTokensBalanceSetEvent,
   getTokensDepositedEvent,
@@ -39,6 +39,7 @@ export const tokensBalanceSet = async (ctx: Ctx, block: SubstrateBlock, item: Ev
   hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
   hab.accountId = acc.accountId;
   hab.event = item.event.name.split('.')[1];
+  hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = ab.assetId;
   hab.dBalance = ab.balance - oldBalance;
   hab.blockNumber = block.height;
@@ -68,6 +69,7 @@ export const tokensDeposited = async (
   hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
   hab.accountId = acc.accountId;
   hab.event = item.event.name.split('.')[1];
+  hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = assetId;
   hab.dBalance = amount;
   hab.blockNumber = block.height;
@@ -93,6 +95,7 @@ export const tokensTransfer = async (ctx: Ctx, block: SubstrateBlock, item: Even
   fromHab.id = item.event.id + '-' + fromId.substring(fromId.length - 5);
   fromHab.accountId = fromAcc.accountId;
   fromHab.event = item.event.name.split('.')[1];
+  fromHab.extrinsic = extrinsicFromEvent(item.event);
   fromHab.assetId = assetId;
   fromHab.dBalance = -amount;
   fromHab.blockNumber = block.height;
@@ -112,6 +115,7 @@ export const tokensTransfer = async (ctx: Ctx, block: SubstrateBlock, item: Even
   toHab.id = item.event.id + '-' + toId.substring(toId.length - 5);
   toHab.accountId = toAcc.accountId;
   toHab.event = item.event.name.split('.')[1];
+  toHab.extrinsic = extrinsicFromEvent(item.event);
   toHab.assetId = assetId;
   toHab.dBalance = amount;
   toHab.blockNumber = block.height;
@@ -141,6 +145,7 @@ export const tokensWithdrawn = async (
   hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
   hab.accountId = acc.accountId;
   hab.event = item.event.name.split('.')[1];
+  hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = assetId;
   hab.dBalance = -amount;
   hab.blockNumber = block.height;
