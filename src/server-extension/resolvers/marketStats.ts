@@ -1,8 +1,7 @@
-import { Arg, Field, Int, ObjectType, Query, Resolver } from 'type-graphql';
+import { Arg, Field, Int, ObjectType, Query, Resolver, registerEnumType } from 'type-graphql';
 import type { EntityManager } from 'typeorm';
 import { Market } from '../../model/generated';
-import { mergeByField } from '../helper';
-import { marketLiquidity, marketParticipants } from '../query';
+import { marketStats } from '../query';
 
 @ObjectType()
 export class MarketStats {
@@ -15,22 +14,35 @@ export class MarketStats {
   @Field(() => BigInt)
   liquidity!: bigint;
 
+  @Field(() => BigInt)
+  volume!: bigint;
+
   constructor(props: Partial<MarketStats>) {
     Object.assign(this, props);
   }
 }
+
+enum OrderBy {
+  volume_ASC = 'VOLUME ASC',
+  volume_DESC = 'VOLUME DESC',
+}
+
+registerEnumType(OrderBy, {
+  name: 'OrderBy',
+  description: 'Ordering stats',
+});
 
 @Resolver()
 export class MarketStatsResolver {
   constructor(private tx: () => Promise<EntityManager>) {}
 
   @Query(() => [MarketStats])
-  async marketStats(@Arg('marketId', () => [Int!], { nullable: false }) ids: number[]): Promise<MarketStats[]> {
+  async marketStats(
+    @Arg('marketId', () => [Int!], { nullable: false }) ids: number[],
+    @Arg('orderBy', () => OrderBy, { nullable: false }) orderBy: OrderBy
+  ): Promise<MarketStats[]> {
     const manager = await this.tx();
-    const participants = await manager.getRepository(Market).query(marketParticipants(ids));
-    const liquidity = await manager.getRepository(Market).query(marketLiquidity(ids));
-
-    const result = mergeByField(participants, liquidity, 'market_id');
+    const result = await manager.getRepository(Market).query(marketStats(ids));
     return result;
   }
 }
