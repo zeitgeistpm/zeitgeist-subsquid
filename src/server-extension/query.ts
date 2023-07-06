@@ -44,7 +44,7 @@ export const balanceInfo = (accountId: string, assetId: string, blockNumber: str
     asset_id;
 `;
 
-export const marketStats = (ids: number[]) => `
+export const marketStats = (ids: string, orderBy: string, limit: number, offset: number) => `
   SELECT
     m.market_id,
     COALESCE(ROUND(SUM(a.price*a.amount_in_pool)+p.base_asset_qty, 0), 0) AS liquidity,
@@ -59,11 +59,17 @@ export const marketStats = (ids: number[]) => `
   LEFT JOIN
     pool p ON p.id = m.pool_id
   WHERE
-    m.market_id in (${ids})
+    m.market_id IN (${ids})
   GROUP BY
     m.market_id,
     p.base_asset_qty,
-    p.volume;
+    p.volume
+  ORDER BY 
+    ${orderBy}
+  LIMIT 
+    ${limit}
+  OFFSET 
+    ${offset};
 `;
 
 export const marketInfo = (marketId: number) => `
