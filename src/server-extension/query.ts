@@ -1,4 +1,5 @@
 import { encodedAssetId } from './helper';
+import { Asset } from './resolvers/marketStats';
 
 export const assetPriceHistory = (assetId: string, startTime: string, endTime: string, interval: string) => `
   WITH t0 AS (
@@ -44,12 +45,15 @@ export const balanceInfo = (accountId: string, assetId: string, blockNumber: str
     asset_id;
 `;
 
-export const marketStats = (ids: string, orderBy: string, limit: number, offset: number) => `
+export const marketStats = (ids: string, orderBy: string, limit: number, offset: number, price: any) => `
   SELECT
     m.market_id,
-    COALESCE(ROUND(SUM(a.price*a.amount_in_pool)+p.base_asset_qty, 0), 0) AS liquidity,
+    COALESCE(ROUND(SUM(a.price * a.amount_in_pool) + p.base_asset_qty, 0), 0) AS liquidity,
     COALESCE(COUNT(DISTINCT ha.account_id), 0) AS participants,
-    COALESCE(p.volume, 0) AS volume
+    CASE
+      WHEN p.base_asset = 'Ztg' THEN COALESCE(ROUND(p.volume * ${price[Asset.Zeitgeist]}, 0), 0)
+      ELSE COALESCE(ROUND(p.volume * ${price[Asset.Polkadot]}, 0), 0)
+    END AS volume
   FROM
     market m
   LEFT JOIN
@@ -62,6 +66,7 @@ export const marketStats = (ids: string, orderBy: string, limit: number, offset:
     m.market_id IN (${ids})
   GROUP BY
     m.market_id,
+    p.base_asset,
     p.base_asset_qty,
     p.volume
   ORDER BY 
