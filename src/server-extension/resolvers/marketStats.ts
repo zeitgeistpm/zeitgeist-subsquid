@@ -59,7 +59,7 @@ export class MarketStatsResolver {
   }
 }
 
-export const getAssetUsdPrice = async (coinGeckoId: Asset): Promise<any> => {
+const getAssetUsdPrice = async (coinGeckoId: Asset): Promise<any> => {
   return new Promise(async (resolve) => {
     try {
       const res = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${coinGeckoId}&vs_currencies=usd`);
