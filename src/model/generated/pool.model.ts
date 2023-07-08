@@ -1,5 +1,6 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, OneToMany as OneToMany_, Index as Index_} from "typeorm"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_, OneToMany as OneToMany_} from "typeorm"
 import * as marshal from "./marshal"
+import {Account} from "./account.model"
 import {Asset} from "./asset.model"
 import {PoolStatus} from "./_poolStatus"
 import {Weight} from "./_weight"
@@ -15,6 +16,13 @@ export class Pool {
 
     @PrimaryColumn_()
     id!: string
+
+    /**
+     * Account for the pool
+     */
+    @Index_()
+    @ManyToOne_(() => Account, {nullable: true})
+    account!: Account | undefined | null
 
     /**
      * Zeitgeist's identifier for account
