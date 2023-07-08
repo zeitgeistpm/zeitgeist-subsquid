@@ -242,7 +242,6 @@ export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
   pool.id = item.event.id + '-' + cpep.poolId;
   pool.poolId = +cpep.poolId.toString();
   pool.account = acc;
-  pool.accountId = accountId;
   pool.marketId = +swapPool.marketId.toString();
   pool.status = getPoolStatus(swapPool.poolStatus);
   pool.scoringRule = swapPool.scoringRule.__kind;
@@ -365,7 +364,7 @@ export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Event
   await ctx.store.save<HistoricalPool>(hp);
 
   const ab = await ctx.store.findOneBy(AccountBalance, {
-    account: { accountId: pool.accountId },
+    account: { poolId: pool.poolId },
     assetId: pool.baseAsset,
   });
   if (!ab) return;
@@ -376,8 +375,8 @@ export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Event
   await ctx.store.save<AccountBalance>(ab);
 
   const hab = new HistoricalAccountBalance();
-  hab.id = item.event.id + '-' + pool.accountId.substring(pool.accountId.length - 5);
-  hab.accountId = pool.accountId;
+  hab.id = item.event.id + '-' + ab.account.accountId.substring(ab.account.accountId.length - 5);
+  hab.accountId = ab.account.accountId;
   hab.event = item.event.name.split('.')[1];
   hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = ab.assetId;
