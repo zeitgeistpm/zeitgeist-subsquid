@@ -25,12 +25,6 @@ export class Pool {
     account!: Account | undefined | null
 
     /**
-     * Zeitgeist's identifier for account
-     */
-    @Column_("text", {nullable: false})
-    accountId!: string
-
-    /**
      * List of assets connected to the pool
      */
     @OneToMany_(() => Asset, e => e.pool)

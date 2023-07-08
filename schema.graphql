@@ -218,8 +218,6 @@ Liquidity pool details
 type Pool @entity {
   "Account for the pool"
   account: Account
-  "Zeitgeist's identifier for account"
-  accountId: String!
   "List of assets connected to the pool"
   assets: [Asset]! @derivedFrom(field: "pool")
   "The base asset in the market swap pool (usually a currency)"
