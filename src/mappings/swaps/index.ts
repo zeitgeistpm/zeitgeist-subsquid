@@ -226,9 +226,22 @@ export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
     accountId = hab ? hab.accountId : accountId;
   }
 
+  let acc;
+  if (accountId.length > 0) {
+    acc = await ctx.store.get(Account, {
+      where: { accountId: accountId },
+    });
+    if (acc) {
+      acc.poolId = +cpep.poolId.toString();
+      console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
+      await ctx.store.save<Account>(acc);
+    }
+  }
+
   const pool = new Pool();
   pool.id = item.event.id + '-' + cpep.poolId;
   pool.poolId = +cpep.poolId.toString();
+  pool.account = acc;
   pool.accountId = accountId;
   pool.marketId = +swapPool.marketId.toString();
   pool.status = getPoolStatus(swapPool.poolStatus);
@@ -243,15 +256,6 @@ export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
   pool.baseAsset = getAssetId(swapPool.baseAsset);
   console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
   await ctx.store.save<Pool>(pool);
-
-  const acc = await ctx.store.get(Account, {
-    where: { accountId: pool.accountId },
-  });
-  if (acc) {
-    acc.poolId = pool.poolId;
-    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
-    await ctx.store.save<Account>(acc);
-  }
 
   if (swapPool.weights && isBaseAsset(swapPool.weights[swapPool.weights.length - 1][0])) {
     const baseAssetWeight = +swapPool.weights[swapPool.weights.length - 1][1].toString();
