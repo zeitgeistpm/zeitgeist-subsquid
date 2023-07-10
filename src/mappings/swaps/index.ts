@@ -363,9 +363,12 @@ export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Event
   console.log(`[${item.event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`);
   await ctx.store.save<HistoricalPool>(hp);
 
-  const ab = await ctx.store.findOneBy(AccountBalance, {
-    account: { poolId: pool.poolId },
-    assetId: pool.baseAsset,
+  const ab = await ctx.store.findOne(AccountBalance, {
+    where: {
+      account: { poolId: pool.poolId },
+      assetId: pool.baseAsset,
+    },
+    relations: { account: true },
   });
   if (!ab) return;
   const oldBalance = ab.balance;
