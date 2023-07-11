@@ -6,7 +6,7 @@ type Account @entity {
   "Account address"
   accountId: String!
   "List of balances connected to the account"
-  balances: [AccountBalance]! @derivedFrom(field: "account")
+  balances: [AccountBalance]! @derivedFrom(field: "account") @cardinality(value: 100)
   "Unique identifier of the object"
   id: ID!
   "Zeitgeist's identifier for market. Valid only for market account."
@@ -20,7 +20,7 @@ Balance of a particular asset denoted by assetId present in the account
 """
 type AccountBalance @entity {
   "Connected account"
-  account: Account!
+  account: Account! @cardinality(value: 1)
   "Zeitgeist's identifier for asset"
   assetId: String!
   "Balance of the asset"
@@ -62,7 +62,7 @@ type Asset @entity {
   "Zeitgeist's identifier for asset"
   assetId: String!
   "Connected pool"
-  pool: Pool!
+  pool: Pool! @cardinality(value: 1)
   "Spot price of the asset in the pool"
   price: Float!
   "Balance of the asset present in the pool account"
@@ -166,7 +166,7 @@ type Market @entity {
   "Time period expressed in block numbers or timestamps"
   period: MarketPeriod!
   "Market's liquidity pool details"
-  pool: Pool
+  pool: Pool @cardinality(value: 1)
   "Reasoning for market rejection"
   rejectReason: String
   "Reported outcome of the market. Null if the market is not reported yet"
@@ -216,10 +216,10 @@ type HistoricalMarket @entity {
 Liquidity pool details
 """
 type Pool @entity {
-  "Zeitgeist's identifier for account"
-  accountId: String!
+  "Account for the pool"
+  account: Account @cardinality(value: 1)
   "List of assets connected to the pool"
-  assets: [Asset]! @derivedFrom(field: "pool")
+  assets: [Asset]! @derivedFrom(field: "pool") @cardinality(value: 20)
   "The base asset in the market swap pool (usually a currency)"
   baseAsset: String!
   "Amount of market's base asset present in the pool"
