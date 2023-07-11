@@ -6,7 +6,7 @@
   "author": "",
   "license": "ISC",
   "scripts": {
-    "api:start": "squid-graphql-server --subscriptions",
+    "api:start": "squid-graphql-server --subscriptions --max-root-fields 50 --max-response-size 5000",
     "api:stop": "./scripts/deploy/api.sh stop",
     "archive:start": "./scripts/deploy/archive.sh local up",
     "archive:stop": "./scripts/deploy/archive.sh local down",
