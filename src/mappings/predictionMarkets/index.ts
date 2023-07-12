@@ -40,6 +40,7 @@ import {
 import { Tools } from '../util';
 import {
   getBoughtCompleteSetEvent,
+  getGlobalDisputeStartedEvent,
   getMarketApprovedEvent,
   getMarketClosedEvent,
   getMarketCreatedEvent,
@@ -124,6 +125,23 @@ export const boughtCompleteSet = async (
     habs.push(hab);
   }
   return habs;
+};
+
+export const globalDisputeStarted = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
+  const { marketId } = getGlobalDisputeStartedEvent(ctx, item);
+
+  const market = await ctx.store.get(Market, { where: { marketId: marketId } });
+  if (!market) return;
+
+  const hm = new HistoricalMarket();
+  hm.id = item.event.id + '-' + market.marketId;
+  hm.marketId = market.marketId;
+  hm.status = market.status;
+  hm.event = getMarketEvent(item.event.name);
+  hm.blockNumber = block.height;
+  hm.timestamp = new Date(block.timestamp);
+  console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
+  await ctx.store.save<HistoricalMarket>(hm);
 };
 
 export const marketApproved = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
