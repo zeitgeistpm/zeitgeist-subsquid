@@ -638,6 +638,35 @@ export class PredictionMarketsBoughtCompleteSetEvent {
     }
 }
 
+export class PredictionMarketsGlobalDisputeStartedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'PredictionMarkets.GlobalDisputeStarted')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * The global dispute was started. \[market_id\]
+     */
+    get isV41(): boolean {
+        return this._chain.getEventHash('PredictionMarkets.GlobalDisputeStarted') === '47b59f698451e50cce59979f0121e842fa3f8b2bcef2e388222dbd69849514f9'
+    }
+
+    /**
+     * The global dispute was started. \[market_id\]
+     */
+    get asV41(): bigint {
+        assert(this.isV41)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
 export class PredictionMarketsMarketApprovedEvent {
     private readonly _chain: Chain
     private readonly event: Event
