@@ -30,8 +30,8 @@ import {
   decodeMarketMetadata,
   extrinsicFromEvent,
   formatMarketCreation,
+  formatMarketEvent,
   getAssetId,
-  getMarketEvent,
   getMarketStatus,
   initBalance,
   rescale,
@@ -137,7 +137,7 @@ export const globalDisputeStarted = async (ctx: Ctx, block: SubstrateBlock, item
   hm.id = item.event.id + '-' + market.marketId;
   hm.marketId = market.marketId;
   hm.status = market.status;
-  hm.event = getMarketEvent(item.event.name);
+  hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -164,7 +164,7 @@ export const marketApproved = async (ctx: Ctx, block: SubstrateBlock, item: Even
   hm.id = item.event.id + '-' + market.marketId;
   hm.marketId = market.marketId;
   hm.status = market.status;
-  hm.event = getMarketEvent(item.event.name);
+  hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -184,7 +184,7 @@ export const marketClosed = async (ctx: Ctx, block: SubstrateBlock, item: EventI
   hm.id = item.event.id + '-' + market.marketId;
   hm.marketId = market.marketId;
   hm.status = market.status;
-  hm.event = getMarketEvent(item.event.name);
+  hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -368,7 +368,7 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
   hm.id = item.event.id + '-' + newMarket.marketId;
   hm.marketId = newMarket.marketId;
   hm.status = newMarket.status;
-  hm.event = getMarketEvent(item.event.name);
+  hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -393,7 +393,7 @@ export const marketDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Eve
   hm.id = item.event.id + '-' + market.marketId;
   hm.marketId = market.marketId;
   hm.status = market.status;
-  hm.event = getMarketEvent(item.event.name);
+  hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -458,7 +458,7 @@ export const marketDisputed = async (ctx: Ctx, block: SubstrateBlock, item: Even
   hm.status = market.status;
   hm.by = mr.by;
   hm.outcome = ocr;
-  hm.event = getMarketEvent(item.event.name);
+  hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -482,7 +482,7 @@ export const marketExpired = async (ctx: Ctx, block: SubstrateBlock, item: Event
   hm.id = item.event.id + '-' + market.marketId;
   hm.marketId = market.marketId;
   hm.status = market.status;
-  hm.event = getMarketEvent(item.event.name);
+  hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -502,7 +502,7 @@ export const marketInsufficientSubsidy = async (ctx: Ctx, block: SubstrateBlock,
   hm.id = item.event.id + '-' + market.marketId;
   hm.marketId = market.marketId;
   hm.status = market.status;
-  hm.event = getMarketEvent(item.event.name);
+  hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -527,7 +527,7 @@ export const marketRejected = async (ctx: Ctx, block: SubstrateBlock, item: Even
   hm.id = item.event.id + '-' + market.marketId;
   hm.marketId = market.marketId;
   hm.status = market.status;
-  hm.event = getMarketEvent(item.event.name);
+  hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -576,7 +576,7 @@ export const marketReported = async (ctx: Ctx, block: SubstrateBlock, item: Even
   hm.status = market.status;
   hm.by = mr.by;
   hm.outcome = ocr;
-  hm.event = getMarketEvent(item.event.name);
+  hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -606,7 +606,7 @@ export const marketResolved = async (ctx: Ctx, block: SubstrateBlock, item: Even
   hm.marketId = market.marketId;
   hm.status = market.status;
   hm.resolvedOutcome = market.resolvedOutcome;
-  hm.event = getMarketEvent(item.event.name);
+  hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -701,7 +701,7 @@ export const marketStartedWithSubsidy = async (ctx: Ctx, block: SubstrateBlock, 
   hm.id = item.event.id + '-' + market.marketId;
   hm.marketId = market.marketId;
   hm.status = market.status;
-  hm.event = getMarketEvent(item.event.name);
+  hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);

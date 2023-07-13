@@ -19,7 +19,14 @@ import {
   Weight,
 } from '../../model';
 import { Ctx, EventItem } from '../../processor';
-import { calcSpotPrice, extrinsicFromEvent, getAssetId, getMarketEvent, getPoolStatus, isBaseAsset } from '../helper';
+import {
+  calcSpotPrice,
+  extrinsicFromEvent,
+  formatMarketEvent,
+  getAssetId,
+  getPoolStatus,
+  isBaseAsset,
+} from '../helper';
 import {
   getArbitrageBuyBurnEvent,
   getArbitrageMintSellEvent,
@@ -330,7 +337,7 @@ export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
   hm.marketId = market.marketId;
   hm.status = market.status;
   hm.poolId = market.pool.poolId;
-  hm.event = getMarketEvent(item.event.name);
+  hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
