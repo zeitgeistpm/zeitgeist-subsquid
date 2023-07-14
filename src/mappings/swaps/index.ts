@@ -229,11 +229,13 @@ export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
   const account = await ctx.store.get(Account, {
     where: { accountId: accountId },
   });
-  if (account) {
-    account.poolId = +poolId;
-    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(account, null, 2)}`);
-    await ctx.store.save<Account>(account);
+  if (!account) {
+    console.error(`Coudn't find pool account with accountId ${accountId}`);
+    return;
   }
+  account.poolId = +poolId;
+  console.log(`[${item.event.name}] Saving account: ${JSON.stringify(account, null, 2)}`);
+  await ctx.store.save<Account>(account);
 
   const pool = new Pool();
   pool.id = item.event.id + '-' + poolId;
