@@ -218,26 +218,27 @@ export const poolClosed = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
 export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
   let { cpep, swapPool, amount, accountId } = getPoolCreateEvent(ctx, item);
 
+  const poolId = cpep.poolId.toString();
+
   if (accountId.length === 0) {
     const sdk = await Tools.getSDK();
     // @ts-ignore
-    const res = await sdk.api.rpc.swaps.poolAccountId(+cpep.poolId.toString());
-    accountId = res.toString();
+    accountId = (await sdk.api.rpc.swaps.poolAccountId(poolId)).toString();
   }
 
-  const acc = await ctx.store.get(Account, {
+  const account = await ctx.store.get(Account, {
     where: { accountId: accountId },
   });
-  if (acc) {
-    acc.poolId = +cpep.poolId.toString();
-    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
-    await ctx.store.save<Account>(acc);
+  if (account) {
+    account.poolId = +poolId;
+    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(account, null, 2)}`);
+    await ctx.store.save<Account>(account);
   }
 
   const pool = new Pool();
-  pool.id = item.event.id + '-' + cpep.poolId;
-  pool.poolId = +cpep.poolId.toString();
-  pool.account = acc;
+  pool.id = item.event.id + '-' + poolId;
+  pool.poolId = +poolId;
+  pool.account = account;
   pool.marketId = +swapPool.marketId.toString();
   pool.status = getPoolStatus(swapPool.poolStatus);
   pool.scoringRule = swapPool.scoringRule.__kind;
