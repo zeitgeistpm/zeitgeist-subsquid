@@ -20,6 +20,7 @@ import {
 } from '../../model';
 import { Ctx, EventItem } from '../../processor';
 import { calcSpotPrice, extrinsicFromEvent, getAssetId, getMarketEvent, getPoolStatus, isBaseAsset } from '../helper';
+import { Tools } from '../util';
 import {
   getArbitrageBuyBurnEvent,
   getArbitrageMintSellEvent,
@@ -217,25 +218,20 @@ export const poolClosed = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
 export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
   let { cpep, swapPool, amount, accountId } = getPoolCreateEvent(ctx, item);
 
-  if (accountId.length === 0 && swapPool.weights) {
-    const hab = await ctx.store.findOneBy(HistoricalAccountBalance, {
-      assetId: getAssetId(swapPool.weights[0][0]),
-      event: 'EndowedTransferred',
-      blockNumber: block.height,
-    });
-    accountId = hab ? hab.accountId : accountId;
+  if (accountId.length === 0) {
+    const sdk = await Tools.getSDK();
+    // @ts-ignore
+    const res = await sdk.api.rpc.swaps.poolAccountId(+cpep.poolId.toString());
+    accountId = res.toString();
   }
 
-  let acc;
-  if (accountId.length > 0) {
-    acc = await ctx.store.get(Account, {
-      where: { accountId: accountId },
-    });
-    if (acc) {
-      acc.poolId = +cpep.poolId.toString();
-      console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
-      await ctx.store.save<Account>(acc);
-    }
+  const acc = await ctx.store.get(Account, {
+    where: { accountId: accountId },
+  });
+  if (acc) {
+    acc.poolId = +cpep.poolId.toString();
+    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
+    await ctx.store.save<Account>(acc);
   }
 
   const pool = new Pool();
