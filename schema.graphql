@@ -408,6 +408,7 @@ enum MarketCreation {
 Market's event options
 """
 enum MarketEvent {
+  GlobalDisputeStarted
   MarketApproved
   MarketClosed
   MarketCreated

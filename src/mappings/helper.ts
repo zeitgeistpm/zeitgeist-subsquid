@@ -85,6 +85,35 @@ export const formatMarketCreation = (creation: _MarketCreation): MarketCreation 
   }
 };
 
+export const formatMarketEvent = (eventName: string): MarketEvent => {
+  switch (eventName) {
+    case 'PredictionMarkets.GlobalDisputeStarted':
+      return MarketEvent.GlobalDisputeStarted;
+    case 'PredictionMarkets.MarketApproved':
+      return MarketEvent.MarketApproved;
+    case 'PredictionMarkets.MarketClosed':
+      return MarketEvent.MarketClosed;
+    case 'PredictionMarkets.MarketCreated':
+      return MarketEvent.MarketCreated;
+    case 'PredictionMarkets.MarketDestroyed':
+      return MarketEvent.MarketDestroyed;
+    case 'PredictionMarkets.MarketDisputed':
+      return MarketEvent.MarketDisputed;
+    case 'PredictionMarkets.MarketExpired':
+      return MarketEvent.MarketExpired;
+    case 'PredictionMarkets.MarketRejected':
+      return MarketEvent.MarketRejected;
+    case 'PredictionMarkets.MarketReported':
+      return MarketEvent.MarketReported;
+    case 'PredictionMarkets.MarketResolved':
+      return MarketEvent.MarketResolved;
+    case 'Swaps.PoolCreate':
+      return MarketEvent.PoolCreate;
+    default:
+      return MarketEvent.MarketCreated;
+  }
+};
+
 export const getAssetId = (currencyId: any): string => {
   if (currencyId.__kind == 'CategoricalOutcome') {
     return JSON.stringify(util.AssetIdFromString('[' + currencyId.value.toString() + ']'));
@@ -128,33 +157,6 @@ export const getFees = async (block: SubstrateBlock, extrinsic: SubstrateExtrins
   }
   await (await Cache.init()).setFee(block.hash + id, totalFees.toString());
   return totalFees;
-};
-
-export const getMarketEvent = (eventName: string): MarketEvent => {
-  switch (eventName) {
-    case 'PredictionMarkets.MarketApproved':
-      return MarketEvent.MarketApproved;
-    case 'PredictionMarkets.MarketClosed':
-      return MarketEvent.MarketClosed;
-    case 'PredictionMarkets.MarketCreated':
-      return MarketEvent.MarketCreated;
-    case 'PredictionMarkets.MarketDestroyed':
-      return MarketEvent.MarketDestroyed;
-    case 'PredictionMarkets.MarketDisputed':
-      return MarketEvent.MarketDisputed;
-    case 'PredictionMarkets.MarketExpired':
-      return MarketEvent.MarketExpired;
-    case 'PredictionMarkets.MarketRejected':
-      return MarketEvent.MarketRejected;
-    case 'PredictionMarkets.MarketReported':
-      return MarketEvent.MarketReported;
-    case 'PredictionMarkets.MarketResolved':
-      return MarketEvent.MarketResolved;
-    case 'Swaps.PoolCreate':
-      return MarketEvent.PoolCreate;
-    default:
-      return MarketEvent.MarketCreated;
-  }
 };
 
 export const getMarketStatus = (status: _MarketStatus): MarketStatus => {

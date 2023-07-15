@@ -16,6 +16,7 @@
     "Currency.Withdrawn",
     "ParachainStaking.Rewarded",
     "PredictionMarkets.BoughtCompleteSet",
+    "PredictionMarkets.GlobalDisputeStarted",
     "PredictionMarkets.MarketApproved",
     "PredictionMarkets.MarketClosed",
     "PredictionMarkets.MarketCreated",

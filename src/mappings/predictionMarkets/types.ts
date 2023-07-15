@@ -4,6 +4,7 @@ import { CallItem, Ctx, EventItem } from '../../processor';
 import { PredictionMarketsRedeemSharesCall } from '../../types/calls';
 import {
   PredictionMarketsBoughtCompleteSetEvent,
+  PredictionMarketsGlobalDisputeStartedEvent,
   PredictionMarketsMarketApprovedEvent,
   PredictionMarketsMarketClosedEvent,
   PredictionMarketsMarketCreatedEvent,
@@ -43,6 +44,19 @@ export const getBoughtCompleteSetEvent = (ctx: Ctx, item: EventItem): BoughtComp
   }
 };
 
+export const getGlobalDisputeStartedEvent = (ctx: Ctx, item: EventItem): MarketEvent => {
+  const event = new PredictionMarketsGlobalDisputeStartedEvent(ctx, item.event);
+  if (event.isV41) {
+    const mId = event.asV41;
+    const marketId = Number(mId);
+    return { marketId };
+  } else {
+    const [mId] = item.event.args;
+    const marketId = Number(mId);
+    return { marketId };
+  }
+};
+
 export const getMarketApprovedEvent = (ctx: Ctx, item: EventItem): MarketApprovedEvent => {
   const event = new PredictionMarketsMarketApprovedEvent(ctx, item.event);
   if (event.isV23) {
@@ -60,7 +74,7 @@ export const getMarketApprovedEvent = (ctx: Ctx, item: EventItem): MarketApprove
   }
 };
 
-export const getMarketClosedEvent = (ctx: Ctx, item: EventItem): MarketClosedEvent => {
+export const getMarketClosedEvent = (ctx: Ctx, item: EventItem): MarketEvent => {
   const event = new PredictionMarketsMarketClosedEvent(ctx, item.event);
   if (event.isV37) {
     const marketId = Number(event.asV37);
@@ -104,7 +118,7 @@ export const getMarketCreatedEvent = (ctx: Ctx, item: EventItem, specVersion: nu
   }
 };
 
-export const getMarketDestroyedEvent = (ctx: Ctx, item: EventItem): MarketDestroyedEvent => {
+export const getMarketDestroyedEvent = (ctx: Ctx, item: EventItem): MarketEvent => {
   const event = new PredictionMarketsMarketDestroyedEvent(ctx, item.event);
   if (event.isV32) {
     const marketId = Number(event.asV32);
@@ -134,7 +148,7 @@ export const getMarketDisputedEvent = (ctx: Ctx, item: EventItem): MarketDispute
   }
 };
 
-export const getMarketExpiredEvent = (ctx: Ctx, item: EventItem): MarketExpiredEvent => {
+export const getMarketExpiredEvent = (ctx: Ctx, item: EventItem): MarketEvent => {
   const event = new PredictionMarketsMarketExpiredEvent(ctx, item.event);
   if (event.isV37) {
     const marketId = Number(event.asV37);
@@ -232,7 +246,7 @@ export const getMarketStartedWithSubsidyEvent = (ctx: Ctx, item: EventItem): Mar
   }
 };
 
-export const getRedeemSharesCall = (ctx: Ctx, call: CallItem): RedeemSharesCall => {
+export const getRedeemSharesCall = (ctx: Ctx, call: CallItem): MarketEvent => {
   const redeemSharesCall = new PredictionMarketsRedeemSharesCall(ctx, call);
   if (redeemSharesCall.isV23) {
     const marketId = Number(redeemSharesCall.asV23.marketId);
@@ -291,13 +305,13 @@ interface BoughtCompleteSetEvent {
   walletId: string;
 }
 
+interface MarketEvent {
+  marketId: number;
+}
+
 interface MarketApprovedEvent {
   marketId: number;
   status?: MarketStatus;
-}
-
-interface MarketClosedEvent {
-  marketId: number;
 }
 
 interface MarketCreatedEvent {
@@ -306,18 +320,10 @@ interface MarketCreatedEvent {
   market: any;
 }
 
-interface MarketDestroyedEvent {
-  marketId: number;
-}
-
 interface MarketDisputedEvent {
   marketId: number;
   status?: MarketStatus;
   report: MarketDispute;
-}
-
-interface MarketExpiredEvent {
-  marketId: number;
 }
 
 interface MarketRejectedEvent {
@@ -340,10 +346,6 @@ interface MarketResolvedEvent {
 interface MarketSubsidyEvent {
   marketId: number;
   status?: MarketStatus;
-}
-
-interface RedeemSharesCall {
-  marketId: number;
 }
 
 interface SoldCompleteSetEvent {

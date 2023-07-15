@@ -1,4 +1,5 @@
 export enum MarketEvent {
+    GlobalDisputeStarted = "GlobalDisputeStarted",
     MarketApproved = "MarketApproved",
     MarketClosed = "MarketClosed",
     MarketCreated = "MarketCreated",

@@ -38,6 +38,7 @@ import {
 import { destroyMarkets } from './mappings/postHooks/marketDestroyed';
 import {
   boughtCompleteSet,
+  globalDisputeStarted,
   marketApproved,
   marketClosed,
   marketCreated,
@@ -132,6 +133,7 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Currency.Withdrawn', eventExtrinsicOptions)
   .addEvent('ParachainStaking.Rewarded', eventOptions)
   .addEvent('PredictionMarkets.BoughtCompleteSet', eventExtrinsicOptions)
+  .addEvent('PredictionMarkets.GlobalDisputeStarted', eventOptions)
   .addEvent('PredictionMarkets.MarketApproved', eventOptions)
   .addEvent('PredictionMarkets.MarketClosed', eventOptions)
   .addEvent('PredictionMarkets.MarketCreated', eventExtrinsicOptions)
@@ -182,6 +184,8 @@ export type EventItem = Exclude<BatchProcessorEventItem<typeof processor>, _Even
 
 const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
   switch (item.name) {
+    case 'PredictionMarkets.GlobalDisputeStarted':
+      return globalDisputeStarted(ctx, block, item);
     case 'PredictionMarkets.MarketApproved':
       return marketApproved(ctx, block, item);
     case 'PredictionMarkets.MarketClosed':
