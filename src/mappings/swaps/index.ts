@@ -240,9 +240,6 @@ export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
     console.error(`Coudn't find pool account with accountId ${accountId}`);
     return;
   }
-  account.poolId = +poolId;
-  console.log(`[${item.event.name}] Saving account: ${JSON.stringify(account, null, 2)}`);
-  await ctx.store.save<Account>(account);
 
   const pool = new Pool();
   pool.id = item.event.id + '-' + poolId;
@@ -351,6 +348,7 @@ export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Event
 
   const pool = await ctx.store.get(Pool, {
     where: { poolId: +poolId.toString() },
+    relations: { account: true },
   });
   if (!pool) return;
   pool.status = PoolStatus.Destroyed;
@@ -371,7 +369,7 @@ export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Event
 
   const ab = await ctx.store.findOne(AccountBalance, {
     where: {
-      account: { poolId: pool.poolId },
+      account: { accountId: pool.account.accountId },
       assetId: pool.baseAsset,
     },
     relations: { account: true },
