@@ -11,8 +11,6 @@ type Account @entity {
   id: ID!
   "Zeitgeist's identifier for market. Valid only for market account."
   marketId: Int
-  "Zeitgeist's identifier for pool. Valid only for pool account."
-  poolId: Int
 }
 
 """
