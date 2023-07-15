@@ -20,6 +20,7 @@ import {
 } from '../../model';
 import { Ctx, EventItem } from '../../processor';
 import { calcSpotPrice, extrinsicFromEvent, getAssetId, getMarketEvent, getPoolStatus, isBaseAsset } from '../helper';
+import { Tools } from '../util';
 import {
   getArbitrageBuyBurnEvent,
   getArbitrageMintSellEvent,
@@ -217,31 +218,29 @@ export const poolClosed = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
 export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
   let { cpep, swapPool, amount, accountId } = getPoolCreateEvent(ctx, item);
 
-  if (accountId.length === 0 && swapPool.weights) {
-    const hab = await ctx.store.findOneBy(HistoricalAccountBalance, {
-      assetId: getAssetId(swapPool.weights[0][0]),
-      event: 'EndowedTransferred',
-      blockNumber: block.height,
-    });
-    accountId = hab ? hab.accountId : accountId;
+  const poolId = cpep.poolId.toString();
+
+  if (accountId.length === 0) {
+    const sdk = await Tools.getSDK();
+    // @ts-ignore
+    accountId = (await sdk.api.rpc.swaps.poolAccountId(poolId)).toString();
   }
 
-  let acc;
-  if (accountId.length > 0) {
-    acc = await ctx.store.get(Account, {
-      where: { accountId: accountId },
-    });
-    if (acc) {
-      acc.poolId = +cpep.poolId.toString();
-      console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
-      await ctx.store.save<Account>(acc);
-    }
+  const account = await ctx.store.get(Account, {
+    where: { accountId: accountId },
+  });
+  if (!account) {
+    console.error(`Coudn't find pool account with accountId ${accountId}`);
+    return;
   }
+  account.poolId = +poolId;
+  console.log(`[${item.event.name}] Saving account: ${JSON.stringify(account, null, 2)}`);
+  await ctx.store.save<Account>(account);
 
   const pool = new Pool();
-  pool.id = item.event.id + '-' + cpep.poolId;
-  pool.poolId = +cpep.poolId.toString();
-  pool.account = acc;
+  pool.id = item.event.id + '-' + poolId;
+  pool.poolId = +poolId;
+  pool.account = account;
   pool.marketId = +swapPool.marketId.toString();
   pool.status = getPoolStatus(swapPool.poolStatus);
   pool.scoringRule = swapPool.scoringRule.__kind;
