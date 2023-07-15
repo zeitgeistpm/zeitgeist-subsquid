@@ -22,7 +22,7 @@ export class Pool {
      */
     @Index_()
     @ManyToOne_(() => Account, {nullable: true})
-    account!: Account | undefined | null
+    account!: Account
 
     /**
      * List of assets connected to the pool
