@@ -11,8 +11,6 @@ type Account @entity {
   id: ID!
   "Zeitgeist's identifier for market. Valid only for market account."
   marketId: Int
-  "Zeitgeist's identifier for pool. Valid only for pool account."
-  poolId: Int
 }
 
 """
@@ -216,8 +214,8 @@ type HistoricalMarket @entity {
 Liquidity pool details
 """
 type Pool @entity {
-  "Zeitgeist's identifier for account"
-  accountId: String!
+  "Account for the pool"
+  account: Account!
   "List of assets connected to the pool"
   assets: [Asset]! @derivedFrom(field: "pool")
   "The base asset in the market swap pool (usually a currency)"
