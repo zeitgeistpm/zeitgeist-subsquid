@@ -1,6 +1,6 @@
 /**
  * Script to validate asset balances of all squid accounts against on-chain balance
- * Run using `ts-node scripts/validate/balances.ts wss://bsr.zeitgeist.pm`
+ * Run using `ts-node scripts/validate/balances.ts dev`
  */
 import axios from 'axios';
 import { AccountInfo } from '@polkadot/types/interfaces/system';
@@ -9,8 +9,27 @@ import { Tools } from '../../src/mappings/util';
 import { Account, AccountBalance } from '../../src/model';
 
 const PROGRESS = false; // true or false for viewing running logs
-const NODE_URL = process.argv[2];
-const GRAPHQL_HOSTNAME = NODE_URL.includes(`bs`) ? `processor.zeitgeist.pm` : `processor.rpc-0.zeitgeist.pm`;
+
+let NODE_URL: string;
+let GRAPHQL_HOSTNAME: string;
+switch (process.argv[2]) {
+  case 'dev':
+    NODE_URL = 'wss://bsr.zeitgeist.pm';
+    GRAPHQL_HOSTNAME = 'processor.zeitgeist.pm';
+    break;
+  case 'test':
+    NODE_URL = 'wss://bsr.zeitgeist.pm';
+    GRAPHQL_HOSTNAME = 'processor.bsr.zeitgeist.pm';
+    break;
+  case 'main':
+    NODE_URL = 'wss://zeitgeist-rpc.dwellir.com';
+    GRAPHQL_HOSTNAME = 'processor.rpc-0.zeitgeist.pm';
+    break;
+  default:
+    console.log(`Please pass 'dev' or 'test' or 'main' as environment`);
+    console.log(`Example: ts-node scripts/validate/balances.ts dev`);
+    process.exit(1);
+}
 
 const query = {
   query: `{
@@ -36,17 +55,17 @@ const validateBalances = async () => {
   const { validatedAccCount, outlierMap, validatedABCount } = await getOutliers(accounts, squidHeight);
   console.log(`\nTotal accounts validated: ${validatedAccCount}`);
   console.log(`Total asset balances validated: ${validatedABCount}`);
-  if (validatedABCount === 0) process.exit();
+  if (validatedAccCount === 0) process.exit(1);
   if (outlierMap.size > 0) {
     console.log(`Asset balances don't match for ${outlierMap.size} account(s) 🔴`);
     [...outlierMap.entries()].map(([accountId, assets], idx) => {
       console.log(`${idx + 1}. ${accountId}`);
       console.log(assets);
     });
-    process.exit();
+    process.exit(0);
   }
   console.log(`Asset balances match for all accounts ✅`);
-  process.exit();
+  process.exit(0);
 };
 
 const getOutliers = async (
