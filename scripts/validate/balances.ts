@@ -1,6 +1,6 @@
 /**
  * Script to validate asset balances of all squid accounts against on-chain balance
- * Run using `ts-node scripts/validate/balances.ts dev`
+ * Run using the command: ts-node scripts/validate/balances.ts dev
  */
 import axios from 'axios';
 import { AccountInfo } from '@polkadot/types/interfaces/system';
