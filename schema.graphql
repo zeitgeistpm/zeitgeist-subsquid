@@ -11,8 +11,6 @@ type Account @entity {
   id: ID!
   "Zeitgeist's identifier for market. Valid only for market account."
   marketId: Int
-  "Zeitgeist's identifier for pool. Valid only for pool account."
-  poolId: Int
 }
 
 """
@@ -217,7 +215,7 @@ Liquidity pool details
 """
 type Pool @entity {
   "Account for the pool"
-  account: Account @cardinality(value: 1)
+  account: Account! @cardinality(value: 1)
   "List of assets connected to the pool"
   assets: [Asset]! @derivedFrom(field: "pool") @cardinality(value: 20)
   "The base asset in the market swap pool (usually a currency)"
@@ -408,6 +406,7 @@ enum MarketCreation {
 Market's event options
 """
 enum MarketEvent {
+  GlobalDisputeStarted
   MarketApproved
   MarketClosed
   MarketCreated

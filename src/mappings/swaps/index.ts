@@ -19,7 +19,15 @@ import {
   Weight,
 } from '../../model';
 import { Ctx, EventItem } from '../../processor';
-import { calcSpotPrice, extrinsicFromEvent, getAssetId, getMarketEvent, getPoolStatus, isBaseAsset } from '../helper';
+import {
+  calcSpotPrice,
+  extrinsicFromEvent,
+  formatMarketEvent,
+  getAssetId,
+  getPoolStatus,
+  isBaseAsset,
+} from '../helper';
+import { Tools } from '../util';
 import {
   getArbitrageBuyBurnEvent,
   getArbitrageMintSellEvent,
@@ -217,19 +225,26 @@ export const poolClosed = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
 export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
   let { cpep, swapPool, amount, accountId } = getPoolCreateEvent(ctx, item);
 
-  if (accountId.length === 0 && swapPool.weights) {
-    const hab = await ctx.store.findOneBy(HistoricalAccountBalance, {
-      assetId: getAssetId(swapPool.weights[0][0]),
-      event: 'EndowedTransferred',
-      blockNumber: block.height,
-    });
-    accountId = hab ? hab.accountId : accountId;
+  const poolId = cpep.poolId.toString();
+
+  if (accountId.length === 0) {
+    const sdk = await Tools.getSDK();
+    // @ts-ignore
+    accountId = (await sdk.api.rpc.swaps.poolAccountId(poolId)).toString();
+  }
+
+  const account = await ctx.store.get(Account, {
+    where: { accountId: accountId },
+  });
+  if (!account) {
+    console.error(`Coudn't find pool account with accountId ${accountId}`);
+    return;
   }
 
   const pool = new Pool();
-  pool.id = item.event.id + '-' + cpep.poolId;
-  pool.poolId = +cpep.poolId.toString();
-  pool.accountId = accountId;
+  pool.id = item.event.id + '-' + poolId;
+  pool.poolId = +poolId;
+  pool.account = account;
   pool.marketId = +swapPool.marketId.toString();
   pool.status = getPoolStatus(swapPool.poolStatus);
   pool.scoringRule = swapPool.scoringRule.__kind;
@@ -243,15 +258,6 @@ export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
   pool.baseAsset = getAssetId(swapPool.baseAsset);
   console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
   await ctx.store.save<Pool>(pool);
-
-  const acc = await ctx.store.get(Account, {
-    where: { accountId: pool.accountId },
-  });
-  if (acc) {
-    acc.poolId = pool.poolId;
-    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
-    await ctx.store.save<Account>(acc);
-  }
 
   if (swapPool.weights && isBaseAsset(swapPool.weights[swapPool.weights.length - 1][0])) {
     const baseAssetWeight = +swapPool.weights[swapPool.weights.length - 1][1].toString();
@@ -330,7 +336,7 @@ export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
   hm.marketId = market.marketId;
   hm.status = market.status;
   hm.poolId = market.pool.poolId;
-  hm.event = getMarketEvent(item.event.name);
+  hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -342,6 +348,7 @@ export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Event
 
   const pool = await ctx.store.get(Pool, {
     where: { poolId: +poolId.toString() },
+    relations: { account: true },
   });
   if (!pool) return;
   pool.status = PoolStatus.Destroyed;
@@ -360,9 +367,12 @@ export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Event
   console.log(`[${item.event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`);
   await ctx.store.save<HistoricalPool>(hp);
 
-  const ab = await ctx.store.findOneBy(AccountBalance, {
-    account: { accountId: pool.accountId },
-    assetId: pool.baseAsset,
+  const ab = await ctx.store.findOne(AccountBalance, {
+    where: {
+      account: { accountId: pool.account.accountId },
+      assetId: pool.baseAsset,
+    },
+    relations: { account: true },
   });
   if (!ab) return;
   const oldBalance = ab.balance;
@@ -372,8 +382,8 @@ export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Event
   await ctx.store.save<AccountBalance>(ab);
 
   const hab = new HistoricalAccountBalance();
-  hab.id = item.event.id + '-' + pool.accountId.substring(pool.accountId.length - 5);
-  hab.accountId = pool.accountId;
+  hab.id = item.event.id + '-' + ab.account.accountId.substring(ab.account.accountId.length - 5);
+  hab.accountId = ab.account.accountId;
   hab.event = item.event.name.split('.')[1];
   hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = ab.assetId;
