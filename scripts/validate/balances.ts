@@ -100,8 +100,7 @@ const getOutliers = async (
               chainBal = free;
             }
           } catch (err) {
-            console.error(err);
-            return { validatedAccCount, outlierMap, validatedABCount };
+            if (PROGRESS) console.error(err);
           }
           if (!isSame(account.accountId, chainBal, ab)) {
             let assets = outlierMap.get(account.accountId) || [];
