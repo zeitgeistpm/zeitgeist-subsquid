@@ -2,7 +2,7 @@
 A type that has ss58 address format of the account. As soon as the chain
 encounters any new address, they get registered here as user/pool/market account.
 """
-type Account @entity {
+type Account @entity @cardinality(value: 500) {
   "Account address"
   accountId: String!
   "List of balances connected to the account"
@@ -16,7 +16,7 @@ type Account @entity {
 """
 Balance of a particular asset denoted by assetId present in the account
 """
-type AccountBalance @entity {
+type AccountBalance @entity @cardinality(value: 500) {
   "Connected account"
   account: Account! @cardinality(value: 1)
   "Zeitgeist's identifier for asset"
@@ -31,7 +31,7 @@ type AccountBalance @entity {
 Balance history of a particular asset in an account. Records all transactions
 associated with the account.
 """
-type HistoricalAccountBalance @entity {
+type HistoricalAccountBalance @entity @cardinality(value: 500) {
   "Account address"
   accountId: String! @index
   "Zeitgeist's identifier for asset"
@@ -54,7 +54,7 @@ type HistoricalAccountBalance @entity {
 A type that has detail of the outcome asset. It is initialised as soon as the
 market is created and price is assigned when pool is deployed for the market.
 """
-type Asset @entity {
+type Asset @entity @cardinality(value: 500) {
   "Unique identifier of the object"
   id: ID!
   "Zeitgeist's identifier for asset"
@@ -70,7 +70,7 @@ type Asset @entity {
 """
 A type that records the price history of an outcome asset.
 """
-type HistoricalAsset @entity {
+type HistoricalAsset @entity @cardinality(value: 500) {
   "Unique identifier of the object"
   id: ID!
   "Account which executed the trade"
@@ -98,7 +98,7 @@ type HistoricalAsset @entity {
 """
 A type that records the trade history of an account.
 """
-type HistoricalSwap @entity {
+type HistoricalSwap @entity @cardinality(value: 500) {
   "Unique identifier of the object"
   id: ID!
   "Account which executed the trade"
@@ -189,7 +189,7 @@ type Market @entity @cardinality(value: 500) {
 Market history of a particular market. Records all transactions
 associated with the market.
 """
-type HistoricalMarket @entity {
+type HistoricalMarket @entity @cardinality(value: 500) {
   "Height of the block"
   blockNumber: Int!
   "The account that reported or disputed"
@@ -213,7 +213,7 @@ type HistoricalMarket @entity {
 """
 Liquidity pool details
 """
-type Pool @entity {
+type Pool @entity @cardinality(value: 500) {
   "Account for the pool"
   account: Account! @cardinality(value: 1)
   "List of assets connected to the pool"
@@ -248,7 +248,7 @@ type Pool @entity {
 Liquidity history of a particular pool. Records all transactions
 associated with the pool.
 """
-type HistoricalPool @entity {
+type HistoricalPool @entity @cardinality(value: 500) {
   "New amount of market's base asset present in the pool"
   baseAssetQty: BigInt
   "Height of the block"
