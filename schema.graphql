@@ -122,7 +122,7 @@ type HistoricalSwap @entity {
 """
 Prediction market details
 """
-type Market @entity {
+type Market @entity @cardinality(value: 500) {
   "Address responsible for authorizing disputes. Null if Adv Comm is the authority"
   authorizedAddress: String
   "The base asset in the market swap pool (usually a currency)"
