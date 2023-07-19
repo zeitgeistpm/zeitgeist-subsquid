@@ -1,5 +1,6 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_} from "typeorm"
 import * as marshal from "./marshal"
+import {Extrinsic} from "./_extrinsic"
 
 /**
  * A type that records the trade history of an account.
@@ -52,6 +53,12 @@ export class HistoricalSwap {
      */
     @Column_("text", {nullable: false})
     event!: string
+
+    /**
+     * Extrinsic responsible for this change
+     */
+    @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new Extrinsic(undefined, obj)}, nullable: true})
+    extrinsic!: Extrinsic | undefined | null
 
     /**
      * Height of the block
