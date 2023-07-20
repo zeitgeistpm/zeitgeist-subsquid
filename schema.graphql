@@ -113,6 +113,8 @@ type HistoricalSwap @entity {
   assetAmountOut: BigInt!
   "Event method which initiated this swap"
   event: String!
+  "Extrinsic responsible for this change"
+  extrinsic: Extrinsic
   "Height of the block"
   blockNumber: Int!
   "Timestamp of the block"
