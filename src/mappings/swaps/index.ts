@@ -197,6 +197,7 @@ export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
 
   const account = await ctx.store.get(Account, {
     where: { accountId: accountId },
+    relations: { balances: true },
   });
   if (!account) {
     console.error(`Coudn't find pool account with accountId ${accountId}`);
