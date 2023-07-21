@@ -52,7 +52,12 @@ export const arbitrageBuyBurn = async (ctx: Ctx, block: SubstrateBlock, item: Ev
     relations: { account: { balances: true } },
   });
   if (!pool) return;
-  const baseAssetQty = pool.account.balances[pool.account.balances.length - 1].balance;
+  let baseAssetQty = pool.account.balances[pool.account.balances.length - 1].balance;
+  await Promise.all(
+    pool.account.balances.map(async (ab) => {
+      if (ab.assetId === pool.baseAsset) baseAssetQty = ab.balance;
+    })
+  );
   const numOfPoolWts = pool.weights.length;
 
   if (numOfPoolWts > 0 && isBaseAsset(pool.weights[numOfPoolWts - 1]!.assetId)) {
@@ -100,7 +105,12 @@ export const arbitrageMintSell = async (ctx: Ctx, block: SubstrateBlock, item: E
     relations: { account: { balances: true } },
   });
   if (!pool) return;
-  const baseAssetQty = pool.account.balances[pool.account.balances.length - 1].balance;
+  let baseAssetQty = pool.account.balances[pool.account.balances.length - 1].balance;
+  await Promise.all(
+    pool.account.balances.map(async (ab) => {
+      if (ab.assetId === pool.baseAsset) baseAssetQty = ab.balance;
+    })
+  );
   const numOfPoolWts = pool.weights.length;
 
   if (numOfPoolWts > 0 && isBaseAsset(pool.weights[numOfPoolWts - 1]!.assetId)) {
@@ -221,6 +231,13 @@ export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
   console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
   await ctx.store.save<Pool>(pool);
 
+  let baseAssetQty = pool.account.balances[pool.account.balances.length - 1].balance;
+  await Promise.all(
+    pool.account.balances.map(async (ab) => {
+      if (ab.assetId === pool.baseAsset) baseAssetQty = ab.balance;
+    })
+  );
+
   if (swapPool.weights && isBaseAsset(swapPool.weights[swapPool.weights.length - 1][0])) {
     const baseAssetWeight = +swapPool.weights[swapPool.weights.length - 1][1].toString();
     await Promise.all(
@@ -237,13 +254,7 @@ export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
           assetId: wt.assetId,
         });
         const assetQty = ab ? +ab.balance.toString() : 10 ** 12;
-        const spotPrice = calcSpotPrice(
-          +pool.account.balances[pool.account.balances.length - 1].balance.toString(),
-          baseAssetWeight,
-          assetQty,
-          +wt.weight.toString()
-        );
-
+        const spotPrice = calcSpotPrice(+baseAssetQty.toString(), baseAssetWeight, assetQty, +wt.weight.toString());
         const asset = new Asset();
         asset.id = item.event.id + '-' + pool.marketId + i;
         asset.assetId = wt.assetId;
@@ -432,7 +443,12 @@ export const poolExit = async (ctx: Ctx, block: SubstrateBlock, item: EventItem)
   });
   if (!market) return;
 
-  const baseAssetQty = pool.account.balances[pool.account.balances.length - 1].balance;
+  let baseAssetQty = pool.account.balances[pool.account.balances.length - 1].balance;
+  await Promise.all(
+    pool.account.balances.map(async (ab) => {
+      if (ab.assetId === pool.baseAsset) baseAssetQty = ab.balance;
+    })
+  );
   const numOfPoolWts = pool.weights.length;
   const baseAssetWeight = +pool.weights[numOfPoolWts - 1]!.weight.toString();
 
@@ -574,7 +590,12 @@ export const poolExitWithExactAssetAmount = async (ctx: Ctx, block: SubstrateBlo
     relations: { account: { balances: true } },
   });
   if (!pool || !isBaseAsset(pae.asset)) return;
-  const baseAssetQty = pool.account.balances[pool.account.balances.length - 1].balance;
+  let baseAssetQty = pool.account.balances[pool.account.balances.length - 1].balance;
+  await Promise.all(
+    pool.account.balances.map(async (ab) => {
+      if (ab.assetId === pool.baseAsset) baseAssetQty = ab.balance;
+    })
+  );
   const numOfPoolWts = pool.weights.length;
   const baseAssetWeight = +pool.weights[numOfPoolWts - 1]!.weight.toString();
 
@@ -621,7 +642,12 @@ export const poolJoin = async (ctx: Ctx, block: SubstrateBlock, item: EventItem)
     relations: { account: { balances: true } },
   });
   if (!pool) return;
-  const baseAssetQty = pool.account.balances[pool.account.balances.length - 1].balance;
+  let baseAssetQty = pool.account.balances[pool.account.balances.length - 1].balance;
+  await Promise.all(
+    pool.account.balances.map(async (ab) => {
+      if (ab.assetId === pool.baseAsset) baseAssetQty = ab.balance;
+    })
+  );
   const numOfPoolWts = pool.weights.length;
 
   const baseAssetWeight = +pool.weights[numOfPoolWts - 1]!.weight.toString();
@@ -715,7 +741,12 @@ export const poolJoinWithExactAssetAmount = async (ctx: Ctx, block: SubstrateBlo
     relations: { account: { balances: true } },
   });
   if (!pool || !isBaseAsset(pae.asset)) return;
-  const baseAssetQty = pool.account.balances[pool.account.balances.length - 1].balance;
+  let baseAssetQty = pool.account.balances[pool.account.balances.length - 1].balance;
+  await Promise.all(
+    pool.account.balances.map(async (ab) => {
+      if (ab.assetId === pool.baseAsset) baseAssetQty = ab.balance;
+    })
+  );
   const numOfPoolWts = pool.weights.length;
 
   const baseAssetWeight = +pool.weights[numOfPoolWts - 1]!.weight.toString();
@@ -808,7 +839,12 @@ export const swapExactAmountIn = async (ctx: Ctx, block: SubstrateBlock, item: E
   const assetBoughtQty = BigInt(swapEvent.assetAmountOut.toString());
   const assetSoldQty = BigInt(swapEvent.assetAmountIn.toString());
 
-  const baseAssetQty = pool.account.balances[pool.account.balances.length - 1].balance;
+  let baseAssetQty = pool.account.balances[pool.account.balances.length - 1].balance;
+  await Promise.all(
+    pool.account.balances.map(async (ab) => {
+      if (ab.assetId === pool.baseAsset) baseAssetQty = ab.balance;
+    })
+  );
   let oldVolume = pool.volume;
   let newVolume = oldVolume;
   if (isBaseAsset(assetBought) || isBaseAsset(assetSold)) {
@@ -945,7 +981,12 @@ export const swapExactAmountOut = async (ctx: Ctx, block: SubstrateBlock, item: 
   const assetBoughtQty = BigInt(swapEvent.assetAmountOut.toString());
   const assetSoldQty = BigInt(swapEvent.assetAmountIn.toString());
 
-  const baseAssetQty = pool.account.balances[pool.account.balances.length - 1].balance;
+  let baseAssetQty = pool.account.balances[pool.account.balances.length - 1].balance;
+  await Promise.all(
+    pool.account.balances.map(async (ab) => {
+      if (ab.assetId === pool.baseAsset) baseAssetQty = ab.balance;
+    })
+  );
   let oldVolume = pool.volume;
   let newVolume = oldVolume;
   if (isBaseAsset(assetBought) || isBaseAsset(assetSold)) {
