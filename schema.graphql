@@ -222,8 +222,6 @@ type Pool @entity {
   assets: [Asset]! @derivedFrom(field: "pool")
   "The base asset in the market swap pool (usually a currency)"
   baseAsset: String!
-  "Amount of market's base asset present in the pool"
-  baseAssetQty: BigInt!
   "Timestamp of pool creation"
   createdAt: DateTime!
   "Zeitgeist's identifier for market connected to the pool"
@@ -251,8 +249,6 @@ Liquidity history of a particular pool. Records all transactions
 associated with the pool.
 """
 type HistoricalPool @entity {
-  "New amount of market's base asset present in the pool"
-  baseAssetQty: BigInt
   "Height of the block"
   blockNumber: Int!
   "Volume difference"
