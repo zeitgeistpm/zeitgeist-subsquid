@@ -16,12 +16,6 @@ export class HistoricalPool {
     id!: string
 
     /**
-     * New amount of market's base asset present in the pool
-     */
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
-    baseAssetQty!: bigint | undefined | null
-
-    /**
      * Height of the block
      */
     @Column_("int4", {nullable: false})
