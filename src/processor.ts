@@ -208,26 +208,10 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
       return marketStartedWithSubsidy(ctx, block, item);
     case 'Styx.AccountCrossed':
       return accountCrossed(ctx, block, item);
-    case 'Swaps.ArbitrageBuyBurn':
-      return arbitrageBuyBurn(ctx, block, item);
-    case 'Swaps.ArbitrageMintSell':
-      return arbitrageMintSell(ctx, block, item);
     case 'Swaps.PoolActive':
       return poolActive(ctx, block, item);
     case 'Swaps.PoolClosed':
       return poolClosed(ctx, block, item);
-    case 'Swaps.PoolExit':
-      return poolExit(ctx, block, item);
-    case 'Swaps.PoolExitWithExactAssetAmount':
-      return poolExitWithExactAssetAmount(ctx, block, item);
-    case 'Swaps.PoolJoin':
-      return poolJoin(ctx, block, item);
-    case 'Swaps.PoolJoinWithExactAssetAmount':
-      return poolJoinWithExactAssetAmount(ctx, block, item);
-    case 'Swaps.SwapExactAmountIn':
-      return swapExactAmountIn(ctx, block, item);
-    case 'Swaps.SwapExactAmountOut':
-      return swapExactAmountOut(ctx, block, item);
     case 'System.NewAccount':
       return systemNewAccount(ctx, block, item);
   }
@@ -491,6 +475,18 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             balanceHistory.push(hab);
             break;
           }
+          case 'Swaps.ArbitrageBuyBurn': {
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            await arbitrageBuyBurn(ctx, block.header, item);
+            break;
+          }
+          case 'Swaps.ArbitrageMintSell': {
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            await arbitrageMintSell(ctx, block.header, item);
+            break;
+          }
           case 'Swaps.PoolCreate': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
@@ -501,6 +497,42 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
             await poolDestroyed(ctx, block.header, item);
+            break;
+          }
+          case 'Swaps.PoolExit': {
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            await poolExit(ctx, block.header, item);
+            break;
+          }
+          case 'Swaps.PoolExitWithExactAssetAmount': {
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            await poolExitWithExactAssetAmount(ctx, block.header, item);
+            break;
+          }
+          case 'Swaps.PoolJoin': {
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            await poolJoin(ctx, block.header, item);
+            break;
+          }
+          case 'Swaps.PoolJoinWithExactAssetAmount': {
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            await poolJoinWithExactAssetAmount(ctx, block.header, item);
+            break;
+          }
+          case 'Swaps.SwapExactAmountIn': {
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            await swapExactAmountIn(ctx, block.header, item);
+            break;
+          }
+          case 'Swaps.SwapExactAmountOut': {
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            await swapExactAmountOut(ctx, block.header, item);
             break;
           }
           // @ts-ignore
