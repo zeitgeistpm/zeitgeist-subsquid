@@ -71,8 +71,8 @@ export const marketLiquidity = (ids: number[]) => `
   JOIN
     account_balance ab ON ab.account_id = p.account_id
   WHERE
-    m.market_id in (${ids}),
-    ab.asset_id = 'Ztg'
+    m.market_id IN (${ids})
+    AND ab.asset_id = 'Ztg'
   GROUP BY
     m.market_id,
     ab.balance;
