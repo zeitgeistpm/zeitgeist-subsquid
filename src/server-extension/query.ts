@@ -73,6 +73,7 @@ export const marketLiquidity = (ids: number[]) => `
   WHERE
     m.market_id IN (${ids})
     AND ab.asset_id NOT LIKE '%Outcome%'
+    AND ab.balance > 0
   GROUP BY
     m.market_id,
     ab.balance;
@@ -113,6 +114,7 @@ export const totalLiquidityAndVolume = () => `
       account_balance ab ON ab.account_id = p.account_id
     WHERE
       ab.asset_id NOT LIKE '%Outcome%'
+      AND ab.balance > 0
     GROUP BY
       m.market_id,
       ab.balance,
