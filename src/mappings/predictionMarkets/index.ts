@@ -341,26 +341,19 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
   }
   newMarket.period = period;
 
-  if (market.bonds) {
-    const marketBonds = new MarketBonds();
-    if (market.bonds.creation) {
-      const creationBond = market.bonds.creation;
-      const bond = new MarketBond();
-      bond.who = encodeAddress(creationBond.who, 73);
-      bond.value = creationBond.value;
-      bond.isSettled = creationBond.isSettled;
-      marketBonds.creation = bond;
-    }
-    if (market.bonds.oracle) {
-      const oracleBond = market.bonds.oracle;
-      const bond = new MarketBond();
-      bond.who = encodeAddress(oracleBond.who, 73);
-      bond.value = oracleBond.value;
-      bond.isSettled = oracleBond.isSettled;
-      marketBonds.oracle = bond;
-    }
-    newMarket.bonds = marketBonds;
-  }
+  const bonds = market.bonds ?? (await new MarketCommonsMarketsStorage(ctx, block).asV46.get(BigInt(marketId)))?.bonds;
+  newMarket.bonds = new MarketBonds({
+    creation: new MarketBond({
+      who: encodeAddress(bonds.creation.who, 73),
+      value: bonds.creation.value,
+      isSettled: bonds.creation.isSettled,
+    }),
+    oracle: new MarketBond({
+      who: encodeAddress(bonds.oracle.who, 73),
+      value: bonds.oracle.value,
+      isSettled: bonds.oracle.isSettled,
+    }),
+  });
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(newMarket, null, 2)}`);
   await ctx.store.save<Market>(newMarket);
 
