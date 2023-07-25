@@ -37,12 +37,6 @@ export class Pool {
     baseAsset!: string
 
     /**
-     * Amount of market's base asset present in the pool
-     */
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
-    baseAssetQty!: bigint
-
-    /**
      * Timestamp of pool creation
      */
     @Column_("timestamp with time zone", {nullable: false})
