@@ -135,7 +135,7 @@ export const globalDisputeStarted = async (ctx: Ctx, block: SubstrateBlock, item
 
   const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + market.marketId;
-  hm.marketId = market.marketId;
+  hm.market = market;
   hm.status = market.status;
   hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
@@ -162,7 +162,7 @@ export const marketApproved = async (ctx: Ctx, block: SubstrateBlock, item: Even
 
   const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + market.marketId;
-  hm.marketId = market.marketId;
+  hm.market = market;
   hm.status = market.status;
   hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
@@ -182,7 +182,7 @@ export const marketClosed = async (ctx: Ctx, block: SubstrateBlock, item: EventI
 
   const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + market.marketId;
-  hm.marketId = market.marketId;
+  hm.market = market;
   hm.status = market.status;
   hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
@@ -366,7 +366,7 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
 
   const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + newMarket.marketId;
-  hm.marketId = newMarket.marketId;
+  hm.market = newMarket;
   hm.status = newMarket.status;
   hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
@@ -391,7 +391,7 @@ export const marketDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Eve
 
   const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + market.marketId;
-  hm.marketId = market.marketId;
+  hm.market = market;
   hm.status = market.status;
   hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
@@ -454,7 +454,7 @@ export const marketDisputed = async (ctx: Ctx, block: SubstrateBlock, item: Even
 
   const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + market.marketId;
-  hm.marketId = market.marketId;
+  hm.market = market;
   hm.status = market.status;
   hm.by = mr.by;
   hm.outcome = ocr;
@@ -480,7 +480,7 @@ export const marketExpired = async (ctx: Ctx, block: SubstrateBlock, item: Event
 
   const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + market.marketId;
-  hm.marketId = market.marketId;
+  hm.market = market;
   hm.status = market.status;
   hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
@@ -500,7 +500,7 @@ export const marketInsufficientSubsidy = async (ctx: Ctx, block: SubstrateBlock,
 
   const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + market.marketId;
-  hm.marketId = market.marketId;
+  hm.market = market;
   hm.status = market.status;
   hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
@@ -525,7 +525,7 @@ export const marketRejected = async (ctx: Ctx, block: SubstrateBlock, item: Even
 
   const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + market.marketId;
-  hm.marketId = market.marketId;
+  hm.market = market;
   hm.status = market.status;
   hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
@@ -572,7 +572,7 @@ export const marketReported = async (ctx: Ctx, block: SubstrateBlock, item: Even
 
   const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + market.marketId;
-  hm.marketId = market.marketId;
+  hm.market = market;
   hm.status = market.status;
   hm.by = mr.by;
   hm.outcome = ocr;
@@ -603,7 +603,7 @@ export const marketResolved = async (ctx: Ctx, block: SubstrateBlock, item: Even
 
   const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + market.marketId;
-  hm.marketId = market.marketId;
+  hm.market = market;
   hm.status = market.status;
   hm.resolvedOutcome = market.resolvedOutcome;
   hm.event = formatMarketEvent(item.event.name);
@@ -699,7 +699,7 @@ export const marketStartedWithSubsidy = async (ctx: Ctx, block: SubstrateBlock, 
 
   const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + market.marketId;
-  hm.marketId = market.marketId;
+  hm.market = market;
   hm.status = market.status;
   hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
