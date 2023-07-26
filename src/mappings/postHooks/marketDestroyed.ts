@@ -30,7 +30,7 @@ export const destroyMarkets = async (ctx: Ctx, block: SubstrateBlock) => {
 
       const hm = new HistoricalMarket();
       hm.id = eventId + '-' + market.marketId;
-      hm.marketId = market.marketId;
+      hm.market = market;
       hm.event = MarketEvent.MarketDestroyed;
       hm.status = market.status;
       hm.blockNumber = block.height;

@@ -26,7 +26,7 @@ export const resolveMarket = async (ctx: Ctx, block: SubstrateBlock, marketId: n
 
   let hm = new HistoricalMarket();
   hm.id = eventId + '-' + market.marketId;
-  hm.marketId = market.marketId;
+  hm.market = market;
   hm.status = market.status;
   hm.resolvedOutcome = market.resolvedOutcome;
   hm.event = MarketEvent.MarketResolved;

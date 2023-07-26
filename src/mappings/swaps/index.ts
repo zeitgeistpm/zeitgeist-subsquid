@@ -305,7 +305,7 @@ export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
 
   const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + market.marketId;
-  hm.marketId = market.marketId;
+  hm.market = market;
   hm.status = market.status;
   hm.poolId = market.pool.poolId;
   hm.event = formatMarketEvent(item.event.name);
