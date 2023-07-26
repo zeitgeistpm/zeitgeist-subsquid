@@ -198,8 +198,8 @@ type HistoricalMarket @entity {
   by: String
   "Event method which initiated this change"
   event: MarketEvent!
-  "Zeitgeist's identifier for market"
-  marketId: Int!
+  "Details of the connected market"
+  market: Market!
   "Zeitgeist's identifier for pool"
   poolId: Int
   "Reported or disputed outcome for the market"
