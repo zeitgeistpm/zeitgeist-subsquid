@@ -70,7 +70,7 @@ const validateBalanceHistory = async () => {
     // When all block numbers are covered
     if (toBlockNum - fromBlockNum === 1) {
       if (lastDiff !== BigInt(0)) {
-        console.log(`\nFound difference of ${lastDiff} ZTG at #${toBlockNum}`);
+        console.log(`\nFound difference of ${lastDiff} ZTG on ${ACCOUNT_ID} at #${toBlockNum}`);
         console.log(`On Subsquid: ${squidBalance}, On Chain: ${chainBalance}`);
       } else {
         console.log(`Ztg balance history of ${ACCOUNT_ID} is in sync with ${CHAIN_ENV} chain`);
