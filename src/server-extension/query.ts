@@ -86,7 +86,7 @@ export const marketInfo = (marketId: number) => `
   FROM
     market m
   JOIN
-    historical_market hm ON hm.market_id = m.market_id
+    historical_market hm ON hm.market_id = m.id
   WHERE
     m.market_id=${marketId}
     AND hm.event~'(Pool|Resolved)'
