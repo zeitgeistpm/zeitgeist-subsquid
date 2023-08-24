@@ -52,7 +52,7 @@ const validateBalances = async () => {
   const squidHeight = res.data.data.squidStatus.height as bigint;
   console.log(`Received ${accounts.length} accounts at #${squidHeight} via ${GRAPHQL_HOSTNAME}`);
 
-  const { validatedAccCount, outlierMap, validatedABCount } = await getOutliers(accounts, squidHeight);
+  const { validatedAccCount, validatedABCount, outlierMap } = await getOutliers(accounts, squidHeight);
   console.log(`\nTotal accounts validated: ${validatedAccCount}`);
   console.log(`Total asset balances validated: ${validatedABCount}`);
   if (validatedAccCount === 0) process.exit(1);
@@ -71,9 +71,9 @@ const validateBalances = async () => {
 const getOutliers = async (
   accounts: Account[],
   squidHeight: bigint
-): Promise<{ validatedAccCount: number; outlierMap: Map<string, string[]>; validatedABCount: number }> => {
-  let validatedAccCount = 0,
-    validatedABCount = 0;
+): Promise<{ validatedAccCount: number; validatedABCount: number; outlierMap: Map<string, string[]> }> => {
+  let validatedAccounts = new Set();
+  let validatedABCount = 0;
   const outlierMap = new Map<string, string[]>();
   const sdk = await Tools.getSDK(NODE_URL);
   const blockHash = await sdk.api.rpc.chain.getBlockHash(squidHeight);
@@ -102,18 +102,21 @@ const getOutliers = async (
           } catch (err) {
             if (PROGRESS) console.error(err);
           }
-          if (!isSame(account.accountId, chainBal, ab)) {
-            let assets = outlierMap.get(account.accountId) || [];
-            assets.push(ab.assetId);
-            outlierMap.set(account.accountId, assets);
+
+          if (chainBal) {
+            if (!isSame(account.accountId, chainBal, ab)) {
+              let assets = outlierMap.get(account.accountId) || [];
+              assets.push(ab.assetId);
+              outlierMap.set(account.accountId, assets);
+            }
+            validatedAccounts.add(account.accountId);
+            validatedABCount++;
           }
-          validatedABCount++;
         })
       );
-      validatedAccCount++;
     })
   );
-  return { validatedAccCount, outlierMap, validatedABCount };
+  return { validatedAccCount: validatedAccounts.size, validatedABCount, outlierMap };
 };
 
 const isSame = (accountId: string, chainBal: any, squidAB: AccountBalance): boolean => {
