@@ -180,7 +180,7 @@ export const balancesReserveRepatriated = async (
   hab.event = item.event.name.split('.')[1];
   hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = 'Ztg';
-  hab.dBalance = -amount;
+  hab.dBalance = amount;
   hab.blockNumber = block.height;
   hab.timestamp = new Date(block.timestamp);
 
