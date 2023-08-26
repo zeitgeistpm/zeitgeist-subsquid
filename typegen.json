@@ -7,6 +7,7 @@
     "Balances.Deposit",
     "Balances.DustLost",
     "Balances.Reserved",
+    "Balances.ReserveRepatriated",
     "Balances.Slashed",
     "Balances.Transfer",
     "Balances.Unreserved",

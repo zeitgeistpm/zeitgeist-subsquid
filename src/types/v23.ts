@@ -1,5 +1,15 @@
 import type {Result, Option} from './support'
 
+export type BalanceStatus = BalanceStatus_Free | BalanceStatus_Reserved
+
+export interface BalanceStatus_Free {
+    __kind: 'Free'
+}
+
+export interface BalanceStatus_Reserved {
+    __kind: 'Reserved'
+}
+
 export type Currency = Currency_CategoricalOutcome | Currency_ScalarOutcome | Currency_CombinatorialOutcome | Currency_PoolShare | Currency_Ztg
 
 export interface Currency_CategoricalOutcome {
