@@ -6,6 +6,7 @@ import {
   getBalanceSetEvent,
   getDepositEvent,
   getDustLostEvent,
+  getReserveRepatriatedEvent,
   getReservedEvent,
   getSlashedEvent,
   getTransferEvent,
@@ -144,6 +145,37 @@ export const balancesReserved = async (
 
   let hab = new HistoricalAccountBalance();
   hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
+  hab.accountId = acc.accountId;
+  hab.event = item.event.name.split('.')[1];
+  hab.extrinsic = extrinsicFromEvent(item.event);
+  hab.assetId = 'Ztg';
+  hab.dBalance = -amount;
+  hab.blockNumber = block.height;
+  hab.timestamp = new Date(block.timestamp);
+
+  return hab;
+};
+
+export const balancesReserveRepatriated = async (
+  ctx: Ctx,
+  block: SubstrateBlock,
+  item: EventItem
+): Promise<HistoricalAccountBalance | undefined> => {
+  const { fromId, toId, amount, destinationStatus } = getReserveRepatriatedEvent(ctx, item);
+  if (destinationStatus.__kind !== 'Free') return;
+
+  let acc = await ctx.store.get(Account, { where: { accountId: toId } });
+  if (!acc) {
+    acc = new Account();
+    acc.id = toId;
+    acc.accountId = toId;
+    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
+    await ctx.store.save<Account>(acc);
+    await initBalance(acc, ctx.store, block, item);
+  }
+
+  const hab = new HistoricalAccountBalance();
+  hab.id = item.event.id + '-' + toId.substring(toId.length - 5);
   hab.accountId = acc.accountId;
   hab.event = item.event.name.split('.')[1];
   hab.extrinsic = extrinsicFromEvent(item.event);
