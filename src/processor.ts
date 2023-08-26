@@ -15,6 +15,7 @@ import {
   balancesBalanceSet,
   balancesDeposit,
   balancesDustLost,
+  balancesReserveRepatriated,
   balancesReserved,
   balancesTransfer,
   balancesUnreserved,
@@ -125,6 +126,7 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Balances.Deposit', eventExtrinsicOptions)
   .addEvent('Balances.DustLost', eventExtrinsicOptions)
   .addEvent('Balances.Reserved', eventExtrinsicOptions)
+  .addEvent('Balances.ReserveRepatriated', eventExtrinsicOptions)
   .addEvent('Balances.Transfer', eventExtrinsicOptions)
   .addEvent('Balances.Unreserved', eventExtrinsicOptions)
   .addEvent('Balances.Withdraw', eventExtrinsicOptions)
@@ -366,6 +368,15 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             const key = makeKey(hab.accountId, hab.assetId);
             balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
             balanceHistory.push(hab);
+            break;
+          }
+          case 'Balances.ReserveRepatriated': {
+            const hab = await balancesReserveRepatriated(ctx, block.header, item);
+            if (hab) {
+              const key = makeKey(hab.accountId, hab.assetId);
+              balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+              balanceHistory.push(hab);
+            }
             break;
           }
           case 'Balances.Transfer': {
