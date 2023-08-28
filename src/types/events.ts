@@ -151,6 +151,56 @@ export class BalancesDustLostEvent {
     }
 }
 
+export class BalancesReserveRepatriatedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'Balances.ReserveRepatriated')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     *  Some balance was moved from the reserve of the first account to the second account.
+     *  Final argument indicates the destination balance type.
+     *  \[from, to, balance, destination_status\]
+     */
+    get isV23(): boolean {
+        return this._chain.getEventHash('Balances.ReserveRepatriated') === '68e9ec5664c8ffe977da0c890bac43122a5cf13565c1c936e2120ba4980bcf31'
+    }
+
+    /**
+     *  Some balance was moved from the reserve of the first account to the second account.
+     *  Final argument indicates the destination balance type.
+     *  \[from, to, balance, destination_status\]
+     */
+    get asV23(): [Uint8Array, Uint8Array, bigint, v23.BalanceStatus] {
+        assert(this.isV23)
+        return this._chain.decodeEvent(this.event)
+    }
+
+    /**
+     * Some balance was moved from the reserve of the first account to the second account.
+     * Final argument indicates the destination balance type.
+     */
+    get isV34(): boolean {
+        return this._chain.getEventHash('Balances.ReserveRepatriated') === '6232d50d422cea3a6fd21da36387df36d1d366405d0c589566c6de85c9cf541f'
+    }
+
+    /**
+     * Some balance was moved from the reserve of the first account to the second account.
+     * Final argument indicates the destination balance type.
+     */
+    get asV34(): {from: Uint8Array, to: Uint8Array, amount: bigint, destinationStatus: v34.BalanceStatus} {
+        assert(this.isV34)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
 export class BalancesReservedEvent {
     private readonly _chain: Chain
     private readonly event: Event

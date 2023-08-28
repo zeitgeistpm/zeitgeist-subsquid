@@ -5,12 +5,14 @@ import {
   BalancesBalanceSetEvent,
   BalancesDepositEvent,
   BalancesDustLostEvent,
+  BalancesReserveRepatriatedEvent,
   BalancesReservedEvent,
   BalancesSlashedEvent,
   BalancesTransferEvent,
   BalancesUnreservedEvent,
   BalancesWithdrawEvent,
 } from '../../types/events';
+import { BalanceStatus } from '../../types/v34';
 
 export const getBalanceSetEvent = (ctx: Ctx, item: EventItem): BalanceSetEvent => {
   // @ts-ignore
@@ -78,6 +80,26 @@ export const getReservedEvent = (ctx: Ctx, item: EventItem): BalancesEvent => {
     const [who, amount] = item.event.args;
     const walletId = encodeAddress(who, 73);
     return { walletId, amount };
+  }
+};
+
+export const getReserveRepatriatedEvent = (ctx: Ctx, item: EventItem): ReserveRepatriatedEvent => {
+  const event = new BalancesReserveRepatriatedEvent(ctx, item.event);
+  if (event.isV23) {
+    const [from, to, amount, destinationStatus] = event.asV23;
+    const fromId = ss58.codec('zeitgeist').encode(from);
+    const toId = ss58.codec('zeitgeist').encode(to);
+    return { fromId, toId, amount, destinationStatus };
+  } else if (event.isV34) {
+    const { from, to, amount, destinationStatus } = event.asV34;
+    const fromId = ss58.codec('zeitgeist').encode(from);
+    const toId = ss58.codec('zeitgeist').encode(to);
+    return { fromId, toId, amount, destinationStatus };
+  } else {
+    const [from, to, amount, destinationStatus] = item.event.args;
+    const fromId = ss58.codec('zeitgeist').encode(from);
+    const toId = ss58.codec('zeitgeist').encode(to);
+    return { fromId, toId, amount, destinationStatus };
   }
 };
 
@@ -162,9 +184,11 @@ interface BalanceSetEvent {
   free: bigint;
 }
 
-interface EndowedEvent {
-  walletId: string;
-  freeBalance: bigint;
+interface ReserveRepatriatedEvent {
+  fromId: string;
+  toId: string;
+  amount: bigint;
+  destinationStatus: BalanceStatus;
 }
 
 interface TransferEvent {
