@@ -1,9 +1,8 @@
 import { SubstrateBlock } from '@subsquid/substrate-processor';
 import { Ctx, EventItem } from '../../processor';
 import { Account, HistoricalAccountBalance } from '../../model';
-import { AssetRegistryMetadataStorage } from '../../types/storage';
 import { extrinsicFromEvent, initBalance } from '../helper';
-import { getAssetTxFeePaidEvent } from './types';
+import { getAssetTxFeePaidEvent, getMetadataStorage } from './types';
 
 export const assetTxPaymentAssetTxFeePaidEvent = async (
   ctx: Ctx,
@@ -22,8 +21,7 @@ export const assetTxPaymentAssetTxFeePaidEvent = async (
     await initBalance(acc, ctx.store, block, item);
   }
 
-  const storage = new AssetRegistryMetadataStorage(ctx, block);
-  const onChainAsset = await storage.asV48.get({ __kind: 'ForeignAsset', value: assetId });
+  const onChainAsset = await getMetadataStorage(ctx, block, assetId);
   if (!onChainAsset || !onChainAsset.additional.xcm.feeFactor) return;
   const amount = (actualFee * onChainAsset.additional.xcm.feeFactor) / BigInt(10 ** 10);
 
