@@ -11,6 +11,7 @@ import {
   EventItem as _EventItem,
 } from '@subsquid/substrate-processor/lib/interfaces/dataSelection';
 import { Store, TypeormDatabase } from '@subsquid/typeorm-store';
+import { assetTxPaymentAssetTxFeePaidEvent } from './mappings/assetTxPayment';
 import {
   balancesBalanceSet,
   balancesDeposit,
@@ -122,6 +123,7 @@ const processor = new SubstrateBatchProcessor()
     chain: process.env.WS_NODE_URL ?? 'wss://bsr.zeitgeist.pm',
   })
   .setTypesBundle('typesBundle.json')
+  .addEvent('AssetTxPayment.AssetTxFeePaid', eventExtrinsicOptions)
   .addEvent('Balances.BalanceSet', eventExtrinsicOptions)
   .addEvent('Balances.Deposit', eventExtrinsicOptions)
   .addEvent('Balances.DustLost', eventExtrinsicOptions)
@@ -343,6 +345,15 @@ processor.run(new TypeormDatabase(), async (ctx) => {
 
       if (item.kind === 'event') {
         switch (item.name) {
+          case 'AssetTxPayment.AssetTxFeePaid': {
+            const hab = await assetTxPaymentAssetTxFeePaidEvent(ctx, block.header, item);
+            if (hab) {
+              const key = makeKey(hab.accountId, hab.assetId);
+              balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+              balanceHistory.push(hab);
+            }
+            break;
+          }
           case 'Balances.BalanceSet': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
