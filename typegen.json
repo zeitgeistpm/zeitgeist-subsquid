@@ -3,6 +3,7 @@
   "specVersions": "zeitgeistVersions.jsonl",
   "typesBundle": "typesBundle.json",
   "events": [
+    "AssetTxPayment.AssetTxFeePaid",
     "Balances.BalanceSet",
     "Balances.Deposit",
     "Balances.DustLost",
@@ -53,5 +54,5 @@
     "Tokens.Withdrawn"
   ],
   "calls": ["PredictionMarkets.redeem_shares", "Swaps.pool_exit"],
-  "storage": ["MarketCommons.Markets"]
+  "storage": ["AssetRegistry.Metadata", "MarketCommons.Markets"]
 }

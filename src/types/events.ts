@@ -14,6 +14,55 @@ import * as v40 from './v40'
 import * as v41 from './v41'
 import * as v42 from './v42'
 import * as v46 from './v46'
+import * as v47 from './v47'
+
+export class AssetTxPaymentAssetTxFeePaidEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'AssetTxPayment.AssetTxFeePaid')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * A transaction fee `actual_fee`, of which `tip` was added to the minimum inclusion fee,
+     * has been paid by `who` in an asset `asset_id`.
+     */
+    get isV47(): boolean {
+        return this._chain.getEventHash('AssetTxPayment.AssetTxFeePaid') === '8565e5eb1a9b8a9dfb80fc33fb9fde83c6104ccfc3e9056660b2d95baf78fa67'
+    }
+
+    /**
+     * A transaction fee `actual_fee`, of which `tip` was added to the minimum inclusion fee,
+     * has been paid by `who` in an asset `asset_id`.
+     */
+    get asV47(): {who: Uint8Array, actualFee: bigint, tip: bigint, assetId: (v47.Asset | undefined)} {
+        assert(this.isV47)
+        return this._chain.decodeEvent(this.event)
+    }
+
+    /**
+     * A transaction fee `actual_fee`, of which `tip` was added to the minimum inclusion fee,
+     * has been paid by `who` in an asset `asset_id`.
+     */
+    get isV48(): boolean {
+        return this._chain.getEventHash('AssetTxPayment.AssetTxFeePaid') === '9e5962e093ef4207f408df1507d64884ba2bbaffc848e63ac884e30ea8d31596'
+    }
+
+    /**
+     * A transaction fee `actual_fee`, of which `tip` was added to the minimum inclusion fee,
+     * has been paid by `who` in an asset `asset_id`.
+     */
+    get asV48(): {who: Uint8Array, actualFee: bigint, tip: bigint, assetId: (number | undefined)} {
+        assert(this.isV48)
+        return this._chain.decodeEvent(this.event)
+    }
+}
 
 export class BalancesBalanceSetEvent {
     private readonly _chain: Chain
