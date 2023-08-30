@@ -16,6 +16,36 @@ export class BalanceInfo {
   }
 }
 
+enum AssetKind {
+  CategoricalOutcome = 'CategoricalOutcome',
+  ForeignAsset = 'ForeignAsset',
+  PoolShare = 'PoolShare',
+  ScalarOutcome = 'ScalarOutcome',
+  Ztg = 'Ztg',
+}
+
+registerEnumType(AssetKind, {
+  name: 'AssetKind',
+  description: 'Kind of asset',
+});
+
+@InputType()
+class AssetKindValue {
+  @Field(() => AssetKind)
+  kind!: AssetKind;
+
+  @Field(() => Int, { nullable: true })
+  value!: number;
+
+  constructor(props: Partial<AssetKindValue>) {
+    Object.assign(this, props);
+  }
+
+  toString(): string {
+    return getAssetId({ __kind: this.kind, value: this.value });
+  }
+}
+
 @Resolver()
 export class BalanceInfoResolver {
   constructor(private tx: () => Promise<EntityManager>) {}
