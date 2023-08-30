@@ -1,7 +1,8 @@
-import { Arg, Field, ObjectType, Query, Resolver } from 'type-graphql';
+import { Arg, Field, Int, ObjectType, Query, Resolver, registerEnumType, InputType } from 'type-graphql';
 import type { EntityManager } from 'typeorm';
 import { HistoricalAccountBalance } from '../../model/generated';
 import { balanceInfo } from '../query';
+import { getAssetId } from '../../mappings/helper';
 
 @ObjectType()
 export class BalanceInfo {
@@ -53,13 +54,13 @@ export class BalanceInfoResolver {
   @Query(() => BalanceInfo, { nullable: true })
   async balanceInfo(
     @Arg('accountId', () => String, { nullable: false }) accountId: string,
-    @Arg('assetId', () => String, { nullable: true }) assetId: string,
+    @Arg('assetId', () => AssetKindValue) assetId: AssetKindValue,
     @Arg('blockNumber', () => String, { nullable: false }) blockNumber: string
   ): Promise<BalanceInfo> {
     const manager = await this.tx();
     const result = await manager
       .getRepository(HistoricalAccountBalance)
-      .query(balanceInfo(accountId, assetId ?? 'Ztg', blockNumber));
+      .query(balanceInfo(accountId, assetId.toString(), blockNumber));
 
     return result[0];
   }
