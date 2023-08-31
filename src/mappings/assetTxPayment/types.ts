@@ -4,7 +4,7 @@ import * as ss58 from '@subsquid/ss58';
 import { Ctx, EventItem } from '../../processor';
 import { AssetTxPaymentAssetTxFeePaidEvent } from '../../types/events';
 import { AssetRegistryMetadataStorage } from '../../types/storage';
-import { AssetMetadata } from '../../types/v48';
+import { AssetMetadata, Asset_ForeignAsset } from '../../types/v48';
 
 export const getAssetTxFeePaidEvent = (ctx: Ctx, item: EventItem): AssetTxFeePaidEvent => {
   // @ts-ignore
@@ -28,14 +28,14 @@ export const getAssetTxFeePaidEvent = (ctx: Ctx, item: EventItem): AssetTxFeePai
 export const getMetadataStorage = async (
   ctx: Ctx,
   block: SubstrateBlock,
-  assetId: any
+  assetId: Asset_ForeignAsset
 ): Promise<AssetMetadata | undefined> => {
   const storage = new AssetRegistryMetadataStorage(ctx, block);
   if (storage.isV42) {
     const assetMetadata = await storage.asV42.get(assetId);
     return assetMetadata;
   } else if (storage.isV48) {
-    const assetMetadata = await storage.asV48.get({ __kind: 'ForeignAsset', value: assetId });
+    const assetMetadata = await storage.asV48.get(assetId);
     return assetMetadata;
   }
 };

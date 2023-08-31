@@ -1,7 +1,8 @@
 import { SubstrateBlock } from '@subsquid/substrate-processor';
 import { Ctx, EventItem } from '../../processor';
 import { Account, HistoricalAccountBalance } from '../../model';
-import { extrinsicFromEvent, initBalance } from '../helper';
+import { Asset_ForeignAsset } from '../../types/v48';
+import { extrinsicFromEvent, getAssetId, initBalance } from '../helper';
 import { getAssetTxFeePaidEvent, getMetadataStorage } from './types';
 
 export const assetTxPaymentAssetTxFeePaidEvent = async (
@@ -10,6 +11,7 @@ export const assetTxPaymentAssetTxFeePaidEvent = async (
   item: EventItem
 ): Promise<HistoricalAccountBalance | undefined> => {
   const { walletId, actualFee, assetId } = getAssetTxFeePaidEvent(ctx, item);
+  const currencyId: Asset_ForeignAsset = { __kind: 'ForeignAsset', value: assetId };
 
   let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
   if (!acc) {
@@ -21,7 +23,7 @@ export const assetTxPaymentAssetTxFeePaidEvent = async (
     await initBalance(acc, ctx.store, block, item);
   }
 
-  const onChainAsset = await getMetadataStorage(ctx, block, assetId);
+  const onChainAsset = await getMetadataStorage(ctx, block, currencyId);
   if (!onChainAsset || !onChainAsset.additional.xcm.feeFactor) return;
   const amount = (actualFee * onChainAsset.additional.xcm.feeFactor) / BigInt(10 ** 10);
 
@@ -30,7 +32,7 @@ export const assetTxPaymentAssetTxFeePaidEvent = async (
   hab.accountId = acc.accountId;
   hab.event = item.event.name.split('.')[1];
   hab.extrinsic = extrinsicFromEvent(item.event);
-  hab.assetId = JSON.stringify({ foreignAsset: assetId });
+  hab.assetId = getAssetId(currencyId);
   hab.dBalance = -amount;
   hab.blockNumber = block.height;
   hab.timestamp = new Date(block.timestamp);
