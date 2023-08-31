@@ -35,8 +35,8 @@ class AssetKindValue {
   @Field(() => AssetKind)
   kind!: AssetKind;
 
-  @Field(() => Int, { nullable: true })
-  value!: number;
+  @Field(() => String, { nullable: true })
+  value!: string;
 
   constructor(props: Partial<AssetKindValue>) {
     Object.assign(this, props);
