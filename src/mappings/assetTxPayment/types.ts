@@ -10,8 +10,9 @@ export const getAssetTxFeePaidEvent = (ctx: Ctx, item: EventItem): AssetTxFeePai
   // @ts-ignore
   const event = new AssetTxPaymentAssetTxFeePaidEvent(ctx, item.event);
   if (event.isV47) {
-    const { who, actualFee, assetId } = event.asV47;
+    let { who, actualFee, assetId } = event.asV47;
     const walletId = ss58.codec('zeitgeist').encode(who);
+    assetId = (assetId as any).value;
     return { walletId, actualFee, assetId };
   } else if (event.isV48) {
     const { who, actualFee, assetId } = event.asV48;
