@@ -1,8 +1,8 @@
-import { Arg, Field, Int, ObjectType, Query, Resolver, registerEnumType, InputType } from 'type-graphql';
+import { Arg, Field, ObjectType, Query, Resolver, registerEnumType, InputType } from 'type-graphql';
 import type { EntityManager } from 'typeorm';
+import { getAssetId } from '../../mappings/helper';
 import { HistoricalAccountBalance } from '../../model/generated';
 import { balanceInfo } from '../query';
-import { getAssetId } from '../../mappings/helper';
 
 @ObjectType()
 export class BalanceInfo {
