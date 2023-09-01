@@ -25,7 +25,7 @@ export const assetTxPaymentAssetTxFeePaidEvent = async (
 
   const onChainAsset = await getMetadataStorage(ctx, block, currencyId);
   if (!onChainAsset || !onChainAsset.additional.xcm.feeFactor) return;
-  const amount = (actualFee * onChainAsset.additional.xcm.feeFactor) / BigInt(10 ** 10);
+  const amount = (Number(actualFee) * Number(onChainAsset.additional.xcm.feeFactor)) / 10 ** 10;
 
   const hab = new HistoricalAccountBalance();
   hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
@@ -33,7 +33,7 @@ export const assetTxPaymentAssetTxFeePaidEvent = async (
   hab.event = item.event.name.split('.')[1];
   hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = getAssetId(currencyId);
-  hab.dBalance = -amount;
+  hab.dBalance = -BigInt(Math.round(amount));
   hab.blockNumber = block.height;
   hab.timestamp = new Date(block.timestamp);
 
