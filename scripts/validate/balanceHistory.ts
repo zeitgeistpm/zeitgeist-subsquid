@@ -1,10 +1,10 @@
 /**
- * Script to validate Ztg balance history of an account against on-chain data
- * Run using the command: ts-node scripts/validate/balanceHistory.ts <env> <account-id>
+ * Script to validate asset balance history of an account against on-chain data
+ * Run using the command: ts-node scripts/validate/balanceHistory.ts <env> <account-id> <asset-kind> <asset-value1> <asset-value2>
  */
 import axios from 'axios';
 import { AccountInfo } from '@polkadot/types/interfaces/system';
-import SDK from '@zeitgeistpm/sdk';
+import SDK, { util } from '@zeitgeistpm/sdk';
 import { Tools } from '../../src/mappings/util';
 import { HistoricalAccountBalance } from '../../src/model';
 
@@ -27,7 +27,7 @@ switch (CHAIN_ENV) {
   default:
     console.log(`Please pass 'dev' or 'test' or 'main' as environment`);
     console.log(
-      `Example: ts-node scripts/validate/balanceHistory.ts main dDyQQkwy5MmibHv5y1qQYpADS6x2x8yJjzaTRt2uTGfeSD7V9`
+      `Example: ts-node scripts/validate/balanceHistory.ts dev dE3phcNpdXRzK8RQnWej9C87CJ3AphKwCYXniTKAqiaUfdfCz PoolShare 316`
     );
     process.exit(1);
 }
