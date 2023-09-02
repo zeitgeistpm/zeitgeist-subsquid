@@ -73,7 +73,7 @@ switch (ASSET_KIND) {
 const balanceHistoryQuery = {
   // GraphQL query for retrieving balance history of an account
   query: `{
-    historicalAccountBalances(where: {accountId_eq: "${ACCOUNT_ID}", assetId_eq: "Ztg"}, orderBy: blockNumber_ASC) {
+    historicalAccountBalances(where: {accountId_eq: "${ACCOUNT_ID}", ${assetQuery}}, orderBy: blockNumber_ASC) {
       blockNumber
     }
   }`,
@@ -118,11 +118,11 @@ const validateBalanceHistory = async () => {
   }
 };
 
-// To query indexer for Ztg balance as on block number
+// To query indexer for asset balance as on block number
 const getSquidBalance = async (blockNumber: number): Promise<bigint> => {
   const res = await axios.post(`https://${GRAPHQL_HOSTNAME}/graphql`, {
     query: `{
-      balanceInfo(accountId: "${ACCOUNT_ID}", blockNumber: "${blockNumber}") {
+      balanceInfo(accountId: "${ACCOUNT_ID}", assetId: {kind: ${ASSET_KIND}, value: "${assetValue}"}, blockNumber: "${blockNumber}") {
         balance
       }
     }`,
@@ -131,13 +131,22 @@ const getSquidBalance = async (blockNumber: number): Promise<bigint> => {
   return BigInt(balance);
 };
 
-// To query chain for Ztg balance as on block number
+// To query chain for asset balance as on block number
 const getChainBalance = async (sdk: SDK, blockNumber: number) => {
   const blockHash = await sdk.api.rpc.chain.getBlockHash(blockNumber);
-  const {
-    data: { free: amt },
-  } = (await sdk.api.query.system.account.at(blockHash, ACCOUNT_ID)) as AccountInfo;
-  return amt.toBigInt();
+  try {
+    if (ASSET_KIND === 'Ztg') {
+      const {
+        data: { free },
+      } = (await sdk.api.query.system.account.at(blockHash, ACCOUNT_ID)) as AccountInfo;
+      return free.toBigInt();
+    } else {
+      const { free } = (await sdk.api.query.tokens.accounts.at(blockHash, ACCOUNT_ID, chainAssetId)) as any;
+      return free.toBigInt();
+    }
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 validateBalanceHistory();
