@@ -33,6 +33,43 @@ switch (CHAIN_ENV) {
 }
 
 const ACCOUNT_ID = process.argv[3];
+const ASSET_KIND = process.argv[4];
+const ASSET_VALUE1 = process.argv[5];
+const ASSET_VALUE2 = process.argv[6];
+
+let chainAssetId: any,
+  assetValue: string | null,
+  assetQuery = '';
+switch (ASSET_KIND) {
+  case 'CategoricalOutcome':
+  case 'ScalarOutcome':
+    assetValue = `${ASSET_VALUE1},${ASSET_VALUE2}`;
+    assetQuery = `assetId_contains: "[${assetValue}]"`;
+    chainAssetId = util.AssetIdFromString(`[${assetValue}]`);
+    break;
+  case 'ForeignAsset':
+    assetValue = ASSET_VALUE1;
+    assetQuery = `assetId_contains: "foreign", AND: {assetId_contains: "${assetValue}"}`;
+    chainAssetId = { ForeignAsset: ASSET_VALUE1 };
+    break;
+  case 'PoolShare':
+    assetValue = ASSET_VALUE1;
+    assetQuery = `assetId_contains: "pool", AND: {assetId_contains: "${assetValue}"}`;
+    chainAssetId = util.AssetIdFromString(`pool ${assetValue}`);
+    break;
+  case 'Ztg':
+    assetValue = null;
+    assetQuery = `assetId_eq: "${ASSET_KIND}"`;
+    chainAssetId = ASSET_KIND;
+    break;
+  default:
+    console.log(`Please pass CategoricalOutcome/ForeignAsset/PoolShare/ScalarOutcome/Ztg as asset-kind`);
+    console.log(
+      `Example: ts-node scripts/validate/balanceHistory.ts dev dE3phcNpdXRzK8RQnWej9C87CJ3AphKwCYXniTKAqiaUfdfCz CategoricalOutcome 367 0`
+    );
+    process.exit(1);
+}
+
 const balanceHistoryQuery = {
   // GraphQL query for retrieving balance history of an account
   query: `{
