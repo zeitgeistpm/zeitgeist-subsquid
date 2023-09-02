@@ -82,35 +82,47 @@ const balanceHistoryQuery = {
 const validateBalanceHistory = async () => {
   const res = await axios.post(`https://${GRAPHQL_HOSTNAME}/graphql`, balanceHistoryQuery);
   const balanceHistory = res.data.data.historicalAccountBalances as HistoricalAccountBalance[];
-  console.log(`Received ${balanceHistory.length} records of ${ACCOUNT_ID} via ${GRAPHQL_HOSTNAME}`);
+  console.log(
+    `Received ${balanceHistory.length} records of ${JSON.stringify(
+      chainAssetId
+    )} on ${ACCOUNT_ID} via ${GRAPHQL_HOSTNAME}`
+  );
+  if (balanceHistory.length === 0) process.exit(0);
 
   const sdk = await Tools.getSDK(NODE_URL);
   let fromBlockNum = balanceHistory[0].blockNumber;
-  let toBlockNum = balanceHistory[balanceHistory.length - 1].blockNumber;
-  let lastDiff = BigInt(0);
+  let toBlockNum = balanceHistory[balanceHistory.length - 1].blockNumber + 1;
+  let lastChainBalance = BigInt(0);
+  let lastSquidBalance = BigInt(0);
 
   // Inspired by binary search algorithm
-  while (fromBlockNum <= toBlockNum) {
+  while (fromBlockNum < toBlockNum) {
     console.log(`Reading between #${fromBlockNum} and #${toBlockNum}`);
     const midBlockNum = Math.floor((fromBlockNum + toBlockNum) / 2);
     const chainBalance = await getChainBalance(sdk, midBlockNum);
     const squidBalance = await getSquidBalance(midBlockNum);
 
-    console.log(`Detected difference of ${squidBalance - chainBalance} ZTG at #${midBlockNum}`);
-    if (squidBalance - chainBalance !== BigInt(0)) {
+    console.log(`Detected difference of ${squidBalance - chainBalance} units at #${midBlockNum}`);
+    if (squidBalance !== chainBalance) {
       toBlockNum = midBlockNum;
-      lastDiff = squidBalance - chainBalance;
+      lastChainBalance = chainBalance;
+      lastSquidBalance = squidBalance;
     } else {
       fromBlockNum = midBlockNum;
     }
 
     // When all block numbers are covered
     if (toBlockNum - fromBlockNum === 1) {
-      if (lastDiff !== BigInt(0)) {
-        console.log(`\nFound difference of ${lastDiff} ZTG on ${ACCOUNT_ID} at #${toBlockNum}`);
-        console.log(`On Subsquid: ${squidBalance}, On Chain: ${chainBalance}`);
+      console.log();
+      if (lastSquidBalance !== lastChainBalance) {
+        console.log(
+          `Found difference of ${lastSquidBalance - lastChainBalance} units on ${ACCOUNT_ID} at #${toBlockNum}`
+        );
+        console.log(`On Subsquid: ${lastSquidBalance}, On Chain: ${lastChainBalance}`);
       } else {
-        console.log(`Ztg balance history of ${ACCOUNT_ID} is in sync with ${CHAIN_ENV} chain`);
+        console.log(
+          `${JSON.stringify(chainAssetId)} balance history of ${ACCOUNT_ID} is in sync with ${CHAIN_ENV} chain`
+        );
       }
       sdk.api.disconnect();
       process.exit(0);
