@@ -42,7 +42,6 @@ let chainAssetId: any,
   assetQuery = '';
 switch (ASSET_KIND) {
   case 'CategoricalOutcome':
-  case 'ScalarOutcome':
     assetValue = `${ASSET_VALUE1},${ASSET_VALUE2}`;
     assetQuery = `assetId_contains: "[${assetValue}]"`;
     chainAssetId = util.AssetIdFromString(`[${assetValue}]`);
