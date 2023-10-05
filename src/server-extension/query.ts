@@ -61,7 +61,7 @@ export const marketParticipants = (ids: number[]) => `
 export const marketLiquidity = (ids: number[]) => `
   SELECT
     m.market_id,
-    ROUND(SUM(COALESCE(a.price,1)*ab.balance), 0) AS liquidity
+    COALESCE(ROUND(SUM(COALESCE(a.price,1) * ab.balance), 0), 0) AS liquidity
   FROM
     market m
   LEFT JOIN
