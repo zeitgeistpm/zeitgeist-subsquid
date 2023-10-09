@@ -61,22 +61,19 @@ export const marketParticipants = (ids: number[]) => `
 export const marketLiquidity = (ids: number[]) => `
   SELECT
     m.market_id,
-    COALESCE(ROUND(SUM(a.price*a.amount_in_pool)+ab.balance, 0), 0) AS liquidity
+    COALESCE(ROUND(SUM(COALESCE(a.price,1) * ab.balance), 0), 0) AS liquidity
   FROM
     market m
   LEFT JOIN
-    asset a ON a.asset_id = ANY (m.outcome_assets)
-  LEFT JOIN
     pool p ON p.id = m.pool_id
-  JOIN
+  LEFT JOIN
     account_balance ab ON ab.account_id = p.account_id
+  LEFT JOIN
+    asset a ON a.pool_id = p.id AND a.asset_id = ab.asset_id
   WHERE
     m.market_id IN (${ids})
-    AND ab.asset_id NOT LIKE '%Outcome%'
-    AND ab.balance > 0
   GROUP BY
-    m.market_id,
-    ab.balance;
+    m.market_id;
 `;
 
 export const marketInfo = (marketId: number) => `
