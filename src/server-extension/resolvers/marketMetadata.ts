@@ -31,10 +31,11 @@ export class MarketMetadataResolver {
 
     let result: MarketMetadata[] = await Promise.all(
       encodedData.map(async (ed: any) => {
+        const decodedData = await (await Cache.init()).getMeta(ed.metadata);
         return {
           marketId: ed.market_id,
           encoded: ed.metadata,
-          decoded: await (await Cache.init()).getMeta(ed.metadata),
+          decoded: decodedData !== '0' ? decodedData : null, // '0' implies non-decodable metadata
         };
       })
     );
