@@ -31,7 +31,7 @@ export class MarketMetadataResolver {
 
     let result: MarketMetadata[] = await Promise.all(
       encodedData.map(async (ed: any) => {
-        const decodedData = await (await Cache.init()).getMeta(ed.metadata);
+        const decodedData = await (await Cache.init()).getDecodedMetadata(ed.metadata);
         return {
           marketId: ed.market_id,
           encoded: ed.metadata,

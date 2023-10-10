@@ -34,15 +34,12 @@ export class Cache {
     return `${prefix}_${key}`;
   }
 
-  async setMeta(key: string, value: string): Promise<void> {
+  async setDecodedMetadata(key: string, value: string): Promise<void> {
     return new Promise((resolve, reject) => {
       const cacheKey = this.makeKey('meta', key);
       this.client.set(cacheKey, value, (err: any) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
+        if (err) reject(err);
+        else resolve();
       });
     });
   }
@@ -60,15 +57,12 @@ export class Cache {
     });
   }
 
-  async getMeta(key: string): Promise<string | null> {
+  async getDecodedMetadata(key: string): Promise<string | null> {
     return new Promise((resolve, reject) => {
       const cacheKey = this.makeKey('meta', key);
       this.client.get(cacheKey, (err: any, data: string | PromiseLike<string | null> | null) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(data);
-        }
+        if (err) reject(err);
+        else resolve(data);
       });
     });
   }
