@@ -48,7 +48,7 @@ export const createAssetsForMarket = async (marketId: string, marketType: any): 
 
 export const decodeMarketMetadata = async (metadata: string): Promise<DecodedMarketMetadata | undefined> => {
   if (metadata.startsWith('0x1530fa0bb52e67d0d9f89bf26552e1')) return undefined;
-  let raw = await (await Cache.init()).getMeta(metadata);
+  let raw = await (await Cache.init()).getDecodedMetadata(metadata);
   if (raw && !(process.env.NODE_ENV == 'local')) {
     return raw !== '0' ? (JSON.parse(raw) as DecodedMarketMetadata) : undefined;
   } else {
@@ -56,12 +56,12 @@ export const decodeMarketMetadata = async (metadata: string): Promise<DecodedMar
       const ipfs = new IPFS();
       raw = await ipfs.read(metadata);
       const rawData = JSON.parse(raw) as DecodedMarketMetadata;
-      await (await Cache.init()).setMeta(metadata, raw);
+      await (await Cache.init()).setDecodedMetadata(metadata, raw);
       return rawData;
     } catch (err) {
       console.error(err);
       if (err instanceof SyntaxError) {
-        await (await Cache.init()).setMeta(metadata, '0');
+        await (await Cache.init()).setDecodedMetadata(metadata, '0');
       }
       return undefined;
     }

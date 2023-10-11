@@ -92,6 +92,16 @@ export const marketInfo = (marketId: number) => `
     hm.timestamp;
 `;
 
+export const marketMetadata = (ids: number[]) => `
+  SELECT
+    m.market_id,
+    m.metadata
+  FROM
+    market m
+  WHERE
+    m.market_id IN (${ids});
+`;
+
 export const totalLiquidityAndVolume = () => `
   SELECT
     ROUND(SUM(liquidity),0) AS total_liquidity,
