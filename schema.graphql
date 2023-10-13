@@ -367,7 +367,7 @@ type MarketReport @jsonField {
   "Account which reported"
   by: String
   "Outcome details"
-  outcome: OutcomeReport!
+  outcome: OutcomeReport
 }
 
 """
