@@ -141,10 +141,14 @@ export const getMarketDisputedEvent = (ctx: Ctx, item: EventItem): MarketDispute
     const [mId, status, report] = event.asV29;
     const marketId = Number(mId);
     return { marketId, status, report };
-  } else {
-    const [mId, status, report] = item.event.args;
+  } else if (event.isV49) {
+    const [mId, status] = event.asV49;
     const marketId = Number(mId);
-    return { marketId, status, report };
+    return { marketId, status };
+  } else {
+    const [mId, status] = item.event.args;
+    const marketId = Number(mId);
+    return { marketId, status };
   }
 };
 
@@ -323,7 +327,7 @@ interface MarketCreatedEvent {
 interface MarketDisputedEvent {
   marketId: number;
   status?: MarketStatus;
-  report: MarketDispute;
+  report?: MarketDispute;
 }
 
 interface MarketRejectedEvent {
