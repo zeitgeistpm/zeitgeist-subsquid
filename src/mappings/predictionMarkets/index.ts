@@ -436,18 +436,15 @@ export const marketDisputed = async (ctx: Ctx, block: SubstrateBlock, item: Even
   if (!market.disputes) market.disputes = [];
 
   const mr = new MarketReport();
+  mr.at = block.height;
   if (report) {
-    if (report.at) mr.at = +report.at.toString();
     if (report.by) mr.by = ss58.codec('zeitgeist').encode(report.by);
-
-    const ocr = new OutcomeReport();
-    if (report.outcome.__kind == 'Categorical') ocr.categorical = report.outcome.value;
-    else if (report.outcome.__kind == 'Scalar') ocr.scalar = report.outcome.value;
-    mr.outcome = ocr;
-
-    market.disputes.push(mr);
+    const or = new OutcomeReport();
+    if (report.outcome.__kind == 'Categorical') or.categorical = report.outcome.value;
+    else if (report.outcome.__kind == 'Scalar') or.scalar = report.outcome.value;
+    mr.outcome = or;
   }
-
+  market.disputes.push(mr);
   market.status = status ? getMarketStatus(status) : MarketStatus.Disputed;
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
