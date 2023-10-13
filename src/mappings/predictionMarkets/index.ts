@@ -435,20 +435,20 @@ export const marketDisputed = async (ctx: Ctx, block: SubstrateBlock, item: Even
   if (!market) return;
   if (!market.disputes) market.disputes = [];
 
-  const ocr = new OutcomeReport();
-  if (report.outcome.__kind == 'Categorical') {
-    ocr.categorical = report.outcome.value;
-  } else if (report.outcome.__kind == 'Scalar') {
-    ocr.scalar = report.outcome.value;
+  const mr = new MarketReport();
+  if (report) {
+    if (report.at) mr.at = +report.at.toString();
+    if (report.by) mr.by = ss58.codec('zeitgeist').encode(report.by);
+
+    const ocr = new OutcomeReport();
+    if (report.outcome.__kind == 'Categorical') ocr.categorical = report.outcome.value;
+    else if (report.outcome.__kind == 'Scalar') ocr.scalar = report.outcome.value;
+    mr.outcome = ocr;
+
+    market.disputes.push(mr);
   }
 
-  const mr = new MarketReport();
-  mr.outcome = ocr;
-  if (report.at) mr.at = +report.at.toString();
-  if (report.by) mr.by = ss58.codec('zeitgeist').encode(report.by);
-
   market.status = status ? getMarketStatus(status) : MarketStatus.Disputed;
-  market.disputes.push(mr);
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
 
@@ -457,7 +457,7 @@ export const marketDisputed = async (ctx: Ctx, block: SubstrateBlock, item: Even
   hm.market = market;
   hm.status = market.status;
   hm.by = mr.by;
-  hm.outcome = ocr;
+  hm.outcome = mr.outcome;
   hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
