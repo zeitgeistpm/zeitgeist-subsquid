@@ -15,6 +15,7 @@ import * as v41 from './v41'
 import * as v42 from './v42'
 import * as v46 from './v46'
 import * as v47 from './v47'
+import * as v49 from './v49'
 
 export class AssetTxPaymentAssetTxFeePaidEvent {
     private readonly _chain: Chain
@@ -986,6 +987,21 @@ export class PredictionMarketsMarketCreatedEvent {
         assert(this.isV46)
         return this._chain.decodeEvent(this.event)
     }
+
+    /**
+     * A market has been created. \[market_id, market_account, market\]
+     */
+    get isV49(): boolean {
+        return this._chain.getEventHash('PredictionMarkets.MarketCreated') === '53764ddcd3e5dd127a8ff52ec7e3eb8a693f33ec19192a40c74da9091c3bc813'
+    }
+
+    /**
+     * A market has been created. \[market_id, market_account, market\]
+     */
+    get asV49(): [bigint, Uint8Array, v49.Market] {
+        assert(this.isV49)
+        return this._chain.decodeEvent(this.event)
+    }
 }
 
 export class PredictionMarketsMarketDestroyedEvent {
@@ -1057,6 +1073,21 @@ export class PredictionMarketsMarketDisputedEvent {
      */
     get asV29(): [bigint, v29.MarketStatus, v29.MarketDispute] {
         assert(this.isV29)
+        return this._chain.decodeEvent(this.event)
+    }
+
+    /**
+     * A market has been disputed \[market_id, new_market_status\]
+     */
+    get isV49(): boolean {
+        return this._chain.getEventHash('PredictionMarkets.MarketDisputed') === 'fb75141ba1d5569f28a5c37f474643ded3eff690fd78829c343a0a124058d613'
+    }
+
+    /**
+     * A market has been disputed \[market_id, new_market_status\]
+     */
+    get asV49(): [bigint, v49.MarketStatus] {
+        assert(this.isV49)
         return this._chain.decodeEvent(this.event)
     }
 }
