@@ -391,13 +391,14 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             break;
           }
           case 'Balances.Transfer': {
-            const res = await balancesTransfer(ctx, block.header, item);
-            const fromKey = makeKey(res.fromHab.accountId, res.fromHab.assetId);
-            const toKey = makeKey(res.toHab.accountId, res.toHab.assetId);
-            balanceAccounts.set(fromKey, (balanceAccounts.get(fromKey) || BigInt(0)) + res.fromHab.dBalance);
-            balanceAccounts.set(toKey, (balanceAccounts.get(toKey) || BigInt(0)) + res.toHab.dBalance);
-            balanceHistory.push(res.fromHab);
-            balanceHistory.push(res.toHab);
+            const habs = await balancesTransfer(ctx, block.header, item);
+            await Promise.all(
+              habs.map(async (hab) => {
+                const key = makeKey(hab.accountId, hab.assetId);
+                balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+                balanceHistory.push(hab);
+              })
+            );
             break;
           }
           case 'Balances.Unreserved': {
