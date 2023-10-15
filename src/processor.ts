@@ -154,6 +154,7 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Styx.AccountCrossed', eventExtrinsicOptions)
   .addEvent('Swaps.ArbitrageBuyBurn', eventOptions)
   .addEvent('Swaps.ArbitrageMintSell', eventOptions)
+  .addEvent('Swaps.MarketCreatorFeesPaid', eventOptions)
   .addEvent('Swaps.PoolActive', eventOptions)
   .addEvent('Swaps.PoolClosed', eventOptions)
   .addEvent('Swaps.PoolCreate', eventOptions)
@@ -508,6 +509,19 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
             await arbitrageMintSell(ctx, block.header, item);
+            break;
+          }
+          case 'Swaps.MarketCreatorFeesPaid': {
+            const newHabs: HistoricalAccountBalance[] = [];
+            for (let i = 0; i < 2; i++) {
+              const hab = balanceHistory.pop();
+              if (hab && hab.event === 'Transfer') {
+                hab.id = item.event.id + hab.id.slice(-6);
+                hab.event = item.event.name.split('.')[1];
+                newHabs.push(hab);
+              }
+            }
+            balanceHistory.push(...newHabs);
             break;
           }
           case 'Swaps.PoolCreate': {
