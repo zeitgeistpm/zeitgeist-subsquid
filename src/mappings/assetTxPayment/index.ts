@@ -1,7 +1,7 @@
 import { SubstrateBlock } from '@subsquid/substrate-processor';
 import { Ctx, EventItem } from '../../processor';
 import { Account, HistoricalAccountBalance } from '../../model';
-import { Asset_ForeignAsset } from '../../types/v48';
+import { Asset_ForeignAsset } from '../../types/v49';
 import { extrinsicFromEvent, getAssetId, initBalance } from '../helper';
 import { getAssetTxFeePaidEvent, getMetadataStorage } from './types';
 
