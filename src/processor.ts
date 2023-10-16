@@ -154,6 +154,7 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Styx.AccountCrossed', eventExtrinsicOptions)
   .addEvent('Swaps.ArbitrageBuyBurn', eventOptions)
   .addEvent('Swaps.ArbitrageMintSell', eventOptions)
+  .addEvent('Swaps.MarketCreatorFeesPaid', eventOptions)
   .addEvent('Swaps.PoolActive', eventOptions)
   .addEvent('Swaps.PoolClosed', eventOptions)
   .addEvent('Swaps.PoolCreate', eventOptions)
@@ -391,13 +392,14 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             break;
           }
           case 'Balances.Transfer': {
-            const res = await balancesTransfer(ctx, block.header, item);
-            const fromKey = makeKey(res.fromHab.accountId, res.fromHab.assetId);
-            const toKey = makeKey(res.toHab.accountId, res.toHab.assetId);
-            balanceAccounts.set(fromKey, (balanceAccounts.get(fromKey) || BigInt(0)) + res.fromHab.dBalance);
-            balanceAccounts.set(toKey, (balanceAccounts.get(toKey) || BigInt(0)) + res.toHab.dBalance);
-            balanceHistory.push(res.fromHab);
-            balanceHistory.push(res.toHab);
+            const habs = await balancesTransfer(ctx, block.header, item);
+            await Promise.all(
+              habs.map(async (hab) => {
+                const key = makeKey(hab.accountId, hab.assetId);
+                balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+                balanceHistory.push(hab);
+              })
+            );
             break;
           }
           case 'Balances.Unreserved': {
@@ -507,6 +509,19 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
             await arbitrageMintSell(ctx, block.header, item);
+            break;
+          }
+          case 'Swaps.MarketCreatorFeesPaid': {
+            const newHabs: HistoricalAccountBalance[] = [];
+            for (let i = 0; i < 2; i++) {
+              const hab = balanceHistory.pop();
+              if (hab && hab.event === 'Transfer') {
+                hab.id = item.event.id + hab.id.slice(-6);
+                hab.event = item.event.name.split('.')[1];
+                newHabs.push(hab);
+              }
+            }
+            balanceHistory.push(...newHabs);
             break;
           }
           case 'Swaps.PoolCreate': {

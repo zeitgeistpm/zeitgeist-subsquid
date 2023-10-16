@@ -223,8 +223,13 @@ export const balancesSlashed = async (ctx: Ctx, block: SubstrateBlock, item: Eve
   }
 };
 
-export const balancesTransfer = async (ctx: Ctx, block: SubstrateBlock, item: EventItem): Promise<Transfer> => {
+export const balancesTransfer = async (
+  ctx: Ctx,
+  block: SubstrateBlock,
+  item: EventItem
+): Promise<HistoricalAccountBalance[]> => {
   const { fromId, toId, amount } = getTransferEvent(ctx, item);
+  const habs: HistoricalAccountBalance[] = [];
 
   let fromAcc = await ctx.store.get(Account, { where: { accountId: fromId } });
   if (!fromAcc) {
@@ -245,6 +250,7 @@ export const balancesTransfer = async (ctx: Ctx, block: SubstrateBlock, item: Ev
   fromHab.dBalance = -amount;
   fromHab.blockNumber = block.height;
   fromHab.timestamp = new Date(block.timestamp);
+  habs.push(fromHab);
 
   let toAcc = await ctx.store.get(Account, { where: { accountId: toId } });
   if (!toAcc) {
@@ -265,8 +271,9 @@ export const balancesTransfer = async (ctx: Ctx, block: SubstrateBlock, item: Ev
   toHab.dBalance = amount;
   toHab.blockNumber = block.height;
   toHab.timestamp = new Date(block.timestamp);
+  habs.push(toHab);
 
-  return { fromHab, toHab };
+  return habs;
 };
 
 export const balancesUnreserved = async (
