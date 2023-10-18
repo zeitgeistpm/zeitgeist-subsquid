@@ -1,21 +1,11 @@
 import { SubstrateBlock } from '@subsquid/substrate-processor';
-import { Account, AccountBalance, HistoricalAccountBalance } from '../../model';
+import { AccountBalance, HistoricalAccountBalance } from '../../model';
 import { Ctx, EventItem } from '../../processor';
-import { extrinsicFromEvent, initBalance } from '../helper';
+import { extrinsicFromEvent } from '../helper';
 import { getAccountCrossedEvent } from './types';
 
 export const accountCrossed = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
   const { walletId, amount } = getAccountCrossedEvent(ctx, item);
-
-  let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
-  if (!acc) {
-    acc = new Account();
-    acc.id = walletId;
-    acc.accountId = walletId;
-    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
-    await ctx.store.save<Account>(acc);
-    await initBalance(acc, ctx.store, block, item);
-  }
 
   let ab = await ctx.store.findOneBy(AccountBalance, {
     account: { accountId: walletId },
@@ -26,9 +16,9 @@ export const accountCrossed = async (ctx: Ctx, block: SubstrateBlock, item: Even
     console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
     await ctx.store.save<AccountBalance>(ab);
 
-    let hab = new HistoricalAccountBalance();
-    hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
-    hab.accountId = acc.accountId;
+    const hab = new HistoricalAccountBalance();
+    hab.id = item.event.id + '-' + walletId.slice(-5);
+    hab.accountId = walletId;
     hab.event = item.event.name.split('.')[1];
     hab.extrinsic = extrinsicFromEvent(item.event);
     hab.assetId = ab.assetId;

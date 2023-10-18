@@ -1,7 +1,6 @@
 import { SubstrateBlock } from '@subsquid/substrate-processor';
-import { Account, HistoricalAccountBalance } from '../../model';
+import { HistoricalAccountBalance } from '../../model';
 import { Ctx, EventItem } from '../../processor';
-import { initBalance } from '../helper';
 import { getRewardedEvent } from './types';
 
 export const parachainStakingRewarded = async (
@@ -11,19 +10,9 @@ export const parachainStakingRewarded = async (
 ): Promise<HistoricalAccountBalance> => {
   const { walletId, rewards } = getRewardedEvent(ctx, item);
 
-  let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
-  if (!acc) {
-    acc = new Account();
-    acc.id = walletId;
-    acc.accountId = walletId;
-    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
-    await ctx.store.save<Account>(acc);
-    await initBalance(acc, ctx.store, block, item);
-  }
-
-  let hab = new HistoricalAccountBalance();
-  hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
-  hab.accountId = acc.accountId;
+  const hab = new HistoricalAccountBalance();
+  hab.id = item.event.id + '-' + walletId.slice(-5);
+  hab.accountId = walletId;
   hab.event = item.event.name.split('.')[1];
   hab.assetId = 'Ztg';
   hab.dBalance = rewards;

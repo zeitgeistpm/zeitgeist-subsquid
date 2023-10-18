@@ -1,7 +1,7 @@
 import { SubstrateBlock } from '@subsquid/substrate-processor';
-import { Account, HistoricalAccountBalance } from '../../model';
+import { HistoricalAccountBalance } from '../../model';
 import { Ctx, EventItem } from '../../processor';
-import { extrinsicFromEvent, initBalance, Transfer } from '../helper';
+import { extrinsicFromEvent, Transfer } from '../helper';
 import { getDepositedEvent, getTransferredEvent, getWithdrawnEvent } from './types';
 
 export const currencyDeposited = async (
@@ -11,19 +11,9 @@ export const currencyDeposited = async (
 ): Promise<HistoricalAccountBalance> => {
   const { assetId, walletId, amount } = getDepositedEvent(ctx, item);
 
-  let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
-  if (!acc) {
-    acc = new Account();
-    acc.id = walletId;
-    acc.accountId = walletId;
-    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
-    await ctx.store.save<Account>(acc);
-    await initBalance(acc, ctx.store, block, item);
-  }
-
   const hab = new HistoricalAccountBalance();
-  hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
-  hab.accountId = acc.accountId;
+  hab.id = item.event.id + '-' + walletId.slice(-5);
+  hab.accountId = walletId;
   hab.event = item.event.name.split('.')[1];
   hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = assetId;
@@ -42,19 +32,9 @@ export const currencyTransferred = async (
   const { assetId, fromId, toId, amount } = getTransferredEvent(ctx, item);
   if (assetId === 'Ztg') return;
 
-  let fromAcc = await ctx.store.get(Account, { where: { accountId: fromId } });
-  if (!fromAcc) {
-    fromAcc = new Account();
-    fromAcc.id = fromId;
-    fromAcc.accountId = fromId;
-    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(fromAcc, null, 2)}`);
-    await ctx.store.save<Account>(fromAcc);
-    await initBalance(fromAcc, ctx.store, block, item);
-  }
-
   const fromHab = new HistoricalAccountBalance();
-  fromHab.id = item.event.id + '-' + fromId.substring(fromId.length - 5);
-  fromHab.accountId = fromAcc.accountId;
+  fromHab.id = item.event.id + '-' + fromId.slice(-5);
+  fromHab.accountId = fromId;
   fromHab.event = item.event.name.split('.')[1];
   fromHab.extrinsic = extrinsicFromEvent(item.event);
   fromHab.assetId = assetId;
@@ -62,19 +42,9 @@ export const currencyTransferred = async (
   fromHab.blockNumber = block.height;
   fromHab.timestamp = new Date(block.timestamp);
 
-  let toAcc = await ctx.store.get(Account, { where: { accountId: toId } });
-  if (!toAcc) {
-    toAcc = new Account();
-    toAcc.id = toId;
-    toAcc.accountId = toId;
-    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(toAcc, null, 2)}`);
-    await ctx.store.save<Account>(toAcc);
-    await initBalance(toAcc, ctx.store, block, item);
-  }
-
   const toHab = new HistoricalAccountBalance();
-  toHab.id = item.event.id + '-' + toId.substring(toId.length - 5);
-  toHab.accountId = toAcc.accountId;
+  toHab.id = item.event.id + '-' + toId.slice(-5);
+  toHab.accountId = toId;
   toHab.event = item.event.name.split('.')[1];
   toHab.extrinsic = extrinsicFromEvent(item.event);
   toHab.assetId = assetId;
@@ -92,19 +62,9 @@ export const currencyWithdrawn = async (
 ): Promise<HistoricalAccountBalance> => {
   const { assetId, walletId, amount } = getWithdrawnEvent(ctx, item);
 
-  let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
-  if (!acc) {
-    acc = new Account();
-    acc.id = walletId;
-    acc.accountId = walletId;
-    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
-    await ctx.store.save<Account>(acc);
-    await initBalance(acc, ctx.store, block, item);
-  }
-
   const hab = new HistoricalAccountBalance();
-  hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
-  hab.accountId = acc.accountId;
+  hab.id = item.event.id + '-' + walletId.slice(-5);
+  hab.accountId = walletId;
   hab.event = item.event.name.split('.')[1];
   hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = assetId;
