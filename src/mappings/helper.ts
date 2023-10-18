@@ -201,8 +201,7 @@ export const getPoolStatus = (status: _PoolStatus): PoolStatus => {
   }
 };
 
-// @ts-ignore
-export const initBalance = async (acc: Account, store: Store, block: SubstrateBlock, item: EventItem) => {
+export const initBalance = async (acc: Account, store: Store) => {
   const sdk = await Tools.getSDK();
   const blockZero = await sdk.api.rpc.chain.getBlockHash(0);
   const {
@@ -210,23 +209,22 @@ export const initBalance = async (acc: Account, store: Store, block: SubstrateBl
   } = (await sdk.api.query.system.account.at(blockZero, acc.accountId)) as AccountInfo;
 
   let ab = new AccountBalance();
-  ab.id = item.event.id + '-' + acc.accountId.substring(acc.accountId.length - 5);
+  ab.id = '0000000000-000000-b3cc3-' + acc.accountId.slice(-5);
   ab.account = acc;
   ab.assetId = 'Ztg';
   ab.balance = amt.toBigInt();
-  console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
+  console.log(`Saving account balance: ${JSON.stringify(ab, null, 2)}`);
   await store.save<AccountBalance>(ab);
 
   let hab = new HistoricalAccountBalance();
-  hab.id = item.event.id + '-000-' + acc.accountId.substring(acc.accountId.length - 5);
+  hab.id = '0000000000-000000-b3cc3-' + acc.accountId.slice(-5);
   hab.accountId = acc.accountId;
   hab.event = 'Initialised';
-  hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = ab.assetId;
   hab.dBalance = amt.toBigInt();
   hab.blockNumber = 0;
-  hab.timestamp = new Date(block.timestamp);
-  console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
+  hab.timestamp = new Date('1970-01-01T00:00:00.000000Z');
+  console.log(`Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
   await store.save<HistoricalAccountBalance>(hab);
 };
 
