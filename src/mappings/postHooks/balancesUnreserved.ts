@@ -18,8 +18,8 @@ export const unreserveBalances_92128 = async (ctx: Ctx, block: SubstrateBlock) =
     console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
     await ctx.store.save<AccountBalance>(ab);
 
-    let hab = new HistoricalAccountBalance();
-    hab.id = event.id + '-' + walletId.substring(walletId.length - 5);
+    const hab = new HistoricalAccountBalance();
+    hab.id = event.id + '-' + walletId.slice(-5);
     hab.accountId = walletId;
     hab.event = 'Unreserved';
     hab.assetId = ab.assetId;
@@ -47,8 +47,8 @@ export const unreserveBalances_108949 = async (ctx: Ctx, block: SubstrateBlock) 
     console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
     await ctx.store.save<AccountBalance>(ab);
 
-    let hab = new HistoricalAccountBalance();
-    hab.id = event.id + '-' + walletId.substring(walletId.length - 5);
+    const hab = new HistoricalAccountBalance();
+    hab.id = event.id + '-' + walletId.slice(-5);
     hab.accountId = walletId;
     hab.event = 'Unreserved';
     hab.assetId = ab.assetId;
@@ -76,8 +76,8 @@ export const unreserveBalances_155917 = async (ctx: Ctx, block: SubstrateBlock) 
     console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
     await ctx.store.save<AccountBalance>(ab);
 
-    let hab = new HistoricalAccountBalance();
-    hab.id = event.id + '-' + walletId.substring(walletId.length - 5);
+    const hab = new HistoricalAccountBalance();
+    hab.id = event.id + '-' + walletId.slice(-5);
     hab.accountId = walletId;
     hab.event = 'Unreserved';
     hab.assetId = ab.assetId;
@@ -111,8 +111,8 @@ export const unreserveBalances_168378 = async (ctx: Ctx, block: SubstrateBlock) 
         console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
         await ctx.store.save<AccountBalance>(ab);
 
-        let hab = new HistoricalAccountBalance();
-        hab.id = event.id + '-' + wId.substring(wId.length - 5);
+        const hab = new HistoricalAccountBalance();
+        hab.id = event.id + '-' + wId.slice(-5);
         hab.accountId = wId;
         hab.event = 'Unreserved';
         hab.assetId = ab.assetId;
@@ -142,8 +142,8 @@ export const unreserveBalances_175178 = async (ctx: Ctx, block: SubstrateBlock) 
     console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
     await ctx.store.save<AccountBalance>(ab);
 
-    let hab = new HistoricalAccountBalance();
-    hab.id = event.id + '-' + walletId.substring(walletId.length - 5);
+    const hab = new HistoricalAccountBalance();
+    hab.id = event.id + '-' + walletId.slice(-5);
     hab.accountId = walletId;
     hab.event = 'Unreserved';
     hab.assetId = ab.assetId;
@@ -171,8 +171,8 @@ export const unreserveBalances_176408 = async (ctx: Ctx, block: SubstrateBlock) 
     console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
     await ctx.store.save<AccountBalance>(ab);
 
-    let hab = new HistoricalAccountBalance();
-    hab.id = event.id + '-' + walletId.substring(walletId.length - 5);
+    const hab = new HistoricalAccountBalance();
+    hab.id = event.id + '-' + walletId.slice(-5);
     hab.accountId = walletId;
     hab.event = 'Unreserved';
     hab.assetId = ab.assetId;
@@ -200,8 +200,8 @@ export const unreserveBalances_178290 = async (ctx: Ctx, block: SubstrateBlock) 
     console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
     await ctx.store.save<AccountBalance>(ab);
 
-    let hab = new HistoricalAccountBalance();
-    hab.id = event.id + '-' + walletId.substring(walletId.length - 5);
+    const hab = new HistoricalAccountBalance();
+    hab.id = event.id + '-' + walletId.slice(-5);
     hab.accountId = walletId;
     hab.event = 'Unreserved';
     hab.assetId = ab.assetId;
@@ -229,8 +229,8 @@ export const unreserveBalances_179524 = async (ctx: Ctx, block: SubstrateBlock) 
     console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
     await ctx.store.save<AccountBalance>(ab);
 
-    let hab = new HistoricalAccountBalance();
-    hab.id = event.id + '-' + walletId.substring(walletId.length - 5);
+    const hab = new HistoricalAccountBalance();
+    hab.id = event.id + '-' + walletId.slice(-5);
     hab.accountId = walletId;
     hab.event = 'Unreserved';
     hab.assetId = ab.assetId;
@@ -258,8 +258,8 @@ export const unreserveBalances_184820 = async (ctx: Ctx, block: SubstrateBlock) 
     console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
     await ctx.store.save<AccountBalance>(ab);
 
-    let hab = new HistoricalAccountBalance();
-    hab.id = event.id + '-' + walletId.substring(walletId.length - 5);
+    const hab = new HistoricalAccountBalance();
+    hab.id = event.id + '-' + walletId.slice(-5);
     hab.accountId = walletId;
     hab.event = 'Unreserved';
     hab.assetId = ab.assetId;
@@ -292,8 +292,8 @@ export const unreserveBalances_204361 = async (ctx: Ctx, block: SubstrateBlock) 
         console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
         await ctx.store.save<AccountBalance>(ab);
 
-        let hab = new HistoricalAccountBalance();
-        hab.id = event.id + '-' + wId.substring(wId.length - 5);
+        const hab = new HistoricalAccountBalance();
+        hab.id = event.id + '-' + wId.slice(-5);
         hab.accountId = wId;
         hab.event = 'Unreserved';
         hab.assetId = ab.assetId;
@@ -323,8 +323,8 @@ export const unreserveBalances_211391 = async (ctx: Ctx, block: SubstrateBlock) 
     console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
     await ctx.store.save<AccountBalance>(ab);
 
-    let hab = new HistoricalAccountBalance();
-    hab.id = event.id + '-' + walletId.substring(walletId.length - 5);
+    const hab = new HistoricalAccountBalance();
+    hab.id = event.id + '-' + walletId.slice(-5);
     hab.accountId = walletId;
     hab.event = 'Unreserved';
     hab.assetId = ab.assetId;

@@ -7,6 +7,7 @@ import { AssetRegistryMetadataStorage } from '../../types/storage';
 import { AssetMetadata as AssetMetadata_v48 } from '../../types/v48';
 import { AssetMetadata as AssetMetadata_v49, Asset_ForeignAsset } from '../../types/v49';
 
+// @ts-ignore
 export const getAssetTxFeePaidEvent = (ctx: Ctx, item: EventItem): AssetTxFeePaidEvent => {
   // @ts-ignore
   const event = new AssetTxPaymentAssetTxFeePaidEvent(ctx, item.event);
