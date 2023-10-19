@@ -33,7 +33,6 @@ import {
   formatMarketEvent,
   getAssetId,
   getMarketStatus,
-  initBalance,
   rescale,
   specVersion,
 } from '../helper';
@@ -98,22 +97,12 @@ export const boughtCompleteSet = async (
     }
   }
 
-  let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
-  if (!acc) {
-    acc = new Account();
-    acc.id = walletId;
-    acc.accountId = walletId;
-    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
-    await ctx.store.save<Account>(acc);
-    await initBalance(acc, ctx.store, block, item);
-  }
-
   const habs: HistoricalAccountBalance[] = [];
   for (let i = 0; i < market.outcomeAssets.length; i++) {
     const assetId = market.outcomeAssets[i]!;
 
     const hab = new HistoricalAccountBalance();
-    hab.id = item.event.id + '-' + marketId + i + '-' + walletId.substring(walletId.length - 5);
+    hab.id = item.event.id + '-' + marketId + i + '-' + walletId.slice(-5);
     hab.accountId = walletId;
     hab.event = item.event.name.split('.')[1];
     hab.extrinsic = extrinsicFromEvent(item.event);
@@ -219,7 +208,7 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
       await ctx.store.save<AccountBalance>(ab);
 
       const hab = new HistoricalAccountBalance();
-      hab.id = item.event.id + '-' + marketAccountId.substring(marketAccountId.length - 5);
+      hab.id = item.event.id + '-' + marketAccountId.slice(-5);
       hab.accountId = acc.accountId;
       hab.event = item.event.name.split('.')[1];
       hab.extrinsic = extrinsicFromEvent(item.event);
@@ -628,7 +617,7 @@ export const marketResolved = async (ctx: Ctx, block: SubstrateBlock, item: Even
           await ctx.store.save<AccountBalance>(ab);
 
           const hab = new HistoricalAccountBalance();
-          hab.id = item.event.id + '-' + market.marketId + i + '-' + acc.accountId.substring(acc.accountId.length - 5);
+          hab.id = item.event.id + '-' + market.marketId + i + '-' + acc.accountId.slice(-5);
           hab.accountId = acc.accountId;
           hab.event = item.event.name.split('.')[1];
           hab.extrinsic = extrinsicFromEvent(item.event);
@@ -730,7 +719,7 @@ export const redeemSharesCall = async (ctx: Ctx, block: SubstrateBlock, item: an
 
   const hab = new HistoricalAccountBalance();
   // @ts-ignore
-  hab.id = item.call.id + '-' + walletId.substring(walletId.length - 5);
+  hab.id = item.call.id + '-' + walletId.slice(-5);
   hab.accountId = walletId;
   // @ts-ignore
   hab.event = item.call.name.split('.')[1];
@@ -812,7 +801,7 @@ export const tokensRedeemed = async (
   const { assetId, amtRedeemed, walletId } = getTokensRedeemedEvent(ctx, item);
 
   const hab = new HistoricalAccountBalance();
-  hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
+  hab.id = item.event.id + '-' + walletId.slice(-5);
   hab.accountId = walletId;
   hab.event = item.event.name.split('.')[1];
   hab.extrinsic = extrinsicFromEvent(item.event);

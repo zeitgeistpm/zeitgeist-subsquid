@@ -352,7 +352,7 @@ export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Event
   await ctx.store.save<AccountBalance>(ab);
 
   const hab = new HistoricalAccountBalance();
-  hab.id = item.event.id + '-' + ab.account.accountId.substring(ab.account.accountId.length - 5);
+  hab.id = item.event.id + '-' + ab.account.accountId.slice(-5);
   hab.accountId = ab.account.accountId;
   hab.event = item.event.name.split('.')[1];
   hab.extrinsic = extrinsicFromEvent(item.event);
@@ -414,7 +414,7 @@ export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Event
         await ctx.store.save<AccountBalance>(ab);
 
         const hab = new HistoricalAccountBalance();
-        hab.id = item.event.id + '-' + market.marketId + i + '-' + acc.accountId.substring(acc.accountId.length - 5);
+        hab.id = item.event.id + '-' + market.marketId + i + '-' + acc.accountId.slice(-5);
         hab.accountId = acc.accountId;
         hab.event = item.event.name.split('.')[1];
         hab.extrinsic = extrinsicFromEvent(item.event);
@@ -570,7 +570,7 @@ export const poolExitCall = async (ctx: Ctx, block: SubstrateBlock, item: any) =
   await ctx.store.save<AccountBalance>(ab);
 
   const hab = new HistoricalAccountBalance();
-  hab.id = item.call.id + '-' + walletId.substring(walletId.length - 5);
+  hab.id = item.call.id + '-' + walletId.slice(-5);
   hab.accountId = walletId;
   hab.event = item.call.name.split('.')[1];
   hab.extrinsic = new Extrinsic({ name: item.call.name, hash: item.extrinsic.hash });

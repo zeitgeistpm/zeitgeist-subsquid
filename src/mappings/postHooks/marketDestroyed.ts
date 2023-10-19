@@ -55,7 +55,7 @@ export const destroyMarkets = async (ctx: Ctx, block: SubstrateBlock) => {
             await ctx.store.save<AccountBalance>(ab);
 
             const hab = new HistoricalAccountBalance();
-            hab.id = eventId + '-' + market.marketId + i + '-' + acc.accountId.substring(acc.accountId.length - 5);
+            hab.id = eventId + '-' + market.marketId + i + '-' + acc.accountId.slice(-5);
             hab.accountId = acc.accountId;
             hab.event = eventName.split('.')[1];
             hab.assetId = ab.assetId;

@@ -28,23 +28,12 @@ export const systemExtrinsicFailed = async (
     item.event.extrinsic.signature.address['value'],
     73
   );
-  let acc = await ctx.store.get(Account, {
-    where: { accountId: walletId },
-  });
-  if (!acc) {
-    acc = new Account();
-    acc.id = walletId;
-    acc.accountId = walletId;
-    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
-    await ctx.store.save<Account>(acc);
-    await initBalance(acc, ctx.store, block, item);
-  }
   // @ts-ignore
   const txnFees = await getFees(block, item.event.extrinsic);
 
-  let hab = new HistoricalAccountBalance();
-  hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
-  hab.accountId = acc.accountId;
+  const hab = new HistoricalAccountBalance();
+  hab.id = item.event.id + '-' + walletId.slice(-5);
+  hab.accountId = walletId;
   hab.event = item.event.name.split('.')[1];
   hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = 'Ztg';
@@ -82,21 +71,12 @@ export const systemExtrinsicSuccess = async (
     item.event.extrinsic.signature.address['value'],
     73
   );
-  let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
-  if (!acc) {
-    acc = new Account();
-    acc.id = walletId;
-    acc.accountId = walletId;
-    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
-    await ctx.store.save<Account>(acc);
-    await initBalance(acc, ctx.store, block, item);
-  }
   // @ts-ignore
   const txnFees = await getFees(block, item.event.extrinsic);
 
-  let hab = new HistoricalAccountBalance();
-  hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
-  hab.accountId = acc.accountId;
+  const hab = new HistoricalAccountBalance();
+  hab.id = item.event.id + '-' + walletId.slice(-5);
+  hab.accountId = walletId;
   hab.event = item.event.name.split('.')[1];
   hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = 'Ztg';
@@ -113,22 +93,22 @@ export const systemNewAccount = async (ctx: Ctx, block: SubstrateBlock, item: Ev
   const acc = await ctx.store.get(Account, { where: { accountId: walletId } });
   if (acc) return;
 
-  let newAcc = new Account();
+  const newAcc = new Account();
   newAcc.id = walletId;
   newAcc.accountId = walletId;
   console.log(`[${item.event.name}] Saving account: ${JSON.stringify(newAcc, null, 2)}`);
   await ctx.store.save<Account>(newAcc);
 
-  let ab = new AccountBalance();
-  ab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
+  const ab = new AccountBalance();
+  ab.id = item.event.id + '-' + walletId.slice(-5);
   ab.account = newAcc;
   ab.assetId = 'Ztg';
   ab.balance = BigInt(0);
   console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
   await ctx.store.save<AccountBalance>(ab);
 
-  let hab = new HistoricalAccountBalance();
-  hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
+  const hab = new HistoricalAccountBalance();
+  hab.id = item.event.id + '-' + walletId.slice(-5);
   hab.accountId = newAcc.accountId;
   hab.event = item.event.name.split('.')[1];
   hab.extrinsic = extrinsicFromEvent(item.event);

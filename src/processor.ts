@@ -76,7 +76,7 @@ import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from 
 import { tokensBalanceSet, tokensDeposited, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
 import { Account, AccountBalance, HistoricalAccountBalance } from './model';
 import { resolveMarket } from './mappings/postHooks/marketResolved';
-import { specVersion } from './mappings/helper';
+import { initBalance, specVersion } from './mappings/helper';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -646,17 +646,23 @@ const saveBalanceChanges = async (ctx: Ctx, balanceAccounts: Map<string, bigint>
   await Promise.all(
     balanceAccountsArr.map(async ([key, amount]) => {
       const [walletId, assetId] = key.split('|');
+      let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
+      if (!acc) {
+        acc = new Account();
+        acc.id = walletId;
+        acc.accountId = walletId;
+        console.log(`Saving account: ${JSON.stringify(acc, null, 2)}`);
+        await ctx.store.save<Account>(acc);
+        await initBalance(acc, ctx.store);
+      }
+
       let ab = await ctx.store.findOneBy(AccountBalance, {
         account: { accountId: walletId },
         assetId: assetId,
       });
-      if (!ab && assetId === 'Ztg') return;
       if (ab) {
         ab.balance = ab.balance + amount;
       } else {
-        const acc = await ctx.store.get(Account, { where: { accountId: walletId } });
-        if (!acc) return;
-
         ab = new AccountBalance();
         ab.id = walletId + '-' + assetId;
         ab.account = acc;
