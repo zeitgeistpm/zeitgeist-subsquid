@@ -16,6 +16,7 @@ import * as v42 from './v42'
 import * as v46 from './v46'
 import * as v47 from './v47'
 import * as v49 from './v49'
+import * as v50 from './v50'
 
 export class AssetTxPaymentAssetTxFeePaidEvent {
     private readonly _chain: Chain
@@ -1002,6 +1003,21 @@ export class PredictionMarketsMarketCreatedEvent {
         assert(this.isV49)
         return this._chain.decodeEvent(this.event)
     }
+
+    /**
+     * A market has been created. \[market_id, market_account, market\]
+     */
+    get isV50(): boolean {
+        return this._chain.getEventHash('PredictionMarkets.MarketCreated') === '78ca205890aa9339387fc69dd4f0eb7e3a0435e10465fd4fcb6d77245cf162a7'
+    }
+
+    /**
+     * A market has been created. \[market_id, market_account, market\]
+     */
+    get asV50(): [bigint, Uint8Array, v50.Market] {
+        assert(this.isV50)
+        return this._chain.decodeEvent(this.event)
+    }
 }
 
 export class PredictionMarketsMarketDestroyedEvent {
@@ -1693,6 +1709,21 @@ export class SwapsPoolCreateEvent {
      */
     get asV41(): [v41.CommonPoolEventParams, v41.Pool, bigint, Uint8Array] {
         assert(this.isV41)
+        return this._chain.decodeEvent(this.event)
+    }
+
+    /**
+     * A new pool has been created. \[CommonPoolEventParams, pool, pool_amount, pool_account\]
+     */
+    get isV50(): boolean {
+        return this._chain.getEventHash('Swaps.PoolCreate') === '7d55bf447f439c2c5eed8787199c89b6b09c3ac4b567ad13685309286c464f81'
+    }
+
+    /**
+     * A new pool has been created. \[CommonPoolEventParams, pool, pool_amount, pool_account\]
+     */
+    get asV50(): [v50.CommonPoolEventParams, v50.Pool, bigint, Uint8Array] {
+        assert(this.isV50)
         return this._chain.decodeEvent(this.event)
     }
 }
