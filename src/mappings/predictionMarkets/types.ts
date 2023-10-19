@@ -23,7 +23,7 @@ import {
 import { MarketCommonsMarketsStorage } from '../../types/storage';
 import { MarketDispute, OutcomeReport, Report } from '../../types/v29';
 import { MarketStatus } from '../../types/v42';
-import { Market } from '../../types/v46';
+import { MarketBonds } from '../../types/v46';
 import { getAssetId } from '../helper';
 
 export const getBoughtCompleteSetEvent = (ctx: Ctx, item: EventItem): BoughtCompleteSetEvent => {
@@ -257,15 +257,18 @@ export const getMarketsStorage = async (
   ctx: Ctx,
   block: SubstrateBlock,
   marketId: bigint
-): Promise<Market | undefined> => {
+): Promise<MarketBonds | undefined> => {
   const storage = new MarketCommonsMarketsStorage(ctx, block);
+  let market;
   if (storage.isV46) {
-    const market = await storage.asV46.get(marketId);
-    return market;
-  } else {
-    const market = await storage.asV49.get(marketId);
-    return market;
+    market = await storage.asV46.get(marketId);
+  } else if (storage.isV49) {
+    market = await storage.asV49.get(marketId);
+  } else if (storage.isV50) {
+    market = await storage.asV50.get(marketId);
   }
+  if (!market) return;
+  return market.bonds;
 };
 
 export const getRedeemSharesCall = (ctx: Ctx, call: CallItem): MarketEvent => {

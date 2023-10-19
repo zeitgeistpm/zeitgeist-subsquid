@@ -539,9 +539,9 @@ export const marketReported = async (ctx: Ctx, block: SubstrateBlock, item: Even
   mr.outcome = ocr;
 
   if (mr.by !== market.oracle && specVersion(block.specId) >= 46) {
-    const onChainMarket = await getMarketsStorage(ctx, block, BigInt(marketId));
-    if (onChainMarket && onChainMarket.bonds.outsider && market.bonds) {
-      const outsiderBond = onChainMarket.bonds.outsider;
+    const onChainBonds = await getMarketsStorage(ctx, block, BigInt(marketId));
+    if (onChainBonds && onChainBonds.outsider && market.bonds) {
+      const outsiderBond = onChainBonds.outsider;
       const bond = new MarketBond();
       bond.who = encodeAddress(outsiderBond.who, 73);
       bond.value = outsiderBond.value;
