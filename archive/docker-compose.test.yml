@@ -2,7 +2,7 @@ version: "3.4"
 services:
   db:
     volumes:
-      - /cockroach/cockroach-data
+      - data:/cockroach/cockroach-data
     command: start-single-node --insecure
 
   ingest:
@@ -51,3 +51,6 @@ services:
       DB_USER: root
     ports:
       - 4444:3000
+
+volumes:
+  data:

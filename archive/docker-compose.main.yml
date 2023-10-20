@@ -2,7 +2,7 @@ version: "3.4"
 services:
   db:
     volumes:
-      - /cockroach/cockroach-data
+      - data:/cockroach/cockroach-data
     command: start-single-node --insecure
 
   ingest:
@@ -42,3 +42,6 @@ services:
         "--database-max-connections",
         "10"
       ]
+
+volumes:
+  data:
