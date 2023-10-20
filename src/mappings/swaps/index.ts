@@ -1,6 +1,5 @@
 import { encodeAddress } from '@polkadot/keyring';
 import { SubstrateBlock } from '@subsquid/substrate-processor';
-import * as ss58 from '@subsquid/ss58';
 import { util } from '@zeitgeistpm/sdk';
 import { Like } from 'typeorm/find-options/operator/Like';
 import {
@@ -266,7 +265,7 @@ export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
 
         const ha = new HistoricalAsset();
         ha.id = item.event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1);
-        ha.accountId = ss58.codec('zeitgeist').encode(cpep.who);
+        ha.accountId = encodeAddress(cpep.who, 73);
         ha.assetId = asset.assetId;
         ha.newPrice = asset.price;
         ha.newAmountInPool = asset.amountInPool;
