@@ -4,7 +4,6 @@ import * as ss58 from '@subsquid/ss58';
 import { util } from '@zeitgeistpm/sdk';
 import { Like } from 'typeorm';
 import { Ctx, EventItem } from '../../processor';
-import { MarketCommonsMarketsStorage } from '../../types/storage';
 import {
   Account,
   AccountBalance,
@@ -51,6 +50,7 @@ import {
   getMarketReportedEvent,
   getMarketResolvedEvent,
   getMarketStartedWithSubsidyEvent,
+  getMarketsStorage,
   getRedeemSharesCall,
   getSoldCompleteSetEvent,
   getTokensRedeemedEvent,
@@ -539,10 +539,9 @@ export const marketReported = async (ctx: Ctx, block: SubstrateBlock, item: Even
   mr.outcome = ocr;
 
   if (mr.by !== market.oracle && specVersion(block.specId) >= 46) {
-    const storage = new MarketCommonsMarketsStorage(ctx, block);
-    const onChainMarket = await storage.asV46.get(BigInt(marketId));
-    if (onChainMarket && onChainMarket.bonds.outsider && market.bonds) {
-      const outsiderBond = onChainMarket.bonds.outsider;
+    const onChainBonds = await getMarketsStorage(ctx, block, BigInt(marketId));
+    if (onChainBonds && onChainBonds.outsider && market.bonds) {
+      const outsiderBond = onChainBonds.outsider;
       const bond = new MarketBond();
       bond.who = encodeAddress(outsiderBond.who, 73);
       bond.value = outsiderBond.value;

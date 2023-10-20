@@ -9,6 +9,7 @@ import * as v42 from './v42'
 import * as v46 from './v46'
 import * as v48 from './v48'
 import * as v49 from './v49'
+import * as v50 from './v50'
 
 export class AssetRegistryMetadataStorage extends StorageBase {
     protected getPrefix() {
@@ -276,6 +277,21 @@ export class MarketCommonsMarketsStorage extends StorageBase {
         assert(this.isV49)
         return this as any
     }
+
+    /**
+     *  Holds all markets
+     */
+    get isV50(): boolean {
+        return this.getTypeHash() === 'a7207ffad7407a4a9357a0958443a50fe89228fcbd89842748e59966c0ffe8d0'
+    }
+
+    /**
+     *  Holds all markets
+     */
+    get asV50(): MarketCommonsMarketsStorageV50 {
+        assert(this.isV50)
+        return this as any
+    }
 }
 
 /**
@@ -412,4 +428,21 @@ export interface MarketCommonsMarketsStorageV49 {
     getPairs(key: bigint): Promise<[k: bigint, v: v49.Market][]>
     getPairsPaged(pageSize: number): AsyncIterable<[k: bigint, v: v49.Market][]>
     getPairsPaged(pageSize: number, key: bigint): AsyncIterable<[k: bigint, v: v49.Market][]>
+}
+
+/**
+ *  Holds all markets
+ */
+export interface MarketCommonsMarketsStorageV50 {
+    get(key: bigint): Promise<(v50.Market | undefined)>
+    getAll(): Promise<v50.Market[]>
+    getMany(keys: bigint[]): Promise<(v50.Market | undefined)[]>
+    getKeys(): Promise<bigint[]>
+    getKeys(key: bigint): Promise<bigint[]>
+    getKeysPaged(pageSize: number): AsyncIterable<bigint[]>
+    getKeysPaged(pageSize: number, key: bigint): AsyncIterable<bigint[]>
+    getPairs(): Promise<[k: bigint, v: v50.Market][]>
+    getPairs(key: bigint): Promise<[k: bigint, v: v50.Market][]>
+    getPairsPaged(pageSize: number): AsyncIterable<[k: bigint, v: v50.Market][]>
+    getPairsPaged(pageSize: number, key: bigint): AsyncIterable<[k: bigint, v: v50.Market][]>
 }

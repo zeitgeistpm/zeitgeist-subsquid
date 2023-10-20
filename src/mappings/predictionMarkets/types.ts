@@ -1,4 +1,5 @@
 import { encodeAddress } from '@polkadot/keyring';
+import { SubstrateBlock } from '@subsquid/substrate-processor';
 import * as ss58 from '@subsquid/ss58';
 import { CallItem, Ctx, EventItem } from '../../processor';
 import { PredictionMarketsRedeemSharesCall } from '../../types/calls';
@@ -19,8 +20,10 @@ import {
   PredictionMarketsSoldCompleteSetEvent,
   PredictionMarketsTokensRedeemedEvent,
 } from '../../types/events';
+import { MarketCommonsMarketsStorage } from '../../types/storage';
 import { MarketDispute, OutcomeReport, Report } from '../../types/v29';
 import { MarketStatus } from '../../types/v42';
+import { MarketBonds } from '../../types/v46';
 import { getAssetId } from '../helper';
 
 export const getBoughtCompleteSetEvent = (ctx: Ctx, item: EventItem): BoughtCompleteSetEvent => {
@@ -248,6 +251,24 @@ export const getMarketStartedWithSubsidyEvent = (ctx: Ctx, item: EventItem): Mar
     const marketId = Number(mId);
     return { marketId, status };
   }
+};
+
+export const getMarketsStorage = async (
+  ctx: Ctx,
+  block: SubstrateBlock,
+  marketId: bigint
+): Promise<MarketBonds | undefined> => {
+  const storage = new MarketCommonsMarketsStorage(ctx, block);
+  let market;
+  if (storage.isV46) {
+    market = await storage.asV46.get(marketId);
+  } else if (storage.isV49) {
+    market = await storage.asV49.get(marketId);
+  } else if (storage.isV50) {
+    market = await storage.asV50.get(marketId);
+  }
+  if (!market) return;
+  return market.bonds;
 };
 
 export const getRedeemSharesCall = (ctx: Ctx, call: CallItem): MarketEvent => {
