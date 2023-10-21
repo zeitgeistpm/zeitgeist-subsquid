@@ -72,8 +72,11 @@ switch (ASSET_KIND) {
 const balanceHistoryQuery = {
   // GraphQL query for retrieving balance history of an account
   query: `{
-    historicalAccountBalances(where: {accountId_eq: "${ACCOUNT_ID}", ${assetQuery}}, orderBy: blockNumber_ASC) {
+    historicalAccountBalances(where: {accountId_eq: "${ACCOUNT_ID}", ${assetQuery}}, orderBy: blockNumber_ASC, limit: 1) {
       blockNumber
+    }
+    squidStatus {
+      height
     }
   }`,
 };
@@ -81,16 +84,13 @@ const balanceHistoryQuery = {
 const validateBalanceHistory = async () => {
   const res = await axios.post(`https://${GRAPHQL_HOSTNAME}/graphql`, balanceHistoryQuery);
   const balanceHistory = res.data.data.historicalAccountBalances as HistoricalAccountBalance[];
-  console.log(
-    `Received ${balanceHistory.length} records of ${JSON.stringify(
-      chainAssetId
-    )} on ${ACCOUNT_ID} via ${GRAPHQL_HOSTNAME}`
-  );
+  const squidHeight = +res.data.data.squidStatus.height.toString();
+  console.log(`Validating balance history of ${JSON.stringify(chainAssetId)} on ${ACCOUNT_ID} via ${GRAPHQL_HOSTNAME}`);
   if (balanceHistory.length === 0) process.exit(0);
 
   const sdk = await Tools.getSDK(NODE_URL);
   let fromBlockNum = balanceHistory[0].blockNumber;
-  let toBlockNum = balanceHistory[balanceHistory.length - 1].blockNumber + 1;
+  let toBlockNum = squidHeight;
   let lastChainBalance = BigInt(0);
   let lastSquidBalance = BigInt(0);
 
