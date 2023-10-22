@@ -12,10 +12,11 @@ import {
   MarketStatus,
   PoolStatus,
 } from '../model';
-import { EventItem } from '../processor';
 import { PoolStatus as _PoolStatus } from '../types/v41';
 import { Asset, MarketCreation as _MarketCreation, MarketStatus as _MarketStatus } from '../types/v42';
 import { Cache, IPFS, Tools } from './util';
+
+export const TREASURY_ACCOUNT = 'dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ';
 
 export const calcSpotPrice = (
   tokenBalanceIn: number,

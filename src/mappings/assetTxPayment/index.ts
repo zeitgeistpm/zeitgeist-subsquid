@@ -2,7 +2,7 @@ import { SubstrateBlock } from '@subsquid/substrate-processor';
 import { Ctx, EventItem } from '../../processor';
 import { HistoricalAccountBalance } from '../../model';
 import { Asset_ForeignAsset } from '../../types/v49';
-import { extrinsicFromEvent, getAssetId } from '../helper';
+import { TREASURY_ACCOUNT, extrinsicFromEvent, getAssetId } from '../helper';
 import { getAssetTxFeePaidEvent, getMetadataStorage } from './types';
 
 export const assetTxPaymentAssetTxFeePaidEvent = async (
@@ -30,8 +30,8 @@ export const assetTxPaymentAssetTxFeePaidEvent = async (
   });
 
   const treasuryHab = new HistoricalAccountBalance({
-    id: item.event.id + '-' + walletId.slice(-5),
-    accountId: 'dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ',
+    id: item.event.id + '-' + TREASURY_ACCOUNT.slice(-5),
+    accountId: TREASURY_ACCOUNT,
     assetId: getAssetId(currencyId),
     blockNumber: block.height,
     dBalance: BigInt(Math.round(amount)),
