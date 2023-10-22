@@ -18,7 +18,7 @@ export const assetTxPaymentAssetTxFeePaidEvent = async (
   if (!onChainAsset || !onChainAsset.additional.xcm.feeFactor) return;
   const amount = (Number(actualFee) * Number(onChainAsset.additional.xcm.feeFactor)) / 10 ** 10;
 
-  const userHab: HistoricalAccountBalance = {
+  const userHab = new HistoricalAccountBalance({
     id: item.event.id + '-' + walletId.slice(-5),
     accountId: walletId,
     assetId: getAssetId(currencyId),
@@ -27,9 +27,9 @@ export const assetTxPaymentAssetTxFeePaidEvent = async (
     event: item.event.name.split('.')[1],
     extrinsic: extrinsicFromEvent(item.event),
     timestamp: new Date(block.timestamp),
-  };
+  });
 
-  const treasuryHab: HistoricalAccountBalance = {
+  const treasuryHab = new HistoricalAccountBalance({
     id: item.event.id + '-' + walletId.slice(-5),
     accountId: 'dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ',
     assetId: getAssetId(currencyId),
@@ -38,7 +38,7 @@ export const assetTxPaymentAssetTxFeePaidEvent = async (
     event: item.event.name.split('.')[1],
     extrinsic: extrinsicFromEvent(item.event),
     timestamp: new Date(block.timestamp),
-  };
+  });
 
   habs.push(userHab, treasuryHab);
   return habs;
