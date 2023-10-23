@@ -1,6 +1,7 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_} from "typeorm"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_} from "typeorm"
 import * as marshal from "./marshal"
 import {MarketEvent} from "./_marketEvent"
+import {Market} from "./market.model"
 import {OutcomeReport} from "./_outcomeReport"
 import {MarketStatus} from "./_marketStatus"
 
@@ -32,14 +33,15 @@ export class HistoricalMarket {
     /**
      * Event method which initiated this change
      */
-    @Column_("varchar", {length: 15, nullable: false})
+    @Column_("varchar", {length: 20, nullable: false})
     event!: MarketEvent
 
     /**
-     * Zeitgeist's identifier for market
+     * Details of the connected market
      */
-    @Column_("int4", {nullable: false})
-    marketId!: number
+    @Index_()
+    @ManyToOne_(() => Market, {nullable: true})
+    market!: Market
 
     /**
      * Zeitgeist's identifier for pool

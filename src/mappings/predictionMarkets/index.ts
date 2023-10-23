@@ -4,7 +4,6 @@ import * as ss58 from '@subsquid/ss58';
 import { util } from '@zeitgeistpm/sdk';
 import { Like } from 'typeorm';
 import { Ctx, EventItem } from '../../processor';
-import { MarketCommonsMarketsStorage } from '../../types/storage';
 import {
   Account,
   AccountBalance,
@@ -30,16 +29,16 @@ import {
   decodeMarketMetadata,
   extrinsicFromEvent,
   formatMarketCreation,
+  formatMarketEvent,
   getAssetId,
-  getMarketEvent,
   getMarketStatus,
-  initBalance,
   rescale,
   specVersion,
 } from '../helper';
 import { Tools } from '../util';
 import {
   getBoughtCompleteSetEvent,
+  getGlobalDisputeStartedEvent,
   getMarketApprovedEvent,
   getMarketClosedEvent,
   getMarketCreatedEvent,
@@ -51,6 +50,7 @@ import {
   getMarketReportedEvent,
   getMarketResolvedEvent,
   getMarketStartedWithSubsidyEvent,
+  getMarketsStorage,
   getRedeemSharesCall,
   getSoldCompleteSetEvent,
   getTokensRedeemedEvent,
@@ -97,22 +97,12 @@ export const boughtCompleteSet = async (
     }
   }
 
-  let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
-  if (!acc) {
-    acc = new Account();
-    acc.id = walletId;
-    acc.accountId = walletId;
-    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
-    await ctx.store.save<Account>(acc);
-    await initBalance(acc, ctx.store, block, item);
-  }
-
   const habs: HistoricalAccountBalance[] = [];
   for (let i = 0; i < market.outcomeAssets.length; i++) {
     const assetId = market.outcomeAssets[i]!;
 
     const hab = new HistoricalAccountBalance();
-    hab.id = item.event.id + '-' + marketId + i + '-' + walletId.substring(walletId.length - 5);
+    hab.id = item.event.id + '-' + marketId + i + '-' + walletId.slice(-5);
     hab.accountId = walletId;
     hab.event = item.event.name.split('.')[1];
     hab.extrinsic = extrinsicFromEvent(item.event);
@@ -124,6 +114,23 @@ export const boughtCompleteSet = async (
     habs.push(hab);
   }
   return habs;
+};
+
+export const globalDisputeStarted = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
+  const { marketId } = getGlobalDisputeStartedEvent(ctx, item);
+
+  const market = await ctx.store.get(Market, { where: { marketId: marketId } });
+  if (!market) return;
+
+  const hm = new HistoricalMarket();
+  hm.id = item.event.id + '-' + market.marketId;
+  hm.market = market;
+  hm.status = market.status;
+  hm.event = formatMarketEvent(item.event.name);
+  hm.blockNumber = block.height;
+  hm.timestamp = new Date(block.timestamp);
+  console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
+  await ctx.store.save<HistoricalMarket>(hm);
 };
 
 export const marketApproved = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
@@ -144,9 +151,9 @@ export const marketApproved = async (ctx: Ctx, block: SubstrateBlock, item: Even
 
   const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + market.marketId;
-  hm.marketId = market.marketId;
+  hm.market = market;
   hm.status = market.status;
-  hm.event = getMarketEvent(item.event.name);
+  hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -164,9 +171,9 @@ export const marketClosed = async (ctx: Ctx, block: SubstrateBlock, item: EventI
 
   const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + market.marketId;
-  hm.marketId = market.marketId;
+  hm.market = market;
   hm.status = market.status;
-  hm.event = getMarketEvent(item.event.name);
+  hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -201,7 +208,7 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
       await ctx.store.save<AccountBalance>(ab);
 
       const hab = new HistoricalAccountBalance();
-      hab.id = item.event.id + '-' + marketAccountId.substring(marketAccountId.length - 5);
+      hab.id = item.event.id + '-' + marketAccountId.slice(-5);
       hab.accountId = acc.accountId;
       hab.event = item.event.name.split('.')[1];
       hab.extrinsic = extrinsicFromEvent(item.event);
@@ -348,9 +355,9 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
 
   const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + newMarket.marketId;
-  hm.marketId = newMarket.marketId;
+  hm.market = newMarket;
   hm.status = newMarket.status;
-  hm.event = getMarketEvent(item.event.name);
+  hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -373,9 +380,9 @@ export const marketDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Eve
 
   const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + market.marketId;
-  hm.marketId = market.marketId;
+  hm.market = market;
   hm.status = market.status;
-  hm.event = getMarketEvent(item.event.name);
+  hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -417,30 +424,27 @@ export const marketDisputed = async (ctx: Ctx, block: SubstrateBlock, item: Even
   if (!market) return;
   if (!market.disputes) market.disputes = [];
 
-  const ocr = new OutcomeReport();
-  if (report.outcome.__kind == 'Categorical') {
-    ocr.categorical = report.outcome.value;
-  } else if (report.outcome.__kind == 'Scalar') {
-    ocr.scalar = report.outcome.value;
-  }
-
   const mr = new MarketReport();
-  mr.outcome = ocr;
-  if (report.at) mr.at = +report.at.toString();
-  if (report.by) mr.by = ss58.codec('zeitgeist').encode(report.by);
-
-  market.status = status ? getMarketStatus(status) : MarketStatus.Disputed;
+  mr.at = block.height;
+  if (report) {
+    if (report.by) mr.by = ss58.codec('zeitgeist').encode(report.by);
+    const or = new OutcomeReport();
+    if (report.outcome.__kind == 'Categorical') or.categorical = report.outcome.value;
+    else if (report.outcome.__kind == 'Scalar') or.scalar = report.outcome.value;
+    mr.outcome = or;
+  }
   market.disputes.push(mr);
+  market.status = status ? getMarketStatus(status) : MarketStatus.Disputed;
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
 
   const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + market.marketId;
-  hm.marketId = market.marketId;
+  hm.market = market;
   hm.status = market.status;
   hm.by = mr.by;
-  hm.outcome = ocr;
-  hm.event = getMarketEvent(item.event.name);
+  hm.outcome = mr.outcome;
+  hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -462,9 +466,9 @@ export const marketExpired = async (ctx: Ctx, block: SubstrateBlock, item: Event
 
   const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + market.marketId;
-  hm.marketId = market.marketId;
+  hm.market = market;
   hm.status = market.status;
-  hm.event = getMarketEvent(item.event.name);
+  hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -482,9 +486,9 @@ export const marketInsufficientSubsidy = async (ctx: Ctx, block: SubstrateBlock,
 
   const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + market.marketId;
-  hm.marketId = market.marketId;
+  hm.market = market;
   hm.status = market.status;
-  hm.event = getMarketEvent(item.event.name);
+  hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -507,9 +511,9 @@ export const marketRejected = async (ctx: Ctx, block: SubstrateBlock, item: Even
 
   const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + market.marketId;
-  hm.marketId = market.marketId;
+  hm.market = market;
   hm.status = market.status;
-  hm.event = getMarketEvent(item.event.name);
+  hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -535,10 +539,9 @@ export const marketReported = async (ctx: Ctx, block: SubstrateBlock, item: Even
   mr.outcome = ocr;
 
   if (mr.by !== market.oracle && specVersion(block.specId) >= 46) {
-    const storage = new MarketCommonsMarketsStorage(ctx, block);
-    const onChainMarket = await storage.asV46.get(BigInt(marketId));
-    if (onChainMarket && onChainMarket.bonds.outsider && market.bonds) {
-      const outsiderBond = onChainMarket.bonds.outsider;
+    const onChainBonds = await getMarketsStorage(ctx, block, BigInt(marketId));
+    if (onChainBonds && onChainBonds.outsider && market.bonds) {
+      const outsiderBond = onChainBonds.outsider;
       const bond = new MarketBond();
       bond.who = encodeAddress(outsiderBond.who, 73);
       bond.value = outsiderBond.value;
@@ -554,11 +557,11 @@ export const marketReported = async (ctx: Ctx, block: SubstrateBlock, item: Even
 
   const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + market.marketId;
-  hm.marketId = market.marketId;
+  hm.market = market;
   hm.status = market.status;
   hm.by = mr.by;
   hm.outcome = ocr;
-  hm.event = getMarketEvent(item.event.name);
+  hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -585,10 +588,10 @@ export const marketResolved = async (ctx: Ctx, block: SubstrateBlock, item: Even
 
   const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + market.marketId;
-  hm.marketId = market.marketId;
+  hm.market = market;
   hm.status = market.status;
   hm.resolvedOutcome = market.resolvedOutcome;
-  hm.event = getMarketEvent(item.event.name);
+  hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -613,7 +616,7 @@ export const marketResolved = async (ctx: Ctx, block: SubstrateBlock, item: Even
           await ctx.store.save<AccountBalance>(ab);
 
           const hab = new HistoricalAccountBalance();
-          hab.id = item.event.id + '-' + market.marketId + i + '-' + acc.accountId.substring(acc.accountId.length - 5);
+          hab.id = item.event.id + '-' + market.marketId + i + '-' + acc.accountId.slice(-5);
           hab.accountId = acc.accountId;
           hab.event = item.event.name.split('.')[1];
           hab.extrinsic = extrinsicFromEvent(item.event);
@@ -681,9 +684,9 @@ export const marketStartedWithSubsidy = async (ctx: Ctx, block: SubstrateBlock, 
 
   const hm = new HistoricalMarket();
   hm.id = item.event.id + '-' + market.marketId;
-  hm.marketId = market.marketId;
+  hm.market = market;
   hm.status = market.status;
-  hm.event = getMarketEvent(item.event.name);
+  hm.event = formatMarketEvent(item.event.name);
   hm.blockNumber = block.height;
   hm.timestamp = new Date(block.timestamp);
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
@@ -715,7 +718,7 @@ export const redeemSharesCall = async (ctx: Ctx, block: SubstrateBlock, item: an
 
   const hab = new HistoricalAccountBalance();
   // @ts-ignore
-  hab.id = item.call.id + '-' + walletId.substring(walletId.length - 5);
+  hab.id = item.call.id + '-' + walletId.slice(-5);
   hab.accountId = walletId;
   // @ts-ignore
   hab.event = item.call.name.split('.')[1];
@@ -797,7 +800,7 @@ export const tokensRedeemed = async (
   const { assetId, amtRedeemed, walletId } = getTokensRedeemedEvent(ctx, item);
 
   const hab = new HistoricalAccountBalance();
-  hab.id = item.event.id + '-' + walletId.substring(walletId.length - 5);
+  hab.id = item.event.id + '-' + walletId.slice(-5);
   hab.accountId = walletId;
   hab.event = item.event.name.split('.')[1];
   hab.extrinsic = extrinsicFromEvent(item.event);

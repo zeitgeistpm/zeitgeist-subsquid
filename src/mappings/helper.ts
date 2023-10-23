@@ -12,10 +12,11 @@ import {
   MarketStatus,
   PoolStatus,
 } from '../model';
-import { EventItem } from '../processor';
 import { PoolStatus as _PoolStatus } from '../types/v41';
 import { Asset, MarketCreation as _MarketCreation, MarketStatus as _MarketStatus } from '../types/v42';
 import { Cache, IPFS, Tools } from './util';
+
+export const TREASURY_ACCOUNT = 'dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ';
 
 export const calcSpotPrice = (
   tokenBalanceIn: number,
@@ -48,7 +49,7 @@ export const createAssetsForMarket = async (marketId: string, marketType: any): 
 
 export const decodeMarketMetadata = async (metadata: string): Promise<DecodedMarketMetadata | undefined> => {
   if (metadata.startsWith('0x1530fa0bb52e67d0d9f89bf26552e1')) return undefined;
-  let raw = await (await Cache.init()).getMeta(metadata);
+  let raw = await (await Cache.init()).getDecodedMetadata(metadata);
   if (raw && !(process.env.NODE_ENV == 'local')) {
     return raw !== '0' ? (JSON.parse(raw) as DecodedMarketMetadata) : undefined;
   } else {
@@ -56,12 +57,12 @@ export const decodeMarketMetadata = async (metadata: string): Promise<DecodedMar
       const ipfs = new IPFS();
       raw = await ipfs.read(metadata);
       const rawData = JSON.parse(raw) as DecodedMarketMetadata;
-      await (await Cache.init()).setMeta(metadata, raw);
+      await (await Cache.init()).setDecodedMetadata(metadata, raw);
       return rawData;
     } catch (err) {
       console.error(err);
       if (err instanceof SyntaxError) {
-        await (await Cache.init()).setMeta(metadata, '0');
+        await (await Cache.init()).setDecodedMetadata(metadata, '0');
       }
       return undefined;
     }
@@ -82,6 +83,35 @@ export const formatMarketCreation = (creation: _MarketCreation): MarketCreation 
       return MarketCreation.Advised;
     case 'Permissionless':
       return MarketCreation.Permissionless;
+  }
+};
+
+export const formatMarketEvent = (eventName: string): MarketEvent => {
+  switch (eventName) {
+    case 'PredictionMarkets.GlobalDisputeStarted':
+      return MarketEvent.GlobalDisputeStarted;
+    case 'PredictionMarkets.MarketApproved':
+      return MarketEvent.MarketApproved;
+    case 'PredictionMarkets.MarketClosed':
+      return MarketEvent.MarketClosed;
+    case 'PredictionMarkets.MarketCreated':
+      return MarketEvent.MarketCreated;
+    case 'PredictionMarkets.MarketDestroyed':
+      return MarketEvent.MarketDestroyed;
+    case 'PredictionMarkets.MarketDisputed':
+      return MarketEvent.MarketDisputed;
+    case 'PredictionMarkets.MarketExpired':
+      return MarketEvent.MarketExpired;
+    case 'PredictionMarkets.MarketRejected':
+      return MarketEvent.MarketRejected;
+    case 'PredictionMarkets.MarketReported':
+      return MarketEvent.MarketReported;
+    case 'PredictionMarkets.MarketResolved':
+      return MarketEvent.MarketResolved;
+    case 'Swaps.PoolCreate':
+      return MarketEvent.PoolCreate;
+    default:
+      return MarketEvent.MarketCreated;
   }
 };
 
@@ -130,33 +160,6 @@ export const getFees = async (block: SubstrateBlock, extrinsic: SubstrateExtrins
   return totalFees;
 };
 
-export const getMarketEvent = (eventName: string): MarketEvent => {
-  switch (eventName) {
-    case 'PredictionMarkets.MarketApproved':
-      return MarketEvent.MarketApproved;
-    case 'PredictionMarkets.MarketClosed':
-      return MarketEvent.MarketClosed;
-    case 'PredictionMarkets.MarketCreated':
-      return MarketEvent.MarketCreated;
-    case 'PredictionMarkets.MarketDestroyed':
-      return MarketEvent.MarketDestroyed;
-    case 'PredictionMarkets.MarketDisputed':
-      return MarketEvent.MarketDisputed;
-    case 'PredictionMarkets.MarketExpired':
-      return MarketEvent.MarketExpired;
-    case 'PredictionMarkets.MarketRejected':
-      return MarketEvent.MarketRejected;
-    case 'PredictionMarkets.MarketReported':
-      return MarketEvent.MarketReported;
-    case 'PredictionMarkets.MarketResolved':
-      return MarketEvent.MarketResolved;
-    case 'Swaps.PoolCreate':
-      return MarketEvent.PoolCreate;
-    default:
-      return MarketEvent.MarketCreated;
-  }
-};
-
 export const getMarketStatus = (status: _MarketStatus): MarketStatus => {
   switch (status.__kind) {
     case 'Active':
@@ -199,8 +202,7 @@ export const getPoolStatus = (status: _PoolStatus): PoolStatus => {
   }
 };
 
-// @ts-ignore
-export const initBalance = async (acc: Account, store: Store, block: SubstrateBlock, item: EventItem) => {
+export const initBalance = async (acc: Account, store: Store) => {
   const sdk = await Tools.getSDK();
   const blockZero = await sdk.api.rpc.chain.getBlockHash(0);
   const {
@@ -208,23 +210,22 @@ export const initBalance = async (acc: Account, store: Store, block: SubstrateBl
   } = (await sdk.api.query.system.account.at(blockZero, acc.accountId)) as AccountInfo;
 
   let ab = new AccountBalance();
-  ab.id = item.event.id + '-' + acc.accountId.substring(acc.accountId.length - 5);
+  ab.id = '0000000000-000000-b3cc3-' + acc.accountId.slice(-5);
   ab.account = acc;
   ab.assetId = 'Ztg';
   ab.balance = amt.toBigInt();
-  console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
+  console.log(`Saving account balance: ${JSON.stringify(ab, null, 2)}`);
   await store.save<AccountBalance>(ab);
 
   let hab = new HistoricalAccountBalance();
-  hab.id = item.event.id + '-000-' + acc.accountId.substring(acc.accountId.length - 5);
+  hab.id = '0000000000-000000-b3cc3-' + acc.accountId.slice(-5);
   hab.accountId = acc.accountId;
   hab.event = 'Initialised';
-  hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = ab.assetId;
   hab.dBalance = amt.toBigInt();
   hab.blockNumber = 0;
-  hab.timestamp = new Date(block.timestamp);
-  console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
+  hab.timestamp = new Date('1970-01-01T00:00:00.000000Z');
+  console.log(`Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
   await store.save<HistoricalAccountBalance>(hab);
 };
 

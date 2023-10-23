@@ -48,33 +48,33 @@ export const balanceInfo = (accountId: string, assetId: string, blockNumber: str
 export const marketStats = (ids: string, orderBy: string, limit: number, offset: number, price: any) => `
   SELECT
     m.market_id,
-    COALESCE(ROUND(SUM(a.price * a.amount_in_pool) + p.base_asset_qty, 0), 0) AS liquidity,
-    COALESCE(COUNT(DISTINCT ha.account_id), 0) AS participants,
-    CASE
-      WHEN p.base_asset = 'Ztg' THEN COALESCE(ROUND(p.volume * ${price[Asset.Zeitgeist]}, 0), 0)
-      ELSE COALESCE(ROUND(p.volume * ${price[Asset.Polkadot]}, 0), 0)
-    END AS volume
+    COALESCE(COUNT(DISTINCT ha.account_id), 0) AS participants
   FROM
     market m
   LEFT JOIN
-    asset a ON a.asset_id = ANY (m.outcome_assets)
-  LEFT JOIN
     historical_asset ha ON ha.asset_id = ANY (m.outcome_assets)
+  WHERE
+    m.market_id in (${ids})
+  GROUP BY
+    m.market_id;
+`;
+
+export const marketLiquidity = (ids: number[]) => `
+  SELECT
+    m.market_id,
+    COALESCE(ROUND(SUM(COALESCE(a.price,1) * ab.balance), 0), 0) AS liquidity
+  FROM
+    market m
   LEFT JOIN
     pool p ON p.id = m.pool_id
+  LEFT JOIN
+    account_balance ab ON ab.account_id = p.account_id
+  LEFT JOIN
+    asset a ON a.pool_id = p.id AND a.asset_id = ab.asset_id
   WHERE
     m.market_id IN (${ids})
   GROUP BY
-    m.market_id,
-    p.base_asset,
-    p.base_asset_qty,
-    p.volume
-  ORDER BY 
-    ${orderBy}
-  LIMIT 
-    ${limit}
-  OFFSET 
-    ${offset};
+    m.market_id;
 `;
 
 export const marketInfo = (marketId: number) => `
@@ -84,13 +84,23 @@ export const marketInfo = (marketId: number) => `
   FROM
     market m
   JOIN
-    historical_market hm ON hm.market_id = m.market_id
+    historical_market hm ON hm.market_id = m.id
   WHERE
     m.market_id=${marketId}
     AND hm.event~'(Pool|Resolved)'
   GROUP BY
     m.outcome_assets,
     hm.timestamp;
+`;
+
+export const marketMetadata = (ids: number[]) => `
+  SELECT
+    m.market_id,
+    m.metadata
+  FROM
+    market m
+  WHERE
+    m.market_id IN (${ids});
 `;
 
 export const totalLiquidityAndVolume = () => `
@@ -100,7 +110,7 @@ export const totalLiquidityAndVolume = () => `
   FROM (
     SELECT
       m.market_id,
-      SUM(a.price*a.amount_in_pool)+p.base_asset_qty AS liquidity,
+      SUM(a.price*a.amount_in_pool)+ab.balance AS liquidity,
       p.volume
     FROM
       market m
@@ -108,9 +118,14 @@ export const totalLiquidityAndVolume = () => `
       asset a ON a.asset_id = ANY (m.outcome_assets)
     JOIN
       pool p ON p.id = m.pool_id
+    JOIN
+      account_balance ab ON ab.account_id = p.account_id
+    WHERE
+      ab.asset_id NOT LIKE '%Outcome%'
+      AND ab.balance > 0
     GROUP BY
       m.market_id,
-      p.base_asset_qty,
+      ab.balance,
       p.volume
   ) AS market_stats;
 `;

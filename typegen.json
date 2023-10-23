@@ -3,10 +3,12 @@
   "specVersions": "zeitgeistVersions.jsonl",
   "typesBundle": "typesBundle.json",
   "events": [
+    "AssetTxPayment.AssetTxFeePaid",
     "Balances.BalanceSet",
     "Balances.Deposit",
     "Balances.DustLost",
     "Balances.Reserved",
+    "Balances.ReserveRepatriated",
     "Balances.Slashed",
     "Balances.Transfer",
     "Balances.Unreserved",
@@ -16,6 +18,7 @@
     "Currency.Withdrawn",
     "ParachainStaking.Rewarded",
     "PredictionMarkets.BoughtCompleteSet",
+    "PredictionMarkets.GlobalDisputeStarted",
     "PredictionMarkets.MarketApproved",
     "PredictionMarkets.MarketClosed",
     "PredictionMarkets.MarketCreated",
@@ -51,5 +54,5 @@
     "Tokens.Withdrawn"
   ],
   "calls": ["PredictionMarkets.redeem_shares", "Swaps.pool_exit"],
-  "storage": ["MarketCommons.Markets"]
+  "storage": ["AssetRegistry.Metadata", "MarketCommons.Markets"]
 }

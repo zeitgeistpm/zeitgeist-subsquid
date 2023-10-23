@@ -24,9 +24,9 @@ export const resolveMarket = async (ctx: Ctx, block: SubstrateBlock, marketId: n
   console.log(`[${eventName}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
 
-  let hm = new HistoricalMarket();
+  const hm = new HistoricalMarket();
   hm.id = eventId + '-' + market.marketId;
-  hm.marketId = market.marketId;
+  hm.market = market;
   hm.status = market.status;
   hm.resolvedOutcome = market.resolvedOutcome;
   hm.event = MarketEvent.MarketResolved;
@@ -53,8 +53,8 @@ export const resolveMarket = async (ctx: Ctx, block: SubstrateBlock, marketId: n
           console.log(`[${eventName}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
           await ctx.store.save<AccountBalance>(ab);
 
-          let hab = new HistoricalAccountBalance();
-          hab.id = eventId + '-' + market.marketId + i + '-' + acc.accountId.substring(acc.accountId.length - 5);
+          const hab = new HistoricalAccountBalance();
+          hab.id = eventId + '-' + market.marketId + i + '-' + acc.accountId.slice(- 5);
           hab.accountId = acc.accountId;
           hab.event = eventName.split('.')[1];
           hab.assetId = ab.assetId;
@@ -92,7 +92,7 @@ export const resolveMarket = async (ctx: Ctx, block: SubstrateBlock, marketId: n
       console.log(`[${eventName}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
       await ctx.store.save<Asset>(asset);
 
-      let ha = new HistoricalAsset();
+      const ha = new HistoricalAsset();
       ha.id = eventId + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1);
       ha.assetId = asset.assetId;
       ha.newPrice = newPrice;

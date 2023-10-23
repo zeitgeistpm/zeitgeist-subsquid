@@ -11,8 +11,6 @@ type Account @entity {
   id: ID!
   "Zeitgeist's identifier for market. Valid only for market account."
   marketId: Int
-  "Zeitgeist's identifier for pool. Valid only for pool account."
-  poolId: Int
 }
 
 """
@@ -115,6 +113,8 @@ type HistoricalSwap @entity {
   assetAmountOut: BigInt!
   "Event method which initiated this swap"
   event: String!
+  "Extrinsic responsible for this change"
+  extrinsic: Extrinsic
   "Height of the block"
   blockNumber: Int!
   "Timestamp of the block"
@@ -198,8 +198,8 @@ type HistoricalMarket @entity {
   by: String
   "Event method which initiated this change"
   event: MarketEvent!
-  "Zeitgeist's identifier for market"
-  marketId: Int!
+  "Details of the connected market"
+  market: Market!
   "Zeitgeist's identifier for pool"
   poolId: Int
   "Reported or disputed outcome for the market"
@@ -216,14 +216,12 @@ type HistoricalMarket @entity {
 Liquidity pool details
 """
 type Pool @entity {
-  "Zeitgeist's identifier for account"
-  accountId: String!
+  "Account for the pool"
+  account: Account!
   "List of assets connected to the pool"
   assets: [Asset]! @derivedFrom(field: "pool")
   "The base asset in the market swap pool (usually a currency)"
   baseAsset: String!
-  "Amount of market's base asset present in the pool"
-  baseAssetQty: BigInt!
   "Timestamp of pool creation"
   createdAt: DateTime!
   "Zeitgeist's identifier for market connected to the pool"
@@ -251,8 +249,6 @@ Liquidity history of a particular pool. Records all transactions
 associated with the pool.
 """
 type HistoricalPool @entity {
-  "New amount of market's base asset present in the pool"
-  baseAssetQty: BigInt
   "Height of the block"
   blockNumber: Int!
   "Volume difference"
@@ -371,7 +367,7 @@ type MarketReport @jsonField {
   "Account which reported"
   by: String
   "Outcome details"
-  outcome: OutcomeReport!
+  outcome: OutcomeReport
 }
 
 """
@@ -408,6 +404,7 @@ enum MarketCreation {
 Market's event options
 """
 enum MarketEvent {
+  GlobalDisputeStarted
   MarketApproved
   MarketClosed
   MarketCreated

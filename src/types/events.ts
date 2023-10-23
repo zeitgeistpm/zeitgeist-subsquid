@@ -14,6 +14,57 @@ import * as v40 from './v40'
 import * as v41 from './v41'
 import * as v42 from './v42'
 import * as v46 from './v46'
+import * as v47 from './v47'
+import * as v49 from './v49'
+import * as v50 from './v50'
+
+export class AssetTxPaymentAssetTxFeePaidEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'AssetTxPayment.AssetTxFeePaid')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * A transaction fee `actual_fee`, of which `tip` was added to the minimum inclusion fee,
+     * has been paid by `who` in an asset `asset_id`.
+     */
+    get isV47(): boolean {
+        return this._chain.getEventHash('AssetTxPayment.AssetTxFeePaid') === '8565e5eb1a9b8a9dfb80fc33fb9fde83c6104ccfc3e9056660b2d95baf78fa67'
+    }
+
+    /**
+     * A transaction fee `actual_fee`, of which `tip` was added to the minimum inclusion fee,
+     * has been paid by `who` in an asset `asset_id`.
+     */
+    get asV47(): {who: Uint8Array, actualFee: bigint, tip: bigint, assetId: (v47.Asset | undefined)} {
+        assert(this.isV47)
+        return this._chain.decodeEvent(this.event)
+    }
+
+    /**
+     * A transaction fee `actual_fee`, of which `tip` was added to the minimum inclusion fee,
+     * has been paid by `who` in an asset `asset_id`.
+     */
+    get isV48(): boolean {
+        return this._chain.getEventHash('AssetTxPayment.AssetTxFeePaid') === '9e5962e093ef4207f408df1507d64884ba2bbaffc848e63ac884e30ea8d31596'
+    }
+
+    /**
+     * A transaction fee `actual_fee`, of which `tip` was added to the minimum inclusion fee,
+     * has been paid by `who` in an asset `asset_id`.
+     */
+    get asV48(): {who: Uint8Array, actualFee: bigint, tip: bigint, assetId: (number | undefined)} {
+        assert(this.isV48)
+        return this._chain.decodeEvent(this.event)
+    }
+}
 
 export class BalancesBalanceSetEvent {
     private readonly _chain: Chain
@@ -146,6 +197,56 @@ export class BalancesDustLostEvent {
      * resulting in an outright loss.
      */
     get asV34(): {account: Uint8Array, amount: bigint} {
+        assert(this.isV34)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class BalancesReserveRepatriatedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'Balances.ReserveRepatriated')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     *  Some balance was moved from the reserve of the first account to the second account.
+     *  Final argument indicates the destination balance type.
+     *  \[from, to, balance, destination_status\]
+     */
+    get isV23(): boolean {
+        return this._chain.getEventHash('Balances.ReserveRepatriated') === '68e9ec5664c8ffe977da0c890bac43122a5cf13565c1c936e2120ba4980bcf31'
+    }
+
+    /**
+     *  Some balance was moved from the reserve of the first account to the second account.
+     *  Final argument indicates the destination balance type.
+     *  \[from, to, balance, destination_status\]
+     */
+    get asV23(): [Uint8Array, Uint8Array, bigint, v23.BalanceStatus] {
+        assert(this.isV23)
+        return this._chain.decodeEvent(this.event)
+    }
+
+    /**
+     * Some balance was moved from the reserve of the first account to the second account.
+     * Final argument indicates the destination balance type.
+     */
+    get isV34(): boolean {
+        return this._chain.getEventHash('Balances.ReserveRepatriated') === '6232d50d422cea3a6fd21da36387df36d1d366405d0c589566c6de85c9cf541f'
+    }
+
+    /**
+     * Some balance was moved from the reserve of the first account to the second account.
+     * Final argument indicates the destination balance type.
+     */
+    get asV34(): {from: Uint8Array, to: Uint8Array, amount: bigint, destinationStatus: v34.BalanceStatus} {
         assert(this.isV34)
         return this._chain.decodeEvent(this.event)
     }
@@ -638,6 +739,35 @@ export class PredictionMarketsBoughtCompleteSetEvent {
     }
 }
 
+export class PredictionMarketsGlobalDisputeStartedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'PredictionMarkets.GlobalDisputeStarted')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * The global dispute was started. \[market_id\]
+     */
+    get isV41(): boolean {
+        return this._chain.getEventHash('PredictionMarkets.GlobalDisputeStarted') === '47b59f698451e50cce59979f0121e842fa3f8b2bcef2e388222dbd69849514f9'
+    }
+
+    /**
+     * The global dispute was started. \[market_id\]
+     */
+    get asV41(): bigint {
+        assert(this.isV41)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
 export class PredictionMarketsMarketApprovedEvent {
     private readonly _chain: Chain
     private readonly event: Event
@@ -858,6 +988,36 @@ export class PredictionMarketsMarketCreatedEvent {
         assert(this.isV46)
         return this._chain.decodeEvent(this.event)
     }
+
+    /**
+     * A market has been created. \[market_id, market_account, market\]
+     */
+    get isV49(): boolean {
+        return this._chain.getEventHash('PredictionMarkets.MarketCreated') === '53764ddcd3e5dd127a8ff52ec7e3eb8a693f33ec19192a40c74da9091c3bc813'
+    }
+
+    /**
+     * A market has been created. \[market_id, market_account, market\]
+     */
+    get asV49(): [bigint, Uint8Array, v49.Market] {
+        assert(this.isV49)
+        return this._chain.decodeEvent(this.event)
+    }
+
+    /**
+     * A market has been created. \[market_id, market_account, market\]
+     */
+    get isV50(): boolean {
+        return this._chain.getEventHash('PredictionMarkets.MarketCreated') === '78ca205890aa9339387fc69dd4f0eb7e3a0435e10465fd4fcb6d77245cf162a7'
+    }
+
+    /**
+     * A market has been created. \[market_id, market_account, market\]
+     */
+    get asV50(): [bigint, Uint8Array, v50.Market] {
+        assert(this.isV50)
+        return this._chain.decodeEvent(this.event)
+    }
 }
 
 export class PredictionMarketsMarketDestroyedEvent {
@@ -929,6 +1089,21 @@ export class PredictionMarketsMarketDisputedEvent {
      */
     get asV29(): [bigint, v29.MarketStatus, v29.MarketDispute] {
         assert(this.isV29)
+        return this._chain.decodeEvent(this.event)
+    }
+
+    /**
+     * A market has been disputed \[market_id, new_market_status\]
+     */
+    get isV49(): boolean {
+        return this._chain.getEventHash('PredictionMarkets.MarketDisputed') === 'fb75141ba1d5569f28a5c37f474643ded3eff690fd78829c343a0a124058d613'
+    }
+
+    /**
+     * A market has been disputed \[market_id, new_market_status\]
+     */
+    get asV49(): [bigint, v49.MarketStatus] {
+        assert(this.isV49)
         return this._chain.decodeEvent(this.event)
     }
 }
@@ -1534,6 +1709,21 @@ export class SwapsPoolCreateEvent {
      */
     get asV41(): [v41.CommonPoolEventParams, v41.Pool, bigint, Uint8Array] {
         assert(this.isV41)
+        return this._chain.decodeEvent(this.event)
+    }
+
+    /**
+     * A new pool has been created. \[CommonPoolEventParams, pool, pool_amount, pool_account\]
+     */
+    get isV50(): boolean {
+        return this._chain.getEventHash('Swaps.PoolCreate') === '7d55bf447f439c2c5eed8787199c89b6b09c3ac4b567ad13685309286c464f81'
+    }
+
+    /**
+     * A new pool has been created. \[CommonPoolEventParams, pool, pool_amount, pool_account\]
+     */
+    get asV50(): [v50.CommonPoolEventParams, v50.Pool, bigint, Uint8Array] {
+        assert(this.isV50)
         return this._chain.decodeEvent(this.event)
     }
 }

@@ -7,6 +7,147 @@ import * as v40 from './v40'
 import * as v41 from './v41'
 import * as v42 from './v42'
 import * as v46 from './v46'
+import * as v48 from './v48'
+import * as v49 from './v49'
+import * as v50 from './v50'
+
+export class AssetRegistryMetadataStorage extends StorageBase {
+    protected getPrefix() {
+        return 'AssetRegistry'
+    }
+
+    protected getName() {
+        return 'Metadata'
+    }
+
+    /**
+     *  The metadata of an asset, indexed by asset id.
+     */
+    get isV41(): boolean {
+        return this.getTypeHash() === '3a1bbd58e36b2f8aa278c13faa0dc576a8999da27d52c289b610408ff000886c'
+    }
+
+    /**
+     *  The metadata of an asset, indexed by asset id.
+     */
+    get asV41(): AssetRegistryMetadataStorageV41 {
+        assert(this.isV41)
+        return this as any
+    }
+
+    /**
+     *  The metadata of an asset, indexed by asset id.
+     */
+    get isV42(): boolean {
+        return this.getTypeHash() === '2e0ab0cb7391ee43866504f39263a553856fae13ca3dcdc5ed8ab358681279f7'
+    }
+
+    /**
+     *  The metadata of an asset, indexed by asset id.
+     */
+    get asV42(): AssetRegistryMetadataStorageV42 {
+        assert(this.isV42)
+        return this as any
+    }
+
+    /**
+     *  The metadata of an asset, indexed by asset id.
+     */
+    get isV48(): boolean {
+        return this.getTypeHash() === 'b7425561a5c46347602ccf3a2d15aaf0d34fc2621e47cb1520d4503a3af3cd28'
+    }
+
+    /**
+     *  The metadata of an asset, indexed by asset id.
+     */
+    get asV48(): AssetRegistryMetadataStorageV48 {
+        assert(this.isV48)
+        return this as any
+    }
+
+    /**
+     *  The metadata of an asset, indexed by asset id.
+     */
+    get isV49(): boolean {
+        return this.getTypeHash() === 'b5a28fdad27e7ab599284fc6df7a7fe9e948ece74102bdce1eaeac25f43361ee'
+    }
+
+    /**
+     *  The metadata of an asset, indexed by asset id.
+     */
+    get asV49(): AssetRegistryMetadataStorageV49 {
+        assert(this.isV49)
+        return this as any
+    }
+}
+
+/**
+ *  The metadata of an asset, indexed by asset id.
+ */
+export interface AssetRegistryMetadataStorageV41 {
+    get(key: v41.Asset): Promise<(v41.AssetMetadata | undefined)>
+    getAll(): Promise<v41.AssetMetadata[]>
+    getMany(keys: v41.Asset[]): Promise<(v41.AssetMetadata | undefined)[]>
+    getKeys(): Promise<v41.Asset[]>
+    getKeys(key: v41.Asset): Promise<v41.Asset[]>
+    getKeysPaged(pageSize: number): AsyncIterable<v41.Asset[]>
+    getKeysPaged(pageSize: number, key: v41.Asset): AsyncIterable<v41.Asset[]>
+    getPairs(): Promise<[k: v41.Asset, v: v41.AssetMetadata][]>
+    getPairs(key: v41.Asset): Promise<[k: v41.Asset, v: v41.AssetMetadata][]>
+    getPairsPaged(pageSize: number): AsyncIterable<[k: v41.Asset, v: v41.AssetMetadata][]>
+    getPairsPaged(pageSize: number, key: v41.Asset): AsyncIterable<[k: v41.Asset, v: v41.AssetMetadata][]>
+}
+
+/**
+ *  The metadata of an asset, indexed by asset id.
+ */
+export interface AssetRegistryMetadataStorageV42 {
+    get(key: v42.Asset): Promise<(v42.AssetMetadata | undefined)>
+    getAll(): Promise<v42.AssetMetadata[]>
+    getMany(keys: v42.Asset[]): Promise<(v42.AssetMetadata | undefined)[]>
+    getKeys(): Promise<v42.Asset[]>
+    getKeys(key: v42.Asset): Promise<v42.Asset[]>
+    getKeysPaged(pageSize: number): AsyncIterable<v42.Asset[]>
+    getKeysPaged(pageSize: number, key: v42.Asset): AsyncIterable<v42.Asset[]>
+    getPairs(): Promise<[k: v42.Asset, v: v42.AssetMetadata][]>
+    getPairs(key: v42.Asset): Promise<[k: v42.Asset, v: v42.AssetMetadata][]>
+    getPairsPaged(pageSize: number): AsyncIterable<[k: v42.Asset, v: v42.AssetMetadata][]>
+    getPairsPaged(pageSize: number, key: v42.Asset): AsyncIterable<[k: v42.Asset, v: v42.AssetMetadata][]>
+}
+
+/**
+ *  The metadata of an asset, indexed by asset id.
+ */
+export interface AssetRegistryMetadataStorageV48 {
+    get(key: v48.Asset): Promise<(v48.AssetMetadata | undefined)>
+    getAll(): Promise<v48.AssetMetadata[]>
+    getMany(keys: v48.Asset[]): Promise<(v48.AssetMetadata | undefined)[]>
+    getKeys(): Promise<v48.Asset[]>
+    getKeys(key: v48.Asset): Promise<v48.Asset[]>
+    getKeysPaged(pageSize: number): AsyncIterable<v48.Asset[]>
+    getKeysPaged(pageSize: number, key: v48.Asset): AsyncIterable<v48.Asset[]>
+    getPairs(): Promise<[k: v48.Asset, v: v48.AssetMetadata][]>
+    getPairs(key: v48.Asset): Promise<[k: v48.Asset, v: v48.AssetMetadata][]>
+    getPairsPaged(pageSize: number): AsyncIterable<[k: v48.Asset, v: v48.AssetMetadata][]>
+    getPairsPaged(pageSize: number, key: v48.Asset): AsyncIterable<[k: v48.Asset, v: v48.AssetMetadata][]>
+}
+
+/**
+ *  The metadata of an asset, indexed by asset id.
+ */
+export interface AssetRegistryMetadataStorageV49 {
+    get(key: v49.Asset): Promise<(v49.AssetMetadata | undefined)>
+    getAll(): Promise<v49.AssetMetadata[]>
+    getMany(keys: v49.Asset[]): Promise<(v49.AssetMetadata | undefined)[]>
+    getKeys(): Promise<v49.Asset[]>
+    getKeys(key: v49.Asset): Promise<v49.Asset[]>
+    getKeysPaged(pageSize: number): AsyncIterable<v49.Asset[]>
+    getKeysPaged(pageSize: number, key: v49.Asset): AsyncIterable<v49.Asset[]>
+    getPairs(): Promise<[k: v49.Asset, v: v49.AssetMetadata][]>
+    getPairs(key: v49.Asset): Promise<[k: v49.Asset, v: v49.AssetMetadata][]>
+    getPairsPaged(pageSize: number): AsyncIterable<[k: v49.Asset, v: v49.AssetMetadata][]>
+    getPairsPaged(pageSize: number, key: v49.Asset): AsyncIterable<[k: v49.Asset, v: v49.AssetMetadata][]>
+}
 
 export class MarketCommonsMarketsStorage extends StorageBase {
     protected getPrefix() {
@@ -119,6 +260,36 @@ export class MarketCommonsMarketsStorage extends StorageBase {
      */
     get asV46(): MarketCommonsMarketsStorageV46 {
         assert(this.isV46)
+        return this as any
+    }
+
+    /**
+     *  Holds all markets
+     */
+    get isV49(): boolean {
+        return this.getTypeHash() === 'f22ea6b3d18a1fc67c234fa2c60ca04f2f2ed1b23e416b25f9b17b8ea50eaebb'
+    }
+
+    /**
+     *  Holds all markets
+     */
+    get asV49(): MarketCommonsMarketsStorageV49 {
+        assert(this.isV49)
+        return this as any
+    }
+
+    /**
+     *  Holds all markets
+     */
+    get isV50(): boolean {
+        return this.getTypeHash() === 'a7207ffad7407a4a9357a0958443a50fe89228fcbd89842748e59966c0ffe8d0'
+    }
+
+    /**
+     *  Holds all markets
+     */
+    get asV50(): MarketCommonsMarketsStorageV50 {
+        assert(this.isV50)
         return this as any
     }
 }
@@ -240,4 +411,38 @@ export interface MarketCommonsMarketsStorageV46 {
     getPairs(key: bigint): Promise<[k: bigint, v: v46.Market][]>
     getPairsPaged(pageSize: number): AsyncIterable<[k: bigint, v: v46.Market][]>
     getPairsPaged(pageSize: number, key: bigint): AsyncIterable<[k: bigint, v: v46.Market][]>
+}
+
+/**
+ *  Holds all markets
+ */
+export interface MarketCommonsMarketsStorageV49 {
+    get(key: bigint): Promise<(v49.Market | undefined)>
+    getAll(): Promise<v49.Market[]>
+    getMany(keys: bigint[]): Promise<(v49.Market | undefined)[]>
+    getKeys(): Promise<bigint[]>
+    getKeys(key: bigint): Promise<bigint[]>
+    getKeysPaged(pageSize: number): AsyncIterable<bigint[]>
+    getKeysPaged(pageSize: number, key: bigint): AsyncIterable<bigint[]>
+    getPairs(): Promise<[k: bigint, v: v49.Market][]>
+    getPairs(key: bigint): Promise<[k: bigint, v: v49.Market][]>
+    getPairsPaged(pageSize: number): AsyncIterable<[k: bigint, v: v49.Market][]>
+    getPairsPaged(pageSize: number, key: bigint): AsyncIterable<[k: bigint, v: v49.Market][]>
+}
+
+/**
+ *  Holds all markets
+ */
+export interface MarketCommonsMarketsStorageV50 {
+    get(key: bigint): Promise<(v50.Market | undefined)>
+    getAll(): Promise<v50.Market[]>
+    getMany(keys: bigint[]): Promise<(v50.Market | undefined)[]>
+    getKeys(): Promise<bigint[]>
+    getKeys(key: bigint): Promise<bigint[]>
+    getKeysPaged(pageSize: number): AsyncIterable<bigint[]>
+    getKeysPaged(pageSize: number, key: bigint): AsyncIterable<bigint[]>
+    getPairs(): Promise<[k: bigint, v: v50.Market][]>
+    getPairs(key: bigint): Promise<[k: bigint, v: v50.Market][]>
+    getPairsPaged(pageSize: number): AsyncIterable<[k: bigint, v: v50.Market][]>
+    getPairsPaged(pageSize: number, key: bigint): AsyncIterable<[k: bigint, v: v50.Market][]>
 }

@@ -11,10 +11,12 @@ import {
   EventItem as _EventItem,
 } from '@subsquid/substrate-processor/lib/interfaces/dataSelection';
 import { Store, TypeormDatabase } from '@subsquid/typeorm-store';
+import { assetTxPaymentAssetTxFeePaidEvent } from './mappings/assetTxPayment';
 import {
   balancesBalanceSet,
   balancesDeposit,
   balancesDustLost,
+  balancesReserveRepatriated,
   balancesReserved,
   balancesTransfer,
   balancesUnreserved,
@@ -38,6 +40,7 @@ import {
 import { destroyMarkets } from './mappings/postHooks/marketDestroyed';
 import {
   boughtCompleteSet,
+  globalDisputeStarted,
   marketApproved,
   marketClosed,
   marketCreated,
@@ -73,7 +76,7 @@ import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from 
 import { tokensBalanceSet, tokensDeposited, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
 import { Account, AccountBalance, HistoricalAccountBalance } from './model';
 import { resolveMarket } from './mappings/postHooks/marketResolved';
-import { specVersion } from './mappings/helper';
+import { initBalance, specVersion } from './mappings/helper';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -120,10 +123,12 @@ const processor = new SubstrateBatchProcessor()
     chain: process.env.WS_NODE_URL ?? 'wss://bsr.zeitgeist.pm',
   })
   .setTypesBundle('typesBundle.json')
+  .addEvent('AssetTxPayment.AssetTxFeePaid', eventExtrinsicOptions)
   .addEvent('Balances.BalanceSet', eventExtrinsicOptions)
   .addEvent('Balances.Deposit', eventExtrinsicOptions)
   .addEvent('Balances.DustLost', eventExtrinsicOptions)
   .addEvent('Balances.Reserved', eventExtrinsicOptions)
+  .addEvent('Balances.ReserveRepatriated', eventExtrinsicOptions)
   .addEvent('Balances.Transfer', eventExtrinsicOptions)
   .addEvent('Balances.Unreserved', eventExtrinsicOptions)
   .addEvent('Balances.Withdraw', eventExtrinsicOptions)
@@ -132,6 +137,7 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Currency.Withdrawn', eventExtrinsicOptions)
   .addEvent('ParachainStaking.Rewarded', eventOptions)
   .addEvent('PredictionMarkets.BoughtCompleteSet', eventExtrinsicOptions)
+  .addEvent('PredictionMarkets.GlobalDisputeStarted', eventOptions)
   .addEvent('PredictionMarkets.MarketApproved', eventOptions)
   .addEvent('PredictionMarkets.MarketClosed', eventOptions)
   .addEvent('PredictionMarkets.MarketCreated', eventExtrinsicOptions)
@@ -148,6 +154,7 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Styx.AccountCrossed', eventExtrinsicOptions)
   .addEvent('Swaps.ArbitrageBuyBurn', eventOptions)
   .addEvent('Swaps.ArbitrageMintSell', eventOptions)
+  .addEvent('Swaps.MarketCreatorFeesPaid', eventOptions)
   .addEvent('Swaps.PoolActive', eventOptions)
   .addEvent('Swaps.PoolClosed', eventOptions)
   .addEvent('Swaps.PoolCreate', eventOptions)
@@ -182,6 +189,8 @@ export type EventItem = Exclude<BatchProcessorEventItem<typeof processor>, _Even
 
 const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
   switch (item.name) {
+    case 'PredictionMarkets.GlobalDisputeStarted':
+      return globalDisputeStarted(ctx, block, item);
     case 'PredictionMarkets.MarketApproved':
       return marketApproved(ctx, block, item);
     case 'PredictionMarkets.MarketClosed':
@@ -204,26 +213,10 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
       return marketStartedWithSubsidy(ctx, block, item);
     case 'Styx.AccountCrossed':
       return accountCrossed(ctx, block, item);
-    case 'Swaps.ArbitrageBuyBurn':
-      return arbitrageBuyBurn(ctx, block, item);
-    case 'Swaps.ArbitrageMintSell':
-      return arbitrageMintSell(ctx, block, item);
     case 'Swaps.PoolActive':
       return poolActive(ctx, block, item);
     case 'Swaps.PoolClosed':
       return poolClosed(ctx, block, item);
-    case 'Swaps.PoolExit':
-      return poolExit(ctx, block, item);
-    case 'Swaps.PoolExitWithExactAssetAmount':
-      return poolExitWithExactAssetAmount(ctx, block, item);
-    case 'Swaps.PoolJoin':
-      return poolJoin(ctx, block, item);
-    case 'Swaps.PoolJoinWithExactAssetAmount':
-      return poolJoinWithExactAssetAmount(ctx, block, item);
-    case 'Swaps.SwapExactAmountIn':
-      return swapExactAmountIn(ctx, block, item);
-    case 'Swaps.SwapExactAmountOut':
-      return swapExactAmountOut(ctx, block, item);
     case 'System.NewAccount':
       return systemNewAccount(ctx, block, item);
   }
@@ -353,6 +346,19 @@ processor.run(new TypeormDatabase(), async (ctx) => {
 
       if (item.kind === 'event') {
         switch (item.name) {
+          case 'AssetTxPayment.AssetTxFeePaid': {
+            const habs = await assetTxPaymentAssetTxFeePaidEvent(ctx, block.header, item);
+            if (habs) {
+              await Promise.all(
+                habs.map(async (hab) => {
+                  const key = makeKey(hab.accountId, hab.assetId);
+                  balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+                  balanceHistory.push(hab);
+                })
+              );
+            }
+            break;
+          }
           case 'Balances.BalanceSet': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
@@ -380,14 +386,24 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             balanceHistory.push(hab);
             break;
           }
+          case 'Balances.ReserveRepatriated': {
+            const hab = await balancesReserveRepatriated(ctx, block.header, item);
+            if (hab) {
+              const key = makeKey(hab.accountId, hab.assetId);
+              balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+              balanceHistory.push(hab);
+            }
+            break;
+          }
           case 'Balances.Transfer': {
-            const res = await balancesTransfer(ctx, block.header, item);
-            const fromKey = makeKey(res.fromHab.accountId, res.fromHab.assetId);
-            const toKey = makeKey(res.toHab.accountId, res.toHab.assetId);
-            balanceAccounts.set(fromKey, (balanceAccounts.get(fromKey) || BigInt(0)) + res.fromHab.dBalance);
-            balanceAccounts.set(toKey, (balanceAccounts.get(toKey) || BigInt(0)) + res.toHab.dBalance);
-            balanceHistory.push(res.fromHab);
-            balanceHistory.push(res.toHab);
+            const habs = await balancesTransfer(ctx, block.header, item);
+            await Promise.all(
+              habs.map(async (hab) => {
+                const key = makeKey(hab.accountId, hab.assetId);
+                balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+                balanceHistory.push(hab);
+              })
+            );
             break;
           }
           case 'Balances.Unreserved': {
@@ -487,6 +503,31 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             balanceHistory.push(hab);
             break;
           }
+          case 'Swaps.ArbitrageBuyBurn': {
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            await arbitrageBuyBurn(ctx, block.header, item);
+            break;
+          }
+          case 'Swaps.ArbitrageMintSell': {
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            await arbitrageMintSell(ctx, block.header, item);
+            break;
+          }
+          case 'Swaps.MarketCreatorFeesPaid': {
+            const newHabs: HistoricalAccountBalance[] = [];
+            for (let i = 0; i < 2; i++) {
+              const hab = balanceHistory.pop();
+              if (hab && hab.event === 'Transfer') {
+                hab.id = item.event.id + hab.id.slice(-6);
+                hab.event = item.event.name.split('.')[1];
+                newHabs.push(hab);
+              }
+            }
+            balanceHistory.push(...newHabs);
+            break;
+          }
           case 'Swaps.PoolCreate': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
@@ -497,6 +538,42 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
             await poolDestroyed(ctx, block.header, item);
+            break;
+          }
+          case 'Swaps.PoolExit': {
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            await poolExit(ctx, block.header, item);
+            break;
+          }
+          case 'Swaps.PoolExitWithExactAssetAmount': {
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            await poolExitWithExactAssetAmount(ctx, block.header, item);
+            break;
+          }
+          case 'Swaps.PoolJoin': {
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            await poolJoin(ctx, block.header, item);
+            break;
+          }
+          case 'Swaps.PoolJoinWithExactAssetAmount': {
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            await poolJoinWithExactAssetAmount(ctx, block.header, item);
+            break;
+          }
+          case 'Swaps.SwapExactAmountIn': {
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            await swapExactAmountIn(ctx, block.header, item);
+            break;
+          }
+          case 'Swaps.SwapExactAmountOut': {
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            await swapExactAmountOut(ctx, block.header, item);
             break;
           }
           // @ts-ignore
@@ -573,17 +650,23 @@ const saveBalanceChanges = async (ctx: Ctx, balanceAccounts: Map<string, bigint>
   await Promise.all(
     balanceAccountsArr.map(async ([key, amount]) => {
       const [walletId, assetId] = key.split('|');
+      let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
+      if (!acc) {
+        acc = new Account();
+        acc.id = walletId;
+        acc.accountId = walletId;
+        console.log(`Saving account: ${JSON.stringify(acc, null, 2)}`);
+        await ctx.store.save<Account>(acc);
+        await initBalance(acc, ctx.store);
+      }
+
       let ab = await ctx.store.findOneBy(AccountBalance, {
         account: { accountId: walletId },
         assetId: assetId,
       });
-      if (!ab && assetId === 'Ztg') return;
       if (ab) {
         ab.balance = ab.balance + amount;
       } else {
-        const acc = await ctx.store.get(Account, { where: { accountId: walletId } });
-        if (!acc) return;
-
         ab = new AccountBalance();
         ab.id = walletId + '-' + assetId;
         ab.account = acc;

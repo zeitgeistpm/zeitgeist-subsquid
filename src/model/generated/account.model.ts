@@ -34,10 +34,4 @@ export class Account {
      */
     @Column_("int4", {nullable: true})
     marketId!: number | undefined | null
-
-    /**
-     * Zeitgeist's identifier for pool. Valid only for pool account.
-     */
-    @Column_("int4", {nullable: true})
-    poolId!: number | undefined | null
 }
