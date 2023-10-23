@@ -30,9 +30,11 @@ export const assetTxPaymentAssetTxFeePaidEvent = async (
   });
   habs.push(userHab);
 
+  // Skip condition. Ref: https://github.com/zeitgeistpm/zeitgeist/issues/1091
   if (process.env.WS_NODE_URL?.includes(`bs`) && specVersion(block.specId) < 49)
     if (assetId == 0 || assetId == 2) return habs;
 
+  // Deposit transaction fees to treasury account (against TokensBalanceSetEvent noticed on-chain)
   const treasuryHab = new HistoricalAccountBalance({
     id: item.event.id + '-' + TREASURY_ACCOUNT.slice(-5),
     accountId: TREASURY_ACCOUNT,
