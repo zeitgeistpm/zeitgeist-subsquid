@@ -1,5 +1,5 @@
+import { Asset } from './resolvers/marketStatsWithOrder';
 import { encodedAssetId } from './helper';
-import { Asset } from './resolvers/marketStats';
 
 export const assetPriceHistory = (assetId: string, startTime: string, endTime: string, interval: string) => `
   WITH t0 AS (
@@ -45,7 +45,7 @@ export const balanceInfo = (accountId: string, assetId: string, blockNumber: str
     asset_id;
 `;
 
-export const marketStats = (ids: string, orderBy: string, limit: number, offset: number, price: any) => `
+export const marketParticipants = (ids: number[]) => `
   SELECT
     m.market_id,
     COALESCE(COUNT(DISTINCT ha.account_id), 0) AS participants
@@ -101,6 +101,37 @@ export const marketMetadata = (ids: number[]) => `
     market m
   WHERE
     m.market_id IN (${ids});
+`;
+
+export const marketStatsWithOrder = (ids: string, orderBy: string, limit: number, offset: number, price: any) => `
+  SELECT
+    m.market_id,
+    COALESCE(ROUND(SUM(COALESCE(a.price,1) * ab.balance), 0), 0) AS liquidity,
+    COALESCE(COUNT(DISTINCT ha.account_id), 0) AS participants,
+    CASE
+      WHEN p.base_asset = 'Ztg' THEN COALESCE(ROUND(p.volume * ${price[Asset.Zeitgeist]}, 0), 0)
+      ELSE COALESCE(ROUND(p.volume * ${price[Asset.Polkadot]}, 0), 0)
+    END AS volume
+  FROM
+    market m
+  LEFT JOIN
+    pool p ON p.id = m.pool_id
+  LEFT JOIN
+    account_balance ab ON ab.account_id = p.account_id
+  LEFT JOIN
+    asset a ON a.pool_id = p.id AND a.asset_id = ab.asset_id
+  LEFT JOIN
+    historical_asset ha ON ha.asset_id = a.asset_id
+  WHERE
+    m.market_id IN (${ids})
+  GROUP BY
+    m.market_id
+  ORDER BY 
+    ${orderBy}
+  LIMIT 
+    ${limit}
+  OFFSET 
+    ${offset};
 `;
 
 export const totalLiquidityAndVolume = () => `
