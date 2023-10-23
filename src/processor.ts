@@ -347,11 +347,15 @@ processor.run(new TypeormDatabase(), async (ctx) => {
       if (item.kind === 'event') {
         switch (item.name) {
           case 'AssetTxPayment.AssetTxFeePaid': {
-            const hab = await assetTxPaymentAssetTxFeePaidEvent(ctx, block.header, item);
-            if (hab) {
-              const key = makeKey(hab.accountId, hab.assetId);
-              balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-              balanceHistory.push(hab);
+            const habs = await assetTxPaymentAssetTxFeePaidEvent(ctx, block.header, item);
+            if (habs) {
+              await Promise.all(
+                habs.map(async (hab) => {
+                  const key = makeKey(hab.accountId, hab.assetId);
+                  balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+                  balanceHistory.push(hab);
+                })
+              );
             }
             break;
           }
