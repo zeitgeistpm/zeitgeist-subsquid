@@ -125,7 +125,9 @@ export const marketStatsWithOrder = (ids: string, orderBy: string, limit: number
   WHERE
     m.market_id IN (${ids})
   GROUP BY
-    m.market_id
+    m.market_id,
+    p.base_asset,
+    p.volume
   ORDER BY 
     ${orderBy}
   LIMIT 
