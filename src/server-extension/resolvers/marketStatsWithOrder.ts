@@ -49,17 +49,12 @@ export class MarketStatsWithOrderResolver {
     @Arg('offset', () => Int, { nullable: true }) offset: number
   ): Promise<MarketStatsWithOrder[]> {
     const manager = await this.tx();
+    const where = ids ? `WHERE m.market_id IN (${ids})` : ``;
     const result = await manager.getRepository(Market).query(
-      marketStatsWithOrder(
-        ids ?? 'SELECT market_id FROM market',
-        orderBy ?? OrderBy.volume_DESC,
-        limit ?? 10,
-        offset ?? 0,
-        {
-          [Asset.Polkadot]: await getAssetUsdPrice(Asset.Polkadot),
-          [Asset.Zeitgeist]: await getAssetUsdPrice(Asset.Zeitgeist),
-        }
-      )
+      marketStatsWithOrder(where, orderBy ?? OrderBy.volume_DESC, limit ?? 10, offset ?? 0, {
+        [Asset.Polkadot]: await getAssetUsdPrice(Asset.Polkadot),
+        [Asset.Zeitgeist]: await getAssetUsdPrice(Asset.Zeitgeist),
+      })
     );
     return result;
   }

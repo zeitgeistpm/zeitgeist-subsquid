@@ -103,7 +103,7 @@ export const marketMetadata = (ids: number[]) => `
     m.market_id IN (${ids});
 `;
 
-export const marketStatsWithOrder = (ids: string, orderBy: string, limit: number, offset: number, price: any) => `
+export const marketStatsWithOrder = (where: string, orderBy: string, limit: number, offset: number, price: any) => `
   SELECT
     m.market_id,
     COALESCE(ROUND(SUM(COALESCE(a.price,1) * ab.balance), 0), 0) AS liquidity,
@@ -122,8 +122,7 @@ export const marketStatsWithOrder = (ids: string, orderBy: string, limit: number
     asset a ON a.pool_id = p.id AND a.asset_id = ab.asset_id
   LEFT JOIN
     historical_asset ha ON ha.asset_id = a.asset_id
-  WHERE
-    m.market_id IN (${ids})
+  ${where}
   GROUP BY
     m.market_id,
     p.base_asset,
