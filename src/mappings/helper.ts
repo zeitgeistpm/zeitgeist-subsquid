@@ -236,6 +236,12 @@ export const isBaseAsset = (currencyId: Asset | string): boolean => {
   return currencyId.__kind.includes('Ztg') || currencyId.__kind.includes('ForeignAsset');
 };
 
+export const mergeByField = (array1: any[], array2: any[], field: string) =>
+  array1.map((a1) => ({
+    ...a1,
+    ...array2.find((a2) => a2[field].toString() == a1[field].toString() && a2),
+  }));
+
 export const rescale = (value: string): string => {
   return (BigInt(value) * BigInt(10 ** 10)).toString();
 };
