@@ -67,16 +67,14 @@ const getAssetUsdPrices = async (): Promise<Map<Asset, number>> => {
   await Promise.all(
     Array.from(prices).map(async (price) => {
       if (process.env.WS_NODE_URL?.includes(`bs`)) {
-        price[1] = 1;
-      } else {
-        try {
-          const res = await axios.get(
-            `https://api.coingecko.com/api/v3/simple/price?ids=${price[0]}&vs_currencies=usd`
-          );
-          price[1] = res.data[price[0]].usd;
-        } catch (err) {
-          console.log(JSON.stringify(err, null, 2));
-        }
+        prices.set(price[0], 1);
+        return;
+      }
+      try {
+        const res = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${price[0]}&vs_currencies=usd`);
+        prices.set(price[0], res.data[price[0]].usd);
+      } catch (err) {
+        console.log(JSON.stringify(err, null, 2));
       }
     })
   );
