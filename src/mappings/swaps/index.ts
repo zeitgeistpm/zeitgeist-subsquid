@@ -624,8 +624,8 @@ export const poolExitWithExactAssetAmount = async (
       });
       if (!asset) return;
       const assetWeight = +poolAsset._weight.toString();
-      const oldAssetQty = poolAsset.balance;
-      const newAssetQty = oldAssetQty;
+      const oldAssetQty = asset.amountInPool;
+      const newAssetQty = poolAsset.balance;
       const oldPrice = asset.price;
       const newPrice = calcSpotPrice(+baseAssetQty.toString(), baseAssetWeight, +newAssetQty.toString(), assetWeight);
 
@@ -795,8 +795,8 @@ export const poolJoinWithExactAssetAmount = async (
       });
       if (!asset) return;
       const assetWeight = +poolAsset._weight.toString();
-      const oldAssetQty = poolAsset.balance;
-      const newAssetQty = oldAssetQty;
+      const oldAssetQty = asset.amountInPool;
+      const newAssetQty = poolAsset.balance;
       const oldPrice = asset.price;
       const newPrice = calcSpotPrice(+baseAssetQty.toString(), baseAssetWeight, +newAssetQty.toString(), assetWeight);
 
@@ -924,15 +924,9 @@ export const swapExactAmountIn = async (
       });
       if (!asset) return;
       const assetWeight = +poolAsset._weight.toString();
-      const oldAssetQty = poolAsset.balance;
+      const oldAssetQty = asset.amountInPool;
       const oldPrice = asset.price;
-      let newAssetQty = oldAssetQty;
-
-      if (poolAsset.assetId == getAssetId(assetBought)) {
-        newAssetQty = oldAssetQty - assetBoughtQty;
-      } else if (poolAsset.assetId == getAssetId(assetSold)) {
-        newAssetQty = oldAssetQty + assetSoldQty;
-      }
+      const newAssetQty = poolAsset.balance;
 
       const newPrice = calcSpotPrice(+baseAssetQty.toString(), baseAssetWeight, +newAssetQty.toString(), assetWeight);
       asset.price = newPrice;
@@ -1072,15 +1066,9 @@ export const swapExactAmountOut = async (
       });
       if (!asset) return;
       const assetWeight = +poolAsset._weight.toString();
-      const oldAssetQty = poolAsset.balance;
+      const oldAssetQty = asset.amountInPool;
       const oldPrice = asset.price;
-      let newAssetQty = oldAssetQty;
-
-      if (poolAsset.assetId == getAssetId(assetBought)) {
-        newAssetQty = oldAssetQty - assetBoughtQty;
-      } else if (poolAsset.assetId == getAssetId(assetSold)) {
-        newAssetQty = oldAssetQty + assetSoldQty;
-      }
+      const newAssetQty = poolAsset.balance;
 
       const newPrice = calcSpotPrice(+baseAssetQty.toString(), baseAssetWeight, +newAssetQty.toString(), assetWeight);
       asset.price = newPrice;
