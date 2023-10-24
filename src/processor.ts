@@ -545,25 +545,33 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           case 'Swaps.PoolExit': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            await poolExit(ctx, block.header, item);
+            const has = await poolExit(ctx, block.header, item);
+            if (!has) break;
+            assetHistory.push(...has);
             break;
           }
           case 'Swaps.PoolExitWithExactAssetAmount': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            await poolExitWithExactAssetAmount(ctx, block.header, item);
+            const has = await poolExitWithExactAssetAmount(ctx, block.header, item);
+            if (!has) break;
+            assetHistory.push(...has);
             break;
           }
           case 'Swaps.PoolJoin': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            await poolJoin(ctx, block.header, item);
+            const has = await poolJoin(ctx, block.header, item);
+            if (!has) break;
+            assetHistory.push(...has);
             break;
           }
           case 'Swaps.PoolJoinWithExactAssetAmount': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            await poolJoinWithExactAssetAmount(ctx, block.header, item);
+            const has = await poolJoinWithExactAssetAmount(ctx, block.header, item);
+            if (!has) break;
+            assetHistory.push(...has);
             break;
           }
           case 'Swaps.SwapExactAmountIn': {
