@@ -103,14 +103,20 @@ export const marketMetadata = (ids: number[]) => `
     m.market_id IN (${ids});
 `;
 
-export const marketStatsWithOrder = (where: string, orderBy: string, limit: number, offset: number, price: any) => `
+export const marketStatsWithOrder = (
+  where: string,
+  orderBy: string,
+  limit: number,
+  offset: number,
+  prices: Map<Asset, number>
+) => `
   SELECT
     m.market_id,
     COALESCE(ROUND(SUM(COALESCE(a.price,1) * ab.balance), 0), 0) AS liquidity,
     COALESCE(COUNT(DISTINCT ha.account_id), 0) AS participants,
     CASE
-      WHEN p.base_asset = 'Ztg' THEN COALESCE(ROUND(p.volume * ${price[Asset.Zeitgeist]}, 0), 0)
-      ELSE COALESCE(ROUND(p.volume * ${price[Asset.Polkadot]}, 0), 0)
+      WHEN p.base_asset = 'Ztg' THEN COALESCE(ROUND(p.volume * ${prices.get(Asset.Zeitgeist)}, 0), 0)
+      ELSE COALESCE(ROUND(p.volume * ${prices.get(Asset.Polkadot)}, 0), 0)
     END AS volume
   FROM
     market m

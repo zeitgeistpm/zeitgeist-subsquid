@@ -50,27 +50,35 @@ export class MarketStatsWithOrderResolver {
   ): Promise<MarketStatsWithOrder[]> {
     const manager = await this.tx();
     const where = ids ? `WHERE m.market_id IN (${ids})` : ``;
-    const result = await manager.getRepository(Market).query(
-      marketStatsWithOrder(where, orderBy ?? OrderBy.volume_DESC, limit ?? 10, offset ?? 0, {
-        [Asset.Polkadot]: await getAssetUsdPrice(Asset.Polkadot),
-        [Asset.Zeitgeist]: await getAssetUsdPrice(Asset.Zeitgeist),
-      })
-    );
+    const result = await manager
+      .getRepository(Market)
+      .query(
+        marketStatsWithOrder(where, orderBy ?? OrderBy.volume_DESC, limit ?? 10, offset ?? 0, await getAssetUsdPrices())
+      );
     return result;
   }
 }
 
-const getAssetUsdPrice = async (coinGeckoId: Asset): Promise<any> => {
-  return new Promise(async (resolve) => {
-    try {
-      const res = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${coinGeckoId}&vs_currencies=usd`);
-      resolve(res.data[`${coinGeckoId}`].usd);
-    } catch (err) {
-      console.log(JSON.stringify(err, null, 2));
-      if (coinGeckoId === Asset.Zeitgeist) resolve(0.0357);
-      else resolve(5.08);
-    }
-  });
+const getAssetUsdPrices = async (): Promise<Map<Asset, number>> => {
+  const prices: Map<Asset, number> = new Map([
+    [Asset.Polkadot, 4.34],
+    [Asset.Zeitgeist, 0.0313],
+  ]);
+  await Promise.all(
+    Array.from(prices).map(async (price) => {
+      if (process.env.WS_NODE_URL?.includes(`bs`)) {
+        price[1] = 1;
+        return;
+      }
+      try {
+        const res = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${price[0]}&vs_currencies=usd`);
+        price[1] = res.data[price[0]].usd;
+      } catch (err) {
+        console.log(JSON.stringify(err, null, 2));
+      }
+    })
+  );
+  return prices;
 };
 
 export enum Asset {
