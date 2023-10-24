@@ -23,6 +23,7 @@ import {
   balancesWithdraw,
 } from './mappings/balances';
 import { currencyTransferred, currencyDeposited, currencyWithdrawn } from './mappings/currency';
+import { initBalance, specVersion } from './mappings/helper';
 import { parachainStakingRewarded } from './mappings/parachainStaking';
 import {
   unreserveBalances_108949,
@@ -38,6 +39,7 @@ import {
   unreserveBalances_92128,
 } from './mappings/postHooks/balancesUnreserved';
 import { destroyMarkets } from './mappings/postHooks/marketDestroyed';
+import { resolveMarket } from './mappings/postHooks/marketResolved';
 import {
   boughtCompleteSet,
   globalDisputeStarted,
@@ -74,9 +76,7 @@ import {
 } from './mappings/swaps';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensBalanceSet, tokensDeposited, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
-import { Account, AccountBalance, HistoricalAccountBalance } from './model';
-import { resolveMarket } from './mappings/postHooks/marketResolved';
-import { initBalance, specVersion } from './mappings/helper';
+import { Account, AccountBalance, HistoricalAccountBalance, HistoricalAsset, HistoricalSwap } from './model';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -323,8 +323,10 @@ const makeKey = (walletId: string, assetId: string): string => {
 
 // @ts-ignore
 processor.run(new TypeormDatabase(), async (ctx) => {
-  let balanceAccounts = new Map<string, bigint>();
-  let balanceHistory: HistoricalAccountBalance[] = [];
+  const balanceAccounts = new Map<string, bigint>();
+  const assetHistory: HistoricalAsset[] = [];
+  const balanceHistory: HistoricalAccountBalance[] = [];
+  const swapHistory: HistoricalSwap[] = [];
 
   for (let block of ctx.blocks) {
     for (let item of block.items) {
@@ -567,13 +569,19 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           case 'Swaps.SwapExactAmountIn': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            await swapExactAmountIn(ctx, block.header, item);
+            const res = await swapExactAmountIn(ctx, block.header, item);
+            if (!res) break;
+            assetHistory.push(...res.historicalAssets);
+            swapHistory.push(res.historicalSwap);
             break;
           }
           case 'Swaps.SwapExactAmountOut': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            await swapExactAmountOut(ctx, block.header, item);
+            const res = await swapExactAmountOut(ctx, block.header, item);
+            if (!res) break;
+            assetHistory.push(...res.historicalAssets);
+            swapHistory.push(res.historicalSwap);
             break;
           }
           // @ts-ignore
@@ -642,7 +650,9 @@ processor.run(new TypeormDatabase(), async (ctx) => {
     }
   }
   await saveBalanceChanges(ctx, balanceAccounts);
+  await saveAssetHistory(ctx, assetHistory);
   await saveBalanceHistory(ctx, balanceHistory);
+  await saveSwapHistory(ctx, swapHistory);
 });
 
 const saveBalanceChanges = async (ctx: Ctx, balanceAccounts: Map<string, bigint>) => {
@@ -679,8 +689,20 @@ const saveBalanceChanges = async (ctx: Ctx, balanceAccounts: Map<string, bigint>
   );
 };
 
+const saveAssetHistory = async (ctx: Ctx, assetHistory: HistoricalAsset[]) => {
+  if (assetHistory.length === 0) return;
+  console.log(`Saving historical assets: ${JSON.stringify(assetHistory, null, 2)}`);
+  await ctx.store.save(assetHistory);
+};
+
 const saveBalanceHistory = async (ctx: Ctx, balanceHistory: HistoricalAccountBalance[]) => {
   if (balanceHistory.length === 0) return;
   console.log(`Saving historical account balances: ${JSON.stringify(balanceHistory, null, 2)}`);
   await ctx.store.save(balanceHistory);
+};
+
+const saveSwapHistory = async (ctx: Ctx, swapHistory: HistoricalSwap[]) => {
+  if (swapHistory.length === 0) return;
+  console.log(`Saving historical swaps: ${JSON.stringify(swapHistory, null, 2)}`);
+  await ctx.store.save(swapHistory);
 };
