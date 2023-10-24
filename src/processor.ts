@@ -508,13 +508,17 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           case 'Swaps.ArbitrageBuyBurn': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            await arbitrageBuyBurn(ctx, block.header, item);
+            const has = await arbitrageBuyBurn(ctx, block.header, item);
+            if (!has) break;
+            assetHistory.push(...has);
             break;
           }
           case 'Swaps.ArbitrageMintSell': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            await arbitrageMintSell(ctx, block.header, item);
+            const has = await arbitrageMintSell(ctx, block.header, item);
+            if (!has) break;
+            assetHistory.push(...has);
             break;
           }
           case 'Swaps.MarketCreatorFeesPaid': {
