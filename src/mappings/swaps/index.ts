@@ -447,16 +447,17 @@ export const poolExit = async (
   });
   if (!market) return;
 
-  const poolAssets: AssetAmountInPoolAndWeight[] = mergeByAssetId(pool.account.balances, pool.weights);
+  let poolAssets: AssetAmountInPoolAndWeight[] = mergeByAssetId(pool.account.balances, pool.weights);
   let baseAssetQty: number, baseAssetWeight: number;
-  await Promise.all(
-    poolAssets.map(async (poolAsset) => {
-      if (poolAsset.assetId === pool.baseAsset) {
-        baseAssetQty = +poolAsset.balance.toString();
-        baseAssetWeight = +poolAsset._weight.toString();
-      }
-    })
-  );
+  poolAssets = poolAssets.filter((poolAsset) => {
+    if (poolAsset.assetId === pool.baseAsset) {
+      baseAssetQty = +poolAsset.balance.toString();
+      baseAssetWeight = +poolAsset._weight.toString();
+      return false;
+    }
+    return true;
+  });
+  poolAssets.sort((a, b) => (a.id > b.id ? 1 : -1));
 
   const historicalAssets: HistoricalAsset[] = [];
   await Promise.all(
@@ -616,16 +617,17 @@ export const poolJoin = async (
   });
   if (!pool) return;
 
-  const poolAssets: AssetAmountInPoolAndWeight[] = mergeByAssetId(pool.account.balances, pool.weights);
+  let poolAssets: AssetAmountInPoolAndWeight[] = mergeByAssetId(pool.account.balances, pool.weights);
   let baseAssetQty: number, baseAssetWeight: number;
-  await Promise.all(
-    poolAssets.map(async (poolAsset) => {
-      if (poolAsset.assetId === pool.baseAsset) {
-        baseAssetQty = +poolAsset.balance.toString();
-        baseAssetWeight = +poolAsset._weight.toString();
-      }
-    })
-  );
+  poolAssets = poolAssets.filter((poolAsset) => {
+    if (poolAsset.assetId === pool.baseAsset) {
+      baseAssetQty = +poolAsset.balance.toString();
+      baseAssetWeight = +poolAsset._weight.toString();
+      return false;
+    }
+    return true;
+  });
+  poolAssets.sort((a, b) => (a.id > b.id ? 1 : -1));
 
   const historicalAssets: HistoricalAsset[] = [];
   await Promise.all(
@@ -1024,6 +1026,7 @@ export const swapExactAmountOut = async (
 };
 
 interface AssetAmountInPoolAndWeight {
+  id: string;
   assetId: string;
   balance: bigint;
   _weight: bigint;
