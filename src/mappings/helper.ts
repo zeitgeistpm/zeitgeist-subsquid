@@ -242,6 +242,12 @@ export const mergeByField = (array1: any[], array2: any[], field: string) =>
     ...array2.find((a2) => a2[field].toString() == a1[field].toString() && a2),
   }));
 
+export const mergeByAssetId = (balances: any[], weights: any[]) =>
+  balances.map((b) => ({
+    ...b,
+    ...weights.find((w) => w['_assetId'].toString() == b['assetId'].toString() && w),
+  }));
+
 export const rescale = (value: string): string => {
   return (BigInt(value) * BigInt(10 ** 10)).toString();
 };

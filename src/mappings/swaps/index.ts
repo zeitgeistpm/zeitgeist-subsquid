@@ -25,7 +25,7 @@ import {
   getAssetId,
   getPoolStatus,
   isBaseAsset,
-  mergeByField,
+  mergeByAssetId,
 } from '../helper';
 import { Tools } from '../util';
 import {
@@ -447,13 +447,13 @@ export const poolExit = async (
   });
   if (!market) return;
 
-  const poolAssets: AssetAmountInPoolAndWeight[] = mergeByField(pool.account.balances, pool.weights, 'assetId');
+  const poolAssets: AssetAmountInPoolAndWeight[] = mergeByAssetId(pool.account.balances, pool.weights);
   let baseAssetQty: number, baseAssetWeight: number;
   await Promise.all(
     poolAssets.map(async (poolAsset) => {
       if (poolAsset.assetId === pool.baseAsset) {
         baseAssetQty = +poolAsset.balance.toString();
-        baseAssetWeight = +poolAsset.weight.toString();
+        baseAssetWeight = +poolAsset._weight.toString();
       }
     })
   );
@@ -466,7 +466,7 @@ export const poolExit = async (
         where: { assetId: poolAsset.assetId },
       });
       if (!asset) return;
-      const assetWeight = +poolAsset.weight.toString();
+      const assetWeight = +poolAsset._weight.toString();
       const oldAssetQty = poolAsset.balance;
       const newAssetQty = oldAssetQty - BigInt(pae.transferred[idx].toString());
       const oldPrice = asset.price;
@@ -554,13 +554,13 @@ export const poolExitWithExactAssetAmount = async (
   });
   if (!pool || !isBaseAsset(pae.asset)) return;
 
-  const poolAssets: AssetAmountInPoolAndWeight[] = mergeByField(pool.account.balances, pool.weights, 'assetId');
+  const poolAssets: AssetAmountInPoolAndWeight[] = mergeByAssetId(pool.account.balances, pool.weights);
   let baseAssetQty: number, baseAssetWeight: number;
   await Promise.all(
     poolAssets.map(async (poolAsset) => {
       if (poolAsset.assetId === pool.baseAsset) {
         baseAssetQty = +poolAsset.balance.toString();
-        baseAssetWeight = +poolAsset.weight.toString();
+        baseAssetWeight = +poolAsset._weight.toString();
       }
     })
   );
@@ -573,7 +573,7 @@ export const poolExitWithExactAssetAmount = async (
         where: { assetId: poolAsset.assetId },
       });
       if (!asset) return;
-      const assetWeight = +poolAsset.weight.toString();
+      const assetWeight = +poolAsset._weight.toString();
       const oldAssetQty = poolAsset.balance;
       const newAssetQty = oldAssetQty;
       const oldPrice = asset.price;
@@ -616,13 +616,13 @@ export const poolJoin = async (
   });
   if (!pool) return;
 
-  const poolAssets: AssetAmountInPoolAndWeight[] = mergeByField(pool.account.balances, pool.weights, 'assetId');
+  const poolAssets: AssetAmountInPoolAndWeight[] = mergeByAssetId(pool.account.balances, pool.weights);
   let baseAssetQty: number, baseAssetWeight: number;
   await Promise.all(
     poolAssets.map(async (poolAsset) => {
       if (poolAsset.assetId === pool.baseAsset) {
         baseAssetQty = +poolAsset.balance.toString();
-        baseAssetWeight = +poolAsset.weight.toString();
+        baseAssetWeight = +poolAsset._weight.toString();
       }
     })
   );
@@ -635,7 +635,7 @@ export const poolJoin = async (
         where: { assetId: poolAsset.assetId },
       });
       if (!asset) return;
-      const assetWeight = +poolAsset.weight.toString();
+      const assetWeight = +poolAsset._weight.toString();
       const oldAssetQty = poolAsset.balance;
       const newAssetQty = oldAssetQty + BigInt(pae.transferred[idx].toString());
       const oldPrice = asset.price;
@@ -678,13 +678,13 @@ export const poolJoinWithExactAssetAmount = async (
   });
   if (!pool || !isBaseAsset(pae.asset)) return;
 
-  const poolAssets: AssetAmountInPoolAndWeight[] = mergeByField(pool.account.balances, pool.weights, 'assetId');
+  const poolAssets: AssetAmountInPoolAndWeight[] = mergeByAssetId(pool.account.balances, pool.weights);
   let baseAssetQty: number, baseAssetWeight: number;
   await Promise.all(
     poolAssets.map(async (poolAsset) => {
       if (poolAsset.assetId === pool.baseAsset) {
         baseAssetQty = +poolAsset.balance.toString();
-        baseAssetWeight = +poolAsset.weight.toString();
+        baseAssetWeight = +poolAsset._weight.toString();
       }
     })
   );
@@ -697,7 +697,7 @@ export const poolJoinWithExactAssetAmount = async (
         where: { assetId: poolAsset.assetId },
       });
       if (!asset) return;
-      const assetWeight = +poolAsset.weight.toString();
+      const assetWeight = +poolAsset._weight.toString();
       const oldAssetQty = poolAsset.balance;
       const newAssetQty = oldAssetQty;
       const oldPrice = asset.price;
@@ -807,13 +807,13 @@ export const swapExactAmountIn = async (
     await ctx.store.save<HistoricalPool>(hp);
   }
 
-  const poolAssets: AssetAmountInPoolAndWeight[] = mergeByField(pool.account.balances, pool.weights, 'assetId');
+  const poolAssets: AssetAmountInPoolAndWeight[] = mergeByAssetId(pool.account.balances, pool.weights);
   let baseAssetQty: number, baseAssetWeight: number;
   await Promise.all(
     poolAssets.map(async (poolAsset) => {
       if (poolAsset.assetId === pool.baseAsset) {
         baseAssetQty = +poolAsset.balance.toString();
-        baseAssetWeight = +poolAsset.weight.toString();
+        baseAssetWeight = +poolAsset._weight.toString();
       }
     })
   );
@@ -826,7 +826,7 @@ export const swapExactAmountIn = async (
         where: { assetId: poolAsset.assetId },
       });
       if (!asset) return;
-      const assetWeight = +poolAsset.weight.toString();
+      const assetWeight = +poolAsset._weight.toString();
       const oldAssetQty = poolAsset.balance;
       const oldPrice = asset.price;
       let newAssetQty = oldAssetQty;
@@ -955,13 +955,13 @@ export const swapExactAmountOut = async (
     await ctx.store.save<HistoricalPool>(hp);
   }
 
-  const poolAssets: AssetAmountInPoolAndWeight[] = mergeByField(pool.account.balances, pool.weights, 'assetId');
+  const poolAssets: AssetAmountInPoolAndWeight[] = mergeByAssetId(pool.account.balances, pool.weights);
   let baseAssetQty: number, baseAssetWeight: number;
   await Promise.all(
     poolAssets.map(async (poolAsset) => {
       if (poolAsset.assetId === pool.baseAsset) {
         baseAssetQty = +poolAsset.balance.toString();
-        baseAssetWeight = +poolAsset.weight.toString();
+        baseAssetWeight = +poolAsset._weight.toString();
       }
     })
   );
@@ -974,7 +974,7 @@ export const swapExactAmountOut = async (
         where: { assetId: poolAsset.assetId },
       });
       if (!asset) return;
-      const assetWeight = +poolAsset.weight.toString();
+      const assetWeight = +poolAsset._weight.toString();
       const oldAssetQty = poolAsset.balance;
       const oldPrice = asset.price;
       let newAssetQty = oldAssetQty;
@@ -1026,5 +1026,5 @@ export const swapExactAmountOut = async (
 interface AssetAmountInPoolAndWeight {
   assetId: string;
   balance: bigint;
-  weight: bigint;
+  _weight: bigint;
 }
