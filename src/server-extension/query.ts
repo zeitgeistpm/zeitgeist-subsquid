@@ -1,3 +1,4 @@
+import { Asset } from './resolvers/marketStatsWithOrder';
 import { encodedAssetId } from './helper';
 
 export const assetPriceHistory = (assetId: string, startTime: string, endTime: string, interval: string) => `
@@ -100,6 +101,44 @@ export const marketMetadata = (ids: number[]) => `
     market m
   WHERE
     m.market_id IN (${ids});
+`;
+
+export const marketStatsWithOrder = (
+  where: string,
+  orderBy: string,
+  limit: number,
+  offset: number,
+  prices: Map<Asset, number>
+) => `
+  SELECT
+    m.market_id,
+    COALESCE(ROUND(SUM(COALESCE(a.price,1) * ab.balance), 0), 0) AS liquidity,
+    COALESCE(COUNT(DISTINCT ha.account_id), 0) AS participants,
+    CASE
+      WHEN p.base_asset = 'Ztg' THEN COALESCE(ROUND(p.volume * ${prices.get(Asset.Zeitgeist)}, 0), 0)
+      ELSE COALESCE(ROUND(p.volume * ${prices.get(Asset.Polkadot)}, 0), 0)
+    END AS volume
+  FROM
+    market m
+  LEFT JOIN
+    pool p ON p.id = m.pool_id
+  LEFT JOIN
+    account_balance ab ON ab.account_id = p.account_id
+  LEFT JOIN
+    asset a ON a.pool_id = p.id AND a.asset_id = ab.asset_id
+  LEFT JOIN
+    historical_asset ha ON ha.asset_id = a.asset_id
+  ${where}
+  GROUP BY
+    m.market_id,
+    p.base_asset,
+    p.volume
+  ORDER BY 
+    ${orderBy}
+  LIMIT 
+    ${limit}
+  OFFSET 
+    ${offset};
 `;
 
 export const totalLiquidityAndVolume = () => `
