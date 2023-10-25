@@ -1,8 +1,7 @@
 import { util } from '@zeitgeistpm/sdk';
 import { Field, Int, ObjectType, Query, registerEnumType, Resolver, InputType, Arg } from 'type-graphql';
 import { EntityManager } from 'typeorm';
-import { mergeByField } from '../../mappings/helper';
-import { decodedAssetId } from '../helper';
+import { decodedAssetId, mergeByField } from '../helper';
 import { assetPriceHistory, marketInfo } from '../query';
 
 @ObjectType()

@@ -1,7 +1,7 @@
 import { Arg, Field, Int, ObjectType, Query, Resolver } from 'type-graphql';
 import type { EntityManager } from 'typeorm';
 import { Market } from '../../model/generated';
-import { mergeByField } from '../../mappings/helper';
+import { mergeByField } from '../helper';
 import { marketLiquidity, marketParticipants } from '../query';
 
 @ObjectType()
