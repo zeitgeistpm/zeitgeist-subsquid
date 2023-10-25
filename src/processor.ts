@@ -76,7 +76,14 @@ import {
 } from './mappings/swaps';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensBalanceSet, tokensDeposited, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
-import { Account, AccountBalance, HistoricalAccountBalance, HistoricalAsset, HistoricalSwap } from './model';
+import {
+  Account,
+  AccountBalance,
+  HistoricalAccountBalance,
+  HistoricalAsset,
+  HistoricalPool,
+  HistoricalSwap,
+} from './model';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -213,10 +220,6 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
       return marketStartedWithSubsidy(ctx, block, item);
     case 'Styx.AccountCrossed':
       return accountCrossed(ctx, block, item);
-    case 'Swaps.PoolActive':
-      return poolActive(ctx, block, item);
-    case 'Swaps.PoolClosed':
-      return poolClosed(ctx, block, item);
     case 'System.NewAccount':
       return systemNewAccount(ctx, block, item);
   }
@@ -326,6 +329,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   const balanceAccounts = new Map<string, bigint>();
   const assetHistory: HistoricalAsset[] = [];
   const balanceHistory: HistoricalAccountBalance[] = [];
+  const poolHistory: HistoricalPool[] = [];
   const swapHistory: HistoricalSwap[] = [];
 
   for (let block of ctx.blocks) {
@@ -505,6 +509,12 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             balanceHistory.push(hab);
             break;
           }
+          case 'Swaps.PoolActive': {
+            const hp = await poolActive(ctx, block.header, item);
+            if (!hp) break;
+            poolHistory.push(hp);
+            break;
+          }
           case 'Swaps.ArbitrageBuyBurn': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
@@ -532,6 +542,12 @@ processor.run(new TypeormDatabase(), async (ctx) => {
               }
             }
             balanceHistory.push(...newHabs);
+            break;
+          }
+          case 'Swaps.PoolClosed': {
+            const hp = await poolClosed(ctx, block.header, item);
+            if (!hp) break;
+            poolHistory.push(hp);
             break;
           }
           case 'Swaps.PoolCreate': {
@@ -664,6 +680,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   await saveBalanceChanges(ctx, balanceAccounts);
   await saveAssetHistory(ctx, assetHistory);
   await saveBalanceHistory(ctx, balanceHistory);
+  await savePoolHistory(ctx, poolHistory);
   await saveSwapHistory(ctx, swapHistory);
 });
 
@@ -711,6 +728,12 @@ const saveBalanceHistory = async (ctx: Ctx, balanceHistory: HistoricalAccountBal
   if (balanceHistory.length === 0) return;
   console.log(`Saving historical account balances: ${JSON.stringify(balanceHistory, null, 2)}`);
   await ctx.store.save(balanceHistory);
+};
+
+const savePoolHistory = async (ctx: Ctx, poolHistory: HistoricalPool[]) => {
+  if (poolHistory.length === 0) return;
+  console.log(`Saving historical pools: ${JSON.stringify(poolHistory, null, 2)}`);
+  await ctx.store.save(poolHistory);
 };
 
 const saveSwapHistory = async (ctx: Ctx, swapHistory: HistoricalSwap[]) => {

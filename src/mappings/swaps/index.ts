@@ -168,7 +168,11 @@ export const arbitrageMintSell = async (
   return historicalAssets;
 };
 
-export const poolActive = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
+export const poolActive = async (
+  ctx: Ctx,
+  block: SubstrateBlock,
+  item: EventItem
+): Promise<HistoricalPool | undefined> => {
   const { poolId } = getPoolActiveEvent(ctx, item);
 
   const pool = await ctx.store.get(Pool, {
@@ -179,18 +183,24 @@ export const poolActive = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
   console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
   await ctx.store.save<Pool>(pool);
 
-  const hp = new HistoricalPool();
-  hp.id = item.event.id + '-' + pool.poolId;
-  hp.poolId = pool.poolId;
-  hp.status = pool.status;
-  hp.event = item.event.name.split('.')[1];
-  hp.blockNumber = block.height;
-  hp.timestamp = new Date(block.timestamp);
-  console.log(`[${item.event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`);
-  await ctx.store.save<HistoricalPool>(hp);
+  const hp = new HistoricalPool({
+    blockNumber: block.height,
+    dVolume: BigInt(0),
+    event: item.event.name.split('.')[1],
+    id: item.event.id + '-' + pool.poolId,
+    poolId: pool.poolId,
+    status: pool.status,
+    timestamp: new Date(block.timestamp),
+    volume: pool.volume,
+  });
+  return hp;
 };
 
-export const poolClosed = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
+export const poolClosed = async (
+  ctx: Ctx,
+  block: SubstrateBlock,
+  item: EventItem
+): Promise<HistoricalPool | undefined> => {
   const { poolId } = getPoolClosedEvent(ctx, item);
 
   const pool = await ctx.store.get(Pool, {
@@ -201,15 +211,17 @@ export const poolClosed = async (ctx: Ctx, block: SubstrateBlock, item: EventIte
   console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
   await ctx.store.save<Pool>(pool);
 
-  const hp = new HistoricalPool();
-  hp.id = item.event.id + '-' + pool.poolId;
-  hp.poolId = pool.poolId;
-  hp.status = pool.status;
-  hp.event = item.event.name.split('.')[1];
-  hp.blockNumber = block.height;
-  hp.timestamp = new Date(block.timestamp);
-  console.log(`[${item.event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`);
-  await ctx.store.save<HistoricalPool>(hp);
+  const hp = new HistoricalPool({
+    blockNumber: block.height,
+    dVolume: BigInt(0),
+    event: item.event.name.split('.')[1],
+    id: item.event.id + '-' + pool.poolId,
+    poolId: pool.poolId,
+    status: pool.status,
+    timestamp: new Date(block.timestamp),
+    volume: pool.volume,
+  });
+  return hp;
 };
 
 export const poolCreate = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
