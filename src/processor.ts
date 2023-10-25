@@ -562,7 +562,17 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           case 'Swaps.PoolDestroyed': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            await poolDestroyed(ctx, block.header, item);
+            const res = await poolDestroyed(ctx, block.header, item);
+            if (!res) break;
+            await Promise.all(
+              res.historicalAccountBalances.map(async (hab) => {
+                const key = makeKey(hab.accountId, hab.assetId);
+                balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+                balanceHistory.push(hab);
+              })
+            );
+            assetHistory.push(...res.historicalAssets);
+            poolHistory.push(res.historicalPool);
             break;
           }
           case 'Swaps.PoolExit': {

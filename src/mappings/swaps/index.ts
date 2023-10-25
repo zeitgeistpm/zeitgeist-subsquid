@@ -352,8 +352,20 @@ export const poolCreate = async (
   return { historicalAssets, historicalPool };
 };
 
-export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
+export const poolDestroyed = async (
+  ctx: Ctx,
+  block: SubstrateBlock,
+  item: EventItem
+): Promise<
+  | {
+      historicalAccountBalances: HistoricalAccountBalance[];
+      historicalAssets: HistoricalAsset[];
+      historicalPool: HistoricalPool;
+    }
+  | undefined
+> => {
   const { poolId } = getPoolDestroyedEvent(ctx, item);
+  const historicalAccountBalances: HistoricalAccountBalance[] = [];
 
   const pool = await ctx.store.get(Pool, {
     where: { poolId: +poolId.toString() },
@@ -364,47 +376,43 @@ export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Event
   console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
   await ctx.store.save<Pool>(pool);
 
-  const hp = new HistoricalPool();
-  hp.id = item.event.id + '-' + pool.poolId;
-  hp.poolId = pool.poolId;
-  hp.event = item.event.name.split('.')[1];
-  hp.status = pool.status;
-  hp.blockNumber = block.height;
-  hp.timestamp = new Date(block.timestamp);
-  console.log(`[${item.event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`);
-  await ctx.store.save<HistoricalPool>(hp);
+  const historicalPool = new HistoricalPool({
+    blockNumber: block.height,
+    dVolume: BigInt(0),
+    event: item.event.name.split('.')[1],
+    id: item.event.id + '-' + pool.poolId,
+    poolId: pool.poolId,
+    status: pool.status,
+    timestamp: new Date(block.timestamp),
+    volume: pool.volume,
+  });
 
   const ab = await ctx.store.findOne(AccountBalance, {
     where: {
       account: { accountId: pool.account.accountId },
       assetId: pool.baseAsset,
     },
-    relations: { account: true },
   });
   if (!ab) return;
-  const oldBalance = ab.balance;
-  const newBalance = BigInt(0);
-  ab.balance = newBalance;
-  console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-  await ctx.store.save<AccountBalance>(ab);
 
-  const hab = new HistoricalAccountBalance();
-  hab.id = item.event.id + '-' + ab.account.accountId.slice(-5);
-  hab.accountId = ab.account.accountId;
-  hab.event = item.event.name.split('.')[1];
-  hab.extrinsic = extrinsicFromEvent(item.event);
-  hab.assetId = ab.assetId;
-  hab.dBalance = newBalance - oldBalance;
-  hab.blockNumber = block.height;
-  hab.timestamp = new Date(block.timestamp);
-  console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
-  await ctx.store.save<HistoricalAccountBalance>(hab);
+  const hab = new HistoricalAccountBalance({
+    accountId: pool.account.accountId,
+    assetId: ab.assetId,
+    blockNumber: block.height,
+    dBalance: -ab.balance,
+    event: item.event.name.split('.')[1],
+    extrinsic: extrinsicFromEvent(item.event),
+    id: item.event.id + '-' + pool.account.accountId.slice(-5),
+    timestamp: new Date(block.timestamp),
+  });
+  historicalAccountBalances.push(hab);
 
   const market = await ctx.store.findOneBy(Market, {
     pool: { poolId: Number(poolId) },
   });
   if (!market) return;
 
+  const historicalAssets: HistoricalAsset[] = [];
   const numOfOutcomeAssets = market.outcomeAssets.length;
   if (numOfOutcomeAssets === 0) return;
   for (let i = 0; i < numOfOutcomeAssets; i++) {
@@ -421,49 +429,44 @@ export const poolDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Event
     console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
     await ctx.store.save<Asset>(asset);
 
-    const ha = new HistoricalAsset();
-    ha.id = item.event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1);
-    ha.assetId = asset.assetId;
-    ha.newPrice = newPrice;
-    ha.newAmountInPool = newAssetQty;
-    ha.dPrice = oldPrice ? newPrice - oldPrice : null;
-    ha.dAmountInPool = oldAssetQty ? newAssetQty - oldAssetQty : null;
-    ha.event = item.event.name.split('.')[1];
-    ha.blockNumber = block.height;
-    ha.timestamp = new Date(block.timestamp);
-    console.log(`[${item.event.name}] Saving historical asset: ${JSON.stringify(ha, null, 2)}`);
-    await ctx.store.save<HistoricalAsset>(ha);
+    const ha = new HistoricalAsset({
+      accountId: null,
+      assetId: asset.assetId,
+      baseAssetTraded: BigInt(0),
+      blockNumber: block.height,
+      dAmountInPool: newAssetQty - oldAssetQty,
+      dPrice: newPrice - oldPrice,
+      event: item.event.name.split('.')[1],
+      id: item.event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+      newAmountInPool: asset.amountInPool,
+      newPrice: asset.price,
+      timestamp: new Date(block.timestamp),
+    });
+    historicalAssets.push(ha);
 
     const abs = await ctx.store.find(AccountBalance, {
       where: { assetId: market.outcomeAssets[i]! },
+      relations: { account: true },
     });
     await Promise.all(
       abs.map(async (ab) => {
-        const accLookupKey = ab.id.substring(0, ab.id.indexOf('-'));
-        const acc = await ctx.store.get(Account, {
-          where: { id: Like(`%${accLookupKey}%`) },
-        });
-        if (acc == null || ab.balance === BigInt(0)) return;
-        const oldBalance = ab.balance;
-        const newBalance = BigInt(0);
-        ab.balance = newBalance;
-        console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-        await ctx.store.save<AccountBalance>(ab);
+        if (ab.balance === BigInt(0)) return;
 
-        const hab = new HistoricalAccountBalance();
-        hab.id = item.event.id + '-' + market.marketId + i + '-' + acc.accountId.slice(-5);
-        hab.accountId = acc.accountId;
-        hab.event = item.event.name.split('.')[1];
-        hab.extrinsic = extrinsicFromEvent(item.event);
-        hab.assetId = ab.assetId;
-        hab.dBalance = newBalance - oldBalance;
-        hab.blockNumber = block.height;
-        hab.timestamp = new Date(block.timestamp);
-        console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
-        await ctx.store.save<HistoricalAccountBalance>(hab);
+        const hab = new HistoricalAccountBalance({
+          accountId: ab.account.accountId,
+          assetId: ab.assetId,
+          blockNumber: block.height,
+          dBalance: -ab.balance,
+          event: item.event.name.split('.')[1],
+          extrinsic: extrinsicFromEvent(item.event),
+          id: item.event.id + '-' + market.marketId + i + '-' + ab.account.accountId.slice(-5),
+          timestamp: new Date(block.timestamp),
+        });
+        historicalAccountBalances.push(hab);
       })
     );
   }
+  return { historicalAccountBalances, historicalAssets, historicalPool };
 };
 
 export const poolExit = async (
