@@ -553,7 +553,10 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           case 'Swaps.PoolCreate': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            await poolCreate(ctx, block.header, item);
+            const res = await poolCreate(ctx, block.header, item);
+            if (!res) break;
+            assetHistory.push(...res.historicalAssets);
+            poolHistory.push(res.historicalPool);
             break;
           }
           case 'Swaps.PoolDestroyed': {
