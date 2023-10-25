@@ -236,7 +236,7 @@ export const isBaseAsset = (currencyId: Asset | string): boolean => {
   return currencyId.__kind.includes('Ztg') || currencyId.__kind.includes('ForeignAsset');
 };
 
-export const mergeByAssetId = (balances: any[], weights: any[]) =>
+export const mergeByAssetId = (balances: any[], weights: any[]): AssetAmountInPoolAndWeight[] =>
   balances.map((b) => ({
     ...b,
     ...weights.find((w) => w['_assetId'].toString() == b['assetId'].toString() && w),
@@ -250,6 +250,19 @@ export const specVersion = (specId: string): number => {
   return +specId.substring(specId.indexOf('@') + 1);
 };
 
+interface AssetAmountInPoolAndWeight {
+  assetId: string;
+  balance: bigint;
+  _weight: bigint;
+}
+
+interface CategoryData {
+  name: string;
+  ticker?: string;
+  img?: string;
+  color?: string;
+}
+
 interface DecodedMarketMetadata {
   slug: string;
   question: string;
@@ -258,13 +271,6 @@ interface DecodedMarketMetadata {
   tags?: string[];
   img?: string;
   scalarType?: string;
-}
-
-interface CategoryData {
-  name: string;
-  ticker?: string;
-  img?: string;
-  color?: string;
 }
 
 export interface Transfer {

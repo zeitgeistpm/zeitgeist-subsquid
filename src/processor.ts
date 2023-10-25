@@ -614,6 +614,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             if (!res) break;
             assetHistory.push(...res.historicalAssets);
             swapHistory.push(res.historicalSwap);
+            if (res.historicalPool) poolHistory.push(res.historicalPool);
             break;
           }
           case 'Swaps.SwapExactAmountOut': {
@@ -623,6 +624,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             if (!res) break;
             assetHistory.push(...res.historicalAssets);
             swapHistory.push(res.historicalSwap);
+            if (res.historicalPool) poolHistory.push(res.historicalPool);
             break;
           }
           // @ts-ignore

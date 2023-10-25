@@ -1,7 +1,6 @@
 import { encodeAddress } from '@polkadot/keyring';
 import { SubstrateBlock } from '@subsquid/substrate-processor';
 import { util } from '@zeitgeistpm/sdk';
-import { Like } from 'typeorm/find-options/operator/Like';
 import {
   Account,
   AccountBalance,
@@ -57,7 +56,7 @@ export const arbitrageBuyBurn = async (
   });
   if (!pool) return;
 
-  const poolAssets: AssetAmountInPoolAndWeight[] = mergeByAssetId(pool.account.balances, pool.weights);
+  const poolAssets = mergeByAssetId(pool.account.balances, pool.weights);
   let baseAssetQty: number, baseAssetWeight: number;
   await Promise.all(
     poolAssets.map(async (poolAsset) => {
@@ -119,7 +118,7 @@ export const arbitrageMintSell = async (
   });
   if (!pool) return;
 
-  const poolAssets: AssetAmountInPoolAndWeight[] = mergeByAssetId(pool.account.balances, pool.weights);
+  const poolAssets = mergeByAssetId(pool.account.balances, pool.weights);
   let baseAssetQty: number, baseAssetWeight: number;
   await Promise.all(
     poolAssets.map(async (poolAsset) => {
@@ -644,7 +643,7 @@ export const poolExitWithExactAssetAmount = async (
   });
   if (!pool || !isBaseAsset(pae.asset)) return;
 
-  const poolAssets: AssetAmountInPoolAndWeight[] = mergeByAssetId(pool.account.balances, pool.weights);
+  const poolAssets = mergeByAssetId(pool.account.balances, pool.weights);
   let baseAssetQty: number, baseAssetWeight: number;
   await Promise.all(
     poolAssets.map(async (poolAsset) => {
@@ -815,7 +814,7 @@ export const poolJoinWithExactAssetAmount = async (
   });
   if (!pool || !isBaseAsset(pae.asset)) return;
 
-  const poolAssets: AssetAmountInPoolAndWeight[] = mergeByAssetId(pool.account.balances, pool.weights);
+  const poolAssets = mergeByAssetId(pool.account.balances, pool.weights);
   let baseAssetQty: number, baseAssetWeight: number;
   await Promise.all(
     poolAssets.map(async (poolAsset) => {
@@ -868,7 +867,10 @@ export const swapExactAmountIn = async (
   ctx: Ctx,
   block: SubstrateBlock,
   item: EventItem
-): Promise<{ historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap } | undefined> => {
+): Promise<
+  | { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalPool: HistoricalPool | undefined }
+  | undefined
+> => {
   const { swapEvent, walletId } = getSwapExactAmountInEvent(ctx, item);
 
   const pool = await ctx.store.get(Pool, {
@@ -924,6 +926,7 @@ export const swapExactAmountIn = async (
 
   let oldVolume = pool.volume;
   let newVolume = oldVolume;
+  let historicalPool;
   if (isBaseAsset(assetBought) || isBaseAsset(assetSold)) {
     newVolume = isBaseAsset(assetBought) ? oldVolume + assetBoughtQty : oldVolume + assetSoldQty;
 
@@ -931,20 +934,19 @@ export const swapExactAmountIn = async (
     console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
     await ctx.store.save<Pool>(pool);
 
-    const hp = new HistoricalPool();
-    hp.id = item.event.id + '-' + pool.poolId;
-    hp.poolId = pool.poolId;
-    hp.event = item.event.name.split('.')[1];
-    hp.dVolume = newVolume - oldVolume;
-    hp.volume = newVolume;
-    hp.status = pool.status;
-    hp.blockNumber = block.height;
-    hp.timestamp = new Date(block.timestamp);
-    console.log(`[${item.event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`);
-    await ctx.store.save<HistoricalPool>(hp);
+    historicalPool = new HistoricalPool({
+      blockNumber: block.height,
+      dVolume: newVolume - oldVolume,
+      event: item.event.name.split('.')[1],
+      id: item.event.id + '-' + pool.poolId,
+      poolId: pool.poolId,
+      status: pool.status,
+      timestamp: new Date(block.timestamp),
+      volume: pool.volume,
+    });
   }
 
-  const poolAssets: AssetAmountInPoolAndWeight[] = mergeByAssetId(pool.account.balances, pool.weights);
+  const poolAssets = mergeByAssetId(pool.account.balances, pool.weights);
   let baseAssetQty: number, baseAssetWeight: number;
   await Promise.all(
     poolAssets.map(async (poolAsset) => {
@@ -1003,14 +1005,17 @@ export const swapExactAmountIn = async (
     id: item.event.id,
     timestamp: new Date(block.timestamp),
   });
-  return { historicalAssets, historicalSwap };
+  return { historicalAssets, historicalSwap, historicalPool };
 };
 
 export const swapExactAmountOut = async (
   ctx: Ctx,
   block: SubstrateBlock,
   item: EventItem
-): Promise<{ historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap } | undefined> => {
+): Promise<
+  | { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalPool: HistoricalPool | undefined }
+  | undefined
+> => {
   const { swapEvent, walletId } = getSwapExactAmountOutEvent(ctx, item);
 
   const pool = await ctx.store.get(Pool, {
@@ -1066,6 +1071,7 @@ export const swapExactAmountOut = async (
 
   let oldVolume = pool.volume;
   let newVolume = oldVolume;
+  let historicalPool;
   if (isBaseAsset(assetBought) || isBaseAsset(assetSold)) {
     newVolume = isBaseAsset(assetBought) ? oldVolume + assetBoughtQty : oldVolume + assetSoldQty;
 
@@ -1073,20 +1079,19 @@ export const swapExactAmountOut = async (
     console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
     await ctx.store.save<Pool>(pool);
 
-    const hp = new HistoricalPool();
-    hp.id = item.event.id + '-' + pool.poolId;
-    hp.poolId = pool.poolId;
-    hp.event = item.event.name.split('.')[1];
-    hp.dVolume = newVolume - oldVolume;
-    hp.volume = newVolume;
-    hp.status = pool.status;
-    hp.blockNumber = block.height;
-    hp.timestamp = new Date(block.timestamp);
-    console.log(`[${item.event.name}] Saving historical pool: ${JSON.stringify(hp, null, 2)}`);
-    await ctx.store.save<HistoricalPool>(hp);
+    historicalPool = new HistoricalPool({
+      blockNumber: block.height,
+      dVolume: newVolume - oldVolume,
+      event: item.event.name.split('.')[1],
+      id: item.event.id + '-' + pool.poolId,
+      poolId: pool.poolId,
+      status: pool.status,
+      timestamp: new Date(block.timestamp),
+      volume: pool.volume,
+    });
   }
 
-  const poolAssets: AssetAmountInPoolAndWeight[] = mergeByAssetId(pool.account.balances, pool.weights);
+  const poolAssets = mergeByAssetId(pool.account.balances, pool.weights);
   let baseAssetQty: number, baseAssetWeight: number;
   await Promise.all(
     poolAssets.map(async (poolAsset) => {
@@ -1145,11 +1150,5 @@ export const swapExactAmountOut = async (
     id: item.event.id,
     timestamp: new Date(block.timestamp),
   });
-  return { historicalAssets, historicalSwap };
+  return { historicalAssets, historicalSwap, historicalPool };
 };
-
-interface AssetAmountInPoolAndWeight {
-  assetId: string;
-  balance: bigint;
-  _weight: bigint;
-}
