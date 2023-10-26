@@ -1,5 +1,17 @@
 import type {Result, Option} from './support'
 
+export type OutcomeReport = OutcomeReport_Categorical | OutcomeReport_Scalar
+
+export interface OutcomeReport_Categorical {
+    __kind: 'Categorical'
+    value: number
+}
+
+export interface OutcomeReport_Scalar {
+    __kind: 'Scalar'
+    value: bigint
+}
+
 export interface Market {
     baseAsset: Asset
     creator: Uint8Array
@@ -149,18 +161,6 @@ export interface Report {
     at: bigint
     by: Uint8Array
     outcome: OutcomeReport
-}
-
-export type OutcomeReport = OutcomeReport_Categorical | OutcomeReport_Scalar
-
-export interface OutcomeReport_Categorical {
-    __kind: 'Categorical'
-    value: number
-}
-
-export interface OutcomeReport_Scalar {
-    __kind: 'Scalar'
-    value: bigint
 }
 
 export type MarketDisputeMechanism = MarketDisputeMechanism_Authorized | MarketDisputeMechanism_Court | MarketDisputeMechanism_SimpleDisputes
