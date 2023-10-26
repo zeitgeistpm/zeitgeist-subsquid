@@ -23,6 +23,7 @@ import {
   balancesWithdraw,
 } from './mappings/balances';
 import { currencyTransferred, currencyDeposited, currencyWithdrawn } from './mappings/currency';
+import { initBalance, specVersion } from './mappings/helper';
 import { parachainStakingRewarded } from './mappings/parachainStaking';
 import {
   unreserveBalances_108949,
@@ -38,6 +39,7 @@ import {
   unreserveBalances_92128,
 } from './mappings/postHooks/balancesUnreserved';
 import { destroyMarkets } from './mappings/postHooks/marketDestroyed';
+import { resolveMarket } from './mappings/postHooks/marketResolved';
 import {
   boughtCompleteSet,
   globalDisputeStarted,
@@ -74,9 +76,14 @@ import {
 } from './mappings/swaps';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensBalanceSet, tokensDeposited, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
-import { Account, AccountBalance, HistoricalAccountBalance } from './model';
-import { resolveMarket } from './mappings/postHooks/marketResolved';
-import { initBalance, specVersion } from './mappings/helper';
+import {
+  Account,
+  AccountBalance,
+  HistoricalAccountBalance,
+  HistoricalAsset,
+  HistoricalPool,
+  HistoricalSwap,
+} from './model';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -213,10 +220,6 @@ const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
       return marketStartedWithSubsidy(ctx, block, item);
     case 'Styx.AccountCrossed':
       return accountCrossed(ctx, block, item);
-    case 'Swaps.PoolActive':
-      return poolActive(ctx, block, item);
-    case 'Swaps.PoolClosed':
-      return poolClosed(ctx, block, item);
     case 'System.NewAccount':
       return systemNewAccount(ctx, block, item);
   }
@@ -323,8 +326,11 @@ const makeKey = (walletId: string, assetId: string): string => {
 
 // @ts-ignore
 processor.run(new TypeormDatabase(), async (ctx) => {
-  let balanceAccounts = new Map<string, bigint>();
-  let balanceHistory: HistoricalAccountBalance[] = [];
+  const balanceAccounts = new Map<string, bigint>();
+  const assetHistory: HistoricalAsset[] = [];
+  const balanceHistory: HistoricalAccountBalance[] = [];
+  const poolHistory: HistoricalPool[] = [];
+  const swapHistory: HistoricalSwap[] = [];
 
   for (let block of ctx.blocks) {
     for (let item of block.items) {
@@ -503,16 +509,26 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             balanceHistory.push(hab);
             break;
           }
+          case 'Swaps.PoolActive': {
+            const hp = await poolActive(ctx, block.header, item);
+            if (!hp) break;
+            poolHistory.push(hp);
+            break;
+          }
           case 'Swaps.ArbitrageBuyBurn': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            await arbitrageBuyBurn(ctx, block.header, item);
+            const has = await arbitrageBuyBurn(ctx, block.header, item);
+            if (!has) break;
+            assetHistory.push(...has);
             break;
           }
           case 'Swaps.ArbitrageMintSell': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            await arbitrageMintSell(ctx, block.header, item);
+            const has = await arbitrageMintSell(ctx, block.header, item);
+            if (!has) break;
+            assetHistory.push(...has);
             break;
           }
           case 'Swaps.MarketCreatorFeesPaid': {
@@ -528,52 +544,87 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             balanceHistory.push(...newHabs);
             break;
           }
+          case 'Swaps.PoolClosed': {
+            const hp = await poolClosed(ctx, block.header, item);
+            if (!hp) break;
+            poolHistory.push(hp);
+            break;
+          }
           case 'Swaps.PoolCreate': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            await poolCreate(ctx, block.header, item);
+            const res = await poolCreate(ctx, block.header, item);
+            if (!res) break;
+            assetHistory.push(...res.historicalAssets);
+            poolHistory.push(res.historicalPool);
             break;
           }
           case 'Swaps.PoolDestroyed': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            await poolDestroyed(ctx, block.header, item);
+            const res = await poolDestroyed(ctx, block.header, item);
+            if (!res) break;
+            await Promise.all(
+              res.historicalAccountBalances.map(async (hab) => {
+                const key = makeKey(hab.accountId, hab.assetId);
+                balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+                balanceHistory.push(hab);
+              })
+            );
+            assetHistory.push(...res.historicalAssets);
+            poolHistory.push(res.historicalPool);
             break;
           }
           case 'Swaps.PoolExit': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            await poolExit(ctx, block.header, item);
+            const has = await poolExit(ctx, block.header, item);
+            if (!has) break;
+            assetHistory.push(...has);
             break;
           }
           case 'Swaps.PoolExitWithExactAssetAmount': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            await poolExitWithExactAssetAmount(ctx, block.header, item);
+            const has = await poolExitWithExactAssetAmount(ctx, block.header, item);
+            if (!has) break;
+            assetHistory.push(...has);
             break;
           }
           case 'Swaps.PoolJoin': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            await poolJoin(ctx, block.header, item);
+            const has = await poolJoin(ctx, block.header, item);
+            if (!has) break;
+            assetHistory.push(...has);
             break;
           }
           case 'Swaps.PoolJoinWithExactAssetAmount': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            await poolJoinWithExactAssetAmount(ctx, block.header, item);
+            const has = await poolJoinWithExactAssetAmount(ctx, block.header, item);
+            if (!has) break;
+            assetHistory.push(...has);
             break;
           }
           case 'Swaps.SwapExactAmountIn': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            await swapExactAmountIn(ctx, block.header, item);
+            const res = await swapExactAmountIn(ctx, block.header, item);
+            if (!res) break;
+            assetHistory.push(...res.historicalAssets);
+            swapHistory.push(res.historicalSwap);
+            if (res.historicalPool) poolHistory.push(res.historicalPool);
             break;
           }
           case 'Swaps.SwapExactAmountOut': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            await swapExactAmountOut(ctx, block.header, item);
+            const res = await swapExactAmountOut(ctx, block.header, item);
+            if (!res) break;
+            assetHistory.push(...res.historicalAssets);
+            swapHistory.push(res.historicalSwap);
+            if (res.historicalPool) poolHistory.push(res.historicalPool);
             break;
           }
           // @ts-ignore
@@ -642,7 +693,10 @@ processor.run(new TypeormDatabase(), async (ctx) => {
     }
   }
   await saveBalanceChanges(ctx, balanceAccounts);
+  await saveAssetHistory(ctx, assetHistory);
   await saveBalanceHistory(ctx, balanceHistory);
+  await savePoolHistory(ctx, poolHistory);
+  await saveSwapHistory(ctx, swapHistory);
 });
 
 const saveBalanceChanges = async (ctx: Ctx, balanceAccounts: Map<string, bigint>) => {
@@ -679,8 +733,26 @@ const saveBalanceChanges = async (ctx: Ctx, balanceAccounts: Map<string, bigint>
   );
 };
 
+const saveAssetHistory = async (ctx: Ctx, assetHistory: HistoricalAsset[]) => {
+  if (assetHistory.length === 0) return;
+  console.log(`Saving historical assets: ${JSON.stringify(assetHistory, null, 2)}`);
+  await ctx.store.save(assetHistory);
+};
+
 const saveBalanceHistory = async (ctx: Ctx, balanceHistory: HistoricalAccountBalance[]) => {
   if (balanceHistory.length === 0) return;
   console.log(`Saving historical account balances: ${JSON.stringify(balanceHistory, null, 2)}`);
   await ctx.store.save(balanceHistory);
+};
+
+const savePoolHistory = async (ctx: Ctx, poolHistory: HistoricalPool[]) => {
+  if (poolHistory.length === 0) return;
+  console.log(`Saving historical pools: ${JSON.stringify(poolHistory, null, 2)}`);
+  await ctx.store.save(poolHistory);
+};
+
+const saveSwapHistory = async (ctx: Ctx, swapHistory: HistoricalSwap[]) => {
+  if (swapHistory.length === 0) return;
+  console.log(`Saving historical swaps: ${JSON.stringify(swapHistory, null, 2)}`);
+  await ctx.store.save(swapHistory);
 };
