@@ -2,7 +2,7 @@ import { encodeAddress } from '@polkadot/keyring';
 import * as ss58 from '@subsquid/ss58';
 import { Ctx, EventItem } from '../../processor';
 import { CurrencyDepositedEvent, CurrencyTransferredEvent, CurrencyWithdrawnEvent } from '../../types/events';
-import { getAssetId } from '../helper';
+import { formatAssetId } from '../helper';
 
 export const getDepositedEvent = (ctx: Ctx, item: EventItem): DepositedEvent => {
   const event = new CurrencyDepositedEvent(ctx, item.event);
@@ -21,7 +21,7 @@ export const getDepositedEvent = (ctx: Ctx, item: EventItem): DepositedEvent => 
     [currencyId, who, amount] = item.event.args;
     walletId = encodeAddress(who, 73);
   }
-  const assetId = getAssetId(currencyId);
+  const assetId = formatAssetId(currencyId);
   return { assetId, walletId, amount };
 };
 
@@ -46,7 +46,7 @@ export const getTransferredEvent = (ctx: Ctx, item: EventItem): TransferredEvent
     fromId = encodeAddress(from, 73);
     toId = encodeAddress(to, 73);
   }
-  const assetId = getAssetId(currencyId);
+  const assetId = formatAssetId(currencyId);
   return { assetId, fromId, toId, amount };
 };
 
@@ -67,7 +67,7 @@ export const getWithdrawnEvent = (ctx: Ctx, item: EventItem): WithdrawnEvent => 
     [currencyId, who, amount] = item.event.args;
     walletId = encodeAddress(who, 73);
   }
-  const assetId = getAssetId(currencyId);
+  const assetId = formatAssetId(currencyId);
   return { assetId, walletId, amount };
 };
 
