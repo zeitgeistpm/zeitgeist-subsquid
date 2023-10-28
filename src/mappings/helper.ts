@@ -5,15 +5,18 @@ import { util } from '@zeitgeistpm/sdk';
 import {
   Account,
   AccountBalance,
+  DisputeMechanism,
   Extrinsic,
   HistoricalAccountBalance,
   MarketCreation,
   MarketEvent,
   MarketStatus,
   PoolStatus,
+  ScoringRule,
 } from '../model';
 import { PoolStatus as _PoolStatus } from '../types/v41';
-import { Asset, MarketCreation as _MarketCreation, MarketStatus as _MarketStatus } from '../types/v42';
+import { MarketCreation as _MarketCreation, MarketStatus as _MarketStatus } from '../types/v42';
+import { Asset, MarketDisputeMechanism, ScoringRule as _ScoringRule } from '../types/v50';
 import { Cache, IPFS, Tools } from './util';
 
 export const TREASURY_ACCOUNT = 'dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ';
@@ -77,6 +80,37 @@ export const extrinsicFromEvent = (event: any): Extrinsic | null => {
   });
 };
 
+export const formatAssetId = (assetId: Asset): string => {
+  switch (assetId.__kind) {
+    case 'CategoricalOutcome':
+      return JSON.stringify(util.AssetIdFromString('[' + assetId.value.toString() + ']'));
+    case 'ForeignAsset':
+      return JSON.stringify({ foreignAsset: Number(assetId.value) });
+    case 'PoolShare':
+      return JSON.stringify(util.AssetIdFromString('pool' + assetId.value.toString()));
+    case 'ScalarOutcome':
+      const scale = new Array();
+      scale.push(+assetId.value[0].toString());
+      scale.push(assetId.value[1].__kind);
+      return JSON.stringify(util.AssetIdFromString(JSON.stringify(scale)));
+    case 'Ztg':
+      return 'Ztg';
+    default:
+      return '';
+  }
+};
+
+export const formatDisputeMechanism = (disputeMechanism: MarketDisputeMechanism): DisputeMechanism => {
+  switch (disputeMechanism.__kind) {
+    case 'Authorized':
+      return DisputeMechanism.Authorized;
+    case 'Court':
+      return DisputeMechanism.Court;
+    case 'SimpleDisputes':
+      return DisputeMechanism.SimpleDisputes;
+  }
+};
+
 export const formatMarketCreation = (creation: _MarketCreation): MarketCreation => {
   switch (creation.__kind) {
     case 'Advised':
@@ -117,22 +151,58 @@ export const formatMarketEvent = (eventName: string): MarketEvent => {
   }
 };
 
-export const getAssetId = (currencyId: any): string => {
-  if (currencyId.__kind == 'CategoricalOutcome') {
-    return JSON.stringify(util.AssetIdFromString('[' + currencyId.value.toString() + ']'));
-  } else if (currencyId.__kind == 'ScalarOutcome') {
-    const scale = new Array();
-    scale.push(+currencyId.value[0].toString());
-    scale.push(currencyId.value[1].__kind);
-    return JSON.stringify(util.AssetIdFromString(JSON.stringify(scale)));
-  } else if (currencyId.__kind == 'Ztg') {
-    return 'Ztg';
-  } else if (currencyId.__kind == 'PoolShare') {
-    return JSON.stringify(util.AssetIdFromString('pool' + currencyId.value.toString()));
-  } else if (currencyId.__kind == 'ForeignAsset') {
-    return JSON.stringify({ foreignAsset: Number(currencyId.value) });
-  } else {
-    return '';
+export const formatMarketStatus = (status: _MarketStatus): MarketStatus => {
+  switch (status.__kind) {
+    case 'Active':
+      return MarketStatus.Active;
+    case 'Closed':
+      return MarketStatus.Closed;
+    case 'CollectingSubsidy':
+      return MarketStatus.CollectingSubsidy;
+    case 'Disputed':
+      return MarketStatus.Disputed;
+    case 'InsufficientSubsidy':
+      return MarketStatus.InsufficientSubsidy;
+    case 'Proposed':
+      return MarketStatus.Proposed;
+    case 'Reported':
+      return MarketStatus.Reported;
+    case 'Resolved':
+      return MarketStatus.Resolved;
+    case 'Suspended':
+      return MarketStatus.Suspended;
+    default:
+      return MarketStatus.Active;
+  }
+};
+
+export const formatPoolStatus = (status: _PoolStatus): PoolStatus => {
+  switch (status.__kind) {
+    case 'Active':
+      return PoolStatus.Active;
+    case 'Clean':
+      return PoolStatus.Clean;
+    case 'Closed':
+      return PoolStatus.Closed;
+    case 'CollectingSubsidy':
+      return PoolStatus.CollectingSubsidy;
+    case 'Initialized':
+      return PoolStatus.Initialized;
+    default:
+      return PoolStatus.Active;
+  }
+};
+
+export const formatScoringRule = (scoringRule: _ScoringRule): ScoringRule => {
+  switch (scoringRule.__kind) {
+    case 'CPMM':
+      return ScoringRule.CPMM;
+    case 'RikiddoSigmoidFeeMarketEma':
+      return ScoringRule.RikiddoSigmoidFeeMarketEma;
+    case 'Lmsr':
+      return ScoringRule.Lmsr;
+    case 'Orderbook':
+      return ScoringRule.Orderbook;
   }
 };
 
@@ -162,48 +232,6 @@ export const getFees = async (block: SubstrateBlock, extrinsic: SubstrateExtrins
   return totalFees;
 };
 
-export const getMarketStatus = (status: _MarketStatus): MarketStatus => {
-  switch (status.__kind) {
-    case 'Active':
-      return MarketStatus.Active;
-    case 'Closed':
-      return MarketStatus.Closed;
-    case 'CollectingSubsidy':
-      return MarketStatus.CollectingSubsidy;
-    case 'Disputed':
-      return MarketStatus.Disputed;
-    case 'InsufficientSubsidy':
-      return MarketStatus.InsufficientSubsidy;
-    case 'Proposed':
-      return MarketStatus.Proposed;
-    case 'Reported':
-      return MarketStatus.Reported;
-    case 'Resolved':
-      return MarketStatus.Resolved;
-    case 'Suspended':
-      return MarketStatus.Suspended;
-    default:
-      return MarketStatus.Active;
-  }
-};
-
-export const getPoolStatus = (status: _PoolStatus): PoolStatus => {
-  switch (status.__kind) {
-    case 'Active':
-      return PoolStatus.Active;
-    case 'Clean':
-      return PoolStatus.Clean;
-    case 'Closed':
-      return PoolStatus.Closed;
-    case 'CollectingSubsidy':
-      return PoolStatus.CollectingSubsidy;
-    case 'Initialized':
-      return PoolStatus.Initialized;
-    default:
-      return PoolStatus.Active;
-  }
-};
-
 export const initBalance = async (acc: Account, store: Store) => {
   const sdk = await Tools.getSDK();
   const blockZero = await sdk.api.rpc.chain.getBlockHash(0);
@@ -231,11 +259,11 @@ export const initBalance = async (acc: Account, store: Store) => {
   await store.save<HistoricalAccountBalance>(hab);
 };
 
-export const isBaseAsset = (currencyId: Asset | string): boolean => {
-  if (typeof currencyId === 'string') {
-    return currencyId.includes('Ztg') || currencyId.includes('foreignAsset');
+export const isBaseAsset = (assetId: Asset | string): boolean => {
+  if (typeof assetId === 'string') {
+    return assetId.includes('Ztg') || assetId.includes('foreignAsset');
   }
-  return currencyId.__kind.includes('Ztg') || currencyId.__kind.includes('ForeignAsset');
+  return assetId.__kind.includes('Ztg') || assetId.__kind.includes('ForeignAsset');
 };
 
 export const mergeByAssetId = (balances: any[], weights: any[]): AssetAmountInPoolAndWeight[] =>
