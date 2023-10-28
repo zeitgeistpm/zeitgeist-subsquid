@@ -66,6 +66,35 @@ export class AssetTxPaymentAssetTxFeePaidEvent {
     }
 }
 
+export class AuthorizedAuthorityReportedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'Authorized.AuthorityReported')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * The Authority reported.
+     */
+    get isV49(): boolean {
+        return this._chain.getEventHash('Authorized.AuthorityReported') === '76b7a7c25591d79bb3a7a6938a8aa342e474b3ed9f777640d5c70824598c13e8'
+    }
+
+    /**
+     * The Authority reported.
+     */
+    get asV49(): {marketId: bigint, outcome: v49.OutcomeReport} {
+        assert(this.isV49)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
 export class BalancesBalanceSetEvent {
     private readonly _chain: Chain
     private readonly event: Event

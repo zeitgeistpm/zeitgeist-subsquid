@@ -3,6 +3,7 @@
   "specVersions": "zeitgeistVersions.jsonl",
   "typesBundle": "typesBundle.json",
   "events": [
+    "Authorized.AuthorityReported",
     "AssetTxPayment.AssetTxFeePaid",
     "Balances.BalanceSet",
     "Balances.Deposit",

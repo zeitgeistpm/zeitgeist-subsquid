@@ -88,6 +88,8 @@ export const formatMarketCreation = (creation: _MarketCreation): MarketCreation 
 
 export const formatMarketEvent = (eventName: string): MarketEvent => {
   switch (eventName) {
+    case 'Authorized.AuthorityReported':
+      return MarketEvent.MarketReported;
     case 'PredictionMarkets.GlobalDisputeStarted':
       return MarketEvent.GlobalDisputeStarted;
     case 'PredictionMarkets.MarketApproved':

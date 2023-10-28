@@ -11,6 +11,7 @@ import {
   EventItem as _EventItem,
 } from '@subsquid/substrate-processor/lib/interfaces/dataSelection';
 import { Store, TypeormDatabase } from '@subsquid/typeorm-store';
+import { authorityReport } from './mappings/authorized';
 import { assetTxPaymentAssetTxFeePaidEvent } from './mappings/assetTxPayment';
 import {
   balancesBalanceSet,
@@ -130,6 +131,7 @@ const processor = new SubstrateBatchProcessor()
     chain: process.env.WS_NODE_URL ?? 'wss://bsr.zeitgeist.pm',
   })
   .setTypesBundle('typesBundle.json')
+  .addEvent('Authorized.AuthorityReported', eventOptions)
   .addEvent('AssetTxPayment.AssetTxFeePaid', eventExtrinsicOptions)
   .addEvent('Balances.BalanceSet', eventExtrinsicOptions)
   .addEvent('Balances.Deposit', eventExtrinsicOptions)
@@ -196,6 +198,8 @@ export type EventItem = Exclude<BatchProcessorEventItem<typeof processor>, _Even
 
 const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
   switch (item.name) {
+    case 'Authorized.AuthorityReported':
+      return authorityReport(ctx, block, item);
     case 'PredictionMarkets.GlobalDisputeStarted':
       return globalDisputeStarted(ctx, block, item);
     case 'PredictionMarkets.MarketApproved':
