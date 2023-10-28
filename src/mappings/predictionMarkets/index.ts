@@ -28,10 +28,12 @@ import {
   createAssetsForMarket,
   decodeMarketMetadata,
   extrinsicFromEvent,
+  formatAssetId,
+  formatDisputeMechanism,
   formatMarketCreation,
   formatMarketEvent,
-  getAssetId,
-  getMarketStatus,
+  formatMarketStatus,
+  formatScoringRule,
   rescale,
   specVersion,
 } from '../helper';
@@ -99,7 +101,7 @@ export const boughtCompleteSet = async (
 
   const habs: HistoricalAccountBalance[] = [];
   for (let i = 0; i < market.outcomeAssets.length; i++) {
-    const assetId = market.outcomeAssets[i]!;
+    const assetId = market.outcomeAssets[i];
 
     const hab = new HistoricalAccountBalance();
     hab.id = item.event.id + '-' + marketId + i + '-' + walletId.slice(-5);
@@ -139,7 +141,7 @@ export const marketApproved = async (ctx: Ctx, block: SubstrateBlock, item: Even
   const market = await ctx.store.get(Market, { where: { marketId: marketId } });
   if (!market) return;
   market.status = status
-    ? getMarketStatus(status)
+    ? formatMarketStatus(status)
     : market.scoringRule === 'CPMM'
     ? MarketStatus.Active
     : MarketStatus.CollectingSubsidy;
@@ -221,23 +223,25 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
     }
   }
 
-  const newMarket = new Market();
-  newMarket.id = item.event.id + '-' + marketId;
-  newMarket.marketId = +marketId;
-  newMarket.baseAsset = market.baseAsset ? getAssetId(market.baseAsset) : 'Ztg';
-  newMarket.creator = encodeAddress(market.creator, 73);
-  newMarket.creation = formatMarketCreation(market.creation);
-  newMarket.creatorFee = +market.creatorFee.toString();
-  newMarket.oracle = encodeAddress(market.oracle, 73);
-  newMarket.scoringRule = market.scoringRule.__kind;
-  newMarket.status = getMarketStatus(market.status);
-  newMarket.outcomeAssets = (await createAssetsForMarket(marketId, market.marketType)) as string[];
-  newMarket.metadata = market.metadata.toString();
+  const newMarket = new Market({
+    baseAsset: market.baseAsset ? formatAssetId(market.baseAsset) : 'Ztg',
+    creation: formatMarketCreation(market.creation),
+    creator: encodeAddress(market.creator, 73),
+    creatorFee: +market.creatorFee.toString(),
+    disputeMechanism: formatDisputeMechanism(market.disputeMechanism),
+    id: item.event.id + '-' + marketId,
+    marketId: +marketId,
+    metadata: market.metadata.toString(),
+    oracle: encodeAddress(market.oracle, 73),
+    outcomeAssets: (await createAssetsForMarket(marketId, market.marketType)) as string[],
+    scoringRule: formatScoringRule(market.scoringRule),
+    status: formatMarketStatus(market.status),
+  });
 
-  const d = market.disputeMechanism;
-  newMarket.disputeMechanism = d.__kind;
-  if (d.__kind === 'Authorized') {
-    newMarket.authorizedAddress = d.value ? encodeAddress(d.value, 73) : null;
+  if (market.disputeMechanism.__kind === 'Authorized') {
+    newMarket.authorizedAddress = market.disputeMechanism.value
+      ? encodeAddress(market.disputeMechanism.value, 73)
+      : null;
   }
 
   let hasValidMetaCategories = true;
@@ -255,11 +259,12 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
     if (metadata.categories) {
       newMarket.categories = [];
       for (let i = 0; i < metadata.categories.length; i++) {
-        let cm = new CategoryMetadata();
-        cm.name = metadata.categories[i].name;
-        cm.ticker = metadata.categories[i].ticker;
-        cm.img = metadata.categories[i].img;
-        cm.color = metadata.categories[i].color;
+        let cm = new CategoryMetadata({
+          color: metadata.categories[i].color,
+          img: metadata.categories[i].img,
+          name: metadata.categories[i].name,
+          ticker: metadata.categories[i].ticker,
+        });
         newMarket.categories.push(cm);
         if (!cm.name) {
           hasValidMetaCategories = false;
@@ -277,10 +282,11 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
   newMarket.hasValidMetaCategories = hasValidMetaCategories;
 
   if (market.deadlines) {
-    const deadlines = new MarketDeadlines();
-    deadlines.disputeDuration = market.deadlines.disputeDuration;
-    deadlines.gracePeriod = market.deadlines.gracePeriod;
-    deadlines.oracleDuration = market.deadlines.oracleDuration;
+    const deadlines = new MarketDeadlines({
+      disputeDuration: market.deadlines.disputeDuration,
+      gracePeriod: market.deadlines.gracePeriod,
+      oracleDuration: market.deadlines.oracleDuration,
+    });
     newMarket.deadlines = deadlines;
   }
 
@@ -334,18 +340,20 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
     const marketBonds = new MarketBonds();
     if (market.bonds.creation) {
       const creationBond = market.bonds.creation;
-      const bond = new MarketBond();
-      bond.who = encodeAddress(creationBond.who, 73);
-      bond.value = creationBond.value;
-      bond.isSettled = creationBond.isSettled;
+      const bond = new MarketBond({
+        isSettled: creationBond.isSettled,
+        value: creationBond.value,
+        who: encodeAddress(creationBond.who, 73),
+      });
       marketBonds.creation = bond;
     }
     if (market.bonds.oracle) {
       const oracleBond = market.bonds.oracle;
-      const bond = new MarketBond();
-      bond.who = encodeAddress(oracleBond.who, 73);
-      bond.value = oracleBond.value;
-      bond.isSettled = oracleBond.isSettled;
+      const bond = new MarketBond({
+        isSettled: oracleBond.isSettled,
+        value: oracleBond.value,
+        who: encodeAddress(oracleBond.who, 73),
+      });
       marketBonds.oracle = bond;
     }
     newMarket.bonds = marketBonds;
@@ -353,13 +361,17 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(newMarket, null, 2)}`);
   await ctx.store.save<Market>(newMarket);
 
-  const hm = new HistoricalMarket();
-  hm.id = item.event.id + '-' + newMarket.marketId;
-  hm.market = newMarket;
-  hm.status = newMarket.status;
-  hm.event = formatMarketEvent(item.event.name);
-  hm.blockNumber = block.height;
-  hm.timestamp = new Date(block.timestamp);
+  const hm = new HistoricalMarket({
+    blockNumber: block.height,
+    by: null,
+    event: formatMarketEvent(item.event.name),
+    id: item.event.id + '-' + market.marketId,
+    market: newMarket,
+    outcome: null,
+    resolvedOutcome: null,
+    status: newMarket.status,
+    timestamp: new Date(block.timestamp),
+  });
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
   await ctx.store.save<HistoricalMarket>(hm);
 };
@@ -434,7 +446,7 @@ export const marketDisputed = async (ctx: Ctx, block: SubstrateBlock, item: Even
     mr.outcome = or;
   }
   market.disputes.push(mr);
-  market.status = status ? getMarketStatus(status) : MarketStatus.Disputed;
+  market.status = status ? formatMarketStatus(status) : MarketStatus.Disputed;
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
 
@@ -480,7 +492,7 @@ export const marketInsufficientSubsidy = async (ctx: Ctx, block: SubstrateBlock,
 
   const market = await ctx.store.get(Market, { where: { marketId: marketId } });
   if (!market) return;
-  market.status = status ? getMarketStatus(status) : MarketStatus.InsufficientSubsidy;
+  market.status = status ? formatMarketStatus(status) : MarketStatus.InsufficientSubsidy;
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
 
@@ -550,7 +562,7 @@ export const marketReported = async (ctx: Ctx, block: SubstrateBlock, item: Even
     }
   }
 
-  market.status = status ? getMarketStatus(status) : MarketStatus.Reported;
+  market.status = status ? formatMarketStatus(status) : MarketStatus.Reported;
   market.report = mr;
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
@@ -577,7 +589,7 @@ export const marketResolved = async (ctx: Ctx, block: SubstrateBlock, item: Even
     market.marketType.scalar && specVersion(block.specId) < 41
       ? rescale(report.value.toString())
       : report.value.toString();
-  market.status = status ? getMarketStatus(status) : MarketStatus.Resolved;
+  market.status = status ? formatMarketStatus(status) : MarketStatus.Resolved;
   if (market.bonds) {
     if (market.creation === MarketCreation.Permissionless) market.bonds.creation.isSettled = true;
     market.bonds.oracle.isSettled = true;
@@ -630,7 +642,7 @@ export const marketResolved = async (ctx: Ctx, block: SubstrateBlock, item: Even
       }
 
       const asset = await ctx.store.get(Asset, {
-        where: { assetId: market.outcomeAssets[i]! },
+        where: { assetId: market.outcomeAssets[i] },
       });
       if (!asset) return;
       const oldPrice = asset.price;
@@ -678,7 +690,7 @@ export const marketStartedWithSubsidy = async (ctx: Ctx, block: SubstrateBlock, 
 
   const market = await ctx.store.get(Market, { where: { marketId: marketId } });
   if (!market) return;
-  market.status = status ? getMarketStatus(status) : MarketStatus.Active;
+  market.status = status ? formatMarketStatus(status) : MarketStatus.Active;
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
 
@@ -775,7 +787,7 @@ export const soldCompleteSet = async (
 
   const habs: HistoricalAccountBalance[] = [];
   for (let i = 0; i < market.outcomeAssets.length; i++) {
-    const assetId = market.outcomeAssets[i]!;
+    const assetId = market.outcomeAssets[i];
 
     const hab = new HistoricalAccountBalance();
     hab.id = item.event.id + '-' + marketId + i + '-' + walletId.substring(walletId.length - 5);
