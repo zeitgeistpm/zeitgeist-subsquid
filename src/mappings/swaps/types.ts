@@ -64,21 +64,19 @@ export const getPoolClosedEvent = (ctx: Ctx, item: EventItem): PoolEvent => {
 
 export const getPoolCreateEvent = (ctx: Ctx, item: EventItem): PoolCreateEvent => {
   const event = new SwapsPoolCreateEvent(ctx, item.event);
-  let accountId = ``;
+  let accountId;
   if (event.isV23) {
     const [cpep, pool] = event.asV23;
     let swapPool = pool as Pool;
-    const amount = BigInt(0);
-    return { cpep, swapPool, amount, accountId };
+    return { cpep, swapPool };
   } else if (event.isV32) {
     const [cpep, pool] = event.asV32;
     let swapPool = pool as Pool;
-    const amount = BigInt(0);
-    return { cpep, swapPool, amount, accountId };
+    return { cpep, swapPool };
   } else if (event.isV35) {
     const [cpep, pool, amount] = event.asV35;
     let swapPool = pool as Pool;
-    return { cpep, swapPool, amount, accountId };
+    return { cpep, swapPool, amount };
   } else if (event.isV36) {
     const [cpep, pool, amount, account] = event.asV36;
     let swapPool = pool as Pool;
@@ -309,8 +307,8 @@ interface PoolEvent {
 interface PoolCreateEvent {
   cpep: CommonPoolEventParams;
   swapPool: Pool;
-  amount: bigint;
-  accountId: string;
+  amount?: bigint;
+  accountId?: string;
 }
 
 interface PoolJoinEvent {
