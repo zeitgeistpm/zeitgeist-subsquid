@@ -224,8 +224,6 @@ type Pool @entity {
   marketId: Int! @index
   "Zeitgeist's identifier for pool"
   poolId: Int! @index
-  "Scoring rule used for the pool"
-  scoringRule: ScoringRule!
   "Status of the pool"
   status: PoolStatus!
   "Fee applied to each swap"

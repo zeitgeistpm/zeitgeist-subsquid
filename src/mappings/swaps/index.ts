@@ -254,7 +254,6 @@ export const poolCreate = async (
     marketId: +swapPool.marketId.toString(),
     id: item.event.id + '-' + poolId,
     poolId: +poolId,
-    scoringRule: formatScoringRule(swapPool.scoringRule),
     status: formatPoolStatus(swapPool.poolStatus),
     swapFee: swapPool.swapFee ? swapPool.swapFee.toString() : null,
     totalSubsidy: swapPool.totalSubsidy ? swapPool.totalSubsidy.toString() : null,

@@ -2,7 +2,6 @@ import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, M
 import * as marshal from "./marshal"
 import {Account} from "./account.model"
 import {Asset} from "./asset.model"
-import {ScoringRule} from "./_scoringRule"
 import {PoolStatus} from "./_poolStatus"
 import {Weight} from "./_weight"
 
@@ -56,12 +55,6 @@ export class Pool {
     @Index_()
     @Column_("int4", {nullable: false})
     poolId!: number
-
-    /**
-     * Scoring rule used for the pool
-     */
-    @Column_("varchar", {length: 26, nullable: false})
-    scoringRule!: ScoringRule
 
     /**
      * Status of the pool
