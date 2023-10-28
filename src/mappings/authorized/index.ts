@@ -4,7 +4,7 @@ import { HistoricalMarket, Market, MarketReport, MarketStatus, OutcomeReport } f
 import { formatMarketEvent } from '../helper';
 import { getAuthorityReportedEvent } from './types';
 
-export const authorityReport = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
+export const authorityReported = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
   const { marketId, outcome } = getAuthorityReportedEvent(ctx, item);
 
   const market = await ctx.store.get(Market, { where: { marketId: Number(marketId) } });
@@ -17,7 +17,7 @@ export const authorityReport = async (ctx: Ctx, block: SubstrateBlock, item: Eve
 
   const mr = new MarketReport({
     at: block.height,
-    by: market.authorizedAddress,
+    by: null,
     outcome: ocr,
   });
 
@@ -28,13 +28,12 @@ export const authorityReport = async (ctx: Ctx, block: SubstrateBlock, item: Eve
 
   const hm = new HistoricalMarket({
     blockNumber: block.height,
-    by: mr.by,
+    by: null,
     event: formatMarketEvent(item.event.name),
     id: item.event.id + '-' + market.marketId,
     market: market,
     outcome: ocr,
-    poolId: null,
-    resolvedOutcome: market.resolvedOutcome,
+    resolvedOutcome: null,
     status: market.status,
     timestamp: new Date(block.timestamp),
   });
