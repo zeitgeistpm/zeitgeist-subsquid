@@ -44,12 +44,6 @@ export class HistoricalMarket {
     market!: Market
 
     /**
-     * Zeitgeist's identifier for pool
-     */
-    @Column_("int4", {nullable: true})
-    poolId!: number | undefined | null
-
-    /**
      * Reported or disputed outcome for the market
      */
     @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new OutcomeReport(undefined, obj)}, nullable: true})
