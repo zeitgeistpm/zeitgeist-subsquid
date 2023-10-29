@@ -15,15 +15,15 @@ export const getAssetTxFeePaidEvent = (ctx: Ctx, item: EventItem): AssetTxFeePai
     let { who, actualFee, assetId } = event.asV47;
     const walletId = ss58.codec('zeitgeist').encode(who);
     assetId = (assetId as any).value;
-    return { walletId, actualFee, assetId };
+    return { walletId, actualFee, assetIdValue: assetId };
   } else if (event.isV48) {
     const { who, actualFee, assetId } = event.asV48;
     const walletId = ss58.codec('zeitgeist').encode(who);
-    return { walletId, actualFee, assetId };
+    return { walletId, actualFee, assetIdValue: assetId };
   } else {
     const { who, actualFee, assetId } = item.event.args;
     const walletId = encodeAddress(who, 73);
-    return { walletId, actualFee, assetId };
+    return { walletId, actualFee, assetIdValue: assetId };
   }
 };
 
@@ -48,5 +48,5 @@ export const getMetadataStorage = async (
 interface AssetTxFeePaidEvent {
   walletId: string;
   actualFee: bigint;
-  assetId: any;
+  assetIdValue: any;
 }

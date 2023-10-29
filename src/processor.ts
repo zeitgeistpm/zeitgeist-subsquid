@@ -11,7 +11,7 @@ import {
   EventItem as _EventItem,
 } from '@subsquid/substrate-processor/lib/interfaces/dataSelection';
 import { Store, TypeormDatabase } from '@subsquid/typeorm-store';
-import { authorityReport } from './mappings/authorized';
+import { authorityReported } from './mappings/authorized';
 import { assetTxPaymentAssetTxFeePaidEvent } from './mappings/assetTxPayment';
 import {
   balancesBalanceSet,
@@ -199,7 +199,7 @@ export type EventItem = Exclude<BatchProcessorEventItem<typeof processor>, _Even
 const handleEvents = async (ctx: Ctx, block: SubstrateBlock, item: Item) => {
   switch (item.name) {
     case 'Authorized.AuthorityReported':
-      return authorityReport(ctx, block, item);
+      return authorityReported(ctx, block, item);
     case 'PredictionMarkets.GlobalDisputeStarted':
       return globalDisputeStarted(ctx, block, item);
     case 'PredictionMarkets.MarketApproved':

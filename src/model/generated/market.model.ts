@@ -5,9 +5,11 @@ import {CategoryMetadata} from "./_categoryMetadata"
 import {MarketCreation} from "./_marketCreation"
 import {MarketDeadlines} from "./_marketDeadlines"
 import {MarketReport} from "./_marketReport"
+import {DisputeMechanism} from "./_disputeMechanism"
 import {MarketType} from "./_marketType"
 import {MarketPeriod} from "./_marketPeriod"
 import {Pool} from "./pool.model"
+import {ScoringRule} from "./_scoringRule"
 import {MarketStatus} from "./_marketStatus"
 
 /**
@@ -18,6 +20,9 @@ export class Market {
     constructor(props?: Partial<Market>) {
         Object.assign(this, props)
     }
+
+    @PrimaryColumn_()
+    id!: string
 
     /**
      * Address responsible for authorizing disputes. Null if Adv Comm is the authority
@@ -82,20 +87,14 @@ export class Market {
     /**
      * Can be `Authorized` or `Court` or `SimpleDisputes`
      */
-    @Column_("text", {nullable: false})
-    disputeMechanism!: string
+    @Column_("varchar", {length: 14, nullable: false})
+    disputeMechanism!: DisputeMechanism
 
     /**
      * Checks if each category has a name for display on UI
      */
     @Column_("bool", {nullable: false})
     hasValidMetaCategories!: boolean
-
-    /**
-     * Unique identifier of the object
-     */
-    @PrimaryColumn_()
-    id!: string
 
     /**
      * Image for the market
@@ -132,7 +131,7 @@ export class Market {
      * Share identifiers
      */
     @Column_("text", {array: true, nullable: false})
-    outcomeAssets!: (string | undefined | null)[]
+    outcomeAssets!: (string)[]
 
     /**
      * Time period expressed in block numbers or timestamps
@@ -174,8 +173,8 @@ export class Market {
     /**
      * Scoring rule used for the market
      */
-    @Column_("text", {nullable: false})
-    scoringRule!: string
+    @Column_("varchar", {length: 26, nullable: false})
+    scoringRule!: ScoringRule
 
     /**
      * Short name for the market

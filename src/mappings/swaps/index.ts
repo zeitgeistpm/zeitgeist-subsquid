@@ -20,9 +20,10 @@ import { Ctx, EventItem } from '../../processor';
 import {
   calcSpotPrice,
   extrinsicFromEvent,
+  formatAssetId,
   formatMarketEvent,
-  getAssetId,
-  getPoolStatus,
+  formatPoolStatus,
+  formatScoringRule,
   isBaseAsset,
   mergeByAssetId,
 } from '../helper';
@@ -231,8 +232,7 @@ export const poolCreate = async (
   let { cpep, swapPool, amount, accountId } = getPoolCreateEvent(ctx, item);
 
   const poolId = cpep.poolId.toString();
-
-  if (accountId.length === 0) {
+  if (!accountId) {
     const sdk = await Tools.getSDK();
     // @ts-ignore
     accountId = (await sdk.api.rpc.swaps.poolAccountId(poolId)).toString();
@@ -247,20 +247,20 @@ export const poolCreate = async (
     return;
   }
 
-  const pool = new Pool();
-  pool.id = item.event.id + '-' + poolId;
-  pool.poolId = +poolId;
-  pool.account = account;
-  pool.marketId = +swapPool.marketId.toString();
-  pool.status = getPoolStatus(swapPool.poolStatus);
-  pool.scoringRule = swapPool.scoringRule.__kind;
-  pool.swapFee = swapPool.swapFee ? swapPool.swapFee.toString() : '';
-  pool.totalSubsidy = swapPool.totalSubsidy ? swapPool.totalSubsidy.toString() : '';
-  pool.totalWeight = swapPool.totalWeight ? swapPool.totalWeight.toString() : '';
-  pool.weights = [];
-  pool.volume = BigInt(0);
-  pool.createdAt = new Date(block.timestamp);
-  pool.baseAsset = getAssetId(swapPool.baseAsset);
+  const pool = new Pool({
+    account: account,
+    baseAsset: formatAssetId(swapPool.baseAsset),
+    createdAt: new Date(block.timestamp),
+    marketId: +swapPool.marketId.toString(),
+    id: item.event.id + '-' + poolId,
+    poolId: +poolId,
+    status: formatPoolStatus(swapPool.poolStatus),
+    swapFee: swapPool.swapFee ? swapPool.swapFee.toString() : null,
+    totalSubsidy: swapPool.totalSubsidy ? swapPool.totalSubsidy.toString() : null,
+    totalWeight: swapPool.totalWeight ? swapPool.totalWeight.toString() : '',
+    weights: [],
+    volume: BigInt(0),
+  });
   console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
   await ctx.store.save<Pool>(pool);
 
@@ -276,11 +276,11 @@ export const poolCreate = async (
     const baseAssetWeight = +swapPool.weights[swapPool.weights.length - 1][1].toString();
     await Promise.all(
       swapPool.weights.map(async (weight, i) => {
-        const wt = new Weight();
-        wt.assetId = getAssetId(weight[0]);
-        wt.weight = weight[1];
+        const wt = new Weight({
+          assetId: formatAssetId(weight[0]),
+          weight: weight[1],
+        });
         pool.weights.push(wt);
-
         if (isBaseAsset(weight[0])) return;
 
         const ab = await ctx.store.findOneBy(AccountBalance, {
@@ -288,13 +288,14 @@ export const poolCreate = async (
           assetId: wt.assetId,
         });
         const assetQty = ab ? +ab.balance.toString() : 10 ** 12;
-        const spotPrice = calcSpotPrice(+baseAssetQty.toString(), baseAssetWeight, assetQty, +wt.weight.toString());
-        const asset = new Asset();
-        asset.id = item.event.id + '-' + pool.marketId + i;
-        asset.assetId = wt.assetId;
-        asset.price = +spotPrice.toString();
-        asset.amountInPool = BigInt(assetQty);
-        asset.pool = pool;
+
+        const asset = new Asset({
+          assetId: wt.assetId,
+          amountInPool: BigInt(assetQty),
+          id: item.event.id + '-' + pool.marketId + i,
+          pool: pool,
+          price: calcSpotPrice(+baseAssetQty.toString(), baseAssetWeight, assetQty, +wt.weight.toString()),
+        });
         console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
         await ctx.store.save<Asset>(asset);
 
@@ -337,14 +338,17 @@ export const poolCreate = async (
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
 
-  const hm = new HistoricalMarket();
-  hm.id = item.event.id + '-' + market.marketId;
-  hm.market = market;
-  hm.status = market.status;
-  hm.poolId = market.pool.poolId;
-  hm.event = formatMarketEvent(item.event.name);
-  hm.blockNumber = block.height;
-  hm.timestamp = new Date(block.timestamp);
+  const hm = new HistoricalMarket({
+    blockNumber: block.height,
+    by: null,
+    event: formatMarketEvent(item.event.name),
+    id: item.event.id + '-' + market.marketId,
+    market: market,
+    outcome: null,
+    resolvedOutcome: null,
+    status: market.status,
+    timestamp: new Date(block.timestamp),
+  });
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
   await ctx.store.save<HistoricalMarket>(hm);
 
@@ -501,7 +505,7 @@ export const poolExit = async (
     await Promise.all(
       pae.assets.map(async (a, idx) => {
         if (isBaseAsset(a)) return;
-        const assetId = getAssetId(a);
+        const assetId = formatAssetId(a);
 
         const asset = await ctx.store.get(Asset, { where: { assetId: assetId } });
         if (!asset) return;
@@ -720,7 +724,7 @@ export const poolJoin = async (
     await Promise.all(
       pae.assets.map(async (a, idx) => {
         if (isBaseAsset(a)) return;
-        const assetId = getAssetId(a);
+        const assetId = formatAssetId(a);
 
         const asset = await ctx.store.get(Asset, { where: { assetId: assetId } });
         if (!asset) return;
@@ -997,8 +1001,8 @@ export const swapExactAmountIn = async (
     accountId: walletId,
     assetAmountIn: swapEvent.assetAmountIn,
     assetAmountOut: swapEvent.assetAmountOut,
-    assetIn: getAssetId(assetSold),
-    assetOut: getAssetId(assetBought),
+    assetIn: formatAssetId(assetSold),
+    assetOut: formatAssetId(assetBought),
     blockNumber: block.height,
     event: item.event.name.split('.')[1],
     extrinsic: extrinsicFromEvent(item.event),
@@ -1142,8 +1146,8 @@ export const swapExactAmountOut = async (
     accountId: walletId,
     assetAmountIn: swapEvent.assetAmountIn,
     assetAmountOut: swapEvent.assetAmountOut,
-    assetIn: getAssetId(assetSold),
-    assetOut: getAssetId(assetBought),
+    assetIn: formatAssetId(assetSold),
+    assetOut: formatAssetId(assetBought),
     blockNumber: block.height,
     event: item.event.name.split('.')[1],
     extrinsic: extrinsicFromEvent(item.event),

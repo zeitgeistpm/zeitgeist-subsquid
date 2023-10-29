@@ -24,7 +24,7 @@ import { MarketCommonsMarketsStorage } from '../../types/storage';
 import { MarketDispute, OutcomeReport, Report } from '../../types/v29';
 import { MarketStatus } from '../../types/v42';
 import { MarketBonds } from '../../types/v46';
-import { getAssetId } from '../helper';
+import { formatAssetId } from '../helper';
 
 export const getBoughtCompleteSetEvent = (ctx: Ctx, item: EventItem): BoughtCompleteSetEvent => {
   const event = new PredictionMarketsBoughtCompleteSetEvent(ctx, item.event);
@@ -320,7 +320,7 @@ export const getTokensRedeemedEvent = (ctx: Ctx, item: EventItem): TokensRedeeme
     marketId = Number(mId);
     walletId = ss58.codec('zeitgeist').encode(who);
   }
-  const assetId = getAssetId(currencyId);
+  const assetId = formatAssetId(currencyId);
   return { marketId, assetId, amtRedeemed, payout, walletId };
 };
 

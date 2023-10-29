@@ -1,7 +1,8 @@
 import { Arg, Field, ObjectType, Query, Resolver, registerEnumType, InputType } from 'type-graphql';
 import type { EntityManager } from 'typeorm';
-import { getAssetId } from '../../mappings/helper';
+import { formatAssetId } from '../../mappings/helper';
 import { HistoricalAccountBalance } from '../../model/generated';
+import { Asset } from '../../types/v50';
 import { balanceInfo } from '../query';
 
 @ObjectType()
@@ -43,7 +44,7 @@ class AssetKindValue {
   }
 
   toString(): string {
-    return getAssetId({ __kind: this.kind, value: this.value });
+    return formatAssetId({ __kind: this.kind, value: this.value } as Asset);
   }
 }
 

@@ -7,7 +7,7 @@ import {
   TokensTransferEvent,
   TokensWithdrawnEvent,
 } from '../../types/events';
-import { getAssetId } from '../helper';
+import { formatAssetId } from '../helper';
 
 export const getTokensBalanceSetEvent = (ctx: Ctx, item: EventItem): TokensEvent => {
   const event = new TokensBalanceSetEvent(ctx, item.event);
@@ -30,7 +30,7 @@ export const getTokensBalanceSetEvent = (ctx: Ctx, item: EventItem): TokensEvent
     [currencyId, who, amount] = item.event.args;
     walletId = encodeAddress(who, 73);
   }
-  const assetId = getAssetId(currencyId);
+  const assetId = formatAssetId(currencyId);
   return { assetId, walletId, amount };
 };
 
@@ -49,7 +49,7 @@ export const getTokensDepositedEvent = (ctx: Ctx, item: EventItem): TokensEvent 
     [currencyId, who, amount] = item.event.args;
     walletId = encodeAddress(who, 73);
   }
-  const assetId = getAssetId(currencyId);
+  const assetId = formatAssetId(currencyId);
   return { assetId, walletId, amount };
 };
 
@@ -79,7 +79,7 @@ export const getTokensTransferEvent = (ctx: Ctx, item: EventItem): TransferEvent
     fromId = encodeAddress(from, 73);
     toId = encodeAddress(to, 73);
   }
-  const assetId = getAssetId(currencyId);
+  const assetId = formatAssetId(currencyId);
   return { assetId, fromId, toId, amount };
 };
 
@@ -98,7 +98,7 @@ export const getTokensWithdrawnEvent = (ctx: Ctx, item: EventItem): TokensEvent 
     [currencyId, who, amount] = item.event.args;
     walletId = encodeAddress(who, 73);
   }
-  const assetId = getAssetId(currencyId);
+  const assetId = formatAssetId(currencyId);
   return { assetId, walletId, amount };
 };
 

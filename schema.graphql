@@ -146,11 +146,9 @@ type Market @entity {
   "The dispute information for each dispute that's been issued"
   disputes: [MarketReport]
   "Can be `Authorized` or `Court` or `SimpleDisputes`"
-  disputeMechanism: String!
+  disputeMechanism: DisputeMechanism!
   "Checks if each category has a name for display on UI"
   hasValidMetaCategories: Boolean!
-  "Unique identifier of the object"
-  id: ID!
   "Image for the market"
   img: String
   "Zeitgeist's identifier for market"
@@ -162,7 +160,7 @@ type Market @entity {
   "Account designated to report on the market"
   oracle: String!
   "Share identifiers"
-  outcomeAssets: [String]!
+  outcomeAssets: [String!]!
   "Time period expressed in block numbers or timestamps"
   period: MarketPeriod!
   "Market's liquidity pool details"
@@ -176,7 +174,7 @@ type Market @entity {
   "Type of scalar range if market is of type scalar"
   scalarType: String
   "Scoring rule used for the market"
-  scoringRule: String!
+  scoringRule: ScoringRule!
   "Short name for the market"
   slug: String
   "Status of the market"
@@ -200,8 +198,6 @@ type HistoricalMarket @entity {
   event: MarketEvent!
   "Details of the connected market"
   market: Market!
-  "Zeitgeist's identifier for pool"
-  poolId: Int
   "Reported or disputed outcome for the market"
   outcome: OutcomeReport
   "Latest resolved outcome"
@@ -219,7 +215,7 @@ type Pool @entity {
   "Account for the pool"
   account: Account!
   "List of assets connected to the pool"
-  assets: [Asset]! @derivedFrom(field: "pool")
+  assets: [Asset!]! @derivedFrom(field: "pool")
   "The base asset in the market swap pool (usually a currency)"
   baseAsset: String!
   "Timestamp of pool creation"
@@ -228,14 +224,12 @@ type Pool @entity {
   marketId: Int! @index
   "Zeitgeist's identifier for pool"
   poolId: Int! @index
-  "Scoring rule used for the pool"
-  scoringRule: String!
   "Status of the pool"
   status: PoolStatus!
   "Fee applied to each swap"
-  swapFee: String!
+  swapFee: String
   "Subsidy gathered for the market"
-  totalSubsidy: String!
+  totalSubsidy: String
   "Sum of `weights`"
   totalWeight: String!
   "Total amount of ZTG that has moved through a market's liquidity pool"
@@ -381,19 +375,7 @@ type OutcomeReport @jsonField {
 }
 
 """
-Market's dispute details. Only one field would have value rest would be null."
-"""
-type MarketDisputeMechanism @jsonField {
-  "Account address"
-  authorized: String
-  "True if mechanism is court else null"
-  court: Boolean
-  "True if mechanism is simple-disputes else null"
-  simpleDisputes: Boolean
-}
-
-"""
-Market's creation options
+Markets' creation options
 """
 enum MarketCreation {
   Advised
@@ -401,7 +383,16 @@ enum MarketCreation {
 }
 
 """
-Market's event options
+Markets' dispute options
+"""
+enum DisputeMechanism {
+  Authorized
+  Court
+  SimpleDisputes
+}
+
+"""
+Markets' event options
 """
 enum MarketEvent {
   GlobalDisputeStarted
@@ -418,7 +409,7 @@ enum MarketEvent {
 }
 
 """
-Market's status options
+Markets' status options
 """
 enum MarketStatus {
   Active
@@ -436,7 +427,7 @@ enum MarketStatus {
 }
 
 """
-Pool's status options
+Pools' status options
 """
 enum PoolStatus {
   Active
@@ -445,4 +436,14 @@ enum PoolStatus {
   CollectingSubsidy
   Destroyed
   Initialized
+}
+
+"""
+Markets' scoring rule options
+"""
+enum ScoringRule {
+  CPMM
+  RikiddoSigmoidFeeMarketEma
+  Lmsr
+  Orderbook
 }

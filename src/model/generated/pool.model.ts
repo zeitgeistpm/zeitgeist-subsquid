@@ -57,12 +57,6 @@ export class Pool {
     poolId!: number
 
     /**
-     * Scoring rule used for the pool
-     */
-    @Column_("text", {nullable: false})
-    scoringRule!: string
-
-    /**
      * Status of the pool
      */
     @Column_("varchar", {length: 17, nullable: false})
@@ -71,14 +65,14 @@ export class Pool {
     /**
      * Fee applied to each swap
      */
-    @Column_("text", {nullable: false})
-    swapFee!: string
+    @Column_("text", {nullable: true})
+    swapFee!: string | undefined | null
 
     /**
      * Subsidy gathered for the market
      */
-    @Column_("text", {nullable: false})
-    totalSubsidy!: string
+    @Column_("text", {nullable: true})
+    totalSubsidy!: string | undefined | null
 
     /**
      * Sum of `weights`
