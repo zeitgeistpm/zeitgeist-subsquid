@@ -5,6 +5,7 @@ import ipfsClient from 'ipfs-http-client';
 import { concat, toString } from 'uint8arrays';
 import CID from 'cids';
 import all from 'it-all';
+import { CacheHint } from './helper';
 
 export class Cache {
   private static _instance: Cache;
@@ -32,6 +33,24 @@ export class Cache {
 
   private makeKey(prefix: string, key: string) {
     return `${prefix}_${key}`;
+  }
+
+  async setData(hint: CacheHint, key: string, value: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.client.set(`${hint}_${key}`, value, (err: any) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+  }
+
+  async getData(hint: CacheHint, key: string): Promise<string | null> {
+    return new Promise((resolve, reject) => {
+      this.client.get(`${hint}_${key}`, (err: any, data: string | PromiseLike<string | null> | null) => {
+        if (err) reject(err);
+        else resolve(data);
+      });
+    });
   }
 
   async setDecodedMetadata(key: string, value: string): Promise<void> {
