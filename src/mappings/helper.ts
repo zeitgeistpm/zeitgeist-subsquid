@@ -19,7 +19,13 @@ import { MarketCreation as _MarketCreation, MarketStatus as _MarketStatus } from
 import { Asset, MarketDisputeMechanism, ScoringRule as _ScoringRule } from '../types/v50';
 import { Cache, IPFS, Tools } from './util';
 
+export const EPOCH_TIME = new Date('1970-01-01T00:00:00.000Z');
+export const TEN_MINUTES = 10 * 60 * 1000;
 export const TREASURY_ACCOUNT = 'dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ';
+
+export enum CacheHint {
+  Price = 'price',
+}
 
 export const calcSpotPrice = (
   tokenBalanceIn: number,
@@ -254,7 +260,7 @@ export const initBalance = async (acc: Account, store: Store) => {
   hab.assetId = ab.assetId;
   hab.dBalance = amt.toBigInt();
   hab.blockNumber = 0;
-  hab.timestamp = new Date('1970-01-01T00:00:00.000000Z');
+  hab.timestamp = EPOCH_TIME;
   console.log(`Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
   await store.save<HistoricalAccountBalance>(hab);
 };
