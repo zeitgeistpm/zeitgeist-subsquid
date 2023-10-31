@@ -37,7 +37,7 @@ export const getTokensBalanceSetEvent = (ctx: Ctx, item: EventItem): TokensEvent
 
 export const getTokensDepositedEvent = (ctx: Ctx, item: EventItem): TokensEvent => {
   const event = new TokensDepositedEvent(ctx, item.event);
-  let currencyId, walletId, who, amount;
+  let currencyId, walletId, amount;
   if (event.isV36) {
     currencyId = event.asV36.currencyId;
     walletId = ss58.codec('zeitgeist').encode(event.asV36.who);
@@ -47,8 +47,9 @@ export const getTokensDepositedEvent = (ctx: Ctx, item: EventItem): TokensEvent 
     walletId = ss58.codec('zeitgeist').encode(event.asV41.who);
     amount = event.asV41.amount;
   } else {
-    [currencyId, who, amount] = item.event.args;
-    walletId = encodeAddress(who, 73);
+    currencyId = item.event.args.currencyId;
+    walletId = encodeAddress(item.event.args.who, 73);
+    amount = BigInt(item.event.args.amount);
   }
   const assetId = formatAssetId(currencyId);
   return { assetId, walletId, amount };
@@ -76,9 +77,10 @@ export const getTokensTransferEvent = (ctx: Ctx, item: EventItem): TransferEvent
     toId = ss58.codec('zeitgeist').encode(event.asV41.to);
     amount = event.asV41.amount;
   } else {
-    [currencyId, from, to, amount] = item.event.args;
-    fromId = encodeAddress(from, 73);
-    toId = encodeAddress(to, 73);
+    currencyId = item.event.args.currencyId;
+    fromId = encodeAddress(item.event.args.from, 73);
+    toId = encodeAddress(item.event.args.to, 73);
+    amount = BigInt(item.event.args.amount);
   }
   const assetId = formatAssetId(currencyId);
   return { assetId, fromId, toId, amount };
@@ -96,8 +98,9 @@ export const getTokensWithdrawnEvent = (ctx: Ctx, item: EventItem): TokensEvent 
     walletId = ss58.codec('zeitgeist').encode(event.asV41.who);
     amount = event.asV41.amount;
   } else {
-    [currencyId, who, amount] = item.event.args;
-    walletId = encodeAddress(who, 73);
+    currencyId = item.event.args.currencyId;
+    walletId = encodeAddress(item.event.args.who, 73);
+    amount = BigInt(item.event.args.amount);
   }
   const assetId = formatAssetId(currencyId);
   return { assetId, walletId, amount };
