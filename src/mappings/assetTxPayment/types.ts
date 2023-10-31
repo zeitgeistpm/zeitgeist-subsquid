@@ -39,8 +39,11 @@ export const getMetadataStorage = async (
   } else if (storage.isV48) {
     const assetMetadata = await storage.asV48.get(assetId);
     return assetMetadata;
-  } else {
+  } else if (storage.isV49) {
     const assetMetadata = await storage.asV49.get(assetId);
+    return assetMetadata;
+  } else if (storage.isV51) {
+    const assetMetadata = await storage.asV51.get(assetId);
     return assetMetadata;
   }
 };
