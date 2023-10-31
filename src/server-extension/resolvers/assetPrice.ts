@@ -65,10 +65,9 @@ export class AssetPriceResolver {
     for (let i = 0; i < nums.length; i++) {
       for (let j = 0; j < dens.length; j++) {
         const pairedAsset = generatePair(nums[i], dens[j]);
-        const price = await fetchFromCache(pairedAsset);
         prices.push({
           pair: pairedAsset,
-          price: price ?? undefined,
+          price: await fetchFromCache(pairedAsset),
           timestamp: AssetPriceResolver.cachedAt,
         });
       }
@@ -94,9 +93,9 @@ const refreshPrices = async () => {
 };
 
 // Fetch price from redis db.. Returns null in case of failure
-const fetchFromCache = async (pair: string): Promise<number | null> => {
+const fetchFromCache = async (pair: string): Promise<number | undefined> => {
   const price = await (await Cache.init()).getData(CacheHint.Price, pair);
-  return price ? +price : null;
+  return price ? +price : undefined;
 };
 
 // Traverse through response from Coingecko to cache prices
