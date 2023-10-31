@@ -266,6 +266,8 @@ export const getMarketsStorage = async (
     market = await storage.asV49.get(marketId);
   } else if (storage.isV50) {
     market = await storage.asV50.get(marketId);
+  } else if (storage.isV51) {
+    market = await storage.asV51.get(marketId);
   }
   if (!market) return;
   return market.bonds;
