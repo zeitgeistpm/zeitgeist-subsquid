@@ -1,6 +1,7 @@
 import { Arg, Field, Int, ObjectType, Query, Resolver } from 'type-graphql';
 import type { EntityManager } from 'typeorm';
 import { Market } from '../../model/generated';
+import { CacheHint } from '../../mappings/helper';
 import { Cache } from '../../mappings/util';
 import { marketMetadata } from '../query';
 
@@ -31,7 +32,7 @@ export class MarketMetadataResolver {
 
     let result: MarketMetadata[] = await Promise.all(
       encodedData.map(async (ed: any) => {
-        const decodedData = await (await Cache.init()).getDecodedMetadata(ed.metadata);
+        const decodedData = await (await Cache.init()).getData(CacheHint.Meta, ed.metadata);
         return {
           marketId: ed.market_id,
           encoded: ed.metadata,

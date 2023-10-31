@@ -24,6 +24,8 @@ export const TEN_MINUTES = 10 * 60 * 1000;
 export const TREASURY_ACCOUNT = 'dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ';
 
 export enum CacheHint {
+  Fee = 'fee',
+  Meta = 'meta',
   Price = 'price',
 }
 
@@ -58,7 +60,7 @@ export const createAssetsForMarket = async (marketId: string, marketType: any): 
 
 export const decodeMarketMetadata = async (metadata: string): Promise<DecodedMarketMetadata | undefined> => {
   if (metadata.startsWith('0x1530fa0bb52e67d0d9f89bf26552e1')) return undefined;
-  let raw = await (await Cache.init()).getDecodedMetadata(metadata);
+  let raw = await (await Cache.init()).getData(CacheHint.Meta, metadata);
   if (raw && !(process.env.NODE_ENV == 'local')) {
     return raw !== '0' ? (JSON.parse(raw) as DecodedMarketMetadata) : undefined;
   } else {
@@ -66,12 +68,12 @@ export const decodeMarketMetadata = async (metadata: string): Promise<DecodedMar
       const ipfs = new IPFS();
       raw = await ipfs.read(metadata);
       const rawData = JSON.parse(raw) as DecodedMarketMetadata;
-      await (await Cache.init()).setDecodedMetadata(metadata, raw);
+      await (await Cache.init()).setData(CacheHint.Meta, metadata, raw);
       return rawData;
     } catch (err) {
       console.error(err);
       if (err instanceof SyntaxError) {
-        await (await Cache.init()).setDecodedMetadata(metadata, '0');
+        await (await Cache.init()).setData(CacheHint.Meta, metadata, '0');
       }
       return undefined;
     }
@@ -214,10 +216,8 @@ export const formatScoringRule = (scoringRule: _ScoringRule): ScoringRule => {
 
 export const getFees = async (block: SubstrateBlock, extrinsic: SubstrateExtrinsic): Promise<bigint> => {
   const id = extrinsic.indexInBlock;
-  let fees = await (await Cache.init()).getFee(block.hash + id);
-  if (fees) {
-    return BigInt(fees);
-  }
+  let fees = await (await Cache.init()).getData(CacheHint.Fee, block.hash + id);
+  if (fees) return BigInt(fees);
 
   let totalFees = BigInt(0);
   const sdk = await Tools.getSDK();
@@ -234,7 +234,7 @@ export const getFees = async (block: SubstrateBlock, extrinsic: SubstrateExtrins
       if (adjustedWeightFee) totalFees = totalFees + BigInt(adjustedWeightFee);
     }
   }
-  await (await Cache.init()).setFee(block.hash + id, totalFees.toString());
+  await (await Cache.init()).setData(CacheHint.Fee, block.hash + id, totalFees.toString());
   return totalFees;
 };
 

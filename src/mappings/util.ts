@@ -31,73 +31,23 @@ export class Cache {
     return this._instance;
   }
 
-  private makeKey(prefix: string, key: string) {
-    return `${prefix}_${key}`;
-  }
-
-  async setData(hint: CacheHint, key: string, value: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.client.set(`${hint}_${key}`, value, (err: any) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
-  }
-
-  async getData(hint: CacheHint, key: string): Promise<string | null> {
+  getData = async (hint: CacheHint, key: string): Promise<string | null> => {
     return new Promise((resolve, reject) => {
       this.client.get(`${hint}_${key}`, (err: any, data: string | PromiseLike<string | null> | null) => {
         if (err) reject(err);
         else resolve(data);
       });
     });
-  }
+  };
 
-  async setDecodedMetadata(key: string, value: string): Promise<void> {
+  setData = async (hint: CacheHint, key: string, value: string): Promise<void> => {
     return new Promise((resolve, reject) => {
-      const cacheKey = this.makeKey('meta', key);
-      this.client.set(cacheKey, value, (err: any) => {
+      this.client.set(`${hint}_${key}`, value, (err: any) => {
         if (err) reject(err);
         else resolve();
       });
     });
-  }
-
-  async setFee(key: string, value: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const cacheKey = this.makeKey('fee', key);
-      this.client.set(cacheKey, value, (err: any) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
-    });
-  }
-
-  async getDecodedMetadata(key: string): Promise<string | null> {
-    return new Promise((resolve, reject) => {
-      const cacheKey = this.makeKey('meta', key);
-      this.client.get(cacheKey, (err: any, data: string | PromiseLike<string | null> | null) => {
-        if (err) reject(err);
-        else resolve(data);
-      });
-    });
-  }
-
-  async getFee(key: string): Promise<string | null> {
-    return new Promise((resolve, reject) => {
-      const cacheKey = this.makeKey('fee', key);
-      this.client.get(cacheKey, (err: any, data: string | PromiseLike<string | null> | null) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(data);
-        }
-      });
-    });
-  }
+  };
 }
 
 export class IPFS {
