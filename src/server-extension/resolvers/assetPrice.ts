@@ -77,22 +77,23 @@ export class AssetPriceResolver {
   }
 }
 
-// Fetch and store prices for all supported assets from Coingecko
+// Fetch and store prices for all supported assets
 const refreshPrices = async () => {
   const ids = Object.values(NumeratorAsset).join(',');
   const vs_currencies = Object.values(DenominatorAsset).join(',');
+  let res;
   try {
-    const res = await axios.get(
-      `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=${vs_currencies}`
-    );
+    res = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=${vs_currencies}`);
+  } catch (err) {
+    console.error(`Error while fetching prices from coingecko: ` + JSON.stringify(err, null, 2));
+  } finally {
+    if (!res || res.data.length == 0) return;
     Object.entries(res.data).forEach(([numAsset, denAssetPrice]) => {
       Object.entries(denAssetPrice as Map<string, number>).forEach(async ([denAsset, price]) => {
         await (await Cache.init()).setData(CacheHint.Price, generatePair(numAsset, denAsset), price.toString());
       });
     });
     AssetPriceResolver.cachedAt = new Date();
-  } catch (err) {
-    console.error(`Error while fetching prices from coingecko: ` + JSON.stringify(err, null, 2));
   }
 };
 
