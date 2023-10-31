@@ -77,7 +77,7 @@ export class AssetPriceResolver {
   }
 }
 
-// Fetch and store prices for all supported assets
+// Fetch prices from Coingecko for all supported assets
 const refreshPrices = async () => {
   const ids = Object.values(NumeratorAsset).join(',');
   const vs_currencies = Object.values(DenominatorAsset).join(',');
@@ -88,11 +88,7 @@ const refreshPrices = async () => {
     console.error(`Error while fetching prices from coingecko: ` + JSON.stringify(err, null, 2));
   } finally {
     if (!res || res.data.length == 0) return;
-    Object.entries(res.data).forEach(([numAsset, denAssetPrice]) => {
-      Object.entries(denAssetPrice as Map<string, number>).forEach(async ([denAsset, price]) => {
-        await (await Cache.init()).setData(CacheHint.Price, generatePair(numAsset, denAsset), price.toString());
-      });
-    });
+    await storeOnCache(res.data);
     AssetPriceResolver.cachedAt = new Date();
   }
 };
@@ -101,6 +97,15 @@ const refreshPrices = async () => {
 const fetchFromCache = async (pair: string): Promise<number | null> => {
   const price = await (await Cache.init()).getData(CacheHint.Price, pair);
   return price ? +price : null;
+};
+
+// Traverse through response from Coingecko to cache prices
+const storeOnCache = async (data: any): Promise<void> => {
+  Object.entries(data).forEach(([numAsset, denAssetPrice]) => {
+    Object.entries(denAssetPrice as Map<string, number>).forEach(async ([denAsset, price]) => {
+      await (await Cache.init()).setData(CacheHint.Price, generatePair(numAsset, denAsset), price.toString());
+    });
+  });
 };
 
 const generatePair = (num: string, den: string): string => {
