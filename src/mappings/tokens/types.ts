@@ -18,17 +18,10 @@ export const getTokensBalanceSetEvent = (ctx: Ctx, item: EventItem): TokensEvent
   } else if (event.isV32) {
     [currencyId, who, amount] = event.asV32;
     walletId = ss58.codec('zeitgeist').encode(who);
-  } else if (event.isV34) {
-    currencyId = event.asV34.currencyId;
-    walletId = ss58.codec('zeitgeist').encode(event.asV34.who);
-    amount = event.asV34.free;
-  } else if (event.isV41) {
-    currencyId = event.asV41.currencyId;
-    walletId = ss58.codec('zeitgeist').encode(event.asV41.who);
-    amount = event.asV41.free;
   } else {
-    [currencyId, who, amount] = item.event.args;
-    walletId = encodeAddress(who, 73);
+    currencyId = item.event.args.currencyId;
+    walletId = encodeAddress(item.event.args.who, 73);
+    amount = item.event.args.free;
   }
   const assetId = formatAssetId(currencyId);
   return { assetId, walletId, amount };
