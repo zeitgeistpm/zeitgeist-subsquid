@@ -1,5 +1,40 @@
 import type {Result, Option} from './support'
 
+export type Asset = Asset_CategoricalOutcome | Asset_ScalarOutcome | Asset_CombinatorialOutcome | Asset_PoolShare | Asset_Ztg | Asset_ForeignAsset | Asset_ParimutuelShare
+
+export interface Asset_CategoricalOutcome {
+    __kind: 'CategoricalOutcome'
+    value: [bigint, number]
+}
+
+export interface Asset_ScalarOutcome {
+    __kind: 'ScalarOutcome'
+    value: [bigint, ScalarPosition]
+}
+
+export interface Asset_CombinatorialOutcome {
+    __kind: 'CombinatorialOutcome'
+}
+
+export interface Asset_PoolShare {
+    __kind: 'PoolShare'
+    value: bigint
+}
+
+export interface Asset_Ztg {
+    __kind: 'Ztg'
+}
+
+export interface Asset_ForeignAsset {
+    __kind: 'ForeignAsset'
+    value: number
+}
+
+export interface Asset_ParimutuelShare {
+    __kind: 'ParimutuelShare'
+    value: [bigint, number]
+}
+
 export interface Market {
     baseAsset: Asset
     creator: Uint8Array
@@ -57,41 +92,6 @@ export interface MarketStatus_Resolved {
     __kind: 'Resolved'
 }
 
-export type Asset = Asset_CategoricalOutcome | Asset_ScalarOutcome | Asset_CombinatorialOutcome | Asset_PoolShare | Asset_Ztg | Asset_ForeignAsset | Asset_ParimutuelShare
-
-export interface Asset_CategoricalOutcome {
-    __kind: 'CategoricalOutcome'
-    value: [bigint, number]
-}
-
-export interface Asset_ScalarOutcome {
-    __kind: 'ScalarOutcome'
-    value: [bigint, ScalarPosition]
-}
-
-export interface Asset_CombinatorialOutcome {
-    __kind: 'CombinatorialOutcome'
-}
-
-export interface Asset_PoolShare {
-    __kind: 'PoolShare'
-    value: bigint
-}
-
-export interface Asset_Ztg {
-    __kind: 'Ztg'
-}
-
-export interface Asset_ForeignAsset {
-    __kind: 'ForeignAsset'
-    value: number
-}
-
-export interface Asset_ParimutuelShare {
-    __kind: 'ParimutuelShare'
-    value: [bigint, number]
-}
-
 export interface CommonPoolEventParams {
     poolId: bigint
     who: Uint8Array
@@ -142,6 +142,16 @@ export interface AssetMetadata {
     existentialDeposit: bigint
     location: (VersionedMultiLocation | undefined)
     additional: CustomMetadata
+}
+
+export type ScalarPosition = ScalarPosition_Long | ScalarPosition_Short
+
+export interface ScalarPosition_Long {
+    __kind: 'Long'
+}
+
+export interface ScalarPosition_Short {
+    __kind: 'Short'
 }
 
 export type MarketCreation = MarketCreation_Permissionless | MarketCreation_Advised
@@ -251,16 +261,6 @@ export interface EarlyClose {
     old: MarketPeriod
     new: MarketPeriod
     state: EarlyCloseState
-}
-
-export type ScalarPosition = ScalarPosition_Long | ScalarPosition_Short
-
-export interface ScalarPosition_Long {
-    __kind: 'Long'
-}
-
-export interface ScalarPosition_Short {
-    __kind: 'Short'
 }
 
 export type PoolStatus = PoolStatus_Active | PoolStatus_CollectingSubsidy | PoolStatus_Closed | PoolStatus_Clean | PoolStatus_Initialized

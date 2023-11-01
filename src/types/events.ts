@@ -681,6 +681,50 @@ export class CurrencyWithdrawnEvent {
     }
 }
 
+export class NeoSwapsPoolDeployedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'NeoSwaps.PoolDeployed')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * Pool was createed.
+     */
+    get isV50(): boolean {
+        return this._chain.getEventHash('NeoSwaps.PoolDeployed') === '3d9bd2b061e36e9d32129086ad0a51b28fa6ad21f9adc64449fc41422b30d7b3'
+    }
+
+    /**
+     * Pool was createed.
+     */
+    get asV50(): {who: Uint8Array, marketId: bigint, poolSharesAmount: bigint, amountsIn: bigint[], liquidityParameter: bigint} {
+        assert(this.isV50)
+        return this._chain.decodeEvent(this.event)
+    }
+
+    /**
+     * Pool was createed.
+     */
+    get isV51(): boolean {
+        return this._chain.getEventHash('NeoSwaps.PoolDeployed') === '82d4b0aadad707251bd7ec5a23bf45343fd48c1677202f6868a3d830a039f784'
+    }
+
+    /**
+     * Pool was createed.
+     */
+    get asV51(): {who: Uint8Array, marketId: bigint, accountId: Uint8Array, reserves: [v51.Asset, bigint][], collateral: v51.Asset, liquidityParameter: bigint, poolSharesAmount: bigint, swapFee: bigint} {
+        assert(this.isV51)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
 export class ParachainStakingRewardedEvent {
     private readonly _chain: Chain
     private readonly event: Event
