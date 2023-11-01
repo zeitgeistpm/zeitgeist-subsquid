@@ -9,5 +9,5 @@ export enum MarketEvent {
     MarketRejected = "MarketRejected",
     MarketReported = "MarketReported",
     MarketResolved = "MarketResolved",
-    PoolCreate = "PoolCreate",
+    PoolDeployed = "PoolDeployed",
 }

@@ -9,6 +9,7 @@ import {DisputeMechanism} from "./_disputeMechanism"
 import {MarketType} from "./_marketType"
 import {MarketPeriod} from "./_marketPeriod"
 import {Pool} from "./pool.model"
+import {NeoPool} from "./neoPool.model"
 import {ScoringRule} from "./_scoringRule"
 import {MarketStatus} from "./_marketStatus"
 
@@ -145,6 +146,13 @@ export class Market {
     @Index_()
     @ManyToOne_(() => Pool, {nullable: true})
     pool!: Pool | undefined | null
+
+    /**
+     * Market's amm2 pool details
+     */
+    @Index_()
+    @ManyToOne_(() => NeoPool, {nullable: true})
+    neoPool!: NeoPool | undefined | null
 
     /**
      * Reasoning for market rejection
