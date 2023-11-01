@@ -12,6 +12,7 @@ import {
   HistoricalPool,
   HistoricalSwap,
   Market,
+  MarketEvent,
   Pool,
   PoolStatus,
   Weight,
@@ -341,7 +342,7 @@ export const poolCreate = async (
   const hm = new HistoricalMarket({
     blockNumber: block.height,
     by: null,
-    event: formatMarketEvent(item.event.name),
+    event: MarketEvent.PoolDeployed,
     id: item.event.id + '-' + market.marketId,
     market: market,
     outcome: null,
