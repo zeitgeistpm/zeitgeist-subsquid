@@ -360,15 +360,14 @@ processor.run(new TypeormDatabase(), async (ctx) => {
         switch (item.name) {
           case 'AssetTxPayment.AssetTxFeePaid': {
             const habs = await assetTxPaymentAssetTxFeePaidEvent(ctx, block.header, item);
-            if (habs) {
-              await Promise.all(
-                habs.map(async (hab) => {
-                  const key = makeKey(hab.accountId, hab.assetId);
-                  balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-                  balanceHistory.push(hab);
-                })
-              );
-            }
+            if (!habs) break;
+            await Promise.all(
+              habs.map(async (hab) => {
+                const key = makeKey(hab.accountId, hab.assetId);
+                balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+                balanceHistory.push(hab);
+              })
+            );
             break;
           }
           case 'Balances.BalanceSet': {
@@ -400,11 +399,10 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           }
           case 'Balances.ReserveRepatriated': {
             const hab = await balancesReserveRepatriated(ctx, block.header, item);
-            if (hab) {
-              const key = makeKey(hab.accountId, hab.assetId);
-              balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-              balanceHistory.push(hab);
-            }
+            if (!hab) break;
+            const key = makeKey(hab.accountId, hab.assetId);
+            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+            balanceHistory.push(hab);
             break;
           }
           case 'Balances.Transfer': {
@@ -433,15 +431,15 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             break;
           }
           case 'Currency.Transferred': {
-            const res = await currencyTransferred(ctx, block.header, item);
-            if (res) {
-              const fromKey = makeKey(res.fromHab.accountId, res.fromHab.assetId);
-              const toKey = makeKey(res.toHab.accountId, res.toHab.assetId);
-              balanceAccounts.set(fromKey, (balanceAccounts.get(fromKey) || BigInt(0)) + res.fromHab.dBalance);
-              balanceAccounts.set(toKey, (balanceAccounts.get(toKey) || BigInt(0)) + res.toHab.dBalance);
-              balanceHistory.push(res.fromHab);
-              balanceHistory.push(res.toHab);
-            }
+            const habs = await currencyTransferred(ctx, block.header, item);
+            if (!habs) break;
+            await Promise.all(
+              habs.map(async (hab) => {
+                const key = makeKey(hab.accountId, hab.assetId);
+                balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+                balanceHistory.push(hab);
+              })
+            );
             break;
           }
           case 'Currency.Deposited': {
@@ -484,15 +482,14 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           }
           case 'PredictionMarkets.BoughtCompleteSet': {
             const habs = await boughtCompleteSet(ctx, block.header, item);
-            if (habs) {
-              await Promise.all(
-                habs.map(async (hab) => {
-                  const key = makeKey(hab.accountId, hab.assetId);
-                  balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-                  balanceHistory.push(hab);
-                })
-              );
-            }
+            if (!habs) break;
+            await Promise.all(
+              habs.map(async (hab) => {
+                const key = makeKey(hab.accountId, hab.assetId);
+                balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+                balanceHistory.push(hab);
+              })
+            );
             break;
           }
           case 'PredictionMarkets.MarketResolved': {
@@ -503,15 +500,14 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           }
           case 'PredictionMarkets.SoldCompleteSet': {
             const habs = await soldCompleteSet(ctx, block.header, item);
-            if (habs) {
-              await Promise.all(
-                habs.map(async (hab) => {
-                  const key = makeKey(hab.accountId, hab.assetId);
-                  balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-                  balanceHistory.push(hab);
-                })
-              );
-            }
+            if (!habs) break;
+            await Promise.all(
+              habs.map(async (hab) => {
+                const key = makeKey(hab.accountId, hab.assetId);
+                balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+                balanceHistory.push(hab);
+              })
+            );
             break;
           }
           case 'PredictionMarkets.TokensRedeemed': {
@@ -642,21 +638,19 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           // @ts-ignore
           case 'System.ExtrinsicFailed': {
             const hab = await systemExtrinsicFailed(ctx, block.header, item);
-            if (hab) {
-              const key = makeKey(hab.accountId, hab.assetId);
-              balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-              balanceHistory.push(hab);
-            }
+            if (!hab) break;
+            const key = makeKey(hab.accountId, hab.assetId);
+            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+            balanceHistory.push(hab);
             break;
           }
           // @ts-ignore
           case 'System.ExtrinsicSuccess': {
             const hab = await systemExtrinsicSuccess(ctx, block.header, item);
-            if (hab) {
-              const key = makeKey(hab.accountId, hab.assetId);
-              balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-              balanceHistory.push(hab);
-            }
+            if (!hab) break;
+            const key = makeKey(hab.accountId, hab.assetId);
+            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+            balanceHistory.push(hab);
             break;
           }
           case 'Tokens.BalanceSet': {
@@ -673,13 +667,14 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             break;
           }
           case 'Tokens.Transfer': {
-            const res = await tokensTransfer(ctx, block.header, item);
-            const fromKey = makeKey(res.fromHab.accountId, res.fromHab.assetId);
-            const toKey = makeKey(res.toHab.accountId, res.toHab.assetId);
-            balanceAccounts.set(fromKey, (balanceAccounts.get(fromKey) || BigInt(0)) + res.fromHab.dBalance);
-            balanceAccounts.set(toKey, (balanceAccounts.get(toKey) || BigInt(0)) + res.toHab.dBalance);
-            balanceHistory.push(res.fromHab);
-            balanceHistory.push(res.toHab);
+            const habs = await tokensTransfer(ctx, block.header, item);
+            await Promise.all(
+              habs.map(async (hab) => {
+                const key = makeKey(hab.accountId, hab.assetId);
+                balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+                balanceHistory.push(hab);
+              })
+            );
             break;
           }
           case 'Tokens.Withdrawn': {
