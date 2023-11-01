@@ -165,6 +165,8 @@ type Market @entity {
   period: MarketPeriod!
   "Market's liquidity pool details"
   pool: Pool
+  "Market's amm2 pool details"
+  neoPool: NeoPool
   "Reasoning for market rejection"
   rejectReason: String
   "Reported outcome of the market. Null if the market is not reported yet"
@@ -236,6 +238,20 @@ type Pool @entity {
   volume: BigInt!
   "List of lengths for each asset"
   weights: [Weight!]!
+}
+
+"""
+AMM2 pool details
+"""
+type NeoPool @entity {
+  account: Account
+  collateral: String
+  createdAt: DateTime!
+  liquidityParameter: BigInt!
+  liquiditySharesManager: LiquiditySharesManager!
+  marketId: Int! @index
+  poolId: Int! @index
+  swapFee: BigInt
 }
 
 """
@@ -374,6 +390,12 @@ type OutcomeReport @jsonField {
   scalar: BigInt
 }
 
+type LiquiditySharesManager @jsonField {
+  owner: String
+  totalShares: BigInt!
+  fees: BigInt
+}
+
 """
 Markets' creation options
 """
@@ -405,7 +427,7 @@ enum MarketEvent {
   MarketRejected
   MarketReported
   MarketResolved
-  PoolCreate
+  PoolDeployed
 }
 
 """
