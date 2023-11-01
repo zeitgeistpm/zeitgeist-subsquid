@@ -1,7 +1,7 @@
 import { SubstrateBlock } from '@subsquid/substrate-processor';
 import { Account, AccountBalance, HistoricalAccountBalance } from '../../model';
 import { Ctx, EventItem } from '../../processor';
-import { extrinsicFromEvent, Transfer } from '../helper';
+import { extrinsicFromEvent } from '../helper';
 import {
   getTokensBalanceSetEvent,
   getTokensDepositedEvent,
@@ -68,8 +68,13 @@ export const tokensDeposited = async (
   return hab;
 };
 
-export const tokensTransfer = async (ctx: Ctx, block: SubstrateBlock, item: EventItem): Promise<Transfer> => {
+export const tokensTransfer = async (
+  ctx: Ctx,
+  block: SubstrateBlock,
+  item: EventItem
+): Promise<HistoricalAccountBalance[]> => {
   const { assetId, fromId, toId, amount } = getTokensTransferEvent(ctx, item);
+  const habs: HistoricalAccountBalance[] = [];
 
   const fromHab = new HistoricalAccountBalance();
   fromHab.id = item.event.id + '-' + fromId.slice(-5);
@@ -91,7 +96,8 @@ export const tokensTransfer = async (ctx: Ctx, block: SubstrateBlock, item: Even
   toHab.blockNumber = block.height;
   toHab.timestamp = new Date(block.timestamp);
 
-  return { fromHab, toHab };
+  habs.push(fromHab, toHab);
+  return habs;
 };
 
 export const tokensWithdrawn = async (

@@ -302,8 +302,3 @@ interface DecodedMarketMetadata {
   img?: string;
   scalarType?: string;
 }
-
-export interface Transfer {
-  fromHab: HistoricalAccountBalance;
-  toHab: HistoricalAccountBalance;
-}
