@@ -17,6 +17,7 @@
     "Currency.Deposited",
     "Currency.Transferred",
     "Currency.Withdrawn",
+    "NeoSwaps.PoolDeployed",
     "ParachainStaking.Rewarded",
     "PredictionMarkets.BoughtCompleteSet",
     "PredictionMarkets.GlobalDisputeStarted",

@@ -25,6 +25,7 @@ import {
 } from './mappings/balances';
 import { currencyTransferred, currencyDeposited, currencyWithdrawn } from './mappings/currency';
 import { initBalance, specVersion } from './mappings/helper';
+import { poolDeployed } from './mappings/neoSwaps';
 import { parachainStakingRewarded } from './mappings/parachainStaking';
 import {
   unreserveBalances_108949,
@@ -144,6 +145,7 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Currency.Transferred', eventExtrinsicOptions)
   .addEvent('Currency.Deposited', eventExtrinsicOptions)
   .addEvent('Currency.Withdrawn', eventExtrinsicOptions)
+  .addEvent('NeoSwaps.PoolDeployed', eventOptions)
   .addEvent('ParachainStaking.Rewarded', eventOptions)
   .addEvent('PredictionMarkets.BoughtCompleteSet', eventExtrinsicOptions)
   .addEvent('PredictionMarkets.GlobalDisputeStarted', eventOptions)
@@ -452,6 +454,12 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             const key = makeKey(hab.accountId, hab.assetId);
             balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
             balanceHistory.push(hab);
+            break;
+          }
+          case 'NeoSwaps.PoolDeployed': {
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            await poolDeployed(ctx, block.header, item);
             break;
           }
           case 'ParachainStaking.Rewarded': {

@@ -144,8 +144,6 @@ export const formatMarketEvent = (eventName: string): MarketEvent => {
       return MarketEvent.MarketReported;
     case 'PredictionMarkets.MarketResolved':
       return MarketEvent.MarketResolved;
-    case 'Swaps.PoolCreate':
-      return MarketEvent.PoolCreate;
     default:
       return MarketEvent.MarketCreated;
   }

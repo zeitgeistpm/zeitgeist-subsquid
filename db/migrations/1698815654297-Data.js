@@ -1,5 +1,5 @@
-module.exports = class Data1698483956554 {
-    name = 'Data1698483956554'
+module.exports = class Data1698815654297 {
+    name = 'Data1698815654297'
 
     async up(db) {
         await db.query(`CREATE TABLE "account_balance" ("asset_id" text NOT NULL, "balance" numeric NOT NULL, "id" character varying NOT NULL, "account_id" character varying, CONSTRAINT "PK_bd893045760f719e24a95a42562" PRIMARY KEY ("id"))`)
@@ -18,16 +18,23 @@ module.exports = class Data1698483956554 {
         await db.query(`CREATE INDEX "IDX_d9ec182f218dc183716b8807cf" ON "historical_asset" ("asset_id") `)
         await db.query(`CREATE TABLE "historical_swap" ("id" character varying NOT NULL, "account_id" text NOT NULL, "asset_in" text NOT NULL, "asset_out" text NOT NULL, "asset_amount_in" numeric NOT NULL, "asset_amount_out" numeric NOT NULL, "event" text NOT NULL, "extrinsic" jsonb, "block_number" integer NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_fae24759f3f207b19d75d63314f" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_275903cccb306ca3529eb5bedf" ON "historical_swap" ("account_id") `)
-        await db.query(`CREATE TABLE "market" ("id" character varying NOT NULL, "authorized_address" text, "base_asset" text NOT NULL, "bonds" jsonb, "categories" jsonb, "creation" character varying(14) NOT NULL, "creator" text NOT NULL, "creator_fee" integer, "deadlines" jsonb, "description" text, "disputes" jsonb, "dispute_mechanism" character varying(14) NOT NULL, "has_valid_meta_categories" boolean NOT NULL, "img" text, "market_id" integer NOT NULL, "market_type" jsonb NOT NULL, "metadata" text NOT NULL, "oracle" text NOT NULL, "outcome_assets" text array NOT NULL, "period" jsonb NOT NULL, "reject_reason" text, "report" jsonb, "resolved_outcome" text, "scalar_type" text, "scoring_rule" character varying(26) NOT NULL, "slug" text, "status" character varying(19) NOT NULL, "tags" text array, "question" text, "pool_id" character varying, CONSTRAINT "PK_1e9a2963edfd331d92018e3abac" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "neo_pool" ("id" character varying NOT NULL, "collateral" text, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "liquidity_parameter" numeric NOT NULL, "liquidity_shares_manager" jsonb NOT NULL, "market_id" integer NOT NULL, "pool_id" integer NOT NULL, "swap_fee" numeric, "account_id" character varying, CONSTRAINT "PK_bc70713102726a0949a50a22046" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_fb707135b8bb6b3ce35248d53c" ON "neo_pool" ("account_id") `)
+        await db.query(`CREATE INDEX "IDX_e1c80a90a67b13803f68531f66" ON "neo_pool" ("market_id") `)
+        await db.query(`CREATE INDEX "IDX_2f5bf015fefd46462d8fb28cdd" ON "neo_pool" ("pool_id") `)
+        await db.query(`CREATE TABLE "market" ("id" character varying NOT NULL, "authorized_address" text, "base_asset" text NOT NULL, "bonds" jsonb, "categories" jsonb, "creation" character varying(14) NOT NULL, "creator" text NOT NULL, "creator_fee" integer, "deadlines" jsonb, "description" text, "disputes" jsonb, "dispute_mechanism" character varying(14) NOT NULL, "has_valid_meta_categories" boolean NOT NULL, "img" text, "market_id" integer NOT NULL, "market_type" jsonb NOT NULL, "metadata" text NOT NULL, "oracle" text NOT NULL, "outcome_assets" text array NOT NULL, "period" jsonb NOT NULL, "reject_reason" text, "report" jsonb, "resolved_outcome" text, "scalar_type" text, "scoring_rule" character varying(26) NOT NULL, "slug" text, "status" character varying(19) NOT NULL, "tags" text array, "question" text, "pool_id" character varying, "neo_pool_id" character varying, CONSTRAINT "PK_1e9a2963edfd331d92018e3abac" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_1a8068c93b7b3b7f483268ea11" ON "market" ("market_id") `)
         await db.query(`CREATE INDEX "IDX_190888a8e7a706187b12093c29" ON "market" ("pool_id") `)
+        await db.query(`CREATE INDEX "IDX_923b7aeab33f803bc47adddeb6" ON "market" ("neo_pool_id") `)
         await db.query(`CREATE TABLE "historical_market" ("id" character varying NOT NULL, "block_number" integer NOT NULL, "by" text, "event" character varying(20) NOT NULL, "outcome" jsonb, "resolved_outcome" text, "status" character varying(19) NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "market_id" character varying, CONSTRAINT "PK_8b5b3dfdac79a88102b94d55498" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_37393fa690692f119c5473d515" ON "historical_market" ("market_id") `)
         await db.query(`CREATE TABLE "historical_pool" ("id" character varying NOT NULL, "block_number" integer NOT NULL, "d_volume" numeric, "event" text NOT NULL, "pool_id" integer NOT NULL, "status" character varying(17) NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "volume" numeric, CONSTRAINT "PK_6ee31afe7b6dc3500a94effc951" PRIMARY KEY ("id"))`)
         await db.query(`ALTER TABLE "account_balance" ADD CONSTRAINT "FK_029576f147e256f1f93e4865c76" FOREIGN KEY ("account_id") REFERENCES "account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "pool" ADD CONSTRAINT "FK_7042da86b8de81cc3e9e448f9a7" FOREIGN KEY ("account_id") REFERENCES "account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "asset" ADD CONSTRAINT "FK_55d87b88a0e01b25819b9d4d5aa" FOREIGN KEY ("pool_id") REFERENCES "pool"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
+        await db.query(`ALTER TABLE "neo_pool" ADD CONSTRAINT "FK_fb707135b8bb6b3ce35248d53cd" FOREIGN KEY ("account_id") REFERENCES "account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "market" ADD CONSTRAINT "FK_190888a8e7a706187b12093c29d" FOREIGN KEY ("pool_id") REFERENCES "pool"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
+        await db.query(`ALTER TABLE "market" ADD CONSTRAINT "FK_923b7aeab33f803bc47adddeb69" FOREIGN KEY ("neo_pool_id") REFERENCES "neo_pool"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "historical_market" ADD CONSTRAINT "FK_37393fa690692f119c5473d5152" FOREIGN KEY ("market_id") REFERENCES "market"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     }
 
@@ -48,16 +55,23 @@ module.exports = class Data1698483956554 {
         await db.query(`DROP INDEX "public"."IDX_d9ec182f218dc183716b8807cf"`)
         await db.query(`DROP TABLE "historical_swap"`)
         await db.query(`DROP INDEX "public"."IDX_275903cccb306ca3529eb5bedf"`)
+        await db.query(`DROP TABLE "neo_pool"`)
+        await db.query(`DROP INDEX "public"."IDX_fb707135b8bb6b3ce35248d53c"`)
+        await db.query(`DROP INDEX "public"."IDX_e1c80a90a67b13803f68531f66"`)
+        await db.query(`DROP INDEX "public"."IDX_2f5bf015fefd46462d8fb28cdd"`)
         await db.query(`DROP TABLE "market"`)
         await db.query(`DROP INDEX "public"."IDX_1a8068c93b7b3b7f483268ea11"`)
         await db.query(`DROP INDEX "public"."IDX_190888a8e7a706187b12093c29"`)
+        await db.query(`DROP INDEX "public"."IDX_923b7aeab33f803bc47adddeb6"`)
         await db.query(`DROP TABLE "historical_market"`)
         await db.query(`DROP INDEX "public"."IDX_37393fa690692f119c5473d515"`)
         await db.query(`DROP TABLE "historical_pool"`)
         await db.query(`ALTER TABLE "account_balance" DROP CONSTRAINT "FK_029576f147e256f1f93e4865c76"`)
         await db.query(`ALTER TABLE "pool" DROP CONSTRAINT "FK_7042da86b8de81cc3e9e448f9a7"`)
         await db.query(`ALTER TABLE "asset" DROP CONSTRAINT "FK_55d87b88a0e01b25819b9d4d5aa"`)
+        await db.query(`ALTER TABLE "neo_pool" DROP CONSTRAINT "FK_fb707135b8bb6b3ce35248d53cd"`)
         await db.query(`ALTER TABLE "market" DROP CONSTRAINT "FK_190888a8e7a706187b12093c29d"`)
+        await db.query(`ALTER TABLE "market" DROP CONSTRAINT "FK_923b7aeab33f803bc47adddeb69"`)
         await db.query(`ALTER TABLE "historical_market" DROP CONSTRAINT "FK_37393fa690692f119c5473d5152"`)
     }
 }
