@@ -23,6 +23,8 @@ export class AssetPrice {
 
 enum BaseAsset {
   DOT = 'polkadot',
+  USDC = 'usd-coin',
+  USDT = 'tether',
   ZTG = 'zeitgeist',
 }
 
