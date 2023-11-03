@@ -21,21 +21,21 @@ export class AssetPrice {
   }
 }
 
-enum NumeratorAsset {
+enum BaseAsset {
   DOT = 'polkadot',
   ZTG = 'zeitgeist',
 }
 
-enum DenominatorAsset {
+enum TargetAsset {
   USD = 'usd',
 }
 
-registerEnumType(NumeratorAsset, {
-  name: 'NumeratorAsset',
+registerEnumType(BaseAsset, {
+  name: 'BaseAsset',
 });
 
-registerEnumType(DenominatorAsset, {
-  name: 'DenominatorAsset',
+registerEnumType(TargetAsset, {
+  name: 'TargetAsset',
 });
 
 @Resolver()
@@ -46,8 +46,8 @@ export class AssetPriceResolver {
 
   @Query(() => [AssetPrice])
   async assetPrice(
-    @Arg('assetId', () => [NumeratorAsset], { nullable: false }) numerator: NumeratorAsset[],
-    @Arg('denominator', () => [DenominatorAsset], { nullable: false }) denominator: DenominatorAsset[]
+    @Arg('base', () => [BaseAsset], { nullable: false }) base: BaseAsset[],
+    @Arg('target', () => [TargetAsset], { nullable: false }) target: TargetAsset[]
   ): Promise<AssetPrice[]> {
     // Required for visibility on graphql
     const result = (await this.tx()).getRepository(HistoricalMarket);
@@ -58,13 +58,13 @@ export class AssetPriceResolver {
     }
 
     // Remove duplicates
-    const nums = [...new Set(numerator)];
-    const dens = [...new Set(denominator)];
+    const bases = [...new Set(base)];
+    const targets = [...new Set(target)];
 
     const prices: AssetPrice[] = [];
-    for (let i = 0; i < nums.length; i++) {
-      for (let j = 0; j < dens.length; j++) {
-        const pairedAsset = generatePair(nums[i], dens[j]);
+    for (let i = 0; i < bases.length; i++) {
+      for (let j = 0; j < targets.length; j++) {
+        const pairedAsset = generatePair(bases[i], targets[j]);
         prices.push({
           pair: pairedAsset,
           price: await fetchFromCache(pairedAsset),
@@ -78,8 +78,8 @@ export class AssetPriceResolver {
 
 // Fetch prices from Coingecko for all supported assets
 const refreshPrices = async () => {
-  const ids = Object.values(NumeratorAsset).join(',');
-  const vs_currencies = Object.values(DenominatorAsset).join(',');
+  const ids = Object.values(BaseAsset).join(',');
+  const vs_currencies = Object.values(TargetAsset).join(',');
   let res;
   try {
     res = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=${vs_currencies}`);
@@ -100,15 +100,15 @@ const fetchFromCache = async (pair: string): Promise<number | undefined> => {
 
 // Traverse through response from Coingecko to cache prices
 const storeOnCache = async (data: any): Promise<void> => {
-  Object.entries(data).forEach(([numAsset, denAssetPrice]) => {
-    Object.entries(denAssetPrice as Map<string, number>).forEach(async ([denAsset, price]) => {
-      await (await Cache.init()).setData(CacheHint.Price, generatePair(numAsset, denAsset), price.toString());
+  Object.entries(data).forEach(([baseAsset, targetAssetPrice]) => {
+    Object.entries(targetAssetPrice as Map<string, number>).forEach(async ([targetAsset, price]) => {
+      await (await Cache.init()).setData(CacheHint.Price, generatePair(baseAsset, targetAsset), price.toString());
     });
   });
 };
 
-const generatePair = (num: string, den: string): string => {
-  const numerator = Object.keys(NumeratorAsset)[Object.values(NumeratorAsset).indexOf(<any>num)];
-  const denominator = Object.keys(DenominatorAsset)[Object.values(DenominatorAsset).indexOf(<any>den)];
-  return `${numerator}/${denominator}`;
+const generatePair = (b: string, t: string): string => {
+  const base = Object.keys(BaseAsset)[Object.values(BaseAsset).indexOf(<any>b)];
+  const target = Object.keys(TargetAsset)[Object.values(TargetAsset).indexOf(<any>t)];
+  return `${base}/${target}`;
 };
