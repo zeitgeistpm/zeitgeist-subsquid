@@ -5,6 +5,7 @@ import ipfsClient from 'ipfs-http-client';
 import { concat, toString } from 'uint8arrays';
 import CID from 'cids';
 import all from 'it-all';
+import { CacheHint } from './helper';
 
 export class Cache {
   private static _instance: Cache;
@@ -30,55 +31,23 @@ export class Cache {
     return this._instance;
   }
 
-  private makeKey(prefix: string, key: string) {
-    return `${prefix}_${key}`;
-  }
-
-  async setDecodedMetadata(key: string, value: string): Promise<void> {
+  getData = async (hint: CacheHint, key: string): Promise<string | null> => {
     return new Promise((resolve, reject) => {
-      const cacheKey = this.makeKey('meta', key);
-      this.client.set(cacheKey, value, (err: any) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
-  }
-
-  async setFee(key: string, value: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const cacheKey = this.makeKey('fee', key);
-      this.client.set(cacheKey, value, (err: any) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
-    });
-  }
-
-  async getDecodedMetadata(key: string): Promise<string | null> {
-    return new Promise((resolve, reject) => {
-      const cacheKey = this.makeKey('meta', key);
-      this.client.get(cacheKey, (err: any, data: string | PromiseLike<string | null> | null) => {
+      this.client.get(`${hint}_${key}`, (err: any, data: string | PromiseLike<string | null> | null) => {
         if (err) reject(err);
         else resolve(data);
       });
     });
-  }
+  };
 
-  async getFee(key: string): Promise<string | null> {
+  setData = async (hint: CacheHint, key: string, value: string): Promise<void> => {
     return new Promise((resolve, reject) => {
-      const cacheKey = this.makeKey('fee', key);
-      this.client.get(cacheKey, (err: any, data: string | PromiseLike<string | null> | null) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(data);
-        }
+      this.client.set(`${hint}_${key}`, value, (err: any) => {
+        if (err) reject(err);
+        else resolve();
       });
     });
-  }
+  };
 }
 
 export class IPFS {
