@@ -681,6 +681,52 @@ export class CurrencyWithdrawnEvent {
     }
 }
 
+export class NeoSwapsBuyExecutedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'NeoSwaps.BuyExecuted')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * Informant bought a position.
+     */
+    get isV50(): boolean {
+        return this._chain.getEventHash('NeoSwaps.BuyExecuted') === 'da754578b633b5217b5464ac37ebc2e1b6f4bff5a8120d5a65002eb4b29c3282'
+    }
+
+    /**
+     * Informant bought a position.
+     */
+    get asV50(): {who: Uint8Array, marketId: bigint, assetOut: v50.Asset, amountIn: bigint, amountOut: bigint, swapFeeAmount: bigint, externalFeeAmount: bigint} {
+        assert(this.isV50)
+        return this._chain.decodeEvent(this.event)
+    }
+
+    /**
+     * Informant bought a position. `amount_in` is the amount of collateral paid by `who`,
+     * including swap and external fees.
+     */
+    get isV51(): boolean {
+        return this._chain.getEventHash('NeoSwaps.BuyExecuted') === '0560140c853cad7278073349134c4127e48a415387791e0a7c2efc16f04a5e98'
+    }
+
+    /**
+     * Informant bought a position. `amount_in` is the amount of collateral paid by `who`,
+     * including swap and external fees.
+     */
+    get asV51(): {who: Uint8Array, marketId: bigint, assetOut: v51.Asset, amountIn: bigint, amountOut: bigint, swapFeeAmount: bigint, externalFeeAmount: bigint} {
+        assert(this.isV51)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
 export class NeoSwapsPoolDeployedEvent {
     private readonly _chain: Chain
     private readonly event: Event
@@ -720,6 +766,52 @@ export class NeoSwapsPoolDeployedEvent {
      * Pool was createed.
      */
     get asV51(): {who: Uint8Array, marketId: bigint, accountId: Uint8Array, reserves: [v51.Asset, bigint][], collateral: v51.Asset, liquidityParameter: bigint, poolSharesAmount: bigint, swapFee: bigint} {
+        assert(this.isV51)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class NeoSwapsSellExecutedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'NeoSwaps.SellExecuted')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * Informant sold a position.
+     */
+    get isV50(): boolean {
+        return this._chain.getEventHash('NeoSwaps.SellExecuted') === 'a3385e6e5c655a1372cb6a68481b59bb05469b25532e401f11ce1a676e13109a'
+    }
+
+    /**
+     * Informant sold a position.
+     */
+    get asV50(): {who: Uint8Array, marketId: bigint, assetIn: v50.Asset, amountIn: bigint, amountOut: bigint, swapFeeAmount: bigint, externalFeeAmount: bigint} {
+        assert(this.isV50)
+        return this._chain.decodeEvent(this.event)
+    }
+
+    /**
+     * Informant sold a position. `amount_out` is the amount of collateral received by `who`,
+     * including swap and external fees.
+     */
+    get isV51(): boolean {
+        return this._chain.getEventHash('NeoSwaps.SellExecuted') === '6eb63a0ad3c016871e8e6c9695deb6542b10108d4787786e9e932c06c8858767'
+    }
+
+    /**
+     * Informant sold a position. `amount_out` is the amount of collateral received by `who`,
+     * including swap and external fees.
+     */
+    get asV51(): {who: Uint8Array, marketId: bigint, assetIn: v51.Asset, amountIn: bigint, amountOut: bigint, swapFeeAmount: bigint, externalFeeAmount: bigint} {
         assert(this.isV51)
         return this._chain.decodeEvent(this.event)
     }
