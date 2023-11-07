@@ -303,6 +303,8 @@ creating DAOs, and other parts of the protocol.
 type MarketBonds @jsonField {
   "Bond associated with creation of markets"
   creation: MarketBond!
+  "Bond reserved by the disputant"
+  dispute: MarketBond
   "Bond associated with oracle selection"
   oracle: MarketBond!
   "A bond for an outcome reporter, who is not the oracle"
