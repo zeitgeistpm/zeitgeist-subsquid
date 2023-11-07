@@ -21,9 +21,9 @@ import {
   PredictionMarketsTokensRedeemedEvent,
 } from '../../types/events';
 import { MarketCommonsMarketsStorage } from '../../types/storage';
-import { MarketDispute, OutcomeReport, Report } from '../../types/v29';
+import { OutcomeReport, Report } from '../../types/v29';
 import { MarketStatus } from '../../types/v42';
-import { MarketBonds } from '../../types/v46';
+import { MarketBonds } from '../../types/v51';
 import { formatAssetId } from '../helper';
 
 export const getBoughtCompleteSetEvent = (ctx: Ctx, item: EventItem): BoughtCompleteSetEvent => {
@@ -135,23 +135,23 @@ export const getMarketDestroyedEvent = (ctx: Ctx, item: EventItem): MarketEvent 
 export const getMarketDisputedEvent = (ctx: Ctx, item: EventItem): MarketDisputedEvent => {
   const event = new PredictionMarketsMarketDisputedEvent(ctx, item.event);
   if (event.isV23) {
-    const [mId, dispute] = event.asV23;
-    let report = {} as any;
-    const marketId = Number(mId);
-    report.outcome = dispute;
-    return { marketId, report };
+    const [marketId, outcome] = event.asV23;
+    return { marketId, outcome };
   } else if (event.isV29) {
-    const [mId, status, report] = event.asV29;
-    const marketId = Number(mId);
-    return { marketId, status, report };
+    const [marketId, status, { by, outcome }] = event.asV29;
+    const who = ss58.codec('zeitgeist').encode(by);
+    return { who, marketId, outcome };
   } else if (event.isV49) {
-    const [mId, status] = event.asV49;
-    const marketId = Number(mId);
-    return { marketId, status };
+    const [marketId, status] = event.asV49;
+    return { marketId };
+  } else if (event.isV51) {
+    const [marketId, status, disputant] = event.asV51;
+    const who = ss58.codec('zeitgeist').encode(disputant);
+    return { who, marketId };
   } else {
-    const [mId, status] = item.event.args;
-    const marketId = Number(mId);
-    return { marketId, status };
+    const [marketId, status, disputant] = item.event.args;
+    const who = encodeAddress(disputant, 73);
+    return { who, marketId };
   }
 };
 
@@ -270,7 +270,8 @@ export const getMarketsStorage = async (
     market = await storage.asV51.get(marketId);
   }
   if (!market) return;
-  return market.bonds;
+  const bonds = market.bonds as MarketBonds;
+  return bonds;
 };
 
 export const getRedeemSharesCall = (ctx: Ctx, call: CallItem): MarketEvent => {
@@ -348,9 +349,9 @@ interface MarketCreatedEvent {
 }
 
 interface MarketDisputedEvent {
-  marketId: number;
-  status?: MarketStatus;
-  report?: MarketDispute;
+  who?: string;
+  marketId: bigint;
+  outcome?: OutcomeReport;
 }
 
 interface MarketRejectedEvent {
