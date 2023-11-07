@@ -446,7 +446,19 @@ export const marketDisputed = async (ctx: Ctx, block: SubstrateBlock, item: Even
     mr.outcome = or;
   }
   market.disputes.push(mr);
-  market.status = status ? formatMarketStatus(status) : MarketStatus.Disputed;
+
+  if (specVersion(block.specId) >= 49) {
+    const onChainBonds = await getMarketsStorage(ctx, block, BigInt(marketId));
+    if (onChainBonds && onChainBonds.dispute && market.bonds) {
+      const bond = new MarketBond({
+        isSettled: onChainBonds.dispute.isSettled,
+        value: onChainBonds.dispute.value,
+        who: encodeAddress(onChainBonds.dispute.who, 73),
+      });
+      market.bonds.dispute = bond;
+    }
+  }
+
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
 
