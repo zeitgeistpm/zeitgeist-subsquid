@@ -430,21 +430,22 @@ export const marketDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Eve
 };
 
 export const marketDisputed = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
-  const { marketId, status, report } = getMarketDisputedEvent(ctx, item);
+  const { who, marketId, outcome } = getMarketDisputedEvent(ctx, item);
 
-  const market = await ctx.store.get(Market, { where: { marketId: marketId } });
+  const market = await ctx.store.get(Market, { where: { marketId: +marketId.toString() } });
   if (!market) return;
-  if (!market.disputes) market.disputes = [];
 
-  const mr = new MarketReport();
-  mr.at = block.height;
-  if (report) {
-    if (report.by) mr.by = ss58.codec('zeitgeist').encode(report.by);
-    const or = new OutcomeReport();
-    if (report.outcome.__kind == 'Categorical') or.categorical = report.outcome.value;
-    else if (report.outcome.__kind == 'Scalar') or.scalar = report.outcome.value;
-    mr.outcome = or;
-  }
+  if (!market.disputes) market.disputes = [];
+  const mr = new MarketReport({
+    at: block.height,
+    by: who,
+    outcome: outcome
+      ? new OutcomeReport({
+          categorical: outcome.__kind == 'Categorical' ? outcome.value : null,
+          scalar: outcome.__kind == 'Scalar' ? outcome.value : null,
+        })
+      : null,
+  });
   market.disputes.push(mr);
 
   if (specVersion(block.specId) >= 49) {
@@ -459,6 +460,7 @@ export const marketDisputed = async (ctx: Ctx, block: SubstrateBlock, item: Even
     }
   }
 
+  market.status = MarketStatus.Disputed;
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
 
