@@ -246,7 +246,7 @@ type Pool @entity {
 AMM2 pool details
 """
 type NeoPool @entity {
-  account: Account
+  account: Account!
   collateral: String
   createdAt: DateTime!
   liquidityParameter: BigInt!
@@ -270,7 +270,7 @@ type HistoricalPool @entity {
   "Zeitgeist's identifier for pool"
   poolId: Int!
   "Current status of the pool"
-  status: PoolStatus!
+  status: PoolStatus
   "Timestamp of the block"
   timestamp: DateTime!
   "New updated volume"

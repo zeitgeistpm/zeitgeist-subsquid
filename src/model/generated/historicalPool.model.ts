@@ -42,8 +42,8 @@ export class HistoricalPool {
     /**
      * Current status of the pool
      */
-    @Column_("varchar", {length: 17, nullable: false})
-    status!: PoolStatus
+    @Column_("varchar", {length: 17, nullable: true})
+    status!: PoolStatus | undefined | null
 
     /**
      * Timestamp of the block

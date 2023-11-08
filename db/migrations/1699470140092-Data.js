@@ -1,5 +1,5 @@
-module.exports = class Data1699466628507 {
-    name = 'Data1699466628507'
+module.exports = class Data1699470140092 {
+    name = 'Data1699470140092'
 
     async up(db) {
         await db.query(`CREATE TABLE "account_balance" ("asset_id" text NOT NULL, "balance" numeric NOT NULL, "id" character varying NOT NULL, "account_id" character varying, CONSTRAINT "PK_bd893045760f719e24a95a42562" PRIMARY KEY ("id"))`)
@@ -29,7 +29,7 @@ module.exports = class Data1699466628507 {
         await db.query(`CREATE INDEX "IDX_275903cccb306ca3529eb5bedf" ON "historical_swap" ("account_id") `)
         await db.query(`CREATE TABLE "historical_market" ("id" character varying NOT NULL, "block_number" integer NOT NULL, "by" text, "event" character varying(20) NOT NULL, "outcome" jsonb, "resolved_outcome" text, "status" character varying(19) NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "market_id" character varying, CONSTRAINT "PK_8b5b3dfdac79a88102b94d55498" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_37393fa690692f119c5473d515" ON "historical_market" ("market_id") `)
-        await db.query(`CREATE TABLE "historical_pool" ("id" character varying NOT NULL, "block_number" integer NOT NULL, "d_volume" numeric, "event" text NOT NULL, "pool_id" integer NOT NULL, "status" character varying(17) NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "volume" numeric, CONSTRAINT "PK_6ee31afe7b6dc3500a94effc951" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "historical_pool" ("id" character varying NOT NULL, "block_number" integer NOT NULL, "d_volume" numeric, "event" text NOT NULL, "pool_id" integer NOT NULL, "status" character varying(17), "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "volume" numeric, CONSTRAINT "PK_6ee31afe7b6dc3500a94effc951" PRIMARY KEY ("id"))`)
         await db.query(`ALTER TABLE "account_balance" ADD CONSTRAINT "FK_029576f147e256f1f93e4865c76" FOREIGN KEY ("account_id") REFERENCES "account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "pool" ADD CONSTRAINT "FK_7042da86b8de81cc3e9e448f9a7" FOREIGN KEY ("account_id") REFERENCES "account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "neo_pool" ADD CONSTRAINT "FK_fb707135b8bb6b3ce35248d53cd" FOREIGN KEY ("account_id") REFERENCES "account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)

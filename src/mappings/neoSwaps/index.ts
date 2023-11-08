@@ -99,36 +99,34 @@ export const poolDeployed = async (
   await ctx.store.save<HistoricalMarket>(hm);
 
   const historicalAssets: HistoricalAsset[] = [];
-  if (neoPool.account) {
-    await Promise.all(
-      neoPool.account.balances.map(async (ab, i) => {
-        const asset = new Asset({
-          assetId: ab.assetId,
-          amountInPool: ab.balance,
-          id: item.event.id + '-' + neoPool.marketId + i,
-          market: market,
-          price: 0,
-        });
-        console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
-        await ctx.store.save<Asset>(asset);
+  await Promise.all(
+    neoPool.account.balances.map(async (ab, i) => {
+      const asset = new Asset({
+        assetId: ab.assetId,
+        amountInPool: ab.balance,
+        id: item.event.id + '-' + neoPool.marketId + i,
+        market: market,
+        price: 0,
+      });
+      console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
+      await ctx.store.save<Asset>(asset);
 
-        const ha = new HistoricalAsset({
-          accountId: who,
-          assetId: asset.assetId,
-          baseAssetTraded: BigInt(0),
-          blockNumber: block.height,
-          dAmountInPool: asset.amountInPool,
-          dPrice: asset.price,
-          event: item.event.name.split('.')[1],
-          id: item.event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
-          newAmountInPool: asset.amountInPool,
-          newPrice: asset.price,
-          timestamp: new Date(block.timestamp),
-        });
-        historicalAssets.push(ha);
-      })
-    );
-  }
+      const ha = new HistoricalAsset({
+        accountId: who,
+        assetId: asset.assetId,
+        baseAssetTraded: BigInt(0),
+        blockNumber: block.height,
+        dAmountInPool: asset.amountInPool,
+        dPrice: asset.price,
+        event: item.event.name.split('.')[1],
+        id: item.event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+        newAmountInPool: asset.amountInPool,
+        newPrice: asset.price,
+        timestamp: new Date(block.timestamp),
+      });
+      historicalAssets.push(ha);
+    })
+  );
 
   const historicalPool = new HistoricalPool({
     blockNumber: block.height,
@@ -136,7 +134,7 @@ export const poolDeployed = async (
     event: item.event.name.split('.')[1],
     id: item.event.id + '-' + neoPool.poolId,
     poolId: neoPool.poolId,
-    status: PoolStatus.Active,
+    status: null,
     timestamp: new Date(block.timestamp),
     volume: BigInt(0),
   });
