@@ -436,10 +436,9 @@ export const marketDisputed = async (ctx: Ctx, block: SubstrateBlock, item: Even
   const market = await ctx.store.get(Market, { where: { marketId: +marketId.toString() } });
   if (!market) return;
 
-  let mr = new MarketReport();
-  if (specVersion(block.specId) >= 49) {
+  if (specVersion(block.specId) >= 42 && market.bonds) {
     const onChainBonds = await getMarketsStorage(ctx, block, BigInt(marketId));
-    if (onChainBonds && onChainBonds.dispute && market.bonds) {
+    if (onChainBonds && onChainBonds.dispute) {
       const bond = new MarketBond({
         isSettled: onChainBonds.dispute.isSettled,
         value: onChainBonds.dispute.value,
@@ -447,7 +446,11 @@ export const marketDisputed = async (ctx: Ctx, block: SubstrateBlock, item: Even
       });
       market.bonds.dispute = bond;
     }
-  } else {
+  }
+
+  let mr = new MarketReport();
+  // Conditions set based on PredictionMarketsDisputesStorage
+  if (specVersion(block.specId) < 49) {
     if (!market.disputes) market.disputes = [];
     mr = new MarketReport({
       at: block.height,
