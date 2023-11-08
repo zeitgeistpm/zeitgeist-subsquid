@@ -18,6 +18,7 @@ import {
   MarketBonds,
   MarketCreation,
   MarketDeadlines,
+  MarketEvent,
   MarketPeriod,
   MarketReport,
   MarketStatus,
@@ -435,19 +436,7 @@ export const marketDisputed = async (ctx: Ctx, block: SubstrateBlock, item: Even
   const market = await ctx.store.get(Market, { where: { marketId: +marketId.toString() } });
   if (!market) return;
 
-  if (!market.disputes) market.disputes = [];
-  const mr = new MarketReport({
-    at: block.height,
-    by: who,
-    outcome: outcome
-      ? new OutcomeReport({
-          categorical: outcome.__kind == 'Categorical' ? outcome.value : null,
-          scalar: outcome.__kind == 'Scalar' ? outcome.value : null,
-        })
-      : null,
-  });
-  market.disputes.push(mr);
-
+  let mr = new MarketReport();
   if (specVersion(block.specId) >= 49) {
     const onChainBonds = await getMarketsStorage(ctx, block, BigInt(marketId));
     if (onChainBonds && onChainBonds.dispute && market.bonds) {
@@ -458,21 +447,35 @@ export const marketDisputed = async (ctx: Ctx, block: SubstrateBlock, item: Even
       });
       market.bonds.dispute = bond;
     }
+  } else {
+    if (!market.disputes) market.disputes = [];
+    mr = new MarketReport({
+      at: block.height,
+      by: who,
+      outcome: outcome
+        ? new OutcomeReport({
+            categorical: outcome.__kind == 'Categorical' ? outcome.value : null,
+            scalar: outcome.__kind == 'Scalar' ? outcome.value : null,
+          })
+        : null,
+    });
+    market.disputes.push(mr);
   }
-
   market.status = MarketStatus.Disputed;
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
 
-  const hm = new HistoricalMarket();
-  hm.id = item.event.id + '-' + market.marketId;
-  hm.market = market;
-  hm.status = market.status;
-  hm.by = mr.by;
-  hm.outcome = mr.outcome;
-  hm.event = formatMarketEvent(item.event.name);
-  hm.blockNumber = block.height;
-  hm.timestamp = new Date(block.timestamp);
+  const hm = new HistoricalMarket({
+    blockNumber: block.height,
+    by: who || market.bonds?.dispute?.who,
+    event: MarketEvent.MarketDisputed,
+    id: item.event.id + '-' + market.marketId,
+    market: market,
+    outcome: mr.outcome,
+    resolvedOutcome: null,
+    status: market.status,
+    timestamp: new Date(block.timestamp),
+  });
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
   await ctx.store.save<HistoricalMarket>(hm);
 };
