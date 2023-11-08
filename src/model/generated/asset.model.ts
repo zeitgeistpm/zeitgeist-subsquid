@@ -1,5 +1,6 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_} from "typeorm"
 import * as marshal from "./marshal"
+import {Market} from "./market.model"
 import {Pool} from "./pool.model"
 
 /**
@@ -12,11 +13,14 @@ export class Asset {
         Object.assign(this, props)
     }
 
-    /**
-     * Unique identifier of the object
-     */
     @PrimaryColumn_()
     id!: string
+
+    /**
+     * Balance of the asset present in the pool account
+     */
+    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+    amountInPool!: bigint
 
     /**
      * Zeitgeist's identifier for asset
@@ -25,21 +29,22 @@ export class Asset {
     assetId!: string
 
     /**
+     * Connected market
+     */
+    @Index_()
+    @ManyToOne_(() => Market, {nullable: true})
+    market!: Market
+
+    /**
      * Connected pool
      */
     @Index_()
     @ManyToOne_(() => Pool, {nullable: true})
-    pool!: Pool
+    pool!: Pool | undefined | null
 
     /**
      * Spot price of the asset in the pool
      */
     @Column_("numeric", {transformer: marshal.floatTransformer, nullable: false})
     price!: number
-
-    /**
-     * Balance of the asset present in the pool account
-     */
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
-    amountInPool!: bigint
 }

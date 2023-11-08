@@ -1,5 +1,6 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_, ManyToOne as ManyToOne_} from "typeorm"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, OneToMany as OneToMany_, Index as Index_, ManyToOne as ManyToOne_} from "typeorm"
 import * as marshal from "./marshal"
+import {Asset} from "./asset.model"
 import {MarketBonds} from "./_marketBonds"
 import {CategoryMetadata} from "./_categoryMetadata"
 import {MarketCreation} from "./_marketCreation"
@@ -30,6 +31,12 @@ export class Market {
      */
     @Column_("text", {nullable: true})
     authorizedAddress!: string | undefined | null
+
+    /**
+     * List of assets connected to the market
+     */
+    @OneToMany_(() => Asset, e => e.market)
+    assets!: Asset[]
 
     /**
      * The base asset in the market swap pool (usually a currency)
