@@ -1,7 +1,10 @@
 import { SubstrateBlock } from '@subsquid/substrate-processor';
 import {
   Account,
+  Asset,
+  HistoricalAsset,
   HistoricalMarket,
+  HistoricalPool,
   HistoricalSwap,
   LiquiditySharesManager,
   Market,
@@ -9,7 +12,7 @@ import {
   NeoPool,
 } from '../../model';
 import { Ctx, EventItem } from '../../processor';
-import { extrinsicFromEvent } from '../helper';
+import { PoolAccount, extrinsicFromEvent } from '../helper';
 import { getBuyExecutedEvent, getPoolDeployedEvent, getSellExecutedEvent } from './types';
 
 export const buyExecuted = async (
@@ -37,18 +40,19 @@ export const buyExecuted = async (
   return historicalSwap;
 };
 
-export const poolDeployed = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
+export const poolDeployed = async (
+  ctx: Ctx,
+  block: SubstrateBlock,
+  item: EventItem
+): Promise<{ historicalAssets: HistoricalAsset[]; historicalPool: HistoricalPool } | undefined> => {
   let { who, marketId, accountId, collateral, liquidityParameter, poolSharesAmount, swapFee } = getPoolDeployedEvent(
     ctx,
     item
   );
 
-  let account;
-  if (accountId) {
-    account = await ctx.store.get(Account, {
-      where: { accountId: accountId },
-    });
-  }
+  const account = await ctx.store.get(Account, {
+    where: { accountId: accountId || PoolAccount[+marketId.toString()] },
+  });
 
   const liquiditySharesManager = new LiquiditySharesManager({
     fees: null,
@@ -69,6 +73,49 @@ export const poolDeployed = async (ctx: Ctx, block: SubstrateBlock, item: EventI
   });
   console.log(`[${item.event.name}] Saving neo pool: ${JSON.stringify(pool, null, 2)}`);
   await ctx.store.save<NeoPool>(pool);
+
+  const historicalAssets: HistoricalAsset[] = [];
+  if (pool.account) {
+    await Promise.all(
+      pool.account.balances.map(async (ab, i) => {
+        const asset = new Asset({
+          assetId: ab.assetId,
+          amountInPool: ab.balance,
+          id: item.event.id + '-' + pool.marketId + i,
+          market: market,
+          price: undefined,
+        });
+        console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
+        await ctx.store.save<Asset>(asset);
+
+        const ha = new HistoricalAsset({
+          accountId: who,
+          assetId: asset.assetId,
+          baseAssetTraded: BigInt(0),
+          blockNumber: block.height,
+          dAmountInPool: asset.amountInPool,
+          dPrice: asset.price,
+          event: item.event.name.split('.')[1],
+          id: item.event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+          newAmountInPool: asset.amountInPool,
+          newPrice: asset.price,
+          timestamp: new Date(block.timestamp),
+        });
+        historicalAssets.push(ha);
+      })
+    );
+  }
+
+  const historicalPool = new HistoricalPool({
+    blockNumber: block.height,
+    dVolume: BigInt(0),
+    event: item.event.name.split('.')[1],
+    id: item.event.id + '-' + pool.poolId,
+    poolId: pool.poolId,
+    status: undefined,
+    timestamp: new Date(block.timestamp),
+    volume: BigInt(0),
+  });
 
   const market = await ctx.store.get(Market, {
     where: { marketId: +marketId.toString() },
@@ -91,6 +138,8 @@ export const poolDeployed = async (ctx: Ctx, block: SubstrateBlock, item: EventI
   });
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
   await ctx.store.save<HistoricalMarket>(hm);
+
+  return { historicalAssets, historicalPool };
 };
 
 export const sellExecuted = async (
