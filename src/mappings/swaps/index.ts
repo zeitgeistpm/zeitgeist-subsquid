@@ -294,6 +294,7 @@ export const poolCreate = async (
           assetId: wt.assetId,
           amountInPool: BigInt(assetQty),
           id: item.event.id + '-' + pool.marketId + i,
+          market: market,
           pool: pool,
           price: calcSpotPrice(+baseAssetQty.toString(), baseAssetWeight, assetQty, +wt.weight.toString()),
         });
