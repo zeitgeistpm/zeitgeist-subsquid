@@ -60,7 +60,7 @@ export const poolDeployed = async (
     totalShares: poolSharesAmount,
   });
 
-  const pool = new NeoPool({
+  const neoPool = new NeoPool({
     account,
     collateral,
     createdAt: new Date(block.timestamp),
@@ -71,17 +71,39 @@ export const poolDeployed = async (
     poolId: +marketId.toString(),
     swapFee,
   });
-  console.log(`[${item.event.name}] Saving neo pool: ${JSON.stringify(pool, null, 2)}`);
-  await ctx.store.save<NeoPool>(pool);
+  console.log(`[${item.event.name}] Saving neo pool: ${JSON.stringify(neoPool, null, 2)}`);
+  await ctx.store.save<NeoPool>(neoPool);
+
+  const market = await ctx.store.get(Market, {
+    where: { marketId: +marketId.toString() },
+  });
+  if (!market) return;
+  market.neoPool = neoPool;
+  console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
+  await ctx.store.save<Market>(market);
+
+  const hm = new HistoricalMarket({
+    blockNumber: block.height,
+    by: null,
+    event: MarketEvent.PoolDeployed,
+    id: item.event.id + '-' + market.marketId,
+    market: market,
+    outcome: null,
+    resolvedOutcome: null,
+    status: market.status,
+    timestamp: new Date(block.timestamp),
+  });
+  console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
+  await ctx.store.save<HistoricalMarket>(hm);
 
   const historicalAssets: HistoricalAsset[] = [];
-  if (pool.account) {
+  if (neoPool.account) {
     await Promise.all(
-      pool.account.balances.map(async (ab, i) => {
+      neoPool.account.balances.map(async (ab, i) => {
         const asset = new Asset({
           assetId: ab.assetId,
           amountInPool: ab.balance,
-          id: item.event.id + '-' + pool.marketId + i,
+          id: item.event.id + '-' + neoPool.marketId + i,
           market: market,
           price: undefined,
         });
@@ -110,34 +132,12 @@ export const poolDeployed = async (
     blockNumber: block.height,
     dVolume: BigInt(0),
     event: item.event.name.split('.')[1],
-    id: item.event.id + '-' + pool.poolId,
-    poolId: pool.poolId,
+    id: item.event.id + '-' + neoPool.poolId,
+    poolId: neoPool.poolId,
     status: undefined,
     timestamp: new Date(block.timestamp),
     volume: BigInt(0),
   });
-
-  const market = await ctx.store.get(Market, {
-    where: { marketId: +marketId.toString() },
-  });
-  if (!market) return;
-  market.neoPool = pool;
-  console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
-  await ctx.store.save<Market>(market);
-
-  const hm = new HistoricalMarket({
-    blockNumber: block.height,
-    by: null,
-    event: MarketEvent.PoolDeployed,
-    id: item.event.id + '-' + market.marketId,
-    market: market,
-    outcome: null,
-    resolvedOutcome: null,
-    status: market.status,
-    timestamp: new Date(block.timestamp),
-  });
-  console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
-  await ctx.store.save<HistoricalMarket>(hm);
 
   return { historicalAssets, historicalPool };
 };
