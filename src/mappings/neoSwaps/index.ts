@@ -10,9 +10,10 @@ import {
   Market,
   MarketEvent,
   NeoPool,
+  PoolStatus,
 } from '../../model';
 import { Ctx, EventItem } from '../../processor';
-import { PoolAccount, extrinsicFromEvent } from '../helper';
+import { extrinsicFromEvent } from '../helper';
 import { getBuyExecutedEvent, getPoolDeployedEvent, getSellExecutedEvent } from './types';
 
 export const buyExecuted = async (
@@ -51,7 +52,8 @@ export const poolDeployed = async (
   );
 
   const account = await ctx.store.get(Account, {
-    where: { accountId: accountId || PoolAccount[+marketId.toString()] },
+    where: { accountId: accountId },
+    relations: { balances: true },
   });
 
   const liquiditySharesManager = new LiquiditySharesManager({
@@ -105,7 +107,7 @@ export const poolDeployed = async (
           amountInPool: ab.balance,
           id: item.event.id + '-' + neoPool.marketId + i,
           market: market,
-          price: undefined,
+          price: 0,
         });
         console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
         await ctx.store.save<Asset>(asset);
@@ -134,7 +136,7 @@ export const poolDeployed = async (
     event: item.event.name.split('.')[1],
     id: item.event.id + '-' + neoPool.poolId,
     poolId: neoPool.poolId,
-    status: undefined,
+    status: PoolStatus.Active,
     timestamp: new Date(block.timestamp),
     volume: BigInt(0),
   });
