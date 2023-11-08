@@ -1,7 +1,41 @@
 import { SubstrateBlock } from '@subsquid/substrate-processor';
-import { Account, HistoricalMarket, LiquiditySharesManager, Market, MarketEvent, NeoPool } from '../../model';
+import {
+  Account,
+  HistoricalMarket,
+  HistoricalSwap,
+  LiquiditySharesManager,
+  Market,
+  MarketEvent,
+  NeoPool,
+} from '../../model';
 import { Ctx, EventItem } from '../../processor';
-import { getPoolDeployedEvent } from './types';
+import { extrinsicFromEvent } from '../helper';
+import { getBuyExecutedEvent, getPoolDeployedEvent, getSellExecutedEvent } from './types';
+
+export const buyExecuted = async (
+  ctx: Ctx,
+  block: SubstrateBlock,
+  item: EventItem
+): Promise<HistoricalSwap | undefined> => {
+  let { who, marketId, asset, amountIn, amountOut } = getBuyExecutedEvent(ctx, item);
+
+  const market = await ctx.store.get(Market, { where: { marketId: +marketId.toString() } });
+  if (!market) return;
+
+  const historicalSwap = new HistoricalSwap({
+    accountId: who,
+    assetAmountIn: amountIn,
+    assetAmountOut: amountOut,
+    assetIn: market.baseAsset,
+    assetOut: asset,
+    blockNumber: block.height,
+    event: item.event.name.split('.')[1],
+    extrinsic: extrinsicFromEvent(item.event),
+    id: item.event.id,
+    timestamp: new Date(block.timestamp),
+  });
+  return historicalSwap;
+};
 
 export const poolDeployed = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
   let { who, marketId, accountId, collateral, liquidityParameter, poolSharesAmount, swapFee } = getPoolDeployedEvent(
@@ -57,4 +91,29 @@ export const poolDeployed = async (ctx: Ctx, block: SubstrateBlock, item: EventI
   });
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
   await ctx.store.save<HistoricalMarket>(hm);
+};
+
+export const sellExecuted = async (
+  ctx: Ctx,
+  block: SubstrateBlock,
+  item: EventItem
+): Promise<HistoricalSwap | undefined> => {
+  let { who, marketId, asset, amountIn, amountOut } = getSellExecutedEvent(ctx, item);
+
+  const market = await ctx.store.get(Market, { where: { marketId: +marketId.toString() } });
+  if (!market) return;
+
+  const historicalSwap = new HistoricalSwap({
+    accountId: who,
+    assetAmountIn: amountIn,
+    assetAmountOut: amountOut,
+    assetIn: asset,
+    assetOut: market.baseAsset,
+    blockNumber: block.height,
+    event: item.event.name.split('.')[1],
+    extrinsic: extrinsicFromEvent(item.event),
+    id: item.event.id,
+    timestamp: new Date(block.timestamp),
+  });
+  return historicalSwap;
 };
