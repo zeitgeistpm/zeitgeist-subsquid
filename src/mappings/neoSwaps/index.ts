@@ -46,7 +46,7 @@ export const poolDeployed = async (
   block: SubstrateBlock,
   item: EventItem
 ): Promise<{ historicalAssets: HistoricalAsset[]; historicalPool: HistoricalPool } | undefined> => {
-  let { who, marketId, accountId, collateral, liquidityParameter, poolSharesAmount, swapFee } = getPoolDeployedEvent(
+  const { who, marketId, accountId, collateral, liquidityParameter, poolSharesAmount, swapFee } = getPoolDeployedEvent(
     ctx,
     item
   );
@@ -55,6 +55,10 @@ export const poolDeployed = async (
     where: { accountId: accountId },
     relations: { balances: true },
   });
+  if (!account) {
+    console.error(`Coudn't find pool account with accountId ${accountId}`);
+    return;
+  }
 
   const liquiditySharesManager = new LiquiditySharesManager({
     fees: null,
