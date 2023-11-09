@@ -612,6 +612,7 @@ export const marketResolved = async (ctx: Ctx, block: SubstrateBlock, item: Even
   market.status = status ? formatMarketStatus(status) : MarketStatus.Resolved;
   if (market.bonds) {
     if (market.creation === MarketCreation.Permissionless) market.bonds.creation.isSettled = true;
+    if (market.bonds.dispute) market.bonds.dispute.isSettled = true;
     market.bonds.oracle.isSettled = true;
     if (market.bonds.outsider) market.bonds.outsider.isSettled = true;
   }
