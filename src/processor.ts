@@ -467,7 +467,10 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           case 'NeoSwaps.PoolDeployed': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            await poolDeployed(ctx, block.header, item);
+            const res = await poolDeployed(ctx, block.header, item);
+            if (!res) break;
+            assetHistory.push(...res.historicalAssets);
+            poolHistory.push(res.historicalPool);
             break;
           }
           case 'NeoSwaps.SellExecuted': {

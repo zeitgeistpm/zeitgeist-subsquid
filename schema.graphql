@@ -55,16 +55,16 @@ A type that has detail of the outcome asset. It is initialised as soon as the
 market is created and price is assigned when pool is deployed for the market.
 """
 type Asset @entity {
-  "Unique identifier of the object"
-  id: ID!
-  "Zeitgeist's identifier for asset"
-  assetId: String!
-  "Connected pool"
-  pool: Pool!
-  "Spot price of the asset in the pool"
-  price: Float!
   "Balance of the asset present in the pool account"
   amountInPool: BigInt!
+  "Zeitgeist's identifier for asset"
+  assetId: String!
+  "Connected market"
+  market: Market!
+  "Connected pool"
+  pool: Pool
+  "Spot price of the asset in the pool"
+  price: Float!
 }
 
 """
@@ -127,6 +127,8 @@ Prediction market details
 type Market @entity {
   "Address responsible for authorizing disputes. Null if Adv Comm is the authority"
   authorizedAddress: String
+  "List of assets connected to the market"
+  assets: [Asset!]! @derivedFrom(field: "market")
   "The base asset in the market swap pool (usually a currency)"
   baseAsset: String!
   "Tracks the status of the advisory, oracle and validity bonds"
@@ -244,7 +246,7 @@ type Pool @entity {
 AMM2 pool details
 """
 type NeoPool @entity {
-  account: Account
+  account: Account!
   collateral: String
   createdAt: DateTime!
   liquidityParameter: BigInt!
@@ -268,7 +270,7 @@ type HistoricalPool @entity {
   "Zeitgeist's identifier for pool"
   poolId: Int!
   "Current status of the pool"
-  status: PoolStatus!
+  status: PoolStatus
   "Timestamp of the block"
   timestamp: DateTime!
   "New updated volume"

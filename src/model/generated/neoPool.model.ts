@@ -17,7 +17,7 @@ export class NeoPool {
 
     @Index_()
     @ManyToOne_(() => Account, {nullable: true})
-    account!: Account | undefined | null
+    account!: Account
 
     @Column_("text", {nullable: true})
     collateral!: string | undefined | null

@@ -2,7 +2,7 @@ import { encodeAddress } from '@polkadot/keyring';
 import * as ss58 from '@subsquid/ss58';
 import { Ctx, EventItem } from '../../processor';
 import { NeoSwapsBuyExecutedEvent, NeoSwapsPoolDeployedEvent, NeoSwapsSellExecutedEvent } from '../../types/events';
-import { formatAssetId } from '../helper';
+import { PoolAccount, formatAssetId } from '../helper';
 
 export const getBuyExecutedEvent = (ctx: Ctx, item: EventItem): ExecutedEvent => {
   const event = new NeoSwapsBuyExecutedEvent(ctx, item.event);
@@ -34,6 +34,7 @@ export const getPoolDeployedEvent = (ctx: Ctx, item: EventItem): PoolDeployedEve
   if (event.isV50) {
     eventAs = event.asV50;
     who = ss58.codec('zeitgeist').encode(event.asV50.who);
+    accountId = PoolAccount[+event.asV50.marketId.toString()];
   } else if (event.isV51) {
     eventAs = event.asV51;
     who = ss58.codec('zeitgeist').encode(event.asV51.who);
@@ -91,7 +92,7 @@ interface ExecutedEvent {
 interface PoolDeployedEvent {
   who: string;
   marketId: bigint;
-  accountId?: string;
+  accountId: string;
   collateral?: string;
   liquidityParameter: bigint;
   poolSharesAmount: bigint;

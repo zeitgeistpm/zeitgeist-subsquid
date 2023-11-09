@@ -265,6 +265,28 @@ export const poolCreate = async (
   console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
   await ctx.store.save<Pool>(pool);
 
+  const market = await ctx.store.get(Market, {
+    where: { marketId: pool.marketId },
+  });
+  if (!market) return;
+  market.pool = pool;
+  console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
+  await ctx.store.save<Market>(market);
+
+  const hm = new HistoricalMarket({
+    blockNumber: block.height,
+    by: null,
+    event: MarketEvent.PoolDeployed,
+    id: item.event.id + '-' + market.marketId,
+    market: market,
+    outcome: null,
+    resolvedOutcome: null,
+    status: market.status,
+    timestamp: new Date(block.timestamp),
+  });
+  console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
+  await ctx.store.save<HistoricalMarket>(hm);
+
   let baseAssetQty = pool.account.balances[pool.account.balances.length - 1].balance;
   await Promise.all(
     pool.account.balances.map(async (ab) => {
@@ -294,6 +316,7 @@ export const poolCreate = async (
           assetId: wt.assetId,
           amountInPool: BigInt(assetQty),
           id: item.event.id + '-' + pool.marketId + i,
+          market: market,
           pool: pool,
           price: calcSpotPrice(+baseAssetQty.toString(), baseAssetWeight, assetQty, +wt.weight.toString()),
         });
@@ -330,28 +353,6 @@ export const poolCreate = async (
     timestamp: new Date(block.timestamp),
     volume: pool.volume,
   });
-
-  const market = await ctx.store.get(Market, {
-    where: { marketId: pool.marketId },
-  });
-  if (!market) return;
-  market.pool = pool;
-  console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
-  await ctx.store.save<Market>(market);
-
-  const hm = new HistoricalMarket({
-    blockNumber: block.height,
-    by: null,
-    event: MarketEvent.PoolDeployed,
-    id: item.event.id + '-' + market.marketId,
-    market: market,
-    outcome: null,
-    resolvedOutcome: null,
-    status: market.status,
-    timestamp: new Date(block.timestamp),
-  });
-  console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
-  await ctx.store.save<HistoricalMarket>(hm);
 
   return { historicalAssets, historicalPool };
 };
