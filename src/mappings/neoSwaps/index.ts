@@ -13,7 +13,7 @@ import {
   PoolStatus,
 } from '../../model';
 import { Ctx, EventItem } from '../../processor';
-import { extrinsicFromEvent } from '../helper';
+import { extrinsicFromEvent, isBaseAsset } from '../helper';
 import { getBuyExecutedEvent, getPoolDeployedEvent, getSellExecutedEvent } from './types';
 
 export const buyExecuted = async (
@@ -105,6 +105,7 @@ export const poolDeployed = async (
   const historicalAssets: HistoricalAsset[] = [];
   await Promise.all(
     neoPool.account.balances.map(async (ab, i) => {
+      if (isBaseAsset(ab.assetId)) return;
       const asset = new Asset({
         assetId: ab.assetId,
         amountInPool: ab.balance,
