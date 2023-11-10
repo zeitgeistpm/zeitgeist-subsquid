@@ -320,7 +320,8 @@ export const getTokensRedeemedEvent = (ctx: Ctx, item: EventItem): TokensRedeeme
   } else {
     [mId, currencyId, amtRedeemed, payout, who] = item.event.args;
     marketId = Number(mId);
-    walletId = ss58.codec('zeitgeist').encode(who);
+    amtRedeemed = BigInt(amtRedeemed);
+    walletId = encodeAddress(who, 73);
   }
   const assetId = formatAssetId(currencyId);
   return { marketId, assetId, amtRedeemed, payout, walletId };
