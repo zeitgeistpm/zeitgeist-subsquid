@@ -18,6 +18,7 @@ import {
   MarketBonds,
   MarketCreation,
   MarketDeadlines,
+  MarketEvent,
   MarketPeriod,
   MarketReport,
   MarketStatus,
@@ -430,35 +431,54 @@ export const marketDestroyed = async (ctx: Ctx, block: SubstrateBlock, item: Eve
 };
 
 export const marketDisputed = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
-  const { marketId, status, report } = getMarketDisputedEvent(ctx, item);
+  const { who, marketId, outcome } = getMarketDisputedEvent(ctx, item);
 
-  const market = await ctx.store.get(Market, { where: { marketId: marketId } });
+  const market = await ctx.store.get(Market, { where: { marketId: +marketId.toString() } });
   if (!market) return;
-  if (!market.disputes) market.disputes = [];
 
-  const mr = new MarketReport();
-  mr.at = block.height;
-  if (report) {
-    if (report.by) mr.by = ss58.codec('zeitgeist').encode(report.by);
-    const or = new OutcomeReport();
-    if (report.outcome.__kind == 'Categorical') or.categorical = report.outcome.value;
-    else if (report.outcome.__kind == 'Scalar') or.scalar = report.outcome.value;
-    mr.outcome = or;
+  if (specVersion(block.specId) >= 42 && market.bonds) {
+    const onChainBonds = await getMarketsStorage(ctx, block, BigInt(marketId));
+    if (onChainBonds && onChainBonds.dispute) {
+      const bond = new MarketBond({
+        isSettled: onChainBonds.dispute.isSettled,
+        value: onChainBonds.dispute.value,
+        who: encodeAddress(onChainBonds.dispute.who, 73),
+      });
+      market.bonds.dispute = bond;
+    }
   }
-  market.disputes.push(mr);
-  market.status = status ? formatMarketStatus(status) : MarketStatus.Disputed;
+
+  let mr = new MarketReport();
+  // Conditions set based on PredictionMarketsDisputesStorage
+  if (specVersion(block.specId) < 49) {
+    if (!market.disputes) market.disputes = [];
+    mr = new MarketReport({
+      at: block.height,
+      by: who,
+      outcome: outcome
+        ? new OutcomeReport({
+            categorical: outcome.__kind == 'Categorical' ? outcome.value : null,
+            scalar: outcome.__kind == 'Scalar' ? outcome.value : null,
+          })
+        : null,
+    });
+    market.disputes.push(mr);
+  }
+  market.status = MarketStatus.Disputed;
   console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await ctx.store.save<Market>(market);
 
-  const hm = new HistoricalMarket();
-  hm.id = item.event.id + '-' + market.marketId;
-  hm.market = market;
-  hm.status = market.status;
-  hm.by = mr.by;
-  hm.outcome = mr.outcome;
-  hm.event = formatMarketEvent(item.event.name);
-  hm.blockNumber = block.height;
-  hm.timestamp = new Date(block.timestamp);
+  const hm = new HistoricalMarket({
+    blockNumber: block.height,
+    by: who || market.bonds?.dispute?.who,
+    event: MarketEvent.MarketDisputed,
+    id: item.event.id + '-' + market.marketId,
+    market: market,
+    outcome: mr.outcome,
+    resolvedOutcome: null,
+    status: market.status,
+    timestamp: new Date(block.timestamp),
+  });
   console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
   await ctx.store.save<HistoricalMarket>(hm);
 };
@@ -592,6 +612,7 @@ export const marketResolved = async (ctx: Ctx, block: SubstrateBlock, item: Even
   market.status = status ? formatMarketStatus(status) : MarketStatus.Resolved;
   if (market.bonds) {
     if (market.creation === MarketCreation.Permissionless) market.bonds.creation.isSettled = true;
+    if (market.bonds.dispute) market.bonds.dispute.isSettled = true;
     market.bonds.oracle.isSettled = true;
     if (market.bonds.outsider) market.bonds.outsider.isSettled = true;
   }

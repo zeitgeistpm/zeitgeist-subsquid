@@ -9,6 +9,7 @@ import {MarketBond} from "./_marketBond"
  */
 export class MarketBonds {
     private _creation!: MarketBond
+    private _dispute!: MarketBond | undefined | null
     private _oracle!: MarketBond
     private _outsider!: MarketBond | undefined | null
 
@@ -16,6 +17,7 @@ export class MarketBonds {
         Object.assign(this, props)
         if (json != null) {
             this._creation = new MarketBond(undefined, marshal.nonNull(json.creation))
+            this._dispute = json.dispute == null ? undefined : new MarketBond(undefined, json.dispute)
             this._oracle = new MarketBond(undefined, marshal.nonNull(json.oracle))
             this._outsider = json.outsider == null ? undefined : new MarketBond(undefined, json.outsider)
         }
@@ -31,6 +33,17 @@ export class MarketBonds {
 
     set creation(value: MarketBond) {
         this._creation = value
+    }
+
+    /**
+     * Bond reserved by the disputant
+     */
+    get dispute(): MarketBond | undefined | null {
+        return this._dispute
+    }
+
+    set dispute(value: MarketBond | undefined | null) {
+        this._dispute = value
     }
 
     /**
@@ -59,6 +72,7 @@ export class MarketBonds {
     toJSON(): object {
         return {
             creation: this.creation.toJSON(),
+            dispute: this.dispute == null ? undefined : this.dispute.toJSON(),
             oracle: this.oracle.toJSON(),
             outsider: this.outsider == null ? undefined : this.outsider.toJSON(),
         }

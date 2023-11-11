@@ -150,8 +150,6 @@ export const formatMarketEvent = (eventName: string): MarketEvent => {
       return MarketEvent.MarketCreated;
     case 'PredictionMarkets.MarketDestroyed':
       return MarketEvent.MarketDestroyed;
-    case 'PredictionMarkets.MarketDisputed':
-      return MarketEvent.MarketDisputed;
     case 'PredictionMarkets.MarketExpired':
       return MarketEvent.MarketExpired;
     case 'PredictionMarkets.MarketRejected':
