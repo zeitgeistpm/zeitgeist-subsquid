@@ -254,6 +254,7 @@ type NeoPool @entity {
   marketId: Int! @index
   poolId: Int! @index
   swapFee: BigInt
+  volume: BigInt!
 }
 
 """

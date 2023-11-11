@@ -41,4 +41,7 @@ export class NeoPool {
 
     @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
     swapFee!: bigint | undefined | null
+
+    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+    volume!: bigint
 }
