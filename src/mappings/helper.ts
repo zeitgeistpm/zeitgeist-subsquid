@@ -2,6 +2,7 @@ import { AccountInfo } from '@polkadot/types/interfaces/system';
 import { SubstrateBlock, SubstrateExtrinsic } from '@subsquid/substrate-processor';
 import { Store } from '@subsquid/typeorm-store';
 import { util } from '@zeitgeistpm/sdk';
+import Decimal from 'decimal.js';
 import {
   Account,
   AccountBalance,
@@ -35,6 +36,13 @@ export const PoolAccount: IPoolAccount = {
   745: 'dE1VdxVn8xy7HFDWPpBXRENLV4gzt2KCvPT7daidsktM4sBgc',
   746: 'dE1VdxVn8xy7HFDWPpBXgyPt5BBg5UsJo88498fKiDiDo8rrN',
   750: 'dE1VdxVn8xy7HFDWPpBYmwW4RdANsK5iJ4opBLS5451iiDR1X',
+};
+
+export const calculateSpotPrice = (amountInPool: bigint, liquidityParameter: bigint): number => {
+  const reserve = new Decimal(+amountInPool.toString());
+  const liquidity = new Decimal(+liquidityParameter.toString());
+  const price = new Decimal(0).minus(reserve).div(liquidity).exp();
+  return +price.toString();
 };
 
 export const calcSpotPrice = (

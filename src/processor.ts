@@ -459,9 +459,13 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             break;
           }
           case 'NeoSwaps.BuyExecuted': {
-            const hs = await buyExecuted(ctx, block.header, item);
-            if (!hs) break;
-            swapHistory.push(hs);
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            const res = await buyExecuted(ctx, block.header, item);
+            if (!res) break;
+            assetHistory.push(...res.historicalAssets);
+            swapHistory.push(res.historicalSwap);
+            poolHistory.push(res.historicalPool);
             break;
           }
           case 'NeoSwaps.PoolDeployed': {
@@ -474,9 +478,13 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             break;
           }
           case 'NeoSwaps.SellExecuted': {
-            const hs = await sellExecuted(ctx, block.header, item);
-            if (!hs) break;
-            swapHistory.push(hs);
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            const res = await sellExecuted(ctx, block.header, item);
+            if (!res) break;
+            assetHistory.push(...res.historicalAssets);
+            swapHistory.push(res.historicalSwap);
+            poolHistory.push(res.historicalPool);
             break;
           }
           case 'ParachainStaking.Rewarded': {

@@ -18,11 +18,11 @@ export const getBuyExecutedEvent = (ctx: Ctx, item: EventItem): ExecutedEvent =>
     who = encodeAddress(item.event.args.who, 73);
   }
   const { marketId, amountIn, amountOut } = eventAs;
-  const asset = formatAssetId(eventAs.assetOut);
+  const assetExecuted = formatAssetId(eventAs.assetOut);
   return {
     who,
     marketId,
-    asset,
+    assetExecuted,
     amountIn,
     amountOut,
   };
@@ -71,11 +71,11 @@ export const getSellExecutedEvent = (ctx: Ctx, item: EventItem): ExecutedEvent =
     who = encodeAddress(item.event.args.who, 73);
   }
   const { marketId, amountIn, amountOut } = eventAs;
-  const asset = formatAssetId(eventAs.assetIn);
+  const assetExecuted = formatAssetId(eventAs.assetIn);
   return {
     who,
     marketId,
-    asset,
+    assetExecuted,
     amountIn,
     amountOut,
   };
@@ -84,7 +84,7 @@ export const getSellExecutedEvent = (ctx: Ctx, item: EventItem): ExecutedEvent =
 interface ExecutedEvent {
   who: string;
   marketId: bigint;
-  asset: string;
+  assetExecuted: string;
   amountIn: bigint;
   amountOut: bigint;
 }
