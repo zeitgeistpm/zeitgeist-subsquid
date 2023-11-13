@@ -29,7 +29,7 @@ export const getTokensBalanceSetEvent = (ctx: Ctx, item: EventItem): TokensEvent
   } else {
     currencyId = item.event.args.currencyId;
     walletId = encodeAddress(item.event.args.who, 73);
-    amount = item.event.args.free;
+    amount = BigInt(item.event.args.free);
   }
   const assetId = formatAssetId(currencyId);
   return { assetId, walletId, amount };
