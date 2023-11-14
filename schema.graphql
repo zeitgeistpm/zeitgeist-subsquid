@@ -396,9 +396,9 @@ type OutcomeReport @jsonField {
 }
 
 type LiquiditySharesManager @jsonField {
-  owner: String
+  fees: BigInt!
+  owner: String!
   totalShares: BigInt!
-  fees: BigInt
 }
 
 """
