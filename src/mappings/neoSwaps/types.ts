@@ -49,7 +49,7 @@ export const getPoolDeployedEvent = (ctx: Ctx, item: EventItem): PoolDeployedEve
   }
   const { marketId, liquidityParameter, poolSharesAmount } = eventAs;
   collateral = formatAssetId(eventAs.collateral);
-  swapFee = eventAs.swapFee;
+  swapFee = BigInt(eventAs.swapFee);
   return {
     who,
     marketId,
