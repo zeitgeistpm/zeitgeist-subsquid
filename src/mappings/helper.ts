@@ -30,12 +30,32 @@ export enum CacheHint {
   Price = 'price',
 }
 
-export const PoolAccount: IPoolAccount = {
-  741: 'dE1VdxVn8xy7HFDWPpBWLGGA8ciJ6C6oRSmMbNwtXuar9ncAR',
-  742: 'dE1VdxVn8xy7HFDWPpBWc1HhijCyHeeuJBSJ6vtaNNQit4DNN',
-  745: 'dE1VdxVn8xy7HFDWPpBXRENLV4gzt2KCvPT7daidsktM4sBgc',
-  746: 'dE1VdxVn8xy7HFDWPpBXgyPt5BBg5UsJo88498fKiDiDo8rrN',
-  750: 'dE1VdxVn8xy7HFDWPpBYmwW4RdANsK5iJ4opBLS5451iiDR1X',
+export const NeoPoolAsV50: INeoPoolAsV50 = {
+  741: {
+    accountId: 'dE1VdxVn8xy7HFDWPpBWLGGA8ciJ6C6oRSmMbNwtXuar9ncAR',
+    collateral: 'Ztg',
+    swapFee: BigInt('100000000'),
+  },
+  742: {
+    accountId: 'dE1VdxVn8xy7HFDWPpBWc1HhijCyHeeuJBSJ6vtaNNQit4DNN',
+    collateral: 'Ztg',
+    swapFee: BigInt('100000000'),
+  },
+  745: {
+    accountId: 'dE1VdxVn8xy7HFDWPpBXRENLV4gzt2KCvPT7daidsktM4sBgc',
+    collateral: 'Ztg',
+    swapFee: BigInt('100000000'),
+  },
+  746: {
+    accountId: 'dE1VdxVn8xy7HFDWPpBXgyPt5BBg5UsJo88498fKiDiDo8rrN',
+    collateral: 'Ztg',
+    swapFee: BigInt('100000000'),
+  },
+  750: {
+    accountId: 'dE1VdxVn8xy7HFDWPpBYmwW4RdANsK5iJ4opBLS5451iiDR1X',
+    collateral: 'Ztg',
+    swapFee: BigInt('100000000'),
+  },
 };
 
 export const calculateSpotPrice = (amountInPool: bigint, liquidityParameter: bigint): number => {
@@ -321,6 +341,10 @@ interface DecodedMarketMetadata {
   scalarType?: string;
 }
 
-interface IPoolAccount {
-  [key: number]: string;
+interface INeoPoolAsV50 {
+  [marketId: number]: {
+    accountId: string;
+    collateral: string;
+    swapFee: bigint;
+  };
 }
