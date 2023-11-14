@@ -2,7 +2,7 @@ import { encodeAddress } from '@polkadot/keyring';
 import * as ss58 from '@subsquid/ss58';
 import { Ctx, EventItem } from '../../processor';
 import { NeoSwapsBuyExecutedEvent, NeoSwapsPoolDeployedEvent, NeoSwapsSellExecutedEvent } from '../../types/events';
-import { PoolAccount, formatAssetId } from '../helper';
+import { formatAssetId, NeoPoolAsV50 } from '../helper';
 
 export const getBuyExecutedEvent = (ctx: Ctx, item: EventItem): ExecutedEvent => {
   const event = new NeoSwapsBuyExecutedEvent(ctx, item.event);
@@ -17,7 +17,7 @@ export const getBuyExecutedEvent = (ctx: Ctx, item: EventItem): ExecutedEvent =>
     eventAs = item.event.args;
     who = encodeAddress(item.event.args.who, 73);
   }
-  const { marketId, amountIn, amountOut } = eventAs;
+  const { marketId, amountIn, amountOut, swapFeeAmount } = eventAs;
   const assetExecuted = formatAssetId(eventAs.assetOut);
   return {
     who,
@@ -25,16 +25,19 @@ export const getBuyExecutedEvent = (ctx: Ctx, item: EventItem): ExecutedEvent =>
     assetExecuted,
     amountIn,
     amountOut,
+    swapFeeAmount,
   };
 };
 
 export const getPoolDeployedEvent = (ctx: Ctx, item: EventItem): PoolDeployedEvent => {
   const event = new NeoSwapsPoolDeployedEvent(ctx, item.event);
-  let eventAs, who, accountId;
+  let eventAs, who, accountId, collateral, swapFee;
   if (event.isV50) {
     eventAs = event.asV50;
     who = ss58.codec('zeitgeist').encode(event.asV50.who);
-    accountId = PoolAccount[+event.asV50.marketId.toString()];
+    accountId = NeoPoolAsV50[+event.asV50.marketId.toString()].accountId;
+    collateral = NeoPoolAsV50[+event.asV50.marketId.toString()].collateral;
+    swapFee = NeoPoolAsV50[+event.asV50.marketId.toString()].swapFee;
   } else if (event.isV51) {
     eventAs = event.asV51;
     who = ss58.codec('zeitgeist').encode(event.asV51.who);
@@ -44,8 +47,9 @@ export const getPoolDeployedEvent = (ctx: Ctx, item: EventItem): PoolDeployedEve
     who = encodeAddress(item.event.args.who, 73);
     accountId = encodeAddress(item.event.args.accountId, 73);
   }
-  const { marketId, liquidityParameter, poolSharesAmount, swapFee } = eventAs;
-  const collateral = eventAs.collateral ? formatAssetId(eventAs.collateral) : undefined;
+  const { marketId, liquidityParameter, poolSharesAmount } = eventAs;
+  collateral = collateral ?? formatAssetId(eventAs.collateral);
+  swapFee = swapFee ?? BigInt(eventAs.swapFee);
   return {
     who,
     marketId,
@@ -70,7 +74,7 @@ export const getSellExecutedEvent = (ctx: Ctx, item: EventItem): ExecutedEvent =
     eventAs = item.event.args;
     who = encodeAddress(item.event.args.who, 73);
   }
-  const { marketId, amountIn, amountOut } = eventAs;
+  const { marketId, amountIn, amountOut, swapFeeAmount } = eventAs;
   const assetExecuted = formatAssetId(eventAs.assetIn);
   return {
     who,
@@ -78,6 +82,7 @@ export const getSellExecutedEvent = (ctx: Ctx, item: EventItem): ExecutedEvent =
     assetExecuted,
     amountIn,
     amountOut,
+    swapFeeAmount,
   };
 };
 
@@ -87,14 +92,15 @@ interface ExecutedEvent {
   assetExecuted: string;
   amountIn: bigint;
   amountOut: bigint;
+  swapFeeAmount: bigint;
 }
 
 interface PoolDeployedEvent {
   who: string;
   marketId: bigint;
   accountId: string;
-  collateral?: string;
+  collateral: string;
   liquidityParameter: bigint;
   poolSharesAmount: bigint;
-  swapFee?: bigint;
+  swapFee: bigint;
 }

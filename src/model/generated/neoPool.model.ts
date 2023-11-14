@@ -19,8 +19,8 @@ export class NeoPool {
     @ManyToOne_(() => Account, {nullable: true})
     account!: Account
 
-    @Column_("text", {nullable: true})
-    collateral!: string | undefined | null
+    @Column_("text", {nullable: false})
+    collateral!: string
 
     @Column_("timestamp with time zone", {nullable: false})
     createdAt!: Date
@@ -39,8 +39,8 @@ export class NeoPool {
     @Column_("int4", {nullable: false})
     poolId!: number
 
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
-    swapFee!: bigint | undefined | null
+    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+    swapFee!: bigint
 
     @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
     volume!: bigint

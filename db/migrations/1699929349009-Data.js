@@ -1,5 +1,5 @@
-module.exports = class Data1699699720543 {
-    name = 'Data1699699720543'
+module.exports = class Data1699929349009 {
+    name = 'Data1699929349009'
 
     async up(db) {
         await db.query(`CREATE TABLE "account_balance" ("asset_id" text NOT NULL, "balance" numeric NOT NULL, "id" character varying NOT NULL, "account_id" character varying, CONSTRAINT "PK_bd893045760f719e24a95a42562" PRIMARY KEY ("id"))`)
@@ -11,7 +11,7 @@ module.exports = class Data1699699720543 {
         await db.query(`CREATE INDEX "IDX_7042da86b8de81cc3e9e448f9a" ON "pool" ("account_id") `)
         await db.query(`CREATE INDEX "IDX_7ae36e79b02d471a94b311dfbb" ON "pool" ("market_id") `)
         await db.query(`CREATE INDEX "IDX_ac4a37826438cadcfca6b520be" ON "pool" ("pool_id") `)
-        await db.query(`CREATE TABLE "neo_pool" ("id" character varying NOT NULL, "collateral" text, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "liquidity_parameter" numeric NOT NULL, "liquidity_shares_manager" jsonb NOT NULL, "market_id" integer NOT NULL, "pool_id" integer NOT NULL, "swap_fee" numeric, "volume" numeric NOT NULL, "account_id" character varying, CONSTRAINT "PK_bc70713102726a0949a50a22046" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "neo_pool" ("id" character varying NOT NULL, "collateral" text NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "liquidity_parameter" numeric NOT NULL, "liquidity_shares_manager" jsonb NOT NULL, "market_id" integer NOT NULL, "pool_id" integer NOT NULL, "swap_fee" numeric NOT NULL, "volume" numeric NOT NULL, "account_id" character varying, CONSTRAINT "PK_bc70713102726a0949a50a22046" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_fb707135b8bb6b3ce35248d53c" ON "neo_pool" ("account_id") `)
         await db.query(`CREATE INDEX "IDX_e1c80a90a67b13803f68531f66" ON "neo_pool" ("market_id") `)
         await db.query(`CREATE INDEX "IDX_2f5bf015fefd46462d8fb28cdd" ON "neo_pool" ("pool_id") `)
