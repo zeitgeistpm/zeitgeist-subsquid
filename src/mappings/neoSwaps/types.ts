@@ -48,8 +48,8 @@ export const getPoolDeployedEvent = (ctx: Ctx, item: EventItem): PoolDeployedEve
     accountId = encodeAddress(item.event.args.accountId, 73);
   }
   const { marketId, liquidityParameter, poolSharesAmount } = eventAs;
-  collateral = formatAssetId(eventAs.collateral);
-  swapFee = BigInt(eventAs.swapFee);
+  collateral = collateral ?? formatAssetId(eventAs.collateral);
+  swapFee = swapFee ?? BigInt(eventAs.swapFee);
   return {
     who,
     marketId,
