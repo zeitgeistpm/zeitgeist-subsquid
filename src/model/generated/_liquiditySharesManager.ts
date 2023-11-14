@@ -2,17 +2,26 @@ import assert from "assert"
 import * as marshal from "./marshal"
 
 export class LiquiditySharesManager {
+    private _fees!: bigint
     private _owner!: string
     private _totalShares!: bigint
-    private _fees!: bigint
 
     constructor(props?: Partial<Omit<LiquiditySharesManager, 'toJSON'>>, json?: any) {
         Object.assign(this, props)
         if (json != null) {
+            this._fees = marshal.bigint.fromJSON(json.fees)
             this._owner = marshal.string.fromJSON(json.owner)
             this._totalShares = marshal.bigint.fromJSON(json.totalShares)
-            this._fees = marshal.bigint.fromJSON(json.fees)
         }
+    }
+
+    get fees(): bigint {
+        assert(this._fees != null, 'uninitialized access')
+        return this._fees
+    }
+
+    set fees(value: bigint) {
+        this._fees = value
     }
 
     get owner(): string {
@@ -33,20 +42,11 @@ export class LiquiditySharesManager {
         this._totalShares = value
     }
 
-    get fees(): bigint {
-        assert(this._fees != null, 'uninitialized access')
-        return this._fees
-    }
-
-    set fees(value: bigint) {
-        this._fees = value
-    }
-
     toJSON(): object {
         return {
+            fees: marshal.bigint.toJSON(this.fees),
             owner: this.owner,
             totalShares: marshal.bigint.toJSON(this.totalShares),
-            fees: marshal.bigint.toJSON(this.fees),
         }
     }
 }
