@@ -247,13 +247,13 @@ AMM2 pool details
 """
 type NeoPool @entity {
   account: Account!
-  collateral: String
+  collateral: String!
   createdAt: DateTime!
   liquidityParameter: BigInt!
   liquiditySharesManager: LiquiditySharesManager!
   marketId: Int! @index
   poolId: Int! @index
-  swapFee: BigInt
+  swapFee: BigInt!
   volume: BigInt!
 }
 
