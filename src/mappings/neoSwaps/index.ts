@@ -22,7 +22,7 @@ export const buyExecuted = async (
 ): Promise<
   { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalPool: HistoricalPool } | undefined
 > => {
-  const { who, marketId, assetExecuted, amountIn, amountOut } = getBuyExecutedEvent(ctx, item);
+  const { who, marketId, assetExecuted, amountIn, amountOut, swapFeeAmount } = getBuyExecutedEvent(ctx, item);
 
   const market = await ctx.store.get(Market, {
     where: { marketId: +marketId.toString() },
@@ -30,7 +30,8 @@ export const buyExecuted = async (
   });
   if (!market || !market.neoPool) return;
 
-  market.neoPool.volume = market.neoPool.volume + amountIn;
+  market.neoPool.volume += amountIn;
+  market.neoPool.liquiditySharesManager.fees += swapFeeAmount;
   console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(market.neoPool, null, 2)}`);
   await ctx.store.save<NeoPool>(market.neoPool);
 
@@ -114,7 +115,7 @@ export const poolDeployed = async (
   }
 
   const liquiditySharesManager = new LiquiditySharesManager({
-    fees: null,
+    fees: BigInt(0),
     owner: who,
     totalShares: poolSharesAmount,
   });
@@ -208,7 +209,7 @@ export const sellExecuted = async (
 ): Promise<
   { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalPool: HistoricalPool } | undefined
 > => {
-  const { who, marketId, assetExecuted, amountIn, amountOut } = getSellExecutedEvent(ctx, item);
+  const { who, marketId, assetExecuted, amountIn, amountOut, swapFeeAmount } = getSellExecutedEvent(ctx, item);
 
   const market = await ctx.store.get(Market, {
     where: { marketId: +marketId.toString() },
@@ -216,7 +217,8 @@ export const sellExecuted = async (
   });
   if (!market || !market.neoPool) return;
 
-  market.neoPool.volume = market.neoPool.volume + amountOut;
+  market.neoPool.volume += amountOut;
+  market.neoPool.liquiditySharesManager.fees += swapFeeAmount;
   console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(market.neoPool, null, 2)}`);
   await ctx.store.save<NeoPool>(market.neoPool);
 
