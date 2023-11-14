@@ -17,7 +17,7 @@ export const getBuyExecutedEvent = (ctx: Ctx, item: EventItem): ExecutedEvent =>
     eventAs = item.event.args;
     who = encodeAddress(item.event.args.who, 73);
   }
-  const { marketId, amountIn, amountOut } = eventAs;
+  const { marketId, amountIn, amountOut, swapFeeAmount } = eventAs;
   const assetExecuted = formatAssetId(eventAs.assetOut);
   return {
     who,
@@ -25,6 +25,7 @@ export const getBuyExecutedEvent = (ctx: Ctx, item: EventItem): ExecutedEvent =>
     assetExecuted,
     amountIn,
     amountOut,
+    swapFeeAmount,
   };
 };
 
@@ -70,7 +71,7 @@ export const getSellExecutedEvent = (ctx: Ctx, item: EventItem): ExecutedEvent =
     eventAs = item.event.args;
     who = encodeAddress(item.event.args.who, 73);
   }
-  const { marketId, amountIn, amountOut } = eventAs;
+  const { marketId, amountIn, amountOut, swapFeeAmount } = eventAs;
   const assetExecuted = formatAssetId(eventAs.assetIn);
   return {
     who,
@@ -78,6 +79,7 @@ export const getSellExecutedEvent = (ctx: Ctx, item: EventItem): ExecutedEvent =
     assetExecuted,
     amountIn,
     amountOut,
+    swapFeeAmount,
   };
 };
 
@@ -87,6 +89,7 @@ interface ExecutedEvent {
   assetExecuted: string;
   amountIn: bigint;
   amountOut: bigint;
+  swapFeeAmount: bigint;
 }
 
 interface PoolDeployedEvent {
