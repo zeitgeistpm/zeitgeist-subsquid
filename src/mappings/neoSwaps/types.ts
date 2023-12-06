@@ -1,7 +1,12 @@
 import { encodeAddress } from '@polkadot/keyring';
 import * as ss58 from '@subsquid/ss58';
 import { Ctx, EventItem } from '../../processor';
-import { NeoSwapsBuyExecutedEvent, NeoSwapsPoolDeployedEvent, NeoSwapsSellExecutedEvent } from '../../types/events';
+import {
+  NeoSwapsBuyExecutedEvent,
+  NeoSwapsFeesWithdrawnEvent,
+  NeoSwapsPoolDeployedEvent,
+  NeoSwapsSellExecutedEvent,
+} from '../../types/events';
 import { formatAssetId, NeoPoolAsV50 } from '../helper';
 
 export const getBuyExecutedEvent = (ctx: Ctx, item: EventItem): ExecutedEvent => {
@@ -26,6 +31,24 @@ export const getBuyExecutedEvent = (ctx: Ctx, item: EventItem): ExecutedEvent =>
     amountIn,
     amountOut,
     swapFeeAmount,
+  };
+};
+
+export const getFeesWithdrawnEvent = (ctx: Ctx, item: EventItem): FeesWithdrawnEvent => {
+  const event = new NeoSwapsFeesWithdrawnEvent(ctx, item.event);
+  let eventAs, who;
+  if (event.isV50) {
+    eventAs = event.asV50;
+    who = ss58.codec('zeitgeist').encode(event.asV50.who);
+  } else {
+    eventAs = item.event.args;
+    who = encodeAddress(item.event.args.who, 73);
+  }
+  const { marketId, amount } = eventAs;
+  return {
+    who,
+    marketId,
+    amount,
   };
 };
 
@@ -93,6 +116,12 @@ interface ExecutedEvent {
   amountIn: bigint;
   amountOut: bigint;
   swapFeeAmount: bigint;
+}
+
+interface FeesWithdrawnEvent {
+  who: string;
+  marketId: bigint;
+  amount: bigint;
 }
 
 interface PoolDeployedEvent {
