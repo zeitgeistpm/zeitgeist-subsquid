@@ -727,6 +727,35 @@ export class NeoSwapsBuyExecutedEvent {
     }
 }
 
+export class NeoSwapsFeesWithdrawnEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'NeoSwaps.FeesWithdrawn')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * Liquidity provider withdrew fees.
+     */
+    get isV50(): boolean {
+        return this._chain.getEventHash('NeoSwaps.FeesWithdrawn') === '22c56a9bfdb284fa941823829458c0bd44e7b95540ce3791f94d2022e1b18ca2'
+    }
+
+    /**
+     * Liquidity provider withdrew fees.
+     */
+    get asV50(): {who: Uint8Array, marketId: bigint, amount: bigint} {
+        assert(this.isV50)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
 export class NeoSwapsPoolDeployedEvent {
     private readonly _chain: Chain
     private readonly event: Event
