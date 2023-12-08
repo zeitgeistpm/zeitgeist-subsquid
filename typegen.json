@@ -19,6 +19,7 @@
     "Currency.Withdrawn",
     "NeoSwaps.BuyExecuted",
     "NeoSwaps.FeesWithdrawn",
+    "NeoSwaps.JoinExecuted",
     "NeoSwaps.PoolDeployed",
     "NeoSwaps.SellExecuted",
     "ParachainStaking.Rewarded",
