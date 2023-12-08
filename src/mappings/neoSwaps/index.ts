@@ -13,7 +13,7 @@ import {
 } from '../../model';
 import { Ctx, EventItem } from '../../processor';
 import { calculateSpotPrice, extrinsicFromEvent, isBaseAsset } from '../helper';
-import { getBuyExecutedEvent, getPoolDeployedEvent, getSellExecutedEvent } from './types';
+import { getBuyExecutedEvent, getFeesWithdrawnEvent, getPoolDeployedEvent, getSellExecutedEvent } from './types';
 
 export const buyExecuted = async (
   ctx: Ctx,
@@ -93,6 +93,37 @@ export const buyExecuted = async (
   });
 
   return { historicalAssets, historicalSwap, historicalPool };
+};
+
+export const feesWithdrawn = async (
+  ctx: Ctx,
+  block: SubstrateBlock,
+  item: EventItem
+): Promise<HistoricalPool | undefined> => {
+  const { who, marketId, amount } = getFeesWithdrawnEvent(ctx, item);
+
+  const market = await ctx.store.get(Market, {
+    where: { marketId: +marketId.toString() },
+    relations: { neoPool: true },
+  });
+  if (!market || !market.neoPool) return;
+
+  market.neoPool.liquiditySharesManager.fees -= amount;
+  console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(market.neoPool, null, 2)}`);
+  await ctx.store.save<NeoPool>(market.neoPool);
+
+  const historicalPool = new HistoricalPool({
+    blockNumber: block.height,
+    dVolume: BigInt(0),
+    event: item.event.name.split('.')[1],
+    id: item.event.id + '-' + market.marketId,
+    poolId: market.marketId,
+    status: null,
+    timestamp: new Date(block.timestamp),
+    volume: market.neoPool.volume,
+  });
+
+  return historicalPool;
 };
 
 export const poolDeployed = async (
