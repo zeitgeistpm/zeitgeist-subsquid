@@ -567,17 +567,17 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           case 'Swaps.ArbitrageBuyBurn': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            const has = await arbitrageBuyBurn(ctx, block.header, item);
-            if (!has) break;
-            assetHistory.push(...has);
+            const historicalAssets = await arbitrageBuyBurn(ctx, block.header, item);
+            if (!historicalAssets) break;
+            assetHistory.push(...historicalAssets);
             break;
           }
           case 'Swaps.ArbitrageMintSell': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            const has = await arbitrageMintSell(ctx, block.header, item);
-            if (!has) break;
-            assetHistory.push(...has);
+            const historicalAssets = await arbitrageMintSell(ctx, block.header, item);
+            if (!historicalAssets) break;
+            assetHistory.push(...historicalAssets);
             break;
           }
           case 'Swaps.MarketCreatorFeesPaid': {
@@ -627,33 +627,33 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           case 'Swaps.PoolExit': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            const has = await poolExit(ctx, block.header, item);
-            if (!has) break;
-            assetHistory.push(...has);
+            const historicalAssets = await poolExit(ctx, block.header, item);
+            if (!historicalAssets) break;
+            assetHistory.push(...historicalAssets);
             break;
           }
           case 'Swaps.PoolExitWithExactAssetAmount': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            const has = await poolExitWithExactAssetAmount(ctx, block.header, item);
-            if (!has) break;
-            assetHistory.push(...has);
+            const historicalAssets = await poolExitWithExactAssetAmount(ctx, block.header, item);
+            if (!historicalAssets) break;
+            assetHistory.push(...historicalAssets);
             break;
           }
           case 'Swaps.PoolJoin': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            const has = await poolJoin(ctx, block.header, item);
-            if (!has) break;
-            assetHistory.push(...has);
+            const historicalAssets = await poolJoin(ctx, block.header, item);
+            if (!historicalAssets) break;
+            assetHistory.push(...historicalAssets);
             break;
           }
           case 'Swaps.PoolJoinWithExactAssetAmount': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            const has = await poolJoinWithExactAssetAmount(ctx, block.header, item);
-            if (!has) break;
-            assetHistory.push(...has);
+            const historicalAssets = await poolJoinWithExactAssetAmount(ctx, block.header, item);
+            if (!historicalAssets) break;
+            assetHistory.push(...historicalAssets);
             break;
           }
           case 'Swaps.SwapExactAmountIn': {
