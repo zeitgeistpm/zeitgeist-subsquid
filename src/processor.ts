@@ -25,7 +25,7 @@ import {
 } from './mappings/balances';
 import { currencyTransferred, currencyDeposited, currencyWithdrawn } from './mappings/currency';
 import { initBalance, specVersion } from './mappings/helper';
-import { buyExecuted, feesWithdrawn, poolDeployed, sellExecuted } from './mappings/neoSwaps';
+import { buyExecuted, feesWithdrawn, joinExecuted, poolDeployed, sellExecuted } from './mappings/neoSwaps';
 import { parachainStakingRewarded } from './mappings/parachainStaking';
 import {
   unreserveBalances_108949,
@@ -146,7 +146,8 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Currency.Deposited', eventExtrinsicOptions)
   .addEvent('Currency.Withdrawn', eventExtrinsicOptions)
   .addEvent('NeoSwaps.BuyExecuted', eventExtrinsicOptions)
-  .addEvent('NeoSwaps.FeesWithdrawn', eventExtrinsicOptions)
+  .addEvent('NeoSwaps.FeesWithdrawn', eventOptions)
+  .addEvent('NeoSwaps.JoinExecuted', eventOptions)
   .addEvent('NeoSwaps.PoolDeployed', eventOptions)
   .addEvent('NeoSwaps.SellExecuted', eventExtrinsicOptions)
   .addEvent('ParachainStaking.Rewarded', eventOptions)
@@ -473,6 +474,14 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             const historicalPool = await feesWithdrawn(ctx, block.header, item);
             if (!historicalPool) break;
             poolHistory.push(historicalPool);
+            break;
+          }
+          case 'NeoSwaps.JoinExecuted': {
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            const historicalAssets = await joinExecuted(ctx, block.header, item);
+            if (!historicalAssets) break;
+            assetHistory.push(...historicalAssets);
             break;
           }
           case 'NeoSwaps.PoolDeployed': {
