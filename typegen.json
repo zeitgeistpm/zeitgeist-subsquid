@@ -18,6 +18,7 @@
     "Currency.Transferred",
     "Currency.Withdrawn",
     "NeoSwaps.BuyExecuted",
+    "NeoSwaps.ExitExecuted",
     "NeoSwaps.FeesWithdrawn",
     "NeoSwaps.JoinExecuted",
     "NeoSwaps.PoolDeployed",
