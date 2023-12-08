@@ -13,7 +13,13 @@ import {
 } from '../../model';
 import { Ctx, EventItem } from '../../processor';
 import { calculateSpotPrice, extrinsicFromEvent, isBaseAsset } from '../helper';
-import { getBuyExecutedEvent, getFeesWithdrawnEvent, getPoolDeployedEvent, getSellExecutedEvent } from './types';
+import {
+  getBuyExecutedEvent,
+  getFeesWithdrawnEvent,
+  getJoinExecutedEvent,
+  getPoolDeployedEvent,
+  getSellExecutedEvent,
+} from './types';
 
 export const buyExecuted = async (
   ctx: Ctx,
@@ -124,6 +130,59 @@ export const feesWithdrawn = async (
   });
 
   return historicalPool;
+};
+
+export const joinExecuted = async (
+  ctx: Ctx,
+  block: SubstrateBlock,
+  item: EventItem
+): Promise<HistoricalAsset[] | undefined> => {
+  const { who, marketId, poolSharesAmount, amountsIn, newLiquidityParameter } = getJoinExecutedEvent(ctx, item);
+
+  const market = await ctx.store.get(Market, {
+    where: { marketId: +marketId.toString() },
+    relations: { neoPool: { account: { balances: true } } },
+  });
+  if (!market || !market.neoPool) return;
+
+  market.neoPool.liquidityParameter = newLiquidityParameter;
+  market.neoPool.liquiditySharesManager.totalShares += poolSharesAmount;
+  console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(market.neoPool, null, 2)}`);
+  await ctx.store.save<NeoPool>(market.neoPool);
+
+  const historicalAssets: HistoricalAsset[] = [];
+  await Promise.all(
+    market.neoPool.account.balances.map(async (ab) => {
+      if (isBaseAsset(ab.assetId)) return;
+      const asset = await ctx.store.get(Asset, {
+        where: { assetId: ab.assetId },
+      });
+      if (!asset) return;
+
+      const oldPrice = asset.price;
+      const oldAmountInPool = asset.amountInPool;
+      asset.amountInPool = ab.balance;
+      asset.price = calculateSpotPrice(ab.balance, market.neoPool!.liquidityParameter);
+      console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
+      await ctx.store.save<Asset>(asset);
+
+      const ha = new HistoricalAsset({
+        accountId: who,
+        assetId: asset.assetId,
+        baseAssetTraded: BigInt(0),
+        blockNumber: block.height,
+        dAmountInPool: asset.amountInPool - oldAmountInPool,
+        dPrice: asset.price - oldPrice,
+        event: item.event.name.split('.')[1],
+        id: item.event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+        newAmountInPool: asset.amountInPool,
+        newPrice: asset.price,
+        timestamp: new Date(block.timestamp),
+      });
+      historicalAssets.push(ha);
+    })
+  );
+  return historicalAssets;
 };
 
 export const poolDeployed = async (
