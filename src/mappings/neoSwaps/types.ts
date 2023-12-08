@@ -3,6 +3,7 @@ import * as ss58 from '@subsquid/ss58';
 import { Ctx, EventItem } from '../../processor';
 import {
   NeoSwapsBuyExecutedEvent,
+  NeoSwapsExitExecutedEvent,
   NeoSwapsFeesWithdrawnEvent,
   NeoSwapsJoinExecutedEvent,
   NeoSwapsPoolDeployedEvent,
@@ -10,7 +11,7 @@ import {
 } from '../../types/events';
 import { formatAssetId, NeoPoolAsV50 } from '../helper';
 
-export const getBuyExecutedEvent = (ctx: Ctx, item: EventItem): ExecutedEvent => {
+export const getBuyExecutedEvent = (ctx: Ctx, item: EventItem): BuySellExecutedEvent => {
   const event = new NeoSwapsBuyExecutedEvent(ctx, item.event);
   let eventAs, who;
   if (event.isV50) {
@@ -35,6 +36,25 @@ export const getBuyExecutedEvent = (ctx: Ctx, item: EventItem): ExecutedEvent =>
   };
 };
 
+export const getExitExecutedEvent = (ctx: Ctx, item: EventItem): JoinExitExecutedEvent => {
+  const event = new NeoSwapsExitExecutedEvent(ctx, item.event);
+  let eventAs, who;
+  if (event.isV50) {
+    eventAs = event.asV50;
+    who = ss58.codec('zeitgeist').encode(event.asV50.who);
+  } else {
+    eventAs = item.event.args;
+    who = encodeAddress(item.event.args.who, 73);
+  }
+  const { marketId, poolSharesAmount, newLiquidityParameter } = eventAs;
+  return {
+    who,
+    marketId,
+    poolSharesAmount,
+    newLiquidityParameter,
+  };
+};
+
 export const getFeesWithdrawnEvent = (ctx: Ctx, item: EventItem): FeesWithdrawnEvent => {
   const event = new NeoSwapsFeesWithdrawnEvent(ctx, item.event);
   let eventAs, who;
@@ -53,7 +73,7 @@ export const getFeesWithdrawnEvent = (ctx: Ctx, item: EventItem): FeesWithdrawnE
   };
 };
 
-export const getJoinExecutedEvent = (ctx: Ctx, item: EventItem): JoinExecutedEvent => {
+export const getJoinExecutedEvent = (ctx: Ctx, item: EventItem): JoinExitExecutedEvent => {
   const event = new NeoSwapsJoinExecutedEvent(ctx, item.event);
   let eventAs, who;
   if (event.isV50) {
@@ -63,12 +83,11 @@ export const getJoinExecutedEvent = (ctx: Ctx, item: EventItem): JoinExecutedEve
     eventAs = item.event.args;
     who = encodeAddress(item.event.args.who, 73);
   }
-  const { marketId, poolSharesAmount, amountsIn, newLiquidityParameter } = eventAs;
+  const { marketId, poolSharesAmount, newLiquidityParameter } = eventAs;
   return {
     who,
     marketId,
     poolSharesAmount,
-    amountsIn,
     newLiquidityParameter,
   };
 };
@@ -105,7 +124,7 @@ export const getPoolDeployedEvent = (ctx: Ctx, item: EventItem): PoolDeployedEve
   };
 };
 
-export const getSellExecutedEvent = (ctx: Ctx, item: EventItem): ExecutedEvent => {
+export const getSellExecutedEvent = (ctx: Ctx, item: EventItem): BuySellExecutedEvent => {
   const event = new NeoSwapsSellExecutedEvent(ctx, item.event);
   let eventAs, who;
   if (event.isV50) {
@@ -130,7 +149,7 @@ export const getSellExecutedEvent = (ctx: Ctx, item: EventItem): ExecutedEvent =
   };
 };
 
-interface ExecutedEvent {
+interface BuySellExecutedEvent {
   who: string;
   marketId: bigint;
   assetExecuted: string;
@@ -145,11 +164,10 @@ interface FeesWithdrawnEvent {
   amount: bigint;
 }
 
-interface JoinExecutedEvent {
+interface JoinExitExecutedEvent {
   who: string;
   marketId: bigint;
   poolSharesAmount: bigint;
-  amountsIn: bigint[];
   newLiquidityParameter: bigint;
 }
 
