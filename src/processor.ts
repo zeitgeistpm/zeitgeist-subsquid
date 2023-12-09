@@ -25,7 +25,14 @@ import {
 } from './mappings/balances';
 import { currencyTransferred, currencyDeposited, currencyWithdrawn } from './mappings/currency';
 import { initBalance, specVersion } from './mappings/helper';
-import { buyExecuted, feesWithdrawn, poolDeployed, sellExecuted } from './mappings/neoSwaps';
+import {
+  buyExecuted,
+  exitExecuted,
+  feesWithdrawn,
+  joinExecuted,
+  poolDeployed,
+  sellExecuted,
+} from './mappings/neoSwaps';
 import { parachainStakingRewarded } from './mappings/parachainStaking';
 import {
   unreserveBalances_108949,
@@ -146,7 +153,9 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Currency.Deposited', eventExtrinsicOptions)
   .addEvent('Currency.Withdrawn', eventExtrinsicOptions)
   .addEvent('NeoSwaps.BuyExecuted', eventExtrinsicOptions)
-  .addEvent('NeoSwaps.FeesWithdrawn', eventExtrinsicOptions)
+  .addEvent('NeoSwaps.ExitExecuted', eventOptions)
+  .addEvent('NeoSwaps.FeesWithdrawn', eventOptions)
+  .addEvent('NeoSwaps.JoinExecuted', eventOptions)
   .addEvent('NeoSwaps.PoolDeployed', eventOptions)
   .addEvent('NeoSwaps.SellExecuted', eventExtrinsicOptions)
   .addEvent('ParachainStaking.Rewarded', eventOptions)
@@ -469,10 +478,26 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             poolHistory.push(res.historicalPool);
             break;
           }
+          case 'NeoSwaps.ExitExecuted': {
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            const historicalAssets = await exitExecuted(ctx, block.header, item);
+            if (!historicalAssets) break;
+            assetHistory.push(...historicalAssets);
+            break;
+          }
           case 'NeoSwaps.FeesWithdrawn': {
             const historicalPool = await feesWithdrawn(ctx, block.header, item);
             if (!historicalPool) break;
             poolHistory.push(historicalPool);
+            break;
+          }
+          case 'NeoSwaps.JoinExecuted': {
+            await saveBalanceChanges(ctx, balanceAccounts);
+            balanceAccounts.clear();
+            const historicalAssets = await joinExecuted(ctx, block.header, item);
+            if (!historicalAssets) break;
+            assetHistory.push(...historicalAssets);
             break;
           }
           case 'NeoSwaps.PoolDeployed': {
@@ -558,17 +583,17 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           case 'Swaps.ArbitrageBuyBurn': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            const has = await arbitrageBuyBurn(ctx, block.header, item);
-            if (!has) break;
-            assetHistory.push(...has);
+            const historicalAssets = await arbitrageBuyBurn(ctx, block.header, item);
+            if (!historicalAssets) break;
+            assetHistory.push(...historicalAssets);
             break;
           }
           case 'Swaps.ArbitrageMintSell': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            const has = await arbitrageMintSell(ctx, block.header, item);
-            if (!has) break;
-            assetHistory.push(...has);
+            const historicalAssets = await arbitrageMintSell(ctx, block.header, item);
+            if (!historicalAssets) break;
+            assetHistory.push(...historicalAssets);
             break;
           }
           case 'Swaps.MarketCreatorFeesPaid': {
@@ -618,33 +643,33 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           case 'Swaps.PoolExit': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            const has = await poolExit(ctx, block.header, item);
-            if (!has) break;
-            assetHistory.push(...has);
+            const historicalAssets = await poolExit(ctx, block.header, item);
+            if (!historicalAssets) break;
+            assetHistory.push(...historicalAssets);
             break;
           }
           case 'Swaps.PoolExitWithExactAssetAmount': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            const has = await poolExitWithExactAssetAmount(ctx, block.header, item);
-            if (!has) break;
-            assetHistory.push(...has);
+            const historicalAssets = await poolExitWithExactAssetAmount(ctx, block.header, item);
+            if (!historicalAssets) break;
+            assetHistory.push(...historicalAssets);
             break;
           }
           case 'Swaps.PoolJoin': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            const has = await poolJoin(ctx, block.header, item);
-            if (!has) break;
-            assetHistory.push(...has);
+            const historicalAssets = await poolJoin(ctx, block.header, item);
+            if (!historicalAssets) break;
+            assetHistory.push(...historicalAssets);
             break;
           }
           case 'Swaps.PoolJoinWithExactAssetAmount': {
             await saveBalanceChanges(ctx, balanceAccounts);
             balanceAccounts.clear();
-            const has = await poolJoinWithExactAssetAmount(ctx, block.header, item);
-            if (!has) break;
-            assetHistory.push(...has);
+            const historicalAssets = await poolJoinWithExactAssetAmount(ctx, block.header, item);
+            if (!historicalAssets) break;
+            assetHistory.push(...historicalAssets);
             break;
           }
           case 'Swaps.SwapExactAmountIn': {

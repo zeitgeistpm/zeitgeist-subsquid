@@ -727,6 +727,35 @@ export class NeoSwapsBuyExecutedEvent {
     }
 }
 
+export class NeoSwapsExitExecutedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'NeoSwaps.ExitExecuted')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * Liquidity provider left the pool.
+     */
+    get isV50(): boolean {
+        return this._chain.getEventHash('NeoSwaps.ExitExecuted') === '5b444db97ddebd50c27e2b4be6f35279a0111e44416ef78dc8e416d1008d5e7a'
+    }
+
+    /**
+     * Liquidity provider left the pool.
+     */
+    get asV50(): {who: Uint8Array, marketId: bigint, poolSharesAmount: bigint, amountsOut: bigint[], newLiquidityParameter: bigint} {
+        assert(this.isV50)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
 export class NeoSwapsFeesWithdrawnEvent {
     private readonly _chain: Chain
     private readonly event: Event
@@ -751,6 +780,35 @@ export class NeoSwapsFeesWithdrawnEvent {
      * Liquidity provider withdrew fees.
      */
     get asV50(): {who: Uint8Array, marketId: bigint, amount: bigint} {
+        assert(this.isV50)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class NeoSwapsJoinExecutedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'NeoSwaps.JoinExecuted')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * Liquidity provider joined the pool.
+     */
+    get isV50(): boolean {
+        return this._chain.getEventHash('NeoSwaps.JoinExecuted') === '065c5fca4b127ccdeef25906a9de58969bcddfef6d2c0a807f85ad812e38a733'
+    }
+
+    /**
+     * Liquidity provider joined the pool.
+     */
+    get asV50(): {who: Uint8Array, marketId: bigint, poolSharesAmount: bigint, amountsIn: bigint[], newLiquidityParameter: bigint} {
         assert(this.isV50)
         return this._chain.decodeEvent(this.event)
     }
