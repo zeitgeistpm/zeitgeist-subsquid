@@ -260,7 +260,7 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
     if (metadata.categories) {
       const categoryNames: string[] = [];
       newMarket.categories = [];
-      for (var category of metadata.categories) {
+      for (let category of metadata.categories) {
         categoryNames.push(category.name);
         let cm = new CategoryMetadata({
           color: category.color,
@@ -278,8 +278,8 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
 
     if (metadata.tags) {
       newMarket.tags = [];
-      for (let i = 0; i < metadata.tags.length; i++) {
-        newMarket.tags.push(metadata.tags[i]);
+      for (let tag of metadata.tags) {
+        newMarket.tags.push(tag);
       }
     }
   }
