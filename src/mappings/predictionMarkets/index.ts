@@ -258,19 +258,22 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
     }
 
     if (metadata.categories) {
+      const categoryNames: string[] = [];
       newMarket.categories = [];
-      for (let i = 0; i < metadata.categories.length; i++) {
+      for (var category of metadata.categories) {
+        categoryNames.push(category.name);
         let cm = new CategoryMetadata({
-          color: metadata.categories[i].color,
-          img: metadata.categories[i].img,
-          name: metadata.categories[i].name,
-          ticker: metadata.categories[i].ticker,
+          color: category.color,
+          img: category.img,
+          name: category.name,
+          ticker: category.ticker,
         });
         newMarket.categories.push(cm);
         if (!cm.name) {
           hasValidMetaCategories = false;
         }
       }
+      newMarket.categoryNames = categoryNames.join(' ');
     }
 
     if (metadata.tags) {
