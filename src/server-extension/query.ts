@@ -188,7 +188,7 @@ export const totalLiquidityAndVolume = () => `
 
 export const totalMintedInCourt = () => `
   SELECT
-    SUM(volume) AS total_minted_in_court
+    SUM(d_balance) AS total_minted_in_court
   FROM
     historical_account_balance
   WHERE
