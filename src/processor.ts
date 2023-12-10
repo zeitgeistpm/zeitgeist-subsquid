@@ -149,6 +149,7 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Balances.Transfer', eventExtrinsicOptions)
   .addEvent('Balances.Unreserved', eventExtrinsicOptions)
   .addEvent('Balances.Withdraw', eventExtrinsicOptions)
+  .addEvent('Court.MintedInCourt', eventExtrinsicOptions)
   .addEvent('Currency.Transferred', eventExtrinsicOptions)
   .addEvent('Currency.Deposited', eventExtrinsicOptions)
   .addEvent('Currency.Withdrawn', eventExtrinsicOptions)
@@ -440,6 +441,15 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             const key = makeKey(hab.accountId, hab.assetId);
             balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
             balanceHistory.push(hab);
+            break;
+          }
+          case 'Court.MintedInCourt': {
+            const hab = balanceHistory.pop();
+            if (hab && hab.event === 'Deposit') {
+              hab.id = item.event.id + hab.id.slice(-6);
+              hab.event = item.event.name.split('.')[1];
+              balanceHistory.push(hab);
+            }
             break;
           }
           case 'Currency.Transferred': {
