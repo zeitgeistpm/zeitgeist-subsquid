@@ -31,7 +31,7 @@ export const assetPriceHistory = (assetId: string, startTime: string, endTime: s
   ON 1 = 1;
 `;
 
-export const balanceInfo = (accountId: string, assetId: string, blockNumber: string) => `
+export const balanceInfo = (accountId: string, assetId: string, conditions: string) => `
   SELECT
     asset_id,
     SUM(d_balance) AS balance
@@ -40,7 +40,7 @@ export const balanceInfo = (accountId: string, assetId: string, blockNumber: str
   WHERE
     account_id = '${accountId}'
     AND asset_id LIKE '%${assetId}%'
-    AND block_number <= ${blockNumber}
+    ${conditions}
   GROUP BY
     asset_id;
 `;
@@ -104,8 +104,8 @@ export const marketInfo = (marketId: number) => `
   JOIN
     historical_market hm ON hm.market_id = m.id
   WHERE
-    m.market_id=${marketId}
-    AND hm.event~'(Pool|Resolved)'
+    m.market_id = ${marketId}
+    AND hm.event ~ '(Pool|Resolved)'
   GROUP BY
     m.outcome_assets,
     hm.timestamp;
