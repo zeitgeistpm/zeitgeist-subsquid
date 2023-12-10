@@ -185,3 +185,12 @@ export const totalLiquidityAndVolume = () => `
       p.volume
   ) AS market_stats;
 `;
+
+export const totalMintedInCourt = () => `
+  SELECT
+    SUM(volume) AS total_minted_in_court
+  FROM
+    historical_account_balance
+  WHERE
+    event ~ 'MintedInCourt';
+`;
