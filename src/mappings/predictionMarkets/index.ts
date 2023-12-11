@@ -273,7 +273,7 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
           hasValidMetaCategories = false;
         }
       }
-      newMarket.categoryNames = categoryNames.join(' ');
+      newMarket.categoryNames = categoryNames.join(',');
     }
 
     if (metadata.tags) {
