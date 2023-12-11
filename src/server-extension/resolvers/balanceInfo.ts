@@ -32,7 +32,6 @@ registerEnumType(AssetKind, {
 });
 
 enum BalanceInfoEvent {
-  MarketCreatorFeesPaid = 'MarketCreatorFeesPaid',
   MintedInCourt = 'MintedInCourt',
 }
 
