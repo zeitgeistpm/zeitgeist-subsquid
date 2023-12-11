@@ -258,10 +258,10 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
     }
 
     if (metadata.categories) {
-      newMarket.categoryNames = [];
+      const categoryNames: string[] = [];
       newMarket.categories = [];
       for (let category of metadata.categories) {
-        newMarket.categoryNames.push(category.name);
+        categoryNames.push(category.name);
         let cm = new CategoryMetadata({
           color: category.color,
           img: category.img,
@@ -273,6 +273,7 @@ export const marketCreated = async (ctx: Ctx, block: SubstrateBlock, item: Event
           hasValidMetaCategories = false;
         }
       }
+      newMarket.categoryNames = categoryNames.join(' ');
     }
 
     if (metadata.tags) {

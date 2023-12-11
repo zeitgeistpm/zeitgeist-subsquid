@@ -51,10 +51,10 @@ export class Market {
     bonds!: MarketBonds | undefined | null
 
     /**
-     * Name of all categories
+     * Name of all categories glued together
      */
-    @Column_("text", {array: true, nullable: true})
-    categoryNames!: (string)[] | undefined | null
+    @Column_("text", {nullable: true})
+    categoryNames!: string | undefined | null
 
     /**
      * Share details

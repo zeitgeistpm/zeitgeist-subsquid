@@ -1,5 +1,5 @@
-module.exports = class Data1702296178498 {
-    name = 'Data1702296178498'
+module.exports = class Data1702125775108 {
+    name = 'Data1702125775108'
 
     async up(db) {
         await db.query(`CREATE TABLE "account_balance" ("asset_id" text NOT NULL, "balance" numeric NOT NULL, "id" character varying NOT NULL, "account_id" character varying, CONSTRAINT "PK_bd893045760f719e24a95a42562" PRIMARY KEY ("id"))`)
@@ -15,7 +15,7 @@ module.exports = class Data1702296178498 {
         await db.query(`CREATE INDEX "IDX_fb707135b8bb6b3ce35248d53c" ON "neo_pool" ("account_id") `)
         await db.query(`CREATE INDEX "IDX_e1c80a90a67b13803f68531f66" ON "neo_pool" ("market_id") `)
         await db.query(`CREATE INDEX "IDX_2f5bf015fefd46462d8fb28cdd" ON "neo_pool" ("pool_id") `)
-        await db.query(`CREATE TABLE "market" ("id" character varying NOT NULL, "authorized_address" text, "base_asset" text NOT NULL, "bonds" jsonb, "category_names" text array, "categories" jsonb, "creation" character varying(14) NOT NULL, "creator" text NOT NULL, "creator_fee" integer, "deadlines" jsonb, "description" text, "disputes" jsonb, "dispute_mechanism" character varying(14) NOT NULL, "has_valid_meta_categories" boolean NOT NULL, "img" text, "market_id" integer NOT NULL, "market_type" jsonb NOT NULL, "metadata" text NOT NULL, "oracle" text NOT NULL, "outcome_assets" text array NOT NULL, "period" jsonb NOT NULL, "reject_reason" text, "report" jsonb, "resolved_outcome" text, "scalar_type" text, "scoring_rule" character varying(26) NOT NULL, "slug" text, "status" character varying(19) NOT NULL, "tags" text array, "question" text, "pool_id" character varying, "neo_pool_id" character varying, CONSTRAINT "PK_1e9a2963edfd331d92018e3abac" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "market" ("id" character varying NOT NULL, "authorized_address" text, "base_asset" text NOT NULL, "bonds" jsonb, "category_names" text, "categories" jsonb, "creation" character varying(14) NOT NULL, "creator" text NOT NULL, "creator_fee" integer, "deadlines" jsonb, "description" text, "disputes" jsonb, "dispute_mechanism" character varying(14) NOT NULL, "has_valid_meta_categories" boolean NOT NULL, "img" text, "market_id" integer NOT NULL, "market_type" jsonb NOT NULL, "metadata" text NOT NULL, "oracle" text NOT NULL, "outcome_assets" text array NOT NULL, "period" jsonb NOT NULL, "reject_reason" text, "report" jsonb, "resolved_outcome" text, "scalar_type" text, "scoring_rule" character varying(26) NOT NULL, "slug" text, "status" character varying(19) NOT NULL, "tags" text array, "question" text, "pool_id" character varying, "neo_pool_id" character varying, CONSTRAINT "PK_1e9a2963edfd331d92018e3abac" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_1a8068c93b7b3b7f483268ea11" ON "market" ("market_id") `)
         await db.query(`CREATE INDEX "IDX_190888a8e7a706187b12093c29" ON "market" ("pool_id") `)
         await db.query(`CREATE INDEX "IDX_923b7aeab33f803bc47adddeb6" ON "market" ("neo_pool_id") `)
