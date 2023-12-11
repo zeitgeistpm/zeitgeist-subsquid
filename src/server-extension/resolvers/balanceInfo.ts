@@ -31,6 +31,15 @@ registerEnumType(AssetKind, {
   description: 'Kind of asset',
 });
 
+enum BalanceInfoEvent {
+  MintedInCourt = 'MintedInCourt',
+}
+
+registerEnumType(BalanceInfoEvent, {
+  name: 'BalanceInfoEvent',
+  description: 'Filtering balance based on event',
+});
+
 @InputType()
 class AssetKindValue {
   @Field(() => AssetKind)
@@ -52,17 +61,25 @@ class AssetKindValue {
 export class BalanceInfoResolver {
   constructor(private tx: () => Promise<EntityManager>) {}
 
-  @Query(() => BalanceInfo, { nullable: true })
+  @Query(() => BalanceInfo)
   async balanceInfo(
     @Arg('accountId', () => String, { nullable: false }) accountId: string,
-    @Arg('assetId', () => AssetKindValue) assetId: AssetKindValue,
-    @Arg('blockNumber', () => String, { nullable: false }) blockNumber: string
+    @Arg('assetId', () => AssetKindValue, { nullable: true, defaultValue: { kind: AssetKind.Ztg } })
+    assetId: AssetKindValue,
+    @Arg('blockNumber', () => String, { nullable: true }) blockNumber: string,
+    @Arg('event', () => BalanceInfoEvent, { nullable: true }) event: BalanceInfoEvent
   ): Promise<BalanceInfo> {
     const manager = await this.tx();
+
+    let conditions = ``;
+    conditions += blockNumber ? `AND block_number <= ${blockNumber}` : ``;
+    conditions += event ? `AND event ~ '${event}'` : ``;
+
     const result = await manager
       .getRepository(HistoricalAccountBalance)
-      .query(balanceInfo(accountId, assetId.toString(), blockNumber));
+      .query(balanceInfo(accountId, assetId.toString(), conditions));
 
+    if (result.length == 0) return { asset_id: assetId.toString(), balance: BigInt(0) };
     return result[0];
   }
 }
