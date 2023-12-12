@@ -57,6 +57,7 @@
     "System.ExtrinsicFailed",
     "Tokens.BalanceSet",
     "Tokens.Deposited",
+    "Tokens.Reserved",
     "Tokens.Transfer",
     "Tokens.Withdrawn"
   ],
