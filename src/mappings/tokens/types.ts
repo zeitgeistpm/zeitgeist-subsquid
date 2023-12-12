@@ -4,6 +4,7 @@ import { Ctx, EventItem } from '../../processor';
 import {
   TokensBalanceSetEvent,
   TokensDepositedEvent,
+  TokensReservedEvent,
   TokensTransferEvent,
   TokensWithdrawnEvent,
 } from '../../types/events';
@@ -53,6 +54,20 @@ export const getTokensDepositedEvent = (ctx: Ctx, item: EventItem): TokensEvent 
   }
   const assetId = formatAssetId(currencyId);
   return { assetId, walletId, amount };
+};
+
+export const getTokensReservedEvent = (ctx: Ctx, item: EventItem): TokensEvent => {
+  const event = new TokensReservedEvent(ctx, item.event);
+  let eventAs, walletId;
+  if (event.isV51) {
+    eventAs = event.asV51;
+    walletId = ss58.codec('zeitgeist').encode(eventAs.who);
+  } else {
+    eventAs = item.event.args;
+    walletId = encodeAddress(eventAs.who, 73);
+  }
+  const { currencyId, amount } = eventAs;
+  return { assetId: formatAssetId(currencyId), walletId, amount: BigInt(amount) };
 };
 
 export const getTokensTransferEvent = (ctx: Ctx, item: EventItem): TransferEvent => {
