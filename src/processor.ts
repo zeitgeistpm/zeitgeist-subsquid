@@ -84,7 +84,7 @@ import {
   swapExactAmountOut,
 } from './mappings/swaps';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
-import { tokensBalanceSet, tokensDeposited, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
+import { tokensBalanceSet, tokensDeposited, tokensReserved, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
 import {
   Account,
   AccountBalance,
@@ -192,6 +192,7 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('System.NewAccount', eventExtrinsicOptions)
   .addEvent('Tokens.BalanceSet', eventExtrinsicOptions)
   .addEvent('Tokens.Deposited', eventExtrinsicOptions)
+  .addEvent('Tokens.Reserved', eventExtrinsicOptions)
   .addEvent('Tokens.Transfer', eventExtrinsicOptions)
   .addEvent('Tokens.Withdrawn', eventExtrinsicOptions);
 
@@ -728,6 +729,13 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           }
           case 'Tokens.Deposited': {
             const hab = await tokensDeposited(ctx, block.header, item);
+            const key = makeKey(hab.accountId, hab.assetId);
+            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
+            balanceHistory.push(hab);
+            break;
+          }
+          case 'Tokens.Reserved': {
+            const hab = await tokensReserved(ctx, block.header, item);
             const key = makeKey(hab.accountId, hab.assetId);
             balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
             balanceHistory.push(hab);
