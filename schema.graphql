@@ -133,6 +133,8 @@ type Market @entity {
   baseAsset: String!
   "Tracks the status of the advisory, oracle and validity bonds"
   bonds: MarketBonds
+  "Name of all categories glued together"
+  categoryNames: String
   "Share details"
   categories: [CategoryMetadata!]
   "Can be `Permissionless` or `Advised`"

@@ -51,6 +51,12 @@ export class Market {
     bonds!: MarketBonds | undefined | null
 
     /**
+     * Name of all categories glued together
+     */
+    @Column_("text", {nullable: true})
+    categoryNames!: string | undefined | null
+
+    /**
      * Share details
      */
     @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.map((val: any) => val.toJSON()), from: obj => obj == null ? undefined : marshal.fromList(obj, val => new CategoryMetadata(undefined, marshal.nonNull(val)))}, nullable: true})
