@@ -16,23 +16,22 @@ export const getBuyExecutedEvent = (ctx: Ctx, item: EventItem): BuySellExecutedE
   let eventAs, who;
   if (event.isV50) {
     eventAs = event.asV50;
-    who = ss58.codec('zeitgeist').encode(event.asV50.who);
+    who = ss58.codec('zeitgeist').encode(eventAs.who);
   } else if (event.isV51) {
     eventAs = event.asV51;
-    who = ss58.codec('zeitgeist').encode(event.asV51.who);
+    who = ss58.codec('zeitgeist').encode(eventAs.who);
   } else {
     eventAs = item.event.args;
-    who = encodeAddress(item.event.args.who, 73);
+    who = encodeAddress(eventAs.who, 73);
   }
-  const { marketId, amountIn, amountOut, swapFeeAmount } = eventAs;
-  const assetExecuted = formatAssetId(eventAs.assetOut);
+  const { marketId, amountIn, amountOut, assetOut, swapFeeAmount } = eventAs;
   return {
     who,
     marketId,
-    assetExecuted,
-    amountIn,
-    amountOut,
-    swapFeeAmount,
+    assetExecuted: formatAssetId(assetOut),
+    amountIn: BigInt(amountIn),
+    amountOut: BigInt(amountOut),
+    swapFeeAmount: BigInt(swapFeeAmount),
   };
 };
 
@@ -41,17 +40,17 @@ export const getExitExecutedEvent = (ctx: Ctx, item: EventItem): JoinExitExecute
   let eventAs, who;
   if (event.isV50) {
     eventAs = event.asV50;
-    who = ss58.codec('zeitgeist').encode(event.asV50.who);
+    who = ss58.codec('zeitgeist').encode(eventAs.who);
   } else {
     eventAs = item.event.args;
-    who = encodeAddress(item.event.args.who, 73);
+    who = encodeAddress(eventAs.who, 73);
   }
   const { marketId, poolSharesAmount, newLiquidityParameter } = eventAs;
   return {
     who,
     marketId,
-    poolSharesAmount,
-    newLiquidityParameter,
+    poolSharesAmount: BigInt(poolSharesAmount),
+    newLiquidityParameter: BigInt(newLiquidityParameter),
   };
 };
 
@@ -60,16 +59,16 @@ export const getFeesWithdrawnEvent = (ctx: Ctx, item: EventItem): FeesWithdrawnE
   let eventAs, who;
   if (event.isV50) {
     eventAs = event.asV50;
-    who = ss58.codec('zeitgeist').encode(event.asV50.who);
+    who = ss58.codec('zeitgeist').encode(eventAs.who);
   } else {
     eventAs = item.event.args;
-    who = encodeAddress(item.event.args.who, 73);
+    who = encodeAddress(eventAs.who, 73);
   }
   const { marketId, amount } = eventAs;
   return {
     who,
     marketId,
-    amount,
+    amount: BigInt(amount),
   };
 };
 
@@ -78,17 +77,17 @@ export const getJoinExecutedEvent = (ctx: Ctx, item: EventItem): JoinExitExecute
   let eventAs, who;
   if (event.isV50) {
     eventAs = event.asV50;
-    who = ss58.codec('zeitgeist').encode(event.asV50.who);
+    who = ss58.codec('zeitgeist').encode(eventAs.who);
   } else {
     eventAs = item.event.args;
-    who = encodeAddress(item.event.args.who, 73);
+    who = encodeAddress(eventAs.who, 73);
   }
   const { marketId, poolSharesAmount, newLiquidityParameter } = eventAs;
   return {
     who,
     marketId,
-    poolSharesAmount,
-    newLiquidityParameter,
+    poolSharesAmount: BigInt(poolSharesAmount),
+    newLiquidityParameter: BigInt(newLiquidityParameter),
   };
 };
 
@@ -97,30 +96,28 @@ export const getPoolDeployedEvent = (ctx: Ctx, item: EventItem): PoolDeployedEve
   let eventAs, who, accountId, collateral, swapFee;
   if (event.isV50) {
     eventAs = event.asV50;
-    who = ss58.codec('zeitgeist').encode(event.asV50.who);
+    who = ss58.codec('zeitgeist').encode(eventAs.who);
     accountId = NeoPoolAsV50[+event.asV50.marketId.toString()].accountId;
     collateral = NeoPoolAsV50[+event.asV50.marketId.toString()].collateral;
     swapFee = NeoPoolAsV50[+event.asV50.marketId.toString()].swapFee;
   } else if (event.isV51) {
     eventAs = event.asV51;
-    who = ss58.codec('zeitgeist').encode(event.asV51.who);
-    accountId = ss58.codec('zeitgeist').encode(event.asV51.accountId);
+    who = ss58.codec('zeitgeist').encode(eventAs.who);
+    accountId = ss58.codec('zeitgeist').encode(eventAs.accountId);
   } else {
     eventAs = item.event.args;
-    who = encodeAddress(item.event.args.who, 73);
-    accountId = encodeAddress(item.event.args.accountId, 73);
+    who = encodeAddress(eventAs.who, 73);
+    accountId = encodeAddress(eventAs.accountId, 73);
   }
   const { marketId, liquidityParameter, poolSharesAmount } = eventAs;
-  collateral = collateral ?? formatAssetId(eventAs.collateral);
-  swapFee = swapFee ?? BigInt(eventAs.swapFee);
   return {
     who,
     marketId,
     accountId,
-    collateral,
+    collateral: collateral ?? formatAssetId(eventAs.collateral),
     liquidityParameter,
     poolSharesAmount,
-    swapFee,
+    swapFee: swapFee ?? BigInt(eventAs.swapFee),
   };
 };
 
@@ -129,23 +126,22 @@ export const getSellExecutedEvent = (ctx: Ctx, item: EventItem): BuySellExecuted
   let eventAs, who;
   if (event.isV50) {
     eventAs = event.asV50;
-    who = ss58.codec('zeitgeist').encode(event.asV50.who);
+    who = ss58.codec('zeitgeist').encode(eventAs.who);
   } else if (event.isV51) {
     eventAs = event.asV51;
-    who = ss58.codec('zeitgeist').encode(event.asV51.who);
+    who = ss58.codec('zeitgeist').encode(eventAs.who);
   } else {
     eventAs = item.event.args;
-    who = encodeAddress(item.event.args.who, 73);
+    who = encodeAddress(eventAs.who, 73);
   }
-  const { marketId, amountIn, amountOut, swapFeeAmount } = eventAs;
-  const assetExecuted = formatAssetId(eventAs.assetIn);
+  const { marketId, amountIn, amountOut, assetIn, swapFeeAmount } = eventAs;
   return {
     who,
     marketId,
-    assetExecuted,
-    amountIn,
-    amountOut,
-    swapFeeAmount,
+    assetExecuted: formatAssetId(assetIn),
+    amountIn: BigInt(amountIn),
+    amountOut: BigInt(amountOut),
+    swapFeeAmount: BigInt(swapFeeAmount),
   };
 };
 
