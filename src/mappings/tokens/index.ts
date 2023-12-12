@@ -5,6 +5,7 @@ import { extrinsicFromEvent } from '../helper';
 import {
   getTokensBalanceSetEvent,
   getTokensDepositedEvent,
+  getTokensReservedEvent,
   getTokensTransferEvent,
   getTokensWithdrawnEvent,
 } from './types';
@@ -62,6 +63,26 @@ export const tokensDeposited = async (
   hab.extrinsic = extrinsicFromEvent(item.event);
   hab.assetId = assetId;
   hab.dBalance = amount;
+  hab.blockNumber = block.height;
+  hab.timestamp = new Date(block.timestamp);
+
+  return hab;
+};
+
+export const tokensReserved = async (
+  ctx: Ctx,
+  block: SubstrateBlock,
+  item: EventItem
+): Promise<HistoricalAccountBalance> => {
+  const { assetId, walletId, amount } = getTokensReservedEvent(ctx, item);
+
+  const hab = new HistoricalAccountBalance();
+  hab.id = item.event.id + '-' + walletId.slice(-5);
+  hab.accountId = walletId;
+  hab.event = item.event.name.split('.')[1];
+  hab.extrinsic = extrinsicFromEvent(item.event);
+  hab.assetId = assetId;
+  hab.dBalance = -amount;
   hab.blockNumber = block.height;
   hab.timestamp = new Date(block.timestamp);
 
