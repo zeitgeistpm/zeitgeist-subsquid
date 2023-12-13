@@ -12,62 +12,62 @@ import { formatAssetId } from '../helper';
 
 export const getTokensBalanceSetEvent = (ctx: Ctx, item: EventItem): TokensEvent => {
   const event = new TokensBalanceSetEvent(ctx, item.event);
-  let currencyId, who, walletId, amount;
+  let currencyId, who, accountId, amount;
   if (event.isV23) {
     [currencyId, who, amount] = event.asV23;
-    walletId = ss58.codec('zeitgeist').encode(who);
+    accountId = ss58.codec('zeitgeist').encode(who);
   } else if (event.isV32) {
     [currencyId, who, amount] = event.asV32;
-    walletId = ss58.codec('zeitgeist').encode(who);
+    accountId = ss58.codec('zeitgeist').encode(who);
   } else if (event.isV34) {
     currencyId = event.asV34.currencyId;
-    walletId = ss58.codec('zeitgeist').encode(event.asV34.who);
+    accountId = ss58.codec('zeitgeist').encode(event.asV34.who);
     amount = event.asV34.free;
   } else if (event.isV41) {
     currencyId = event.asV41.currencyId;
-    walletId = ss58.codec('zeitgeist').encode(event.asV41.who);
+    accountId = ss58.codec('zeitgeist').encode(event.asV41.who);
     amount = event.asV41.free;
   } else {
     currencyId = item.event.args.currencyId;
-    walletId = encodeAddress(item.event.args.who, 73);
+    accountId = encodeAddress(item.event.args.who, 73);
     amount = BigInt(item.event.args.free);
   }
   const assetId = formatAssetId(currencyId);
-  return { assetId, walletId, amount };
+  return { assetId, accountId, amount };
 };
 
 export const getTokensDepositedEvent = (ctx: Ctx, item: EventItem): TokensEvent => {
   const event = new TokensDepositedEvent(ctx, item.event);
-  let currencyId, walletId, amount;
+  let currencyId, accountId, amount;
   if (event.isV36) {
     currencyId = event.asV36.currencyId;
-    walletId = ss58.codec('zeitgeist').encode(event.asV36.who);
+    accountId = ss58.codec('zeitgeist').encode(event.asV36.who);
     amount = event.asV36.amount;
   } else if (event.isV41) {
     currencyId = event.asV41.currencyId;
-    walletId = ss58.codec('zeitgeist').encode(event.asV41.who);
+    accountId = ss58.codec('zeitgeist').encode(event.asV41.who);
     amount = event.asV41.amount;
   } else {
     currencyId = item.event.args.currencyId;
-    walletId = encodeAddress(item.event.args.who, 73);
+    accountId = encodeAddress(item.event.args.who, 73);
     amount = BigInt(item.event.args.amount);
   }
   const assetId = formatAssetId(currencyId);
-  return { assetId, walletId, amount };
+  return { assetId, accountId, amount };
 };
 
 export const getTokensReservedEvent = (ctx: Ctx, item: EventItem): TokensEvent => {
   const event = new TokensReservedEvent(ctx, item.event);
-  let eventAs, walletId;
+  let eventAs, accountId;
   if (event.isV51) {
     eventAs = event.asV51;
-    walletId = ss58.codec('zeitgeist').encode(eventAs.who);
+    accountId = ss58.codec('zeitgeist').encode(eventAs.who);
   } else {
     eventAs = item.event.args;
-    walletId = encodeAddress(eventAs.who, 73);
+    accountId = encodeAddress(eventAs.who, 73);
   }
   const { currencyId, amount } = eventAs;
-  return { assetId: formatAssetId(currencyId), walletId, amount: BigInt(amount) };
+  return { assetId: formatAssetId(currencyId), accountId, amount: BigInt(amount) };
 };
 
 export const getTokensTransferEvent = (ctx: Ctx, item: EventItem): TransferEvent => {
@@ -103,27 +103,27 @@ export const getTokensTransferEvent = (ctx: Ctx, item: EventItem): TransferEvent
 
 export const getTokensWithdrawnEvent = (ctx: Ctx, item: EventItem): TokensEvent => {
   const event = new TokensWithdrawnEvent(ctx, item.event);
-  let currencyId, walletId, who, amount;
+  let currencyId, accountId, amount;
   if (event.isV36) {
     currencyId = event.asV36.currencyId;
-    walletId = ss58.codec('zeitgeist').encode(event.asV36.who);
+    accountId = ss58.codec('zeitgeist').encode(event.asV36.who);
     amount = event.asV36.amount;
   } else if (event.isV41) {
     currencyId = event.asV41.currencyId;
-    walletId = ss58.codec('zeitgeist').encode(event.asV41.who);
+    accountId = ss58.codec('zeitgeist').encode(event.asV41.who);
     amount = event.asV41.amount;
   } else {
     currencyId = item.event.args.currencyId;
-    walletId = encodeAddress(item.event.args.who, 73);
+    accountId = encodeAddress(item.event.args.who, 73);
     amount = BigInt(item.event.args.amount);
   }
   const assetId = formatAssetId(currencyId);
-  return { assetId, walletId, amount };
+  return { assetId, accountId, amount };
 };
 
 interface TokensEvent {
   assetId: string;
-  walletId: string;
+  accountId: string;
   amount: bigint;
 }
 
