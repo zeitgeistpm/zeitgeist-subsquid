@@ -690,17 +690,17 @@ processor.run(new TypeormDatabase(), async (ctx) => {
 const storeBalanceChanges = async (habs: HistoricalAccountBalance[]) => {
   await Promise.all(
     habs.map(async (hab) => {
-      const assetBalance = accounts.get(hab.accountId) ?? new Map<string, bigint>();
-      assetBalance.set(hab.assetId, (assetBalance.get(hab.assetId) || BigInt(0)) + hab.dBalance);
-      accounts.set(hab.accountId, assetBalance);
-      balanceHistory.push(hab);
+      const balances = accounts.get(hab.accountId) ?? new Map<string, bigint>();
+      balances.set(hab.assetId, (balances.get(hab.assetId) || BigInt(0)) + hab.dBalance);
+      accounts.set(hab.accountId, balances);
     })
   );
+  balanceHistory.push(...habs);
 };
 
 const saveAccounts = async (ctx: Ctx) => {
   await Promise.all(
-    Array.from(accounts).map(async ([accountId, assetAmounts]) => {
+    Array.from(accounts).map(async ([accountId, balances]) => {
       let account = await ctx.store.get(Account, { where: { accountId } });
       if (!account) {
         account = new Account({
@@ -713,7 +713,7 @@ const saveAccounts = async (ctx: Ctx) => {
       }
 
       await Promise.all(
-        Array.from(assetAmounts).map(async ([assetId, amount]) => {
+        Array.from(balances).map(async ([assetId, amount]) => {
           let ab = await ctx.store.findOneBy(AccountBalance, {
             account: { accountId },
             assetId,
