@@ -340,17 +340,18 @@ const handlePostHooks = async (ctx: Ctx, block: SubstrateBlock) => {
   }
 };
 
-const makeKey = (walletId: string, assetId: string): string => {
-  return walletId + '|' + assetId;
-};
+const accounts = new Map<string, Map<string, bigint>>();
+let assetHistory: HistoricalAsset[];
+let balanceHistory: HistoricalAccountBalance[];
+let poolHistory: HistoricalPool[];
+let swapHistory: HistoricalSwap[];
 
 // @ts-ignore
 processor.run(new TypeormDatabase(), async (ctx) => {
-  const balanceAccounts = new Map<string, bigint>();
-  const assetHistory: HistoricalAsset[] = [];
-  const balanceHistory: HistoricalAccountBalance[] = [];
-  const poolHistory: HistoricalPool[] = [];
-  const swapHistory: HistoricalSwap[] = [];
+  assetHistory = [];
+  balanceHistory = [];
+  poolHistory = [];
+  swapHistory = [];
 
   for (let block of ctx.blocks) {
     for (let item of block.items) {
@@ -735,26 +736,21 @@ const saveAccounts = async (ctx: Ctx) => {
   accounts.clear();
 };
 
-const saveAssetHistory = async (ctx: Ctx, assetHistory: HistoricalAsset[]) => {
-  if (assetHistory.length === 0) return;
-  console.log(`Saving historical assets: ${JSON.stringify(assetHistory, null, 2)}`);
-  await ctx.store.save(assetHistory);
-};
-
-const saveBalanceHistory = async (ctx: Ctx, balanceHistory: HistoricalAccountBalance[]) => {
-  if (balanceHistory.length === 0) return;
-  console.log(`Saving historical account balances: ${JSON.stringify(balanceHistory, null, 2)}`);
-  await ctx.store.save(balanceHistory);
-};
-
-const savePoolHistory = async (ctx: Ctx, poolHistory: HistoricalPool[]) => {
-  if (poolHistory.length === 0) return;
-  console.log(`Saving historical pools: ${JSON.stringify(poolHistory, null, 2)}`);
-  await ctx.store.save(poolHistory);
-};
-
-const saveSwapHistory = async (ctx: Ctx, swapHistory: HistoricalSwap[]) => {
-  if (swapHistory.length === 0) return;
-  console.log(`Saving historical swaps: ${JSON.stringify(swapHistory, null, 2)}`);
-  await ctx.store.save(swapHistory);
+const saveHistory = async (ctx: Ctx) => {
+  if (assetHistory.length > 0) {
+    console.log(`Saving historical assets: ${JSON.stringify(assetHistory, null, 2)}`);
+    await ctx.store.save(assetHistory);
+  }
+  if (balanceHistory.length > 0) {
+    console.log(`Saving historical account balances: ${JSON.stringify(balanceHistory, null, 2)}`);
+    await ctx.store.save(balanceHistory);
+  }
+  if (poolHistory.length > 0) {
+    console.log(`Saving historical pools: ${JSON.stringify(poolHistory, null, 2)}`);
+    await ctx.store.save(poolHistory);
+  }
+  if (swapHistory.length > 0) {
+    console.log(`Saving historical swaps: ${JSON.stringify(swapHistory, null, 2)}`);
+    await ctx.store.save(swapHistory);
+  }
 };
