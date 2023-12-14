@@ -358,14 +358,12 @@ processor.run(new TypeormDatabase(), async (ctx) => {
       if (item.kind === 'call' && item.call.success && block.header.height < 1089818) {
         // @ts-ignore
         if (item.name === 'PredictionMarkets.redeem_shares') {
-          await saveBalanceChanges(ctx, balanceAccounts);
-          balanceAccounts.clear();
+          await saveAccounts(ctx);
           await redeemSharesCall(ctx, block.header, item);
         }
         // @ts-ignore
         if (item.name === 'Swaps.pool_exit') {
-          await saveBalanceChanges(ctx, balanceAccounts);
-          balanceAccounts.clear();
+          await saveAccounts(ctx);
           await poolExitCall(ctx, block.header, item);
         }
       }
@@ -375,73 +373,48 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           case 'AssetTxPayment.AssetTxFeePaid': {
             const habs = await assetTxPaymentAssetTxFeePaidEvent(ctx, block.header, item);
             if (!habs) break;
-            await Promise.all(
-              habs.map(async (hab) => {
-                const key = makeKey(hab.accountId, hab.assetId);
-                balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-                balanceHistory.push(hab);
-              })
-            );
+            await storeBalanceChanges(habs);
             break;
           }
           case 'Balances.BalanceSet': {
-            await saveBalanceChanges(ctx, balanceAccounts);
-            balanceAccounts.clear();
+            await saveAccounts(ctx);
             await balancesBalanceSet(ctx, block.header, item);
             break;
           }
           case 'Balances.Deposit': {
             const hab = await balancesDeposit(ctx, block.header, item);
-            const key = makeKey(hab.accountId, hab.assetId);
-            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-            balanceHistory.push(hab);
+            await storeBalanceChanges([hab]);
             break;
           }
           case 'Balances.DustLost': {
             const hab = await balancesDustLost(ctx, block.header, item);
-            const key = makeKey(hab.accountId, hab.assetId);
-            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-            balanceHistory.push(hab);
+            await storeBalanceChanges([hab]);
             break;
           }
           case 'Balances.Reserved': {
             const hab = await balancesReserved(ctx, block.header, item);
-            const key = makeKey(hab.accountId, hab.assetId);
-            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-            balanceHistory.push(hab);
+            await storeBalanceChanges([hab]);
             break;
           }
           case 'Balances.ReserveRepatriated': {
             const hab = await balancesReserveRepatriated(ctx, block.header, item);
             if (!hab) break;
-            const key = makeKey(hab.accountId, hab.assetId);
-            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-            balanceHistory.push(hab);
+            await storeBalanceChanges([hab]);
             break;
           }
           case 'Balances.Transfer': {
             const habs = await balancesTransfer(ctx, block.header, item);
-            await Promise.all(
-              habs.map(async (hab) => {
-                const key = makeKey(hab.accountId, hab.assetId);
-                balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-                balanceHistory.push(hab);
-              })
-            );
+            await storeBalanceChanges(habs);
             break;
           }
           case 'Balances.Unreserved': {
             const hab = await balancesUnreserved(ctx, block.header, item);
-            const key = makeKey(hab.accountId, hab.assetId);
-            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-            balanceHistory.push(hab);
+            await storeBalanceChanges([hab]);
             break;
           }
           case 'Balances.Withdraw': {
             const hab = await balancesWithdraw(ctx, block.header, item);
-            const key = makeKey(hab.accountId, hab.assetId);
-            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-            balanceHistory.push(hab);
+            await storeBalanceChanges([hab]);
             break;
           }
           case 'Court.MintedInCourt': {
@@ -456,32 +429,21 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           case 'Currency.Transferred': {
             const habs = await currencyTransferred(ctx, block.header, item);
             if (!habs) break;
-            await Promise.all(
-              habs.map(async (hab) => {
-                const key = makeKey(hab.accountId, hab.assetId);
-                balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-                balanceHistory.push(hab);
-              })
-            );
+            await storeBalanceChanges(habs);
             break;
           }
           case 'Currency.Deposited': {
             const hab = await currencyDeposited(ctx, block.header, item);
-            const key = makeKey(hab.accountId, hab.assetId);
-            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-            balanceHistory.push(hab);
+            await storeBalanceChanges([hab]);
             break;
           }
           case 'Currency.Withdrawn': {
             const hab = await currencyWithdrawn(ctx, block.header, item);
-            const key = makeKey(hab.accountId, hab.assetId);
-            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-            balanceHistory.push(hab);
+            await storeBalanceChanges([hab]);
             break;
           }
           case 'NeoSwaps.BuyExecuted': {
-            await saveBalanceChanges(ctx, balanceAccounts);
-            balanceAccounts.clear();
+            await saveAccounts(ctx);
             const res = await buyExecuted(ctx, block.header, item);
             if (!res) break;
             assetHistory.push(...res.historicalAssets);
@@ -490,8 +452,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             break;
           }
           case 'NeoSwaps.ExitExecuted': {
-            await saveBalanceChanges(ctx, balanceAccounts);
-            balanceAccounts.clear();
+            await saveAccounts(ctx);
             const historicalAssets = await exitExecuted(ctx, block.header, item);
             if (!historicalAssets) break;
             assetHistory.push(...historicalAssets);
@@ -504,16 +465,14 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             break;
           }
           case 'NeoSwaps.JoinExecuted': {
-            await saveBalanceChanges(ctx, balanceAccounts);
-            balanceAccounts.clear();
+            await saveAccounts(ctx);
             const historicalAssets = await joinExecuted(ctx, block.header, item);
             if (!historicalAssets) break;
             assetHistory.push(...historicalAssets);
             break;
           }
           case 'NeoSwaps.PoolDeployed': {
-            await saveBalanceChanges(ctx, balanceAccounts);
-            balanceAccounts.clear();
+            await saveAccounts(ctx);
             const res = await poolDeployed(ctx, block.header, item);
             if (!res) break;
             assetHistory.push(...res.historicalAssets);
@@ -521,8 +480,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             break;
           }
           case 'NeoSwaps.SellExecuted': {
-            await saveBalanceChanges(ctx, balanceAccounts);
-            balanceAccounts.clear();
+            await saveAccounts(ctx);
             const res = await sellExecuted(ctx, block.header, item);
             if (!res) break;
             assetHistory.push(...res.historicalAssets);
@@ -533,9 +491,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           case 'ParachainStaking.Rewarded': {
             if (specVersion(block.header.specId) < 33) {
               const hab = await parachainStakingRewarded(ctx, block.header, item);
-              const key = makeKey(hab.accountId, hab.assetId);
-              balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-              balanceHistory.push(hab);
+              await storeBalanceChanges([hab]);
               break;
             }
             // Since specVersion:33, Balances.Deposit is always emitted with ParachainStaking.Rewarded
@@ -551,38 +507,23 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           case 'PredictionMarkets.BoughtCompleteSet': {
             const habs = await boughtCompleteSet(ctx, block.header, item);
             if (!habs) break;
-            await Promise.all(
-              habs.map(async (hab) => {
-                const key = makeKey(hab.accountId, hab.assetId);
-                balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-                balanceHistory.push(hab);
-              })
-            );
+            await storeBalanceChanges(habs);
             break;
           }
           case 'PredictionMarkets.MarketResolved': {
-            await saveBalanceChanges(ctx, balanceAccounts);
-            balanceAccounts.clear();
+            await saveAccounts(ctx);
             await marketResolved(ctx, block.header, item);
             break;
           }
           case 'PredictionMarkets.SoldCompleteSet': {
             const habs = await soldCompleteSet(ctx, block.header, item);
             if (!habs) break;
-            await Promise.all(
-              habs.map(async (hab) => {
-                const key = makeKey(hab.accountId, hab.assetId);
-                balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-                balanceHistory.push(hab);
-              })
-            );
+            await storeBalanceChanges(habs);
             break;
           }
           case 'PredictionMarkets.TokensRedeemed': {
             const hab = await tokensRedeemed(ctx, block.header, item);
-            const key = makeKey(hab.accountId, hab.assetId);
-            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-            balanceHistory.push(hab);
+            await storeBalanceChanges([hab]);
             break;
           }
           case 'Swaps.PoolActive': {
@@ -592,16 +533,14 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             break;
           }
           case 'Swaps.ArbitrageBuyBurn': {
-            await saveBalanceChanges(ctx, balanceAccounts);
-            balanceAccounts.clear();
+            await saveAccounts(ctx);
             const historicalAssets = await arbitrageBuyBurn(ctx, block.header, item);
             if (!historicalAssets) break;
             assetHistory.push(...historicalAssets);
             break;
           }
           case 'Swaps.ArbitrageMintSell': {
-            await saveBalanceChanges(ctx, balanceAccounts);
-            balanceAccounts.clear();
+            await saveAccounts(ctx);
             const historicalAssets = await arbitrageMintSell(ctx, block.header, item);
             if (!historicalAssets) break;
             assetHistory.push(...historicalAssets);
@@ -627,8 +566,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             break;
           }
           case 'Swaps.PoolCreate': {
-            await saveBalanceChanges(ctx, balanceAccounts);
-            balanceAccounts.clear();
+            await saveAccounts(ctx);
             const res = await poolCreate(ctx, block.header, item);
             if (!res) break;
             assetHistory.push(...res.historicalAssets);
@@ -636,56 +574,44 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             break;
           }
           case 'Swaps.PoolDestroyed': {
-            await saveBalanceChanges(ctx, balanceAccounts);
-            balanceAccounts.clear();
+            await saveAccounts(ctx);
             const res = await poolDestroyed(ctx, block.header, item);
             if (!res) break;
-            await Promise.all(
-              res.historicalAccountBalances.map(async (hab) => {
-                const key = makeKey(hab.accountId, hab.assetId);
-                balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-                balanceHistory.push(hab);
-              })
-            );
+            await storeBalanceChanges(res.historicalAccountBalances);
             assetHistory.push(...res.historicalAssets);
             poolHistory.push(res.historicalPool);
             break;
           }
           case 'Swaps.PoolExit': {
-            await saveBalanceChanges(ctx, balanceAccounts);
-            balanceAccounts.clear();
+            await saveAccounts(ctx);
             const historicalAssets = await poolExit(ctx, block.header, item);
             if (!historicalAssets) break;
             assetHistory.push(...historicalAssets);
             break;
           }
           case 'Swaps.PoolExitWithExactAssetAmount': {
-            await saveBalanceChanges(ctx, balanceAccounts);
-            balanceAccounts.clear();
+            await saveAccounts(ctx);
             const historicalAssets = await poolExitWithExactAssetAmount(ctx, block.header, item);
             if (!historicalAssets) break;
             assetHistory.push(...historicalAssets);
             break;
           }
           case 'Swaps.PoolJoin': {
-            await saveBalanceChanges(ctx, balanceAccounts);
-            balanceAccounts.clear();
+            await saveAccounts(ctx);
             const historicalAssets = await poolJoin(ctx, block.header, item);
             if (!historicalAssets) break;
             assetHistory.push(...historicalAssets);
             break;
           }
           case 'Swaps.PoolJoinWithExactAssetAmount': {
-            await saveBalanceChanges(ctx, balanceAccounts);
-            balanceAccounts.clear();
+            await saveAccounts(ctx);
             const historicalAssets = await poolJoinWithExactAssetAmount(ctx, block.header, item);
             if (!historicalAssets) break;
             assetHistory.push(...historicalAssets);
             break;
           }
           case 'Swaps.SwapExactAmountIn': {
-            await saveBalanceChanges(ctx, balanceAccounts);
-            balanceAccounts.clear();
+            await saveAccounts(ctx);
             const res = await swapExactAmountIn(ctx, block.header, item);
             if (!res) break;
             assetHistory.push(...res.historicalAssets);
@@ -694,8 +620,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             break;
           }
           case 'Swaps.SwapExactAmountOut': {
-            await saveBalanceChanges(ctx, balanceAccounts);
-            balanceAccounts.clear();
+            await saveAccounts(ctx);
             const res = await swapExactAmountOut(ctx, block.header, item);
             if (!res) break;
             assetHistory.push(...res.historicalAssets);
@@ -707,56 +632,39 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           case 'System.ExtrinsicFailed': {
             const hab = await systemExtrinsicFailed(ctx, block.header, item);
             if (!hab) break;
-            const key = makeKey(hab.accountId, hab.assetId);
-            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-            balanceHistory.push(hab);
+            await storeBalanceChanges([hab]);
             break;
           }
           // @ts-ignore
           case 'System.ExtrinsicSuccess': {
             const hab = await systemExtrinsicSuccess(ctx, block.header, item);
             if (!hab) break;
-            const key = makeKey(hab.accountId, hab.assetId);
-            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-            balanceHistory.push(hab);
+            await storeBalanceChanges([hab]);
             break;
           }
           case 'Tokens.BalanceSet': {
-            await saveBalanceChanges(ctx, balanceAccounts);
-            balanceAccounts.clear();
+            await saveAccounts(ctx);
             await tokensBalanceSet(ctx, block.header, item);
             break;
           }
           case 'Tokens.Deposited': {
             const hab = await tokensDeposited(ctx, block.header, item);
-            const key = makeKey(hab.accountId, hab.assetId);
-            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-            balanceHistory.push(hab);
+            await storeBalanceChanges([hab]);
             break;
           }
           case 'Tokens.Reserved': {
             const hab = await tokensReserved(ctx, block.header, item);
-            const key = makeKey(hab.accountId, hab.assetId);
-            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-            balanceHistory.push(hab);
+            await storeBalanceChanges([hab]);
             break;
           }
           case 'Tokens.Transfer': {
             const habs = await tokensTransfer(ctx, block.header, item);
-            await Promise.all(
-              habs.map(async (hab) => {
-                const key = makeKey(hab.accountId, hab.assetId);
-                balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-                balanceHistory.push(hab);
-              })
-            );
+            await storeBalanceChanges(habs);
             break;
           }
           case 'Tokens.Withdrawn': {
             const hab = await tokensWithdrawn(ctx, block.header, item);
-            const key = makeKey(hab.accountId, hab.assetId);
-            balanceAccounts.set(key, (balanceAccounts.get(key) || BigInt(0)) + hab.dBalance);
-            balanceHistory.push(hab);
+            await storeBalanceChanges([hab]);
             break;
           }
           default: {
@@ -768,13 +676,14 @@ processor.run(new TypeormDatabase(), async (ctx) => {
     }
     if (process.env.WS_NODE_URL?.includes(`bs`)) {
       if (block.header.height < 215000 || block.header.height === 579140) {
-        await saveBalanceChanges(ctx, balanceAccounts);
-        balanceAccounts.clear();
+        await saveAccounts(ctx);
         await handlePostHooks(ctx, block.header);
       }
     }
   }
 
+  await saveAccounts(ctx);
+  await saveHistory(ctx);
 });
 
 const storeBalanceChanges = async (habs: HistoricalAccountBalance[]) => {
