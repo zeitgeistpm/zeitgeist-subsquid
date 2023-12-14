@@ -774,45 +774,56 @@ processor.run(new TypeormDatabase(), async (ctx) => {
       }
     }
   }
-  await saveBalanceChanges(ctx, balanceAccounts);
-  await saveAssetHistory(ctx, assetHistory);
-  await saveBalanceHistory(ctx, balanceHistory);
-  await savePoolHistory(ctx, poolHistory);
-  await saveSwapHistory(ctx, swapHistory);
+
 });
 
-const saveBalanceChanges = async (ctx: Ctx, balanceAccounts: Map<string, bigint>) => {
-  const balanceAccountsArr = Array.from(balanceAccounts);
+const storeBalanceChanges = async (habs: HistoricalAccountBalance[]) => {
   await Promise.all(
-    balanceAccountsArr.map(async ([key, amount]) => {
-      const [walletId, assetId] = key.split('|');
-      let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
-      if (!acc) {
-        acc = new Account();
-        acc.id = walletId;
-        acc.accountId = walletId;
-        console.log(`Saving account: ${JSON.stringify(acc, null, 2)}`);
-        await ctx.store.save<Account>(acc);
-        await initBalance(acc, ctx.store);
-      }
-
-      let ab = await ctx.store.findOneBy(AccountBalance, {
-        account: { accountId: walletId },
-        assetId: assetId,
-      });
-      if (ab) {
-        ab.balance = ab.balance + amount;
-      } else {
-        ab = new AccountBalance();
-        ab.id = walletId + '-' + assetId;
-        ab.account = acc;
-        ab.assetId = assetId;
-        ab.balance = amount;
-      }
-      console.log(`Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-      await ctx.store.save<AccountBalance>(ab);
+    habs.map(async (hab) => {
+      const assetBalance = accounts.get(hab.accountId) ?? new Map<string, bigint>();
+      assetBalance.set(hab.assetId, (assetBalance.get(hab.assetId) || BigInt(0)) + hab.dBalance);
+      accounts.set(hab.accountId, assetBalance);
+      balanceHistory.push(hab);
     })
   );
+};
+
+const saveAccounts = async (ctx: Ctx) => {
+  await Promise.all(
+    Array.from(accounts).map(async ([accountId, assetAmounts]) => {
+      let account = await ctx.store.get(Account, { where: { accountId } });
+      if (!account) {
+        account = new Account({
+          accountId,
+          id: accountId,
+        });
+        console.log(`Saving account: ${JSON.stringify(account, null, 2)}`);
+        await ctx.store.save<Account>(account);
+        await initBalance(account, ctx.store);
+      }
+
+      await Promise.all(
+        Array.from(assetAmounts).map(async ([assetId, amount]) => {
+          let ab = await ctx.store.findOneBy(AccountBalance, {
+            account: { accountId },
+            assetId,
+          });
+          if (!ab) {
+            ab = new AccountBalance({
+              account,
+              assetId,
+              balance: BigInt(0),
+              id: accountId + '-' + assetId,
+            });
+          }
+          ab.balance += amount;
+          console.log(`Saving account balance: ${JSON.stringify(ab, null, 2)}`);
+          await ctx.store.save<AccountBalance>(ab);
+        })
+      );
+    })
+  );
+  accounts.clear();
 };
 
 const saveAssetHistory = async (ctx: Ctx, assetHistory: HistoricalAsset[]) => {
