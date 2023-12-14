@@ -548,16 +548,16 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             break;
           }
           case 'Swaps.MarketCreatorFeesPaid': {
-            const newHabs: HistoricalAccountBalance[] = [];
-            for (let i = 0; i < 2; i++) {
-              const hab = balanceHistory.pop();
-              if (hab && hab.event === 'Transfer') {
+            // Refurbishes changes from two Balances.Transfer events accompanying before this event
+            if (balanceHistory.length < 2) break;
+            for (let i = 1; i < 3; i++) {
+              const hab = balanceHistory[balanceHistory.length - i];
+              if (hab.event === 'Transfer') {
                 hab.id = item.event.id + hab.id.slice(-6);
                 hab.event = item.event.name.split('.')[1];
-                newHabs.push(hab);
+                balanceHistory[balanceHistory.length - i] = hab;
               }
             }
-            balanceHistory.push(...newHabs);
             break;
           }
           case 'Swaps.PoolClosed': {
