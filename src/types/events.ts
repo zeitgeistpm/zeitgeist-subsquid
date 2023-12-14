@@ -3081,6 +3081,99 @@ export class TokensDepositedEvent {
     }
 }
 
+export class TokensReservedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'Tokens.Reserved')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     *  Some balance was reserved (moved from free to reserved).
+     *  \[currency_id, who, value\]
+     */
+    get isV23(): boolean {
+        return this._chain.getEventHash('Tokens.Reserved') === '6a3d7e7accde03ae3a0153b6dc5d6cc04eea87393610da84950bbe601ce449cc'
+    }
+
+    /**
+     *  Some balance was reserved (moved from free to reserved).
+     *  \[currency_id, who, value\]
+     */
+    get asV23(): [v23.CurrencyId, Uint8Array, bigint] {
+        assert(this.isV23)
+        return this._chain.decodeEvent(this.event)
+    }
+
+    /**
+     * Some balance was reserved (moved from free to reserved).
+     * \[currency_id, who, value\]
+     */
+    get isV32(): boolean {
+        return this._chain.getEventHash('Tokens.Reserved') === 'df0511d0e921e296dbd5c8b43cb7d8933820cb906e355c768e8407ca9193138f'
+    }
+
+    /**
+     * Some balance was reserved (moved from free to reserved).
+     * \[currency_id, who, value\]
+     */
+    get asV32(): [v32.Asset, Uint8Array, bigint] {
+        assert(this.isV32)
+        return this._chain.decodeEvent(this.event)
+    }
+
+    /**
+     * Some balance was reserved (moved from free to reserved).
+     */
+    get isV34(): boolean {
+        return this._chain.getEventHash('Tokens.Reserved') === 'a4f1c201945cdbe991182662e3e9964553c56bb38739bf247036896397e7d07d'
+    }
+
+    /**
+     * Some balance was reserved (moved from free to reserved).
+     */
+    get asV34(): {currencyId: v34.Asset, who: Uint8Array, amount: bigint} {
+        assert(this.isV34)
+        return this._chain.decodeEvent(this.event)
+    }
+
+    /**
+     * Some balance was reserved (moved from free to reserved).
+     */
+    get isV41(): boolean {
+        return this._chain.getEventHash('Tokens.Reserved') === '27a10440ff180980c89f27bf3e4fdbe6561b18dc14dabab1bcce3be2753df5e7'
+    }
+
+    /**
+     * Some balance was reserved (moved from free to reserved).
+     */
+    get asV41(): {currencyId: v41.Asset, who: Uint8Array, amount: bigint} {
+        assert(this.isV41)
+        return this._chain.decodeEvent(this.event)
+    }
+
+    /**
+     * Some balance was reserved (moved from free to reserved).
+     */
+    get isV51(): boolean {
+        return this._chain.getEventHash('Tokens.Reserved') === '83adbcf54f8fdda42a7a581544b9af18229e576ba4341a3aa7fbbf9de712d661'
+    }
+
+    /**
+     * Some balance was reserved (moved from free to reserved).
+     */
+    get asV51(): {currencyId: v51.Asset, who: Uint8Array, amount: bigint} {
+        assert(this.isV51)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
 export class TokensTransferEvent {
     private readonly _chain: Chain
     private readonly event: Event
