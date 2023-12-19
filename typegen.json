@@ -1,6 +1,21 @@
 {
   "outDir": "src2/types",
-  "specVersions": "zeitgeistVersions.jsonl",
-  "typesBundle": "typesBundle.json",
-  "events": ["Balances.Transfer"]
+  "specVersions": "https://v2.archive.subsquid.io/metadata/zeitgeist-testnet",
+  "pallets": {
+    "Balances": {
+      "events": [
+        "BalanceSet",
+        "Deposit",
+        "DustLost",
+        "Reserved",
+        "ReserveRepatriated",
+        "Transfer",
+        "Unreserved",
+        "Withdraw"
+      ],
+      "calls": [],
+      "storage": [],
+      "constants": []
+    }
+  }
 }
