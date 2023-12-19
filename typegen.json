@@ -12,10 +12,10 @@
         "Transfer",
         "Unreserved",
         "Withdraw"
-      ],
-      "calls": [],
-      "storage": [],
-      "constants": []
+      ]
+    },
+    "ParachainStaking": {
+      "events": ["Rewarded"]
     }
   }
 }
