@@ -2,10 +2,21 @@ import {
   SubstrateBatchProcessor,
   SubstrateBatchProcessorFields,
   DataHandlerContext,
+  Block as _Block,
+  Event as _Event,
 } from '@subsquid/substrate-processor';
 import { Store, TypeormDatabase } from '@subsquid/typeorm-store';
 import { lookupArchive } from '@subsquid/archive-registry';
-import { balancesTransfer } from './mappings/balances';
+import {
+  balancesBalanceSet,
+  balancesDeposit,
+  balancesDustLost,
+  balancesReserveRepatriated,
+  balancesReserved,
+  balancesTransfer,
+  balancesUnreserved,
+  balancesWithdraw,
+} from './mappings/balances';
 import { initBalance } from './mappings/helper';
 import {
   Account,
@@ -30,7 +41,18 @@ export const processor = new SubstrateBatchProcessor()
     archive: lookupArchive('zeitgeist-testnet', { release: 'ArrowSquid' }),
   })
   .addEvent({
-    name: [events.balances.transfer.name],
+    name: [
+      events.balances.balanceSet.name,
+      events.balances.deposit.name,
+      events.balances.dustLost.name,
+      events.balances.transfer.name,
+      events.balances.reserveRepatriated.name,
+      events.balances.reserved.name,
+      events.balances.transfer.name,
+      events.balances.unreserved.name,
+      events.balances.withdraw.name,
+    ],
+    call: true,
     extrinsic: true,
   })
   .setFields({
@@ -47,6 +69,7 @@ export const processor = new SubstrateBatchProcessor()
 
 export type Fields = SubstrateBatchProcessorFields<typeof processor>;
 export type ProcessorContext<Store> = DataHandlerContext<Store, Fields>;
+export type Event = _Event<Fields>;
 
 const accounts = new Map<string, Map<string, bigint>>();
 let assetHistory: HistoricalAsset[];
@@ -63,9 +86,45 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   for (let block of ctx.blocks) {
     for (let event of block.events) {
       switch (event.name) {
+        case events.balances.balanceSet.name: {
+          await saveAccounts(ctx);
+          await balancesBalanceSet(ctx, block.header, event);
+          break;
+        }
+        case events.balances.deposit.name: {
+          const hab = await balancesDeposit(block.header, event);
+          await storeBalanceChanges([hab]);
+          break;
+        }
+        case events.balances.dustLost.name: {
+          const hab = await balancesDustLost(block.header, event);
+          await storeBalanceChanges([hab]);
+          break;
+        }
+        case events.balances.reserveRepatriated.name: {
+          const hab = await balancesReserveRepatriated(block.header, event);
+          if (!hab) break;
+          await storeBalanceChanges([hab]);
+          break;
+        }
+        case events.balances.reserved.name: {
+          const hab = await balancesReserved(block.header, event);
+          await storeBalanceChanges([hab]);
+          break;
+        }
         case events.balances.transfer.name: {
           const habs = await balancesTransfer(block.header, event);
           await storeBalanceChanges(habs);
+          break;
+        }
+        case events.balances.unreserved.name: {
+          const hab = await balancesUnreserved(block.header, event);
+          await storeBalanceChanges([hab]);
+          break;
+        }
+        case events.balances.withdraw.name: {
+          const hab = await balancesWithdraw(block.header, event);
+          await storeBalanceChanges([hab]);
           break;
         }
       }
