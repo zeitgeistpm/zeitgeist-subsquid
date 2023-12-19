@@ -18,7 +18,7 @@ import {
   balancesWithdraw,
 } from './mappings/balances';
 import { parachainStakingRewarded } from './mappings/parachainStaking';
-import { initBalance } from './mappings/helper';
+import { Pallet, initBalance } from './helper';
 import {
   Account,
   AccountBalance,
@@ -87,70 +87,86 @@ processor.run(new TypeormDatabase(), async (ctx) => {
 
   for (let block of ctx.blocks) {
     for (let event of block.events) {
-      switch (event.name) {
-        case events.balances.balanceSet.name: {
-          await saveAccounts(ctx);
-          await balancesBalanceSet(ctx, block.header, event);
+      switch (event.name.substring(0, event.name.indexOf('.'))) {
+        case Pallet.Balances:
+          await mapBalances(ctx, block, event);
           break;
-        }
-        case events.balances.deposit.name: {
-          const hab = await balancesDeposit(block.header, event);
-          await storeBalanceChanges([hab]);
+        case Pallet.ParachainStaking:
+          await mapParachainStaking(block, event);
           break;
-        }
-        case events.balances.dustLost.name: {
-          const hab = await balancesDustLost(block.header, event);
-          await storeBalanceChanges([hab]);
-          break;
-        }
-        case events.balances.reserveRepatriated.name: {
-          const hab = await balancesReserveRepatriated(block.header, event);
-          if (!hab) break;
-          await storeBalanceChanges([hab]);
-          break;
-        }
-        case events.balances.reserved.name: {
-          const hab = await balancesReserved(block.header, event);
-          await storeBalanceChanges([hab]);
-          break;
-        }
-        case events.balances.transfer.name: {
-          const habs = await balancesTransfer(block.header, event);
-          await storeBalanceChanges(habs);
-          break;
-        }
-        case events.balances.unreserved.name: {
-          const hab = await balancesUnreserved(block.header, event);
-          await storeBalanceChanges([hab]);
-          break;
-        }
-        case events.balances.withdraw.name: {
-          const hab = await balancesWithdraw(block.header, event);
-          await storeBalanceChanges([hab]);
-          break;
-        }
-        case events.parachainStaking.rewarded.name: {
-          if (block.header.specVersion < 33) {
-            const hab = await parachainStakingRewarded(block.header, event);
-            await storeBalanceChanges([hab]);
-            break;
-          }
-          // Since specVersion:33, Balances.Deposit is always emitted with ParachainStaking.Rewarded
-          // To avoid redundant addition, DepositEvent is being utilised for recording rewards
-          const hab = balanceHistory.pop();
-          if (hab && hab.event === 'Deposit') {
-            hab.event = event.name.split('.')[1];
-            hab.id = event.id + hab.id.slice(-6);
-            balanceHistory.push(hab);
-          }
-          break;
-        }
       }
     }
   }
   await saveAccounts(ctx);
   await saveHistory(ctx);
 });
+
+const mapBalances = async (ctx: ProcessorContext<Store>, block: any, event: Event) => {
+  switch (event.name) {
+    case events.balances.balanceSet.name: {
+      await saveAccounts(ctx);
+      await balancesBalanceSet(ctx, block.header, event);
+      break;
+    }
+    case events.balances.deposit.name: {
+      const hab = await balancesDeposit(block.header, event);
+      await storeBalanceChanges([hab]);
+      break;
+    }
+    case events.balances.dustLost.name: {
+      const hab = await balancesDustLost(block.header, event);
+      await storeBalanceChanges([hab]);
+      break;
+    }
+    case events.balances.reserveRepatriated.name: {
+      const hab = await balancesReserveRepatriated(block.header, event);
+      if (!hab) break;
+      await storeBalanceChanges([hab]);
+      break;
+    }
+    case events.balances.reserved.name: {
+      const hab = await balancesReserved(block.header, event);
+      await storeBalanceChanges([hab]);
+      break;
+    }
+    case events.balances.transfer.name: {
+      const habs = await balancesTransfer(block.header, event);
+      await storeBalanceChanges(habs);
+      break;
+    }
+    case events.balances.unreserved.name: {
+      const hab = await balancesUnreserved(block.header, event);
+      await storeBalanceChanges([hab]);
+      break;
+    }
+    case events.balances.withdraw.name: {
+      const hab = await balancesWithdraw(block.header, event);
+      await storeBalanceChanges([hab]);
+      break;
+    }
+  }
+};
+
+const mapParachainStaking = async (block: any, event: Event) => {
+  switch (event.name) {
+    case events.parachainStaking.rewarded.name: {
+      if (block.header.specVersion < 33) {
+        const hab = await parachainStakingRewarded(block.header, event);
+        await storeBalanceChanges([hab]);
+        break;
+      }
+      // Since specVersion:33, Balances.Deposit is always emitted with ParachainStaking.Rewarded
+      // To avoid redundant addition, DepositEvent is being utilised for recording rewards
+      const hab = balanceHistory.pop();
+      if (hab && hab.event === 'Deposit') {
+        hab.event = event.name.split('.')[1];
+        hab.id = event.id + hab.id.slice(-6);
+        balanceHistory.push(hab);
+      }
+      break;
+    }
+  }
+};
 
 const storeBalanceChanges = async (habs: HistoricalAccountBalance[]) => {
   await Promise.all(

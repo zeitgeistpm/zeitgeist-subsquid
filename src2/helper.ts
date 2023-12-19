@@ -1,6 +1,6 @@
 import { AccountInfo } from '@polkadot/types/interfaces/system';
 import { Store } from '@subsquid/typeorm-store';
-import { Account, AccountBalance, Extrinsic, HistoricalAccountBalance } from '../model';
+import { Account, AccountBalance, Extrinsic, HistoricalAccountBalance } from './model';
 import { Tools } from './util';
 
 export const EPOCH_TIME = new Date('1970-01-01T00:00:00.000Z');
@@ -12,6 +12,11 @@ export enum CacheHint {
   Fee = 'fee',
   Meta = 'meta',
   Price = 'price',
+}
+
+export enum Pallet {
+  Balances = 'Balances',
+  ParachainStaking = 'ParachainStaking',
 }
 
 export const extrinsicFromEvent = (event: any): Extrinsic | null => {

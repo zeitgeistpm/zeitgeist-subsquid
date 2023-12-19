@@ -1,6 +1,6 @@
 import { HistoricalAccountBalance } from '../../model';
 import { Event } from '../../processor';
-import { ZTG_ASSET, extrinsicFromEvent } from '../helper';
+import { ZTG_ASSET, extrinsicFromEvent } from '../../helper';
 import { decodeRewardedEvent } from './decode';
 
 export const parachainStakingRewarded = async (block: any, event: Event): Promise<HistoricalAccountBalance> => {

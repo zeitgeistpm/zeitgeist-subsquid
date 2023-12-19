@@ -1,7 +1,7 @@
 import { Store } from '@subsquid/typeorm-store';
 import { Account, AccountBalance, HistoricalAccountBalance } from '../../model';
 import { ProcessorContext, Event } from '../../processor';
-import { ZTG_ASSET, extrinsicFromEvent, initBalance } from '../helper';
+import { ZTG_ASSET, extrinsicFromEvent, initBalance } from '../../helper';
 import {
   decodeBalanceSetEvent,
   decodeDepositEvent,
