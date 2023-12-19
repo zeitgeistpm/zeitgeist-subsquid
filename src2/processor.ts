@@ -17,6 +17,7 @@ import {
   balancesUnreserved,
   balancesWithdraw,
 } from './mappings/balances';
+import { parachainStakingRewarded } from './mappings/parachainStaking';
 import { initBalance } from './mappings/helper';
 import {
   Account,
@@ -51,6 +52,7 @@ export const processor = new SubstrateBatchProcessor()
       events.balances.transfer.name,
       events.balances.unreserved.name,
       events.balances.withdraw.name,
+      events.parachainStaking.rewarded.name,
     ],
     call: true,
     extrinsic: true,
@@ -125,6 +127,22 @@ processor.run(new TypeormDatabase(), async (ctx) => {
         case events.balances.withdraw.name: {
           const hab = await balancesWithdraw(block.header, event);
           await storeBalanceChanges([hab]);
+          break;
+        }
+        case events.parachainStaking.rewarded.name: {
+          if (block.header.specVersion < 33) {
+            const hab = await parachainStakingRewarded(block.header, event);
+            await storeBalanceChanges([hab]);
+            break;
+          }
+          // Since specVersion:33, Balances.Deposit is always emitted with ParachainStaking.Rewarded
+          // To avoid redundant addition, DepositEvent is being utilised for recording rewards
+          const hab = balanceHistory.pop();
+          if (hab && hab.event === 'Deposit') {
+            hab.event = event.name.split('.')[1];
+            hab.id = event.id + hab.id.slice(-6);
+            balanceHistory.push(hab);
+          }
           break;
         }
       }

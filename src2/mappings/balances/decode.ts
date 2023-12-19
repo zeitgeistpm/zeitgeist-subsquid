@@ -1,8 +1,9 @@
-import ss58 from '@subsquid/ss58';
-import { events } from '../../types';
+import * as ss58 from '@subsquid/ss58';
 import { BalanceStatus } from '../../types/v34';
+import { events } from '../../types';
+import { Event } from '../../processor';
 
-export const decodeBalanceSetEvent = (event: any): BalancesEvent => {
+export const decodeBalanceSetEvent = (event: Event): BalancesEvent => {
   if (events.balances.balanceSet.v23.is(event)) {
     const [who, free] = events.balances.balanceSet.v23.decode(event);
     return {
@@ -24,7 +25,7 @@ export const decodeBalanceSetEvent = (event: any): BalancesEvent => {
   }
 };
 
-export const decodeDepositEvent = (event: any): BalancesEvent => {
+export const decodeDepositEvent = (event: Event): BalancesEvent => {
   if (events.balances.deposit.v23.is(event)) {
     const [who, amount] = events.balances.deposit.v23.decode(event);
     return {
@@ -46,7 +47,7 @@ export const decodeDepositEvent = (event: any): BalancesEvent => {
   }
 };
 
-export const decodeDustLostEvent = (event: any): BalancesEvent => {
+export const decodeDustLostEvent = (event: Event): BalancesEvent => {
   if (events.balances.dustLost.v23.is(event)) {
     const [account, amount] = events.balances.dustLost.v23.decode(event);
     return {
@@ -68,7 +69,7 @@ export const decodeDustLostEvent = (event: any): BalancesEvent => {
   }
 };
 
-export const decodeReserveRepatriatedEvent = (event: any): ReserveRepatriatedEvent => {
+export const decodeReserveRepatriatedEvent = (event: Event): ReserveRepatriatedEvent => {
   if (events.balances.reserveRepatriated.v23.is(event)) {
     const [from, to, amount, destinationStatus] = events.balances.reserveRepatriated.v23.decode(event);
     return {
@@ -96,7 +97,7 @@ export const decodeReserveRepatriatedEvent = (event: any): ReserveRepatriatedEve
   }
 };
 
-export const decodeReservedEvent = (event: any): BalancesEvent => {
+export const decodeReservedEvent = (event: Event): BalancesEvent => {
   if (events.balances.reserved.v23.is(event)) {
     const [who, amount] = events.balances.reserved.v23.decode(event);
     return {
@@ -118,7 +119,7 @@ export const decodeReservedEvent = (event: any): BalancesEvent => {
   }
 };
 
-export const decodeTransferEvent = (event: any): TransferEvent => {
+export const decodeTransferEvent = (event: Event): TransferEvent => {
   if (events.balances.transfer.v23.is(event)) {
     const [from, to, amount] = events.balances.transfer.v23.decode(event);
     return {
@@ -143,7 +144,7 @@ export const decodeTransferEvent = (event: any): TransferEvent => {
   }
 };
 
-export const decodeUnreservedEvent = (event: any): BalancesEvent => {
+export const decodeUnreservedEvent = (event: Event): BalancesEvent => {
   if (events.balances.unreserved.v23.is(event)) {
     const [who, amount] = events.balances.unreserved.v23.decode(event);
     return {
@@ -165,7 +166,7 @@ export const decodeUnreservedEvent = (event: any): BalancesEvent => {
   }
 };
 
-export const decodeWithdrawEvent = (event: any): BalancesEvent => {
+export const decodeWithdrawEvent = (event: Event): BalancesEvent => {
   if (events.balances.withdraw.v33.is(event)) {
     const [who, amount] = events.balances.withdraw.v33.decode(event);
     return {
