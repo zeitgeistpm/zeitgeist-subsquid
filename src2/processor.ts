@@ -18,6 +18,7 @@ import {
 } from './mappings/balances';
 import { currencyDeposited, currencyTransferred, currencyWithdrawn } from './mappings/currency';
 import { parachainStakingRewarded } from './mappings/parachainStaking';
+import { tokensBalanceSet, tokensDeposited, tokensReserved, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
 import {
   Account,
   AccountBalance,
@@ -56,6 +57,11 @@ export const processor = new SubstrateBatchProcessor()
       events.currency.transferred.name,
       events.currency.withdrawn.name,
       events.parachainStaking.rewarded.name,
+      events.tokens.balanceSet.name,
+      events.tokens.deposited.name,
+      events.tokens.reserved.name,
+      events.tokens.transfer.name,
+      events.tokens.withdrawn.name,
     ],
     call: true,
     extrinsic: true,
@@ -99,6 +105,9 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           break;
         case Pallet.ParachainStaking:
           await mapParachainStaking(block, event);
+          break;
+        case Pallet.Tokens:
+          await mapTokens(ctx, block, event);
           break;
       }
     }
@@ -190,6 +199,36 @@ const mapParachainStaking = async (block: any, event: Event) => {
         hab.id = event.id + hab.id.slice(-6);
         balanceHistory.push(hab);
       }
+      break;
+    }
+  }
+};
+
+const mapTokens = async (ctx: ProcessorContext<Store>, block: any, event: Event) => {
+  switch (event.name) {
+    case events.tokens.balanceSet.name: {
+      await saveAccounts(ctx);
+      await tokensBalanceSet(ctx, block.header, event);
+      break;
+    }
+    case events.tokens.deposited.name: {
+      const hab = await tokensDeposited(block.header, event);
+      await storeBalanceChanges([hab]);
+      break;
+    }
+    case events.tokens.reserved.name: {
+      const hab = await tokensReserved(block.header, event);
+      await storeBalanceChanges([hab]);
+      break;
+    }
+    case events.tokens.transfer.name: {
+      const habs = await tokensTransfer(block.header, event);
+      await storeBalanceChanges(habs);
+      break;
+    }
+    case events.tokens.withdrawn.name: {
+      const hab = await tokensWithdrawn(block.header, event);
+      await storeBalanceChanges([hab]);
       break;
     }
   }
