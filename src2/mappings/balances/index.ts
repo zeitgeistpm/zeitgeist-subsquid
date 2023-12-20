@@ -1,7 +1,7 @@
 import { Store } from '@subsquid/typeorm-store';
 import { Account, AccountBalance, HistoricalAccountBalance } from '../../model';
+import { Asset, extrinsicFromEvent, initBalance } from '../../helper';
 import { ProcessorContext, Event } from '../../processor';
-import { ZTG_ASSET, extrinsicFromEvent, initBalance } from '../../helper';
 import {
   decodeBalanceSetEvent,
   decodeDepositEvent,
@@ -29,7 +29,7 @@ export const balancesBalanceSet = async (ctx: ProcessorContext<Store>, block: an
 
   const ab = await ctx.store.findOneBy(AccountBalance, {
     account: { accountId },
-    assetId: ZTG_ASSET,
+    assetId: Asset.Ztg,
   });
   if (!ab) return;
   const oldBalance = ab.balance;
@@ -39,7 +39,7 @@ export const balancesBalanceSet = async (ctx: ProcessorContext<Store>, block: an
 
   const hab = new HistoricalAccountBalance({
     accountId,
-    assetId: ZTG_ASSET,
+    assetId: Asset.Ztg,
     blockNumber: block.height,
     dBalance: ab.balance - oldBalance,
     event: event.name.split('.')[1],
@@ -56,7 +56,7 @@ export const balancesDeposit = async (block: any, event: Event): Promise<Histori
 
   const hab = new HistoricalAccountBalance({
     accountId,
-    assetId: ZTG_ASSET,
+    assetId: Asset.Ztg,
     blockNumber: block.height,
     dBalance: amount,
     event: event.name.split('.')[1],
@@ -72,7 +72,7 @@ export const balancesDustLost = async (block: any, event: Event): Promise<Histor
 
   const hab = new HistoricalAccountBalance({
     accountId,
-    assetId: ZTG_ASSET,
+    assetId: Asset.Ztg,
     blockNumber: block.height,
     dBalance: -amount,
     event: event.name.split('.')[1],
@@ -92,7 +92,7 @@ export const balancesReserveRepatriated = async (
 
   const hab = new HistoricalAccountBalance({
     accountId: toAccountId,
-    assetId: ZTG_ASSET,
+    assetId: Asset.Ztg,
     blockNumber: block.height,
     dBalance: amount,
     event: event.name.split('.')[1],
@@ -108,7 +108,7 @@ export const balancesReserved = async (block: any, event: Event): Promise<Histor
 
   const hab = new HistoricalAccountBalance({
     accountId,
-    assetId: ZTG_ASSET,
+    assetId: Asset.Ztg,
     blockNumber: block.height,
     dBalance: -amount,
     event: event.name.split('.')[1],
@@ -125,7 +125,7 @@ export const balancesTransfer = async (block: any, event: Event): Promise<Histor
 
   const fromHab = new HistoricalAccountBalance({
     accountId: fromAccountId,
-    assetId: ZTG_ASSET,
+    assetId: Asset.Ztg,
     blockNumber: block.height,
     dBalance: -amount,
     event: event.name.split('.')[1],
@@ -136,7 +136,7 @@ export const balancesTransfer = async (block: any, event: Event): Promise<Histor
 
   const toHab = new HistoricalAccountBalance({
     accountId: toAccountId,
-    assetId: ZTG_ASSET,
+    assetId: Asset.Ztg,
     blockNumber: block.height,
     dBalance: amount,
     event: event.name.split('.')[1],
@@ -154,7 +154,7 @@ export const balancesUnreserved = async (block: any, event: Event): Promise<Hist
 
   const hab = new HistoricalAccountBalance({
     accountId,
-    assetId: ZTG_ASSET,
+    assetId: Asset.Ztg,
     blockNumber: block.height,
     dBalance: amount,
     event: event.name.split('.')[1],
@@ -170,7 +170,7 @@ export const balancesWithdraw = async (block: any, event: Event): Promise<Histor
 
   const hab = new HistoricalAccountBalance({
     accountId,
-    assetId: ZTG_ASSET,
+    assetId: Asset.Ztg,
     blockNumber: block.height,
     dBalance: -amount,
     event: event.name.split('.')[1],

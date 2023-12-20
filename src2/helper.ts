@@ -1,12 +1,20 @@
 import { AccountInfo } from '@polkadot/types/interfaces/system';
+import { util } from '@zeitgeistpm/sdk';
 import { Store } from '@subsquid/typeorm-store';
+import { Asset as _Asset } from './types/v34';
 import { Account, AccountBalance, Extrinsic, HistoricalAccountBalance } from './model';
 import { Tools } from './util';
 
 export const EPOCH_TIME = new Date('1970-01-01T00:00:00.000Z');
 export const TEN_MINUTES = 10 * 60 * 1000;
 export const TREASURY_ACCOUNT = 'dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ';
-export const ZTG_ASSET = 'Ztg';
+
+export enum Asset {
+  CategoricalOutcome = 'CategoricalOutcome',
+  PoolShare = 'PoolShare',
+  ScalarOutcome = 'ScalarOutcome',
+  Ztg = 'Ztg',
+}
 
 export enum CacheHint {
   Fee = 'fee',
@@ -16,6 +24,7 @@ export enum CacheHint {
 
 export enum Pallet {
   Balances = 'Balances',
+  Currency = 'Currency',
   ParachainStaking = 'ParachainStaking',
 }
 
@@ -24,6 +33,24 @@ export const extrinsicFromEvent = (event: any): Extrinsic | null => {
   return new Extrinsic({
     hash: event.extrinsic.hash,
   });
+};
+
+export const formatAssetId = (assetId: _Asset): string => {
+  switch (assetId.__kind) {
+    case Asset.CategoricalOutcome:
+      return JSON.stringify(util.AssetIdFromString('[' + assetId.value.toString() + ']'));
+    case Asset.PoolShare:
+      return JSON.stringify(util.AssetIdFromString('pool' + assetId.value.toString()));
+    case Asset.ScalarOutcome:
+      const scale = new Array();
+      scale.push(+assetId.value[0].toString());
+      scale.push(assetId.value[1].__kind);
+      return JSON.stringify(util.AssetIdFromString(JSON.stringify(scale)));
+    case Asset.Ztg:
+      return Asset.Ztg;
+    default:
+      return assetId.__kind;
+  }
 };
 
 export const initBalance = async (acc: Account, store: Store) => {
@@ -35,7 +62,7 @@ export const initBalance = async (acc: Account, store: Store) => {
 
   const ab = new AccountBalance({
     account: acc,
-    assetId: ZTG_ASSET,
+    assetId: Asset.Ztg,
     balance: amt.toBigInt(),
     id: '0000000000-000000-b3cc3-' + acc.accountId.slice(-5),
   });
@@ -44,7 +71,7 @@ export const initBalance = async (acc: Account, store: Store) => {
 
   const hab = new HistoricalAccountBalance({
     accountId: acc.accountId,
-    assetId: ZTG_ASSET,
+    assetId: Asset.Ztg,
     blockNumber: 0,
     dBalance: amt.toBigInt(),
     event: 'Initialised',
