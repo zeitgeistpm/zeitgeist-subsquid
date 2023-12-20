@@ -1,12 +1,11 @@
+import { lookupArchive } from '@subsquid/archive-registry';
 import {
   SubstrateBatchProcessor,
   SubstrateBatchProcessorFields,
   DataHandlerContext,
-  Block as _Block,
   Event as _Event,
 } from '@subsquid/substrate-processor';
 import { Store, TypeormDatabase } from '@subsquid/typeorm-store';
-import { lookupArchive } from '@subsquid/archive-registry';
 import {
   balancesBalanceSet,
   balancesDeposit,
@@ -17,8 +16,8 @@ import {
   balancesUnreserved,
   balancesWithdraw,
 } from './mappings/balances';
+import { currencyDeposited, currencyTransferred, currencyWithdrawn } from './mappings/currency';
 import { parachainStakingRewarded } from './mappings/parachainStaking';
-import { Pallet, initBalance } from './helper';
 import {
   Account,
   AccountBalance,
@@ -28,6 +27,7 @@ import {
   HistoricalSwap,
 } from './model';
 import { events } from './types';
+import { Pallet, initBalance } from './helper';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -52,6 +52,9 @@ export const processor = new SubstrateBatchProcessor()
       events.balances.transfer.name,
       events.balances.unreserved.name,
       events.balances.withdraw.name,
+      events.currency.deposited.name,
+      events.currency.transferred.name,
+      events.currency.withdrawn.name,
       events.parachainStaking.rewarded.name,
     ],
     call: true,
@@ -87,9 +90,12 @@ processor.run(new TypeormDatabase(), async (ctx) => {
 
   for (let block of ctx.blocks) {
     for (let event of block.events) {
-      switch (event.name.substring(0, event.name.indexOf('.'))) {
+      switch (event.name.split('.')[0]) {
         case Pallet.Balances:
           await mapBalances(ctx, block, event);
+          break;
+        case Pallet.Currency:
+          await mapCurrency(block, event);
           break;
         case Pallet.ParachainStaking:
           await mapParachainStaking(block, event);
@@ -141,6 +147,27 @@ const mapBalances = async (ctx: ProcessorContext<Store>, block: any, event: Even
     }
     case events.balances.withdraw.name: {
       const hab = await balancesWithdraw(block.header, event);
+      await storeBalanceChanges([hab]);
+      break;
+    }
+  }
+};
+
+const mapCurrency = async (block: any, event: Event) => {
+  switch (event.name) {
+    case events.currency.deposited.name: {
+      const hab = await currencyDeposited(block.header, event);
+      await storeBalanceChanges([hab]);
+      break;
+    }
+    case events.currency.transferred.name: {
+      const habs = await currencyTransferred(block.header, event);
+      if (!habs) break;
+      await storeBalanceChanges(habs);
+      break;
+    }
+    case events.currency.withdrawn.name: {
+      const hab = await currencyWithdrawn(block.header, event);
       await storeBalanceChanges([hab]);
       break;
     }
