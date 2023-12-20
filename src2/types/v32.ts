@@ -1,5 +1,7 @@
 import {sts, Result, Option, Bytes, BitSequence} from './support'
 
+export const AccountId32 = sts.bytes()
+
 export const Asset: sts.Type<Asset> = sts.closedEnum(() => {
     return  {
         CategoricalOutcome: sts.tuple(() => [sts.bigint(), sts.number()]),
@@ -55,22 +57,3 @@ export interface Asset_Ztg {
 }
 
 export type SerdeWrapper = bigint
-
-export const BalanceStatus: sts.Type<BalanceStatus> = sts.closedEnum(() => {
-    return  {
-        Free: sts.unit(),
-        Reserved: sts.unit(),
-    }
-})
-
-export type BalanceStatus = BalanceStatus_Free | BalanceStatus_Reserved
-
-export interface BalanceStatus_Free {
-    __kind: 'Free'
-}
-
-export interface BalanceStatus_Reserved {
-    __kind: 'Reserved'
-}
-
-export const AccountId32 = sts.bytes()
