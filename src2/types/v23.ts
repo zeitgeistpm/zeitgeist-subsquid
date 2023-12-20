@@ -2,7 +2,7 @@ import {sts, Result, Option, Bytes, BitSequence} from './support'
 
 export const BalanceOf = sts.bigint()
 
-export const Currency: sts.Type<Currency> = sts.closedEnum(() => {
+export const CurrencyId: sts.Type<CurrencyId> = sts.closedEnum(() => {
     return  {
         CategoricalOutcome: sts.tuple(() => [MarketId, CategoryIndex]),
         CombinatorialOutcome: sts.unit(),
@@ -33,6 +33,45 @@ export const CategoryIndex = sts.number()
 
 export const MarketId = sts.bigint()
 
+export type CurrencyId = CurrencyId_CategoricalOutcome | CurrencyId_CombinatorialOutcome | CurrencyId_PoolShare | CurrencyId_ScalarOutcome | CurrencyId_Ztg
+
+export interface CurrencyId_CategoricalOutcome {
+    __kind: 'CategoricalOutcome'
+    value: [MarketId, CategoryIndex]
+}
+
+export interface CurrencyId_CombinatorialOutcome {
+    __kind: 'CombinatorialOutcome'
+}
+
+export interface CurrencyId_PoolShare {
+    __kind: 'PoolShare'
+    value: bigint
+}
+
+export interface CurrencyId_ScalarOutcome {
+    __kind: 'ScalarOutcome'
+    value: [MarketId, ScalarPosition]
+}
+
+export interface CurrencyId_Ztg {
+    __kind: 'Ztg'
+}
+
+export type CategoryIndex = number
+
+export type MarketId = bigint
+
+export const Currency: sts.Type<Currency> = sts.closedEnum(() => {
+    return  {
+        CategoricalOutcome: sts.tuple(() => [MarketId, CategoryIndex]),
+        CombinatorialOutcome: sts.unit(),
+        PoolShare: sts.bigint(),
+        ScalarOutcome: sts.tuple(() => [MarketId, ScalarPosition]),
+        Ztg: sts.unit(),
+    }
+})
+
 export type Currency = Currency_CategoricalOutcome | Currency_CombinatorialOutcome | Currency_PoolShare | Currency_ScalarOutcome | Currency_Ztg
 
 export interface Currency_CategoricalOutcome {
@@ -57,10 +96,6 @@ export interface Currency_ScalarOutcome {
 export interface Currency_Ztg {
     __kind: 'Ztg'
 }
-
-export type CategoryIndex = number
-
-export type MarketId = bigint
 
 export const BalanceStatus: sts.Type<BalanceStatus> = sts.closedEnum(() => {
     return  {

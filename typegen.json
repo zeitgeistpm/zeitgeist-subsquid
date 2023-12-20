@@ -19,6 +19,9 @@
     },
     "ParachainStaking": {
       "events": ["Rewarded"]
+    },
+    "Tokens": {
+      "events": ["BalanceSet", "Deposited", "Reserved", "Transfer", "Withdrawn"]
     }
   }
 }
