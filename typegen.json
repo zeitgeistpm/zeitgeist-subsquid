@@ -20,6 +20,9 @@
     "ParachainStaking": {
       "events": ["Rewarded"]
     },
+    "System": {
+      "events": ["ExtrinsicFailed", "ExtrinsicSuccess", "NewAccount"]
+    },
     "Tokens": {
       "events": ["BalanceSet", "Deposited", "Reserved", "Transfer", "Withdrawn"]
     }

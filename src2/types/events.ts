@@ -1,3 +1,4 @@
+export * as system from './system/events'
 export * as balances from './balances/events'
 export * as currency from './currency/events'
 export * as tokens from './tokens/events'
