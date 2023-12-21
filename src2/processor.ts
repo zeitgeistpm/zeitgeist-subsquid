@@ -3,7 +3,9 @@ import {
   SubstrateBatchProcessor,
   SubstrateBatchProcessorFields,
   DataHandlerContext,
+  BlockHeader,
   Event as _Event,
+  Extrinsic as _Extrinsic,
 } from '@subsquid/substrate-processor';
 import { Store, TypeormDatabase } from '@subsquid/typeorm-store';
 import {
@@ -18,6 +20,7 @@ import {
 } from './mappings/balances';
 import { currencyDeposited, currencyTransferred, currencyWithdrawn } from './mappings/currency';
 import { parachainStakingRewarded } from './mappings/parachainStaking';
+import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensBalanceSet, tokensDeposited, tokensReserved, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
 import {
   Account,
@@ -57,6 +60,9 @@ export const processor = new SubstrateBatchProcessor()
       events.currency.transferred.name,
       events.currency.withdrawn.name,
       events.parachainStaking.rewarded.name,
+      events.system.extrinsicFailed.name,
+      events.system.extrinsicSuccess.name,
+      events.system.newAccount.name,
       events.tokens.balanceSet.name,
       events.tokens.deposited.name,
       events.tokens.reserved.name,
@@ -67,20 +73,26 @@ export const processor = new SubstrateBatchProcessor()
     extrinsic: true,
   })
   .setFields({
+    call: {
+      name: true,
+    },
     event: {
       args: true,
     },
     extrinsic: {
       hash: true,
+      signature: true,
     },
     block: {
       timestamp: true,
     },
   });
 
-export type Fields = SubstrateBatchProcessorFields<typeof processor>;
-export type ProcessorContext<Store> = DataHandlerContext<Store, Fields>;
+type Fields = SubstrateBatchProcessorFields<typeof processor>;
+export type Ctx = DataHandlerContext<Store, Fields>;
+export type Block = BlockHeader<Fields>;
 export type Event = _Event<Fields>;
+export type Extrinsic = _Extrinsic<Fields>;
 
 const accounts = new Map<string, Map<string, bigint>>();
 let assetHistory: HistoricalAsset[];
@@ -106,6 +118,9 @@ processor.run(new TypeormDatabase(), async (ctx) => {
         case Pallet.ParachainStaking:
           await mapParachainStaking(block, event);
           break;
+        case Pallet.System:
+          await mapSystem(ctx, block.header, event);
+          break;
         case Pallet.Tokens:
           await mapTokens(ctx, block, event);
           break;
@@ -116,7 +131,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   await saveHistory(ctx);
 });
 
-const mapBalances = async (ctx: ProcessorContext<Store>, block: any, event: Event) => {
+const mapBalances = async (ctx: Ctx, block: any, event: Event) => {
   switch (event.name) {
     case events.balances.balanceSet.name: {
       await saveAccounts(ctx);
@@ -204,7 +219,28 @@ const mapParachainStaking = async (block: any, event: Event) => {
   }
 };
 
-const mapTokens = async (ctx: ProcessorContext<Store>, block: any, event: Event) => {
+const mapSystem = async (ctx: Ctx, block: Block, event: Event) => {
+  switch (event.name) {
+    case events.system.extrinsicFailed.name: {
+      const hab = await systemExtrinsicFailed(block, event);
+      if (!hab) break;
+      await storeBalanceChanges([hab]);
+      break;
+    }
+    case events.system.extrinsicSuccess.name: {
+      const hab = await systemExtrinsicSuccess(block, event);
+      if (!hab) break;
+      await storeBalanceChanges([hab]);
+      break;
+    }
+    case events.system.newAccount.name: {
+      await systemNewAccount(ctx, block, event);
+      break;
+    }
+  }
+};
+
+const mapTokens = async (ctx: Ctx, block: any, event: Event) => {
   switch (event.name) {
     case events.tokens.balanceSet.name: {
       await saveAccounts(ctx);
@@ -245,7 +281,7 @@ const storeBalanceChanges = async (habs: HistoricalAccountBalance[]) => {
   balanceHistory.push(...habs);
 };
 
-const saveAccounts = async (ctx: ProcessorContext<Store>) => {
+const saveAccounts = async (ctx: Ctx) => {
   await Promise.all(
     Array.from(accounts).map(async ([accountId, balances]) => {
       let account = await ctx.store.get(Account, { where: { accountId } });
@@ -283,7 +319,7 @@ const saveAccounts = async (ctx: ProcessorContext<Store>) => {
   accounts.clear();
 };
 
-const saveHistory = async (ctx: ProcessorContext<Store>) => {
+const saveHistory = async (ctx: Ctx) => {
   if (assetHistory.length > 0) {
     console.log(`Saving historical assets: ${JSON.stringify(assetHistory, null, 2)}`);
     await ctx.store.save(assetHistory);
