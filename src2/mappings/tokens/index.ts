@@ -1,7 +1,6 @@
-import { Store } from '@subsquid/typeorm-store';
 import { Account, AccountBalance, HistoricalAccountBalance } from '../../model';
 import { extrinsicFromEvent } from '../../helper';
-import { ProcessorContext, Event } from '../../processor';
+import { Ctx, Event } from '../../processor';
 import {
   decodeTokensBalanceSetEvent,
   decodeTokensDepositedEvent,
@@ -10,7 +9,7 @@ import {
   decodeTokensWithdrawnEvent,
 } from './decode';
 
-export const tokensBalanceSet = async (ctx: ProcessorContext<Store>, block: any, event: Event) => {
+export const tokensBalanceSet = async (ctx: Ctx, block: any, event: Event) => {
   const { assetId, accountId, amount } = decodeTokensBalanceSetEvent(event);
   if (!assetId.includes('pool')) return;
 
