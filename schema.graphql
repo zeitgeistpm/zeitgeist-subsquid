@@ -286,6 +286,8 @@ Extrinsic data
 type Extrinsic @jsonField {
   "Extrinsic hash"
   hash: String!
+  "Name of the extrinsic"
+  name: String
 }
 
 """
