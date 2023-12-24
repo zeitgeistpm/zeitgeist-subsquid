@@ -43,6 +43,9 @@
       ],
       "calls": ["redeem_shares"]
     },
+    "Styx": {
+      "events": ["AccountCrossed"]
+    },
     "System": {
       "events": ["ExtrinsicFailed", "ExtrinsicSuccess", "NewAccount"]
     },
