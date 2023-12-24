@@ -17,8 +17,31 @@
     "Currency": {
       "events": ["Deposited", "Transferred", "Withdrawn"]
     },
+    "MarketCommons": {
+      "storage": ["Markets"]
+    },
     "ParachainStaking": {
       "events": ["Rewarded"]
+    },
+    "PredictionMarkets": {
+      "events": [
+        "BoughtCompleteSet",
+        "GlobalDisputeStarted",
+        "MarketApproved",
+        "MarketClosed",
+        "MarketCreated",
+        "MarketDestroyed",
+        "MarketDisputed",
+        "MarketExpired",
+        "MarketInsufficientSubsidy",
+        "MarketRejected",
+        "MarketReported",
+        "MarketResolved",
+        "MarketStartedWithSubsidy",
+        "SoldCompleteSet",
+        "TokensRedeemed"
+      ],
+      "calls": ["redeem_shares"]
     },
     "System": {
       "events": ["ExtrinsicFailed", "ExtrinsicSuccess", "NewAccount"]
