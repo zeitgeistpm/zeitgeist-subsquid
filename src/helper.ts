@@ -2,6 +2,7 @@ import { AccountInfo } from '@polkadot/types/interfaces/system';
 import { DecodedMarketMetadata } from '@zeitgeistpm/sdk/dist/types';
 import { util } from '@zeitgeistpm/sdk';
 import { Store } from '@subsquid/typeorm-store';
+import Decimal from 'decimal.js';
 import { Account, AccountBalance, Extrinsic, HistoricalAccountBalance } from './model';
 import { MarketType, Asset } from './types/v51';
 import { Cache, IPFS, Tools } from './util';
@@ -29,12 +30,20 @@ export enum Pallet {
   Authorized = 'Authorized',
   Balances = 'Balances',
   Currency = 'Currency',
+  NeoSwaps = 'NeoSwaps',
   ParachainStaking = 'ParachainStaking',
   PredictionMarkets = 'PredictionMarkets',
   Styx = 'Styx',
   System = 'System',
   Tokens = 'Tokens',
 }
+
+export const calculateSpotPrice = (amountInPool: bigint, liquidityParameter: bigint): number => {
+  const reserve = new Decimal(+amountInPool.toString());
+  const liquidity = new Decimal(+liquidityParameter.toString());
+  const price = new Decimal(0).minus(reserve).div(liquidity).exp();
+  return +price.toString();
+};
 
 export const createAssetsForMarket = async (marketId: number, marketType: MarketType): Promise<any> => {
   const sdk = await Tools.getSDK();
@@ -157,6 +166,13 @@ export const initBalance = async (acc: Account, store: Store) => {
   });
   console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
   await store.save<HistoricalAccountBalance>(hab);
+};
+
+export const isBaseAsset = (assetId: Asset | string): boolean => {
+  if (typeof assetId === 'string') {
+    return assetId.includes('Ztg') || assetId.includes('foreignAsset');
+  }
+  return assetId.__kind.includes('Ztg') || assetId.__kind.includes('ForeignAsset');
 };
 
 export const rescale = (value: string): string => {
