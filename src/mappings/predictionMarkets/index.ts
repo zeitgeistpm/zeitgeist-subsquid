@@ -26,6 +26,7 @@ import {
   ScoringRule,
 } from '../../model';
 import {
+  Pallet,
   _Asset,
   createAssetsForMarket,
   decodeMarketMetadata,
@@ -80,10 +81,10 @@ export const boughtCompleteSet = async (
         value: { __kind: string; amount: string; marketId: string };
       }>) {
         const {
-          __kind: extrinsic,
-          value: { __kind: method, amount: amount, marketId: id },
+          __kind: prefix,
+          value: { __kind: name, amount: amount, marketId: id },
         } = ext;
-        if (extrinsic == 'PredictionMarkets' && method == 'buy_complete_set' && +id == marketId) {
+        if (prefix == Pallet.PredictionMarkets && name == 'buy_complete_set' && +id == marketId) {
           amt = BigInt(amount);
           break;
         }
@@ -840,25 +841,20 @@ export const soldCompleteSet = async (
   let amt = BigInt(0);
   if (amount !== BigInt(0)) {
     amt = amount;
-    // @ts-ignore
-  } else if (event.extrinsic) {
-    // @ts-ignore
+  } else if (event.extrinsic && event.extrinsic.call) {
     if (event.extrinsic.call.args.amount) {
-      // @ts-ignore
       const amount = event.extrinsic.call.args.amount.toString();
       amt = BigInt(amount);
-      // @ts-ignore
     } else if (event.extrinsic.call.args.calls) {
-      // @ts-ignore
       for (let ext of event.extrinsic.call.args.calls as Array<{
         __kind: string;
         value: { __kind: string; amount: string; marketId: string };
       }>) {
         const {
-          __kind: extrinsic,
-          value: { __kind: method, amount: amount, marketId: id },
+          __kind: prefix,
+          value: { __kind: name, amount: amount, marketId: id },
         } = ext;
-        if (extrinsic == 'PredictionMarkets' && method == 'sell_complete_set' && +id == marketId) {
+        if (prefix == Pallet.PredictionMarkets && name == 'sell_complete_set' && +id == marketId) {
           amt = BigInt(amount);
           break;
         }
