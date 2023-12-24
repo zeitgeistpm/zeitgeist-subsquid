@@ -29,6 +29,9 @@
     "MarketCommons": {
       "storage": ["Markets"]
     },
+    "NeoSwaps": {
+      "events": ["BuyExecuted", "ExitExecuted", "FeesWithdrawn", "JoinExecuted", "PoolDeployed", "SellExecuted"]
+    },
     "ParachainStaking": {
       "events": ["Rewarded"]
     },
