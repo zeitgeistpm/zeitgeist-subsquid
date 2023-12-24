@@ -26,6 +26,7 @@ export enum CacheHint {
 
 export enum Pallet {
   AssetTxPayment = 'AssetTxPayment',
+  Authorized = 'Authorized',
   Balances = 'Balances',
   Currency = 'Currency',
   ParachainStaking = 'ParachainStaking',

@@ -9,6 +9,7 @@ import {
 } from '@subsquid/substrate-processor';
 import { Store, TypeormDatabase } from '@subsquid/typeorm-store';
 import { assetTxFeePaid } from './mappings/assetTxPayment';
+import { authorityReported } from './mappings/authorized';
 import {
   balancesBalanceSet,
   balancesDeposit,
@@ -62,7 +63,7 @@ console.log(`ENVIRONMENT: ${process.env.NODE_ENV}`);
 
 export const processor = new SubstrateBatchProcessor()
   .setDataSource({
-    chain: 'wss://bsr.zeitgeist.pm',
+    chain: process.env.WS_NODE_URL ?? 'wss://bsr.zeitgeist.pm',
     archive: lookupArchive('zeitgeist-testnet', { release: 'ArrowSquid' }),
   })
   .addCall({
@@ -72,6 +73,7 @@ export const processor = new SubstrateBatchProcessor()
   .addEvent({
     name: [
       events.assetTxPayment.assetTxFeePaid.name,
+      events.authorized.authorityReported.name,
       events.balances.balanceSet.name,
       events.balances.deposit.name,
       events.balances.dustLost.name,
@@ -163,6 +165,9 @@ processor.run(new TypeormDatabase(), async (ctx) => {
         case Pallet.AssetTxPayment:
           await mapAssetTxPayment(block.header, event);
           break;
+        case Pallet.Authorized:
+          await mapAuthorized(ctx.store, block.header, event);
+          break;
         case Pallet.Balances:
           await mapBalances(ctx.store, block.header, event);
           break;
@@ -197,6 +202,14 @@ const mapAssetTxPayment = async (block: Block, event: Event) => {
       const habs = await assetTxFeePaid(block, event);
       if (!habs) break;
       await storeBalanceChanges(habs);
+      break;
+  }
+};
+
+const mapAuthorized = async (store: Store, block: Block, event: Event) => {
+  switch (event.name) {
+    case events.authorized.authorityReported.name:
+      await authorityReported(store, block, event);
       break;
   }
 };
@@ -371,12 +384,14 @@ const mapStyx = async (store: Store, block: Block, event: Event) => {
 const mapSystem = async (store: Store, block: Block, event: Event) => {
   switch (event.name) {
     case events.system.extrinsicFailed.name: {
+      if (block.height >= 588249) break;
       const hab = await systemExtrinsicFailed(block, event);
       if (!hab) break;
       await storeBalanceChanges([hab]);
       break;
     }
     case events.system.extrinsicSuccess.name: {
+      if (block.height >= 588249) break;
       const hab = await systemExtrinsicSuccess(block, event);
       if (!hab) break;
       await storeBalanceChanges([hab]);
