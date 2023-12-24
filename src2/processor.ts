@@ -38,6 +38,7 @@ import {
   soldCompleteSet,
   tokensRedeemed,
 } from './mappings/predictionMarkets';
+import { accountCrossed } from './mappings/styx';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensBalanceSet, tokensDeposited, tokensReserved, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
 import {
@@ -97,6 +98,7 @@ export const processor = new SubstrateBatchProcessor()
       events.predictionMarkets.marketStartedWithSubsidy.name,
       events.predictionMarkets.soldCompleteSet.name,
       events.predictionMarkets.tokensRedeemed.name,
+      events.styx.accountCrossed.name,
       events.system.extrinsicFailed.name,
       events.system.extrinsicSuccess.name,
       events.system.newAccount.name,
@@ -167,6 +169,9 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           break;
         case Pallet.PredictionMarkets:
           await mapPredictionMarkets(ctx.store, block.header, event);
+          break;
+        case Pallet.Styx:
+          await mapStyx(ctx.store, block.header, event);
           break;
         case Pallet.System:
           await mapSystem(ctx.store, block.header, event);
@@ -337,6 +342,14 @@ const mapPredictionMarkets = async (store: Store, block: Block, event: Event) =>
       await storeBalanceChanges([hab]);
       break;
     }
+  }
+};
+
+const mapStyx = async (store: Store, block: Block, event: Event) => {
+  switch (event.name) {
+    case events.styx.accountCrossed.name:
+      await accountCrossed(store, block, event);
+      break;
   }
 };
 
