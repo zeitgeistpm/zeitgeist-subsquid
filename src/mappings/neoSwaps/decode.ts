@@ -147,29 +147,29 @@ export const decodeSellExecutedEvent = (event: Event): BuySellExecutedEvent => {
 
 const NeoPoolAsV50: INeoPoolAsV50 = {
   741: {
-    accountId: 'dE1VdxVn8xy7HFDWPpBWLGGA8ciJ6C6oRSmMbNwtXuar9ncAR',
+    accountId: '0x6d6f646c7a67652f6e656f73e502000000000000000000000000000000000000',
     collateral: { __kind: 'Ztg' },
-    swapFee: BigInt('100000000'),
+    swapFee: BigInt(10 ** 8),
   },
   742: {
-    accountId: 'dE1VdxVn8xy7HFDWPpBWc1HhijCyHeeuJBSJ6vtaNNQit4DNN',
+    accountId: '0x6d6f646c7a67652f6e656f73e602000000000000000000000000000000000000',
     collateral: { __kind: 'Ztg' },
-    swapFee: BigInt('100000000'),
+    swapFee: BigInt(10 ** 8),
   },
   745: {
-    accountId: 'dE1VdxVn8xy7HFDWPpBXRENLV4gzt2KCvPT7daidsktM4sBgc',
+    accountId: '0x6d6f646c7a67652f6e656f73e902000000000000000000000000000000000000',
     collateral: { __kind: 'Ztg' },
-    swapFee: BigInt('100000000'),
+    swapFee: BigInt(10 ** 8),
   },
   746: {
-    accountId: 'dE1VdxVn8xy7HFDWPpBXgyPt5BBg5UsJo88498fKiDiDo8rrN',
+    accountId: '0x6d6f646c7a67652f6e656f73ea02000000000000000000000000000000000000',
     collateral: { __kind: 'Ztg' },
-    swapFee: BigInt('100000000'),
+    swapFee: BigInt(10 ** 8),
   },
   750: {
-    accountId: 'dE1VdxVn8xy7HFDWPpBYmwW4RdANsK5iJ4opBLS5451iiDR1X',
+    accountId: '0x6d6f646c7a67652f6e656f73ee02000000000000000000000000000000000000',
     collateral: { __kind: 'Ztg' },
-    swapFee: BigInt('100000000'),
+    swapFee: BigInt(10 ** 8),
   },
 };
 
