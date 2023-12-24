@@ -8,6 +8,7 @@ import {
   Extrinsic as _Extrinsic,
 } from '@subsquid/substrate-processor';
 import { Store, TypeormDatabase } from '@subsquid/typeorm-store';
+import { assetTxFeePaid } from './mappings/assetTxPayment';
 import {
   balancesBalanceSet,
   balancesDeposit,
@@ -70,6 +71,7 @@ export const processor = new SubstrateBatchProcessor()
   })
   .addEvent({
     name: [
+      events.assetTxPayment.assetTxFeePaid.name,
       events.balances.balanceSet.name,
       events.balances.deposit.name,
       events.balances.dustLost.name,
@@ -158,6 +160,9 @@ processor.run(new TypeormDatabase(), async (ctx) => {
     }
     for (let event of block.events) {
       switch (event.name.split('.')[0]) {
+        case Pallet.AssetTxPayment:
+          await mapAssetTxPayment(block.header, event);
+          break;
         case Pallet.Balances:
           await mapBalances(ctx.store, block.header, event);
           break;
@@ -185,6 +190,16 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   await saveAccounts(ctx.store);
   await saveHistory(ctx.store);
 });
+
+const mapAssetTxPayment = async (block: Block, event: Event) => {
+  switch (event.name) {
+    case events.assetTxPayment.assetTxFeePaid.name:
+      const habs = await assetTxFeePaid(block, event);
+      if (!habs) break;
+      await storeBalanceChanges(habs);
+      break;
+  }
+};
 
 const mapBalances = async (store: Store, block: Block, event: Event) => {
   switch (event.name) {
