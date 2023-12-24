@@ -33,7 +33,7 @@ export class HistoricalMarket {
     /**
      * Event method which initiated this change
      */
-    @Column_("varchar", {length: 20, nullable: false})
+    @Column_("varchar", {length: 25, nullable: false})
     event!: MarketEvent
 
     /**

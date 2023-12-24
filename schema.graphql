@@ -431,9 +431,11 @@ enum MarketEvent {
   MarketDestroyed
   MarketDisputed
   MarketExpired
+  MarketInsufficientSubsidy
   MarketRejected
   MarketReported
   MarketResolved
+  MarketStartedWithSubsidy 
   PoolDeployed
 }
 
