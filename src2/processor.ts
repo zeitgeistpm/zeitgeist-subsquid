@@ -2,8 +2,8 @@ import { lookupArchive } from '@subsquid/archive-registry';
 import {
   SubstrateBatchProcessor,
   SubstrateBatchProcessorFields,
-  DataHandlerContext,
   BlockHeader,
+  Call as _Call,
   Event as _Event,
   Extrinsic as _Extrinsic,
 } from '@subsquid/substrate-processor';
@@ -20,6 +20,24 @@ import {
 } from './mappings/balances';
 import { currencyDeposited, currencyTransferred, currencyWithdrawn } from './mappings/currency';
 import { parachainStakingRewarded } from './mappings/parachainStaking';
+import {
+  boughtCompleteSet,
+  globalDisputeStarted,
+  marketApproved,
+  marketClosed,
+  marketCreated,
+  marketDestroyed,
+  marketDisputed,
+  marketExpired,
+  marketInsufficientSubsidy,
+  marketRejected,
+  marketReported,
+  marketResolved,
+  marketStartedWithSubsidy,
+  redeemShares,
+  soldCompleteSet,
+  tokensRedeemed,
+} from './mappings/predictionMarkets';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensBalanceSet, tokensDeposited, tokensReserved, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
 import {
@@ -30,7 +48,7 @@ import {
   HistoricalPool,
   HistoricalSwap,
 } from './model';
-import { events } from './types';
+import { calls, events } from './types';
 import { Pallet, initBalance } from './helper';
 
 (BigInt.prototype as any).toJSON = function () {
@@ -44,6 +62,10 @@ export const processor = new SubstrateBatchProcessor()
   .setDataSource({
     chain: 'wss://bsr.zeitgeist.pm',
     archive: lookupArchive('zeitgeist-testnet', { release: 'ArrowSquid' }),
+  })
+  .addCall({
+    name: [calls.predictionMarkets.redeemShares.name],
+    extrinsic: true,
   })
   .addEvent({
     name: [
@@ -60,6 +82,21 @@ export const processor = new SubstrateBatchProcessor()
       events.currency.transferred.name,
       events.currency.withdrawn.name,
       events.parachainStaking.rewarded.name,
+      events.predictionMarkets.boughtCompleteSet.name,
+      events.predictionMarkets.globalDisputeStarted.name,
+      events.predictionMarkets.marketApproved.name,
+      events.predictionMarkets.marketClosed.name,
+      events.predictionMarkets.marketCreated.name,
+      events.predictionMarkets.marketDestroyed.name,
+      events.predictionMarkets.marketDisputed.name,
+      events.predictionMarkets.marketExpired.name,
+      events.predictionMarkets.marketInsufficientSubsidy.name,
+      events.predictionMarkets.marketRejected.name,
+      events.predictionMarkets.marketReported.name,
+      events.predictionMarkets.marketResolved.name,
+      events.predictionMarkets.marketStartedWithSubsidy.name,
+      events.predictionMarkets.soldCompleteSet.name,
+      events.predictionMarkets.tokensRedeemed.name,
       events.system.extrinsicFailed.name,
       events.system.extrinsicSuccess.name,
       events.system.newAccount.name,
@@ -75,6 +112,8 @@ export const processor = new SubstrateBatchProcessor()
   .setFields({
     call: {
       name: true,
+      origin: true,
+      success: true,
     },
     event: {
       args: true,
@@ -89,8 +128,8 @@ export const processor = new SubstrateBatchProcessor()
   });
 
 type Fields = SubstrateBatchProcessorFields<typeof processor>;
-export type Ctx = DataHandlerContext<Store, Fields>;
 export type Block = BlockHeader<Fields>;
+export type Call = _Call<Fields>;
 export type Event = _Event<Fields>;
 export type Extrinsic = _Extrinsic<Fields>;
 
@@ -107,102 +146,113 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   swapHistory = [];
 
   for (let block of ctx.blocks) {
+    for (let call of block.calls) {
+      if (call.success && block.header.height < 1089818) {
+        if (call.name === calls.predictionMarkets.redeemShares.name) {
+          await saveAccounts(ctx.store);
+          await redeemShares(ctx.store, block.header, call);
+        }
+      }
+    }
     for (let event of block.events) {
       switch (event.name.split('.')[0]) {
         case Pallet.Balances:
-          await mapBalances(ctx, block, event);
+          await mapBalances(ctx.store, block.header, event);
           break;
         case Pallet.Currency:
-          await mapCurrency(block, event);
+          await mapCurrency(block.header, event);
           break;
         case Pallet.ParachainStaking:
-          await mapParachainStaking(block, event);
+          await mapParachainStaking(block.header, event);
+          break;
+        case Pallet.PredictionMarkets:
+          await mapPredictionMarkets(ctx.store, block.header, event);
           break;
         case Pallet.System:
-          await mapSystem(ctx, block.header, event);
+          await mapSystem(ctx.store, block.header, event);
           break;
         case Pallet.Tokens:
-          await mapTokens(ctx, block, event);
+          await mapTokens(ctx.store, block.header, event);
           break;
       }
     }
   }
-  await saveAccounts(ctx);
-  await saveHistory(ctx);
+  await saveAccounts(ctx.store);
+  await saveHistory(ctx.store);
 });
 
-const mapBalances = async (ctx: Ctx, block: any, event: Event) => {
+const mapBalances = async (store: Store, block: Block, event: Event) => {
   switch (event.name) {
     case events.balances.balanceSet.name: {
-      await saveAccounts(ctx);
-      await balancesBalanceSet(ctx, block.header, event);
+      await saveAccounts(store);
+      await balancesBalanceSet(store, block, event);
       break;
     }
     case events.balances.deposit.name: {
-      const hab = await balancesDeposit(block.header, event);
+      const hab = await balancesDeposit(block, event);
       await storeBalanceChanges([hab]);
       break;
     }
     case events.balances.dustLost.name: {
-      const hab = await balancesDustLost(block.header, event);
+      const hab = await balancesDustLost(block, event);
       await storeBalanceChanges([hab]);
       break;
     }
     case events.balances.reserveRepatriated.name: {
-      const hab = await balancesReserveRepatriated(block.header, event);
+      const hab = await balancesReserveRepatriated(block, event);
       if (!hab) break;
       await storeBalanceChanges([hab]);
       break;
     }
     case events.balances.reserved.name: {
-      const hab = await balancesReserved(block.header, event);
+      const hab = await balancesReserved(block, event);
       await storeBalanceChanges([hab]);
       break;
     }
     case events.balances.transfer.name: {
-      const habs = await balancesTransfer(block.header, event);
+      const habs = await balancesTransfer(block, event);
       await storeBalanceChanges(habs);
       break;
     }
     case events.balances.unreserved.name: {
-      const hab = await balancesUnreserved(block.header, event);
+      const hab = await balancesUnreserved(block, event);
       await storeBalanceChanges([hab]);
       break;
     }
     case events.balances.withdraw.name: {
-      const hab = await balancesWithdraw(block.header, event);
+      const hab = await balancesWithdraw(block, event);
       await storeBalanceChanges([hab]);
       break;
     }
   }
 };
 
-const mapCurrency = async (block: any, event: Event) => {
+const mapCurrency = async (block: Block, event: Event) => {
   switch (event.name) {
     case events.currency.deposited.name: {
-      const hab = await currencyDeposited(block.header, event);
+      const hab = await currencyDeposited(block, event);
       await storeBalanceChanges([hab]);
       break;
     }
     case events.currency.transferred.name: {
-      const habs = await currencyTransferred(block.header, event);
+      const habs = await currencyTransferred(block, event);
       if (!habs) break;
       await storeBalanceChanges(habs);
       break;
     }
     case events.currency.withdrawn.name: {
-      const hab = await currencyWithdrawn(block.header, event);
+      const hab = await currencyWithdrawn(block, event);
       await storeBalanceChanges([hab]);
       break;
     }
   }
 };
 
-const mapParachainStaking = async (block: any, event: Event) => {
+const mapParachainStaking = async (block: Block, event: Event) => {
   switch (event.name) {
     case events.parachainStaking.rewarded.name: {
-      if (block.header.specVersion < 33) {
-        const hab = await parachainStakingRewarded(block.header, event);
+      if (block.specVersion < 33) {
+        const hab = await parachainStakingRewarded(block, event);
         await storeBalanceChanges([hab]);
         break;
       }
@@ -219,7 +269,78 @@ const mapParachainStaking = async (block: any, event: Event) => {
   }
 };
 
-const mapSystem = async (ctx: Ctx, block: Block, event: Event) => {
+const mapPredictionMarkets = async (store: Store, block: Block, event: Event) => {
+  switch (event.name) {
+    case events.predictionMarkets.boughtCompleteSet.name: {
+      const habs = await boughtCompleteSet(store, block, event);
+      if (!habs) break;
+      await storeBalanceChanges(habs);
+      break;
+    }
+    case events.predictionMarkets.globalDisputeStarted.name: {
+      await globalDisputeStarted(store, block, event);
+      break;
+    }
+    case events.predictionMarkets.marketApproved.name: {
+      await marketApproved(store, block, event);
+      break;
+    }
+    case events.predictionMarkets.marketClosed.name: {
+      await marketClosed(store, block, event);
+      break;
+    }
+    case events.predictionMarkets.marketCreated.name: {
+      await marketCreated(store, block, event);
+      break;
+    }
+    case events.predictionMarkets.marketDestroyed.name: {
+      await marketDestroyed(store, block, event);
+      break;
+    }
+    case events.predictionMarkets.marketDisputed.name: {
+      await marketDisputed(store, block, event);
+      break;
+    }
+    case events.predictionMarkets.marketExpired.name: {
+      await marketExpired(store, block, event);
+      break;
+    }
+    case events.predictionMarkets.marketInsufficientSubsidy.name: {
+      await marketInsufficientSubsidy(store, block, event);
+      break;
+    }
+    case events.predictionMarkets.marketRejected.name: {
+      await marketRejected(store, block, event);
+      break;
+    }
+    case events.predictionMarkets.marketReported.name: {
+      await marketReported(store, block, event);
+      break;
+    }
+    case events.predictionMarkets.marketResolved.name: {
+      await saveAccounts(store);
+      await marketResolved(store, block, event);
+      break;
+    }
+    case events.predictionMarkets.marketStartedWithSubsidy.name: {
+      await marketStartedWithSubsidy(store, block, event);
+      break;
+    }
+    case events.predictionMarkets.soldCompleteSet.name: {
+      const habs = await soldCompleteSet(store, block, event);
+      if (!habs) break;
+      await storeBalanceChanges(habs);
+      break;
+    }
+    case events.predictionMarkets.tokensRedeemed.name: {
+      const hab = await tokensRedeemed(block, event);
+      await storeBalanceChanges([hab]);
+      break;
+    }
+  }
+};
+
+const mapSystem = async (store: Store, block: Block, event: Event) => {
   switch (event.name) {
     case events.system.extrinsicFailed.name: {
       const hab = await systemExtrinsicFailed(block, event);
@@ -234,36 +355,36 @@ const mapSystem = async (ctx: Ctx, block: Block, event: Event) => {
       break;
     }
     case events.system.newAccount.name: {
-      await systemNewAccount(ctx, block, event);
+      await systemNewAccount(store, block, event);
       break;
     }
   }
 };
 
-const mapTokens = async (ctx: Ctx, block: any, event: Event) => {
+const mapTokens = async (store: Store, block: Block, event: Event) => {
   switch (event.name) {
     case events.tokens.balanceSet.name: {
-      await saveAccounts(ctx);
-      await tokensBalanceSet(ctx, block.header, event);
+      await saveAccounts(store);
+      await tokensBalanceSet(store, block, event);
       break;
     }
     case events.tokens.deposited.name: {
-      const hab = await tokensDeposited(block.header, event);
+      const hab = await tokensDeposited(block, event);
       await storeBalanceChanges([hab]);
       break;
     }
     case events.tokens.reserved.name: {
-      const hab = await tokensReserved(block.header, event);
+      const hab = await tokensReserved(block, event);
       await storeBalanceChanges([hab]);
       break;
     }
     case events.tokens.transfer.name: {
-      const habs = await tokensTransfer(block.header, event);
+      const habs = await tokensTransfer(block, event);
       await storeBalanceChanges(habs);
       break;
     }
     case events.tokens.withdrawn.name: {
-      const hab = await tokensWithdrawn(block.header, event);
+      const hab = await tokensWithdrawn(block, event);
       await storeBalanceChanges([hab]);
       break;
     }
@@ -281,23 +402,23 @@ const storeBalanceChanges = async (habs: HistoricalAccountBalance[]) => {
   balanceHistory.push(...habs);
 };
 
-const saveAccounts = async (ctx: Ctx) => {
+const saveAccounts = async (store: Store) => {
   await Promise.all(
     Array.from(accounts).map(async ([accountId, balances]) => {
-      let account = await ctx.store.get(Account, { where: { accountId } });
+      let account = await store.get(Account, { where: { accountId } });
       if (!account) {
         account = new Account({
           accountId,
           id: accountId,
         });
         console.log(`Saving account: ${JSON.stringify(account, null, 2)}`);
-        await ctx.store.save<Account>(account);
-        await initBalance(account, ctx.store);
+        await store.save<Account>(account);
+        await initBalance(account, store);
       }
 
       await Promise.all(
         Array.from(balances).map(async ([assetId, amount]) => {
-          let ab = await ctx.store.findOneBy(AccountBalance, {
+          let ab = await store.findOneBy(AccountBalance, {
             account: { accountId },
             assetId,
           });
@@ -311,7 +432,7 @@ const saveAccounts = async (ctx: Ctx) => {
           }
           ab.balance += amount;
           console.log(`Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-          await ctx.store.save<AccountBalance>(ab);
+          await store.save<AccountBalance>(ab);
         })
       );
     })
@@ -319,21 +440,21 @@ const saveAccounts = async (ctx: Ctx) => {
   accounts.clear();
 };
 
-const saveHistory = async (ctx: Ctx) => {
+const saveHistory = async (store: Store) => {
   if (assetHistory.length > 0) {
     console.log(`Saving historical assets: ${JSON.stringify(assetHistory, null, 2)}`);
-    await ctx.store.save(assetHistory);
+    await store.save(assetHistory);
   }
   if (balanceHistory.length > 0) {
     console.log(`Saving historical account balances: ${JSON.stringify(balanceHistory, null, 2)}`);
-    await ctx.store.save(balanceHistory);
+    await store.save(balanceHistory);
   }
   if (poolHistory.length > 0) {
     console.log(`Saving historical pools: ${JSON.stringify(poolHistory, null, 2)}`);
-    await ctx.store.save(poolHistory);
+    await store.save(poolHistory);
   }
   if (swapHistory.length > 0) {
     console.log(`Saving historical swaps: ${JSON.stringify(swapHistory, null, 2)}`);
-    await ctx.store.save(swapHistory);
+    await store.save(swapHistory);
   }
 };
