@@ -2,6 +2,12 @@
   "outDir": "src2/types",
   "specVersions": "https://v2.archive.subsquid.io/metadata/zeitgeist-testnet",
   "pallets": {
+    "AssetRegistry": {
+      "storage": ["Metadata"]
+    },
+    "AssetTxPayment": {
+      "events": ["AssetTxFeePaid"]
+    },
     "Balances": {
       "events": [
         "BalanceSet",
