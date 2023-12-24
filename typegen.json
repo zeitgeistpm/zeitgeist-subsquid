@@ -8,6 +8,9 @@
     "AssetTxPayment": {
       "events": ["AssetTxFeePaid"]
     },
+    "Authorized": {
+      "events": ["AuthorityReported"]
+    },
     "Balances": {
       "events": [
         "BalanceSet",

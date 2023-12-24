@@ -910,6 +910,13 @@ export interface MarketCreation_Permissionless {
 
 export type AccountId32 = Bytes
 
+export const OutcomeReport: sts.Type<OutcomeReport> = sts.closedEnum(() => {
+    return  {
+        Categorical: sts.number(),
+        Scalar: sts.bigint(),
+    }
+})
+
 export const MarketStatus: sts.Type<MarketStatus> = sts.closedEnum(() => {
     return  {
         Active: sts.unit(),
@@ -966,13 +973,6 @@ export const MarketDisputeMechanism: sts.Type<MarketDisputeMechanism> = sts.clos
         Authorized: sts.unit(),
         Court: sts.unit(),
         SimpleDisputes: sts.unit(),
-    }
-})
-
-export const OutcomeReport: sts.Type<OutcomeReport> = sts.closedEnum(() => {
-    return  {
-        Categorical: sts.number(),
-        Scalar: sts.bigint(),
     }
 })
 
