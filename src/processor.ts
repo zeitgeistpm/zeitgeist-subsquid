@@ -21,6 +21,14 @@ import {
   balancesWithdraw,
 } from './mappings/balances';
 import { currencyDeposited, currencyTransferred, currencyWithdrawn } from './mappings/currency';
+import {
+  buyExecuted,
+  exitExecuted,
+  feesWithdrawn,
+  joinExecuted,
+  poolDeployed,
+  sellExecuted,
+} from './mappings/neoSwaps';
 import { parachainStakingRewarded } from './mappings/parachainStaking';
 import {
   boughtCompleteSet,
@@ -86,6 +94,12 @@ export const processor = new SubstrateBatchProcessor()
       events.currency.deposited.name,
       events.currency.transferred.name,
       events.currency.withdrawn.name,
+      events.neoSwaps.buyExecuted.name,
+      events.neoSwaps.exitExecuted.name,
+      events.neoSwaps.feesWithdrawn.name,
+      events.neoSwaps.joinExecuted.name,
+      events.neoSwaps.poolDeployed.name,
+      events.neoSwaps.sellExecuted.name,
       events.parachainStaking.rewarded.name,
       events.predictionMarkets.boughtCompleteSet.name,
       events.predictionMarkets.globalDisputeStarted.name,
@@ -173,6 +187,9 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           break;
         case Pallet.Currency:
           await mapCurrency(block.header, event);
+          break;
+        case Pallet.NeoSwaps:
+          await mapNeoSwaps(ctx.store, block.header, event);
           break;
         case Pallet.ParachainStaking:
           await mapParachainStaking(block.header, event);
@@ -276,6 +293,57 @@ const mapCurrency = async (block: Block, event: Event) => {
     case events.currency.withdrawn.name: {
       const hab = await currencyWithdrawn(block, event);
       await storeBalanceChanges([hab]);
+      break;
+    }
+  }
+};
+
+const mapNeoSwaps = async (store: Store, block: Block, event: Event) => {
+  switch (event.name) {
+    case events.neoSwaps.buyExecuted.name: {
+      await saveAccounts(store);
+      const res = await buyExecuted(store, block, event);
+      if (!res) break;
+      assetHistory.push(...res.historicalAssets);
+      swapHistory.push(res.historicalSwap);
+      poolHistory.push(res.historicalPool);
+      break;
+    }
+    case events.neoSwaps.exitExecuted.name: {
+      await saveAccounts(store);
+      const historicalAssets = await exitExecuted(store, block, event);
+      if (!historicalAssets) break;
+      assetHistory.push(...historicalAssets);
+      break;
+    }
+    case events.neoSwaps.feesWithdrawn.name: {
+      const historicalPool = await feesWithdrawn(store, block, event);
+      if (!historicalPool) break;
+      poolHistory.push(historicalPool);
+      break;
+    }
+    case events.neoSwaps.joinExecuted.name: {
+      await saveAccounts(store);
+      const historicalAssets = await joinExecuted(store, block, event);
+      if (!historicalAssets) break;
+      assetHistory.push(...historicalAssets);
+      break;
+    }
+    case events.neoSwaps.poolDeployed.name: {
+      await saveAccounts(store);
+      const res = await poolDeployed(store, block, event);
+      if (!res) break;
+      assetHistory.push(...res.historicalAssets);
+      poolHistory.push(res.historicalPool);
+      break;
+    }
+    case events.neoSwaps.sellExecuted.name: {
+      await saveAccounts(store);
+      const res = await sellExecuted(store, block, event);
+      if (!res) break;
+      assetHistory.push(...res.historicalAssets);
+      swapHistory.push(res.historicalSwap);
+      poolHistory.push(res.historicalPool);
       break;
     }
   }
