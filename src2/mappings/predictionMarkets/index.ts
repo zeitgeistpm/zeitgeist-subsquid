@@ -1,7 +1,7 @@
+import { Store } from '@subsquid/typeorm-store';
 import * as ss58 from '@subsquid/ss58';
 import { util } from '@zeitgeistpm/sdk';
 import { Like } from 'typeorm';
-import { Block, Call, Event } from '../../processor';
 import {
   Account,
   AccountBalance,
@@ -33,6 +33,7 @@ import {
   formatAssetId,
   rescale,
 } from '../../helper';
+import { Block, Call, Event } from '../../processor';
 import { Tools } from '../../util';
 import {
   decodeBoughtCompleteSetEvent,
@@ -53,7 +54,6 @@ import {
   decodeSoldCompleteSetEvent,
   decodeTokensRedeemedEvent,
 } from './decode';
-import { Store } from '@subsquid/typeorm-store';
 
 export const boughtCompleteSet = async (
   store: Store,

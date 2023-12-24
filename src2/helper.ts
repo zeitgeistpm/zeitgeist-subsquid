@@ -29,6 +29,7 @@ export enum Pallet {
   Currency = 'Currency',
   ParachainStaking = 'ParachainStaking',
   PredictionMarkets = 'PredictionMarkets',
+  Styx = 'Styx',
   System = 'System',
   Tokens = 'Tokens',
 }
