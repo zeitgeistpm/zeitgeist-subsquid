@@ -1,31 +1,31 @@
-import { SubstrateBlock } from '@subsquid/substrate-processor';
+import { Store } from '@subsquid/typeorm-store';
 import { AccountBalance, HistoricalAccountBalance } from '../../model';
-import { Ctx, EventItem } from '../../processor';
-import { extrinsicFromEvent } from '../helper';
-import { getAccountCrossedEvent } from './types';
+import { _Asset, extrinsicFromEvent } from '../../helper';
+import { Block, Event } from '../../processor';
+import { decodeAccountCrossedEvent } from './decode';
 
-export const accountCrossed = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
-  const { walletId, amount } = getAccountCrossedEvent(ctx, item);
+export const accountCrossed = async (store: Store, block: Block, event: Event) => {
+  const { accountId, amount } = decodeAccountCrossedEvent(event);
 
-  let ab = await ctx.store.findOneBy(AccountBalance, {
-    account: { accountId: walletId },
-    assetId: 'Ztg',
+  const ab = await store.findOneBy(AccountBalance, {
+    account: { accountId },
+    assetId: _Asset.Ztg,
   });
-  if (ab) {
-    ab.balance = ab.balance - amount;
-    console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-    await ctx.store.save<AccountBalance>(ab);
+  if (!ab) return;
+  ab.balance = ab.balance - amount;
+  console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
+  await store.save<AccountBalance>(ab);
 
-    const hab = new HistoricalAccountBalance();
-    hab.id = item.event.id + '-' + walletId.slice(-5);
-    hab.accountId = walletId;
-    hab.event = item.event.name.split('.')[1];
-    hab.extrinsic = extrinsicFromEvent(item.event);
-    hab.assetId = ab.assetId;
-    hab.dBalance = -amount;
-    hab.blockNumber = block.height;
-    hab.timestamp = new Date(block.timestamp);
-    console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
-    await ctx.store.save<HistoricalAccountBalance>(hab);
-  }
+  const hab = new HistoricalAccountBalance({
+    accountId,
+    assetId: _Asset.Ztg,
+    blockNumber: block.height,
+    dBalance: -amount,
+    event: event.name.split('.')[1],
+    extrinsic: extrinsicFromEvent(event),
+    id: event.id + '-' + accountId.slice(-5),
+    timestamp: new Date(block.timestamp!),
+  });
+  console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
+  await store.save<HistoricalAccountBalance>(hab);
 };

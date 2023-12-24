@@ -1,5 +1,5 @@
 {
-  "outDir": "src2/types",
+  "outDir": "src/types",
   "specVersions": "https://v2.archive.subsquid.io/metadata/zeitgeist-testnet",
   "pallets": {
     "AssetRegistry": {

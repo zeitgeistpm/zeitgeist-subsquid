@@ -6,13 +6,13 @@ import * as marshal from "./marshal"
  */
 export class Extrinsic {
     private _hash!: string
-    private _name!: string
+    private _name!: string | undefined | null
 
     constructor(props?: Partial<Omit<Extrinsic, 'toJSON'>>, json?: any) {
         Object.assign(this, props)
         if (json != null) {
             this._hash = marshal.string.fromJSON(json.hash)
-            this._name = marshal.string.fromJSON(json.name)
+            this._name = json.name == null ? undefined : marshal.string.fromJSON(json.name)
         }
     }
 
@@ -31,12 +31,11 @@ export class Extrinsic {
     /**
      * Name of the extrinsic
      */
-    get name(): string {
-        assert(this._name != null, 'uninitialized access')
+    get name(): string | undefined | null {
         return this._name
     }
 
-    set name(value: string) {
+    set name(value: string | undefined | null) {
         this._name = value
     }
 

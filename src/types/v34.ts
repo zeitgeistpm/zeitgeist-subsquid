@@ -1,87 +1,21 @@
-import type {Result, Option} from './support'
+import {sts, Result, Option, Bytes, BitSequence} from './support'
 
-export type BalanceStatus = BalanceStatus_Free | BalanceStatus_Reserved
+export const Asset: sts.Type<Asset> = sts.closedEnum(() => {
+    return  {
+        CategoricalOutcome: sts.tuple(() => [sts.bigint(), sts.number()]),
+        CombinatorialOutcome: sts.unit(),
+        PoolShare: SerdeWrapper,
+        ScalarOutcome: sts.tuple(() => [sts.bigint(), ScalarPosition]),
+        Ztg: sts.unit(),
+    }
+})
 
-export interface BalanceStatus_Free {
-    __kind: 'Free'
-}
-
-export interface BalanceStatus_Reserved {
-    __kind: 'Reserved'
-}
-
-export type Asset = Asset_CategoricalOutcome | Asset_ScalarOutcome | Asset_CombinatorialOutcome | Asset_PoolShare | Asset_Ztg
-
-export interface Asset_CategoricalOutcome {
-    __kind: 'CategoricalOutcome'
-    value: [bigint, number]
-}
-
-export interface Asset_ScalarOutcome {
-    __kind: 'ScalarOutcome'
-    value: [bigint, ScalarPosition]
-}
-
-export interface Asset_CombinatorialOutcome {
-    __kind: 'CombinatorialOutcome'
-}
-
-export interface Asset_PoolShare {
-    __kind: 'PoolShare'
-    value: bigint
-}
-
-export interface Asset_Ztg {
-    __kind: 'Ztg'
-}
-
-export type DispatchError = DispatchError_Other | DispatchError_CannotLookup | DispatchError_BadOrigin | DispatchError_Module | DispatchError_ConsumerRemaining | DispatchError_NoProviders | DispatchError_TooManyConsumers | DispatchError_Token | DispatchError_Arithmetic
-
-export interface DispatchError_Other {
-    __kind: 'Other'
-}
-
-export interface DispatchError_CannotLookup {
-    __kind: 'CannotLookup'
-}
-
-export interface DispatchError_BadOrigin {
-    __kind: 'BadOrigin'
-}
-
-export interface DispatchError_Module {
-    __kind: 'Module'
-    index: number
-    error: number
-}
-
-export interface DispatchError_ConsumerRemaining {
-    __kind: 'ConsumerRemaining'
-}
-
-export interface DispatchError_NoProviders {
-    __kind: 'NoProviders'
-}
-
-export interface DispatchError_TooManyConsumers {
-    __kind: 'TooManyConsumers'
-}
-
-export interface DispatchError_Token {
-    __kind: 'Token'
-    value: TokenError
-}
-
-export interface DispatchError_Arithmetic {
-    __kind: 'Arithmetic'
-    value: ArithmeticError
-}
-
-export interface DispatchInfo {
-    weight: bigint
-    class: DispatchClass
-    paysFee: Pays
-}
+export const ScalarPosition: sts.Type<ScalarPosition> = sts.closedEnum(() => {
+    return  {
+        Long: sts.unit(),
+        Short: sts.unit(),
+    }
+})
 
 export type ScalarPosition = ScalarPosition_Long | ScalarPosition_Short
 
@@ -93,15 +27,84 @@ export interface ScalarPosition_Short {
     __kind: 'Short'
 }
 
-export type TokenError = TokenError_NoFunds | TokenError_WouldDie | TokenError_BelowMinimum | TokenError_CannotCreate | TokenError_UnknownAsset | TokenError_Frozen | TokenError_Unsupported
+export const SerdeWrapper = sts.bigint()
 
-export interface TokenError_NoFunds {
-    __kind: 'NoFunds'
+export type Asset = Asset_CategoricalOutcome | Asset_CombinatorialOutcome | Asset_PoolShare | Asset_ScalarOutcome | Asset_Ztg
+
+export interface Asset_CategoricalOutcome {
+    __kind: 'CategoricalOutcome'
+    value: [bigint, number]
 }
 
-export interface TokenError_WouldDie {
-    __kind: 'WouldDie'
+export interface Asset_CombinatorialOutcome {
+    __kind: 'CombinatorialOutcome'
 }
+
+export interface Asset_PoolShare {
+    __kind: 'PoolShare'
+    value: SerdeWrapper
+}
+
+export interface Asset_ScalarOutcome {
+    __kind: 'ScalarOutcome'
+    value: [bigint, ScalarPosition]
+}
+
+export interface Asset_Ztg {
+    __kind: 'Ztg'
+}
+
+export type SerdeWrapper = bigint
+
+export const BalanceStatus: sts.Type<BalanceStatus> = sts.closedEnum(() => {
+    return  {
+        Free: sts.unit(),
+        Reserved: sts.unit(),
+    }
+})
+
+export type BalanceStatus = BalanceStatus_Free | BalanceStatus_Reserved
+
+export interface BalanceStatus_Free {
+    __kind: 'Free'
+}
+
+export interface BalanceStatus_Reserved {
+    __kind: 'Reserved'
+}
+
+export const AccountId32 = sts.bytes()
+
+export const DispatchError: sts.Type<DispatchError> = sts.closedEnum(() => {
+    return  {
+        Arithmetic: ArithmeticError,
+        BadOrigin: sts.unit(),
+        CannotLookup: sts.unit(),
+        ConsumerRemaining: sts.unit(),
+        Module: sts.enumStruct({
+            index: sts.number(),
+            error: sts.number(),
+        }),
+        NoProviders: sts.unit(),
+        Other: sts.unit(),
+        Token: TokenError,
+        TooManyConsumers: sts.unit(),
+    }
+})
+
+export const TokenError: sts.Type<TokenError> = sts.closedEnum(() => {
+    return  {
+        BelowMinimum: sts.unit(),
+        CannotCreate: sts.unit(),
+        Frozen: sts.unit(),
+        NoFunds: sts.unit(),
+        UnknownAsset: sts.unit(),
+        Unsupported: sts.unit(),
+        WouldDie: sts.unit(),
+    }
+})
+
+export type TokenError = TokenError_BelowMinimum | TokenError_CannotCreate | TokenError_Frozen | TokenError_NoFunds | TokenError_UnknownAsset | TokenError_Unsupported | TokenError_WouldDie
 
 export interface TokenError_BelowMinimum {
     __kind: 'BelowMinimum'
@@ -111,33 +114,128 @@ export interface TokenError_CannotCreate {
     __kind: 'CannotCreate'
 }
 
-export interface TokenError_UnknownAsset {
-    __kind: 'UnknownAsset'
-}
-
 export interface TokenError_Frozen {
     __kind: 'Frozen'
+}
+
+export interface TokenError_NoFunds {
+    __kind: 'NoFunds'
+}
+
+export interface TokenError_UnknownAsset {
+    __kind: 'UnknownAsset'
 }
 
 export interface TokenError_Unsupported {
     __kind: 'Unsupported'
 }
 
-export type ArithmeticError = ArithmeticError_Underflow | ArithmeticError_Overflow | ArithmeticError_DivisionByZero
+export interface TokenError_WouldDie {
+    __kind: 'WouldDie'
+}
 
-export interface ArithmeticError_Underflow {
-    __kind: 'Underflow'
+export const ArithmeticError: sts.Type<ArithmeticError> = sts.closedEnum(() => {
+    return  {
+        DivisionByZero: sts.unit(),
+        Overflow: sts.unit(),
+        Underflow: sts.unit(),
+    }
+})
+
+export type ArithmeticError = ArithmeticError_DivisionByZero | ArithmeticError_Overflow | ArithmeticError_Underflow
+
+export interface ArithmeticError_DivisionByZero {
+    __kind: 'DivisionByZero'
 }
 
 export interface ArithmeticError_Overflow {
     __kind: 'Overflow'
 }
 
-export interface ArithmeticError_DivisionByZero {
-    __kind: 'DivisionByZero'
+export interface ArithmeticError_Underflow {
+    __kind: 'Underflow'
 }
 
-export type DispatchClass = DispatchClass_Normal | DispatchClass_Operational | DispatchClass_Mandatory
+export type DispatchError = DispatchError_Arithmetic | DispatchError_BadOrigin | DispatchError_CannotLookup | DispatchError_ConsumerRemaining | DispatchError_Module | DispatchError_NoProviders | DispatchError_Other | DispatchError_Token | DispatchError_TooManyConsumers
+
+export interface DispatchError_Arithmetic {
+    __kind: 'Arithmetic'
+    value: ArithmeticError
+}
+
+export interface DispatchError_BadOrigin {
+    __kind: 'BadOrigin'
+}
+
+export interface DispatchError_CannotLookup {
+    __kind: 'CannotLookup'
+}
+
+export interface DispatchError_ConsumerRemaining {
+    __kind: 'ConsumerRemaining'
+}
+
+export interface DispatchError_Module {
+    __kind: 'Module'
+    index: number
+    error: number
+}
+
+export interface DispatchError_NoProviders {
+    __kind: 'NoProviders'
+}
+
+export interface DispatchError_Other {
+    __kind: 'Other'
+}
+
+export interface DispatchError_Token {
+    __kind: 'Token'
+    value: TokenError
+}
+
+export interface DispatchError_TooManyConsumers {
+    __kind: 'TooManyConsumers'
+}
+
+export const DispatchInfo: sts.Type<DispatchInfo> = sts.struct(() => {
+    return  {
+        weight: sts.bigint(),
+        class: DispatchClass,
+        paysFee: Pays,
+    }
+})
+
+export const Pays: sts.Type<Pays> = sts.closedEnum(() => {
+    return  {
+        No: sts.unit(),
+        Yes: sts.unit(),
+    }
+})
+
+export type Pays = Pays_No | Pays_Yes
+
+export interface Pays_No {
+    __kind: 'No'
+}
+
+export interface Pays_Yes {
+    __kind: 'Yes'
+}
+
+export const DispatchClass: sts.Type<DispatchClass> = sts.closedEnum(() => {
+    return  {
+        Mandatory: sts.unit(),
+        Normal: sts.unit(),
+        Operational: sts.unit(),
+    }
+})
+
+export type DispatchClass = DispatchClass_Mandatory | DispatchClass_Normal | DispatchClass_Operational
+
+export interface DispatchClass_Mandatory {
+    __kind: 'Mandatory'
+}
 
 export interface DispatchClass_Normal {
     __kind: 'Normal'
@@ -147,16 +245,8 @@ export interface DispatchClass_Operational {
     __kind: 'Operational'
 }
 
-export interface DispatchClass_Mandatory {
-    __kind: 'Mandatory'
-}
-
-export type Pays = Pays_Yes | Pays_No
-
-export interface Pays_Yes {
-    __kind: 'Yes'
-}
-
-export interface Pays_No {
-    __kind: 'No'
+export interface DispatchInfo {
+    weight: bigint
+    class: DispatchClass
+    paysFee: Pays
 }

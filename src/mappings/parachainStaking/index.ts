@@ -1,23 +1,20 @@
-import { SubstrateBlock } from '@subsquid/substrate-processor';
 import { HistoricalAccountBalance } from '../../model';
-import { Ctx, EventItem } from '../../processor';
-import { getRewardedEvent } from './types';
+import { _Asset, extrinsicFromEvent } from '../../helper';
+import { Block, Event } from '../../processor';
+import { decodeRewardedEvent } from './decode';
 
-export const parachainStakingRewarded = async (
-  ctx: Ctx,
-  block: SubstrateBlock,
-  item: EventItem
-): Promise<HistoricalAccountBalance> => {
-  const { walletId, rewards } = getRewardedEvent(ctx, item);
+export const parachainStakingRewarded = async (block: Block, event: Event): Promise<HistoricalAccountBalance> => {
+  const { accountId, amount } = decodeRewardedEvent(event);
 
-  const hab = new HistoricalAccountBalance();
-  hab.id = item.event.id + '-' + walletId.slice(-5);
-  hab.accountId = walletId;
-  hab.event = item.event.name.split('.')[1];
-  hab.assetId = 'Ztg';
-  hab.dBalance = rewards;
-  hab.blockNumber = block.height;
-  hab.timestamp = new Date(block.timestamp);
-
+  const hab = new HistoricalAccountBalance({
+    accountId,
+    assetId: _Asset.Ztg,
+    blockNumber: block.height,
+    dBalance: amount,
+    event: event.name.split('.')[1],
+    extrinsic: extrinsicFromEvent(event),
+    id: event.id + '-' + accountId.slice(-5),
+    timestamp: new Date(block.timestamp!),
+  });
   return hab;
 };
