@@ -11,7 +11,7 @@ import {
   MarketEvent,
   NeoPool,
 } from '../../model';
-import { _Asset, calculateSpotPrice, extrinsicFromEvent, isBaseAsset } from '../../helper';
+import { _Asset, computeNeoSwapSpotPrice, extrinsicFromEvent, isBaseAsset } from '../../helper';
 import { Block, Event } from '../../processor';
 import {
   decodeBuyExecutedEvent,
@@ -65,7 +65,7 @@ export const buyExecuted = async (
       const oldPrice = asset.price;
       const oldAmountInPool = asset.amountInPool;
       asset.amountInPool = ab.balance;
-      asset.price = calculateSpotPrice(ab.balance, market.neoPool!.liquidityParameter);
+      asset.price = computeNeoSwapSpotPrice(ab.balance, market.neoPool!.liquidityParameter);
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
       await store.save<Asset>(asset);
 
@@ -132,7 +132,7 @@ export const exitExecuted = async (
       const oldPrice = asset.price;
       const oldAmountInPool = asset.amountInPool;
       asset.amountInPool = ab.balance;
-      asset.price = calculateSpotPrice(ab.balance, market.neoPool!.liquidityParameter);
+      asset.price = computeNeoSwapSpotPrice(ab.balance, market.neoPool!.liquidityParameter);
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
       await store.save<Asset>(asset);
 
@@ -212,7 +212,7 @@ export const joinExecuted = async (
       const oldPrice = asset.price;
       const oldAmountInPool = asset.amountInPool;
       asset.amountInPool = ab.balance;
-      asset.price = calculateSpotPrice(ab.balance, market.neoPool!.liquidityParameter);
+      asset.price = computeNeoSwapSpotPrice(ab.balance, market.neoPool!.liquidityParameter);
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
       await store.save<Asset>(asset);
 
@@ -304,7 +304,7 @@ export const poolDeployed = async (
         amountInPool: ab.balance,
         id: event.id + '-' + neoPool.marketId + i,
         market: market,
-        price: calculateSpotPrice(ab.balance, neoPool.liquidityParameter),
+        price: computeNeoSwapSpotPrice(ab.balance, neoPool.liquidityParameter),
       });
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
       await store.save<Asset>(asset);
@@ -383,7 +383,7 @@ export const sellExecuted = async (
       const oldPrice = asset.price;
       const oldAmountInPool = asset.amountInPool;
       asset.amountInPool = ab.balance;
-      asset.price = calculateSpotPrice(ab.balance, market.neoPool!.liquidityParameter);
+      asset.price = computeNeoSwapSpotPrice(ab.balance, market.neoPool!.liquidityParameter);
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
       await store.save<Asset>(asset);
 

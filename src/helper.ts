@@ -34,15 +34,29 @@ export enum Pallet {
   ParachainStaking = 'ParachainStaking',
   PredictionMarkets = 'PredictionMarkets',
   Styx = 'Styx',
+  Swaps = 'Swaps',
   System = 'System',
   Tokens = 'Tokens',
 }
 
-export const calculateSpotPrice = (amountInPool: bigint, liquidityParameter: bigint): number => {
+export const computeNeoSwapSpotPrice = (amountInPool: bigint, liquidityParameter: bigint): number => {
   const reserve = new Decimal(+amountInPool.toString());
   const liquidity = new Decimal(+liquidityParameter.toString());
   const price = new Decimal(0).minus(reserve).div(liquidity).exp();
   return +price.toString();
+};
+
+export const computeSwapSpotPrice = (
+  tokenBalanceIn: number,
+  tokenWeightIn: number,
+  tokenBalanceOut: number,
+  tokenWeightOut: number
+): number => {
+  if (tokenBalanceOut == 0) return 0;
+  const numer = tokenBalanceIn / tokenWeightIn;
+  const denom = tokenBalanceOut / tokenWeightOut;
+  const spotPrice = numer / denom;
+  return spotPrice;
 };
 
 export const createAssetsForMarket = async (marketId: number, marketType: MarketType): Promise<any> => {
@@ -175,6 +189,18 @@ export const isBaseAsset = (assetId: Asset | string): boolean => {
   return assetId.__kind.includes('Ztg') || assetId.__kind.includes('ForeignAsset');
 };
 
+export const mergeByAssetId = (balances: any[], weights: any[]): AssetAmountInPoolAndWeight[] =>
+  balances.map((b) => ({
+    ...b,
+    ...weights.find((w) => w['_assetId'].toString() == b['assetId'].toString() && w),
+  }));
+
 export const rescale = (value: string): string => {
   return (BigInt(value) * BigInt(10 ** 10)).toString();
 };
+
+interface AssetAmountInPoolAndWeight {
+  assetId: string;
+  balance: bigint;
+  _weight: bigint;
+}
