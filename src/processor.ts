@@ -49,6 +49,21 @@ import {
   tokensRedeemed,
 } from './mappings/predictionMarkets';
 import { accountCrossed } from './mappings/styx';
+import {
+  arbitrageBuyBurn,
+  arbitrageMintSell,
+  poolActive,
+  poolClosed,
+  poolCreate,
+  poolDestroyed,
+  poolExit,
+  poolExitCall,
+  poolExitWithExactAssetAmount,
+  poolJoin,
+  poolJoinWithExactAssetAmount,
+  swapExactAmountIn,
+  swapExactAmountOut,
+} from './mappings/swaps';
 import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
 import { tokensBalanceSet, tokensDeposited, tokensReserved, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
 import {
@@ -75,7 +90,7 @@ export const processor = new SubstrateBatchProcessor()
     archive: lookupArchive('zeitgeist-testnet', { release: 'ArrowSquid' }),
   })
   .addCall({
-    name: [calls.predictionMarkets.redeemShares.name],
+    name: [calls.predictionMarkets.redeemShares.name, calls.swaps.poolExit.name],
     extrinsic: true,
   })
   .addEvent({
@@ -117,6 +132,19 @@ export const processor = new SubstrateBatchProcessor()
       events.predictionMarkets.soldCompleteSet.name,
       events.predictionMarkets.tokensRedeemed.name,
       events.styx.accountCrossed.name,
+      events.swaps.arbitrageBuyBurn.name,
+      events.swaps.arbitrageMintSell.name,
+      events.swaps.arbitrageBuyBurn.name,
+      events.swaps.marketCreatorFeesPaid.name,
+      events.swaps.poolClosed.name,
+      events.swaps.poolCreate.name,
+      events.swaps.poolDestroyed.name,
+      events.swaps.poolExit.name,
+      events.swaps.poolExitWithExactAssetAmount.name,
+      events.swaps.poolJoin.name,
+      events.swaps.poolJoinWithExactAssetAmount.name,
+      events.swaps.swapExactAmountIn.name,
+      events.swaps.swapExactAmountOut.name,
       events.system.extrinsicFailed.name,
       events.system.extrinsicSuccess.name,
       events.system.newAccount.name,
@@ -171,6 +199,9 @@ processor.run(new TypeormDatabase(), async (ctx) => {
         if (call.name === calls.predictionMarkets.redeemShares.name) {
           await saveAccounts(ctx.store);
           await redeemShares(ctx.store, block.header, call);
+        } else if (call.name === calls.swaps.poolExit.name) {
+          await saveAccounts(ctx.store);
+          await poolExitCall(ctx.store, block.header, call);
         }
       }
     }
@@ -199,6 +230,9 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           break;
         case Pallet.Styx:
           await mapStyx(ctx.store, block.header, event);
+          break;
+        case Pallet.Swaps:
+          await mapSwaps(ctx.store, block.header, event);
           break;
         case Pallet.System:
           await mapSystem(ctx.store, block.header, event);
@@ -446,6 +480,113 @@ const mapStyx = async (store: Store, block: Block, event: Event) => {
     case events.styx.accountCrossed.name:
       await accountCrossed(store, block, event);
       break;
+  }
+};
+
+const mapSwaps = async (store: Store, block: Block, event: Event) => {
+  switch (event.name) {
+    case events.swaps.arbitrageBuyBurn.name: {
+      await saveAccounts(store);
+      const historicalAssets = await arbitrageBuyBurn(store, block, event);
+      if (!historicalAssets) break;
+      assetHistory.push(...historicalAssets);
+      break;
+    }
+    case events.swaps.arbitrageMintSell.name: {
+      await saveAccounts(store);
+      const historicalAssets = await arbitrageMintSell(store, block, event);
+      if (!historicalAssets) break;
+      assetHistory.push(...historicalAssets);
+      break;
+    }
+    case events.swaps.marketCreatorFeesPaid.name: {
+      // Refurbishes changes from two Balances.Transfer events accompanying before this event
+      if (balanceHistory.length < 2) break;
+      for (let i = 1; i < 3; i++) {
+        const hab = balanceHistory[balanceHistory.length - i];
+        if (hab.event === 'Transfer') {
+          hab.id = event.id + hab.id.slice(-6);
+          hab.event = event.name.split('.')[1];
+          balanceHistory[balanceHistory.length - i] = hab;
+        }
+      }
+      break;
+    }
+    case events.swaps.poolActive.name: {
+      const hp = await poolActive(store, block, event);
+      if (!hp) break;
+      poolHistory.push(hp);
+      break;
+    }
+    case events.swaps.poolClosed.name: {
+      const hp = await poolClosed(store, block, event);
+      if (!hp) break;
+      poolHistory.push(hp);
+      break;
+    }
+    case events.swaps.poolCreate.name: {
+      await saveAccounts(store);
+      const res = await poolCreate(store, block, event);
+      if (!res) break;
+      assetHistory.push(...res.historicalAssets);
+      poolHistory.push(res.historicalPool);
+      break;
+    }
+    case events.swaps.poolDestroyed.name: {
+      await saveAccounts(store);
+      const res = await poolDestroyed(store, block, event);
+      if (!res) break;
+      await storeBalanceChanges(res.historicalAccountBalances);
+      assetHistory.push(...res.historicalAssets);
+      poolHistory.push(res.historicalPool);
+      break;
+    }
+    case events.swaps.poolExit.name: {
+      await saveAccounts(store);
+      const historicalAssets = await poolExit(store, block, event);
+      if (!historicalAssets) break;
+      assetHistory.push(...historicalAssets);
+      break;
+    }
+    case events.swaps.poolExitWithExactAssetAmount.name: {
+      await saveAccounts(store);
+      const historicalAssets = await poolExitWithExactAssetAmount(store, block, event);
+      if (!historicalAssets) break;
+      assetHistory.push(...historicalAssets);
+      break;
+    }
+    case events.swaps.poolJoin.name: {
+      await saveAccounts(store);
+      const historicalAssets = await poolJoin(store, block, event);
+      if (!historicalAssets) break;
+      assetHistory.push(...historicalAssets);
+      break;
+    }
+    case events.swaps.poolJoinWithExactAssetAmount.name: {
+      await saveAccounts(store);
+      const historicalAssets = await poolJoinWithExactAssetAmount(store, block, event);
+      if (!historicalAssets) break;
+      assetHistory.push(...historicalAssets);
+      break;
+    }
+    case events.swaps.swapExactAmountIn.name: {
+      await saveAccounts(store);
+      const res = await swapExactAmountIn(store, block, event);
+      if (!res) break;
+      assetHistory.push(...res.historicalAssets);
+      swapHistory.push(res.historicalSwap);
+      if (res.historicalPool) poolHistory.push(res.historicalPool);
+      break;
+    }
+    case events.swaps.swapExactAmountOut.name: {
+      await saveAccounts(store);
+      const res = await swapExactAmountOut(store, block, event);
+      if (!res) break;
+      assetHistory.push(...res.historicalAssets);
+      swapHistory.push(res.historicalSwap);
+      if (res.historicalPool) poolHistory.push(res.historicalPool);
+      break;
+    }
   }
 };
 
