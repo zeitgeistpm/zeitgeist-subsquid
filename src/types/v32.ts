@@ -238,36 +238,32 @@ export const MarketCreation: sts.Type<MarketCreation> = sts.closedEnum(() => {
     }
 })
 
-export const AccountId32 = sts.bytes()
-
-export const Asset: sts.Type<Asset> = sts.closedEnum(() => {
+export const SwapEvent: sts.Type<SwapEvent> = sts.struct(() => {
     return  {
-        CategoricalOutcome: sts.tuple(() => [sts.bigint(), sts.number()]),
-        CombinatorialOutcome: sts.unit(),
-        PoolShare: SerdeWrapper,
-        ScalarOutcome: sts.tuple(() => [sts.bigint(), ScalarPosition]),
-        Ztg: sts.unit(),
+        assetAmountIn: sts.bigint(),
+        assetAmountOut: sts.bigint(),
+        assetBound: sts.bigint(),
+        assetIn: Asset,
+        assetOut: Asset,
+        cpep: CommonPoolEventParams,
+        maxPrice: sts.bigint(),
     }
 })
 
-export const ScalarPosition: sts.Type<ScalarPosition> = sts.closedEnum(() => {
-    return  {
-        Long: sts.unit(),
-        Short: sts.unit(),
-    }
-})
-
-export type ScalarPosition = ScalarPosition_Long | ScalarPosition_Short
-
-export interface ScalarPosition_Long {
-    __kind: 'Long'
+export interface SwapEvent {
+    assetAmountIn: bigint
+    assetAmountOut: bigint
+    assetBound: bigint
+    assetIn: Asset
+    assetOut: Asset
+    cpep: CommonPoolEventParams
+    maxPrice: bigint
 }
 
-export interface ScalarPosition_Short {
-    __kind: 'Short'
+export interface CommonPoolEventParams {
+    poolId: bigint
+    who: AccountId32
 }
-
-export const SerdeWrapper = sts.bigint()
 
 export type Asset = Asset_CategoricalOutcome | Asset_CombinatorialOutcome | Asset_PoolShare | Asset_ScalarOutcome | Asset_Ztg
 
@@ -294,7 +290,125 @@ export interface Asset_Ztg {
     __kind: 'Ztg'
 }
 
+export type ScalarPosition = ScalarPosition_Long | ScalarPosition_Short
+
+export interface ScalarPosition_Long {
+    __kind: 'Long'
+}
+
+export interface ScalarPosition_Short {
+    __kind: 'Short'
+}
+
 export type SerdeWrapper = bigint
+
+export const PoolAssetEvent: sts.Type<PoolAssetEvent> = sts.struct(() => {
+    return  {
+        asset: Asset,
+        bound: sts.bigint(),
+        cpep: CommonPoolEventParams,
+        transferred: sts.bigint(),
+    }
+})
+
+export interface PoolAssetEvent {
+    asset: Asset
+    bound: bigint
+    cpep: CommonPoolEventParams
+    transferred: bigint
+}
+
+export const PoolAssetsEvent: sts.Type<PoolAssetsEvent> = sts.struct(() => {
+    return  {
+        assets: sts.array(() => Asset),
+        bounds: sts.array(() => sts.bigint()),
+        cpep: CommonPoolEventParams,
+        transferred: sts.array(() => sts.bigint()),
+    }
+})
+
+export interface PoolAssetsEvent {
+    assets: Asset[]
+    bounds: bigint[]
+    cpep: CommonPoolEventParams
+    transferred: bigint[]
+}
+
+export const Pool: sts.Type<Pool> = sts.struct(() => {
+    return  {
+        assets: sts.array(() => Asset),
+        baseAsset: sts.option(() => Asset),
+        marketId: sts.bigint(),
+        poolStatus: PoolStatus,
+        scoringRule: ScoringRule,
+        swapFee: sts.option(() => sts.bigint()),
+        totalSubsidy: sts.option(() => sts.bigint()),
+        totalWeight: sts.option(() => sts.bigint()),
+        weights: sts.option(() => sts.array(() => sts.tuple(() => [Asset, sts.bigint()]))),
+    }
+})
+
+export const PoolStatus: sts.Type<PoolStatus> = sts.closedEnum(() => {
+    return  {
+        Active: sts.unit(),
+        CollectingSubsidy: sts.unit(),
+        Stale: sts.unit(),
+    }
+})
+
+export type PoolStatus = PoolStatus_Active | PoolStatus_CollectingSubsidy | PoolStatus_Stale
+
+export interface PoolStatus_Active {
+    __kind: 'Active'
+}
+
+export interface PoolStatus_CollectingSubsidy {
+    __kind: 'CollectingSubsidy'
+}
+
+export interface PoolStatus_Stale {
+    __kind: 'Stale'
+}
+
+export interface Pool {
+    assets: Asset[]
+    baseAsset?: (Asset | undefined)
+    marketId: bigint
+    poolStatus: PoolStatus
+    scoringRule: ScoringRule
+    swapFee?: (bigint | undefined)
+    totalSubsidy?: (bigint | undefined)
+    totalWeight?: (bigint | undefined)
+    weights?: ([Asset, bigint][] | undefined)
+}
+
+export const CommonPoolEventParams: sts.Type<CommonPoolEventParams> = sts.struct(() => {
+    return  {
+        poolId: sts.bigint(),
+        who: AccountId32,
+    }
+})
+
+export const AccountId32 = sts.bytes()
+
+export const Asset: sts.Type<Asset> = sts.closedEnum(() => {
+    return  {
+        CategoricalOutcome: sts.tuple(() => [sts.bigint(), sts.number()]),
+        CombinatorialOutcome: sts.unit(),
+        PoolShare: SerdeWrapper,
+        ScalarOutcome: sts.tuple(() => [sts.bigint(), ScalarPosition]),
+        Ztg: sts.unit(),
+    }
+})
+
+export const ScalarPosition: sts.Type<ScalarPosition> = sts.closedEnum(() => {
+    return  {
+        Long: sts.unit(),
+        Short: sts.unit(),
+    }
+})
+
+export const SerdeWrapper = sts.bigint()
 
 export const DispatchInfo: sts.Type<DispatchInfo> = sts.struct(() => {
     return  {

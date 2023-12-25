@@ -725,26 +725,6 @@ export const V2NetworkId: sts.Type<V2NetworkId> = sts.closedEnum(() => {
     }
 })
 
-export const Asset: sts.Type<Asset> = sts.closedEnum(() => {
-    return  {
-        CategoricalOutcome: sts.tuple(() => [sts.bigint(), sts.number()]),
-        CombinatorialOutcome: sts.unit(),
-        ForeignAsset: sts.number(),
-        PoolShare: SerdeWrapper,
-        ScalarOutcome: sts.tuple(() => [sts.bigint(), ScalarPosition]),
-        Ztg: sts.unit(),
-    }
-})
-
-export const ScalarPosition: sts.Type<ScalarPosition> = sts.closedEnum(() => {
-    return  {
-        Long: sts.unit(),
-        Short: sts.unit(),
-    }
-})
-
-export const SerdeWrapper = sts.bigint()
-
 export interface Market {
     baseAsset: Asset
     creator: AccountId32
@@ -1035,5 +1015,25 @@ export const MarketCreation: sts.Type<MarketCreation> = sts.closedEnum(() => {
         Permissionless: sts.unit(),
     }
 })
+
+export const Asset: sts.Type<Asset> = sts.closedEnum(() => {
+    return  {
+        CategoricalOutcome: sts.tuple(() => [sts.bigint(), sts.number()]),
+        CombinatorialOutcome: sts.unit(),
+        ForeignAsset: sts.number(),
+        PoolShare: SerdeWrapper,
+        ScalarOutcome: sts.tuple(() => [sts.bigint(), ScalarPosition]),
+        Ztg: sts.unit(),
+    }
+})
+
+export const ScalarPosition: sts.Type<ScalarPosition> = sts.closedEnum(() => {
+    return  {
+        Long: sts.unit(),
+        Short: sts.unit(),
+    }
+})
+
+export const SerdeWrapper = sts.bigint()
 
 export const AccountId32 = sts.bytes()

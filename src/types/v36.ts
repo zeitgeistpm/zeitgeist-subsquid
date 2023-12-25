@@ -238,36 +238,53 @@ export interface Market {
     mdm: MarketDisputeMechanism
 }
 
-export const AccountId32 = sts.bytes()
-
-export const Asset: sts.Type<Asset> = sts.closedEnum(() => {
+export const Pool: sts.Type<Pool> = sts.struct(() => {
     return  {
-        CategoricalOutcome: sts.tuple(() => [sts.bigint(), sts.number()]),
-        CombinatorialOutcome: sts.unit(),
-        PoolShare: SerdeWrapper,
-        ScalarOutcome: sts.tuple(() => [sts.bigint(), ScalarPosition]),
-        Ztg: sts.unit(),
+        assets: sts.array(() => Asset),
+        baseAsset: Asset,
+        marketId: sts.bigint(),
+        poolStatus: PoolStatus,
+        scoringRule: ScoringRule,
+        swapFee: sts.option(() => sts.bigint()),
+        totalSubsidy: sts.option(() => sts.bigint()),
+        totalWeight: sts.option(() => sts.bigint()),
+        weights: sts.option(() => sts.array(() => sts.tuple(() => [Asset, sts.bigint()]))),
     }
 })
 
-export const ScalarPosition: sts.Type<ScalarPosition> = sts.closedEnum(() => {
+export const PoolStatus: sts.Type<PoolStatus> = sts.closedEnum(() => {
     return  {
-        Long: sts.unit(),
-        Short: sts.unit(),
+        Active: sts.unit(),
+        CollectingSubsidy: sts.unit(),
+        Stale: sts.unit(),
     }
 })
 
-export type ScalarPosition = ScalarPosition_Long | ScalarPosition_Short
+export type PoolStatus = PoolStatus_Active | PoolStatus_CollectingSubsidy | PoolStatus_Stale
 
-export interface ScalarPosition_Long {
-    __kind: 'Long'
+export interface PoolStatus_Active {
+    __kind: 'Active'
 }
 
-export interface ScalarPosition_Short {
-    __kind: 'Short'
+export interface PoolStatus_CollectingSubsidy {
+    __kind: 'CollectingSubsidy'
 }
 
-export const SerdeWrapper = sts.bigint()
+export interface PoolStatus_Stale {
+    __kind: 'Stale'
+}
+
+export interface Pool {
+    assets: Asset[]
+    baseAsset: Asset
+    marketId: bigint
+    poolStatus: PoolStatus
+    scoringRule: ScoringRule
+    swapFee?: (bigint | undefined)
+    totalSubsidy?: (bigint | undefined)
+    totalWeight?: (bigint | undefined)
+    weights?: ([Asset, bigint][] | undefined)
+}
 
 export type Asset = Asset_CategoricalOutcome | Asset_CombinatorialOutcome | Asset_PoolShare | Asset_ScalarOutcome | Asset_Ztg
 
@@ -294,7 +311,50 @@ export interface Asset_Ztg {
     __kind: 'Ztg'
 }
 
+export type ScalarPosition = ScalarPosition_Long | ScalarPosition_Short
+
+export interface ScalarPosition_Long {
+    __kind: 'Long'
+}
+
+export interface ScalarPosition_Short {
+    __kind: 'Short'
+}
+
 export type SerdeWrapper = bigint
+
+export const CommonPoolEventParams: sts.Type<CommonPoolEventParams> = sts.struct(() => {
+    return  {
+        poolId: sts.bigint(),
+        who: AccountId32,
+    }
+})
+
+export interface CommonPoolEventParams {
+    poolId: bigint
+    who: AccountId32
+}
+
+export const AccountId32 = sts.bytes()
+
+export const Asset: sts.Type<Asset> = sts.closedEnum(() => {
+    return  {
+        CategoricalOutcome: sts.tuple(() => [sts.bigint(), sts.number()]),
+        CombinatorialOutcome: sts.unit(),
+        PoolShare: SerdeWrapper,
+        ScalarOutcome: sts.tuple(() => [sts.bigint(), ScalarPosition]),
+        Ztg: sts.unit(),
+    }
+})
+
+export const ScalarPosition: sts.Type<ScalarPosition> = sts.closedEnum(() => {
+    return  {
+        Long: sts.unit(),
+        Short: sts.unit(),
+    }
+})
+
+export const SerdeWrapper = sts.bigint()
 
 export const DispatchInfo: sts.Type<DispatchInfo> = sts.struct(() => {
     return  {

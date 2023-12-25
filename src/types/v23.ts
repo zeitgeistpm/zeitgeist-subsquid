@@ -961,6 +961,8 @@ export type AccountId = Bytes
 
 export const MarketId = sts.bigint()
 
+export const PoolId = sts.bigint()
+
 export const BalanceOf = sts.bigint()
 
 export const OutcomeReport: sts.Type<OutcomeReport> = sts.closedEnum(() => {
@@ -1430,7 +1432,96 @@ export const MarketCreation: sts.Type<MarketCreation> = sts.closedEnum(() => {
 
 export const MarketIdOf = sts.bigint()
 
-export const CurrencyId: sts.Type<CurrencyId> = sts.closedEnum(() => {
+export const SwapEvent: sts.Type<SwapEvent> = sts.struct(() => {
+    return  {
+        assetAmountIn: Balance,
+        assetAmountOut: Balance,
+        assetBound: Balance,
+        cpep: CommonPoolEventParams,
+        maxPrice: Balance,
+    }
+})
+
+export interface SwapEvent {
+    assetAmountIn: Balance
+    assetAmountOut: Balance
+    assetBound: Balance
+    cpep: CommonPoolEventParams
+    maxPrice: Balance
+}
+
+export interface CommonPoolEventParams {
+    poolId: bigint
+    who: AccountId
+}
+
+export type Balance = bigint
+
+export const PoolAssetEvent: sts.Type<PoolAssetEvent> = sts.struct(() => {
+    return  {
+        bound: Balance,
+        cpep: CommonPoolEventParams,
+        transferred: Balance,
+    }
+})
+
+export interface PoolAssetEvent {
+    bound: Balance
+    cpep: CommonPoolEventParams
+    transferred: Balance
+}
+
+export const PoolAssetsEvent: sts.Type<PoolAssetsEvent> = sts.struct(() => {
+    return  {
+        bounds: sts.array(() => Balance),
+        cpep: CommonPoolEventParams,
+        transferred: sts.array(() => Balance),
+    }
+})
+
+export interface PoolAssetsEvent {
+    bounds: Balance[]
+    cpep: CommonPoolEventParams
+    transferred: Balance[]
+}
+
+export const Pool: sts.Type<Pool> = sts.struct(() => {
+    return  {
+        assets: sts.array(() => Asset),
+        baseAsset: sts.option(() => Asset),
+        marketId: MarketId,
+        poolStatus: PoolStatus,
+        scoringRule: ScoringRule,
+        swapFee: sts.option(() => Balance),
+        totalSubsidy: sts.option(() => Balance),
+        totalWeight: sts.option(() => sts.bigint()),
+        weights: sts.option(() => sts.array(() => sts.tuple(() => [Asset, sts.bigint()]))),
+    }
+})
+
+export const PoolStatus: sts.Type<PoolStatus> = sts.closedEnum(() => {
+    return  {
+        Active: sts.unit(),
+        CollectingSubsidy: sts.unit(),
+        Stale: sts.unit(),
+    }
+})
+
+export type PoolStatus = PoolStatus_Active | PoolStatus_CollectingSubsidy | PoolStatus_Stale
+
+export interface PoolStatus_Active {
+    __kind: 'Active'
+}
+
+export interface PoolStatus_CollectingSubsidy {
+    __kind: 'CollectingSubsidy'
+}
+
+export interface PoolStatus_Stale {
+    __kind: 'Stale'
+}
+
+export const Asset: sts.Type<Asset> = sts.closedEnum(() => {
     return  {
         CategoricalOutcome: sts.tuple(() => [MarketId, CategoryIndex]),
         CombinatorialOutcome: sts.unit(),
@@ -1459,6 +1550,62 @@ export interface ScalarPosition_Short {
 
 export const CategoryIndex = sts.number()
 
+export type Asset = Asset_CategoricalOutcome | Asset_CombinatorialOutcome | Asset_PoolShare | Asset_ScalarOutcome | Asset_Ztg
+
+export interface Asset_CategoricalOutcome {
+    __kind: 'CategoricalOutcome'
+    value: [MarketId, CategoryIndex]
+}
+
+export interface Asset_CombinatorialOutcome {
+    __kind: 'CombinatorialOutcome'
+}
+
+export interface Asset_PoolShare {
+    __kind: 'PoolShare'
+    value: bigint
+}
+
+export interface Asset_ScalarOutcome {
+    __kind: 'ScalarOutcome'
+    value: [MarketId, ScalarPosition]
+}
+
+export interface Asset_Ztg {
+    __kind: 'Ztg'
+}
+
+export type CategoryIndex = number
+
+export interface Pool {
+    assets: Asset[]
+    baseAsset?: (Asset | undefined)
+    marketId: MarketId
+    poolStatus: PoolStatus
+    scoringRule: ScoringRule
+    swapFee?: (Balance | undefined)
+    totalSubsidy?: (Balance | undefined)
+    totalWeight?: (bigint | undefined)
+    weights?: ([Asset, bigint][] | undefined)
+}
+
+export const CommonPoolEventParams: sts.Type<CommonPoolEventParams> = sts.struct(() => {
+    return  {
+        poolId: sts.bigint(),
+        who: AccountId,
+    }
+})
+
+export const CurrencyId: sts.Type<CurrencyId> = sts.closedEnum(() => {
+    return  {
+        CategoricalOutcome: sts.tuple(() => [MarketId, CategoryIndex]),
+        CombinatorialOutcome: sts.unit(),
+        PoolShare: sts.bigint(),
+        ScalarOutcome: sts.tuple(() => [MarketId, ScalarPosition]),
+        Ztg: sts.unit(),
+    }
+})
+
 export type CurrencyId = CurrencyId_CategoricalOutcome | CurrencyId_CombinatorialOutcome | CurrencyId_PoolShare | CurrencyId_ScalarOutcome | CurrencyId_Ztg
 
 export interface CurrencyId_CategoricalOutcome {
@@ -1483,8 +1630,6 @@ export interface CurrencyId_ScalarOutcome {
 export interface CurrencyId_Ztg {
     __kind: 'Ztg'
 }
-
-export type CategoryIndex = number
 
 export const Currency: sts.Type<Currency> = sts.closedEnum(() => {
     return  {

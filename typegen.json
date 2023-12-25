@@ -58,6 +58,24 @@
     "Styx": {
       "events": ["AccountCrossed"]
     },
+    "Swaps": {
+      "calls": ["pool_exit"],
+      "events": [
+        "ArbitrageBuyBurn",
+        "ArbitrageMintSell",
+        "MarketCreatorFeesPaid",
+        "PoolActive",
+        "PoolClosed",
+        "PoolCreate",
+        "PoolDestroyed",
+        "PoolExit",
+        "PoolExitWithExactAssetAmount",
+        "PoolJoin",
+        "PoolJoinWithExactAssetAmount",
+        "SwapExactAmountIn",
+        "SwapExactAmountOut"
+      ]
+    },
     "System": {
       "events": ["ExtrinsicFailed", "ExtrinsicSuccess", "NewAccount"]
     },

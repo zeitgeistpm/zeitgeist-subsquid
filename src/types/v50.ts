@@ -364,3 +364,73 @@ export const MarketCreation: sts.Type<MarketCreation> = sts.closedEnum(() => {
 })
 
 export const AccountId32 = sts.bytes()
+
+export const Pool: sts.Type<Pool> = sts.struct(() => {
+    return  {
+        assets: sts.array(() => Asset),
+        baseAsset: Asset,
+        marketId: sts.bigint(),
+        poolStatus: PoolStatus,
+        scoringRule: ScoringRule,
+        swapFee: sts.option(() => sts.bigint()),
+        totalSubsidy: sts.option(() => sts.bigint()),
+        totalWeight: sts.option(() => sts.bigint()),
+        weights: sts.option(() => sts.array(() => sts.tuple(() => [Asset, sts.bigint()]))),
+    }
+})
+
+export const PoolStatus: sts.Type<PoolStatus> = sts.closedEnum(() => {
+    return  {
+        Active: sts.unit(),
+        Clean: sts.unit(),
+        Closed: sts.unit(),
+        CollectingSubsidy: sts.unit(),
+        Initialized: sts.unit(),
+    }
+})
+
+export type PoolStatus = PoolStatus_Active | PoolStatus_Clean | PoolStatus_Closed | PoolStatus_CollectingSubsidy | PoolStatus_Initialized
+
+export interface PoolStatus_Active {
+    __kind: 'Active'
+}
+
+export interface PoolStatus_Clean {
+    __kind: 'Clean'
+}
+
+export interface PoolStatus_Closed {
+    __kind: 'Closed'
+}
+
+export interface PoolStatus_CollectingSubsidy {
+    __kind: 'CollectingSubsidy'
+}
+
+export interface PoolStatus_Initialized {
+    __kind: 'Initialized'
+}
+
+export interface Pool {
+    assets: Asset[]
+    baseAsset: Asset
+    marketId: bigint
+    poolStatus: PoolStatus
+    scoringRule: ScoringRule
+    swapFee?: (bigint | undefined)
+    totalSubsidy?: (bigint | undefined)
+    totalWeight?: (bigint | undefined)
+    weights?: ([Asset, bigint][] | undefined)
+}
+
+export const CommonPoolEventParams: sts.Type<CommonPoolEventParams> = sts.struct(() => {
+    return  {
+        poolId: sts.bigint(),
+        who: AccountId32,
+    }
+})
+
+export interface CommonPoolEventParams {
+    poolId: bigint
+    who: AccountId32
+}
