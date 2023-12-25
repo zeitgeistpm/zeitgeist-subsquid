@@ -1,5 +1,5 @@
-module.exports = class Data1702125775108 {
-    name = 'Data1702125775108'
+module.exports = class Data1703498124544 {
+    name = 'Data1703498124544'
 
     async up(db) {
         await db.query(`CREATE TABLE "account_balance" ("asset_id" text NOT NULL, "balance" numeric NOT NULL, "id" character varying NOT NULL, "account_id" character varying, CONSTRAINT "PK_bd893045760f719e24a95a42562" PRIMARY KEY ("id"))`)
@@ -7,7 +7,7 @@ module.exports = class Data1702125775108 {
         await db.query(`CREATE TABLE "account" ("account_id" text NOT NULL, "id" character varying NOT NULL, "market_id" integer, CONSTRAINT "PK_54115ee388cdb6d86bb4bf5b2ea" PRIMARY KEY ("id"))`)
         await db.query(`CREATE TABLE "historical_account_balance" ("account_id" text NOT NULL, "asset_id" text NOT NULL, "block_number" integer NOT NULL, "d_balance" numeric NOT NULL, "event" text NOT NULL, "extrinsic" jsonb, "id" character varying NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_bfc701998dd9e45981c88f4d1af" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_082fc1e4bc8a039eab7ebc56ff" ON "historical_account_balance" ("account_id") `)
-        await db.query(`CREATE TABLE "pool" ("id" character varying NOT NULL, "base_asset" text NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "market_id" integer NOT NULL, "pool_id" integer NOT NULL, "status" character varying(17) NOT NULL, "swap_fee" text, "total_subsidy" text, "total_weight" text NOT NULL, "volume" numeric NOT NULL, "weights" jsonb NOT NULL, "account_id" character varying, CONSTRAINT "PK_db1bfe411e1516c01120b85f8fe" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "pool" ("id" character varying NOT NULL, "base_asset" text, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "market_id" integer NOT NULL, "pool_id" integer NOT NULL, "status" character varying(17) NOT NULL, "swap_fee" text, "total_subsidy" text, "total_weight" text, "volume" numeric NOT NULL, "weights" jsonb NOT NULL, "account_id" character varying, CONSTRAINT "PK_db1bfe411e1516c01120b85f8fe" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_7042da86b8de81cc3e9e448f9a" ON "pool" ("account_id") `)
         await db.query(`CREATE INDEX "IDX_7ae36e79b02d471a94b311dfbb" ON "pool" ("market_id") `)
         await db.query(`CREATE INDEX "IDX_ac4a37826438cadcfca6b520be" ON "pool" ("pool_id") `)
@@ -27,7 +27,7 @@ module.exports = class Data1702125775108 {
         await db.query(`CREATE INDEX "IDX_d9ec182f218dc183716b8807cf" ON "historical_asset" ("asset_id") `)
         await db.query(`CREATE TABLE "historical_swap" ("id" character varying NOT NULL, "account_id" text NOT NULL, "asset_in" text NOT NULL, "asset_out" text NOT NULL, "asset_amount_in" numeric NOT NULL, "asset_amount_out" numeric NOT NULL, "event" text NOT NULL, "extrinsic" jsonb, "block_number" integer NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_fae24759f3f207b19d75d63314f" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_275903cccb306ca3529eb5bedf" ON "historical_swap" ("account_id") `)
-        await db.query(`CREATE TABLE "historical_market" ("id" character varying NOT NULL, "block_number" integer NOT NULL, "by" text, "event" character varying(20) NOT NULL, "outcome" jsonb, "resolved_outcome" text, "status" character varying(19) NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "market_id" character varying, CONSTRAINT "PK_8b5b3dfdac79a88102b94d55498" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "historical_market" ("id" character varying NOT NULL, "block_number" integer NOT NULL, "by" text, "event" character varying(25) NOT NULL, "outcome" jsonb, "resolved_outcome" text, "status" character varying(19) NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "market_id" character varying, CONSTRAINT "PK_8b5b3dfdac79a88102b94d55498" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_37393fa690692f119c5473d515" ON "historical_market" ("market_id") `)
         await db.query(`CREATE TABLE "historical_pool" ("id" character varying NOT NULL, "block_number" integer NOT NULL, "d_volume" numeric, "event" text NOT NULL, "pool_id" integer NOT NULL, "status" character varying(17), "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "volume" numeric, CONSTRAINT "PK_6ee31afe7b6dc3500a94effc951" PRIMARY KEY ("id"))`)
         await db.query(`ALTER TABLE "account_balance" ADD CONSTRAINT "FK_029576f147e256f1f93e4865c76" FOREIGN KEY ("account_id") REFERENCES "account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
