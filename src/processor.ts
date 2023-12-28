@@ -74,6 +74,7 @@ import {
   HistoricalPool,
   HistoricalSwap,
 } from './model';
+import { destroyMarkets, resolveMarkets, unreserveBalances } from './postHooks';
 import { calls, events } from './types';
 import { Pallet, initBalance } from './helper';
 
@@ -241,6 +242,14 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           await mapTokens(ctx.store, block.header, event);
           break;
       }
+    }
+    if (process.env.WS_NODE_URL?.includes(`bs`) && block.header.height === 579140) {
+      await saveAccounts(ctx.store);
+      const historicalAccountBalances = await unreserveBalances();
+      await storeBalanceChanges(historicalAccountBalances);
+      const historicalAssets = await resolveMarkets(ctx.store);
+      assetHistory.push(...historicalAssets);
+      await destroyMarkets(ctx.store);
     }
   }
   await saveAccounts(ctx.store);
