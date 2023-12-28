@@ -8,64 +8,7 @@ import {
   Extrinsic as _Extrinsic,
 } from '@subsquid/substrate-processor';
 import { Store, TypeormDatabase } from '@subsquid/typeorm-store';
-import { assetTxFeePaid } from './mappings/assetTxPayment';
-import { authorityReported } from './mappings/authorized';
-import {
-  balancesBalanceSet,
-  balancesDeposit,
-  balancesDustLost,
-  balancesReserveRepatriated,
-  balancesReserved,
-  balancesTransfer,
-  balancesUnreserved,
-  balancesWithdraw,
-} from './mappings/balances';
-import { currencyDeposited, currencyTransferred, currencyWithdrawn } from './mappings/currency';
-import {
-  buyExecuted,
-  exitExecuted,
-  feesWithdrawn,
-  joinExecuted,
-  poolDeployed,
-  sellExecuted,
-} from './mappings/neoSwaps';
-import { parachainStakingRewarded } from './mappings/parachainStaking';
-import {
-  boughtCompleteSet,
-  globalDisputeStarted,
-  marketApproved,
-  marketClosed,
-  marketCreated,
-  marketDestroyed,
-  marketDisputed,
-  marketExpired,
-  marketInsufficientSubsidy,
-  marketRejected,
-  marketReported,
-  marketResolved,
-  marketStartedWithSubsidy,
-  redeemShares,
-  soldCompleteSet,
-  tokensRedeemed,
-} from './mappings/predictionMarkets';
-import { accountCrossed } from './mappings/styx';
-import {
-  arbitrageBuyBurn,
-  arbitrageMintSell,
-  poolActive,
-  poolClosed,
-  poolCreate,
-  poolDestroyed,
-  poolExit,
-  poolExitCall,
-  poolExitWithExactAssetAmount,
-  poolJoin,
-  poolJoinWithExactAssetAmount,
-  swapExactAmountIn,
-  swapExactAmountOut,
-} from './mappings/swaps';
-import { systemExtrinsicFailed, systemExtrinsicSuccess, systemNewAccount } from './mappings/system';
-import { tokensBalanceSet, tokensDeposited, tokensReserved, tokensTransfer, tokensWithdrawn } from './mappings/tokens';
+import * as mappings from './mappings';
 import {
   Account,
   AccountBalance,
@@ -196,13 +139,13 @@ processor.run(new TypeormDatabase(), async (ctx) => {
 
   for (let block of ctx.blocks) {
     for (let call of block.calls) {
-      if (call.success && block.header.height < 1089818) {
+      if (process.env.WS_NODE_URL?.includes(`bs`) && call.success && block.header.height < 1089818) {
         if (call.name === calls.predictionMarkets.redeemShares.name) {
           await saveAccounts(ctx.store);
-          await redeemShares(ctx.store, block.header, call);
+          await mappings.predictionMarkets.redeemShares(ctx.store, block.header, call);
         } else if (call.name === calls.swaps.poolExit.name) {
           await saveAccounts(ctx.store);
-          await poolExitCall(ctx.store, block.header, call);
+          await mappings.swaps.poolExitCall(ctx.store, block.header, call);
         }
       }
     }
@@ -259,7 +202,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
 const mapAssetTxPayment = async (block: Block, event: Event) => {
   switch (event.name) {
     case events.assetTxPayment.assetTxFeePaid.name:
-      const habs = await assetTxFeePaid(block, event);
+      const habs = await mappings.assetTxPayment.assetTxFeePaid(block, event);
       if (!habs) break;
       await storeBalanceChanges(habs);
       break;
@@ -269,7 +212,7 @@ const mapAssetTxPayment = async (block: Block, event: Event) => {
 const mapAuthorized = async (store: Store, block: Block, event: Event) => {
   switch (event.name) {
     case events.authorized.authorityReported.name:
-      await authorityReported(store, block, event);
+      await mappings.authorized.authorityReported(store, block, event);
       break;
   }
 };
@@ -278,42 +221,42 @@ const mapBalances = async (store: Store, block: Block, event: Event) => {
   switch (event.name) {
     case events.balances.balanceSet.name: {
       await saveAccounts(store);
-      await balancesBalanceSet(store, block, event);
+      await mappings.balances.balancesBalanceSet(store, block, event);
       break;
     }
     case events.balances.deposit.name: {
-      const hab = await balancesDeposit(block, event);
+      const hab = await mappings.balances.balancesDeposit(block, event);
       await storeBalanceChanges([hab]);
       break;
     }
     case events.balances.dustLost.name: {
-      const hab = await balancesDustLost(block, event);
+      const hab = await mappings.balances.balancesDustLost(block, event);
       await storeBalanceChanges([hab]);
       break;
     }
     case events.balances.reserveRepatriated.name: {
-      const hab = await balancesReserveRepatriated(block, event);
+      const hab = await mappings.balances.balancesReserveRepatriated(block, event);
       if (!hab) break;
       await storeBalanceChanges([hab]);
       break;
     }
     case events.balances.reserved.name: {
-      const hab = await balancesReserved(block, event);
+      const hab = await mappings.balances.balancesReserved(block, event);
       await storeBalanceChanges([hab]);
       break;
     }
     case events.balances.transfer.name: {
-      const habs = await balancesTransfer(block, event);
+      const habs = await mappings.balances.balancesTransfer(block, event);
       await storeBalanceChanges(habs);
       break;
     }
     case events.balances.unreserved.name: {
-      const hab = await balancesUnreserved(block, event);
+      const hab = await mappings.balances.balancesUnreserved(block, event);
       await storeBalanceChanges([hab]);
       break;
     }
     case events.balances.withdraw.name: {
-      const hab = await balancesWithdraw(block, event);
+      const hab = await mappings.balances.balancesWithdraw(block, event);
       await storeBalanceChanges([hab]);
       break;
     }
@@ -323,18 +266,18 @@ const mapBalances = async (store: Store, block: Block, event: Event) => {
 const mapCurrency = async (block: Block, event: Event) => {
   switch (event.name) {
     case events.currency.deposited.name: {
-      const hab = await currencyDeposited(block, event);
+      const hab = await mappings.currency.currencyDeposited(block, event);
       await storeBalanceChanges([hab]);
       break;
     }
     case events.currency.transferred.name: {
-      const habs = await currencyTransferred(block, event);
+      const habs = await mappings.currency.currencyTransferred(block, event);
       if (!habs) break;
       await storeBalanceChanges(habs);
       break;
     }
     case events.currency.withdrawn.name: {
-      const hab = await currencyWithdrawn(block, event);
+      const hab = await mappings.currency.currencyWithdrawn(block, event);
       await storeBalanceChanges([hab]);
       break;
     }
@@ -345,7 +288,7 @@ const mapNeoSwaps = async (store: Store, block: Block, event: Event) => {
   switch (event.name) {
     case events.neoSwaps.buyExecuted.name: {
       await saveAccounts(store);
-      const res = await buyExecuted(store, block, event);
+      const res = await mappings.neoSwaps.buyExecuted(store, block, event);
       if (!res) break;
       assetHistory.push(...res.historicalAssets);
       swapHistory.push(res.historicalSwap);
@@ -354,27 +297,27 @@ const mapNeoSwaps = async (store: Store, block: Block, event: Event) => {
     }
     case events.neoSwaps.exitExecuted.name: {
       await saveAccounts(store);
-      const historicalAssets = await exitExecuted(store, block, event);
+      const historicalAssets = await mappings.neoSwaps.exitExecuted(store, block, event);
       if (!historicalAssets) break;
       assetHistory.push(...historicalAssets);
       break;
     }
     case events.neoSwaps.feesWithdrawn.name: {
-      const historicalPool = await feesWithdrawn(store, block, event);
+      const historicalPool = await mappings.neoSwaps.feesWithdrawn(store, block, event);
       if (!historicalPool) break;
       poolHistory.push(historicalPool);
       break;
     }
     case events.neoSwaps.joinExecuted.name: {
       await saveAccounts(store);
-      const historicalAssets = await joinExecuted(store, block, event);
+      const historicalAssets = await mappings.neoSwaps.joinExecuted(store, block, event);
       if (!historicalAssets) break;
       assetHistory.push(...historicalAssets);
       break;
     }
     case events.neoSwaps.poolDeployed.name: {
       await saveAccounts(store);
-      const res = await poolDeployed(store, block, event);
+      const res = await mappings.neoSwaps.poolDeployed(store, block, event);
       if (!res) break;
       assetHistory.push(...res.historicalAssets);
       poolHistory.push(res.historicalPool);
@@ -382,7 +325,7 @@ const mapNeoSwaps = async (store: Store, block: Block, event: Event) => {
     }
     case events.neoSwaps.sellExecuted.name: {
       await saveAccounts(store);
-      const res = await sellExecuted(store, block, event);
+      const res = await mappings.neoSwaps.sellExecuted(store, block, event);
       if (!res) break;
       assetHistory.push(...res.historicalAssets);
       swapHistory.push(res.historicalSwap);
@@ -396,7 +339,7 @@ const mapParachainStaking = async (block: Block, event: Event) => {
   switch (event.name) {
     case events.parachainStaking.rewarded.name: {
       if (block.specVersion < 33) {
-        const hab = await parachainStakingRewarded(block, event);
+        const hab = await mappings.parachainStaking.parachainStakingRewarded(block, event);
         await storeBalanceChanges([hab]);
         break;
       }
@@ -416,68 +359,68 @@ const mapParachainStaking = async (block: Block, event: Event) => {
 const mapPredictionMarkets = async (store: Store, block: Block, event: Event) => {
   switch (event.name) {
     case events.predictionMarkets.boughtCompleteSet.name: {
-      const habs = await boughtCompleteSet(store, block, event);
+      const habs = await mappings.predictionMarkets.boughtCompleteSet(store, block, event);
       if (!habs) break;
       await storeBalanceChanges(habs);
       break;
     }
     case events.predictionMarkets.globalDisputeStarted.name: {
-      await globalDisputeStarted(store, block, event);
+      await mappings.predictionMarkets.globalDisputeStarted(store, block, event);
       break;
     }
     case events.predictionMarkets.marketApproved.name: {
-      await marketApproved(store, block, event);
+      await mappings.predictionMarkets.marketApproved(store, block, event);
       break;
     }
     case events.predictionMarkets.marketClosed.name: {
-      await marketClosed(store, block, event);
+      await mappings.predictionMarkets.marketClosed(store, block, event);
       break;
     }
     case events.predictionMarkets.marketCreated.name: {
-      await marketCreated(store, block, event);
+      await mappings.predictionMarkets.marketCreated(store, block, event);
       break;
     }
     case events.predictionMarkets.marketDestroyed.name: {
-      await marketDestroyed(store, block, event);
+      await mappings.predictionMarkets.marketDestroyed(store, block, event);
       break;
     }
     case events.predictionMarkets.marketDisputed.name: {
-      await marketDisputed(store, block, event);
+      await mappings.predictionMarkets.marketDisputed(store, block, event);
       break;
     }
     case events.predictionMarkets.marketExpired.name: {
-      await marketExpired(store, block, event);
+      await mappings.predictionMarkets.marketExpired(store, block, event);
       break;
     }
     case events.predictionMarkets.marketInsufficientSubsidy.name: {
-      await marketInsufficientSubsidy(store, block, event);
+      await mappings.predictionMarkets.marketInsufficientSubsidy(store, block, event);
       break;
     }
     case events.predictionMarkets.marketRejected.name: {
-      await marketRejected(store, block, event);
+      await mappings.predictionMarkets.marketRejected(store, block, event);
       break;
     }
     case events.predictionMarkets.marketReported.name: {
-      await marketReported(store, block, event);
+      await mappings.predictionMarkets.marketReported(store, block, event);
       break;
     }
     case events.predictionMarkets.marketResolved.name: {
       await saveAccounts(store);
-      await marketResolved(store, block, event);
+      await mappings.predictionMarkets.marketResolved(store, block, event);
       break;
     }
     case events.predictionMarkets.marketStartedWithSubsidy.name: {
-      await marketStartedWithSubsidy(store, block, event);
+      await mappings.predictionMarkets.marketStartedWithSubsidy(store, block, event);
       break;
     }
     case events.predictionMarkets.soldCompleteSet.name: {
-      const habs = await soldCompleteSet(store, block, event);
+      const habs = await mappings.predictionMarkets.soldCompleteSet(store, block, event);
       if (!habs) break;
       await storeBalanceChanges(habs);
       break;
     }
     case events.predictionMarkets.tokensRedeemed.name: {
-      const hab = await tokensRedeemed(block, event);
+      const hab = await mappings.predictionMarkets.tokensRedeemed(block, event);
       await storeBalanceChanges([hab]);
       break;
     }
@@ -487,7 +430,7 @@ const mapPredictionMarkets = async (store: Store, block: Block, event: Event) =>
 const mapStyx = async (store: Store, block: Block, event: Event) => {
   switch (event.name) {
     case events.styx.accountCrossed.name:
-      await accountCrossed(store, block, event);
+      await mappings.styx.accountCrossed(store, block, event);
       break;
   }
 };
@@ -496,14 +439,14 @@ const mapSwaps = async (store: Store, block: Block, event: Event) => {
   switch (event.name) {
     case events.swaps.arbitrageBuyBurn.name: {
       await saveAccounts(store);
-      const historicalAssets = await arbitrageBuyBurn(store, block, event);
+      const historicalAssets = await mappings.swaps.arbitrageBuyBurn(store, block, event);
       if (!historicalAssets) break;
       assetHistory.push(...historicalAssets);
       break;
     }
     case events.swaps.arbitrageMintSell.name: {
       await saveAccounts(store);
-      const historicalAssets = await arbitrageMintSell(store, block, event);
+      const historicalAssets = await mappings.swaps.arbitrageMintSell(store, block, event);
       if (!historicalAssets) break;
       assetHistory.push(...historicalAssets);
       break;
@@ -522,20 +465,20 @@ const mapSwaps = async (store: Store, block: Block, event: Event) => {
       break;
     }
     case events.swaps.poolActive.name: {
-      const hp = await poolActive(store, block, event);
+      const hp = await mappings.swaps.poolActive(store, block, event);
       if (!hp) break;
       poolHistory.push(hp);
       break;
     }
     case events.swaps.poolClosed.name: {
-      const hp = await poolClosed(store, block, event);
+      const hp = await mappings.swaps.poolClosed(store, block, event);
       if (!hp) break;
       poolHistory.push(hp);
       break;
     }
     case events.swaps.poolCreate.name: {
       await saveAccounts(store);
-      const res = await poolCreate(store, block, event);
+      const res = await mappings.swaps.poolCreate(store, block, event);
       if (!res) break;
       assetHistory.push(...res.historicalAssets);
       poolHistory.push(res.historicalPool);
@@ -543,7 +486,7 @@ const mapSwaps = async (store: Store, block: Block, event: Event) => {
     }
     case events.swaps.poolDestroyed.name: {
       await saveAccounts(store);
-      const res = await poolDestroyed(store, block, event);
+      const res = await mappings.swaps.poolDestroyed(store, block, event);
       if (!res) break;
       await storeBalanceChanges(res.historicalAccountBalances);
       assetHistory.push(...res.historicalAssets);
@@ -552,35 +495,35 @@ const mapSwaps = async (store: Store, block: Block, event: Event) => {
     }
     case events.swaps.poolExit.name: {
       await saveAccounts(store);
-      const historicalAssets = await poolExit(store, block, event);
+      const historicalAssets = await mappings.swaps.poolExit(store, block, event);
       if (!historicalAssets) break;
       assetHistory.push(...historicalAssets);
       break;
     }
     case events.swaps.poolExitWithExactAssetAmount.name: {
       await saveAccounts(store);
-      const historicalAssets = await poolExitWithExactAssetAmount(store, block, event);
+      const historicalAssets = await mappings.swaps.poolExitWithExactAssetAmount(store, block, event);
       if (!historicalAssets) break;
       assetHistory.push(...historicalAssets);
       break;
     }
     case events.swaps.poolJoin.name: {
       await saveAccounts(store);
-      const historicalAssets = await poolJoin(store, block, event);
+      const historicalAssets = await mappings.swaps.poolJoin(store, block, event);
       if (!historicalAssets) break;
       assetHistory.push(...historicalAssets);
       break;
     }
     case events.swaps.poolJoinWithExactAssetAmount.name: {
       await saveAccounts(store);
-      const historicalAssets = await poolJoinWithExactAssetAmount(store, block, event);
+      const historicalAssets = await mappings.swaps.poolJoinWithExactAssetAmount(store, block, event);
       if (!historicalAssets) break;
       assetHistory.push(...historicalAssets);
       break;
     }
     case events.swaps.swapExactAmountIn.name: {
       await saveAccounts(store);
-      const res = await swapExactAmountIn(store, block, event);
+      const res = await mappings.swaps.swapExactAmountIn(store, block, event);
       if (!res) break;
       assetHistory.push(...res.historicalAssets);
       swapHistory.push(res.historicalSwap);
@@ -589,7 +532,7 @@ const mapSwaps = async (store: Store, block: Block, event: Event) => {
     }
     case events.swaps.swapExactAmountOut.name: {
       await saveAccounts(store);
-      const res = await swapExactAmountOut(store, block, event);
+      const res = await mappings.swaps.swapExactAmountOut(store, block, event);
       if (!res) break;
       assetHistory.push(...res.historicalAssets);
       swapHistory.push(res.historicalSwap);
@@ -603,20 +546,20 @@ const mapSystem = async (store: Store, block: Block, event: Event) => {
   switch (event.name) {
     case events.system.extrinsicFailed.name: {
       if (block.height >= 588249) break;
-      const hab = await systemExtrinsicFailed(block, event);
+      const hab = await mappings.system.systemExtrinsicFailed(block, event);
       if (!hab) break;
       await storeBalanceChanges([hab]);
       break;
     }
     case events.system.extrinsicSuccess.name: {
       if (block.height >= 588249) break;
-      const hab = await systemExtrinsicSuccess(block, event);
+      const hab = await mappings.system.systemExtrinsicSuccess(block, event);
       if (!hab) break;
       await storeBalanceChanges([hab]);
       break;
     }
     case events.system.newAccount.name: {
-      await systemNewAccount(store, block, event);
+      await mappings.system.systemNewAccount(store, block, event);
       break;
     }
   }
@@ -626,26 +569,26 @@ const mapTokens = async (store: Store, block: Block, event: Event) => {
   switch (event.name) {
     case events.tokens.balanceSet.name: {
       await saveAccounts(store);
-      await tokensBalanceSet(store, block, event);
+      await mappings.tokens.tokensBalanceSet(store, block, event);
       break;
     }
     case events.tokens.deposited.name: {
-      const hab = await tokensDeposited(block, event);
+      const hab = await mappings.tokens.tokensDeposited(block, event);
       await storeBalanceChanges([hab]);
       break;
     }
     case events.tokens.reserved.name: {
-      const hab = await tokensReserved(block, event);
+      const hab = await mappings.tokens.tokensReserved(block, event);
       await storeBalanceChanges([hab]);
       break;
     }
     case events.tokens.transfer.name: {
-      const habs = await tokensTransfer(block, event);
+      const habs = await mappings.tokens.tokensTransfer(block, event);
       await storeBalanceChanges(habs);
       break;
     }
     case events.tokens.withdrawn.name: {
-      const hab = await tokensWithdrawn(block, event);
+      const hab = await mappings.tokens.tokensWithdrawn(block, event);
       await storeBalanceChanges([hab]);
       break;
     }
