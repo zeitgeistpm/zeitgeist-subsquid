@@ -23,6 +23,9 @@
         "Withdraw"
       ]
     },
+    "Court": {
+      "events": ["MintedInCourt"]
+    },
     "Currency": {
       "events": ["Deposited", "Transferred", "Withdrawn"]
     },

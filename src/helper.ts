@@ -30,6 +30,7 @@ export enum Pallet {
   AssetTxPayment = 'AssetTxPayment',
   Authorized = 'Authorized',
   Balances = 'Balances',
+  Court = 'Court',
   Currency = 'Currency',
   NeoSwaps = 'NeoSwaps',
   ParachainStaking = 'ParachainStaking',

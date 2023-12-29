@@ -50,6 +50,7 @@ export const processor = new SubstrateBatchProcessor()
       events.balances.transfer.name,
       events.balances.unreserved.name,
       events.balances.withdraw.name,
+      events.court.mintedInCourt.name,
       events.currency.deposited.name,
       events.currency.transferred.name,
       events.currency.withdrawn.name,
@@ -78,8 +79,8 @@ export const processor = new SubstrateBatchProcessor()
       events.styx.accountCrossed.name,
       events.swaps.arbitrageBuyBurn.name,
       events.swaps.arbitrageMintSell.name,
-      events.swaps.arbitrageBuyBurn.name,
       events.swaps.marketCreatorFeesPaid.name,
+      events.swaps.poolActive.name,
       events.swaps.poolClosed.name,
       events.swaps.poolCreate.name,
       events.swaps.poolDestroyed.name,
@@ -159,6 +160,9 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           break;
         case Pallet.Balances:
           await mapBalances(ctx.store, block.header, event);
+          break;
+        case Pallet.Court:
+          await mapCourt(event);
           break;
         case Pallet.Currency:
           await mapCurrency(block.header, event);
@@ -260,6 +264,19 @@ const mapBalances = async (store: Store, block: Block, event: Event) => {
       await storeBalanceChanges([hab]);
       break;
     }
+  }
+};
+
+const mapCourt = async (event: Event) => {
+  switch (event.name) {
+    case events.court.mintedInCourt.name:
+      const hab = balanceHistory.pop();
+      if (hab && hab.event === 'Deposit') {
+        hab.id = event.id + hab.id.slice(-6);
+        hab.event = event.name.split('.')[1];
+        balanceHistory.push(hab);
+      }
+      break;
   }
 };
 
