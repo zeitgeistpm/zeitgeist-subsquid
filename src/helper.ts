@@ -8,6 +8,7 @@ import { MarketType, Asset } from './types/v51';
 import { Cache, IPFS, Tools } from './util';
 import { Block, Extrinsic as _Extrinsic } from './processor';
 
+export const EPOCH_TIME = new Date('1970-01-01T00:00:00.000Z');
 export const TEN_MINUTES = 10 * 60 * 1000;
 export const TREASURY_ACCOUNT = 'dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ';
 

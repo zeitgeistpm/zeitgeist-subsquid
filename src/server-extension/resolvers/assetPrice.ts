@@ -1,9 +1,9 @@
 import { Arg, Field, ObjectType, Query, Resolver, registerEnumType } from 'type-graphql';
 import { EntityManager } from 'typeorm';
 import axios from 'axios';
-import { CacheHint, EPOCH_TIME, TEN_MINUTES } from '../../mappings/helper';
-import { Cache } from '../../mappings/util';
 import { HistoricalMarket } from '../../model';
+import { CacheHint, EPOCH_TIME, TEN_MINUTES } from '../../helper';
+import { Cache } from '../../util';
 
 @ObjectType()
 export class AssetPrice {
