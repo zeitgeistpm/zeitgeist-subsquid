@@ -61,7 +61,6 @@ export const processor = new SubstrateBatchProcessor()
       events.neoSwaps.poolDeployed.name,
       events.neoSwaps.sellExecuted.name,
       events.parachainStaking.rewarded.name,
-      events.predictionMarkets.boughtCompleteSet.name,
       events.predictionMarkets.globalDisputeStarted.name,
       events.predictionMarkets.marketApproved.name,
       events.predictionMarkets.marketClosed.name,
@@ -74,7 +73,6 @@ export const processor = new SubstrateBatchProcessor()
       events.predictionMarkets.marketReported.name,
       events.predictionMarkets.marketResolved.name,
       events.predictionMarkets.marketStartedWithSubsidy.name,
-      events.predictionMarkets.soldCompleteSet.name,
       events.predictionMarkets.tokensRedeemed.name,
       events.styx.accountCrossed.name,
       events.swaps.arbitrageBuyBurn.name,
@@ -99,6 +97,12 @@ export const processor = new SubstrateBatchProcessor()
     ],
     call: true,
     extrinsic: true,
+  })
+  .addEvent({
+    name: [events.predictionMarkets.boughtCompleteSet.name, events.predictionMarkets.soldCompleteSet.name],
+    call: true,
+    extrinsic: true,
+    stack: true,
   })
   .addEvent({
     name: [events.system.extrinsicFailed.name, events.system.extrinsicSuccess.name],

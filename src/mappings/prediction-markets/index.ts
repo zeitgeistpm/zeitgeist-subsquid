@@ -25,6 +25,7 @@ import {
   OutcomeReport,
   ScoringRule,
 } from '../../model';
+import { BUY_COMPLETE_SET, SELL_COMPLETE_SET } from '../../consts';
 import {
   Pallet,
   _Asset,
@@ -76,15 +77,15 @@ export const boughtCompleteSet = async (
       const amount = event.extrinsic.call.args.amount.toString();
       amt = BigInt(amount);
     } else if (event.extrinsic.call.args.calls) {
-      for (let ext of event.extrinsic.call.args.calls as Array<{
+      for (let call of event.extrinsic.call.args.calls as Array<{
         __kind: string;
         value: { __kind: string; amount: string; marketId: string };
       }>) {
         const {
           __kind: prefix,
           value: { __kind: name, amount: amount, marketId: id },
-        } = ext;
-        if (prefix == Pallet.PredictionMarkets && name == 'buy_complete_set' && +id == marketId) {
+        } = call;
+        if (prefix === Pallet.PredictionMarkets && name === BUY_COMPLETE_SET && +id === marketId) {
           amt = BigInt(amount);
           break;
         }
@@ -846,15 +847,15 @@ export const soldCompleteSet = async (
       const amount = event.extrinsic.call.args.amount.toString();
       amt = BigInt(amount);
     } else if (event.extrinsic.call.args.calls) {
-      for (let ext of event.extrinsic.call.args.calls as Array<{
+      for (let call of event.extrinsic.call.args.calls as Array<{
         __kind: string;
         value: { __kind: string; amount: string; marketId: string };
       }>) {
         const {
           __kind: prefix,
           value: { __kind: name, amount: amount, marketId: id },
-        } = ext;
-        if (prefix == Pallet.PredictionMarkets && name == 'sell_complete_set' && +id == marketId) {
+        } = call;
+        if (prefix === Pallet.PredictionMarkets && name === SELL_COMPLETE_SET && +id === marketId) {
           amt = BigInt(amount);
           break;
         }
