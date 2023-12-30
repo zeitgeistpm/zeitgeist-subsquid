@@ -17,7 +17,7 @@ import {
   HistoricalPool,
   HistoricalSwap,
 } from './model';
-import { destroyMarkets, resolveMarkets, unreserveBalances } from './postHooks';
+import * as postHooks from './post-hooks';
 import { calls, events } from './types';
 import { Pallet, initBalance } from './helper';
 
@@ -90,8 +90,6 @@ export const processor = new SubstrateBatchProcessor()
       events.swaps.poolJoinWithExactAssetAmount.name,
       events.swaps.swapExactAmountIn.name,
       events.swaps.swapExactAmountOut.name,
-      events.system.extrinsicFailed.name,
-      events.system.extrinsicSuccess.name,
       events.system.newAccount.name,
       events.tokens.balanceSet.name,
       events.tokens.deposited.name,
@@ -99,6 +97,11 @@ export const processor = new SubstrateBatchProcessor()
       events.tokens.transfer.name,
       events.tokens.withdrawn.name,
     ],
+    call: true,
+    extrinsic: true,
+  })
+  .addEvent({
+    name: [events.system.extrinsicFailed.name, events.system.extrinsicSuccess.name],
     call: true,
     extrinsic: true,
   })
@@ -192,11 +195,11 @@ processor.run(new TypeormDatabase(), async (ctx) => {
     }
     if (process.env.WS_NODE_URL?.includes(`bs`) && block.header.height === 579140) {
       await saveAccounts(ctx.store);
-      const historicalAccountBalances = await unreserveBalances();
+      const historicalAccountBalances = await postHooks.unreserveBalances();
       await storeBalanceChanges(historicalAccountBalances);
-      const historicalAssets = await resolveMarkets(ctx.store);
+      const historicalAssets = await postHooks.resolveMarkets(ctx.store);
       assetHistory.push(...historicalAssets);
-      await destroyMarkets(ctx.store);
+      await postHooks.destroyMarkets(ctx.store);
     }
   }
   await saveAccounts(ctx.store);
