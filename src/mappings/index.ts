@@ -1,10 +1,10 @@
-export * as assetTxPayment from './assetTxPayment';
+export * as assetTxPayment from './asset-tx-payment';
 export * as authorized from './authorized';
 export * as balances from './balances';
 export * as currency from './currency';
-export * as neoSwaps from './neoSwaps';
-export * as parachainStaking from './parachainStaking';
-export * as predictionMarkets from './predictionMarkets';
+export * as neoSwaps from './neo-swaps';
+export * as parachainStaking from './parachain-staking';
+export * as predictionMarkets from './prediction-markets';
 export * as styx from './styx';
 export * as swaps from './swaps';
 export * as system from './system';
