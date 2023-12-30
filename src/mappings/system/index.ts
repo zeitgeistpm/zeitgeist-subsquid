@@ -1,7 +1,7 @@
 import { Store } from '@subsquid/typeorm-store';
 import * as ss58 from '@subsquid/ss58';
 import { Account, AccountBalance, HistoricalAccountBalance } from '../../model';
-import { _Asset, extrinsicFromEvent, getFees } from '../../helper';
+import { Pallet, _Asset, extrinsicFromEvent, getFees } from '../../helper';
 import { Block, Event } from '../../processor';
 import { decodeExtrinsicFailedEvent, decodeExtrinsicSuccessEvent, decodeNewAccountEvent } from './decode';
 
@@ -36,9 +36,7 @@ export const systemExtrinsicSuccess = async (
     !event.extrinsic ||
     !event.extrinsic.signature ||
     !event.extrinsic.signature.address ||
-    !event.extrinsic.call ||
-    event.extrinsic.call.name.split('.')[0] === 'Sudo' ||
-    event.extrinsic.call.name.split('.')[0] === 'ParachainSystem'
+    (event.extrinsic.call && event.extrinsic.call.name.split('.')[0] === (Pallet.Sudo || Pallet.ParachainSystem))
   )
     return;
   const accountId = ss58.encode({ prefix: 73, bytes: (event.extrinsic.signature.address as any).value });
