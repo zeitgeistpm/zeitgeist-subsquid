@@ -198,11 +198,12 @@ processor.run(new TypeormDatabase(), async (ctx) => {
       }
     }
     if (process.env.WS_NODE_URL?.includes(`bs`)) {
-      if (block.header.height === 211391) {
-        await saveAccounts(ctx.store);
+      if (block.header.height === 0) {
         const historicalAccountBalances = await postHooks.unreserveBalances();
         await storeBalanceChanges(historicalAccountBalances);
-        const historicalAssets = await postHooks.resolveMarkets(ctx.store);
+      } else if (block.header.height < 211391) {
+        await saveAccounts(ctx.store);
+        const historicalAssets = await postHooks.resolveMarkets(ctx.store, block.header);
         assetHistory.push(...historicalAssets);
       } else if (block.header.height === 579140) {
         await saveAccounts(ctx.store);

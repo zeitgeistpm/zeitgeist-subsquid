@@ -11,108 +11,113 @@ import {
   MarketEvent,
   MarketStatus,
 } from '../model';
+import { Block } from '../processor';
 import { ResolvedMarket } from '.';
 
-export const resolveMarkets = async (store: Store): Promise<HistoricalAsset[]> => {
+export const resolveMarkets = async (store: Store, block: Block): Promise<HistoricalAsset[]> => {
   const eventName = 'PostHooks.MarketResolved';
   const historicalAssets: HistoricalAsset[] = [];
 
   await Promise.all(
-    resolvedMarkets.map(async (rm: ResolvedMarket) => {
-      const market = await store.get(Market, { where: { marketId: rm.marketId } });
-      if (!market) return;
-      market.resolvedOutcome = rm.resolvedOutcome;
-      market.status = MarketStatus.Resolved;
-      console.log(`[${eventName}] Saving market: ${JSON.stringify(market, null, 2)}`);
-      await store.save<Market>(market);
+    resolvedMarkets
+      .filter((rm) => {
+        return rm.blockHeight === block.height;
+      })
+      .map(async (rm) => {
+        const market = await store.get(Market, { where: { marketId: rm.marketId } });
+        if (!market) return;
+        market.resolvedOutcome = rm.resolvedOutcome;
+        market.status = MarketStatus.Resolved;
+        console.log(`[${eventName}] Saving market: ${JSON.stringify(market, null, 2)}`);
+        await store.save<Market>(market);
 
-      const hm = new HistoricalMarket({
-        blockNumber: rm.blockHeight,
-        event: MarketEvent.MarketResolved,
-        id: rm.eventId + '-' + rm.marketId,
-        market,
-        resolvedOutcome: market.resolvedOutcome,
-        status: market.status,
-        timestamp: new Date(rm.blockTimestamp),
-      });
-      console.log(`[${eventName}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
-      await store.save<HistoricalMarket>(hm);
+        const hm = new HistoricalMarket({
+          blockNumber: rm.blockHeight,
+          event: MarketEvent.MarketResolved,
+          id: rm.eventId + '-' + rm.marketId,
+          market,
+          resolvedOutcome: market.resolvedOutcome,
+          status: market.status,
+          timestamp: new Date(rm.blockTimestamp),
+        });
+        console.log(`[${eventName}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
+        await store.save<HistoricalMarket>(hm);
 
-      await Promise.all(
-        market.outcomeAssets.map(async (outcomeAsset, i) => {
-          if (market.marketType.categorical && i !== +market.resolvedOutcome!) {
-            let abs = await store.find(AccountBalance, {
-              where: { assetId: outcomeAsset! },
-            });
-            abs.map(async (ab) => {
-              const accLookupKey = ab.id.substring(0, ab.id.indexOf('-'));
-              let acc = await store.get(Account, {
-                where: { id: Like(`%${accLookupKey}%`) },
+        await Promise.all(
+          market.outcomeAssets.map(async (outcomeAsset, i) => {
+            if (market.marketType.categorical && i !== +market.resolvedOutcome!) {
+              let abs = await store.find(AccountBalance, {
+                where: { assetId: outcomeAsset! },
               });
-              if (!acc || ab.balance === BigInt(0)) return;
-              const oldBalance = ab.balance;
-              const newBalance = BigInt(0);
-              ab.balance = newBalance;
-              console.log(`[${eventName}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-              await store.save<AccountBalance>(ab);
+              abs.map(async (ab) => {
+                const accLookupKey = ab.id.substring(0, ab.id.indexOf('-'));
+                let acc = await store.get(Account, {
+                  where: { id: Like(`%${accLookupKey}%`) },
+                });
+                if (!acc || ab.balance === BigInt(0)) return;
+                const oldBalance = ab.balance;
+                const newBalance = BigInt(0);
+                ab.balance = newBalance;
+                console.log(`[${eventName}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
+                await store.save<AccountBalance>(ab);
 
-              const hab = new HistoricalAccountBalance({
-                accountId: acc.accountId,
-                assetId: ab.assetId,
-                blockNumber: rm.blockHeight,
-                dBalance: newBalance - oldBalance,
-                event: eventName.split('.')[1],
-                id: rm.eventId + '-' + market.marketId + i + '-' + acc.accountId.slice(-5),
-                timestamp: new Date(rm.blockTimestamp),
+                const hab = new HistoricalAccountBalance({
+                  accountId: acc.accountId,
+                  assetId: ab.assetId,
+                  blockNumber: rm.blockHeight,
+                  dBalance: newBalance - oldBalance,
+                  event: eventName.split('.')[1],
+                  id: rm.eventId + '-' + market.marketId + i + '-' + acc.accountId.slice(-5),
+                  timestamp: new Date(rm.blockTimestamp),
+                });
+                console.log(`[${eventName}] Saving historical account balance: ${JSON.stringify(ab, null, 2)}`);
+                await store.save<HistoricalAccountBalance>(hab);
               });
-              console.log(`[${eventName}] Saving historical account balance: ${JSON.stringify(ab, null, 2)}`);
-              await store.save<HistoricalAccountBalance>(hab);
-            });
-          }
-
-          let asset = await store.get(Asset, {
-            where: { assetId: market.outcomeAssets[i]! },
-          });
-          if (!asset) return;
-          const oldPrice = asset.price;
-          const oldAssetQty = asset.amountInPool;
-          let newPrice = oldPrice;
-          let newAssetQty = oldAssetQty;
-
-          if (market.marketType.scalar) {
-            const lowerBound = Number(market.marketType.scalar[0]);
-            const upperBound = Number(market.marketType.scalar[1]);
-            if (asset.assetId.includes('Long')) {
-              newPrice = (+market.resolvedOutcome! - lowerBound) / (upperBound - lowerBound);
-            } else if (asset.assetId.includes('Short')) {
-              newPrice = (upperBound - +market.resolvedOutcome!) / (upperBound - lowerBound);
             }
-          } else {
-            newPrice = i == +market.resolvedOutcome! ? 1 : 0;
-            newAssetQty = i == +market.resolvedOutcome! ? oldAssetQty : BigInt(0);
-          }
-          asset.price = newPrice;
-          asset.amountInPool = newAssetQty;
-          console.log(`[${eventName}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
-          await store.save<Asset>(asset);
 
-          const ha = new HistoricalAsset({
-            accountId: null,
-            assetId: asset.assetId,
-            baseAssetTraded: null,
-            blockNumber: rm.blockHeight,
-            dAmountInPool: newAssetQty - oldAssetQty,
-            dPrice: newPrice - oldPrice,
-            event: eventName.split('.')[1],
-            id: rm.eventId + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
-            newAmountInPool: newAssetQty,
-            newPrice: newPrice,
-            timestamp: new Date(rm.blockTimestamp),
-          });
-          historicalAssets.push(ha);
-        })
-      );
-    })
+            let asset = await store.get(Asset, {
+              where: { assetId: market.outcomeAssets[i]! },
+            });
+            if (!asset) return;
+            const oldPrice = asset.price;
+            const oldAssetQty = asset.amountInPool;
+            let newPrice = oldPrice;
+            let newAssetQty = oldAssetQty;
+
+            if (market.marketType.scalar) {
+              const lowerBound = Number(market.marketType.scalar[0]);
+              const upperBound = Number(market.marketType.scalar[1]);
+              if (asset.assetId.includes('Long')) {
+                newPrice = (+market.resolvedOutcome! - lowerBound) / (upperBound - lowerBound);
+              } else if (asset.assetId.includes('Short')) {
+                newPrice = (upperBound - +market.resolvedOutcome!) / (upperBound - lowerBound);
+              }
+            } else {
+              newPrice = i == +market.resolvedOutcome! ? 1 : 0;
+              newAssetQty = i == +market.resolvedOutcome! ? oldAssetQty : BigInt(0);
+            }
+            asset.price = newPrice;
+            asset.amountInPool = newAssetQty;
+            console.log(`[${eventName}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
+            await store.save<Asset>(asset);
+
+            const ha = new HistoricalAsset({
+              accountId: null,
+              assetId: asset.assetId,
+              baseAssetTraded: null,
+              blockNumber: rm.blockHeight,
+              dAmountInPool: newAssetQty - oldAssetQty,
+              dPrice: newPrice - oldPrice,
+              event: eventName.split('.')[1],
+              id: rm.eventId + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+              newAmountInPool: newAssetQty,
+              newPrice: newPrice,
+              timestamp: new Date(rm.blockTimestamp),
+            });
+            historicalAssets.push(ha);
+          })
+        );
+      })
   );
   return historicalAssets;
 };
