@@ -29,7 +29,7 @@ export const currencyTransferred = async (
 
   const fromHab = new HistoricalAccountBalance({
     accountId: fromAccountId,
-    assetId: _Asset.Ztg,
+    assetId,
     blockNumber: block.height,
     dBalance: -amount,
     event: event.name.split('.')[1],
@@ -40,7 +40,7 @@ export const currencyTransferred = async (
 
   const toHab = new HistoricalAccountBalance({
     accountId: toAccountId,
-    assetId: _Asset.Ztg,
+    assetId,
     blockNumber: block.height,
     dBalance: amount,
     event: event.name.split('.')[1],
