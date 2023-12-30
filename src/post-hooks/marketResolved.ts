@@ -11,17 +11,16 @@ import {
   MarketEvent,
   MarketStatus,
 } from '../model';
-import { Block } from '../processor';
 import { ResolvedMarket } from '.';
 
-export const resolveMarkets = async (store: Store, block: Block): Promise<HistoricalAsset[]> => {
+export const resolveMarkets = async (store: Store, blockHeight: number): Promise<HistoricalAsset[]> => {
   const eventName = 'PostHooks.MarketResolved';
   const historicalAssets: HistoricalAsset[] = [];
 
   await Promise.all(
     resolvedMarkets
       .filter((rm) => {
-        return rm.blockHeight === block.height;
+        return rm.blockHeight === blockHeight;
       })
       .map(async (rm) => {
         const market = await store.get(Market, { where: { marketId: rm.marketId } });

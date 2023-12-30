@@ -201,9 +201,9 @@ processor.run(new TypeormDatabase(), async (ctx) => {
       if (block.header.height === 0) {
         const historicalAccountBalances = await postHooks.unreserveBalances();
         await storeBalanceChanges(historicalAccountBalances);
-      } else if (block.header.height < 211391) {
+      } else if (block.header.height <= 211391) {
         await saveAccounts(ctx.store);
-        const historicalAssets = await postHooks.resolveMarkets(ctx.store, block.header);
+        const historicalAssets = await postHooks.resolveMarkets(ctx.store, block.header.height);
         assetHistory.push(...historicalAssets);
       } else if (block.header.height === 579140) {
         await saveAccounts(ctx.store);
