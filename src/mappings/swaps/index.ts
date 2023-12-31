@@ -17,15 +17,8 @@ import {
   PoolStatus,
   Weight,
 } from '../../model';
-import {
-  Pallet,
-  _Asset,
-  computeSwapSpotPrice,
-  extrinsicFromEvent,
-  formatAssetId,
-  isBaseAsset,
-  mergeByAssetId,
-} from '../../helper';
+import { Pallet, SWAP_EXACT_AMOUNT_IN, SWAP_EXACT_AMOUNT_OUT } from '../../consts';
+import { computeSwapSpotPrice, extrinsicFromEvent, formatAssetId, isBaseAsset, mergeByAssetId } from '../../helper';
 import { Block, Call, Event } from '../../processor';
 import { Tools } from '../../util';
 import {
@@ -943,10 +936,10 @@ export const swapExactAmountIn = async (
             value: { __kind, assetIn, assetOut, maxPrice, poolId },
           } = ext;
           if (
-            prefix == Pallet.Swaps &&
-            __kind == 'swap_exact_amount_in' &&
-            poolId == swapEvent.cpep.poolId.toString() &&
-            maxPrice == swapEvent.maxPrice
+            prefix === Pallet.Swaps &&
+            __kind === SWAP_EXACT_AMOUNT_IN &&
+            poolId === swapEvent.cpep.poolId.toString() &&
+            maxPrice === swapEvent.maxPrice
           ) {
             assetBought = assetOut;
             assetSold = assetIn;
@@ -1086,10 +1079,10 @@ export const swapExactAmountOut = async (
             value: { __kind, assetIn, assetOut, maxPrice, poolId },
           } = ext;
           if (
-            prefix == Pallet.Swaps &&
-            __kind == 'swap_exact_amount_out' &&
-            poolId == swapEvent.cpep.poolId.toString() &&
-            maxPrice == swapEvent.maxPrice
+            prefix === Pallet.Swaps &&
+            __kind === SWAP_EXACT_AMOUNT_OUT &&
+            poolId === swapEvent.cpep.poolId.toString() &&
+            maxPrice === swapEvent.maxPrice
           ) {
             assetBought = assetOut;
             assetSold = assetIn;

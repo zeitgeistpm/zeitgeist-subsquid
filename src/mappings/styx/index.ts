@@ -1,6 +1,7 @@
 import { Store } from '@subsquid/typeorm-store';
 import { AccountBalance, HistoricalAccountBalance } from '../../model';
-import { _Asset, extrinsicFromEvent } from '../../helper';
+import { _Asset } from '../../consts';
+import { extrinsicFromEvent } from '../../helper';
 import { Block, Event } from '../../processor';
 import { decodeAccountCrossedEvent } from './decode';
 

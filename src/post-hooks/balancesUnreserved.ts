@@ -1,5 +1,5 @@
 import { HistoricalAccountBalance } from '../model';
-import { _Asset } from '../helper';
+import { _Asset } from '../consts';
 import { UnreservedBalance } from '.';
 
 export const unreserveBalances = async (blockHeight: number): Promise<HistoricalAccountBalance[]> => {

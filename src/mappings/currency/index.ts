@@ -1,5 +1,6 @@
 import { HistoricalAccountBalance } from '../../model';
-import { _Asset, extrinsicFromEvent } from '../../helper';
+import { _Asset } from '../../consts';
+import { extrinsicFromEvent } from '../../helper';
 import { Block, Event } from '../../processor';
 import { decodeDepositedEvent, decodeTransferredEvent, decodeWithdrawnEvent } from './decode';
 

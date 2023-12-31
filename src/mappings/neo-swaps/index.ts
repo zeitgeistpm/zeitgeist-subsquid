@@ -11,7 +11,7 @@ import {
   MarketEvent,
   NeoPool,
 } from '../../model';
-import { _Asset, computeNeoSwapSpotPrice, extrinsicFromEvent, isBaseAsset } from '../../helper';
+import { computeNeoSwapSpotPrice, extrinsicFromEvent, isBaseAsset } from '../../helper';
 import { Block, Event } from '../../processor';
 import {
   decodeBuyExecutedEvent,

@@ -25,16 +25,8 @@ import {
   OutcomeReport,
   ScoringRule,
 } from '../../model';
-import { BUY_COMPLETE_SET, SELL_COMPLETE_SET } from '../../consts';
-import {
-  Pallet,
-  _Asset,
-  createAssetsForMarket,
-  decodeMarketMetadata,
-  extrinsicFromEvent,
-  formatAssetId,
-  rescale,
-} from '../../helper';
+import { BUY_COMPLETE_SET, Pallet, SELL_COMPLETE_SET, _Asset } from '../../consts';
+import { createAssetsForMarket, decodeMarketMetadata, extrinsicFromEvent, formatAssetId, rescale } from '../../helper';
 import { Block, Call, Event } from '../../processor';
 import { Tools } from '../../util';
 import { decodeMarketsStorage } from '../market-commons/decode';

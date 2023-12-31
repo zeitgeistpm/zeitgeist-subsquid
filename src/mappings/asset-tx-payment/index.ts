@@ -1,6 +1,7 @@
 import { HistoricalAccountBalance } from '../../model';
 import { Asset_ForeignAsset } from '../../types/v49';
-import { TREASURY_ACCOUNT, _Asset, extrinsicFromEvent, formatAssetId } from '../../helper';
+import { TREASURY_ACCOUNT, _Asset } from '../../consts';
+import { extrinsicFromEvent, formatAssetId } from '../../helper';
 import { Block, Event } from '../../processor';
 import { decodeMetadataStorage } from '../asset-registry/decode';
 import { decodeAssetTxFeePaidEvent } from './decode';

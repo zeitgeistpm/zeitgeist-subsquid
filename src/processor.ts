@@ -19,7 +19,8 @@ import {
 } from './model';
 import * as postHooks from './post-hooks';
 import { calls, events } from './types';
-import { Pallet, initBalance } from './helper';
+import { Pallet } from './consts';
+import { initBalance } from './helper';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -86,8 +87,6 @@ export const processor = new SubstrateBatchProcessor()
       events.swaps.poolExitWithExactAssetAmount.name,
       events.swaps.poolJoin.name,
       events.swaps.poolJoinWithExactAssetAmount.name,
-      events.swaps.swapExactAmountIn.name,
-      events.swaps.swapExactAmountOut.name,
       events.system.newAccount.name,
       events.tokens.balanceSet.name,
       events.tokens.deposited.name,
@@ -99,7 +98,12 @@ export const processor = new SubstrateBatchProcessor()
     extrinsic: true,
   })
   .addEvent({
-    name: [events.predictionMarkets.boughtCompleteSet.name, events.predictionMarkets.soldCompleteSet.name],
+    name: [
+      events.predictionMarkets.boughtCompleteSet.name,
+      events.predictionMarkets.soldCompleteSet.name,
+      events.swaps.swapExactAmountIn.name,
+      events.swaps.swapExactAmountOut.name,
+    ],
     call: true,
     extrinsic: true,
     stack: true,

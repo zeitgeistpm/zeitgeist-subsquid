@@ -1,7 +1,8 @@
 import { Store } from '@subsquid/typeorm-store';
 import * as ss58 from '@subsquid/ss58';
 import { Account, AccountBalance, HistoricalAccountBalance } from '../../model';
-import { Pallet, _Asset, extrinsicFromEvent, getFees } from '../../helper';
+import { Pallet, _Asset } from '../../consts';
+import { extrinsicFromEvent, getFees } from '../../helper';
 import { Block, Event } from '../../processor';
 import { decodeExtrinsicFailedEvent, decodeExtrinsicSuccessEvent, decodeNewAccountEvent } from './decode';
 

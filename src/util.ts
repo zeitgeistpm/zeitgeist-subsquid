@@ -5,7 +5,7 @@ import ipfsClient from 'ipfs-http-client';
 import { concat, toString } from 'uint8arrays';
 import CID from 'cids';
 import all from 'it-all';
-import { CacheHint } from './helper';
+import { CacheHint } from './consts';
 
 export class Cache {
   private static _instance: Cache;
