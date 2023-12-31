@@ -197,23 +197,26 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           break;
       }
     }
-    if (process.env.WS_NODE_URL?.includes(`bs`)) {
-      if (block.header.height === 0) {
-        const historicalAccountBalances = await postHooks.unreserveBalances();
-        await storeBalanceChanges(historicalAccountBalances);
-      } else if (block.header.height <= 211391) {
-        await saveAccounts(ctx.store);
-        const historicalAssets = await postHooks.resolveMarkets(ctx.store, block.header.height);
-        assetHistory.push(...historicalAssets);
-      } else if (block.header.height === 579140) {
-        await saveAccounts(ctx.store);
-        await postHooks.destroyMarkets(ctx.store);
-      }
+    if (process.env.WS_NODE_URL?.includes(`bs`) && block.header.height <= 579140) {
+      await handlePostHooks(ctx.store, block.header.height);
     }
   }
   await saveAccounts(ctx.store);
   await saveHistory(ctx.store);
 });
+
+const handlePostHooks = async (store: Store, blockHeight: number) => {
+  if (blockHeight >= 35683 && blockHeight <= 211391) {
+    await saveAccounts(store);
+    const historicalAccountBalances = await postHooks.unreserveBalances(blockHeight);
+    await storeBalanceChanges(historicalAccountBalances);
+    const historicalAssets = await postHooks.resolveMarkets(store, blockHeight);
+    assetHistory.push(...historicalAssets);
+  } else if (blockHeight === 579140) {
+    await saveAccounts(store);
+    await postHooks.destroyMarkets(store);
+  }
+};
 
 const mapAssetTxPayment = async (block: Block, event: Event) => {
   switch (event.name) {

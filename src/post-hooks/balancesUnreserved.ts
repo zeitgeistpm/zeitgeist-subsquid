@@ -2,22 +2,26 @@ import { HistoricalAccountBalance } from '../model';
 import { _Asset } from '../helper';
 import { UnreservedBalance } from '.';
 
-export const unreserveBalances = async (): Promise<HistoricalAccountBalance[]> => {
+export const unreserveBalances = async (blockHeight: number): Promise<HistoricalAccountBalance[]> => {
   const habs: HistoricalAccountBalance[] = [];
 
   await Promise.all(
-    unreservedBalances.map(async (ub: UnreservedBalance) => {
-      const hab = new HistoricalAccountBalance({
-        accountId: ub.accountId,
-        assetId: _Asset.Ztg,
-        blockNumber: ub.blockHeight,
-        dBalance: ub.amount,
-        event: 'Unreserved',
-        id: ub.eventId + '-' + ub.accountId.slice(-5),
-        timestamp: new Date(ub.blockTimestamp),
-      });
-      habs.push(hab);
-    })
+    unreservedBalances
+      .filter((ub) => {
+        return ub.blockHeight === blockHeight;
+      })
+      .map(async (ub: UnreservedBalance) => {
+        const hab = new HistoricalAccountBalance({
+          accountId: ub.accountId,
+          assetId: _Asset.Ztg,
+          blockNumber: ub.blockHeight,
+          dBalance: ub.amount,
+          event: 'Unreserved',
+          id: ub.eventId + '-' + ub.accountId.slice(-5),
+          timestamp: new Date(ub.blockTimestamp),
+        });
+        habs.push(hab);
+      })
   );
   return habs;
 };
