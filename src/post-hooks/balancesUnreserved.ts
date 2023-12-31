@@ -49,13 +49,6 @@ const unreservedBalances: UnreservedBalance[] = [
     eventId: '0000155917-000000-3f61f',
   },
   {
-    accountId: 'dDykRtA8VyuVVtWTD5PWst3f33L1NMVKseQEji8e3B4ZCHrjK',
-    amount: BigInt(7 * 10 ** 10),
-    blockHeight: 168378,
-    blockTimestamp: '2021-11-02T08:49:18.097000Z',
-    eventId: '0000168378-000000-e544d',
-  },
-  {
     accountId: 'dE3EP2kkLee2E22JJr8kSEnXkQ1VyAoB8YnQsxgE5BFLMHGDj',
     amount: BigInt(7 * 10 ** 10),
     blockHeight: 168378,
