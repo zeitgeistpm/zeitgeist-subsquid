@@ -1,9 +1,9 @@
 import { Store } from '@subsquid/typeorm-store';
 import { HistoricalMarket, Market, MarketEvent, MarketReport, MarketStatus, OutcomeReport } from '../../model';
-import { Block, Event } from '../../processor';
+import { Event } from '../../processor';
 import { decodeAuthorityReportedEvent } from './decode';
 
-export const authorityReported = async (store: Store, block: Block, event: Event) => {
+export const authorityReported = async (store: Store, event: Event) => {
   const { marketId, outcome } = decodeAuthorityReportedEvent(event);
 
   const market = await store.get(Market, { where: { marketId: Number(marketId) } });
@@ -14,7 +14,7 @@ export const authorityReported = async (store: Store, block: Block, event: Event
     scalar: outcome.__kind == 'Scalar' ? outcome.value : null,
   });
   const mr = new MarketReport({
-    at: block.height,
+    at: event.block.height,
     by: null,
     outcome: ocr,
   });
@@ -24,7 +24,7 @@ export const authorityReported = async (store: Store, block: Block, event: Event
   await store.save<Market>(market);
 
   const hm = new HistoricalMarket({
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     by: null,
     event: MarketEvent.MarketReported,
     id: event.id + '-' + market.marketId,
@@ -32,7 +32,7 @@ export const authorityReported = async (store: Store, block: Block, event: Event
     outcome: ocr,
     resolvedOutcome: null,
     status: market.status,
-    timestamp: new Date(block.timestamp!),
+    timestamp: new Date(event.block.timestamp!),
   });
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
   await store.save<HistoricalMarket>(hm);

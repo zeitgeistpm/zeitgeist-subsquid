@@ -3,13 +3,10 @@ import * as ss58 from '@subsquid/ss58';
 import { Account, AccountBalance, HistoricalAccountBalance } from '../../model';
 import { Pallet, _Asset } from '../../consts';
 import { extrinsicFromEvent, getFees } from '../../helper';
-import { Block, Event } from '../../processor';
+import { Event } from '../../processor';
 import { decodeExtrinsicFailedEvent, decodeExtrinsicSuccessEvent, decodeNewAccountEvent } from './decode';
 
-export const systemExtrinsicFailed = async (
-  block: Block,
-  event: Event
-): Promise<HistoricalAccountBalance | undefined> => {
+export const systemExtrinsicFailed = async (event: Event): Promise<HistoricalAccountBalance | undefined> => {
   if (!event.extrinsic || !event.extrinsic.signature || !event.extrinsic.signature.address) return;
   const accountId = ss58.encode({ prefix: 73, bytes: (event.extrinsic.signature.address as any).value });
 
@@ -19,20 +16,17 @@ export const systemExtrinsicFailed = async (
   const hab = new HistoricalAccountBalance({
     accountId,
     assetId: _Asset.Ztg,
-    blockNumber: block.height,
-    dBalance: -(await getFees(block, event.extrinsic)),
+    blockNumber: event.block.height,
+    dBalance: -(await getFees(event.block, event.extrinsic)),
     event: event.name.split('.')[1],
     extrinsic: extrinsicFromEvent(event),
     id: event.id + '-' + accountId.slice(-5),
-    timestamp: new Date(block.timestamp!),
+    timestamp: new Date(event.block.timestamp!),
   });
   return hab;
 };
 
-export const systemExtrinsicSuccess = async (
-  block: Block,
-  event: Event
-): Promise<HistoricalAccountBalance | undefined> => {
+export const systemExtrinsicSuccess = async (event: Event): Promise<HistoricalAccountBalance | undefined> => {
   if (
     !event.extrinsic ||
     !event.extrinsic.signature ||
@@ -48,17 +42,17 @@ export const systemExtrinsicSuccess = async (
   const hab = new HistoricalAccountBalance({
     accountId,
     assetId: _Asset.Ztg,
-    blockNumber: block.height,
-    dBalance: -(await getFees(block, event.extrinsic)),
+    blockNumber: event.block.height,
+    dBalance: -(await getFees(event.block, event.extrinsic)),
     event: event.name.split('.')[1],
     extrinsic: extrinsicFromEvent(event),
     id: event.id + '-' + accountId.slice(-5),
-    timestamp: new Date(block.timestamp!),
+    timestamp: new Date(event.block.timestamp!),
   });
   return hab;
 };
 
-export const systemNewAccount = async (store: Store, block: Block, event: Event) => {
+export const systemNewAccount = async (store: Store, event: Event) => {
   const { accountId } = decodeNewAccountEvent(event);
 
   const account = await store.get(Account, { where: { accountId } });
@@ -83,11 +77,11 @@ export const systemNewAccount = async (store: Store, block: Block, event: Event)
   const hab = new HistoricalAccountBalance({
     accountId,
     assetId: _Asset.Ztg,
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     dBalance: BigInt(0),
     event: event.name.split('.')[1],
     id: event.id + '-' + accountId.slice(-5),
-    timestamp: new Date(block.timestamp!),
+    timestamp: new Date(event.block.timestamp!),
   });
   console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
   await store.save<HistoricalAccountBalance>(hab);

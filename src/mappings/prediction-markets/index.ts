@@ -27,7 +27,7 @@ import {
 } from '../../model';
 import { BUY_COMPLETE_SET, Pallet, SELL_COMPLETE_SET, _Asset } from '../../consts';
 import { createAssetsForMarket, decodeMarketMetadata, extrinsicFromEvent, formatAssetId, rescale } from '../../helper';
-import { Block, Call, Event } from '../../processor';
+import { Call, Event } from '../../processor';
 import { Tools } from '../../util';
 import { decodeMarketsStorage } from '../market-commons/decode';
 import {
@@ -51,13 +51,12 @@ import {
 
 export const boughtCompleteSet = async (
   store: Store,
-  block: Block,
   event: Event
 ): Promise<HistoricalAccountBalance[] | undefined> => {
   const { marketId, amount, accountId } = decodeBoughtCompleteSetEvent(event);
 
   const market = await store.get(Market, { where: { marketId } });
-  if (!market || block.specVersion > 35) return;
+  if (!market || event.block.specVersion > 35) return;
 
   // Setting it as default in case the amount is not retained from event or extrinsic
   // This has been noticed for PredictionMarketsCreateCpmmMarketAndDeployAssetsCall on testnet before specVersion:34
@@ -90,26 +89,26 @@ export const boughtCompleteSet = async (
     const hab = new HistoricalAccountBalance({
       accountId,
       assetId: market.outcomeAssets[i],
-      blockNumber: block.height,
+      blockNumber: event.block.height,
       dBalance: amt,
       event: event.name.split('.')[1],
       extrinsic: extrinsicFromEvent(event),
       id: event.id + '-' + marketId + i + '-' + accountId.slice(-5),
-      timestamp: new Date(block.timestamp!),
+      timestamp: new Date(event.block.timestamp!),
     });
     habs.push(hab);
   }
   return habs;
 };
 
-export const globalDisputeStarted = async (store: Store, block: Block, event: Event) => {
+export const globalDisputeStarted = async (store: Store, event: Event) => {
   const { marketId } = decodeGlobalDisputeStartedEvent(event);
 
   const market = await store.get(Market, { where: { marketId } });
   if (!market) return;
 
   const hm = new HistoricalMarket({
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     by: null,
     event: MarketEvent.GlobalDisputeStarted,
     id: event.id + '-' + marketId,
@@ -117,13 +116,13 @@ export const globalDisputeStarted = async (store: Store, block: Block, event: Ev
     outcome: null,
     resolvedOutcome: null,
     status: market.status,
-    timestamp: new Date(block.timestamp!),
+    timestamp: new Date(event.block.timestamp!),
   });
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
   await store.save<HistoricalMarket>(hm);
 };
 
-export const marketApproved = async (store: Store, block: Block, event: Event) => {
+export const marketApproved = async (store: Store, event: Event) => {
   const { marketId } = decodeMarketApprovedEvent(event);
 
   const market = await store.get(Market, { where: { marketId } });
@@ -136,7 +135,7 @@ export const marketApproved = async (store: Store, block: Block, event: Event) =
   await store.save<Market>(market);
 
   const hm = new HistoricalMarket({
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     by: null,
     event: MarketEvent.MarketApproved,
     id: event.id + '-' + marketId,
@@ -144,13 +143,13 @@ export const marketApproved = async (store: Store, block: Block, event: Event) =
     outcome: null,
     resolvedOutcome: null,
     status: market.status,
-    timestamp: new Date(block.timestamp!),
+    timestamp: new Date(event.block.timestamp!),
   });
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
   await store.save<HistoricalMarket>(hm);
 };
 
-export const marketClosed = async (store: Store, block: Block, event: Event) => {
+export const marketClosed = async (store: Store, event: Event) => {
   const { marketId } = decodeMarketClosedEvent(event);
 
   const market = await store.get(Market, { where: { marketId } });
@@ -160,7 +159,7 @@ export const marketClosed = async (store: Store, block: Block, event: Event) => 
   await store.save<Market>(market);
 
   const hm = new HistoricalMarket({
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     by: null,
     event: MarketEvent.MarketClosed,
     id: event.id + '-' + marketId,
@@ -168,14 +167,14 @@ export const marketClosed = async (store: Store, block: Block, event: Event) => 
     outcome: null,
     resolvedOutcome: null,
     status: market.status,
-    timestamp: new Date(block.timestamp!),
+    timestamp: new Date(event.block.timestamp!),
   });
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
   await store.save<HistoricalMarket>(hm);
 };
 
-export const marketCreated = async (store: Store, block: Block, event: Event) => {
-  const { marketId, accountId, market } = decodeMarketCreatedEvent(event, block.specVersion);
+export const marketCreated = async (store: Store, event: Event) => {
+  const { marketId, accountId, market } = decodeMarketCreatedEvent(event, event.block.specVersion);
 
   if (accountId) {
     const account = await store.findOneBy(Account, {
@@ -206,12 +205,12 @@ export const marketCreated = async (store: Store, block: Block, event: Event) =>
       const hab = new HistoricalAccountBalance({
         accountId,
         assetId: _Asset.Ztg,
-        blockNumber: block.height,
+        blockNumber: event.block.height,
         dBalance: BigInt(0),
         event: event.name.split('.')[1],
         extrinsic: extrinsicFromEvent(event),
         id: event.id + '-' + accountId.slice(-5),
-        timestamp: new Date(block.timestamp!),
+        timestamp: new Date(event.block.timestamp!),
       });
       console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
       await store.save<HistoricalAccountBalance>(hab);
@@ -326,7 +325,7 @@ export const marketCreated = async (store: Store, block: Block, event: Event) =>
     marketType.categorical = type.value.toString();
   } else if (type.__kind == 'Scalar') {
     marketType.scalar = [];
-    if (block.specVersion < 41) {
+    if (event.block.specVersion < 41) {
       if (type.value.start) {
         marketType.scalar.push(rescale(type.value.start.toString()));
         marketType.scalar.push(rescale(type.value.end.toString()));
@@ -392,7 +391,7 @@ export const marketCreated = async (store: Store, block: Block, event: Event) =>
   await store.save<Market>(newMarket);
 
   const hm = new HistoricalMarket({
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     by: null,
     event: MarketEvent.MarketCreated,
     id: event.id + '-' + marketId,
@@ -400,13 +399,13 @@ export const marketCreated = async (store: Store, block: Block, event: Event) =>
     outcome: null,
     resolvedOutcome: null,
     status: newMarket.status,
-    timestamp: new Date(block.timestamp!),
+    timestamp: new Date(event.block.timestamp!),
   });
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
   await store.save<HistoricalMarket>(hm);
 };
 
-export const marketDestroyed = async (store: Store, block: Block, event: Event) => {
+export const marketDestroyed = async (store: Store, event: Event) => {
   const { marketId } = decodeMarketDestroyedEvent(event);
 
   const market = await store.get(Market, { where: { marketId } });
@@ -421,7 +420,7 @@ export const marketDestroyed = async (store: Store, block: Block, event: Event) 
   await store.save<Market>(market);
 
   const hm = new HistoricalMarket({
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     by: null,
     event: MarketEvent.MarketDestroyed,
     id: event.id + '-' + marketId,
@@ -429,7 +428,7 @@ export const marketDestroyed = async (store: Store, block: Block, event: Event) 
     outcome: null,
     resolvedOutcome: null,
     status: market.status,
-    timestamp: new Date(block.timestamp!),
+    timestamp: new Date(event.block.timestamp!),
   });
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
   await store.save<HistoricalMarket>(hm);
@@ -452,25 +451,25 @@ export const marketDestroyed = async (store: Store, block: Block, event: Event) 
   const hab = new HistoricalAccountBalance({
     accountId: account.accountId,
     assetId: ab.assetId,
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     dBalance: ab.balance - oldBalance,
     event: event.name.split('.')[1],
     extrinsic: extrinsicFromEvent(event),
     id: event.id + '-' + account.accountId.slice(-5),
-    timestamp: new Date(block.timestamp!),
+    timestamp: new Date(event.block.timestamp!),
   });
   console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
   await store.save<HistoricalAccountBalance>(hab);
 };
 
-export const marketDisputed = async (store: Store, block: Block, event: Event) => {
+export const marketDisputed = async (store: Store, event: Event) => {
   const { marketId, accountId, outcome } = decodeMarketDisputedEvent(event);
 
   const market = await store.get(Market, { where: { marketId } });
   if (!market) return;
 
-  if (block.specVersion >= 42 && market.bonds) {
-    const onChainBonds = await decodeMarketsStorage(block, BigInt(marketId));
+  if (event.block.specVersion >= 42 && market.bonds) {
+    const onChainBonds = await decodeMarketsStorage(event.block, BigInt(marketId));
     if (onChainBonds && onChainBonds.dispute) {
       const bond = new MarketBond({
         isSettled: onChainBonds.dispute.isSettled,
@@ -483,10 +482,10 @@ export const marketDisputed = async (store: Store, block: Block, event: Event) =
 
   let marketReport = new MarketReport();
   // Conditions set based on PredictionMarketsDisputesStorage
-  if (block.specVersion < 49) {
+  if (event.block.specVersion < 49) {
     if (!market.disputes) market.disputes = [];
     marketReport = new MarketReport({
-      at: block.height,
+      at: event.block.height,
       by: accountId,
       outcome: outcome
         ? new OutcomeReport({
@@ -502,7 +501,7 @@ export const marketDisputed = async (store: Store, block: Block, event: Event) =
   await store.save<Market>(market);
 
   const hm = new HistoricalMarket({
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     by: accountId || market.bonds?.dispute?.who,
     event: MarketEvent.MarketDisputed,
     id: event.id + '-' + marketId,
@@ -510,13 +509,13 @@ export const marketDisputed = async (store: Store, block: Block, event: Event) =
     outcome: marketReport.outcome,
     resolvedOutcome: null,
     status: market.status,
-    timestamp: new Date(block.timestamp!),
+    timestamp: new Date(event.block.timestamp!),
   });
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
   await store.save<HistoricalMarket>(hm);
 };
 
-export const marketExpired = async (store: Store, block: Block, event: Event) => {
+export const marketExpired = async (store: Store, event: Event) => {
   const { marketId } = decodeMarketExpiredEvent(event);
 
   const market = await store.get(Market, { where: { marketId } });
@@ -530,7 +529,7 @@ export const marketExpired = async (store: Store, block: Block, event: Event) =>
   await store.save<Market>(market);
 
   const hm = new HistoricalMarket({
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     by: null,
     event: MarketEvent.MarketExpired,
     id: event.id + '-' + marketId,
@@ -538,13 +537,13 @@ export const marketExpired = async (store: Store, block: Block, event: Event) =>
     outcome: null,
     resolvedOutcome: null,
     status: market.status,
-    timestamp: new Date(block.timestamp!),
+    timestamp: new Date(event.block.timestamp!),
   });
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
   await store.save<HistoricalMarket>(hm);
 };
 
-export const marketInsufficientSubsidy = async (store: Store, block: Block, event: Event) => {
+export const marketInsufficientSubsidy = async (store: Store, event: Event) => {
   const { marketId } = decodeMarketInsufficientSubsidyEvent(event);
 
   const market = await store.get(Market, { where: { marketId } });
@@ -554,7 +553,7 @@ export const marketInsufficientSubsidy = async (store: Store, block: Block, even
   await store.save<Market>(market);
 
   const hm = new HistoricalMarket({
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     by: null,
     event: MarketEvent.MarketInsufficientSubsidy,
     id: event.id + '-' + marketId,
@@ -562,13 +561,13 @@ export const marketInsufficientSubsidy = async (store: Store, block: Block, even
     outcome: null,
     resolvedOutcome: null,
     status: market.status,
-    timestamp: new Date(block.timestamp!),
+    timestamp: new Date(event.block.timestamp!),
   });
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
   await store.save<HistoricalMarket>(hm);
 };
 
-export const marketRejected = async (store: Store, block: Block, event: Event) => {
+export const marketRejected = async (store: Store, event: Event) => {
   const { marketId, reason } = decodeMarketRejectedEvent(event);
 
   const market = await store.get(Market, { where: { marketId } });
@@ -583,7 +582,7 @@ export const marketRejected = async (store: Store, block: Block, event: Event) =
   await store.save<Market>(market);
 
   const hm = new HistoricalMarket({
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     by: null,
     event: MarketEvent.MarketRejected,
     id: event.id + '-' + marketId,
@@ -591,13 +590,13 @@ export const marketRejected = async (store: Store, block: Block, event: Event) =
     outcome: null,
     resolvedOutcome: null,
     status: market.status,
-    timestamp: new Date(block.timestamp!),
+    timestamp: new Date(event.block.timestamp!),
   });
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
   await store.save<HistoricalMarket>(hm);
 };
 
-export const marketReported = async (store: Store, block: Block, event: Event) => {
+export const marketReported = async (store: Store, event: Event) => {
   const { marketId, at, by, outcome } = decodeMarketReportedEvent(event);
 
   const market = await store.get(Market, { where: { marketId } });
@@ -614,8 +613,8 @@ export const marketReported = async (store: Store, block: Block, event: Event) =
     outcome: outcomeReport,
   });
 
-  if (marketReport.by !== market.oracle && block.specVersion >= 46) {
-    const onChainBonds = await decodeMarketsStorage(block, BigInt(marketId));
+  if (marketReport.by !== market.oracle && event.block.specVersion >= 46) {
+    const onChainBonds = await decodeMarketsStorage(event.block, BigInt(marketId));
     if (onChainBonds && onChainBonds.outsider && market.bonds) {
       const outsiderBond = onChainBonds.outsider;
       const bond = new MarketBond({
@@ -633,7 +632,7 @@ export const marketReported = async (store: Store, block: Block, event: Event) =
   await store.save<Market>(market);
 
   const hm = new HistoricalMarket({
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     by: marketReport.by,
     event: MarketEvent.MarketReported,
     id: event.id + '-' + marketId,
@@ -641,20 +640,22 @@ export const marketReported = async (store: Store, block: Block, event: Event) =
     outcome: outcomeReport,
     resolvedOutcome: null,
     status: market.status,
-    timestamp: new Date(block.timestamp!),
+    timestamp: new Date(event.block.timestamp!),
   });
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
   await store.save<HistoricalMarket>(hm);
 };
 
-export const marketResolved = async (store: Store, block: Block, event: Event) => {
+export const marketResolved = async (store: Store, event: Event) => {
   const { marketId, report } = decodeMarketResolvedEvent(event);
 
   const market = await store.get(Market, { where: { marketId } });
   if (!market) return;
 
   market.resolvedOutcome =
-    market.marketType.scalar && block.specVersion < 41 ? rescale(report.value.toString()) : report.value.toString();
+    market.marketType.scalar && event.block.specVersion < 41
+      ? rescale(report.value.toString())
+      : report.value.toString();
   market.status = MarketStatus.Resolved;
   if (market.bonds) {
     if (market.creation === MarketCreation.Permissionless) market.bonds.creation.isSettled = true;
@@ -666,7 +667,7 @@ export const marketResolved = async (store: Store, block: Block, event: Event) =
   await store.save<Market>(market);
 
   const hm = new HistoricalMarket({
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     by: null,
     event: MarketEvent.MarketResolved,
     id: event.id + '-' + marketId,
@@ -674,14 +675,14 @@ export const marketResolved = async (store: Store, block: Block, event: Event) =
     outcome: null,
     resolvedOutcome: market.resolvedOutcome,
     status: market.status,
-    timestamp: new Date(block.timestamp!),
+    timestamp: new Date(event.block.timestamp!),
   });
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
   await store.save<HistoricalMarket>(hm);
 
   await Promise.all(
     market.outcomeAssets.map(async (outcomeAsset, i) => {
-      if (market.marketType.categorical && block.specVersion < 40 && i !== +market.resolvedOutcome!) {
+      if (market.marketType.categorical && event.block.specVersion < 40 && i !== +market.resolvedOutcome!) {
         const abs = await store.find(AccountBalance, {
           where: { assetId: outcomeAsset! },
         });
@@ -699,12 +700,12 @@ export const marketResolved = async (store: Store, block: Block, event: Event) =
           const hab = new HistoricalAccountBalance({
             accountId: account.accountId,
             assetId: ab.assetId,
-            blockNumber: block.height,
+            blockNumber: event.block.height,
             dBalance: ab.balance - oldBalance,
             event: event.name.split('.')[1],
             extrinsic: extrinsicFromEvent(event),
             id: event.id + '-' + marketId + i + '-' + account.accountId.slice(-5),
-            timestamp: new Date(block.timestamp!),
+            timestamp: new Date(event.block.timestamp!),
           });
           console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
           await store.save<HistoricalAccountBalance>(hab);
@@ -730,7 +731,7 @@ export const marketResolved = async (store: Store, block: Block, event: Event) =
         }
       } else {
         newPrice = i == +market.resolvedOutcome! ? 1 : 0;
-        if (block.specVersion < 40) {
+        if (event.block.specVersion < 40) {
           newAssetQty = i == +market.resolvedOutcome! ? oldAssetQty : BigInt(0);
         }
       }
@@ -743,14 +744,14 @@ export const marketResolved = async (store: Store, block: Block, event: Event) =
         accountId: null,
         assetId: asset.assetId,
         baseAssetTraded: null,
-        blockNumber: block.height,
+        blockNumber: event.block.height,
         dAmountInPool: newAssetQty - oldAssetQty,
         dPrice: newPrice - oldPrice,
         event: event.name.split('.')[1],
         id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
         newAmountInPool: newAssetQty,
         newPrice,
-        timestamp: new Date(block.timestamp!),
+        timestamp: new Date(event.block.timestamp!),
       });
       console.log(`[${event.name}] Saving historical asset: ${JSON.stringify(ha, null, 2)}`);
       await store.save<HistoricalAsset>(ha);
@@ -758,7 +759,7 @@ export const marketResolved = async (store: Store, block: Block, event: Event) =
   );
 };
 
-export const marketStartedWithSubsidy = async (store: Store, block: Block, event: Event) => {
+export const marketStartedWithSubsidy = async (store: Store, event: Event) => {
   const { marketId } = decodeMarketStartedWithSubsidyEvent(event);
 
   const market = await store.get(Market, { where: { marketId } });
@@ -768,7 +769,7 @@ export const marketStartedWithSubsidy = async (store: Store, block: Block, event
   await store.save<Market>(market);
 
   const hm = new HistoricalMarket({
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     by: null,
     event: MarketEvent.MarketStartedWithSubsidy,
     id: event.id + '-' + marketId,
@@ -776,13 +777,13 @@ export const marketStartedWithSubsidy = async (store: Store, block: Block, event
     outcome: null,
     resolvedOutcome: null,
     status: market.status,
-    timestamp: new Date(block.timestamp!),
+    timestamp: new Date(event.block.timestamp!),
   });
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
   await store.save<HistoricalMarket>(hm);
 };
 
-export const redeemShares = async (store: Store, block: Block, call: Call) => {
+export const redeemShares = async (store: Store, call: Call) => {
   let accId;
   if (call.origin) {
     accId = call.origin.value.value;
@@ -808,12 +809,12 @@ export const redeemShares = async (store: Store, block: Block, call: Call) => {
   const hab = new HistoricalAccountBalance({
     accountId,
     assetId: ab.assetId,
-    blockNumber: block.height,
+    blockNumber: call.block.height,
     dBalance: ab.balance - oldBalance,
     event: call.name.split('.')[1],
     extrinsic: call.extrinsic ? new Extrinsic({ name: call.name, hash: call.extrinsic.hash }) : null,
     id: call.id + '-' + accountId.slice(-5),
-    timestamp: new Date(block.timestamp!),
+    timestamp: new Date(call.block.timestamp!),
   });
   console.log(`[${call.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
   await store.save<HistoricalAccountBalance>(hab);
@@ -821,7 +822,6 @@ export const redeemShares = async (store: Store, block: Block, call: Call) => {
 
 export const soldCompleteSet = async (
   store: Store,
-  block: Block,
   event: Event
 ): Promise<HistoricalAccountBalance[] | undefined> => {
   const { marketId, amount, accountId } = decodeSoldCompleteSetEvent(event);
@@ -860,30 +860,30 @@ export const soldCompleteSet = async (
     const hab = new HistoricalAccountBalance({
       accountId,
       assetId: market.outcomeAssets[i],
-      blockNumber: block.height,
+      blockNumber: event.block.height,
       dBalance: -amt,
       event: event.name.split('.')[1],
       extrinsic: extrinsicFromEvent(event),
       id: event.id + '-' + marketId + i + '-' + accountId.slice(-5),
-      timestamp: new Date(block.timestamp!),
+      timestamp: new Date(event.block.timestamp!),
     });
     habs.push(hab);
   }
   return habs;
 };
 
-export const tokensRedeemed = async (block: Block, event: Event): Promise<HistoricalAccountBalance> => {
+export const tokensRedeemed = async (event: Event): Promise<HistoricalAccountBalance> => {
   const { assetId, amountRedeemed, accountId } = decodeTokensRedeemedEvent(event);
 
   const hab = new HistoricalAccountBalance({
     accountId,
     assetId,
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     dBalance: -amountRedeemed,
     event: event.name.split('.')[1],
     extrinsic: extrinsicFromEvent(event),
     id: event.id + '-' + accountId.slice(-5),
-    timestamp: new Date(block.timestamp!),
+    timestamp: new Date(event.block.timestamp!),
   });
   return hab;
 };

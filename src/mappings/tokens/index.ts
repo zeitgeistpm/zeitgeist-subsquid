@@ -1,7 +1,7 @@
 import { Store } from '@subsquid/typeorm-store';
 import { Account, AccountBalance, HistoricalAccountBalance } from '../../model';
 import { extrinsicFromEvent } from '../../helper';
-import { Block, Event } from '../../processor';
+import { Event } from '../../processor';
 import {
   decodeTokensBalanceSetEvent,
   decodeTokensDepositedEvent,
@@ -10,7 +10,7 @@ import {
   decodeTokensWithdrawnEvent,
 } from './decode';
 
-export const tokensBalanceSet = async (store: Store, block: Block, event: Event) => {
+export const tokensBalanceSet = async (store: Store, event: Event) => {
   const { assetId, accountId, amount } = decodeTokensBalanceSetEvent(event);
   if (!assetId.includes('pool')) return;
 
@@ -37,91 +37,91 @@ export const tokensBalanceSet = async (store: Store, block: Block, event: Event)
   const hab = new HistoricalAccountBalance({
     accountId,
     assetId,
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     dBalance: ab.balance - oldBalance,
     event: event.name.split('.')[1],
     extrinsic: extrinsicFromEvent(event),
     id: event.id + '-' + accountId.slice(-5),
-    timestamp: new Date(block.timestamp!),
+    timestamp: new Date(event.block.timestamp!),
   });
   console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
   await store.save<HistoricalAccountBalance>(hab);
 };
 
-export const tokensDeposited = async (block: Block, event: Event): Promise<HistoricalAccountBalance> => {
+export const tokensDeposited = async (event: Event): Promise<HistoricalAccountBalance> => {
   const { assetId, accountId, amount } = decodeTokensDepositedEvent(event);
 
   const hab = new HistoricalAccountBalance({
     accountId,
     assetId,
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     dBalance: amount,
     event: event.name.split('.')[1],
     extrinsic: extrinsicFromEvent(event),
     id: event.id + '-' + accountId.slice(-5),
-    timestamp: new Date(block.timestamp!),
+    timestamp: new Date(event.block.timestamp!),
   });
   return hab;
 };
 
-export const tokensReserved = async (block: Block, event: Event): Promise<HistoricalAccountBalance> => {
+export const tokensReserved = async (event: Event): Promise<HistoricalAccountBalance> => {
   const { assetId, accountId, amount } = decodeTokensReservedEvent(event);
 
   const hab = new HistoricalAccountBalance({
     accountId,
     assetId,
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     dBalance: -amount,
     event: event.name.split('.')[1],
     extrinsic: extrinsicFromEvent(event),
     id: event.id + '-' + accountId.slice(-5),
-    timestamp: new Date(block.timestamp!),
+    timestamp: new Date(event.block.timestamp!),
   });
   return hab;
 };
 
-export const tokensTransfer = async (block: Block, event: Event): Promise<HistoricalAccountBalance[]> => {
+export const tokensTransfer = async (event: Event): Promise<HistoricalAccountBalance[]> => {
   const { assetId, fromAccountId, toAccountId, amount } = decodeTokensTransferEvent(event);
   const habs: HistoricalAccountBalance[] = [];
 
   const fromHab = new HistoricalAccountBalance({
     accountId: fromAccountId,
     assetId,
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     dBalance: -amount,
     event: event.name.split('.')[1],
     extrinsic: extrinsicFromEvent(event),
     id: event.id + '-' + fromAccountId.slice(-5),
-    timestamp: new Date(block.timestamp!),
+    timestamp: new Date(event.block.timestamp!),
   });
 
   const toHab = new HistoricalAccountBalance({
     accountId: toAccountId,
     assetId,
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     dBalance: amount,
     event: event.name.split('.')[1],
     extrinsic: extrinsicFromEvent(event),
     id: event.id + '-' + toAccountId.slice(-5),
-    timestamp: new Date(block.timestamp!),
+    timestamp: new Date(event.block.timestamp!),
   });
 
   habs.push(fromHab, toHab);
   return habs;
 };
 
-export const tokensWithdrawn = async (block: Block, event: Event): Promise<HistoricalAccountBalance> => {
+export const tokensWithdrawn = async (event: Event): Promise<HistoricalAccountBalance> => {
   const { assetId, accountId, amount } = decodeTokensWithdrawnEvent(event);
 
   const hab = new HistoricalAccountBalance({
     accountId,
     assetId,
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     dBalance: -amount,
     event: event.name.split('.')[1],
     extrinsic: extrinsicFromEvent(event),
     id: event.id + '-' + accountId.slice(-5),
-    timestamp: new Date(block.timestamp!),
+    timestamp: new Date(event.block.timestamp!),
   });
   return hab;
 };
