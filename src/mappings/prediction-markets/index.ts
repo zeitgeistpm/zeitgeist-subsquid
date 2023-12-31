@@ -37,6 +37,7 @@ import {
 } from '../../helper';
 import { Block, Call, Event } from '../../processor';
 import { Tools } from '../../util';
+import { decodeMarketsStorage } from '../market-commons/decode';
 import {
   decodeBoughtCompleteSetEvent,
   decodeGlobalDisputeStartedEvent,
@@ -51,7 +52,6 @@ import {
   decodeMarketReportedEvent,
   decodeMarketResolvedEvent,
   decodeMarketStartedWithSubsidyEvent,
-  decodeMarketsStorage,
   decodeRedeemSharesCall,
   decodeSoldCompleteSetEvent,
   decodeTokensRedeemedEvent,

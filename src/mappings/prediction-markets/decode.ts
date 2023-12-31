@@ -1,10 +1,9 @@
 import * as ss58 from '@subsquid/ss58';
 import { OutcomeReport } from '../../types/v29';
 import { MarketStatus } from '../../types/v42';
-import { Market, MarketBonds } from '../../types/v51';
-import { calls, events, storage } from '../../types';
+import { calls, events } from '../../types';
 import { formatAssetId } from '../../helper';
-import { Block, Call, Event } from '../../processor';
+import { Call, Event } from '../../processor';
 
 export const decodeBoughtCompleteSetEvent = (event: Event): CompleteSetEvent => {
   let marketId: bigint, amount: bigint, accountId: string;
@@ -223,6 +222,16 @@ export const decodeMarketStartedWithSubsidyEvent = (event: Event): MarketEvent =
   };
 };
 
+export const decodeRedeemSharesCall = (call: Call): MarketEvent => {
+  let marketId: bigint;
+  if (calls.predictionMarkets.redeemShares.v23.is(call)) {
+    marketId = calls.predictionMarkets.redeemShares.v23.decode(call).marketId;
+  } else {
+    marketId = call.args.marketId;
+  }
+  return { marketId: Number(marketId) };
+};
+
 export const decodeSoldCompleteSetEvent = (event: Event): CompleteSetEvent => {
   let marketId: bigint, amount: bigint, accountId: string;
   if (events.predictionMarkets.soldCompleteSet.v23.is(event)) {
@@ -256,31 +265,6 @@ export const decodeTokensRedeemedEvent = (event: Event): TokensRedeemedEvent => 
     payout: BigInt(payout),
     accountId: ss58.encode({ prefix: 73, bytes: accountId }),
   };
-};
-
-export const decodeRedeemSharesCall = (call: Call): MarketEvent => {
-  let marketId: bigint;
-  if (calls.predictionMarkets.redeemShares.v23.is(call)) {
-    marketId = calls.predictionMarkets.redeemShares.v23.decode(call).marketId;
-  } else {
-    marketId = call.args.marketId;
-  }
-  return { marketId: Number(marketId) };
-};
-
-export const decodeMarketsStorage = async (block: Block, marketId: bigint): Promise<MarketBonds | undefined> => {
-  let market: Market | undefined;
-  if (storage.marketCommons.markets.v46.is(block)) {
-    market = await storage.marketCommons.markets.v46.get(block, marketId);
-  } else if (storage.marketCommons.markets.v49.is(block)) {
-    market = await storage.marketCommons.markets.v49.get(block, marketId);
-  } else if (storage.marketCommons.markets.v50.is(block)) {
-    market = await storage.marketCommons.markets.v50.get(block, marketId);
-  } else if (storage.marketCommons.markets.v51.is(block)) {
-    market = await storage.marketCommons.markets.v51.get(block, marketId);
-  }
-  if (!market) return;
-  return market.bonds;
 };
 
 interface CompleteSetEvent {
