@@ -5,43 +5,9 @@ import { Store } from '@subsquid/typeorm-store';
 import Decimal from 'decimal.js';
 import { Account, AccountBalance, Extrinsic, HistoricalAccountBalance } from './model';
 import { MarketType, Asset } from './types/v51';
-import { Cache, IPFS, Tools } from './util';
+import { CacheHint, _Asset } from './consts';
 import { Block, Extrinsic as _Extrinsic } from './processor';
-
-export const EPOCH_TIME = new Date('1970-01-01T00:00:00.000Z');
-export const TEN_MINUTES = 10 * 60 * 1000;
-export const TREASURY_ACCOUNT = 'dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ';
-
-export enum _Asset {
-  CategoricalOutcome = 'CategoricalOutcome',
-  ForeignAsset = 'ForeignAsset',
-  PoolShare = 'PoolShare',
-  ScalarOutcome = 'ScalarOutcome',
-  Ztg = 'Ztg',
-}
-
-export enum CacheHint {
-  Fee = 'fee',
-  Meta = 'meta',
-  Price = 'price',
-}
-
-export enum Pallet {
-  AssetTxPayment = 'AssetTxPayment',
-  Authorized = 'Authorized',
-  Balances = 'Balances',
-  Court = 'Court',
-  Currency = 'Currency',
-  NeoSwaps = 'NeoSwaps',
-  ParachainStaking = 'ParachainStaking',
-  ParachainSystem = 'ParachainSystem',
-  PredictionMarkets = 'PredictionMarkets',
-  Styx = 'Styx',
-  Sudo = 'Sudo',
-  Swaps = 'Swaps',
-  System = 'System',
-  Tokens = 'Tokens',
-}
+import { Cache, IPFS, Tools } from './util';
 
 export const computeNeoSwapSpotPrice = (amountInPool: bigint, liquidityParameter: bigint): number => {
   const reserve = new Decimal(+amountInPool.toString());
