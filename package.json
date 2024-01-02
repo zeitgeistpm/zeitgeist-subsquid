@@ -21,6 +21,7 @@
     "squid:mac:start": "yarn archive:start && sh scripts/deploy/processor.sh mlocal start && sh scripts/deploy/api.sh mlocal start",
     "squid:start": "yarn archive:start && sh scripts/deploy/processor.sh local start && sh scripts/deploy/api.sh local start",
     "squid:stop": "yarn archive:stop && yarn api:stop && yarn db:down && yarn processor:stop",
+    "test": "docker-compose down && yarn db:up && yarn build && yarn migration:apply && REDIS_HOST=localhost DB_HOST=localhost NODE_ENV=test node lib/processor.js",
     "typegen": "squid-substrate-typegen typegen.json"
   },
   "dependencies": {
