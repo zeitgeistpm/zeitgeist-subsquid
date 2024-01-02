@@ -1,4 +1,3 @@
-import { lookupArchive } from '@subsquid/archive-registry';
 import {
   SubstrateBatchProcessor,
   SubstrateBatchProcessorFields,
@@ -30,12 +29,11 @@ require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` });
 console.log(`ENVIRONMENT: ${process.env.NODE_ENV}`);
 
 export const processor = new SubstrateBatchProcessor()
-  .setDataSource({
-    chain: process.env.WS_NODE_URL ?? 'wss://bsr.zeitgeist.pm',
-    archive: lookupArchive('zeitgeist-testnet', { release: 'ArrowSquid' }),
-  })
+  .setGateway('https://v2.archive.subsquid.io/network/zeitgeist-testnet')
+  .setRpcEndpoint(process.env.WS_NODE_URL ?? 'wss://bsr.zeitgeist.pm')
   .addCall({
     name: [calls.predictionMarkets.redeemShares.name, calls.swaps.poolExit.name],
+    range: { from: 0, to: 1089818 },
     extrinsic: true,
   })
   .addEvent({
@@ -110,7 +108,7 @@ export const processor = new SubstrateBatchProcessor()
   })
   .addEvent({
     name: [events.system.extrinsicFailed.name, events.system.extrinsicSuccess.name],
-    // range: { from: 0, to: 588249 },
+    range: { from: 0, to: 588249 },
     call: true,
     extrinsic: true,
   })
@@ -151,8 +149,9 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   swapHistory = [];
 
   for (let block of ctx.blocks) {
-    for (let call of block.calls) {
-      if (process.env.WS_NODE_URL?.includes(`bs`) && call.success && block.header.height < 1089818) {
+    if (process.env.WS_NODE_URL?.includes(`bs`) && block.header.height < 1089818) {
+      for (let call of block.calls) {
+        if (!call.success) continue;
         if (call.name === calls.predictionMarkets.redeemShares.name) {
           await saveAccounts(ctx.store);
           await mappings.predictionMarkets.redeemShares(ctx.store, call);
@@ -582,14 +581,12 @@ const mapSwaps = async (store: Store, event: Event) => {
 const mapSystem = async (store: Store, event: Event) => {
   switch (event.name) {
     case events.system.extrinsicFailed.name: {
-      if (event.block.height >= 588249) break;
       const hab = await mappings.system.systemExtrinsicFailed(event);
       if (!hab) break;
       await storeBalanceChanges([hab]);
       break;
     }
     case events.system.extrinsicSuccess.name: {
-      if (event.block.height >= 588249) break;
       const hab = await mappings.system.systemExtrinsicSuccess(event);
       if (!hab) break;
       await storeBalanceChanges([hab]);
