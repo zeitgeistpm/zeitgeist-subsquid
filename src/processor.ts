@@ -110,6 +110,7 @@ export const processor = new SubstrateBatchProcessor()
   })
   .addEvent({
     name: [events.system.extrinsicFailed.name, events.system.extrinsicSuccess.name],
+    // range: { from: 0, to: 588249 },
     call: true,
     extrinsic: true,
   })
