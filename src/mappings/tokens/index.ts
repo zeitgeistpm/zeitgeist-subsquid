@@ -10,7 +10,7 @@ import {
   decodeTokensWithdrawnEvent,
 } from './decode';
 
-export const tokensBalanceSet = async (store: Store, event: Event) => {
+export const balanceSet = async (store: Store, event: Event) => {
   const { assetId, accountId, amount } = decodeTokensBalanceSetEvent(event);
   if (!assetId.includes('pool')) return;
 
@@ -48,7 +48,7 @@ export const tokensBalanceSet = async (store: Store, event: Event) => {
   await store.save<HistoricalAccountBalance>(hab);
 };
 
-export const tokensDeposited = async (event: Event): Promise<HistoricalAccountBalance> => {
+export const deposited = async (event: Event): Promise<HistoricalAccountBalance> => {
   const { assetId, accountId, amount } = decodeTokensDepositedEvent(event);
 
   const hab = new HistoricalAccountBalance({
@@ -64,7 +64,7 @@ export const tokensDeposited = async (event: Event): Promise<HistoricalAccountBa
   return hab;
 };
 
-export const tokensReserved = async (event: Event): Promise<HistoricalAccountBalance> => {
+export const reserved = async (event: Event): Promise<HistoricalAccountBalance> => {
   const { assetId, accountId, amount } = decodeTokensReservedEvent(event);
 
   const hab = new HistoricalAccountBalance({
@@ -80,7 +80,7 @@ export const tokensReserved = async (event: Event): Promise<HistoricalAccountBal
   return hab;
 };
 
-export const tokensTransfer = async (event: Event): Promise<HistoricalAccountBalance[]> => {
+export const transfer = async (event: Event): Promise<HistoricalAccountBalance[]> => {
   const { assetId, fromAccountId, toAccountId, amount } = decodeTokensTransferEvent(event);
   const habs: HistoricalAccountBalance[] = [];
 
@@ -110,7 +110,7 @@ export const tokensTransfer = async (event: Event): Promise<HistoricalAccountBal
   return habs;
 };
 
-export const tokensWithdrawn = async (event: Event): Promise<HistoricalAccountBalance> => {
+export const withdrawn = async (event: Event): Promise<HistoricalAccountBalance> => {
   const { assetId, accountId, amount } = decodeTokensWithdrawnEvent(event);
 
   const hab = new HistoricalAccountBalance({

@@ -14,7 +14,7 @@ import {
   decodeWithdrawEvent,
 } from './decode';
 
-export const balancesBalanceSet = async (store: Store, event: Event) => {
+export const balanceSet = async (store: Store, event: Event) => {
   const { accountId, amount } = decodeBalanceSetEvent(event);
 
   let account = await store.get(Account, { where: { accountId } });
@@ -52,7 +52,7 @@ export const balancesBalanceSet = async (store: Store, event: Event) => {
   await store.save<HistoricalAccountBalance>(hab);
 };
 
-export const balancesDeposit = async (event: Event): Promise<HistoricalAccountBalance> => {
+export const deposit = async (event: Event): Promise<HistoricalAccountBalance> => {
   const { accountId, amount } = decodeDepositEvent(event);
 
   const hab = new HistoricalAccountBalance({
@@ -68,7 +68,7 @@ export const balancesDeposit = async (event: Event): Promise<HistoricalAccountBa
   return hab;
 };
 
-export const balancesDustLost = async (event: Event): Promise<HistoricalAccountBalance> => {
+export const dustLost = async (event: Event): Promise<HistoricalAccountBalance> => {
   const { accountId, amount } = decodeDustLostEvent(event);
 
   const hab = new HistoricalAccountBalance({
@@ -84,7 +84,7 @@ export const balancesDustLost = async (event: Event): Promise<HistoricalAccountB
   return hab;
 };
 
-export const balancesReserveRepatriated = async (event: Event): Promise<HistoricalAccountBalance | undefined> => {
+export const reserveRepatriated = async (event: Event): Promise<HistoricalAccountBalance | undefined> => {
   const { fromAccountId, toAccountId, amount, destinationStatus } = decodeReserveRepatriatedEvent(event);
   if (destinationStatus.__kind !== 'Free') return;
 
@@ -101,7 +101,7 @@ export const balancesReserveRepatriated = async (event: Event): Promise<Historic
   return hab;
 };
 
-export const balancesReserved = async (event: Event): Promise<HistoricalAccountBalance> => {
+export const reserved = async (event: Event): Promise<HistoricalAccountBalance> => {
   const { accountId, amount } = decodeReservedEvent(event);
 
   const hab = new HistoricalAccountBalance({
@@ -117,7 +117,7 @@ export const balancesReserved = async (event: Event): Promise<HistoricalAccountB
   return hab;
 };
 
-export const balancesTransfer = async (event: Event): Promise<HistoricalAccountBalance[]> => {
+export const transfer = async (event: Event): Promise<HistoricalAccountBalance[]> => {
   const { fromAccountId, toAccountId, amount } = decodeTransferEvent(event);
   const habs: HistoricalAccountBalance[] = [];
 
@@ -147,7 +147,7 @@ export const balancesTransfer = async (event: Event): Promise<HistoricalAccountB
   return habs;
 };
 
-export const balancesUnreserved = async (event: Event): Promise<HistoricalAccountBalance> => {
+export const unreserved = async (event: Event): Promise<HistoricalAccountBalance> => {
   const { accountId, amount } = decodeUnreservedEvent(event);
 
   const hab = new HistoricalAccountBalance({
@@ -163,7 +163,7 @@ export const balancesUnreserved = async (event: Event): Promise<HistoricalAccoun
   return hab;
 };
 
-export const balancesWithdraw = async (event: Event): Promise<HistoricalAccountBalance> => {
+export const withdraw = async (event: Event): Promise<HistoricalAccountBalance> => {
   const { accountId, amount } = decodeWithdrawEvent(event);
 
   const hab = new HistoricalAccountBalance({

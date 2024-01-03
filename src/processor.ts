@@ -244,42 +244,42 @@ const mapBalances = async (store: Store, event: Event) => {
   switch (event.name) {
     case events.balances.balanceSet.name: {
       await saveAccounts(store);
-      await mappings.balances.balancesBalanceSet(store, event);
+      await mappings.balances.balanceSet(store, event);
       break;
     }
     case events.balances.deposit.name: {
-      const hab = await mappings.balances.balancesDeposit(event);
+      const hab = await mappings.balances.deposit(event);
       await storeBalanceChanges([hab]);
       break;
     }
     case events.balances.dustLost.name: {
-      const hab = await mappings.balances.balancesDustLost(event);
+      const hab = await mappings.balances.dustLost(event);
       await storeBalanceChanges([hab]);
       break;
     }
     case events.balances.reserveRepatriated.name: {
-      const hab = await mappings.balances.balancesReserveRepatriated(event);
+      const hab = await mappings.balances.reserveRepatriated(event);
       if (!hab) break;
       await storeBalanceChanges([hab]);
       break;
     }
     case events.balances.reserved.name: {
-      const hab = await mappings.balances.balancesReserved(event);
+      const hab = await mappings.balances.reserved(event);
       await storeBalanceChanges([hab]);
       break;
     }
     case events.balances.transfer.name: {
-      const habs = await mappings.balances.balancesTransfer(event);
+      const habs = await mappings.balances.transfer(event);
       await storeBalanceChanges(habs);
       break;
     }
     case events.balances.unreserved.name: {
-      const hab = await mappings.balances.balancesUnreserved(event);
+      const hab = await mappings.balances.unreserved(event);
       await storeBalanceChanges([hab]);
       break;
     }
     case events.balances.withdraw.name: {
-      const hab = await mappings.balances.balancesWithdraw(event);
+      const hab = await mappings.balances.withdraw(event);
       await storeBalanceChanges([hab]);
       break;
     }
@@ -302,18 +302,18 @@ const mapCourt = async (event: Event) => {
 const mapCurrency = async (event: Event) => {
   switch (event.name) {
     case events.currency.deposited.name: {
-      const hab = await mappings.currency.currencyDeposited(event);
+      const hab = await mappings.currency.deposited(event);
       await storeBalanceChanges([hab]);
       break;
     }
     case events.currency.transferred.name: {
-      const habs = await mappings.currency.currencyTransferred(event);
+      const habs = await mappings.currency.transferred(event);
       if (!habs) break;
       await storeBalanceChanges(habs);
       break;
     }
     case events.currency.withdrawn.name: {
-      const hab = await mappings.currency.currencyWithdrawn(event);
+      const hab = await mappings.currency.withdrawn(event);
       await storeBalanceChanges([hab]);
       break;
     }
@@ -375,7 +375,7 @@ const mapParachainStaking = async (event: Event) => {
   switch (event.name) {
     case events.parachainStaking.rewarded.name: {
       if (event.block.specVersion < 33) {
-        const hab = await mappings.parachainStaking.parachainStakingRewarded(event);
+        const hab = await mappings.parachainStaking.rewarded(event);
         await storeBalanceChanges([hab]);
         break;
       }
@@ -581,19 +581,19 @@ const mapSwaps = async (store: Store, event: Event) => {
 const mapSystem = async (store: Store, event: Event) => {
   switch (event.name) {
     case events.system.extrinsicFailed.name: {
-      const hab = await mappings.system.systemExtrinsicFailed(event);
+      const hab = await mappings.system.extrinsicFailed(event);
       if (!hab) break;
       await storeBalanceChanges([hab]);
       break;
     }
     case events.system.extrinsicSuccess.name: {
-      const hab = await mappings.system.systemExtrinsicSuccess(event);
+      const hab = await mappings.system.extrinsicSuccess(event);
       if (!hab) break;
       await storeBalanceChanges([hab]);
       break;
     }
     case events.system.newAccount.name: {
-      await mappings.system.systemNewAccount(store, event);
+      await mappings.system.newAccount(store, event);
       break;
     }
   }
@@ -603,26 +603,26 @@ const mapTokens = async (store: Store, event: Event) => {
   switch (event.name) {
     case events.tokens.balanceSet.name: {
       await saveAccounts(store);
-      await mappings.tokens.tokensBalanceSet(store, event);
+      await mappings.tokens.balanceSet(store, event);
       break;
     }
     case events.tokens.deposited.name: {
-      const hab = await mappings.tokens.tokensDeposited(event);
+      const hab = await mappings.tokens.deposited(event);
       await storeBalanceChanges([hab]);
       break;
     }
     case events.tokens.reserved.name: {
-      const hab = await mappings.tokens.tokensReserved(event);
+      const hab = await mappings.tokens.reserved(event);
       await storeBalanceChanges([hab]);
       break;
     }
     case events.tokens.transfer.name: {
-      const habs = await mappings.tokens.tokensTransfer(event);
+      const habs = await mappings.tokens.transfer(event);
       await storeBalanceChanges(habs);
       break;
     }
     case events.tokens.withdrawn.name: {
-      const hab = await mappings.tokens.tokensWithdrawn(event);
+      const hab = await mappings.tokens.withdrawn(event);
       await storeBalanceChanges([hab]);
       break;
     }

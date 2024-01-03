@@ -4,7 +4,7 @@ import { extrinsicFromEvent } from '../../helper';
 import { Event } from '../../processor';
 import { decodeRewardedEvent } from './decode';
 
-export const parachainStakingRewarded = async (event: Event): Promise<HistoricalAccountBalance> => {
+export const rewarded = async (event: Event): Promise<HistoricalAccountBalance> => {
   const { accountId, amount } = decodeRewardedEvent(event);
 
   const hab = new HistoricalAccountBalance({

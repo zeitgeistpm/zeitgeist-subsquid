@@ -6,7 +6,7 @@ import { extrinsicFromEvent, getFees } from '../../helper';
 import { Event } from '../../processor';
 import { decodeExtrinsicFailedEvent, decodeExtrinsicSuccessEvent, decodeNewAccountEvent } from './decode';
 
-export const systemExtrinsicFailed = async (event: Event): Promise<HistoricalAccountBalance | undefined> => {
+export const extrinsicFailed = async (event: Event): Promise<HistoricalAccountBalance | undefined> => {
   if (!event.extrinsic || !event.extrinsic.signature || !event.extrinsic.signature.address) return;
   const accountId = ss58.encode({ prefix: 73, bytes: (event.extrinsic.signature.address as any).value });
 
@@ -26,7 +26,7 @@ export const systemExtrinsicFailed = async (event: Event): Promise<HistoricalAcc
   return hab;
 };
 
-export const systemExtrinsicSuccess = async (event: Event): Promise<HistoricalAccountBalance | undefined> => {
+export const extrinsicSuccess = async (event: Event): Promise<HistoricalAccountBalance | undefined> => {
   if (
     !event.extrinsic ||
     !event.extrinsic.signature ||
@@ -52,7 +52,7 @@ export const systemExtrinsicSuccess = async (event: Event): Promise<HistoricalAc
   return hab;
 };
 
-export const systemNewAccount = async (store: Store, event: Event) => {
+export const newAccount = async (store: Store, event: Event) => {
   const { accountId } = decodeNewAccountEvent(event);
 
   const account = await store.get(Account, { where: { accountId } });

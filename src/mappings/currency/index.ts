@@ -4,7 +4,7 @@ import { extrinsicFromEvent } from '../../helper';
 import { Event } from '../../processor';
 import { decodeDepositedEvent, decodeTransferredEvent, decodeWithdrawnEvent } from './decode';
 
-export const currencyDeposited = async (event: Event): Promise<HistoricalAccountBalance> => {
+export const deposited = async (event: Event): Promise<HistoricalAccountBalance> => {
   const { assetId, accountId, amount } = decodeDepositedEvent(event);
 
   const hab = new HistoricalAccountBalance({
@@ -20,7 +20,7 @@ export const currencyDeposited = async (event: Event): Promise<HistoricalAccount
   return hab;
 };
 
-export const currencyTransferred = async (event: Event): Promise<HistoricalAccountBalance[] | undefined> => {
+export const transferred = async (event: Event): Promise<HistoricalAccountBalance[] | undefined> => {
   const { assetId, fromAccountId, toAccountId, amount } = decodeTransferredEvent(event);
   if (assetId === _Asset.Ztg) return;
   const habs: HistoricalAccountBalance[] = [];
@@ -51,7 +51,7 @@ export const currencyTransferred = async (event: Event): Promise<HistoricalAccou
   return habs;
 };
 
-export const currencyWithdrawn = async (event: Event): Promise<HistoricalAccountBalance> => {
+export const withdrawn = async (event: Event): Promise<HistoricalAccountBalance> => {
   const { assetId, accountId, amount } = decodeWithdrawnEvent(event);
 
   const hab = new HistoricalAccountBalance({
