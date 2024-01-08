@@ -5,8 +5,8 @@
 import axios from 'axios';
 import { AccountInfo } from '@polkadot/types/interfaces/system';
 import SDK, { util } from '@zeitgeistpm/sdk';
-import { Tools } from '../../src/mappings/util';
 import { HistoricalAccountBalance } from '../../src/model';
+import { Tools } from '../../src/util';
 
 let NODE_URL: string;
 let GRAPHQL_HOSTNAME: string;
@@ -89,7 +89,7 @@ const validateBalanceHistory = async () => {
   if (balanceHistory.length === 0) process.exit(0);
 
   const sdk = await Tools.getSDK(NODE_URL);
-  let fromBlockNum = balanceHistory[0].blockNumber;
+  let fromBlockNum = balanceHistory[0].blockNumber - 1;
   let toBlockNum = squidHeight;
   let lastChainBalance = BigInt(0);
   let lastSquidBalance = BigInt(0);

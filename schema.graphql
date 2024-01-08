@@ -223,7 +223,7 @@ type Pool @entity {
   "List of assets connected to the pool"
   assets: [Asset!]! @derivedFrom(field: "pool")
   "The base asset in the market swap pool (usually a currency)"
-  baseAsset: String!
+  baseAsset: String
   "Timestamp of pool creation"
   createdAt: DateTime!
   "Zeitgeist's identifier for market connected to the pool"
@@ -237,7 +237,7 @@ type Pool @entity {
   "Subsidy gathered for the market"
   totalSubsidy: String
   "Sum of `weights`"
-  totalWeight: String!
+  totalWeight: String
   "Total amount of ZTG that has moved through a market's liquidity pool"
   volume: BigInt!
   "List of lengths for each asset"
@@ -287,7 +287,7 @@ type Extrinsic @jsonField {
   "Extrinsic hash"
   hash: String!
   "Name of the extrinsic"
-  name: String!
+  name: String
 }
 
 """
@@ -431,9 +431,11 @@ enum MarketEvent {
   MarketDestroyed
   MarketDisputed
   MarketExpired
+  MarketInsufficientSubsidy
   MarketRejected
   MarketReported
   MarketResolved
+  MarketStartedWithSubsidy 
   PoolDeployed
 }
 

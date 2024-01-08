@@ -1,8 +1,8 @@
 import { Arg, Field, ObjectType, Query, Resolver, registerEnumType, InputType } from 'type-graphql';
 import type { EntityManager } from 'typeorm';
-import { formatAssetId } from '../../mappings/helper';
 import { HistoricalAccountBalance } from '../../model/generated';
 import { Asset } from '../../types/v50';
+import { formatAssetId } from '../../helper';
 import { balanceInfo } from '../query';
 
 @ObjectType()

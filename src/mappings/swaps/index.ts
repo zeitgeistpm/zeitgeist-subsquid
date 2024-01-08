@@ -1,5 +1,5 @@
-import { encodeAddress } from '@polkadot/keyring';
-import { SubstrateBlock } from '@subsquid/substrate-processor';
+import { Store } from '@subsquid/typeorm-store';
+import * as ss58 from '@subsquid/ss58';
 import { util } from '@zeitgeistpm/sdk';
 import {
   Account,
@@ -17,43 +17,31 @@ import {
   PoolStatus,
   Weight,
 } from '../../model';
-import { Ctx, EventItem } from '../../processor';
+import { Pallet, SWAP_EXACT_AMOUNT_IN, SWAP_EXACT_AMOUNT_OUT } from '../../consts';
+import { computeSwapSpotPrice, extrinsicFromEvent, formatAssetId, isBaseAsset, mergeByAssetId } from '../../helper';
+import { Call, Event } from '../../processor';
+import { Tools } from '../../util';
 import {
-  calcSpotPrice,
-  extrinsicFromEvent,
-  formatAssetId,
-  formatMarketEvent,
-  formatPoolStatus,
-  formatScoringRule,
-  isBaseAsset,
-  mergeByAssetId,
-} from '../helper';
-import { Tools } from '../util';
-import {
-  getArbitrageBuyBurnEvent,
-  getArbitrageMintSellEvent,
-  getPoolActiveEvent,
-  getPoolClosedEvent,
-  getPoolCreateEvent,
-  getPoolDestroyedEvent,
-  getPoolExitCall,
-  getPoolExitEvent,
-  getPoolExitWithExactAssetAmountEvent,
-  getPoolJoinEvent,
-  getPoolJoinWithExactAssetAmountEvent,
-  getSwapExactAmountInEvent,
-  getSwapExactAmountOutEvent,
-} from './types';
+  decodeArbitrageBuyBurnEvent,
+  decodeArbitrageMintSellEvent,
+  decodePoolActiveEvent,
+  decodePoolClosedEvent,
+  decodePoolCreateEvent,
+  decodePoolDestroyedEvent,
+  decodePoolExitCall,
+  decodePoolExitEvent,
+  decodePoolExitWithExactAssetAmountEvent,
+  decodePoolJoinEvent,
+  decodePoolJoinWithExactAssetAmountEvent,
+  decodeSwapExactAmountInEvent,
+  decodeSwapExactAmountOutEvent,
+} from './decode';
 
-export const arbitrageBuyBurn = async (
-  ctx: Ctx,
-  block: SubstrateBlock,
-  item: EventItem
-): Promise<HistoricalAsset[] | undefined> => {
-  const { poolId, amount } = getArbitrageBuyBurnEvent(ctx, item);
+export const arbitrageBuyBurn = async (store: Store, event: Event): Promise<HistoricalAsset[] | undefined> => {
+  const { poolId } = decodeArbitrageBuyBurnEvent(event);
 
-  const pool = await ctx.store.get(Pool, {
-    where: { poolId: +poolId.toString() },
+  const pool = await store.get(Pool, {
+    where: { poolId },
     relations: { account: { balances: true } },
   });
   if (!pool) return;
@@ -73,7 +61,7 @@ export const arbitrageBuyBurn = async (
   await Promise.all(
     poolAssets.map(async (poolAsset) => {
       if (isBaseAsset(poolAsset.assetId)) return;
-      const asset = await ctx.store.get(Asset, {
+      const asset = await store.get(Asset, {
         where: { assetId: poolAsset.assetId },
       });
       if (!asset) return;
@@ -81,25 +69,30 @@ export const arbitrageBuyBurn = async (
       const oldAssetQty = asset.amountInPool;
       const oldPrice = asset.price;
       const newAssetQty = poolAsset.balance;
-      const newPrice = calcSpotPrice(+baseAssetQty.toString(), baseAssetWeight, +newAssetQty.toString(), assetWeight);
+      const newPrice = computeSwapSpotPrice(
+        +baseAssetQty.toString(),
+        baseAssetWeight,
+        +newAssetQty.toString(),
+        assetWeight
+      );
 
       asset.price = newPrice;
       asset.amountInPool = newAssetQty;
-      console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
-      await ctx.store.save<Asset>(asset);
+      console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
+      await store.save<Asset>(asset);
 
       const ha = new HistoricalAsset({
         accountId: null,
         assetId: asset.assetId,
         baseAssetTraded: BigInt(0),
-        blockNumber: block.height,
+        blockNumber: event.block.height,
         dAmountInPool: newAssetQty - oldAssetQty,
         dPrice: newPrice - oldPrice,
-        event: item.event.name.split('.')[1],
-        id: item.event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+        event: event.name.split('.')[1],
+        id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
         newAmountInPool: asset.amountInPool,
         newPrice: asset.price,
-        timestamp: new Date(block.timestamp),
+        timestamp: new Date(event.block.timestamp!),
       });
       historicalAssets.push(ha);
     })
@@ -107,15 +100,11 @@ export const arbitrageBuyBurn = async (
   return historicalAssets;
 };
 
-export const arbitrageMintSell = async (
-  ctx: Ctx,
-  block: SubstrateBlock,
-  item: EventItem
-): Promise<HistoricalAsset[] | undefined> => {
-  const { poolId, amount } = getArbitrageMintSellEvent(ctx, item);
+export const arbitrageMintSell = async (store: Store, event: Event): Promise<HistoricalAsset[] | undefined> => {
+  const { poolId } = decodeArbitrageMintSellEvent(event);
 
-  const pool = await ctx.store.get(Pool, {
-    where: { poolId: +poolId.toString() },
+  const pool = await store.get(Pool, {
+    where: { poolId },
     relations: { account: { balances: true } },
   });
   if (!pool) return;
@@ -135,7 +124,7 @@ export const arbitrageMintSell = async (
   await Promise.all(
     poolAssets.map(async (poolAsset) => {
       if (isBaseAsset(poolAsset.assetId)) return;
-      const asset = await ctx.store.get(Asset, {
+      const asset = await store.get(Asset, {
         where: { assetId: poolAsset.assetId },
       });
       if (!asset) return;
@@ -143,25 +132,30 @@ export const arbitrageMintSell = async (
       const oldAssetQty = asset.amountInPool;
       const oldPrice = asset.price;
       const newAssetQty = poolAsset.balance;
-      const newPrice = calcSpotPrice(+baseAssetQty.toString(), baseAssetWeight, +newAssetQty.toString(), assetWeight);
+      const newPrice = computeSwapSpotPrice(
+        +baseAssetQty.toString(),
+        baseAssetWeight,
+        +newAssetQty.toString(),
+        assetWeight
+      );
 
       asset.price = newPrice;
       asset.amountInPool = newAssetQty;
-      console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
-      await ctx.store.save<Asset>(asset);
+      console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
+      await store.save<Asset>(asset);
 
       const ha = new HistoricalAsset({
         accountId: null,
         assetId: asset.assetId,
         baseAssetTraded: BigInt(0),
-        blockNumber: block.height,
+        blockNumber: event.block.height,
         dAmountInPool: newAssetQty - oldAssetQty,
         dPrice: newPrice - oldPrice,
-        event: item.event.name.split('.')[1],
-        id: item.event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+        event: event.name.split('.')[1],
+        id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
         newAmountInPool: asset.amountInPool,
         newPrice: asset.price,
-        timestamp: new Date(block.timestamp),
+        timestamp: new Date(event.block.timestamp!),
       });
       historicalAssets.push(ha);
     })
@@ -169,78 +163,69 @@ export const arbitrageMintSell = async (
   return historicalAssets;
 };
 
-export const poolActive = async (
-  ctx: Ctx,
-  block: SubstrateBlock,
-  item: EventItem
-): Promise<HistoricalPool | undefined> => {
-  const { poolId } = getPoolActiveEvent(ctx, item);
+export const poolActive = async (store: Store, event: Event): Promise<HistoricalPool | undefined> => {
+  const { poolId } = decodePoolActiveEvent(event);
 
-  const pool = await ctx.store.get(Pool, {
-    where: { poolId: +poolId.toString() },
+  const pool = await store.get(Pool, {
+    where: { poolId },
   });
   if (!pool) return;
   pool.status = PoolStatus.Active;
-  console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
-  await ctx.store.save<Pool>(pool);
+  console.log(`[${event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
+  await store.save<Pool>(pool);
 
   const hp = new HistoricalPool({
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     dVolume: BigInt(0),
-    event: item.event.name.split('.')[1],
-    id: item.event.id + '-' + pool.poolId,
-    poolId: pool.poolId,
+    event: event.name.split('.')[1],
+    id: event.id + '-' + poolId,
+    poolId,
     status: pool.status,
-    timestamp: new Date(block.timestamp),
+    timestamp: new Date(event.block.timestamp!),
     volume: pool.volume,
   });
   return hp;
 };
 
-export const poolClosed = async (
-  ctx: Ctx,
-  block: SubstrateBlock,
-  item: EventItem
-): Promise<HistoricalPool | undefined> => {
-  const { poolId } = getPoolClosedEvent(ctx, item);
+export const poolClosed = async (store: Store, event: Event): Promise<HistoricalPool | undefined> => {
+  const { poolId } = decodePoolClosedEvent(event);
 
-  const pool = await ctx.store.get(Pool, {
-    where: { poolId: +poolId.toString() },
+  const pool = await store.get(Pool, {
+    where: { poolId },
   });
   if (!pool) return;
   pool.status = PoolStatus.Closed;
-  console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
-  await ctx.store.save<Pool>(pool);
+  console.log(`[${event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
+  await store.save<Pool>(pool);
 
   const hp = new HistoricalPool({
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     dVolume: BigInt(0),
-    event: item.event.name.split('.')[1],
-    id: item.event.id + '-' + pool.poolId,
-    poolId: pool.poolId,
+    event: event.name.split('.')[1],
+    id: event.id + '-' + poolId,
+    poolId,
     status: pool.status,
-    timestamp: new Date(block.timestamp),
+    timestamp: new Date(event.block.timestamp!),
     volume: pool.volume,
   });
   return hp;
 };
 
 export const poolCreate = async (
-  ctx: Ctx,
-  block: SubstrateBlock,
-  item: EventItem
+  store: Store,
+  event: Event
 ): Promise<{ historicalAssets: HistoricalAsset[]; historicalPool: HistoricalPool } | undefined> => {
-  let { cpep, swapPool, amount, accountId } = getPoolCreateEvent(ctx, item);
+  let { cpep, pool, amount, accountId } = decodePoolCreateEvent(event);
+  const poolId = Number(cpep.poolId);
 
-  const poolId = cpep.poolId.toString();
   if (!accountId) {
     const sdk = await Tools.getSDK();
     // @ts-ignore
-    accountId = (await sdk.api.rpc.swaps.poolAccountId(poolId)).toString();
+    accountId = (await sdk.api.rpc.swaps.poolAccountId(BigInt(poolId))).toString();
   }
 
-  const account = await ctx.store.get(Account, {
-    where: { accountId: accountId },
+  const account = await store.get(Account, {
+    where: { accountId },
     relations: { balances: true },
   });
   if (!account) {
@@ -248,119 +233,118 @@ export const poolCreate = async (
     return;
   }
 
-  const pool = new Pool({
+  const newPool = new Pool({
     account: account,
-    baseAsset: formatAssetId(swapPool.baseAsset),
-    createdAt: new Date(block.timestamp),
-    marketId: +swapPool.marketId.toString(),
-    id: item.event.id + '-' + poolId,
-    poolId: +poolId,
-    status: formatPoolStatus(swapPool.poolStatus),
-    swapFee: swapPool.swapFee ? swapPool.swapFee.toString() : null,
-    totalSubsidy: swapPool.totalSubsidy ? swapPool.totalSubsidy.toString() : null,
-    totalWeight: swapPool.totalWeight ? swapPool.totalWeight.toString() : '',
+    baseAsset: pool.baseAsset ? formatAssetId(pool.baseAsset) : null,
+    createdAt: new Date(event.block.timestamp!),
+    marketId: Number(pool.marketId),
+    id: event.id + '-' + poolId,
+    poolId,
+    status: event.block.specVersion < 39 ? PoolStatus.Active : PoolStatus.Initialized,
+    swapFee: pool.swapFee ? pool.swapFee.toString() : null,
+    totalSubsidy: pool.totalSubsidy ? pool.totalSubsidy.toString() : null,
+    totalWeight: pool.totalWeight ? pool.totalWeight.toString() : null,
     weights: [],
     volume: BigInt(0),
   });
-  console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
-  await ctx.store.save<Pool>(pool);
+  console.log(`[${event.name}] Saving pool: ${JSON.stringify(newPool, null, 2)}`);
+  await store.save<Pool>(newPool);
 
-  const market = await ctx.store.get(Market, {
-    where: { marketId: pool.marketId },
+  const market = await store.get(Market, {
+    where: { marketId: newPool.marketId },
   });
   if (!market) return;
-  market.pool = pool;
-  console.log(`[${item.event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
-  await ctx.store.save<Market>(market);
+  market.pool = newPool;
+  console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
+  await store.save<Market>(market);
 
   const hm = new HistoricalMarket({
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     by: null,
     event: MarketEvent.PoolDeployed,
-    id: item.event.id + '-' + market.marketId,
+    id: event.id + '-' + market.marketId,
     market: market,
     outcome: null,
     resolvedOutcome: null,
     status: market.status,
-    timestamp: new Date(block.timestamp),
+    timestamp: new Date(event.block.timestamp!),
   });
-  console.log(`[${item.event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
-  await ctx.store.save<HistoricalMarket>(hm);
+  console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
+  await store.save<HistoricalMarket>(hm);
 
-  let baseAssetQty = pool.account.balances[pool.account.balances.length - 1].balance;
+  let baseAssetQty = newPool.account.balances[newPool.account.balances.length - 1].balance;
   await Promise.all(
-    pool.account.balances.map(async (ab) => {
-      if (ab.assetId === pool.baseAsset) baseAssetQty = ab.balance;
+    newPool.account.balances.map(async (ab) => {
+      if (ab.assetId === newPool.baseAsset) baseAssetQty = ab.balance;
     })
   );
 
   const historicalAssets: HistoricalAsset[] = [];
-  if (swapPool.weights && isBaseAsset(swapPool.weights[swapPool.weights.length - 1][0])) {
-    const baseAssetWeight = +swapPool.weights[swapPool.weights.length - 1][1].toString();
+  if (pool.weights && isBaseAsset(pool.weights[pool.weights.length - 1][0])) {
+    const baseAssetWeight = +pool.weights[pool.weights.length - 1][1].toString();
     await Promise.all(
-      swapPool.weights.map(async (weight, i) => {
+      pool.weights.map(async (weight, i) => {
         const wt = new Weight({
           assetId: formatAssetId(weight[0]),
           weight: weight[1],
         });
-        pool.weights.push(wt);
+        newPool.weights.push(wt);
         if (isBaseAsset(weight[0])) return;
 
-        const ab = await ctx.store.findOneBy(AccountBalance, {
-          account: { accountId: accountId },
+        const ab = await store.findOneBy(AccountBalance, {
+          account: { accountId },
           assetId: wt.assetId,
         });
-        const assetQty = ab ? +ab.balance.toString() : 10 ** 12;
+        const assetQty = ab ? Number(ab.balance) : 10 ** 12;
 
         const asset = new Asset({
           assetId: wt.assetId,
           amountInPool: BigInt(assetQty),
-          id: item.event.id + '-' + pool.marketId + i,
+          id: event.id + '-' + pool.marketId + i,
           market: market,
-          pool: pool,
-          price: calcSpotPrice(+baseAssetQty.toString(), baseAssetWeight, assetQty, +wt.weight.toString()),
+          pool: newPool,
+          price: computeSwapSpotPrice(+baseAssetQty.toString(), baseAssetWeight, assetQty, +wt.weight.toString()),
         });
-        console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
-        await ctx.store.save<Asset>(asset);
+        console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
+        await store.save<Asset>(asset);
 
         const ha = new HistoricalAsset({
-          accountId: encodeAddress(cpep.who, 73),
+          accountId: ss58.encode({ prefix: 73, bytes: cpep.who }),
           assetId: asset.assetId,
           baseAssetTraded: BigInt(0),
-          blockNumber: block.height,
+          blockNumber: event.block.height,
           dAmountInPool: asset.amountInPool,
           dPrice: asset.price,
-          event: item.event.name.split('.')[1],
-          id: item.event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+          event: event.name.split('.')[1],
+          id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
           newAmountInPool: asset.amountInPool,
           newPrice: asset.price,
-          timestamp: new Date(block.timestamp),
+          timestamp: new Date(event.block.timestamp!),
         });
         historicalAssets.push(ha);
       })
     );
   }
-  console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
-  await ctx.store.save<Pool>(pool);
+  console.log(`[${event.name}] Saving pool: ${JSON.stringify(newPool, null, 2)}`);
+  await store.save<Pool>(newPool);
 
   const historicalPool = new HistoricalPool({
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     dVolume: BigInt(0),
-    event: item.event.name.split('.')[1],
-    id: item.event.id + '-' + pool.poolId,
-    poolId: pool.poolId,
-    status: pool.status,
-    timestamp: new Date(block.timestamp),
-    volume: pool.volume,
+    event: event.name.split('.')[1],
+    id: event.id + '-' + poolId,
+    poolId,
+    status: newPool.status,
+    timestamp: new Date(event.block.timestamp!),
+    volume: newPool.volume,
   });
 
   return { historicalAssets, historicalPool };
 };
 
 export const poolDestroyed = async (
-  ctx: Ctx,
-  block: SubstrateBlock,
-  item: EventItem
+  store: Store,
+  event: Event
 ): Promise<
   | {
       historicalAccountBalances: HistoricalAccountBalance[];
@@ -369,50 +353,52 @@ export const poolDestroyed = async (
     }
   | undefined
 > => {
-  const { poolId } = getPoolDestroyedEvent(ctx, item);
+  const { poolId } = decodePoolDestroyedEvent(event);
   const historicalAccountBalances: HistoricalAccountBalance[] = [];
 
-  const pool = await ctx.store.get(Pool, {
-    where: { poolId: +poolId.toString() },
+  const pool = await store.get(Pool, {
+    where: { poolId },
     relations: { account: true },
   });
   if (!pool) return;
   pool.status = PoolStatus.Destroyed;
-  console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
-  await ctx.store.save<Pool>(pool);
+  console.log(`[${event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
+  await store.save<Pool>(pool);
 
   const historicalPool = new HistoricalPool({
-    blockNumber: block.height,
+    blockNumber: event.block.height,
     dVolume: BigInt(0),
-    event: item.event.name.split('.')[1],
-    id: item.event.id + '-' + pool.poolId,
-    poolId: pool.poolId,
+    event: event.name.split('.')[1],
+    id: event.id + '-' + poolId,
+    poolId,
     status: pool.status,
-    timestamp: new Date(block.timestamp),
+    timestamp: new Date(event.block.timestamp!),
     volume: pool.volume,
   });
 
-  const ab = await ctx.store.findOne(AccountBalance, {
-    where: {
-      account: { accountId: pool.account.accountId },
-      assetId: pool.baseAsset,
-    },
-  });
-  if (!ab) return;
+  if (pool.baseAsset) {
+    const ab = await store.findOne(AccountBalance, {
+      where: {
+        account: { accountId: pool.account.accountId },
+        assetId: pool.baseAsset,
+      },
+    });
+    if (ab) {
+      const hab = new HistoricalAccountBalance({
+        accountId: pool.account.accountId,
+        assetId: ab.assetId,
+        blockNumber: event.block.height,
+        dBalance: -ab.balance,
+        event: event.name.split('.')[1],
+        extrinsic: extrinsicFromEvent(event),
+        id: event.id + '-' + pool.account.accountId.slice(-5),
+        timestamp: new Date(event.block.timestamp!),
+      });
+      historicalAccountBalances.push(hab);
+    }
+  }
 
-  const hab = new HistoricalAccountBalance({
-    accountId: pool.account.accountId,
-    assetId: ab.assetId,
-    blockNumber: block.height,
-    dBalance: -ab.balance,
-    event: item.event.name.split('.')[1],
-    extrinsic: extrinsicFromEvent(item.event),
-    id: item.event.id + '-' + pool.account.accountId.slice(-5),
-    timestamp: new Date(block.timestamp),
-  });
-  historicalAccountBalances.push(hab);
-
-  const market = await ctx.store.findOneBy(Market, {
+  const market = await store.findOneBy(Market, {
     pool: { poolId: Number(poolId) },
   });
   if (!market) return;
@@ -421,7 +407,7 @@ export const poolDestroyed = async (
   const numOfOutcomeAssets = market.outcomeAssets.length;
   if (numOfOutcomeAssets === 0) return;
   for (let i = 0; i < numOfOutcomeAssets; i++) {
-    const asset = await ctx.store.get(Asset, {
+    const asset = await store.get(Asset, {
       where: { assetId: market.outcomeAssets[i]! },
     });
     if (!asset) return;
@@ -431,25 +417,25 @@ export const poolDestroyed = async (
     const newAssetQty = BigInt(0);
     asset.price = newPrice;
     asset.amountInPool = newAssetQty;
-    console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
-    await ctx.store.save<Asset>(asset);
+    console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
+    await store.save<Asset>(asset);
 
     const ha = new HistoricalAsset({
       accountId: null,
       assetId: asset.assetId,
       baseAssetTraded: BigInt(0),
-      blockNumber: block.height,
+      blockNumber: event.block.height,
       dAmountInPool: newAssetQty - oldAssetQty,
       dPrice: newPrice - oldPrice,
-      event: item.event.name.split('.')[1],
-      id: item.event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+      event: event.name.split('.')[1],
+      id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
       newAmountInPool: asset.amountInPool,
       newPrice: asset.price,
-      timestamp: new Date(block.timestamp),
+      timestamp: new Date(event.block.timestamp!),
     });
     historicalAssets.push(ha);
 
-    const abs = await ctx.store.find(AccountBalance, {
+    const abs = await store.find(AccountBalance, {
       where: { assetId: market.outcomeAssets[i]! },
       relations: { account: true },
     });
@@ -460,12 +446,12 @@ export const poolDestroyed = async (
         const hab = new HistoricalAccountBalance({
           accountId: ab.account.accountId,
           assetId: ab.assetId,
-          blockNumber: block.height,
+          blockNumber: event.block.height,
           dBalance: -ab.balance,
-          event: item.event.name.split('.')[1],
-          extrinsic: extrinsicFromEvent(item.event),
-          id: item.event.id + '-' + market.marketId + i + '-' + ab.account.accountId.slice(-5),
-          timestamp: new Date(block.timestamp),
+          event: event.name.split('.')[1],
+          extrinsic: extrinsicFromEvent(event),
+          id: event.id + '-' + market.marketId + i + '-' + ab.account.accountId.slice(-5),
+          timestamp: new Date(event.block.timestamp!),
         });
         historicalAccountBalances.push(hab);
       })
@@ -474,20 +460,16 @@ export const poolDestroyed = async (
   return { historicalAccountBalances, historicalAssets, historicalPool };
 };
 
-export const poolExit = async (
-  ctx: Ctx,
-  block: SubstrateBlock,
-  item: EventItem
-): Promise<HistoricalAsset[] | undefined> => {
-  const { pae, walletId } = getPoolExitEvent(ctx, item);
+export const poolExit = async (store: Store, event: Event): Promise<HistoricalAsset[] | undefined> => {
+  const { pae } = decodePoolExitEvent(event);
 
-  const pool = await ctx.store.get(Pool, {
-    where: { poolId: +pae.cpep.poolId.toString() },
+  const pool = await store.get(Pool, {
+    where: { poolId: Number(pae.cpep.poolId) },
     relations: { account: { balances: true } },
   });
   if (!pool) return;
 
-  const market = await ctx.store.get(Market, {
+  const market = await store.get(Market, {
     where: { pool: { poolId: pool.poolId } },
   });
   if (!market) return;
@@ -503,19 +485,21 @@ export const poolExit = async (
   const baseAssetWeight = +pool.weights[numOfPoolWts - 1]!.weight.toString();
   const historicalAssets: HistoricalAsset[] = [];
 
+  // @ts-ignore
   if (pae.assets) {
     await Promise.all(
+      // @ts-ignore
       pae.assets.map(async (a, idx) => {
         if (isBaseAsset(a)) return;
         const assetId = formatAssetId(a);
 
-        const asset = await ctx.store.get(Asset, { where: { assetId: assetId } });
+        const asset = await store.get(Asset, { where: { assetId: assetId } });
         if (!asset) return;
 
         let assetWeight = 0;
         for (let i = 0; i < numOfPoolWts; i++) {
-          if (pool!.weights[i]!.assetId == assetId) {
-            assetWeight = +pool!.weights[i]!.weight.toString();
+          if (pool.weights[i].assetId == assetId) {
+            assetWeight = +pool.weights[i].weight.toString();
           }
         }
         if (assetWeight == 0) {
@@ -528,25 +512,30 @@ export const poolExit = async (
         const oldPrice = asset.price;
         let newPrice = oldPrice;
         if (!market.resolvedOutcome) {
-          newPrice = calcSpotPrice(+baseAssetQty.toString(), baseAssetWeight, +newAssetQty.toString(), assetWeight);
+          newPrice = computeSwapSpotPrice(
+            +baseAssetQty.toString(),
+            baseAssetWeight,
+            +newAssetQty.toString(),
+            assetWeight
+          );
         }
         asset.price = newPrice;
         asset.amountInPool = newAssetQty;
-        console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
-        await ctx.store.save<Asset>(asset);
+        console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
+        await store.save<Asset>(asset);
 
         const ha = new HistoricalAsset({
-          accountId: walletId,
+          accountId: ss58.encode({ prefix: 73, bytes: pae.cpep.who }),
           assetId: asset.assetId,
           baseAssetTraded: BigInt(0),
-          blockNumber: block.height,
+          blockNumber: event.block.height,
           dAmountInPool: newAssetQty - oldAssetQty,
           dPrice: newPrice - oldPrice,
-          event: item.event.name.split('.')[1],
-          id: item.event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+          event: event.name.split('.')[1],
+          id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
           newAmountInPool: asset.amountInPool,
           newPrice: asset.price,
-          timestamp: new Date(block.timestamp),
+          timestamp: new Date(event.block.timestamp!),
         });
         historicalAssets.push(ha);
       })
@@ -555,36 +544,41 @@ export const poolExit = async (
     await Promise.all(
       pool.weights.map(async (wt, idx) => {
         if (idx >= pae.transferred.length - 1) return;
-        const asset = await ctx.store.get(Asset, {
-          where: { assetId: wt!.assetId },
+        const asset = await store.get(Asset, {
+          where: { assetId: wt.assetId },
         });
         if (!asset) return;
 
-        const assetWeight = +wt!.weight.toString();
+        const assetWeight = +wt.weight.toString();
         const oldAssetQty = asset.amountInPool;
         const newAssetQty = oldAssetQty - BigInt(pae.transferred[idx].toString());
         const oldPrice = asset.price;
         let newPrice = oldPrice;
         if (oldPrice > 0 && oldPrice < 1) {
-          newPrice = calcSpotPrice(+baseAssetQty.toString(), baseAssetWeight, +newAssetQty.toString(), assetWeight);
+          newPrice = computeSwapSpotPrice(
+            +baseAssetQty.toString(),
+            baseAssetWeight,
+            +newAssetQty.toString(),
+            assetWeight
+          );
         }
         asset.price = newPrice;
         asset.amountInPool = newAssetQty;
-        console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
-        await ctx.store.save<Asset>(asset);
+        console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
+        await store.save<Asset>(asset);
 
         const ha = new HistoricalAsset({
-          accountId: walletId,
+          accountId: ss58.encode({ prefix: 73, bytes: pae.cpep.who }),
           assetId: asset.assetId,
           baseAssetTraded: BigInt(0),
-          blockNumber: block.height,
+          blockNumber: event.block.height,
           dAmountInPool: newAssetQty - oldAssetQty,
           dPrice: newPrice - oldPrice,
-          event: item.event.name.split('.')[1],
-          id: item.event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+          event: event.name.split('.')[1],
+          id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
           newAmountInPool: asset.amountInPool,
           newPrice: asset.price,
-          timestamp: new Date(block.timestamp),
+          timestamp: new Date(event.block.timestamp!),
         });
         historicalAssets.push(ha);
       })
@@ -597,22 +591,24 @@ export const poolExit = async (
  * This handler is used to debit pool shares from an account
  * When the account exits the pool via call `Swaps.pool_exit`
  */
-export const poolExitCall = async (ctx: Ctx, block: SubstrateBlock, item: any) => {
-  // @ts-ignore
-  const accountId =
-    item.call.origin !== undefined ? item.call.origin.value.value : item.extrinsic.signature.address.value;
-  const walletId = encodeAddress(accountId, 73);
-  // @ts-ignore
-  const { poolId, poolAmount } = getPoolExitCall(ctx, item.call);
-
-  const pool = await ctx.store.get(Pool, {
-    where: { poolId: poolId },
+export const poolExitCall = async (store: Store, call: Call) => {
+  const { poolId, poolAmount } = decodePoolExitCall(call);
+  const pool = await store.get(Pool, {
+    where: { poolId },
   });
   if (!pool) return;
 
+  let accountId;
+  if (call.origin) {
+    accountId = call.origin.value.value;
+  } else if (call.extrinsic && call.extrinsic.signature && call.extrinsic.signature.address) {
+    accountId = (call.extrinsic.signature.address as any).value;
+  }
+  accountId = ss58.encode({ prefix: 73, bytes: accountId });
+
   const assetId = JSON.stringify(util.AssetIdFromString('pool' + poolId));
-  const ab = await ctx.store.findOneBy(AccountBalance, {
-    account: { accountId: walletId },
+  const ab = await store.findOneBy(AccountBalance, {
+    account: { accountId },
     assetId: assetId,
   });
   if (!ab) return;
@@ -620,34 +616,36 @@ export const poolExitCall = async (ctx: Ctx, block: SubstrateBlock, item: any) =
   // Balance is fully debited only if it is less than the amount seeked
   const newBalance = ab.balance > poolAmount ? ab.balance - poolAmount : BigInt(0);
   ab.balance = newBalance;
-  console.log(`[${item.call.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-  await ctx.store.save<AccountBalance>(ab);
+  console.log(`[${call.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
+  await store.save<AccountBalance>(ab);
 
-  const hab = new HistoricalAccountBalance();
-  hab.id = item.call.id + '-' + walletId.slice(-5);
-  hab.accountId = walletId;
-  hab.event = item.call.name.split('.')[1];
-  hab.extrinsic = new Extrinsic({ name: item.call.name, hash: item.extrinsic.hash });
-  hab.assetId = ab.assetId;
-  hab.dBalance = newBalance - oldBalance;
-  hab.blockNumber = block.height;
-  hab.timestamp = new Date(block.timestamp);
-  console.log(`[${item.call.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
-  await ctx.store.save<HistoricalAccountBalance>(hab);
+  const hab = new HistoricalAccountBalance({
+    accountId,
+    assetId: ab.assetId,
+    blockNumber: call.block.height,
+    dBalance: newBalance - oldBalance,
+    event: call.name.split('.')[1],
+    extrinsic: call.extrinsic ? new Extrinsic({ name: call.name, hash: call.extrinsic.hash }) : null,
+    id: call.id + '-' + accountId.slice(-5),
+    timestamp: new Date(call.block.timestamp!),
+  });
+  console.log(`[${call.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
+  await store.save<HistoricalAccountBalance>(hab);
 };
 
 export const poolExitWithExactAssetAmount = async (
-  ctx: Ctx,
-  block: SubstrateBlock,
-  item: EventItem
+  store: Store,
+  event: Event
 ): Promise<HistoricalAsset[] | undefined> => {
-  const { pae, walletId } = getPoolExitWithExactAssetAmountEvent(ctx, item);
+  const { pae } = decodePoolExitWithExactAssetAmountEvent(event);
 
-  const pool = await ctx.store.get(Pool, {
-    where: { poolId: +pae.cpep.poolId.toString() },
+  const pool = await store.get(Pool, {
+    where: { poolId: Number(pae.cpep.poolId) },
     relations: { account: { balances: true } },
   });
-  if (!pool || !isBaseAsset(pae.asset)) return;
+  if (!pool) return;
+  // @ts-ignore
+  if (pae.asset && !isBaseAsset(pae.asset)) return;
 
   const poolAssets = mergeByAssetId(pool.account.balances, pool.weights);
   let baseAssetQty: number, baseAssetWeight: number;
@@ -664,7 +662,7 @@ export const poolExitWithExactAssetAmount = async (
   await Promise.all(
     poolAssets.map(async (poolAsset) => {
       if (isBaseAsset(poolAsset.assetId)) return;
-      const asset = await ctx.store.get(Asset, {
+      const asset = await store.get(Asset, {
         where: { assetId: poolAsset.assetId },
       });
       if (!asset) return;
@@ -672,25 +670,30 @@ export const poolExitWithExactAssetAmount = async (
       const oldAssetQty = asset.amountInPool;
       const newAssetQty = poolAsset.balance;
       const oldPrice = asset.price;
-      const newPrice = calcSpotPrice(+baseAssetQty.toString(), baseAssetWeight, +newAssetQty.toString(), assetWeight);
+      const newPrice = computeSwapSpotPrice(
+        +baseAssetQty.toString(),
+        baseAssetWeight,
+        +newAssetQty.toString(),
+        assetWeight
+      );
 
       asset.price = newPrice;
       asset.amountInPool = newAssetQty;
-      console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
-      await ctx.store.save<Asset>(asset);
+      console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
+      await store.save<Asset>(asset);
 
       const ha = new HistoricalAsset({
-        accountId: walletId,
+        accountId: ss58.encode({ prefix: 73, bytes: pae.cpep.who }),
         assetId: asset.assetId,
         baseAssetTraded: BigInt(0),
-        blockNumber: block.height,
+        blockNumber: event.block.height,
         dAmountInPool: newAssetQty - oldAssetQty,
         dPrice: newPrice - oldPrice,
-        event: item.event.name.split('.')[1],
-        id: item.event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+        event: event.name.split('.')[1],
+        id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
         newAmountInPool: asset.amountInPool,
         newPrice: asset.price,
-        timestamp: new Date(block.timestamp),
+        timestamp: new Date(event.block.timestamp!),
       });
       historicalAssets.push(ha);
     })
@@ -698,15 +701,11 @@ export const poolExitWithExactAssetAmount = async (
   return historicalAssets;
 };
 
-export const poolJoin = async (
-  ctx: Ctx,
-  block: SubstrateBlock,
-  item: EventItem
-): Promise<HistoricalAsset[] | undefined> => {
-  const { pae, walletId } = getPoolJoinEvent(ctx, item);
+export const poolJoin = async (store: Store, event: Event): Promise<HistoricalAsset[] | undefined> => {
+  const { pae } = decodePoolJoinEvent(event);
 
-  const pool = await ctx.store.get(Pool, {
-    where: { poolId: +pae.cpep.poolId.toString() },
+  const pool = await store.get(Pool, {
+    where: { poolId: Number(pae.cpep.poolId) },
     relations: { account: { balances: true } },
   });
   if (!pool) return;
@@ -719,22 +718,24 @@ export const poolJoin = async (
   );
 
   const numOfPoolWts = pool.weights.length;
-  const baseAssetWeight = +pool.weights[numOfPoolWts - 1]!.weight.toString();
+  const baseAssetWeight = +pool.weights[numOfPoolWts - 1].weight.toString();
   const historicalAssets: HistoricalAsset[] = [];
 
+  // @ts-ignore
   if (pae.assets) {
     await Promise.all(
+      // @ts-ignore
       pae.assets.map(async (a, idx) => {
         if (isBaseAsset(a)) return;
         const assetId = formatAssetId(a);
 
-        const asset = await ctx.store.get(Asset, { where: { assetId: assetId } });
+        const asset = await store.get(Asset, { where: { assetId: assetId } });
         if (!asset) return;
 
         let assetWeight = 0;
         for (let i = 0; i < numOfPoolWts; i++) {
-          if (pool!.weights[i]!.assetId == assetId) {
-            assetWeight = +pool!.weights[i]!.weight.toString();
+          if (pool.weights[i].assetId == assetId) {
+            assetWeight = +pool.weights[i].weight.toString();
           }
         }
         if (assetWeight == 0) {
@@ -745,25 +746,30 @@ export const poolJoin = async (
         const oldAssetQty = asset.amountInPool;
         const newAssetQty = oldAssetQty + BigInt(pae.transferred[idx].toString());
         const oldPrice = asset.price;
-        const newPrice = calcSpotPrice(+baseAssetQty.toString(), baseAssetWeight, +newAssetQty.toString(), assetWeight);
+        const newPrice = computeSwapSpotPrice(
+          +baseAssetQty.toString(),
+          baseAssetWeight,
+          +newAssetQty.toString(),
+          assetWeight
+        );
 
         asset.price = newPrice;
         asset.amountInPool = newAssetQty;
-        console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
-        await ctx.store.save<Asset>(asset);
+        console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
+        await store.save<Asset>(asset);
 
         const ha = new HistoricalAsset({
-          accountId: walletId,
+          accountId: ss58.encode({ prefix: 73, bytes: pae.cpep.who }),
           assetId: asset.assetId,
           baseAssetTraded: BigInt(0),
-          blockNumber: block.height,
+          blockNumber: event.block.height,
           dAmountInPool: newAssetQty - oldAssetQty,
           dPrice: newPrice - oldPrice,
-          event: item.event.name.split('.')[1],
-          id: item.event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+          event: event.name.split('.')[1],
+          id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
           newAmountInPool: asset.amountInPool,
           newPrice: asset.price,
-          timestamp: new Date(block.timestamp),
+          timestamp: new Date(event.block.timestamp!),
         });
         historicalAssets.push(ha);
       })
@@ -772,33 +778,38 @@ export const poolJoin = async (
     await Promise.all(
       pool.weights.map(async (wt, idx) => {
         if (idx >= pae.transferred.length - 1) return;
-        const asset = await ctx.store.get(Asset, {
-          where: { assetId: wt!.assetId },
+        const asset = await store.get(Asset, {
+          where: { assetId: wt.assetId },
         });
         if (!asset) return;
-        const assetWeight = +wt!.weight.toString();
+        const assetWeight = +wt.weight.toString();
         const oldAssetQty = asset.amountInPool;
         const newAssetQty = oldAssetQty + BigInt(pae.transferred[idx].toString());
         const oldPrice = asset.price;
-        const newPrice = calcSpotPrice(+baseAssetQty.toString(), baseAssetWeight, +newAssetQty.toString(), assetWeight);
+        const newPrice = computeSwapSpotPrice(
+          +baseAssetQty.toString(),
+          baseAssetWeight,
+          +newAssetQty.toString(),
+          assetWeight
+        );
 
         asset.price = newPrice;
         asset.amountInPool = newAssetQty;
-        console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
-        await ctx.store.save<Asset>(asset);
+        console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
+        await store.save<Asset>(asset);
 
         const ha = new HistoricalAsset({
-          accountId: walletId,
+          accountId: ss58.encode({ prefix: 73, bytes: pae.cpep.who }),
           assetId: asset.assetId,
           baseAssetTraded: BigInt(0),
-          blockNumber: block.height,
+          blockNumber: event.block.height,
           dAmountInPool: newAssetQty - oldAssetQty,
           dPrice: newPrice - oldPrice,
-          event: item.event.name.split('.')[1],
-          id: item.event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+          event: event.name.split('.')[1],
+          id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
           newAmountInPool: asset.amountInPool,
           newPrice: asset.price,
-          timestamp: new Date(block.timestamp),
+          timestamp: new Date(event.block.timestamp!),
         });
         historicalAssets.push(ha);
       })
@@ -808,17 +819,18 @@ export const poolJoin = async (
 };
 
 export const poolJoinWithExactAssetAmount = async (
-  ctx: Ctx,
-  block: SubstrateBlock,
-  item: EventItem
+  store: Store,
+  event: Event
 ): Promise<HistoricalAsset[] | undefined> => {
-  const { pae, walletId } = getPoolJoinWithExactAssetAmountEvent(ctx, item);
+  const { pae } = decodePoolJoinWithExactAssetAmountEvent(event);
 
-  const pool = await ctx.store.get(Pool, {
-    where: { poolId: +pae.cpep.poolId.toString() },
+  const pool = await store.get(Pool, {
+    where: { poolId: Number(pae.cpep.poolId) },
     relations: { account: { balances: true } },
   });
-  if (!pool || !isBaseAsset(pae.asset)) return;
+  if (!pool) return;
+  // @ts-ignore
+  if (pae.asset && !isBaseAsset(pae.asset)) return;
 
   const poolAssets = mergeByAssetId(pool.account.balances, pool.weights);
   let baseAssetQty: number, baseAssetWeight: number;
@@ -835,7 +847,7 @@ export const poolJoinWithExactAssetAmount = async (
   await Promise.all(
     poolAssets.map(async (poolAsset) => {
       if (isBaseAsset(poolAsset.assetId)) return;
-      const asset = await ctx.store.get(Asset, {
+      const asset = await store.get(Asset, {
         where: { assetId: poolAsset.assetId },
       });
       if (!asset) return;
@@ -843,25 +855,30 @@ export const poolJoinWithExactAssetAmount = async (
       const oldAssetQty = asset.amountInPool;
       const newAssetQty = poolAsset.balance;
       const oldPrice = asset.price;
-      const newPrice = calcSpotPrice(+baseAssetQty.toString(), baseAssetWeight, +newAssetQty.toString(), assetWeight);
+      const newPrice = computeSwapSpotPrice(
+        +baseAssetQty.toString(),
+        baseAssetWeight,
+        +newAssetQty.toString(),
+        assetWeight
+      );
 
       asset.price = newPrice;
       asset.amountInPool = newAssetQty;
-      console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
-      await ctx.store.save<Asset>(asset);
+      console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
+      await store.save<Asset>(asset);
 
       const ha = new HistoricalAsset({
-        accountId: walletId,
+        accountId: ss58.encode({ prefix: 73, bytes: pae.cpep.who }),
         assetId: asset.assetId,
         baseAssetTraded: BigInt(0),
-        blockNumber: block.height,
+        blockNumber: event.block.height,
         dAmountInPool: newAssetQty - oldAssetQty,
         dPrice: newPrice - oldPrice,
-        event: item.event.name.split('.')[1],
-        id: item.event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+        event: event.name.split('.')[1],
+        id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
         newAmountInPool: asset.amountInPool,
         newPrice: asset.price,
-        timestamp: new Date(block.timestamp),
+        timestamp: new Date(event.block.timestamp!),
       });
       historicalAssets.push(ha);
     })
@@ -870,54 +887,46 @@ export const poolJoinWithExactAssetAmount = async (
 };
 
 export const swapExactAmountIn = async (
-  ctx: Ctx,
-  block: SubstrateBlock,
-  item: EventItem
+  store: Store,
+  event: Event
 ): Promise<
   | { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalPool: HistoricalPool | undefined }
   | undefined
 > => {
-  const { swapEvent, walletId } = getSwapExactAmountInEvent(ctx, item);
+  const { swapEvent } = decodeSwapExactAmountInEvent(event);
+  const poolId = Number(swapEvent.cpep.poolId);
+  const accountId = ss58.encode({ prefix: 73, bytes: swapEvent.cpep.who });
 
-  const pool = await ctx.store.get(Pool, {
-    where: { poolId: +swapEvent.cpep.poolId.toString() },
+  const pool = await store.get(Pool, {
+    where: { poolId },
     relations: { account: { balances: true } },
   });
   if (!pool) return;
 
+  // @ts-ignore
   let assetBought = swapEvent.assetOut;
+  // @ts-ignore
   let assetSold = swapEvent.assetIn;
   if (!assetBought && !assetSold) {
-    if (
-      // @ts-ignore
-      item.event.call &&
-      // @ts-ignore
-      item.event.call.args.assetOut &&
-      // @ts-ignore
-      item.event.call.args.assetIn
-    ) {
-      // @ts-ignore
-      assetBought = item.event.call.args.assetOut;
-      // @ts-ignore
-      assetSold = item.event.call.args.assetIn;
-      // @ts-ignore
-    } else if (item.event.extrinsic) {
-      // @ts-ignore
-      const args = item.event.extrinsic.call.args;
+    if (event.call && event.call.args.assetOut && event.call.args.assetIn) {
+      assetBought = event.call.args.assetOut;
+      assetSold = event.call.args.assetIn;
+    } else if (event.extrinsic && event.extrinsic.call) {
+      const args = event.extrinsic.call.args;
       if (!args.calls) {
         assetBought = args.assetOut;
         assetSold = args.assetIn;
       } else {
         for (let ext of args.calls as Array<{ __kind: string; value: any }>) {
           const {
-            __kind: method,
+            __kind: prefix,
             value: { __kind, assetIn, assetOut, maxPrice, poolId },
           } = ext;
           if (
-            method == 'Swaps' &&
-            __kind == 'swap_exact_amount_in' &&
-            poolId == swapEvent.cpep.poolId.toString() &&
-            maxPrice == swapEvent.maxPrice
+            prefix === Pallet.Swaps &&
+            __kind === SWAP_EXACT_AMOUNT_IN &&
+            poolId === swapEvent.cpep.poolId.toString() &&
+            maxPrice === swapEvent.maxPrice
           ) {
             assetBought = assetOut;
             assetSold = assetIn;
@@ -937,17 +946,17 @@ export const swapExactAmountIn = async (
     newVolume = isBaseAsset(assetBought) ? oldVolume + assetBoughtQty : oldVolume + assetSoldQty;
 
     pool.volume = newVolume;
-    console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
-    await ctx.store.save<Pool>(pool);
+    console.log(`[${event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
+    await store.save<Pool>(pool);
 
     historicalPool = new HistoricalPool({
-      blockNumber: block.height,
+      blockNumber: event.block.height,
       dVolume: newVolume - oldVolume,
-      event: item.event.name.split('.')[1],
-      id: item.event.id + '-' + pool.poolId,
-      poolId: pool.poolId,
+      event: event.name.split('.')[1],
+      id: event.id + '-' + poolId,
+      poolId,
       status: pool.status,
-      timestamp: new Date(block.timestamp),
+      timestamp: new Date(event.block.timestamp!),
       volume: pool.volume,
     });
   }
@@ -967,7 +976,7 @@ export const swapExactAmountIn = async (
   await Promise.all(
     poolAssets.map(async (poolAsset) => {
       if (isBaseAsset(poolAsset.assetId)) return;
-      const asset = await ctx.store.get(Asset, {
+      const asset = await store.get(Asset, {
         where: { assetId: poolAsset.assetId },
       });
       if (!asset) return;
@@ -975,94 +984,91 @@ export const swapExactAmountIn = async (
       const oldAssetQty = asset.amountInPool;
       const oldPrice = asset.price;
       const newAssetQty = poolAsset.balance;
-      const newPrice = calcSpotPrice(+baseAssetQty.toString(), baseAssetWeight, +newAssetQty.toString(), assetWeight);
+      const newPrice = computeSwapSpotPrice(
+        +baseAssetQty.toString(),
+        baseAssetWeight,
+        +newAssetQty.toString(),
+        assetWeight
+      );
 
       asset.price = newPrice;
       asset.amountInPool = newAssetQty;
-      console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
-      await ctx.store.save<Asset>(asset);
+      console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
+      await store.save<Asset>(asset);
 
       const ha = new HistoricalAsset({
-        accountId: newAssetQty == oldAssetQty ? null : walletId,
+        accountId: newAssetQty == oldAssetQty ? null : accountId,
         assetId: asset.assetId,
         baseAssetTraded: newAssetQty == oldAssetQty ? BigInt(0) : newVolume - oldVolume,
-        blockNumber: block.height,
+        blockNumber: event.block.height,
         dAmountInPool: newAssetQty - oldAssetQty,
         dPrice: newPrice - oldPrice,
-        event: item.event.name.split('.')[1],
-        id: item.event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+        event: event.name.split('.')[1],
+        id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
         newAmountInPool: asset.amountInPool,
         newPrice: asset.price,
-        timestamp: new Date(block.timestamp),
+        timestamp: new Date(event.block.timestamp!),
       });
       historicalAssets.push(ha);
     })
   );
 
   const historicalSwap = new HistoricalSwap({
-    accountId: walletId,
+    accountId,
     assetAmountIn: swapEvent.assetAmountIn,
     assetAmountOut: swapEvent.assetAmountOut,
     assetIn: formatAssetId(assetSold),
     assetOut: formatAssetId(assetBought),
-    blockNumber: block.height,
-    event: item.event.name.split('.')[1],
-    extrinsic: extrinsicFromEvent(item.event),
-    id: item.event.id,
-    timestamp: new Date(block.timestamp),
+    blockNumber: event.block.height,
+    event: event.name.split('.')[1],
+    extrinsic: extrinsicFromEvent(event),
+    id: event.id,
+    timestamp: new Date(event.block.timestamp!),
   });
   return { historicalAssets, historicalSwap, historicalPool };
 };
 
 export const swapExactAmountOut = async (
-  ctx: Ctx,
-  block: SubstrateBlock,
-  item: EventItem
+  store: Store,
+  event: Event
 ): Promise<
   | { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalPool: HistoricalPool | undefined }
   | undefined
 > => {
-  const { swapEvent, walletId } = getSwapExactAmountOutEvent(ctx, item);
+  const { swapEvent } = decodeSwapExactAmountOutEvent(event);
+  const poolId = Number(swapEvent.cpep.poolId);
+  const accountId = ss58.encode({ prefix: 73, bytes: swapEvent.cpep.who });
 
-  const pool = await ctx.store.get(Pool, {
+  const pool = await store.get(Pool, {
     where: { poolId: +swapEvent.cpep.poolId.toString() },
     relations: { account: { balances: true } },
   });
   if (!pool) return;
 
+  // @ts-ignore
   let assetBought = swapEvent.assetOut;
+  // @ts-ignore
   let assetSold = swapEvent.assetIn;
   if (!assetBought && !assetSold) {
-    if (
-      // @ts-ignore
-      item.event.call &&
-      // @ts-ignore
-      item.event.call.args.assetOut &&
-      // @ts-ignore
-      item.event.call.args.assetIn
-    ) {
-      // @ts-ignore
-      assetBought = item.event.call.args.assetOut;
-      // @ts-ignore
-      assetSold = item.event.call.args.assetIn;
-      // @ts-ignore
-    } else if (item.event.extrinsic) {
-      // @ts-ignore
-      const args = item.event.extrinsic.call.args;
+    if (event.call && event.call.args.assetOut && event.call.args.assetIn) {
+      assetBought = event.call.args.assetOut;
+      assetSold = event.call.args.assetIn;
+    } else if (event.extrinsic && event.extrinsic.call) {
+      const args = event.extrinsic.call.args;
       if (!args.calls) {
         assetBought = args.assetOut;
         assetSold = args.assetIn;
       } else {
         for (let ext of args.calls as Array<{ __kind: string; value: any }>) {
           const {
-            __kind: method,
+            __kind: prefix,
             value: { __kind, assetIn, assetOut, maxPrice, poolId },
           } = ext;
           if (
-            method == 'Swaps' &&
-            __kind == 'swap_exact_amount_out' &&
-            poolId == swapEvent.cpep.poolId.toString() &&
-            maxPrice == swapEvent.maxPrice
+            prefix === Pallet.Swaps &&
+            __kind === SWAP_EXACT_AMOUNT_OUT &&
+            poolId === swapEvent.cpep.poolId.toString() &&
+            maxPrice === swapEvent.maxPrice
           ) {
             assetBought = assetOut;
             assetSold = assetIn;
@@ -1082,17 +1088,17 @@ export const swapExactAmountOut = async (
     newVolume = isBaseAsset(assetBought) ? oldVolume + assetBoughtQty : oldVolume + assetSoldQty;
 
     pool.volume = newVolume;
-    console.log(`[${item.event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
-    await ctx.store.save<Pool>(pool);
+    console.log(`[${event.name}] Saving pool: ${JSON.stringify(pool, null, 2)}`);
+    await store.save<Pool>(pool);
 
     historicalPool = new HistoricalPool({
-      blockNumber: block.height,
+      blockNumber: event.block.height,
       dVolume: newVolume - oldVolume,
-      event: item.event.name.split('.')[1],
-      id: item.event.id + '-' + pool.poolId,
-      poolId: pool.poolId,
+      event: event.name.split('.')[1],
+      id: event.id + '-' + poolId,
+      poolId,
       status: pool.status,
-      timestamp: new Date(block.timestamp),
+      timestamp: new Date(event.block.timestamp!),
       volume: pool.volume,
     });
   }
@@ -1112,7 +1118,7 @@ export const swapExactAmountOut = async (
   await Promise.all(
     poolAssets.map(async (poolAsset) => {
       if (isBaseAsset(poolAsset.assetId)) return;
-      const asset = await ctx.store.get(Asset, {
+      const asset = await store.get(Asset, {
         where: { assetId: poolAsset.assetId },
       });
       if (!asset) return;
@@ -1120,41 +1126,46 @@ export const swapExactAmountOut = async (
       const oldAssetQty = asset.amountInPool;
       const oldPrice = asset.price;
       const newAssetQty = poolAsset.balance;
-      const newPrice = calcSpotPrice(+baseAssetQty.toString(), baseAssetWeight, +newAssetQty.toString(), assetWeight);
+      const newPrice = computeSwapSpotPrice(
+        +baseAssetQty.toString(),
+        baseAssetWeight,
+        +newAssetQty.toString(),
+        assetWeight
+      );
 
       asset.price = newPrice;
       asset.amountInPool = newAssetQty;
-      console.log(`[${item.event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
-      await ctx.store.save<Asset>(asset);
+      console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
+      await store.save<Asset>(asset);
 
       const ha = new HistoricalAsset({
-        accountId: newAssetQty == oldAssetQty ? null : walletId,
+        accountId: newAssetQty == oldAssetQty ? null : accountId,
         assetId: asset.assetId,
         baseAssetTraded: newAssetQty == oldAssetQty ? BigInt(0) : newVolume - oldVolume,
-        blockNumber: block.height,
+        blockNumber: event.block.height,
         dAmountInPool: newAssetQty - oldAssetQty,
         dPrice: newPrice - oldPrice,
-        event: item.event.name.split('.')[1],
-        id: item.event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+        event: event.name.split('.')[1],
+        id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
         newAmountInPool: asset.amountInPool,
         newPrice: asset.price,
-        timestamp: new Date(block.timestamp),
+        timestamp: new Date(event.block.timestamp!),
       });
       historicalAssets.push(ha);
     })
   );
 
   const historicalSwap = new HistoricalSwap({
-    accountId: walletId,
+    accountId,
     assetAmountIn: swapEvent.assetAmountIn,
     assetAmountOut: swapEvent.assetAmountOut,
     assetIn: formatAssetId(assetSold),
     assetOut: formatAssetId(assetBought),
-    blockNumber: block.height,
-    event: item.event.name.split('.')[1],
-    extrinsic: extrinsicFromEvent(item.event),
-    id: item.event.id,
-    timestamp: new Date(block.timestamp),
+    blockNumber: event.block.height,
+    event: event.name.split('.')[1],
+    extrinsic: extrinsicFromEvent(event),
+    id: event.id,
+    timestamp: new Date(event.block.timestamp!),
   });
   return { historicalAssets, historicalSwap, historicalPool };
 };

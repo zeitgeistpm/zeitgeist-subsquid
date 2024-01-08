@@ -1,12 +1,12 @@
 /**
  * Script to validate asset balances of all squid accounts against on-chain balance
- * Run using the command: ts-node scripts/validate/balances.ts dev
+ * Run using the command: ts-node scripts/validate/balances.ts <env>
  */
-import axios from 'axios';
 import { AccountInfo } from '@polkadot/types/interfaces/system';
 import { util } from '@zeitgeistpm/sdk';
-import { Tools } from '../../src/mappings/util';
+import axios from 'axios';
 import { Account, AccountBalance } from '../../src/model';
+import { Tools } from '../../src/util';
 
 const PROGRESS = false; // true or false for viewing running logs
 

@@ -1,8 +1,8 @@
 import { Arg, Field, Int, ObjectType, Query, Resolver } from 'type-graphql';
 import type { EntityManager } from 'typeorm';
 import { Market } from '../../model/generated';
-import { CacheHint } from '../../mappings/helper';
-import { Cache } from '../../mappings/util';
+import { CacheHint } from '../../consts';
+import { Cache } from '../../util';
 import { marketMetadata } from '../query';
 
 @ObjectType()

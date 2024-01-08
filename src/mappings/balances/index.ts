@@ -1,247 +1,180 @@
-import { SubstrateBlock } from '@subsquid/substrate-processor';
+import { Store } from '@subsquid/typeorm-store';
 import { Account, AccountBalance, HistoricalAccountBalance } from '../../model';
-import { Ctx, EventItem } from '../../processor';
-import { extrinsicFromEvent, initBalance } from '../helper';
+import { _Asset } from '../../consts';
+import { extrinsicFromEvent, initBalance } from '../../helper';
+import { Event } from '../../processor';
 import {
-  getBalanceSetEvent,
-  getDepositEvent,
-  getDustLostEvent,
-  getReserveRepatriatedEvent,
-  getReservedEvent,
-  getSlashedEvent,
-  getTransferEvent,
-  getUnreservedEvent,
-  getWithdrawEvent,
-} from './types';
+  decodeBalanceSetEvent,
+  decodeDepositEvent,
+  decodeDustLostEvent,
+  decodeReserveRepatriatedEvent,
+  decodeReservedEvent,
+  decodeTransferEvent,
+  decodeUnreservedEvent,
+  decodeWithdrawEvent,
+} from './decode';
 
-export const balancesBalanceSet = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
-  const { walletId, free } = getBalanceSetEvent(ctx, item);
+export const balanceSet = async (store: Store, event: Event) => {
+  const { accountId, amount } = decodeBalanceSetEvent(event);
 
-  let acc = await ctx.store.get(Account, { where: { accountId: walletId } });
-  if (!acc) {
-    acc = new Account();
-    acc.id = walletId;
-    acc.accountId = walletId;
-    console.log(`[${item.event.name}] Saving account: ${JSON.stringify(acc, null, 2)}`);
-    await ctx.store.save<Account>(acc);
-    await initBalance(acc, ctx.store);
+  let account = await store.get(Account, { where: { accountId } });
+  if (!account) {
+    account = new Account({
+      accountId,
+      id: accountId,
+    });
+    console.log(`[${event.name}] Saving account: ${JSON.stringify(account, null, 2)}`);
+    await store.save<Account>(account);
+    await initBalance(account, store);
   }
 
-  let ab = await ctx.store.findOneBy(AccountBalance, {
-    account: { accountId: walletId },
-    assetId: 'Ztg',
+  const ab = await store.findOneBy(AccountBalance, {
+    account: { accountId },
+    assetId: _Asset.Ztg,
   });
   if (!ab) return;
   const oldBalance = ab.balance;
-  const newBalance = free;
-  let eHab = await ctx.store.get(HistoricalAccountBalance, {
-    where: {
-      accountId: acc.accountId,
-      assetId: 'Ztg',
-      event: 'Endowed',
-      blockNumber: block.height,
-    },
+  ab.balance = amount;
+  console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
+  await store.save<AccountBalance>(ab);
+
+  const hab = new HistoricalAccountBalance({
+    accountId,
+    assetId: _Asset.Ztg,
+    blockNumber: event.block.height,
+    dBalance: ab.balance - oldBalance,
+    event: event.name.split('.')[1],
+    extrinsic: extrinsicFromEvent(event),
+    id: event.id + '-' + accountId.slice(-5),
+    timestamp: new Date(event.block.timestamp!),
   });
-  if (!eHab) {
-    ab.balance = newBalance;
-    console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-    await ctx.store.save<AccountBalance>(ab);
-
-    const hab = new HistoricalAccountBalance();
-    hab.id = item.event.id + '-' + walletId.slice(-5);
-    hab.accountId = acc.accountId;
-    hab.event = item.event.name.split('.')[1];
-    hab.extrinsic = extrinsicFromEvent(item.event);
-    hab.assetId = ab.assetId;
-    hab.dBalance = newBalance - oldBalance;
-    hab.blockNumber = block.height;
-    hab.timestamp = new Date(block.timestamp);
-    console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
-    await ctx.store.save<HistoricalAccountBalance>(hab);
-  } else {
-    eHab.event = eHab.event.concat(item.event.name.split('.')[1]);
-    console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(eHab, null, 2)}`);
-    await ctx.store.save<HistoricalAccountBalance>(eHab);
-    return;
-  }
+  console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
+  await store.save<HistoricalAccountBalance>(hab);
 };
 
-export const balancesDeposit = async (
-  ctx: Ctx,
-  block: SubstrateBlock,
-  item: EventItem
-): Promise<HistoricalAccountBalance> => {
-  const { walletId, amount } = getDepositEvent(ctx, item);
+export const deposit = async (event: Event): Promise<HistoricalAccountBalance> => {
+  const { accountId, amount } = decodeDepositEvent(event);
 
-  const hab = new HistoricalAccountBalance();
-  hab.id = item.event.id + '-' + walletId.slice(-5);
-  hab.accountId = walletId;
-  hab.event = item.event.name.split('.')[1];
-  hab.extrinsic = extrinsicFromEvent(item.event);
-  hab.assetId = 'Ztg';
-  hab.dBalance = amount;
-  hab.blockNumber = block.height;
-  hab.timestamp = new Date(block.timestamp);
-
+  const hab = new HistoricalAccountBalance({
+    accountId,
+    assetId: _Asset.Ztg,
+    blockNumber: event.block.height,
+    dBalance: amount,
+    event: event.name.split('.')[1],
+    extrinsic: extrinsicFromEvent(event),
+    id: event.id + '-' + accountId.slice(-5),
+    timestamp: new Date(event.block.timestamp!),
+  });
   return hab;
 };
 
-export const balancesDustLost = async (
-  ctx: Ctx,
-  block: SubstrateBlock,
-  item: EventItem
-): Promise<HistoricalAccountBalance> => {
-  const { walletId, amount } = getDustLostEvent(ctx, item);
+export const dustLost = async (event: Event): Promise<HistoricalAccountBalance> => {
+  const { accountId, amount } = decodeDustLostEvent(event);
 
-  const hab = new HistoricalAccountBalance();
-  hab.id = item.event.id + '-' + walletId.slice(-5);
-  hab.accountId = walletId;
-  hab.event = item.event.name.split('.')[1];
-  hab.extrinsic = extrinsicFromEvent(item.event);
-  hab.assetId = 'Ztg';
-  hab.dBalance = -amount;
-  hab.blockNumber = block.height;
-  hab.timestamp = new Date(block.timestamp);
-
+  const hab = new HistoricalAccountBalance({
+    accountId,
+    assetId: _Asset.Ztg,
+    blockNumber: event.block.height,
+    dBalance: -amount,
+    event: event.name.split('.')[1],
+    extrinsic: extrinsicFromEvent(event),
+    id: event.id + '-' + accountId.slice(-5),
+    timestamp: new Date(event.block.timestamp!),
+  });
   return hab;
 };
 
-export const balancesReserved = async (
-  ctx: Ctx,
-  block: SubstrateBlock,
-  item: EventItem
-): Promise<HistoricalAccountBalance> => {
-  const { walletId, amount } = getReservedEvent(ctx, item);
-
-  const hab = new HistoricalAccountBalance();
-  hab.id = item.event.id + '-' + walletId.slice(-5);
-  hab.accountId = walletId;
-  hab.event = item.event.name.split('.')[1];
-  hab.extrinsic = extrinsicFromEvent(item.event);
-  hab.assetId = 'Ztg';
-  hab.dBalance = -amount;
-  hab.blockNumber = block.height;
-  hab.timestamp = new Date(block.timestamp);
-
-  return hab;
-};
-
-export const balancesReserveRepatriated = async (
-  ctx: Ctx,
-  block: SubstrateBlock,
-  item: EventItem
-): Promise<HistoricalAccountBalance | undefined> => {
-  const { fromId, toId, amount, destinationStatus } = getReserveRepatriatedEvent(ctx, item);
+export const reserveRepatriated = async (event: Event): Promise<HistoricalAccountBalance | undefined> => {
+  const { fromAccountId, toAccountId, amount, destinationStatus } = decodeReserveRepatriatedEvent(event);
   if (destinationStatus.__kind !== 'Free') return;
 
-  const hab = new HistoricalAccountBalance();
-  hab.id = item.event.id + '-' + toId.slice(-5);
-  hab.accountId = toId;
-  hab.event = item.event.name.split('.')[1];
-  hab.extrinsic = extrinsicFromEvent(item.event);
-  hab.assetId = 'Ztg';
-  hab.dBalance = amount;
-  hab.blockNumber = block.height;
-  hab.timestamp = new Date(block.timestamp);
-
+  const hab = new HistoricalAccountBalance({
+    accountId: toAccountId,
+    assetId: _Asset.Ztg,
+    blockNumber: event.block.height,
+    dBalance: amount,
+    event: event.name.split('.')[1],
+    extrinsic: extrinsicFromEvent(event),
+    id: event.id + '-' + toAccountId.slice(-5),
+    timestamp: new Date(event.block.timestamp!),
+  });
   return hab;
 };
 
-export const balancesSlashed = async (ctx: Ctx, block: SubstrateBlock, item: EventItem) => {
-  const { walletId, amount } = getSlashedEvent(ctx, item);
+export const reserved = async (event: Event): Promise<HistoricalAccountBalance> => {
+  const { accountId, amount } = decodeReservedEvent(event);
 
-  let ab = await ctx.store.findOneBy(AccountBalance, {
-    account: { accountId: walletId },
-    assetId: 'Ztg',
+  const hab = new HistoricalAccountBalance({
+    accountId,
+    assetId: _Asset.Ztg,
+    blockNumber: event.block.height,
+    dBalance: -amount,
+    event: event.name.split('.')[1],
+    extrinsic: extrinsicFromEvent(event),
+    id: event.id + '-' + accountId.slice(-5),
+    timestamp: new Date(event.block.timestamp!),
   });
-  if (ab) {
-    ab.balance = ab.balance - amount;
-    console.log(`[${item.event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-    await ctx.store.save<AccountBalance>(ab);
-
-    const hab = new HistoricalAccountBalance();
-    hab.id = item.event.id + '-' + walletId.slice(-5);
-    hab.accountId = walletId;
-    hab.event = item.event.name.split('.')[1];
-    hab.extrinsic = extrinsicFromEvent(item.event);
-    hab.assetId = ab.assetId;
-    hab.dBalance = -amount;
-    hab.blockNumber = block.height;
-    hab.timestamp = new Date(block.timestamp);
-    console.log(`[${item.event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
-    await ctx.store.save<HistoricalAccountBalance>(hab);
-  }
+  return hab;
 };
 
-export const balancesTransfer = async (
-  ctx: Ctx,
-  block: SubstrateBlock,
-  item: EventItem
-): Promise<HistoricalAccountBalance[]> => {
-  const { fromId, toId, amount } = getTransferEvent(ctx, item);
+export const transfer = async (event: Event): Promise<HistoricalAccountBalance[]> => {
+  const { fromAccountId, toAccountId, amount } = decodeTransferEvent(event);
   const habs: HistoricalAccountBalance[] = [];
 
-  const fromHab = new HistoricalAccountBalance();
-  fromHab.id = item.event.id + '-' + fromId.slice(-5);
-  fromHab.accountId = fromId;
-  fromHab.event = item.event.name.split('.')[1];
-  fromHab.extrinsic = extrinsicFromEvent(item.event);
-  fromHab.assetId = 'Ztg';
-  fromHab.dBalance = -amount;
-  fromHab.blockNumber = block.height;
-  fromHab.timestamp = new Date(block.timestamp);
-  habs.push(fromHab);
+  const fromHab = new HistoricalAccountBalance({
+    accountId: fromAccountId,
+    assetId: _Asset.Ztg,
+    blockNumber: event.block.height,
+    dBalance: -amount,
+    event: event.name.split('.')[1],
+    extrinsic: extrinsicFromEvent(event),
+    id: event.id + '-' + fromAccountId.slice(-5),
+    timestamp: new Date(event.block.timestamp!),
+  });
 
-  const toHab = new HistoricalAccountBalance();
-  toHab.id = item.event.id + '-' + toId.slice(-5);
-  toHab.accountId = toId;
-  toHab.event = item.event.name.split('.')[1];
-  toHab.extrinsic = extrinsicFromEvent(item.event);
-  toHab.assetId = 'Ztg';
-  toHab.dBalance = amount;
-  toHab.blockNumber = block.height;
-  toHab.timestamp = new Date(block.timestamp);
-  habs.push(toHab);
+  const toHab = new HistoricalAccountBalance({
+    accountId: toAccountId,
+    assetId: _Asset.Ztg,
+    blockNumber: event.block.height,
+    dBalance: amount,
+    event: event.name.split('.')[1],
+    extrinsic: extrinsicFromEvent(event),
+    id: event.id + '-' + toAccountId.slice(-5),
+    timestamp: new Date(event.block.timestamp!),
+  });
 
+  habs.push(fromHab, toHab);
   return habs;
 };
 
-export const balancesUnreserved = async (
-  ctx: Ctx,
-  block: SubstrateBlock,
-  item: EventItem
-): Promise<HistoricalAccountBalance> => {
-  const { walletId, amount } = getUnreservedEvent(ctx, item);
+export const unreserved = async (event: Event): Promise<HistoricalAccountBalance> => {
+  const { accountId, amount } = decodeUnreservedEvent(event);
 
-  const hab = new HistoricalAccountBalance();
-  hab.id = item.event.id + '-' + walletId.slice(-5);
-  hab.accountId = walletId;
-  hab.event = item.event.name.split('.')[1];
-  hab.extrinsic = extrinsicFromEvent(item.event);
-  hab.assetId = 'Ztg';
-  hab.dBalance = amount;
-  hab.blockNumber = block.height;
-  hab.timestamp = new Date(block.timestamp);
-
+  const hab = new HistoricalAccountBalance({
+    accountId,
+    assetId: _Asset.Ztg,
+    blockNumber: event.block.height,
+    dBalance: amount,
+    event: event.name.split('.')[1],
+    extrinsic: extrinsicFromEvent(event),
+    id: event.id + '-' + accountId.slice(-5),
+    timestamp: new Date(event.block.timestamp!),
+  });
   return hab;
 };
 
-export const balancesWithdraw = async (
-  ctx: Ctx,
-  block: SubstrateBlock,
-  item: EventItem
-): Promise<HistoricalAccountBalance> => {
-  const { walletId, amount } = getWithdrawEvent(ctx, item);
+export const withdraw = async (event: Event): Promise<HistoricalAccountBalance> => {
+  const { accountId, amount } = decodeWithdrawEvent(event);
 
-  const hab = new HistoricalAccountBalance();
-  hab.id = item.event.id + '-' + walletId.slice(-5);
-  hab.accountId = walletId;
-  hab.event = item.event.name.split('.')[1];
-  hab.extrinsic = extrinsicFromEvent(item.event);
-  hab.assetId = 'Ztg';
-  hab.dBalance = -amount;
-  hab.blockNumber = block.height;
-  hab.timestamp = new Date(block.timestamp);
-
+  const hab = new HistoricalAccountBalance({
+    accountId,
+    assetId: _Asset.Ztg,
+    blockNumber: event.block.height,
+    dBalance: -amount,
+    event: event.name.split('.')[1],
+    extrinsic: extrinsicFromEvent(event),
+    id: event.id + '-' + accountId.slice(-5),
+    timestamp: new Date(event.block.timestamp!),
+  });
   return hab;
 };

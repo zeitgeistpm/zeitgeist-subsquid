@@ -26,7 +26,6 @@ COPY --from=deps /home/zeitgeist-squid/node_modules node_modules
 COPY --from=builder /home/zeitgeist-squid/lib lib
 ADD db db
 ADD schema.graphql .
-ADD typesBundle.json .
 
 
 FROM squid AS processor

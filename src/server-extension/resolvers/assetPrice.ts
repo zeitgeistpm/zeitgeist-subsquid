@@ -1,9 +1,9 @@
 import { Arg, Field, ObjectType, Query, Resolver, registerEnumType } from 'type-graphql';
 import { EntityManager } from 'typeorm';
 import axios from 'axios';
-import { CacheHint, EPOCH_TIME, TEN_MINUTES } from '../../mappings/helper';
-import { Cache } from '../../mappings/util';
 import { HistoricalMarket } from '../../model';
+import { CacheHint, EPOCH_TIME } from '../../consts';
+import { Cache } from '../../util';
 
 @ObjectType()
 export class AssetPrice {
@@ -55,7 +55,7 @@ export class AssetPriceResolver {
     const result = (await this.tx()).getRepository(HistoricalMarket);
 
     // Refresh prices if they are older than 10 minutes
-    if (new Date().getTime() - AssetPriceResolver.cachedAt.getTime() > TEN_MINUTES) {
+    if (new Date().getTime() - AssetPriceResolver.cachedAt.getTime() > 600_000) {
       refreshPrices();
     }
 

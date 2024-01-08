@@ -2,12 +2,12 @@
  * Script to automatically disburse Ztg to eligible accounts
  * Run using `ts-node scripts/subscribe/disburseZtg.ts wss://bsr.zeitgeist.pm <origin-seed>`
  */
-import { createClient } from 'graphql-ws';
-import WebSocket from 'ws';
 import { AccountInfo } from '@polkadot/types/interfaces/system';
 import { util } from '@zeitgeistpm/sdk';
-import { Tools } from '../../src/mappings/util';
+import { createClient } from 'graphql-ws';
+import WebSocket from 'ws';
 import { HistoricalAccountBalance } from '../../src/model';
+import { Tools } from '../../src/util';
 import { DisburseDb } from './db';
 
 const NODE_URL = process.argv[2];

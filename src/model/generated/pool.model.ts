@@ -33,8 +33,8 @@ export class Pool {
     /**
      * The base asset in the market swap pool (usually a currency)
      */
-    @Column_("text", {nullable: false})
-    baseAsset!: string
+    @Column_("text", {nullable: true})
+    baseAsset!: string | undefined | null
 
     /**
      * Timestamp of pool creation
@@ -77,8 +77,8 @@ export class Pool {
     /**
      * Sum of `weights`
      */
-    @Column_("text", {nullable: false})
-    totalWeight!: string
+    @Column_("text", {nullable: true})
+    totalWeight!: string | undefined | null
 
     /**
      * Total amount of ZTG that has moved through a market's liquidity pool

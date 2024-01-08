@@ -1,66 +1,89 @@
 {
   "outDir": "src/types",
-  "specVersions": "zeitgeistVersions.jsonl",
-  "typesBundle": "typesBundle.json",
-  "events": [
-    "Authorized.AuthorityReported",
-    "AssetTxPayment.AssetTxFeePaid",
-    "Balances.BalanceSet",
-    "Balances.Deposit",
-    "Balances.DustLost",
-    "Balances.Reserved",
-    "Balances.ReserveRepatriated",
-    "Balances.Slashed",
-    "Balances.Transfer",
-    "Balances.Unreserved",
-    "Balances.Withdraw",
-    "Currency.Deposited",
-    "Currency.Transferred",
-    "Currency.Withdrawn",
-    "NeoSwaps.BuyExecuted",
-    "NeoSwaps.ExitExecuted",
-    "NeoSwaps.FeesWithdrawn",
-    "NeoSwaps.JoinExecuted",
-    "NeoSwaps.PoolDeployed",
-    "NeoSwaps.SellExecuted",
-    "ParachainStaking.Rewarded",
-    "PredictionMarkets.BoughtCompleteSet",
-    "PredictionMarkets.GlobalDisputeStarted",
-    "PredictionMarkets.MarketApproved",
-    "PredictionMarkets.MarketClosed",
-    "PredictionMarkets.MarketCreated",
-    "PredictionMarkets.MarketDestroyed",
-    "PredictionMarkets.MarketDisputed",
-    "PredictionMarkets.MarketExpired",
-    "PredictionMarkets.MarketInsufficientSubsidy",
-    "PredictionMarkets.MarketRejected",
-    "PredictionMarkets.MarketReported",
-    "PredictionMarkets.MarketResolved",
-    "PredictionMarkets.MarketStartedWithSubsidy",
-    "PredictionMarkets.SoldCompleteSet",
-    "PredictionMarkets.TokensRedeemed",
-    "Styx.AccountCrossed",
-    "Swaps.ArbitrageBuyBurn",
-    "Swaps.ArbitrageMintSell",
-    "Swaps.PoolActive",
-    "Swaps.PoolClosed",
-    "Swaps.PoolCreate",
-    "Swaps.PoolDestroyed",
-    "Swaps.PoolExit",
-    "Swaps.PoolExitWithExactAssetAmount",
-    "Swaps.PoolJoin",
-    "Swaps.PoolJoinWithExactAssetAmount",
-    "Swaps.SwapExactAmountIn",
-    "Swaps.SwapExactAmountOut",
-    "System.NewAccount",
-    "System.ExtrinsicSuccess",
-    "System.ExtrinsicFailed",
-    "Tokens.BalanceSet",
-    "Tokens.Deposited",
-    "Tokens.Reserved",
-    "Tokens.Transfer",
-    "Tokens.Withdrawn"
-  ],
-  "calls": ["PredictionMarkets.redeem_shares", "Swaps.pool_exit"],
-  "storage": ["AssetRegistry.Metadata", "MarketCommons.Markets"]
+  "specVersions": "https://v2.archive.subsquid.io/metadata/zeitgeist-testnet",
+  "pallets": {
+    "AssetRegistry": {
+      "storage": ["Metadata"]
+    },
+    "AssetTxPayment": {
+      "events": ["AssetTxFeePaid"]
+    },
+    "Authorized": {
+      "events": ["AuthorityReported"]
+    },
+    "Balances": {
+      "events": [
+        "BalanceSet",
+        "Deposit",
+        "DustLost",
+        "Reserved",
+        "ReserveRepatriated",
+        "Transfer",
+        "Unreserved",
+        "Withdraw"
+      ]
+    },
+    "Court": {
+      "events": ["MintedInCourt"]
+    },
+    "Currency": {
+      "events": ["Deposited", "Transferred", "Withdrawn"]
+    },
+    "MarketCommons": {
+      "storage": ["Markets"]
+    },
+    "NeoSwaps": {
+      "events": ["BuyExecuted", "ExitExecuted", "FeesWithdrawn", "JoinExecuted", "PoolDeployed", "SellExecuted"]
+    },
+    "ParachainStaking": {
+      "events": ["Rewarded"]
+    },
+    "PredictionMarkets": {
+      "events": [
+        "BoughtCompleteSet",
+        "GlobalDisputeStarted",
+        "MarketApproved",
+        "MarketClosed",
+        "MarketCreated",
+        "MarketDestroyed",
+        "MarketDisputed",
+        "MarketExpired",
+        "MarketInsufficientSubsidy",
+        "MarketRejected",
+        "MarketReported",
+        "MarketResolved",
+        "MarketStartedWithSubsidy",
+        "SoldCompleteSet",
+        "TokensRedeemed"
+      ],
+      "calls": ["redeem_shares"]
+    },
+    "Styx": {
+      "events": ["AccountCrossed"]
+    },
+    "Swaps": {
+      "calls": ["pool_exit"],
+      "events": [
+        "ArbitrageBuyBurn",
+        "ArbitrageMintSell",
+        "MarketCreatorFeesPaid",
+        "PoolActive",
+        "PoolClosed",
+        "PoolCreate",
+        "PoolDestroyed",
+        "PoolExit",
+        "PoolExitWithExactAssetAmount",
+        "PoolJoin",
+        "PoolJoinWithExactAssetAmount",
+        "SwapExactAmountIn",
+        "SwapExactAmountOut"
+      ]
+    },
+    "System": {
+      "events": ["ExtrinsicFailed", "ExtrinsicSuccess", "NewAccount"]
+    },
+    "Tokens": {
+      "events": ["BalanceSet", "Deposited", "Reserved", "Transfer", "Withdrawn"]
+    }
+  }
 }
