@@ -221,32 +221,39 @@ export const marketCreated = async (store: Store, event: Event) => {
   switch (market.disputeMechanism.__kind) {
     case 'Authorized':
       disputeMechanism = DisputeMechanism.Authorized;
+      break;
     case 'Court':
       disputeMechanism = DisputeMechanism.Court;
+      break;
     case 'SimpleDisputes':
       disputeMechanism = DisputeMechanism.SimpleDisputes;
+      break;
   }
 
   let scoringRule;
   switch (market.scoringRule.__kind) {
     case 'CPMM':
       scoringRule = ScoringRule.CPMM;
+      break;
     case 'RikiddoSigmoidFeeMarketEma':
       scoringRule = ScoringRule.RikiddoSigmoidFeeMarketEma;
+      break;
     case 'Lmsr':
       scoringRule = ScoringRule.Lmsr;
+      break;
     case 'Orderbook':
       scoringRule = ScoringRule.Orderbook;
+      break;
   }
 
-  let status;
+  let status = MarketStatus.Active;
   switch (market.status.__kind) {
     case 'Active':
       status = MarketStatus.Active;
+      break;
     case 'Proposed':
       status = MarketStatus.Proposed;
-    default:
-      status = MarketStatus.Active;
+      break;
   }
 
   const newMarket = new Market({
@@ -392,7 +399,7 @@ export const marketCreated = async (store: Store, event: Event) => {
 
   const hm = new HistoricalMarket({
     blockNumber: event.block.height,
-    by: null,
+    by: newMarket.creator,
     event: MarketEvent.MarketCreated,
     id: event.id + '-' + marketId,
     market: newMarket,
@@ -820,10 +827,7 @@ export const redeemShares = async (store: Store, call: Call) => {
   await store.save<HistoricalAccountBalance>(hab);
 };
 
-export const soldCompleteSet = async (
-  store: Store,
-  event: Event
-): Promise<HistoricalAccountBalance[] | undefined> => {
+export const soldCompleteSet = async (store: Store, event: Event): Promise<HistoricalAccountBalance[] | undefined> => {
   const { marketId, amount, accountId } = decodeSoldCompleteSetEvent(event);
 
   const market = await store.get(Market, {
