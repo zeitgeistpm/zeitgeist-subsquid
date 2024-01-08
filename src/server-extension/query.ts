@@ -110,11 +110,11 @@ export const marketVolume = (ids: number[]) => `
     GROUP BY t0.market_id, p.volume
   ),
   t2 AS (
-    SELECT t0.market_id, COALESCE(ROUND(p.volume, 0), 0) AS volume
+    SELECT t0.market_id, COALESCE(ROUND(np.volume, 0), 0) AS volume
     FROM t0
     LEFT JOIN neo_pool np ON np.id = t0.neo_pool_id
     WHERE np.id IS NOT NULL
-    GROUP BY t0.market_id, p.volume
+    GROUP BY t0.market_id, np.volume
   ),
   t3 AS (
     SELECT t0.market_id, 0 AS volume
