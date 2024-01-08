@@ -95,6 +95,38 @@ export const marketLiquidity = (ids: number[]) => `
   SELECT * FROM t4;
 `;
 
+export const marketVolume = (ids: number[]) => `
+  WITH
+  t0 AS (
+    SELECT id, market_id, pool_id, neo_pool_id
+    FROM market
+    WHERE market_id IN (${ids})
+  ),
+  t1 AS (
+    SELECT t0.market_id, COALESCE(ROUND(p.volume, 0), 0) AS volume
+    FROM t0
+    LEFT JOIN pool p ON p.id = t0.pool_id
+    WHERE p.id IS NOT NULL
+    GROUP BY t0.market_id
+  ),
+  t2 AS (
+    SELECT t0.market_id, COALESCE(ROUND(p.volume, 0), 0) AS volume
+    FROM t0
+    LEFT JOIN neo_pool np ON np.id = t0.neo_pool_id
+    WHERE np.id IS NOT NULL
+    GROUP BY t0.market_id
+  ),
+  t3 AS (
+    SELECT t0.market_id, 0 AS volume
+    FROM t0
+    WHERE t0.pool_id IS NULL AND t0.neo_pool_id IS NULL
+  ),
+  t4 AS (
+    SELECT * FROM t1 UNION SELECT * FROM t2 UNION SELECT * FROM t3
+  )
+  SELECT * FROM t4;
+`;
+
 export const marketInfo = (marketId: number) => `
   SELECT
     hm.timestamp,
