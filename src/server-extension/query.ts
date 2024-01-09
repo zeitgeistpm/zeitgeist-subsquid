@@ -1,4 +1,4 @@
-import { Asset } from '../consts';
+import { BaseAsset } from '../consts';
 import { encodedAssetId } from './helper';
 
 export const assetPriceHistory = (assetId: string, startTime: string, endTime: string, interval: string) => `
@@ -95,7 +95,7 @@ export const marketLiquidity = (ids: number[]) => `
   SELECT * FROM t4;
 `;
 
-export const marketVolume = (ids: number[], prices: Map<Asset, number>) => `
+export const marketVolume = (ids: number[], prices: Map<BaseAsset, number>) => `
   WITH
   t0 AS (
     SELECT id, market_id, pool_id, neo_pool_id, base_asset
@@ -127,8 +127,8 @@ export const marketVolume = (ids: number[], prices: Map<Asset, number>) => `
   SELECT
     market_id,
     CASE
-      WHEN base_asset = 'Ztg' THEN ROUND(volume * ${prices.get(Asset.Zeitgeist)}, 0)
-      WHEN base_asset = '{\"foreignAsset\":0}' THEN ROUND(volume * ${prices.get(Asset.Polkadot)}, 0)
+      WHEN base_asset = 'Ztg' THEN ROUND(volume * ${prices.get(BaseAsset.ZTG)}, 0)
+      WHEN base_asset = '{\"foreignAsset\":0}' THEN ROUND(volume * ${prices.get(BaseAsset.DOT)}, 0)
       ELSE volume
     END AS volume
   FROM t4;
@@ -165,15 +165,15 @@ export const marketStatsWithOrder = (
   orderBy: string,
   limit: number,
   offset: number,
-  prices: Map<Asset, number>
+  prices: Map<BaseAsset, number>
 ) => `
   SELECT
     m.market_id,
     COALESCE(ROUND(SUM(COALESCE(a.price,1) * ab.balance), 0), 0) AS liquidity,
     COALESCE(COUNT(DISTINCT ha.account_id), 0) AS participants,
     CASE
-      WHEN p.base_asset = 'Ztg' THEN COALESCE(ROUND(p.volume * ${prices.get(Asset.Zeitgeist)}, 0), 0)
-      ELSE COALESCE(ROUND(p.volume * ${prices.get(Asset.Polkadot)}, 0), 0)
+      WHEN p.base_asset = 'Ztg' THEN COALESCE(ROUND(p.volume * ${prices.get(BaseAsset.ZTG)}, 0), 0)
+      ELSE COALESCE(ROUND(p.volume * ${prices.get(BaseAsset.DOT)}, 0), 0)
     END AS volume
   FROM
     market m
