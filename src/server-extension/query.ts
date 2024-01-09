@@ -1,4 +1,4 @@
-import { Asset } from './resolvers/marketStatsWithOrder';
+import { Asset } from '../consts';
 import { encodedAssetId } from './helper';
 
 export const assetPriceHistory = (assetId: string, startTime: string, endTime: string, interval: string) => `
@@ -95,36 +95,43 @@ export const marketLiquidity = (ids: number[]) => `
   SELECT * FROM t4;
 `;
 
-export const marketVolume = (ids: number[]) => `
+export const marketVolume = (ids: number[], prices: Map<Asset, number>) => `
   WITH
   t0 AS (
-    SELECT id, market_id, pool_id, neo_pool_id
+    SELECT id, market_id, pool_id, neo_pool_id, base_asset
     FROM market
     WHERE market_id IN (${ids})
   ),
   t1 AS (
-    SELECT t0.market_id, COALESCE(ROUND(p.volume, 0), 0) AS volume
+    SELECT t0.market_id, t0.base_asset, p.volume
     FROM t0
     LEFT JOIN pool p ON p.id = t0.pool_id
     WHERE p.id IS NOT NULL
-    GROUP BY t0.market_id, p.volume
+    GROUP BY t0.market_id, t0.base_asset, p.volume
   ),
   t2 AS (
-    SELECT t0.market_id, COALESCE(ROUND(np.volume, 0), 0) AS volume
+    SELECT t0.market_id, t0.base_asset, np.volume
     FROM t0
     LEFT JOIN neo_pool np ON np.id = t0.neo_pool_id
     WHERE np.id IS NOT NULL
-    GROUP BY t0.market_id, np.volume
+    GROUP BY t0.market_id, t0.base_asset, np.volume
   ),
   t3 AS (
-    SELECT t0.market_id, 0 AS volume
+    SELECT t0.market_id, t0.base_asset, 0 AS volume
     FROM t0
     WHERE t0.pool_id IS NULL AND t0.neo_pool_id IS NULL
   ),
   t4 AS (
     SELECT * FROM t1 UNION SELECT * FROM t2 UNION SELECT * FROM t3
   )
-  SELECT * FROM t4;
+  SELECT
+    market_id,
+    CASE
+      WHEN base_asset = 'Ztg' THEN ROUND(volume * ${prices.get(Asset.Zeitgeist)}, 0)
+      WHEN base_asset = '{\"foreignAsset\":0}' THEN ROUND(volume * ${prices.get(Asset.Polkadot)}, 0)
+      ELSE volume
+    END AS volume
+  FROM t4;
 `;
 
 export const marketInfo = (marketId: number) => `

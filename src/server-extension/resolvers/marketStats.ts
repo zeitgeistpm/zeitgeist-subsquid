@@ -1,7 +1,7 @@
 import { Arg, Field, Int, ObjectType, Query, Resolver } from 'type-graphql';
 import type { EntityManager } from 'typeorm';
 import { Market } from '../../model/generated';
-import { mergeByField } from '../helper';
+import { getAssetUsdPrices, mergeByField } from '../helper';
 import { marketLiquidity, marketParticipants, marketVolume } from '../query';
 
 @ObjectType()
@@ -32,7 +32,7 @@ export class MarketStatsResolver {
     const manager = await this.tx();
     const participants = await manager.getRepository(Market).query(marketParticipants(ids));
     const liquidity = await manager.getRepository(Market).query(marketLiquidity(ids));
-    const volume = await manager.getRepository(Market).query(marketVolume(ids));
+    const volume = await manager.getRepository(Market).query(marketVolume(ids, await getAssetUsdPrices()));
 
     let result = mergeByField(participants, liquidity, 'market_id');
     result = mergeByField(result, volume, 'market_id');
