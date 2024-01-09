@@ -13,9 +13,11 @@ export enum _Asset {
   Ztg = 'Ztg',
 }
 
-export enum Asset {
-  Polkadot = 'polkadot',
-  Zeitgeist = 'zeitgeist',
+export enum BaseAsset {
+  DOT = 'polkadot',
+  USDC = 'usd-coin',
+  USDT = 'tether',
+  ZTG = 'zeitgeist',
 }
 
 export enum CacheHint {
@@ -39,4 +41,8 @@ export enum Pallet {
   Swaps = 'Swaps',
   System = 'System',
   Tokens = 'Tokens',
+}
+
+export enum TargetAsset {
+  USD = 'usd',
 }
