@@ -1,8 +1,8 @@
 import { Arg, Field, Int, ObjectType, Query, Resolver, registerEnumType } from 'type-graphql';
 import type { EntityManager } from 'typeorm';
-import axios from 'axios';
 import { Market } from '../../model/generated';
 import { marketStatsWithOrder } from '../query';
+import { getAssetUsdPrices } from '../helper';
 
 @ObjectType()
 export class MarketStatsWithOrder {
@@ -57,31 +57,4 @@ export class MarketStatsWithOrderResolver {
       );
     return result;
   }
-}
-
-const getAssetUsdPrices = async (): Promise<Map<Asset, number>> => {
-  const prices: Map<Asset, number> = new Map([
-    [Asset.Polkadot, 4.34],
-    [Asset.Zeitgeist, 0.0313],
-  ]);
-  await Promise.all(
-    Array.from(prices).map(async (price) => {
-      if (process.env.WS_NODE_URL?.includes(`bs`)) {
-        prices.set(price[0], 1);
-        return;
-      }
-      try {
-        const res = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${price[0]}&vs_currencies=usd`);
-        prices.set(price[0], res.data[price[0]].usd);
-      } catch (err) {
-        console.log(JSON.stringify(err, null, 2));
-      }
-    })
-  );
-  return prices;
-};
-
-export enum Asset {
-  Polkadot = 'polkadot',
-  Zeitgeist = 'zeitgeist',
 }

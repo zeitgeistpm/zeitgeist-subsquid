@@ -13,6 +13,11 @@ export enum _Asset {
   Ztg = 'Ztg',
 }
 
+export enum Asset {
+  Polkadot = 'polkadot',
+  Zeitgeist = 'zeitgeist',
+}
+
 export enum CacheHint {
   Fee = 'fee',
   Meta = 'meta',
