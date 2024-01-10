@@ -6,7 +6,7 @@ import {
   Event as _Event,
   Extrinsic as _Extrinsic,
 } from '@subsquid/substrate-processor';
-import { events } from './types';
+import { calls, events } from './types';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -86,7 +86,7 @@ export const processor = new SubstrateBatchProcessor()
     ],
     call: true,
     extrinsic: true,
-    stack: true,
+    stack: process.env.WS_NODE_URL?.includes(`bs`),
   })
   .setFields({
     call: {
@@ -105,6 +105,21 @@ export const processor = new SubstrateBatchProcessor()
       timestamp: true,
     },
   });
+
+if (process.env.WS_NODE_URL?.includes(`bs`)) {
+  processor
+    .addCall({
+      name: [calls.predictionMarkets.redeemShares.name, calls.swaps.poolExit.name],
+      range: { from: 0, to: 1089818 },
+      extrinsic: true,
+    })
+    .addEvent({
+      name: [events.system.extrinsicFailed.name, events.system.extrinsicSuccess.name],
+      range: { from: 0, to: 588249 },
+      call: true,
+      extrinsic: true,
+    });
+}
 
 type Fields = SubstrateBatchProcessorFields<typeof processor>;
 export type Block = BlockHeader<Fields>;

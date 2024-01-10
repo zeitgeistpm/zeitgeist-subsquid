@@ -20,21 +20,6 @@ let balanceHistory: HistoricalAccountBalance[];
 let poolHistory: HistoricalPool[];
 let swapHistory: HistoricalSwap[];
 
-if (process.env.WS_NODE_URL?.includes(`bs`)) {
-  processor
-    .addCall({
-      name: [calls.predictionMarkets.redeemShares.name, calls.swaps.poolExit.name],
-      range: { from: 0, to: 1089818 },
-      extrinsic: true,
-    })
-    .addEvent({
-      name: [events.system.extrinsicFailed.name, events.system.extrinsicSuccess.name],
-      range: { from: 0, to: 588249 },
-      call: true,
-      extrinsic: true,
-    });
-}
-
 processor.run(new TypeormDatabase(), async (ctx) => {
   assetHistory = [];
   balanceHistory = [];
