@@ -8,12 +8,11 @@
   "scripts": {
     "api:start": "squid-graphql-server --subscriptions",
     "api:stop": "./scripts/deploy/api.sh stop",
-    "archive:start": "./scripts/deploy/archive.sh local up",
-    "archive:stop": "./scripts/deploy/archive.sh local down",
     "build": "rm -rf lib && tsc",
     "codegen": "npx squid-typeorm-codegen",
-    "db:up": "docker-compose up -d",
     "db:down": "docker-compose down",
+    "db:up": "docker-compose up -d",
+    "db:restart": "docker-compose down && docker-compose up -d",
     "migration:apply": "squid-typeorm-migration apply",
     "migration:generate": "squid-typeorm-migration generate",
     "migration:revert": "npx squid-typeorm-migration revert",
@@ -21,7 +20,7 @@
     "squid:mac:start": "yarn archive:start && sh scripts/deploy/processor.sh mlocal start && sh scripts/deploy/api.sh mlocal start",
     "squid:start": "yarn archive:start && sh scripts/deploy/processor.sh local start && sh scripts/deploy/api.sh local start",
     "squid:stop": "yarn archive:stop && yarn api:stop && yarn db:down && yarn processor:stop",
-    "test": "docker-compose down && yarn db:up && yarn build && yarn migration:apply && REDIS_HOST=localhost DB_HOST=localhost NODE_ENV=test node lib/processor.js",
+    "test": "yarn db:restart && yarn build && yarn migration:apply && REDIS_HOST=localhost DB_HOST=localhost NODE_ENV=test node lib/main.js",
     "typegen": "squid-substrate-typegen typegen.json"
   },
   "dependencies": {

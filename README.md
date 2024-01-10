@@ -61,7 +61,7 @@ yarn migration:apply
 #### 5. Start processing test chain data
 
 ```bash
-REDIS_HOST=localhost DB_HOST=localhost NODE_ENV=test node lib/processor.js
+REDIS_HOST=localhost DB_HOST=localhost NODE_ENV=test node lib/main.js
 ```
 
 #### 6. Open a separate terminal and launch the graphql server to query the processed data
