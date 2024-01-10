@@ -1,4 +1,4 @@
-import { Asset } from './resolvers/marketStatsWithOrder';
+import { BaseAsset } from '../consts';
 import { encodedAssetId } from './helper';
 
 export const assetPriceHistory = (assetId: string, startTime: string, endTime: string, interval: string) => `
@@ -95,6 +95,45 @@ export const marketLiquidity = (ids: number[]) => `
   SELECT * FROM t4;
 `;
 
+export const marketVolume = (ids: number[], prices: Map<BaseAsset, number>) => `
+  WITH
+  t0 AS (
+    SELECT id, market_id, pool_id, neo_pool_id, base_asset
+    FROM market
+    WHERE market_id IN (${ids})
+  ),
+  t1 AS (
+    SELECT t0.market_id, t0.base_asset, p.volume
+    FROM t0
+    LEFT JOIN pool p ON p.id = t0.pool_id
+    WHERE p.id IS NOT NULL
+    GROUP BY t0.market_id, t0.base_asset, p.volume
+  ),
+  t2 AS (
+    SELECT t0.market_id, t0.base_asset, np.volume
+    FROM t0
+    LEFT JOIN neo_pool np ON np.id = t0.neo_pool_id
+    WHERE np.id IS NOT NULL
+    GROUP BY t0.market_id, t0.base_asset, np.volume
+  ),
+  t3 AS (
+    SELECT t0.market_id, t0.base_asset, 0 AS volume
+    FROM t0
+    WHERE t0.pool_id IS NULL AND t0.neo_pool_id IS NULL
+  ),
+  t4 AS (
+    SELECT * FROM t1 UNION SELECT * FROM t2 UNION SELECT * FROM t3
+  )
+  SELECT
+    market_id,
+    CASE
+      WHEN base_asset = 'Ztg' THEN ROUND(volume * ${prices.get(BaseAsset.ZTG)}, 0)
+      WHEN base_asset = '{\"foreignAsset\":0}' THEN ROUND(volume * ${prices.get(BaseAsset.DOT)}, 0)
+      ELSE volume
+    END AS volume
+  FROM t4;
+`;
+
 export const marketInfo = (marketId: number) => `
   SELECT
     hm.timestamp,
@@ -126,15 +165,15 @@ export const marketStatsWithOrder = (
   orderBy: string,
   limit: number,
   offset: number,
-  prices: Map<Asset, number>
+  prices: Map<BaseAsset, number>
 ) => `
   SELECT
     m.market_id,
     COALESCE(ROUND(SUM(COALESCE(a.price,1) * ab.balance), 0), 0) AS liquidity,
     COALESCE(COUNT(DISTINCT ha.account_id), 0) AS participants,
     CASE
-      WHEN p.base_asset = 'Ztg' THEN COALESCE(ROUND(p.volume * ${prices.get(Asset.Zeitgeist)}, 0), 0)
-      ELSE COALESCE(ROUND(p.volume * ${prices.get(Asset.Polkadot)}, 0), 0)
+      WHEN p.base_asset = 'Ztg' THEN COALESCE(ROUND(p.volume * ${prices.get(BaseAsset.ZTG)}, 0), 0)
+      ELSE COALESCE(ROUND(p.volume * ${prices.get(BaseAsset.DOT)}, 0), 0)
     END AS volume
   FROM
     market m
