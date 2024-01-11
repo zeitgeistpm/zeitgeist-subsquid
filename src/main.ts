@@ -5,6 +5,7 @@ import {
   AccountBalance,
   HistoricalAccountBalance,
   HistoricalAsset,
+  HistoricalMarket,
   HistoricalPool,
   HistoricalSwap,
 } from './model';
@@ -17,12 +18,14 @@ import { processor, Event } from './processor';
 const accounts = new Map<string, Map<string, bigint>>();
 let assetHistory: HistoricalAsset[];
 let balanceHistory: HistoricalAccountBalance[];
+let marketHistory: HistoricalMarket[];
 let poolHistory: HistoricalPool[];
 let swapHistory: HistoricalSwap[];
 
 processor.run(new TypeormDatabase(), async (ctx) => {
   assetHistory = [];
   balanceHistory = [];
+  marketHistory = [];
   poolHistory = [];
   swapHistory = [];
 
@@ -206,7 +209,7 @@ const mapNeoSwaps = async (store: Store, event: Event) => {
       if (!res) break;
       assetHistory.push(...res.historicalAssets);
       swapHistory.push(res.historicalSwap);
-      poolHistory.push(res.historicalPool);
+      marketHistory.push(res.historicalMarket);
       break;
     }
     case events.neoSwaps.exitExecuted.name: {
@@ -234,7 +237,7 @@ const mapNeoSwaps = async (store: Store, event: Event) => {
       const res = await mappings.neoSwaps.poolDeployed(store, event);
       if (!res) break;
       assetHistory.push(...res.historicalAssets);
-      poolHistory.push(res.historicalPool);
+      marketHistory.push(res.historicalMarket);
       break;
     }
     case events.neoSwaps.sellExecuted.name: {
@@ -243,7 +246,7 @@ const mapNeoSwaps = async (store: Store, event: Event) => {
       if (!res) break;
       assetHistory.push(...res.historicalAssets);
       swapHistory.push(res.historicalSwap);
-      poolHistory.push(res.historicalPool);
+      marketHistory.push(res.historicalMarket);
       break;
     }
   }
@@ -441,7 +444,7 @@ const mapSwaps = async (store: Store, event: Event) => {
       if (!res) break;
       assetHistory.push(...res.historicalAssets);
       swapHistory.push(res.historicalSwap);
-      if (res.historicalPool) poolHistory.push(res.historicalPool);
+      if (res.historicalMarket) marketHistory.push(res.historicalMarket);
       break;
     }
     case events.swaps.swapExactAmountOut.name: {
@@ -450,7 +453,7 @@ const mapSwaps = async (store: Store, event: Event) => {
       if (!res) break;
       assetHistory.push(...res.historicalAssets);
       swapHistory.push(res.historicalSwap);
-      if (res.historicalPool) poolHistory.push(res.historicalPool);
+      if (res.historicalMarket) marketHistory.push(res.historicalMarket);
       break;
     }
   }
@@ -559,18 +562,22 @@ const saveAccounts = async (store: Store) => {
 const saveHistory = async (store: Store) => {
   if (assetHistory.length > 0) {
     console.log(`Saving historical assets: ${JSON.stringify(assetHistory, null, 2)}`);
-    await store.save(assetHistory);
+    await store.save<HistoricalAsset>(assetHistory);
   }
   if (balanceHistory.length > 0) {
     console.log(`Saving historical account balances: ${JSON.stringify(balanceHistory, null, 2)}`);
-    await store.save(balanceHistory);
+    await store.save<HistoricalAccountBalance>(balanceHistory);
+  }
+  if (marketHistory.length > 0) {
+    console.log(`Saving historical markets: ${JSON.stringify(marketHistory, null, 2)}`);
+    await store.save<HistoricalMarket>(marketHistory);
   }
   if (poolHistory.length > 0) {
     console.log(`Saving historical pools: ${JSON.stringify(poolHistory, null, 2)}`);
-    await store.save(poolHistory);
+    await store.save<HistoricalPool>(poolHistory);
   }
   if (swapHistory.length > 0) {
     console.log(`Saving historical swaps: ${JSON.stringify(swapHistory, null, 2)}`);
-    await store.save(swapHistory);
+    await store.save<HistoricalSwap>(swapHistory);
   }
 };
