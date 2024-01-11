@@ -415,7 +415,7 @@ export const marketCreated = async (store: Store, event: Event) => {
     resolvedOutcome: null,
     status: newMarket.status,
     timestamp: new Date(event.block.timestamp!),
-    volume: market.volume,
+    volume: newMarket.volume,
   });
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
   await store.save<HistoricalMarket>(hm);
