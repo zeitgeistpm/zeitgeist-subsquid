@@ -5,6 +5,7 @@ import { MarketStatsResolver } from './marketStats';
 import { MarketStatsWithOrderResolver } from './marketStatsWithOrder';
 import { PriceHistoryResolver } from './priceHistory';
 import { StatsResolver } from './stats';
+import { VolumeHistoryResolver } from './volumeHistory';
 
 export {
   AssetPriceResolver,
@@ -14,4 +15,5 @@ export {
   MarketStatsWithOrderResolver,
   PriceHistoryResolver,
   StatsResolver,
+  VolumeHistoryResolver,
 };

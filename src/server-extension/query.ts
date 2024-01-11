@@ -208,3 +208,35 @@ export const totalMintedInCourt = () => `
   WHERE
     event ~ 'MintedInCourt';
 `;
+
+export const volumeHistory = (prices: Map<BaseAsset, number>) => `
+  WITH t0 AS (
+    SELECT 
+      m.base_asset, 
+      SUM(hm.d_volume) AS gross_volume, 
+      date(hm.timestamp)
+    FROM 
+      historical_market hm 
+      JOIN market m ON hm.market_id = m.id 
+    WHERE 
+      hm.d_volume > 0 
+    GROUP BY
+      m.base_asset, 
+      date(hm.timestamp)
+  )
+  SELECT
+    date,
+    SUM(
+      CASE 
+        WHEN base_asset = 'Ztg' THEN ROUND(gross_volume * ${prices.get(BaseAsset.ZTG)}, 0) 
+        WHEN base_asset = '{\"foreignAsset\":0}' THEN ROUND(gross_volume * ${prices.get(BaseAsset.DOT)}, 0) 
+        ELSE gross_volume 
+      END
+    ) AS volume
+  FROM
+    t0
+  GROUP BY 
+    date
+  ORDER BY
+    date ASC;
+`
