@@ -216,6 +216,12 @@ export class Market {
     tags!: (string | undefined | null)[] | undefined | null
 
     /**
+     * Total amount of base-asset that has moved through a market's liquidity pool
+     */
+    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+    volume!: bigint
+
+    /**
      * Market question
      */
     @Column_("text", {nullable: true})

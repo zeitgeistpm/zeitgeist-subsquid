@@ -81,12 +81,6 @@ export class Pool {
     totalWeight!: string | undefined | null
 
     /**
-     * Total amount of ZTG that has moved through a market's liquidity pool
-     */
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
-    volume!: bigint
-
-    /**
      * List of lengths for each asset
      */
     @Column_("jsonb", {transformer: {to: obj => obj.map((val: any) => val.toJSON()), from: obj => obj == null ? undefined : marshal.fromList(obj, val => new Weight(undefined, marshal.nonNull(val)))}, nullable: false})
