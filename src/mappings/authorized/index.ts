@@ -26,6 +26,7 @@ export const authorityReported = async (store: Store, event: Event) => {
   const hm = new HistoricalMarket({
     blockNumber: event.block.height,
     by: null,
+    dVolume: BigInt(0),
     event: MarketEvent.MarketReported,
     id: event.id + '-' + market.marketId,
     market: market,
@@ -33,6 +34,7 @@ export const authorityReported = async (store: Store, event: Event) => {
     resolvedOutcome: null,
     status: market.status,
     timestamp: new Date(event.block.timestamp!),
+    volume: market.volume,
   });
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
   await store.save<HistoricalMarket>(hm);
