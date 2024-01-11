@@ -29,7 +29,7 @@ ADD schema.graphql .
 
 
 FROM squid AS processor
-CMD ["node", "lib/processor.js"]
+CMD ["node", "lib/main.js"]
 
 
 FROM squid AS query-node
