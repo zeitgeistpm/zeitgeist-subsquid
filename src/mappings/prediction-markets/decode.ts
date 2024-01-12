@@ -1,6 +1,6 @@
 import * as ss58 from '@subsquid/ss58';
 import { OutcomeReport } from '../../types/v29';
-import { MarketStatus } from '../../types/v42';
+import { MarketStatus } from '../../types/v51';
 import { calls, events } from '../../types';
 import { formatAssetId } from '../../helper';
 import { Call, Event } from '../../processor';
@@ -35,16 +35,17 @@ export const decodeGlobalDisputeStartedEvent = (event: Event): MarketEvent => {
 };
 
 export const decodeMarketApprovedEvent = (event: Event): MarketEvent => {
-  let marketId: bigint;
+  let marketId: bigint, status: MarketStatus | undefined;
   if (events.predictionMarkets.marketApproved.v23.is(event)) {
     marketId = events.predictionMarkets.marketApproved.v23.decode(event);
   } else if (events.predictionMarkets.marketApproved.v29.is(event)) {
-    [marketId] = events.predictionMarkets.marketApproved.v29.decode(event);
+    [marketId, status] = events.predictionMarkets.marketApproved.v29.decode(event);
   } else {
-    [marketId] = event.args;
+    [marketId, status] = event.args;
   }
   return {
     marketId: Number(marketId),
+    status,
   };
 };
 
@@ -144,16 +145,17 @@ export const decodeMarketExpiredEvent = (event: Event): MarketEvent => {
 };
 
 export const decodeMarketInsufficientSubsidyEvent = (event: Event): MarketEvent => {
-  let marketId: bigint;
+  let marketId: bigint, status: MarketStatus | undefined;
   if (events.predictionMarkets.marketInsufficientSubsidy.v23.is(event)) {
     marketId = events.predictionMarkets.marketInsufficientSubsidy.v23.decode(event);
   } else if (events.predictionMarkets.marketInsufficientSubsidy.v29.is(event)) {
-    [marketId] = events.predictionMarkets.marketInsufficientSubsidy.v29.decode(event);
+    [marketId, status] = events.predictionMarkets.marketInsufficientSubsidy.v29.decode(event);
   } else {
-    [marketId] = event.args;
+    [marketId, status] = event.args;
   }
   return {
     marketId: Number(marketId),
+    status,
   };
 };
 
@@ -209,16 +211,17 @@ export const decodeMarketResolvedEvent = (event: Event): MarketResolvedEvent => 
 };
 
 export const decodeMarketStartedWithSubsidyEvent = (event: Event): MarketEvent => {
-  let marketId: bigint;
+  let marketId: bigint, status: MarketStatus | undefined;
   if (events.predictionMarkets.marketStartedWithSubsidy.v23.is(event)) {
     marketId = events.predictionMarkets.marketStartedWithSubsidy.v23.decode(event);
   } else if (events.predictionMarkets.marketStartedWithSubsidy.v29.is(event)) {
-    [marketId] = events.predictionMarkets.marketStartedWithSubsidy.v29.decode(event);
+    [marketId, status] = events.predictionMarkets.marketStartedWithSubsidy.v29.decode(event);
   } else {
-    [marketId] = event.args;
+    [marketId, status] = event.args;
   }
   return {
     marketId: Number(marketId),
+    status,
   };
 };
 
@@ -275,6 +278,7 @@ interface CompleteSetEvent {
 
 interface MarketEvent {
   marketId: number;
+  status?: MarketStatus;
 }
 
 interface MarketCreatedEvent {
