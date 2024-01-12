@@ -227,9 +227,14 @@ export const poolCreate = async (
     return;
   }
 
+  if (!pool.baseAsset) {
+    console.error(`Coudn't find base-asset on poolId ${poolId}`);
+    return;
+  }
+
   const newPool = new Pool({
     account: account,
-    baseAsset: pool.baseAsset ? formatAssetId(pool.baseAsset) : null,
+    baseAsset: formatAssetId(pool.baseAsset),
     createdAt: new Date(event.block.timestamp!),
     marketId: Number(pool.marketId),
     id: event.id + '-' + poolId,
