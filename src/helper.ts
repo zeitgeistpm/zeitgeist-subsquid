@@ -3,8 +3,8 @@ import { DecodedMarketMetadata } from '@zeitgeistpm/sdk/dist/types';
 import { util } from '@zeitgeistpm/sdk';
 import { Store } from '@subsquid/typeorm-store';
 import Decimal from 'decimal.js';
-import { Account, AccountBalance, Extrinsic, HistoricalAccountBalance } from './model';
-import { MarketType, Asset } from './types/v51';
+import { Account, AccountBalance, Extrinsic, HistoricalAccountBalance, MarketStatus } from './model';
+import { Asset, MarketType, MarketStatus as _MarketStatus } from './types/v51';
 import { CacheHint, _Asset } from './consts';
 import { Block, Extrinsic as _Extrinsic } from './processor';
 import { Cache, IPFS, Tools } from './util';
@@ -92,6 +92,31 @@ export const formatAssetId = (assetId: Asset): string => {
       return _Asset.Ztg;
     default:
       return assetId.__kind;
+  }
+};
+
+export const formatMarketStatus = (status: _MarketStatus): MarketStatus => {
+  switch (status.__kind) {
+    case 'Active':
+      return MarketStatus.Active;
+    case 'Closed':
+      return MarketStatus.Closed;
+    case 'CollectingSubsidy':
+      return MarketStatus.CollectingSubsidy;
+    case 'Disputed':
+      return MarketStatus.Disputed;
+    case 'InsufficientSubsidy':
+      return MarketStatus.InsufficientSubsidy;
+    case 'Proposed':
+      return MarketStatus.Proposed;
+    case 'Reported':
+      return MarketStatus.Reported;
+    case 'Resolved':
+      return MarketStatus.Resolved;
+    case 'Suspended':
+      return MarketStatus.Suspended;
+    default:
+      return MarketStatus.Active;
   }
 };
 
