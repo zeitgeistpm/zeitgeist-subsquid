@@ -75,8 +75,6 @@ type HistoricalAsset @entity {
   id: ID!
   "Account which executed the trade"
   accountId: String @index
-  "Amount of base asset which user spent/redeemed for swap trade"
-  baseAssetTraded: BigInt
   "Zeitgeist's identifier for asset"
   assetId: String! @index
   "Price of the asset has decreased if -ve and +ve if increased"
@@ -187,6 +185,8 @@ type Market @entity {
   status: MarketStatus!
   "Market tags"
   tags: [String]
+  "Total amount of base-asset that has moved through a market's liquidity pool"
+  volume: BigInt!
   "Market question"
   question: String
 }
@@ -200,6 +200,8 @@ type HistoricalMarket @entity {
   blockNumber: Int!
   "The account that reported or disputed"
   by: String
+  "Change in market volume"
+  dVolume: BigInt!
   "Event method which initiated this change"
   event: MarketEvent!
   "Details of the connected market"
@@ -212,6 +214,8 @@ type HistoricalMarket @entity {
   status: MarketStatus!
   "Timestamp of the block"
   timestamp: DateTime!
+  "New updated volume"
+  volume: BigInt!
 }
 
 """
@@ -238,8 +242,6 @@ type Pool @entity {
   totalSubsidy: String
   "Sum of `weights`"
   totalWeight: String
-  "Total amount of ZTG that has moved through a market's liquidity pool"
-  volume: BigInt!
   "List of lengths for each asset"
   weights: [Weight!]!
 }
@@ -256,7 +258,6 @@ type NeoPool @entity {
   marketId: Int! @index
   poolId: Int! @index
   swapFee: BigInt!
-  volume: BigInt!
 }
 
 """
@@ -266,8 +267,6 @@ associated with the pool.
 type HistoricalPool @entity {
   "Height of the block"
   blockNumber: Int!
-  "Volume difference"
-  dVolume: BigInt
   "Event method which initiated this change"
   event: String!
   "Zeitgeist's identifier for pool"
@@ -276,8 +275,6 @@ type HistoricalPool @entity {
   status: PoolStatus
   "Timestamp of the block"
   timestamp: DateTime!
-  "New updated volume"
-  volume: BigInt
 }
 
 """
@@ -424,6 +421,7 @@ enum DisputeMechanism {
 Markets' event options
 """
 enum MarketEvent {
+  BuyExecuted
   GlobalDisputeStarted
   MarketApproved
   MarketClosed
@@ -435,8 +433,11 @@ enum MarketEvent {
   MarketRejected
   MarketReported
   MarketResolved
-  MarketStartedWithSubsidy 
+  MarketStartedWithSubsidy
   PoolDeployed
+  SellExecuted
+  SwapExactAmountIn
+  SwapExactAmountOut
 }
 
 """

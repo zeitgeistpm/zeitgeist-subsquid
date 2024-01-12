@@ -32,12 +32,16 @@ export const resolveMarkets = async (store: Store, blockHeight: number): Promise
 
         const hm = new HistoricalMarket({
           blockNumber: rm.blockHeight,
+          by: null,
+          dVolume: BigInt(0),
           event: MarketEvent.MarketResolved,
           id: rm.eventId + '-' + rm.marketId,
           market,
+          outcome: null,
           resolvedOutcome: market.resolvedOutcome,
           status: market.status,
           timestamp: new Date(rm.blockTimestamp),
+          volume: market.volume,
         });
         console.log(`[${eventName}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
         await store.save<HistoricalMarket>(hm);
@@ -103,7 +107,6 @@ export const resolveMarkets = async (store: Store, blockHeight: number): Promise
             const ha = new HistoricalAsset({
               accountId: null,
               assetId: asset.assetId,
-              baseAssetTraded: null,
               blockNumber: rm.blockHeight,
               dAmountInPool: newAssetQty - oldAssetQty,
               dPrice: newPrice - oldPrice,

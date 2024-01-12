@@ -24,12 +24,6 @@ export class HistoricalAsset {
     accountId!: string | undefined | null
 
     /**
-     * Amount of base asset which user spent/redeemed for swap trade
-     */
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
-    baseAssetTraded!: bigint | undefined | null
-
-    /**
      * Zeitgeist's identifier for asset
      */
     @Index_()

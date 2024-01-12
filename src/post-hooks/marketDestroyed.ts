@@ -32,6 +32,7 @@ export const destroyMarkets = async (store: Store) => {
       const hm = new HistoricalMarket({
         blockNumber,
         by: null,
+        dVolume: BigInt(0),
         event: MarketEvent.MarketDestroyed,
         id: eventId + '-' + marketId,
         market,
@@ -39,6 +40,7 @@ export const destroyMarkets = async (store: Store) => {
         resolvedOutcome: null,
         status: market.status,
         timestamp,
+        volume: market.volume,
       });
       console.log(`[${eventName}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
       await store.save<HistoricalMarket>(hm);

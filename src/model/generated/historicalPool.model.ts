@@ -1,5 +1,4 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_} from "typeorm"
-import * as marshal from "./marshal"
 import {PoolStatus} from "./_poolStatus"
 
 /**
@@ -20,12 +19,6 @@ export class HistoricalPool {
      */
     @Column_("int4", {nullable: false})
     blockNumber!: number
-
-    /**
-     * Volume difference
-     */
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
-    dVolume!: bigint | undefined | null
 
     /**
      * Event method which initiated this change
@@ -50,10 +43,4 @@ export class HistoricalPool {
      */
     @Column_("timestamp with time zone", {nullable: false})
     timestamp!: Date
-
-    /**
-     * New updated volume
-     */
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
-    volume!: bigint | undefined | null
 }

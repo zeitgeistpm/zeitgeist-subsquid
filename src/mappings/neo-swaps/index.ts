@@ -26,7 +26,7 @@ export const buyExecuted = async (
   store: Store,
   event: Event
 ): Promise<
-  { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalPool: HistoricalPool } | undefined
+  { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalMarket: HistoricalMarket } | undefined
 > => {
   const { who, marketId, assetExecuted, amountIn, amountOut, swapFeeAmount } = decodeBuyExecutedEvent(event);
 
@@ -36,20 +36,26 @@ export const buyExecuted = async (
   });
   if (!market || !market.neoPool) return;
 
-  market.neoPool.volume += amountIn;
+  market.volume += amountIn;
+  console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
+  await store.save<Market>(market);
+
   market.neoPool.liquiditySharesManager.fees += swapFeeAmount;
   console.log(`[${event.name}] Saving neo-pool: ${JSON.stringify(market.neoPool, null, 2)}`);
   await store.save<NeoPool>(market.neoPool);
 
-  const historicalPool = new HistoricalPool({
+  const historicalMarket = new HistoricalMarket({
     blockNumber: event.block.height,
+    by: null,
     dVolume: amountIn,
-    event: event.name.split('.')[1],
+    event: MarketEvent.BuyExecuted,
     id: event.id + '-' + market.marketId,
-    poolId: market.marketId,
-    status: null,
+    market: market,
+    outcome: null,
+    resolvedOutcome: null,
+    status: market.status,
     timestamp: new Date(event.block.timestamp!),
-    volume: market.neoPool.volume,
+    volume: market.volume,
   });
 
   const historicalAssets: HistoricalAsset[] = [];
@@ -71,7 +77,6 @@ export const buyExecuted = async (
       const ha = new HistoricalAsset({
         accountId: asset.assetId === assetExecuted ? who : null,
         assetId: asset.assetId,
-        baseAssetTraded: asset.assetId === assetExecuted ? amountIn : null,
         blockNumber: event.block.height,
         dAmountInPool: asset.amountInPool - oldAmountInPool,
         dPrice: asset.price - oldPrice,
@@ -98,7 +103,7 @@ export const buyExecuted = async (
     timestamp: new Date(event.block.timestamp!),
   });
 
-  return { historicalAssets, historicalSwap, historicalPool };
+  return { historicalAssets, historicalSwap, historicalMarket };
 };
 
 export const exitExecuted = async (store: Store, event: Event): Promise<HistoricalAsset[] | undefined> => {
@@ -134,7 +139,6 @@ export const exitExecuted = async (store: Store, event: Event): Promise<Historic
       const ha = new HistoricalAsset({
         accountId: who,
         assetId: asset.assetId,
-        baseAssetTraded: null,
         blockNumber: event.block.height,
         dAmountInPool: asset.amountInPool - oldAmountInPool,
         dPrice: asset.price - oldPrice,
@@ -165,13 +169,11 @@ export const feesWithdrawn = async (store: Store, event: Event): Promise<Histori
 
   const historicalPool = new HistoricalPool({
     blockNumber: event.block.height,
-    dVolume: BigInt(0),
     event: event.name.split('.')[1],
     id: event.id + '-' + market.marketId,
     poolId: market.marketId,
     status: null,
     timestamp: new Date(event.block.timestamp!),
-    volume: market.neoPool.volume,
   });
 
   return historicalPool;
@@ -210,7 +212,6 @@ export const joinExecuted = async (store: Store, event: Event): Promise<Historic
       const ha = new HistoricalAsset({
         accountId: who,
         assetId: asset.assetId,
-        baseAssetTraded: null,
         blockNumber: event.block.height,
         dAmountInPool: asset.amountInPool - oldAmountInPool,
         dPrice: asset.price - oldPrice,
@@ -229,7 +230,7 @@ export const joinExecuted = async (store: Store, event: Event): Promise<Historic
 export const poolDeployed = async (
   store: Store,
   event: Event
-): Promise<{ historicalAssets: HistoricalAsset[]; historicalPool: HistoricalPool } | undefined> => {
+): Promise<{ historicalAssets: HistoricalAsset[]; historicalMarket: HistoricalMarket } | undefined> => {
   const { who, marketId, accountId, collateral, liquidityParameter, poolSharesAmount, swapFee } =
     decodePoolDeployedEvent(event);
 
@@ -258,7 +259,6 @@ export const poolDeployed = async (
     marketId,
     poolId: marketId,
     swapFee,
-    volume: BigInt(0),
   });
   console.log(`[${event.name}] Saving neo pool: ${JSON.stringify(neoPool, null, 2)}`);
   await store.save<NeoPool>(neoPool);
@@ -271,9 +271,10 @@ export const poolDeployed = async (
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await store.save<Market>(market);
 
-  const hm = new HistoricalMarket({
+  const historicalMarket = new HistoricalMarket({
     blockNumber: event.block.height,
     by: null,
+    dVolume: BigInt(0),
     event: MarketEvent.PoolDeployed,
     id: event.id + '-' + market.marketId,
     market,
@@ -281,9 +282,8 @@ export const poolDeployed = async (
     resolvedOutcome: null,
     status: market.status,
     timestamp: new Date(event.block.timestamp!),
+    volume: market.volume,
   });
-  console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
-  await store.save<HistoricalMarket>(hm);
 
   const historicalAssets: HistoricalAsset[] = [];
   await Promise.all(
@@ -302,7 +302,6 @@ export const poolDeployed = async (
       const ha = new HistoricalAsset({
         accountId: who,
         assetId: asset.assetId,
-        baseAssetTraded: BigInt(0),
         blockNumber: event.block.height,
         dAmountInPool: asset.amountInPool,
         dPrice: asset.price,
@@ -316,25 +315,15 @@ export const poolDeployed = async (
     })
   );
 
-  const historicalPool = new HistoricalPool({
-    blockNumber: event.block.height,
-    dVolume: neoPool.volume,
-    event: event.name.split('.')[1],
-    id: event.id + '-' + market.marketId,
-    poolId: market.marketId,
-    status: null,
-    timestamp: new Date(event.block.timestamp!),
-    volume: neoPool.volume,
-  });
-
-  return { historicalAssets, historicalPool };
+  return { historicalAssets, historicalMarket };
 };
 
 export const sellExecuted = async (
   store: Store,
   event: Event
 ): Promise<
-  { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalPool: HistoricalPool } | undefined
+  | { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalMarket: HistoricalMarket }
+  | undefined
 > => {
   const { who, marketId, assetExecuted, amountIn, amountOut, swapFeeAmount } = decodeSellExecutedEvent(event);
 
@@ -344,20 +333,26 @@ export const sellExecuted = async (
   });
   if (!market || !market.neoPool) return;
 
-  market.neoPool.volume += amountOut;
+  market.volume += amountOut;
+  console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
+  await store.save<Market>(market);
+
   market.neoPool.liquiditySharesManager.fees += swapFeeAmount;
   console.log(`[${event.name}] Saving neo-pool: ${JSON.stringify(market.neoPool, null, 2)}`);
   await store.save<NeoPool>(market.neoPool);
 
-  const historicalPool = new HistoricalPool({
+  const historicalMarket = new HistoricalMarket({
     blockNumber: event.block.height,
+    by: null,
     dVolume: amountOut,
-    event: event.name.split('.')[1],
+    event: MarketEvent.SellExecuted,
     id: event.id + '-' + market.marketId,
-    poolId: market.marketId,
-    status: null,
+    market: market,
+    outcome: null,
+    resolvedOutcome: null,
+    status: market.status,
     timestamp: new Date(event.block.timestamp!),
-    volume: market.neoPool.volume,
+    volume: market.volume,
   });
 
   const historicalAssets: HistoricalAsset[] = [];
@@ -379,7 +374,6 @@ export const sellExecuted = async (
       const ha = new HistoricalAsset({
         accountId: asset.assetId === assetExecuted ? who : null,
         assetId: asset.assetId,
-        baseAssetTraded: asset.assetId === assetExecuted ? amountIn : null,
         blockNumber: event.block.height,
         dAmountInPool: asset.amountInPool - oldAmountInPool,
         dPrice: asset.price - oldPrice,
@@ -406,5 +400,5 @@ export const sellExecuted = async (
     timestamp: new Date(event.block.timestamp!),
   });
 
-  return { historicalAssets, historicalSwap, historicalPool };
+  return { historicalAssets, historicalSwap, historicalMarket };
 };

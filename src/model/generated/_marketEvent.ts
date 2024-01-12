@@ -1,4 +1,5 @@
 export enum MarketEvent {
+    BuyExecuted = "BuyExecuted",
     GlobalDisputeStarted = "GlobalDisputeStarted",
     MarketApproved = "MarketApproved",
     MarketClosed = "MarketClosed",
@@ -12,4 +13,7 @@ export enum MarketEvent {
     MarketResolved = "MarketResolved",
     MarketStartedWithSubsidy = "MarketStartedWithSubsidy",
     PoolDeployed = "PoolDeployed",
+    SellExecuted = "SellExecuted",
+    SwapExactAmountIn = "SwapExactAmountIn",
+    SwapExactAmountOut = "SwapExactAmountOut",
 }

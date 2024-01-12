@@ -31,6 +31,12 @@ export class HistoricalMarket {
     by!: string | undefined | null
 
     /**
+     * Change in market volume
+     */
+    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+    dVolume!: bigint
+
+    /**
      * Event method which initiated this change
      */
     @Column_("varchar", {length: 25, nullable: false})
@@ -66,4 +72,10 @@ export class HistoricalMarket {
      */
     @Column_("timestamp with time zone", {nullable: false})
     timestamp!: Date
+
+    /**
+     * New updated volume
+     */
+    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+    volume!: bigint
 }
