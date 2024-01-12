@@ -227,7 +227,7 @@ type Pool @entity {
   "List of assets connected to the pool"
   assets: [Asset!]! @derivedFrom(field: "pool")
   "The base asset in the market swap pool (usually a currency)"
-  baseAsset: String
+  baseAsset: String!
   "Timestamp of pool creation"
   createdAt: DateTime!
   "Zeitgeist's identifier for market connected to the pool"
