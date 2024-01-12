@@ -241,7 +241,7 @@ type Pool @entity {
   "Subsidy gathered for the market"
   totalSubsidy: String
   "Sum of `weights`"
-  totalWeight: String
+  totalWeight: String!
   "List of lengths for each asset"
   weights: [Weight!]!
 }

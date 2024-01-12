@@ -77,8 +77,8 @@ export class Pool {
     /**
      * Sum of `weights`
      */
-    @Column_("text", {nullable: true})
-    totalWeight!: string | undefined | null
+    @Column_("text", {nullable: false})
+    totalWeight!: string
 
     /**
      * List of lengths for each asset

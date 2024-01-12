@@ -232,6 +232,11 @@ export const poolCreate = async (
     return;
   }
 
+  if (!pool.totalWeight) {
+    console.error(`Coudn't find total-weight on poolId ${poolId}`);
+    return;
+  }
+
   const newPool = new Pool({
     account: account,
     baseAsset: formatAssetId(pool.baseAsset),
@@ -242,7 +247,7 @@ export const poolCreate = async (
     status: event.block.specVersion < 39 ? PoolStatus.Active : PoolStatus.Initialized,
     swapFee: pool.swapFee ? pool.swapFee.toString() : null,
     totalSubsidy: pool.totalSubsidy ? pool.totalSubsidy.toString() : null,
-    totalWeight: pool.totalWeight ? pool.totalWeight.toString() : null,
+    totalWeight: pool.totalWeight.toString(),
     weights: [],
   });
   console.log(`[${event.name}] Saving pool: ${JSON.stringify(newPool, null, 2)}`);
