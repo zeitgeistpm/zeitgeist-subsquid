@@ -227,9 +227,19 @@ export const poolCreate = async (
     return;
   }
 
+  if (!pool.baseAsset) {
+    console.error(`Coudn't find base-asset on poolId ${poolId}`);
+    return;
+  }
+
+  if (!pool.totalWeight) {
+    console.error(`Coudn't find total-weight on poolId ${poolId}`);
+    return;
+  }
+
   const newPool = new Pool({
     account: account,
-    baseAsset: pool.baseAsset ? formatAssetId(pool.baseAsset) : null,
+    baseAsset: formatAssetId(pool.baseAsset),
     createdAt: new Date(event.block.timestamp!),
     marketId: Number(pool.marketId),
     id: event.id + '-' + poolId,
@@ -237,7 +247,7 @@ export const poolCreate = async (
     status: event.block.specVersion < 39 ? PoolStatus.Active : PoolStatus.Initialized,
     swapFee: pool.swapFee ? pool.swapFee.toString() : null,
     totalSubsidy: pool.totalSubsidy ? pool.totalSubsidy.toString() : null,
-    totalWeight: pool.totalWeight ? pool.totalWeight.toString() : null,
+    totalWeight: pool.totalWeight.toString(),
     weights: [],
   });
   console.log(`[${event.name}] Saving pool: ${JSON.stringify(newPool, null, 2)}`);

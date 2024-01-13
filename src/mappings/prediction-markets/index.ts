@@ -26,7 +26,14 @@ import {
   ScoringRule,
 } from '../../model';
 import { BUY_COMPLETE_SET, Pallet, SELL_COMPLETE_SET, _Asset } from '../../consts';
-import { createAssetsForMarket, decodeMarketMetadata, extrinsicFromEvent, formatAssetId, rescale } from '../../helper';
+import {
+  createAssetsForMarket,
+  decodeMarketMetadata,
+  extrinsicFromEvent,
+  formatAssetId,
+  formatMarketStatus,
+  rescale,
+} from '../../helper';
 import { Call, Event } from '../../processor';
 import { Tools } from '../../util';
 import { decodeMarketsStorage } from '../market-commons/decode';
@@ -125,14 +132,19 @@ export const globalDisputeStarted = async (store: Store, event: Event) => {
 };
 
 export const marketApproved = async (store: Store, event: Event) => {
-  const { marketId } = decodeMarketApprovedEvent(event);
+  const { marketId, status } = decodeMarketApprovedEvent(event);
 
   const market = await store.get(Market, { where: { marketId } });
   if (!market) return;
-  market.status = market.scoringRule === 'CPMM' ? MarketStatus.Active : MarketStatus.CollectingSubsidy;
-  if (market.bonds && market.creation === MarketCreation.Advised) {
-    market.bonds.creation.isSettled = true;
-  }
+
+  market.status = status
+    ? formatMarketStatus(status)
+    : market.scoringRule === ScoringRule.CPMM
+    ? MarketStatus.Active
+    : MarketStatus.CollectingSubsidy;
+
+  if (market.bonds && market.creation === MarketCreation.Advised) market.bonds.creation.isSettled = true;
+
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await store.save<Market>(market);
 
@@ -252,16 +264,6 @@ export const marketCreated = async (store: Store, event: Event) => {
       break;
   }
 
-  let status = MarketStatus.Active;
-  switch (market.status.__kind) {
-    case 'Active':
-      status = MarketStatus.Active;
-      break;
-    case 'Proposed':
-      status = MarketStatus.Proposed;
-      break;
-  }
-
   const newMarket = new Market({
     baseAsset: market.baseAsset ? formatAssetId(market.baseAsset) : 'Ztg',
     creation: market.creation.__kind == 'Advised' ? MarketCreation.Advised : MarketCreation.Permissionless,
@@ -274,7 +276,7 @@ export const marketCreated = async (store: Store, event: Event) => {
     oracle: ss58.encode({ prefix: 73, bytes: market.oracle }),
     outcomeAssets: (await createAssetsForMarket(marketId, market.marketType)) as string[],
     scoringRule,
-    status,
+    status: formatMarketStatus(market.status),
     volume: BigInt(0),
   });
 
@@ -566,11 +568,11 @@ export const marketExpired = async (store: Store, event: Event) => {
 };
 
 export const marketInsufficientSubsidy = async (store: Store, event: Event) => {
-  const { marketId } = decodeMarketInsufficientSubsidyEvent(event);
+  const { marketId, status } = decodeMarketInsufficientSubsidyEvent(event);
 
   const market = await store.get(Market, { where: { marketId } });
   if (!market) return;
-  market.status = MarketStatus.InsufficientSubsidy;
+  market.status = status ? formatMarketStatus(status) : MarketStatus.InsufficientSubsidy;
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await store.save<Market>(market);
 
@@ -789,11 +791,11 @@ export const marketResolved = async (store: Store, event: Event) => {
 };
 
 export const marketStartedWithSubsidy = async (store: Store, event: Event) => {
-  const { marketId } = decodeMarketStartedWithSubsidyEvent(event);
+  const { marketId, status } = decodeMarketStartedWithSubsidyEvent(event);
 
   const market = await store.get(Market, { where: { marketId } });
   if (!market) return;
-  market.status = MarketStatus.Active;
+  market.status = status ? formatMarketStatus(status) : MarketStatus.Active;
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await store.save<Market>(market);
 

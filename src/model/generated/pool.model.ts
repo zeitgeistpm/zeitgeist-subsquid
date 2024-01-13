@@ -33,8 +33,8 @@ export class Pool {
     /**
      * The base asset in the market swap pool (usually a currency)
      */
-    @Column_("text", {nullable: true})
-    baseAsset!: string | undefined | null
+    @Column_("text", {nullable: false})
+    baseAsset!: string
 
     /**
      * Timestamp of pool creation
@@ -77,8 +77,8 @@ export class Pool {
     /**
      * Sum of `weights`
      */
-    @Column_("text", {nullable: true})
-    totalWeight!: string | undefined | null
+    @Column_("text", {nullable: false})
+    totalWeight!: string
 
     /**
      * List of lengths for each asset
