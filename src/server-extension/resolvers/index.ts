@@ -2,6 +2,7 @@ import { registerEnumType } from 'type-graphql';
 import { BalanceInfoEvent, BaseAsset, OrderBy, TargetAsset, Unit, _Asset } from '../../consts';
 import { AssetPriceResolver } from './assetPrice';
 import { BalanceInfoResolver } from './balanceInfo';
+import { IssuanceHistoryResolver } from './issuanceHistory';
 import { MarketMetadataResolver } from './marketMetadata';
 import { MarketStatsResolver } from './marketStats';
 import { MarketStatsWithOrderResolver } from './marketStatsWithOrder';
@@ -40,6 +41,7 @@ registerEnumType(Unit, {
 export {
   AssetPriceResolver,
   BalanceInfoResolver,
+  IssuanceHistoryResolver,
   MarketMetadataResolver,
   MarketStatsResolver,
   MarketStatsWithOrderResolver,
