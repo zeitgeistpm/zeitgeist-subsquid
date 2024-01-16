@@ -16,11 +16,9 @@
     "migration:apply": "squid-typeorm-migration apply",
     "migration:generate": "squid-typeorm-migration generate",
     "migration:revert": "npx squid-typeorm-migration revert",
+    "processor:start": "yarn migration:apply && node lib/main.js",
     "processor:stop": "sh scripts/deploy/processor.sh stop",
-    "squid:mac:start": "yarn archive:start && sh scripts/deploy/processor.sh mlocal start && sh scripts/deploy/api.sh mlocal start",
-    "squid:start": "yarn archive:start && sh scripts/deploy/processor.sh local start && sh scripts/deploy/api.sh local start",
-    "squid:stop": "yarn archive:stop && yarn api:stop && yarn db:down && yarn processor:stop",
-    "test": "yarn db:restart && yarn build && yarn migration:apply && REDIS_HOST=localhost DB_HOST=localhost NODE_ENV=test node lib/main.js",
+    "spin": "yarn db:restart && yarn build && yarn migration:apply && NODE_ENV=local node lib/main.js",
     "typegen": "squid-substrate-typegen typegen.json"
   },
   "dependencies": {
