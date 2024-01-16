@@ -26,7 +26,7 @@ export const fetchFromCache = async (b: string, t: string): Promise<{ pair: stri
 
 export const getAssetUsdPrices = async (): Promise<Map<BaseAsset, number>> => {
   let prices: Map<BaseAsset, number>;
-  if (isLocalEnv() && isBatteryStation()) {
+  if (isLocalEnv() || isBatteryStation()) {
     prices = new Map([
       [BaseAsset.DOT, 1],
       [BaseAsset.ZTG, 1],
