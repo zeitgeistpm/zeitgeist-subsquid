@@ -7,6 +7,7 @@ import {
   Extrinsic as _Extrinsic,
 } from '@subsquid/substrate-processor';
 import { calls, events } from './types';
+import { isBatteryStation, isLocalEnv } from './helper';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -16,7 +17,6 @@ require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` });
 console.log(`ENVIRONMENT: ${process.env.NODE_ENV}`);
 
 export const processor = new SubstrateBatchProcessor()
-  .setGateway(process.env.ARCHIVE_GATEWAY_URL!)
   .setRpcEndpoint(process.env.WS_NODE_URL!)
   .addEvent({
     name: [
@@ -86,7 +86,7 @@ export const processor = new SubstrateBatchProcessor()
     ],
     call: true,
     extrinsic: true,
-    stack: process.env.WS_NODE_URL?.includes(`bs`),
+    stack: isBatteryStation(),
   })
   .setFields({
     call: {
@@ -106,7 +106,7 @@ export const processor = new SubstrateBatchProcessor()
     },
   });
 
-if (process.env.WS_NODE_URL?.includes(`bs`)) {
+if (isBatteryStation()) {
   processor
     .addCall({
       name: [calls.predictionMarkets.redeemShares.name, calls.swaps.poolExit.name],
@@ -119,6 +119,12 @@ if (process.env.WS_NODE_URL?.includes(`bs`)) {
       call: true,
       extrinsic: true,
     });
+}
+
+if (!isLocalEnv()) {
+  processor.setGateway(process.env.ARCHIVE_GATEWAY_URL!);
+} else {
+  processor.setBlockRange({ from: 1 });
 }
 
 type Fields = SubstrateBatchProcessorFields<typeof processor>;
