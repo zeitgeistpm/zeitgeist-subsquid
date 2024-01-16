@@ -4,8 +4,6 @@ __usage="
 Usage: ./scripts/deploy/processor.sh <first> <second>
 
 Options for <first>:
-  local       Process data from local chain
-  mlocal      Process data from local chain running on mac
   stop        Stop the running processor
 
 Options for <second>:
@@ -22,7 +20,6 @@ elif [ "$2" = "start" ]; then
   echo "Starting services..."
   yarn db:up
   docker build . --target processor -t processor
-  yarn migration:apply
   echo "Starting processor..."
 elif [ "$2" = "resume" ]; then
   echo "Building processor..."
@@ -35,22 +32,16 @@ elif [ "$2" = "restart" ]; then
   docker stop api
   docker stop sub-api
   echo "Restarting database..."
-  docker-compose down
-  yarn db:up
+  yarn db:restart
   echo "Building processor..."
   docker build . --target processor -t processor
-  yarn migration:apply
   echo "Starting processor..."
 else
   echo "$__usage"
   exit
 fi
 
-if [ "$1" = "local" ]; then
-  docker run -d --network=host --rm -e NODE_ENV=local --env-file=.env.local --name=zeitgeist-processor processor
-elif [ "$1" = "mlocal" ]; then
-  docker run -d -p 9090:9090 --rm -e NODE_ENV=mlocal --env-file=.env.mlocal --name=zeitgeist-processor processor
-elif [ "$1" = "test" ] || [ "$1" = "main" ]; then
+if [ "$1" = "test" ] || [ "$1" = "main" ]; then
   docker run -d --network=host --rm -e NODE_ENV=$1 --env-file=.env.$1 --name=zeitgeist-processor processor
 else
   echo "$__usage"
