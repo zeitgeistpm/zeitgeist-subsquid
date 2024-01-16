@@ -1,7 +1,10 @@
 import axios from 'axios';
-import { BaseAsset, CacheHint, TargetAsset } from '../consts';
-import { Cache } from '../util';
 import { AssetPriceResolver } from './resolvers';
+import { Field, InputType } from 'type-graphql';
+import { Asset } from '../types/v51';
+import { BaseAsset, CacheHint, TargetAsset, _Asset } from '../consts';
+import { formatAssetId } from '../helper';
+import { Cache } from '../util';
 
 export const decodedAssetId = (assetId: string) => {
   return assetId.replaceAll('#', '"');
@@ -72,3 +75,20 @@ const storeOnCache = async (data: any): Promise<void> => {
     });
   });
 };
+
+@InputType()
+export class AssetKindValue {
+  @Field(() => _Asset)
+  kind!: _Asset;
+
+  @Field(() => String, { nullable: true })
+  value!: string;
+
+  constructor(props: Partial<AssetKindValue>) {
+    Object.assign(this, props);
+  }
+
+  toString(): string {
+    return formatAssetId({ __kind: this.kind, value: this.value } as Asset);
+  }
+}

@@ -1,6 +1,7 @@
 import { util } from '@zeitgeistpm/sdk';
-import { Field, Int, ObjectType, Query, registerEnumType, Resolver, InputType, Arg } from 'type-graphql';
+import { Field, Int, ObjectType, Query, Resolver, InputType, Arg } from 'type-graphql';
 import { EntityManager } from 'typeorm';
+import { Unit } from '../../consts';
 import { decodedAssetId, mergeByField } from '../helper';
 import { assetPriceHistory, marketInfo } from '../query';
 
@@ -29,18 +30,6 @@ class Price {
     Object.assign(this, props);
   }
 }
-
-enum Unit {
-  Day = 'DAYS',
-  Hour = 'HOURS',
-  Minute = 'MINUTES',
-  Second = 'SECONDS',
-}
-
-registerEnumType(Unit, {
-  name: 'Unit',
-  description: 'Unit for the interval',
-});
 
 @InputType()
 class IntervalArgs {

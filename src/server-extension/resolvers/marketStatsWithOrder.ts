@@ -1,8 +1,9 @@
-import { Arg, Field, Int, ObjectType, Query, Resolver, registerEnumType } from 'type-graphql';
+import { Arg, Field, Int, ObjectType, Query, Resolver } from 'type-graphql';
 import type { EntityManager } from 'typeorm';
 import { Market } from '../../model/generated';
-import { marketStatsWithOrder } from '../query';
+import { OrderBy } from '../../consts';
 import { getAssetUsdPrices } from '../helper';
+import { marketStatsWithOrder } from '../query';
 
 @ObjectType()
 export class MarketStatsWithOrder {
@@ -22,20 +23,6 @@ export class MarketStatsWithOrder {
     Object.assign(this, props);
   }
 }
-
-enum OrderBy {
-  liquidity_ASC = 'liquidity ASC',
-  liquidity_DESC = 'liquidity DESC',
-  participants_ASC = 'participants ASC',
-  participants_DESC = 'participants DESC',
-  volume_ASC = 'volume ASC',
-  volume_DESC = 'volume DESC',
-}
-
-registerEnumType(OrderBy, {
-  name: 'OrderBy',
-  description: 'Ordering stats',
-});
 
 @Resolver()
 export class MarketStatsWithOrderResolver {

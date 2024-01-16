@@ -13,6 +13,10 @@ export enum _Asset {
   Ztg = 'Ztg',
 }
 
+export enum BalanceInfoEvent {
+  MintedInCourt = 'MintedInCourt',
+}
+
 export enum BaseAsset {
   DOT = 'polkadot',
   USDC = 'usd-coin',
@@ -45,4 +49,20 @@ export enum Pallet {
 
 export enum TargetAsset {
   USD = 'usd',
+}
+
+export enum Unit {
+  Day = 'DAYS',
+  Hour = 'HOURS',
+  Minute = 'MINUTES',
+  Second = 'SECONDS',
+}
+
+export enum OrderBy {
+  liquidity_ASC = 'liquidity ASC',
+  liquidity_DESC = 'liquidity DESC',
+  participants_ASC = 'participants ASC',
+  participants_DESC = 'participants DESC',
+  volume_ASC = 'volume ASC',
+  volume_DESC = 'volume DESC',
 }

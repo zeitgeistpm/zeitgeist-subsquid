@@ -1,4 +1,4 @@
-import { Arg, Field, ObjectType, Query, Resolver, registerEnumType } from 'type-graphql';
+import { Arg, Field, ObjectType, Query, Resolver } from 'type-graphql';
 import { EntityManager } from 'typeorm';
 import { HistoricalMarket } from '../../model';
 import { BaseAsset, EPOCH_TIME, TargetAsset } from '../../consts';
@@ -19,14 +19,6 @@ export class AssetPrice {
     Object.assign(this, props);
   }
 }
-
-registerEnumType(BaseAsset, {
-  name: 'BaseAsset',
-});
-
-registerEnumType(TargetAsset, {
-  name: 'TargetAsset',
-});
 
 @Resolver()
 export class AssetPriceResolver {

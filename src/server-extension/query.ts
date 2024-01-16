@@ -45,6 +45,22 @@ export const balanceInfo = (accountId: string, assetId: string, conditions: stri
     asset_id;
 `;
 
+export const issuanceHistory = (assetId: string) => `
+  SELECT
+    asset_id,
+    date(timestamp),
+    SUM(d_balance) AS issuance
+  FROM
+    historical_account_balance
+  WHERE
+    asset_id LIKE '%${assetId}%'
+  GROUP BY
+    asset_id,
+    date(timestamp)
+  ORDER BY
+    date ASC;
+`
+
 export const marketParticipants = (ids: number[]) => `
   SELECT
     m.market_id,

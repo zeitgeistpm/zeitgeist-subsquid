@@ -1,8 +1,8 @@
-import { Arg, Field, ObjectType, Query, Resolver, registerEnumType, InputType } from 'type-graphql';
+import { Arg, Field, ObjectType, Query, Resolver } from 'type-graphql';
 import type { EntityManager } from 'typeorm';
 import { HistoricalAccountBalance } from '../../model/generated';
-import { Asset } from '../../types/v50';
-import { formatAssetId } from '../../helper';
+import { BalanceInfoEvent, _Asset } from '../../consts';
+import { AssetKindValue } from '../helper';
 import { balanceInfo } from '../query';
 
 @ObjectType()
@@ -18,45 +18,6 @@ export class BalanceInfo {
   }
 }
 
-enum AssetKind {
-  CategoricalOutcome = 'CategoricalOutcome',
-  ForeignAsset = 'ForeignAsset',
-  PoolShare = 'PoolShare',
-  ScalarOutcome = 'ScalarOutcome',
-  Ztg = 'Ztg',
-}
-
-registerEnumType(AssetKind, {
-  name: 'AssetKind',
-  description: 'Kind of asset',
-});
-
-enum BalanceInfoEvent {
-  MintedInCourt = 'MintedInCourt',
-}
-
-registerEnumType(BalanceInfoEvent, {
-  name: 'BalanceInfoEvent',
-  description: 'Filtering balance based on event',
-});
-
-@InputType()
-class AssetKindValue {
-  @Field(() => AssetKind)
-  kind!: AssetKind;
-
-  @Field(() => String, { nullable: true })
-  value!: string;
-
-  constructor(props: Partial<AssetKindValue>) {
-    Object.assign(this, props);
-  }
-
-  toString(): string {
-    return formatAssetId({ __kind: this.kind, value: this.value } as Asset);
-  }
-}
-
 @Resolver()
 export class BalanceInfoResolver {
   constructor(private tx: () => Promise<EntityManager>) {}
@@ -64,7 +25,7 @@ export class BalanceInfoResolver {
   @Query(() => BalanceInfo)
   async balanceInfo(
     @Arg('accountId', () => String, { nullable: false }) accountId: string,
-    @Arg('assetId', () => AssetKindValue, { nullable: true, defaultValue: { kind: AssetKind.Ztg } })
+    @Arg('assetId', () => AssetKindValue, { nullable: true, defaultValue: { kind: _Asset.Ztg } })
     assetId: AssetKindValue,
     @Arg('blockNumber', () => String, { nullable: true }) blockNumber: string,
     @Arg('event', () => BalanceInfoEvent, { nullable: true }) event: BalanceInfoEvent
