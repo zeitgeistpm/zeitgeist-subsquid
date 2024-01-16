@@ -17,7 +17,7 @@ The substrate events are processed in a multi-step pipeline:
 
 ## Prerequisites
 
-* Node 16.x
+* Node 20.x
 * Docker
 
 
@@ -26,19 +26,12 @@ The substrate events are processed in a multi-step pipeline:
 ```bash
 # The dependencies setup
 yarn install --frozen-lockfile
+
+# Init and start services
+yarn spin
 ```
 
-### Using local node (ws://localhost:9944)
-
-```bash
-# For mac users
-yarn squid:mac:start
-
-# For non-mac users
-yarn squid:start
-```
-
-### Using testnet node (wss://bsr.zeitgeist.pm)
+## Step-by-step run (Using wss://bsr.zeitgeist.pm)
 
 #### 1. Start processor services
 
@@ -88,16 +81,10 @@ Subsquid tools expect a certain directory layout:
 # Stop query-node
 yarn api:stop
 
-# Index data from local node
-yarn archive:start
-
-# Stop local indexer
-yarn archive:stop
-
 # Generate necessary entity classes based on definitions at schema.graphql
 yarn codegen
 
-# Stop local processor services
+# Stop processor services
 yarn db:down
 
 # Generate migration to match the target schema
@@ -107,11 +94,11 @@ yarn migration:generate
 # Revert the last performed migration
 yarn migration:revert
 
-# Stop local processor
-yarn processor:stop
+# Start processor
+yarn processor:start
 
-# Stop local subsquid running on docker
-yarn squid:stop
+# Stop processor
+yarn processor:stop
 
 # Generate types for events defined at typegen.json
 yarn typegen
