@@ -46,25 +46,28 @@ export const createAssetsForMarket = async (marketId: number, marketType: Market
 };
 
 export const decodeMarketMetadata = async (metadata: string): Promise<DecodedMarketMetadata | undefined> => {
-  if (metadata.startsWith('0x1530fa0bb52e67d0d9f89bf26552e1')) return undefined;
-  let raw = await (await Cache.init()).getData(CacheHint.Meta, metadata);
-  if (raw && !(process.env.NODE_ENV == 'local')) {
-    return raw !== '0' ? (JSON.parse(raw) as DecodedMarketMetadata) : undefined;
-  } else {
+  let cachedData;
+  if (!isLocalEnv()) {
+    cachedData = await (await Cache.init()).getData(CacheHint.Meta, metadata);
+  }
+  // Fetch from IPFS for new markets / redis-db issues / local environment
+  // or if the last request to IPFS failed
+  if (!cachedData) {
+    let dataToCache;
     try {
-      const ipfs = new IPFS();
-      raw = await ipfs.read(metadata);
-      const rawData = JSON.parse(raw) as DecodedMarketMetadata;
-      await (await Cache.init()).setData(CacheHint.Meta, metadata, raw);
-      return rawData;
+      dataToCache = await new IPFS().read(metadata);
     } catch (err) {
       console.error(err);
-      if (err instanceof SyntaxError) {
-        await (await Cache.init()).setData(CacheHint.Meta, metadata, '0');
-      }
-      return undefined;
+      if (err instanceof SyntaxError) dataToCache = '0';
+    }
+    // Store data if data is fetched from IPFS
+    if (dataToCache && !isLocalEnv()) {
+      await (await Cache.init()).setData(CacheHint.Meta, metadata, dataToCache);
+      cachedData = dataToCache;
     }
   }
+  // Parse raw data fetched from either IPFS or redis
+  return cachedData && cachedData !== '0' ? JSON.parse(cachedData) : undefined;
 };
 
 export const extrinsicFromEvent = (event: any): Extrinsic | null => {
