@@ -188,11 +188,11 @@ export const isBaseAsset = (assetId: Asset | string): boolean => {
 };
 
 export const isBatteryStation = (): boolean => {
-  return process.env.NODE_ENV === 'test';
+  return process.env.NODE_ENV === 'test' && process.env.WS_NODE_URL!.includes('bs');
 };
 
 export const isLocalEnv = (): boolean => {
-  return process.env.NODE_ENV === 'local';
+  return process.env.NODE_ENV === 'local' && !process.env.WS_NODE_URL!.includes('bs');
 };
 
 export const mergeByAssetId = (balances: any[], weights: any[]): AssetAmountInPoolAndWeight[] =>
