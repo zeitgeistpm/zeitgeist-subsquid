@@ -188,7 +188,7 @@ export const isBaseAsset = (assetId: Asset | string): boolean => {
 };
 
 export const isBatteryStation = (): boolean => {
-  return process.env.NODE_ENV === 'test' && process.env.WS_NODE_URL!.includes('bs');
+  return process.env.WS_NODE_URL!.includes('bs');
 };
 
 export const isLocalEnv = (): boolean => {
