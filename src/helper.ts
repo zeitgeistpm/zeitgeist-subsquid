@@ -184,6 +184,14 @@ export const isBaseAsset = (assetId: Asset | string): boolean => {
   return assetId.__kind.includes('Ztg') || assetId.__kind.includes('ForeignAsset');
 };
 
+export const isBatteryStation = (): boolean => {
+  return process.env.NODE_ENV === 'test';
+};
+
+export const isLocalEnv = (): boolean => {
+  return process.env.NODE_ENV === 'local';
+};
+
 export const mergeByAssetId = (balances: any[], weights: any[]): AssetAmountInPoolAndWeight[] =>
   balances.map((b) => ({
     ...b,
