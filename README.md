@@ -31,7 +31,7 @@ yarn install --frozen-lockfile
 yarn spin
 ```
 
-## Step-by-step run (Using wss://bsr.zeitgeist.pm)
+### Step-by-step Run (Using tesnet)
 
 #### 1. Start processor services
 
