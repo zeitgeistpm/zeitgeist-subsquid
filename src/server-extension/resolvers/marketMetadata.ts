@@ -2,6 +2,7 @@ import { Arg, Field, Int, ObjectType, Query, Resolver } from 'type-graphql';
 import type { EntityManager } from 'typeorm';
 import { Market } from '../../model/generated';
 import { CacheHint } from '../../consts';
+import { isLocalEnv } from '../../helper';
 import { Cache } from '../../util';
 import { marketMetadata } from '../query';
 
@@ -25,8 +26,11 @@ export class MarketMetadata {
 export class MarketMetadataResolver {
   constructor(private tx: () => Promise<EntityManager>) {}
 
-  @Query(() => [MarketMetadata])
-  async marketMetadata(@Arg('marketId', () => [Int!], { nullable: false }) ids: number[]): Promise<MarketMetadata[]> {
+  @Query(() => [MarketMetadata], { nullable: true })
+  async marketMetadata(
+    @Arg('marketId', () => [Int!], { nullable: false }) ids: number[]
+  ): Promise<MarketMetadata[] | undefined> {
+    if (isLocalEnv()) return;
     const manager = await this.tx();
     const encodedData = await manager.getRepository(Market).query(marketMetadata(ids));
 
