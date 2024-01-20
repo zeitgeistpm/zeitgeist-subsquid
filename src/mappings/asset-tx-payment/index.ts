@@ -1,7 +1,7 @@
 import { HistoricalAccountBalance } from '../../model';
 import { Asset_ForeignAsset } from '../../types/v49';
 import { TREASURY_ACCOUNT, _Asset } from '../../consts';
-import { extrinsicFromEvent, formatAssetId } from '../../helper';
+import { extrinsicFromEvent, formatAssetId, isBatteryStation } from '../../helper';
 import { Event } from '../../processor';
 import { decodeMetadataStorage } from '../asset-registry/decode';
 import { decodeAssetTxFeePaidEvent } from './decode';
@@ -28,8 +28,9 @@ export const assetTxFeePaid = async (event: Event): Promise<HistoricalAccountBal
   habs.push(userHab);
 
   // Skip condition. Ref: https://github.com/zeitgeistpm/zeitgeist/issues/1091
-  if (process.env.WS_NODE_URL?.includes(`bs`) && event.block.specVersion < 49)
+  if (isBatteryStation() && event.block.specVersion < 49) {
     if (assetIdValue == 0 || assetIdValue == 2) return habs;
+  }
 
   // Record TokensBalanceSetEvent for txn fee deposits in treasury account
   const treasuryHab = new HistoricalAccountBalance({

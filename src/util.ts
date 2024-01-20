@@ -89,7 +89,7 @@ export class Tools {
 
   static async getSDK(nodeUrl?: string) {
     if (!this.sdk) {
-      const url = nodeUrl ?? process.env.WS_NODE_URL ?? `wss://bsr.zeitgeist.pm`;
+      const url = nodeUrl ?? process.env.WS_NODE_URL!;
       return this.init(url);
     }
     if (!this.sdk.api.isConnected) {

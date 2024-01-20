@@ -17,56 +17,20 @@ The substrate events are processed in a multi-step pipeline:
 
 ## Prerequisites
 
-* Node 16.x
+* Node 20.x
 * Docker
 
 
 ## Quick Run
 
 ```bash
-# The dependencies setup
+# 1. The dependencies setup
 yarn install --frozen-lockfile
-```
 
-### Using local node (ws://localhost:9944)
+# 2. Init and start services
+yarn spin
 
-```bash
-# For mac users
-yarn squid:mac:start
-
-# For non-mac users
-yarn squid:start
-```
-
-### Using testnet node (wss://bsr.zeitgeist.pm)
-
-#### 1. Start processor services
-
-```bash
-yarn db:up
-```
-
-#### 2. Compile processor code
-
-```bash
-yarn build
-```
-
-#### 3. Run existing migrations onto database
-
-```bash
-yarn migration:apply
-```
-
-#### 5. Start processing test chain data
-
-```bash
-REDIS_HOST=localhost DB_HOST=localhost NODE_ENV=test node lib/main.js
-```
-
-#### 6. Open a separate terminal and launch the graphql server to query the processed data
-
-```bash
+# 3. Launch GraphQl API
 yarn api:start
 ```
 
@@ -75,11 +39,11 @@ yarn api:start
 
 Subsquid tools expect a certain directory layout:
 
-* `src/generated` - model/server definitions created by `codegen`. Do not alter the contents of this directory manually.
+* `src/mappings` - handlers for events and calls.
+* `src/model` - model/server definitions created by `codegen`. Do not alter the contents of this directory manually.
+* `src/post-hooks` - manual injection of data for missing events on testnet during early stages.
 * `src/server-extension` - module with custom `type-graphql` based resolvers
 * `src/types` - data type definitions for chain events and extrinsics created by `typegen`.
-* `src/mappings` - mapping module.
-* `lib` - compiled js files. The structure of this directory must reflect `src`.
   
 
 ## Scripts
@@ -88,30 +52,33 @@ Subsquid tools expect a certain directory layout:
 # Stop query-node
 yarn api:stop
 
-# Index data from local node
-yarn archive:start
-
-# Stop local indexer
-yarn archive:stop
+# Compile processor code
+yarn build
 
 # Generate necessary entity classes based on definitions at schema.graphql
 yarn codegen
 
-# Stop local processor services
+# Start processor services
+yarn db:up
+
+# Stop processor services
 yarn db:down
 
+# Run existing migrations onto database
+yarn migration:apply
+
 # Generate migration to match the target schema
-# The target schema is derived from entity classes generated earlier
+# The target schema is derived from entity classes generated using codegen
 yarn migration:generate
 
 # Revert the last performed migration
 yarn migration:revert
 
-# Stop local processor
-yarn processor:stop
+# Start processor
+yarn processor:start
 
-# Stop local subsquid running on docker
-yarn squid:stop
+# Stop processor
+yarn processor:stop
 
 # Generate types for events defined at typegen.json
 yarn typegen

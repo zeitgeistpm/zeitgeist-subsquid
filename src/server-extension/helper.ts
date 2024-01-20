@@ -1,10 +1,10 @@
 import axios from 'axios';
-import { AssetPriceResolver } from './resolvers';
 import { Field, InputType } from 'type-graphql';
 import { Asset } from '../types/v51';
 import { BaseAsset, CacheHint, TargetAsset, _Asset } from '../consts';
-import { formatAssetId } from '../helper';
+import { formatAssetId, isBatteryStation, isLocalEnv } from '../helper';
 import { Cache } from '../util';
+import { AssetPriceResolver } from './resolvers/assetPrice';
 
 export const decodedAssetId = (assetId: string) => {
   return assetId.replaceAll('#', '"');
@@ -26,7 +26,7 @@ export const fetchFromCache = async (b: string, t: string): Promise<{ pair: stri
 
 export const getAssetUsdPrices = async (): Promise<Map<BaseAsset, number>> => {
   let prices: Map<BaseAsset, number>;
-  if (process.env.WS_NODE_URL?.includes(`bs`)) {
+  if (isLocalEnv() || isBatteryStation()) {
     prices = new Map([
       [BaseAsset.DOT, 1],
       [BaseAsset.ZTG, 1],

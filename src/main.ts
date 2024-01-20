@@ -12,7 +12,7 @@ import {
 import * as postHooks from './post-hooks';
 import { calls, events } from './types';
 import { Pallet } from './consts';
-import { initBalance } from './helper';
+import { initBalance, isBatteryStation } from './helper';
 import { processor, Event } from './processor';
 
 const accounts = new Map<string, Map<string, bigint>>();
@@ -30,7 +30,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   swapHistory = [];
 
   for (let block of ctx.blocks) {
-    if (process.env.WS_NODE_URL?.includes(`bs`) && block.header.height < 1089818) {
+    if (isBatteryStation() && block.header.height < 1089818) {
       for (let call of block.calls) {
         if (!call.success) continue;
         if (call.name === calls.predictionMarkets.redeemShares.name) {
@@ -82,7 +82,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           break;
       }
     }
-    if (process.env.WS_NODE_URL?.includes(`bs`) && block.header.height <= 579140) {
+    if (isBatteryStation() && block.header.height <= 579140) {
       await handlePostHooks(ctx.store, block.header.height);
     }
   }
@@ -510,17 +510,6 @@ const mapTokens = async (store: Store, event: Event) => {
   }
 };
 
-const storeBalanceChanges = async (habs: HistoricalAccountBalance[]) => {
-  await Promise.all(
-    habs.map(async (hab) => {
-      const balances = accounts.get(hab.accountId) ?? new Map<string, bigint>();
-      balances.set(hab.assetId, (balances.get(hab.assetId) || BigInt(0)) + hab.dBalance);
-      accounts.set(hab.accountId, balances);
-    })
-  );
-  balanceHistory.push(...habs);
-};
-
 const saveAccounts = async (store: Store) => {
   await Promise.all(
     Array.from(accounts).map(async ([accountId, balances]) => {
@@ -580,4 +569,15 @@ const saveHistory = async (store: Store) => {
     console.log(`Saving historical swaps: ${JSON.stringify(swapHistory, null, 2)}`);
     await store.save<HistoricalSwap>(swapHistory);
   }
+};
+
+const storeBalanceChanges = async (habs: HistoricalAccountBalance[]) => {
+  await Promise.all(
+    habs.map(async (hab) => {
+      const balances = accounts.get(hab.accountId) ?? new Map<string, bigint>();
+      balances.set(hab.assetId, (balances.get(hab.assetId) || BigInt(0)) + hab.dBalance);
+      accounts.set(hab.accountId, balances);
+    })
+  );
+  balanceHistory.push(...habs);
 };
