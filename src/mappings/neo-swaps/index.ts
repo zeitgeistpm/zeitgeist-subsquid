@@ -4,7 +4,6 @@ import {
   Asset,
   HistoricalAsset,
   HistoricalMarket,
-  HistoricalPool,
   HistoricalSwap,
   LiquiditySharesManager,
   Market,
@@ -26,13 +25,14 @@ export const buyExecuted = async (
   store: Store,
   event: Event
 ): Promise<
-  { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalMarket: HistoricalMarket } | undefined
+  | { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalMarket: HistoricalMarket }
+  | undefined
 > => {
   const { who, marketId, assetExecuted, amountIn, amountOut, swapFeeAmount } = decodeBuyExecutedEvent(event);
 
   const market = await store.get(Market, {
     where: { marketId },
-    relations: { neoPool: { account: { balances: true } } },
+    relations: { neoPool: { account: { balances: true }, liquiditySharesManager: true } },
   });
   if (!market || !market.neoPool) return;
 
@@ -40,9 +40,13 @@ export const buyExecuted = async (
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await store.save<Market>(market);
 
-  market.neoPool.liquiditySharesManager.fees += swapFeeAmount;
-  console.log(`[${event.name}] Saving neo-pool: ${JSON.stringify(market.neoPool, null, 2)}`);
-  await store.save<NeoPool>(market.neoPool);
+  await Promise.all(
+    market.neoPool.liquiditySharesManager.map(async (lsm) => {
+      lsm.fees += (lsm.stake / market.neoPool!.totalStake) * swapFeeAmount;
+      console.log(`[${event.name}] Saving liquidity-shares-manager: ${JSON.stringify(lsm, null, 2)}`);
+      await store.save<LiquiditySharesManager>(lsm);
+    })
+  );
 
   const historicalMarket = new HistoricalMarket({
     blockNumber: event.block.height,
@@ -109,20 +113,28 @@ export const buyExecuted = async (
 export const exitExecuted = async (store: Store, event: Event): Promise<HistoricalAsset[] | undefined> => {
   const { who, marketId, poolSharesAmount, newLiquidityParameter } = decodeExitExecutedEvent(event);
 
-  const market = await store.get(Market, {
-    where: { marketId },
-    relations: { neoPool: { account: { balances: true } } },
+  const liquiditySharesManager = await store.get(LiquiditySharesManager, {
+    where: { account: who },
   });
-  if (!market || !market.neoPool) return;
+  if (!liquiditySharesManager) return;
+  liquiditySharesManager.stake -= poolSharesAmount;
+  console.log(`[${event.name}] Saving liquidity-shares-manager ${JSON.stringify(liquiditySharesManager, null, 2)}`);
+  await store.save<LiquiditySharesManager>(liquiditySharesManager);
 
-  market.neoPool.liquidityParameter = newLiquidityParameter;
-  market.neoPool.liquiditySharesManager.totalShares -= poolSharesAmount;
-  console.log(`[${event.name}] Saving neo-pool: ${JSON.stringify(market.neoPool, null, 2)}`);
-  await store.save<NeoPool>(market.neoPool);
+  const neoPool = await store.get(NeoPool, {
+    where: { marketId },
+    relations: { account: { balances: true } },
+  });
+  if (!neoPool) return;
+
+  neoPool.liquidityParameter = newLiquidityParameter;
+  neoPool.totalStake -= poolSharesAmount;
+  console.log(`[${event.name}] Saving neo-pool: ${JSON.stringify(neoPool, null, 2)}`);
+  await store.save<NeoPool>(neoPool);
 
   const historicalAssets: HistoricalAsset[] = [];
   await Promise.all(
-    market.neoPool.account.balances.map(async (ab) => {
+    neoPool.account.balances.map(async (ab) => {
       if (isBaseAsset(ab.assetId)) return;
       const asset = await store.get(Asset, {
         where: { assetId: ab.assetId },
@@ -132,7 +144,7 @@ export const exitExecuted = async (store: Store, event: Event): Promise<Historic
       const oldPrice = asset.price;
       const oldAmountInPool = asset.amountInPool;
       asset.amountInPool = ab.balance;
-      asset.price = computeNeoSwapSpotPrice(ab.balance, market.neoPool!.liquidityParameter);
+      asset.price = computeNeoSwapSpotPrice(ab.balance, neoPool.liquidityParameter);
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
       await store.save<Asset>(asset);
 
@@ -154,48 +166,51 @@ export const exitExecuted = async (store: Store, event: Event): Promise<Historic
   return historicalAssets;
 };
 
-export const feesWithdrawn = async (store: Store, event: Event): Promise<HistoricalPool | undefined> => {
+export const feesWithdrawn = async (store: Store, event: Event) => {
   const { who, marketId, amount } = decodeFeesWithdrawnEvent(event);
 
-  const market = await store.get(Market, {
-    where: { marketId },
-    relations: { neoPool: true },
+  const liquiditySharesManager = await store.get(LiquiditySharesManager, {
+    where: { account: who, neoPool: { marketId } },
   });
-  if (!market || !market.neoPool) return;
+  if (!liquiditySharesManager) return;
 
-  market.neoPool.liquiditySharesManager.fees -= amount;
-  console.log(`[${event.name}] Saving neo-pool: ${JSON.stringify(market.neoPool, null, 2)}`);
-  await store.save<NeoPool>(market.neoPool);
-
-  const historicalPool = new HistoricalPool({
-    blockNumber: event.block.height,
-    event: event.name.split('.')[1],
-    id: event.id + '-' + market.marketId,
-    poolId: market.marketId,
-    status: null,
-    timestamp: new Date(event.block.timestamp!),
-  });
-
-  return historicalPool;
+  liquiditySharesManager.fees = BigInt(0);
+  console.log(`[${event.name}] Saving liquidity-shares-manager: ${JSON.stringify(liquiditySharesManager, null, 2)}`);
+  await store.save<LiquiditySharesManager>(liquiditySharesManager);
 };
 
 export const joinExecuted = async (store: Store, event: Event): Promise<HistoricalAsset[] | undefined> => {
   const { who, marketId, poolSharesAmount, newLiquidityParameter } = decodeJoinExecutedEvent(event);
 
-  const market = await store.get(Market, {
+  const neoPool = await store.get(NeoPool, {
     where: { marketId },
-    relations: { neoPool: { account: { balances: true } } },
+    relations: { account: { balances: true } },
   });
-  if (!market || !market.neoPool) return;
+  if (!neoPool) return;
 
-  market.neoPool.liquidityParameter = newLiquidityParameter;
-  market.neoPool.liquiditySharesManager.totalShares += poolSharesAmount;
-  console.log(`[${event.name}] Saving neo-pool: ${JSON.stringify(market.neoPool, null, 2)}`);
-  await store.save<NeoPool>(market.neoPool);
+  neoPool.liquidityParameter = newLiquidityParameter;
+  neoPool.totalStake += poolSharesAmount;
+  console.log(`[${event.name}] Saving neo-pool: ${JSON.stringify(neoPool, null, 2)}`);
+  await store.save<NeoPool>(neoPool);
+
+  let liquiditySharesManager = await store.get(LiquiditySharesManager, {
+    where: { account: who },
+  });
+  if (!liquiditySharesManager) {
+    liquiditySharesManager = new LiquiditySharesManager({
+      account: who,
+      fees: BigInt(0),
+      neoPool,
+      stake: BigInt(0),
+    });
+  }
+  liquiditySharesManager.stake += poolSharesAmount;
+  console.log(`[${event.name}] Saving liquidity-shares-manager ${JSON.stringify(liquiditySharesManager, null, 2)}`);
+  await store.save<LiquiditySharesManager>(liquiditySharesManager);
 
   const historicalAssets: HistoricalAsset[] = [];
   await Promise.all(
-    market.neoPool.account.balances.map(async (ab) => {
+    neoPool.account.balances.map(async (ab) => {
       if (isBaseAsset(ab.assetId)) return;
       const asset = await store.get(Asset, {
         where: { assetId: ab.assetId },
@@ -205,7 +220,7 @@ export const joinExecuted = async (store: Store, event: Event): Promise<Historic
       const oldPrice = asset.price;
       const oldAmountInPool = asset.amountInPool;
       asset.amountInPool = ab.balance;
-      asset.price = computeNeoSwapSpotPrice(ab.balance, market.neoPool!.liquidityParameter);
+      asset.price = computeNeoSwapSpotPrice(ab.balance, neoPool.liquidityParameter);
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
       await store.save<Asset>(asset);
 
@@ -243,25 +258,28 @@ export const poolDeployed = async (
     return;
   }
 
-  const liquiditySharesManager = new LiquiditySharesManager({
-    fees: BigInt(0),
-    owner: who,
-    totalShares: poolSharesAmount,
-  });
-
   const neoPool = new NeoPool({
     account,
     collateral,
     createdAt: new Date(event.block.timestamp!),
     id: event.id + '-' + marketId,
     liquidityParameter,
-    liquiditySharesManager,
     marketId,
     poolId: marketId,
     swapFee,
+    totalStake: poolSharesAmount,
   });
   console.log(`[${event.name}] Saving neo pool: ${JSON.stringify(neoPool, null, 2)}`);
   await store.save<NeoPool>(neoPool);
+
+  const liquiditySharesManager = new LiquiditySharesManager({
+    account: who,
+    fees: BigInt(0),
+    neoPool,
+    stake: poolSharesAmount,
+  });
+  console.log(`[${event.name}] Saving liquidity-shares-manager ${JSON.stringify(liquiditySharesManager, null, 2)}`);
+  await store.save<LiquiditySharesManager>(liquiditySharesManager);
 
   const market = await store.get(Market, {
     where: { marketId },
@@ -329,7 +347,7 @@ export const sellExecuted = async (
 
   const market = await store.get(Market, {
     where: { marketId },
-    relations: { neoPool: { account: { balances: true } } },
+    relations: { neoPool: { account: { balances: true }, liquiditySharesManager: true } },
   });
   if (!market || !market.neoPool) return;
 
@@ -337,9 +355,13 @@ export const sellExecuted = async (
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await store.save<Market>(market);
 
-  market.neoPool.liquiditySharesManager.fees += swapFeeAmount;
-  console.log(`[${event.name}] Saving neo-pool: ${JSON.stringify(market.neoPool, null, 2)}`);
-  await store.save<NeoPool>(market.neoPool);
+  await Promise.all(
+    market.neoPool.liquiditySharesManager.map(async (lsm) => {
+      lsm.fees += (lsm.stake / market.neoPool!.totalStake) * swapFeeAmount;
+      console.log(`[${event.name}] Saving liquidity-shares-manager: ${JSON.stringify(lsm, null, 2)}`);
+      await store.save<LiquiditySharesManager>(lsm);
+    })
+  );
 
   const historicalMarket = new HistoricalMarket({
     blockNumber: event.block.height,

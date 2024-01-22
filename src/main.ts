@@ -220,9 +220,7 @@ const mapNeoSwaps = async (store: Store, event: Event) => {
       break;
     }
     case events.neoSwaps.feesWithdrawn.name: {
-      const historicalPool = await mappings.neoSwaps.feesWithdrawn(store, event);
-      if (!historicalPool) break;
-      poolHistory.push(historicalPool);
+      await mappings.neoSwaps.feesWithdrawn(store, event);
       break;
     }
     case events.neoSwaps.joinExecuted.name: {
