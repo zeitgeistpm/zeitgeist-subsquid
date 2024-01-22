@@ -1,5 +1,5 @@
-module.exports = class Data1705930554941 {
-    name = 'Data1705930554941'
+module.exports = class Data1705936892906 {
+    name = 'Data1705936892906'
 
     async up(db) {
         await db.query(`CREATE TABLE "account_balance" ("asset_id" text NOT NULL, "balance" numeric NOT NULL, "id" character varying NOT NULL, "account_id" character varying, CONSTRAINT "PK_bd893045760f719e24a95a42562" PRIMARY KEY ("id"))`)
@@ -12,6 +12,7 @@ module.exports = class Data1705930554941 {
         await db.query(`CREATE INDEX "IDX_7ae36e79b02d471a94b311dfbb" ON "pool" ("market_id") `)
         await db.query(`CREATE INDEX "IDX_ac4a37826438cadcfca6b520be" ON "pool" ("pool_id") `)
         await db.query(`CREATE TABLE "liquidity_shares_manager" ("id" character varying NOT NULL, "account" text NOT NULL, "fees" numeric NOT NULL, "stake" numeric NOT NULL, "neo_pool_id" character varying, CONSTRAINT "PK_4797e9888a1cd15adbc13714d1c" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_c24d155e130209f43c0e06edf9" ON "liquidity_shares_manager" ("account") `)
         await db.query(`CREATE INDEX "IDX_d5619d9184d06e28163e74afa5" ON "liquidity_shares_manager" ("neo_pool_id") `)
         await db.query(`CREATE TABLE "neo_pool" ("id" character varying NOT NULL, "collateral" text NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "liquidity_parameter" numeric NOT NULL, "market_id" integer NOT NULL, "pool_id" integer NOT NULL, "swap_fee" numeric NOT NULL, "total_stake" numeric NOT NULL, "account_id" character varying, CONSTRAINT "PK_bc70713102726a0949a50a22046" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_fb707135b8bb6b3ce35248d53c" ON "neo_pool" ("account_id") `)
@@ -54,6 +55,7 @@ module.exports = class Data1705930554941 {
         await db.query(`DROP INDEX "public"."IDX_7ae36e79b02d471a94b311dfbb"`)
         await db.query(`DROP INDEX "public"."IDX_ac4a37826438cadcfca6b520be"`)
         await db.query(`DROP TABLE "liquidity_shares_manager"`)
+        await db.query(`DROP INDEX "public"."IDX_c24d155e130209f43c0e06edf9"`)
         await db.query(`DROP INDEX "public"."IDX_d5619d9184d06e28163e74afa5"`)
         await db.query(`DROP TABLE "neo_pool"`)
         await db.query(`DROP INDEX "public"."IDX_fb707135b8bb6b3ce35248d53c"`)

@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_} from "typeorm"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_, ManyToOne as ManyToOne_} from "typeorm"
 import * as marshal from "./marshal"
 import {NeoPool} from "./neoPool.model"
 
@@ -11,6 +11,7 @@ export class LiquiditySharesManager {
     @PrimaryColumn_()
     id!: string
 
+    @Index_()
     @Column_("text", {nullable: false})
     account!: string
 

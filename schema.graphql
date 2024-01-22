@@ -396,7 +396,7 @@ type OutcomeReport @jsonField {
 }
 
 type LiquiditySharesManager @entity {
-  account: String!
+  account: String! @index
   fees: BigInt!
   neoPool: NeoPool!
   stake: BigInt!
