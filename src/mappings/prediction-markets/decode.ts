@@ -40,6 +40,8 @@ export const decodeMarketApprovedEvent = (event: Event): MarketEvent => {
     marketId = events.predictionMarkets.marketApproved.v23.decode(event);
   } else if (events.predictionMarkets.marketApproved.v29.is(event)) {
     [marketId, status] = events.predictionMarkets.marketApproved.v29.decode(event);
+  } else if (events.predictionMarkets.marketApproved.v53.is(event)) {
+    [marketId, status] = events.predictionMarkets.marketApproved.v53.decode(event);
   } else {
     [marketId, status] = event.args;
   }
@@ -122,6 +124,8 @@ export const decodeMarketDisputedEvent = (event: Event): MarketDisputedEvent => 
     [marketId, status] = events.predictionMarkets.marketDisputed.v49.decode(event);
   } else if (events.predictionMarkets.marketDisputed.v51.is(event)) {
     [marketId, status, accountId] = events.predictionMarkets.marketDisputed.v51.decode(event);
+  } else if (events.predictionMarkets.marketDisputed.v53.is(event)) {
+    [marketId, status, accountId] = events.predictionMarkets.marketDisputed.v53.decode(event);
   } else {
     [marketId, status, accountId] = event.args;
   }
@@ -182,6 +186,8 @@ export const decodeMarketReportedEvent = (event: Event): MarketReportedEvent => 
     [marketId, report.outcome] = events.predictionMarkets.marketReported.v23.decode(event);
   } else if (events.predictionMarkets.marketReported.v29.is(event)) {
     [marketId, status, report] = events.predictionMarkets.marketReported.v29.decode(event);
+  } else if (events.predictionMarkets.marketReported.v53.is(event)) {
+    [marketId, status, report] = events.predictionMarkets.marketReported.v53.decode(event);
   } else {
     [marketId, status, report] = event.args;
   }
@@ -201,6 +207,8 @@ export const decodeMarketResolvedEvent = (event: Event): MarketResolvedEvent => 
     report.value = outcome;
   } else if (events.predictionMarkets.marketResolved.v29.is(event)) {
     [marketId, status, report] = events.predictionMarkets.marketResolved.v29.decode(event);
+  } else if (events.predictionMarkets.marketResolved.v53.is(event)) {
+    [marketId, status, report] = events.predictionMarkets.marketResolved.v53.decode(event);
   } else {
     [marketId, status, report] = event.args;
   }
