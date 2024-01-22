@@ -1,5 +1,5 @@
-module.exports = class Data1705055422503 {
-    name = 'Data1705055422503'
+module.exports = class Data1705930554941 {
+    name = 'Data1705930554941'
 
     async up(db) {
         await db.query(`CREATE TABLE "account_balance" ("asset_id" text NOT NULL, "balance" numeric NOT NULL, "id" character varying NOT NULL, "account_id" character varying, CONSTRAINT "PK_bd893045760f719e24a95a42562" PRIMARY KEY ("id"))`)
@@ -11,7 +11,9 @@ module.exports = class Data1705055422503 {
         await db.query(`CREATE INDEX "IDX_7042da86b8de81cc3e9e448f9a" ON "pool" ("account_id") `)
         await db.query(`CREATE INDEX "IDX_7ae36e79b02d471a94b311dfbb" ON "pool" ("market_id") `)
         await db.query(`CREATE INDEX "IDX_ac4a37826438cadcfca6b520be" ON "pool" ("pool_id") `)
-        await db.query(`CREATE TABLE "neo_pool" ("id" character varying NOT NULL, "collateral" text NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "liquidity_parameter" numeric NOT NULL, "liquidity_shares_manager" jsonb NOT NULL, "market_id" integer NOT NULL, "pool_id" integer NOT NULL, "swap_fee" numeric NOT NULL, "account_id" character varying, CONSTRAINT "PK_bc70713102726a0949a50a22046" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "liquidity_shares_manager" ("id" character varying NOT NULL, "account" text NOT NULL, "fees" numeric NOT NULL, "stake" numeric NOT NULL, "neo_pool_id" character varying, CONSTRAINT "PK_4797e9888a1cd15adbc13714d1c" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_d5619d9184d06e28163e74afa5" ON "liquidity_shares_manager" ("neo_pool_id") `)
+        await db.query(`CREATE TABLE "neo_pool" ("id" character varying NOT NULL, "collateral" text NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "liquidity_parameter" numeric NOT NULL, "market_id" integer NOT NULL, "pool_id" integer NOT NULL, "swap_fee" numeric NOT NULL, "total_stake" numeric NOT NULL, "account_id" character varying, CONSTRAINT "PK_bc70713102726a0949a50a22046" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_fb707135b8bb6b3ce35248d53c" ON "neo_pool" ("account_id") `)
         await db.query(`CREATE INDEX "IDX_e1c80a90a67b13803f68531f66" ON "neo_pool" ("market_id") `)
         await db.query(`CREATE INDEX "IDX_2f5bf015fefd46462d8fb28cdd" ON "neo_pool" ("pool_id") `)
@@ -32,6 +34,7 @@ module.exports = class Data1705055422503 {
         await db.query(`CREATE TABLE "historical_pool" ("id" character varying NOT NULL, "block_number" integer NOT NULL, "event" text NOT NULL, "pool_id" integer NOT NULL, "status" character varying(17), "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_6ee31afe7b6dc3500a94effc951" PRIMARY KEY ("id"))`)
         await db.query(`ALTER TABLE "account_balance" ADD CONSTRAINT "FK_029576f147e256f1f93e4865c76" FOREIGN KEY ("account_id") REFERENCES "account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "pool" ADD CONSTRAINT "FK_7042da86b8de81cc3e9e448f9a7" FOREIGN KEY ("account_id") REFERENCES "account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
+        await db.query(`ALTER TABLE "liquidity_shares_manager" ADD CONSTRAINT "FK_d5619d9184d06e28163e74afa55" FOREIGN KEY ("neo_pool_id") REFERENCES "neo_pool"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "neo_pool" ADD CONSTRAINT "FK_fb707135b8bb6b3ce35248d53cd" FOREIGN KEY ("account_id") REFERENCES "account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "market" ADD CONSTRAINT "FK_190888a8e7a706187b12093c29d" FOREIGN KEY ("pool_id") REFERENCES "pool"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "market" ADD CONSTRAINT "FK_923b7aeab33f803bc47adddeb69" FOREIGN KEY ("neo_pool_id") REFERENCES "neo_pool"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
@@ -50,6 +53,8 @@ module.exports = class Data1705055422503 {
         await db.query(`DROP INDEX "public"."IDX_7042da86b8de81cc3e9e448f9a"`)
         await db.query(`DROP INDEX "public"."IDX_7ae36e79b02d471a94b311dfbb"`)
         await db.query(`DROP INDEX "public"."IDX_ac4a37826438cadcfca6b520be"`)
+        await db.query(`DROP TABLE "liquidity_shares_manager"`)
+        await db.query(`DROP INDEX "public"."IDX_d5619d9184d06e28163e74afa5"`)
         await db.query(`DROP TABLE "neo_pool"`)
         await db.query(`DROP INDEX "public"."IDX_fb707135b8bb6b3ce35248d53c"`)
         await db.query(`DROP INDEX "public"."IDX_e1c80a90a67b13803f68531f66"`)
@@ -71,6 +76,7 @@ module.exports = class Data1705055422503 {
         await db.query(`DROP TABLE "historical_pool"`)
         await db.query(`ALTER TABLE "account_balance" DROP CONSTRAINT "FK_029576f147e256f1f93e4865c76"`)
         await db.query(`ALTER TABLE "pool" DROP CONSTRAINT "FK_7042da86b8de81cc3e9e448f9a7"`)
+        await db.query(`ALTER TABLE "liquidity_shares_manager" DROP CONSTRAINT "FK_d5619d9184d06e28163e74afa55"`)
         await db.query(`ALTER TABLE "neo_pool" DROP CONSTRAINT "FK_fb707135b8bb6b3ce35248d53cd"`)
         await db.query(`ALTER TABLE "market" DROP CONSTRAINT "FK_190888a8e7a706187b12093c29d"`)
         await db.query(`ALTER TABLE "market" DROP CONSTRAINT "FK_923b7aeab33f803bc47adddeb69"`)
