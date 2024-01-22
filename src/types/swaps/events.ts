@@ -10,6 +10,7 @@ import * as v41 from '../v41'
 import * as v49 from '../v49'
 import * as v50 from '../v50'
 import * as v51 from '../v51'
+import * as v53 from '../v53'
 
 export const poolCreate =  {
     name: 'Swaps.PoolCreate',
@@ -75,6 +76,13 @@ export const poolCreate =  {
     v51: new EventType(
         'Swaps.PoolCreate',
         sts.tuple([v51.CommonPoolEventParams, v51.Pool, sts.bigint(), v51.AccountId32])
+    ),
+    /**
+     * A new pool has been created. \[CommonPoolEventParams, pool, pool_amount, pool_account\]
+     */
+    v53: new EventType(
+        'Swaps.PoolCreate',
+        sts.tuple([v53.CommonPoolEventParams, v53.Pool, sts.bigint(), v53.AccountId32])
     ),
 }
 
