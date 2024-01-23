@@ -114,7 +114,7 @@ export const exitExecuted = async (store: Store, event: Event): Promise<Historic
   const { who, marketId, poolSharesAmount, newLiquidityParameter } = decodeExitExecutedEvent(event);
 
   const liquiditySharesManager = await store.get(LiquiditySharesManager, {
-    where: { account: who },
+    where: { account: who, neoPool: { marketId } },
   });
   if (!liquiditySharesManager) return;
   liquiditySharesManager.stake -= poolSharesAmount;
@@ -194,7 +194,7 @@ export const joinExecuted = async (store: Store, event: Event): Promise<Historic
   await store.save<NeoPool>(neoPool);
 
   let liquiditySharesManager = await store.get(LiquiditySharesManager, {
-    where: { account: who },
+    where: { account: who, neoPool: { marketId } },
   });
   if (!liquiditySharesManager) {
     liquiditySharesManager = new LiquiditySharesManager({
