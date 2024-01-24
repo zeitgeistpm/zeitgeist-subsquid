@@ -1,6 +1,7 @@
 import * as ss58 from '@subsquid/ss58';
 import { Asset } from '../../types/v51';
 import { events } from '../../types';
+import { _Asset } from '../../consts';
 import { formatAssetId } from '../../helper';
 import { Event } from '../../processor';
 
@@ -100,9 +101,9 @@ export const decodePoolDeployedEvent = (event: Event): PoolDeployedEvent => {
   };
   if (events.neoSwaps.poolDeployed.v50.is(event)) {
     decoded = events.neoSwaps.poolDeployed.v50.decode(event) as any;
-    decoded.accountId = NeoPoolAsV50[Number(decoded.marketId)].accountId;
-    decoded.collateral = NeoPoolAsV50[Number(decoded.marketId)].collateral;
-    decoded.swapFee = NeoPoolAsV50[Number(decoded.marketId)].swapFee;
+    decoded.accountId = NeoPoolAccountIdAsV50[Number(decoded.marketId)];
+    decoded.collateral = { __kind: _Asset.Ztg };
+    decoded.swapFee = BigInt(10 ** 8);
   } else if (events.neoSwaps.poolDeployed.v51.is(event)) {
     decoded = events.neoSwaps.poolDeployed.v51.decode(event);
   } else {
@@ -145,32 +146,12 @@ export const decodeSellExecutedEvent = (event: Event): BuySellExecutedEvent => {
   };
 };
 
-const NeoPoolAsV50: INeoPoolAsV50 = {
-  741: {
-    accountId: '0x6d6f646c7a67652f6e656f73e502000000000000000000000000000000000000',
-    collateral: { __kind: 'Ztg' },
-    swapFee: BigInt(10 ** 8),
-  },
-  742: {
-    accountId: '0x6d6f646c7a67652f6e656f73e602000000000000000000000000000000000000',
-    collateral: { __kind: 'Ztg' },
-    swapFee: BigInt(10 ** 8),
-  },
-  745: {
-    accountId: '0x6d6f646c7a67652f6e656f73e902000000000000000000000000000000000000',
-    collateral: { __kind: 'Ztg' },
-    swapFee: BigInt(10 ** 8),
-  },
-  746: {
-    accountId: '0x6d6f646c7a67652f6e656f73ea02000000000000000000000000000000000000',
-    collateral: { __kind: 'Ztg' },
-    swapFee: BigInt(10 ** 8),
-  },
-  750: {
-    accountId: '0x6d6f646c7a67652f6e656f73ee02000000000000000000000000000000000000',
-    collateral: { __kind: 'Ztg' },
-    swapFee: BigInt(10 ** 8),
-  },
+const NeoPoolAccountIdAsV50: INeoPoolAccountIdAsV50 = {
+  741: '0x6d6f646c7a67652f6e656f73e502000000000000000000000000000000000000',
+  742: '0x6d6f646c7a67652f6e656f73e602000000000000000000000000000000000000',
+  745: '0x6d6f646c7a67652f6e656f73e902000000000000000000000000000000000000',
+  746: '0x6d6f646c7a67652f6e656f73ea02000000000000000000000000000000000000',
+  750: '0x6d6f646c7a67652f6e656f73ee02000000000000000000000000000000000000',
 };
 
 interface BuySellExecutedEvent {
@@ -205,10 +186,6 @@ interface PoolDeployedEvent {
   swapFee: bigint;
 }
 
-interface INeoPoolAsV50 {
-  [marketId: number]: {
-    accountId: string;
-    collateral: Asset;
-    swapFee: bigint;
-  };
+interface INeoPoolAccountIdAsV50 {
+  [marketId: number]: string;
 }

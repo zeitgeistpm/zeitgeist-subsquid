@@ -12,7 +12,8 @@ export const decodeMarketsStorage = async (block: Block, marketId: bigint): Prom
     market = await storage.marketCommons.markets.v50.get(block, marketId);
   } else if (storage.marketCommons.markets.v51.is(block)) {
     market = await storage.marketCommons.markets.v51.get(block, marketId);
+  } else if (storage.marketCommons.markets.v53.is(block)) {
+    market = await storage.marketCommons.markets.v53.get(block, marketId);
   }
-  if (!market) return;
-  return market.bonds;
+  return market?.bonds;
 };

@@ -1,7 +1,7 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_} from "typeorm"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_, OneToMany as OneToMany_} from "typeorm"
 import * as marshal from "./marshal"
 import {Account} from "./account.model"
-import {LiquiditySharesManager} from "./_liquiditySharesManager"
+import {LiquiditySharesManager} from "./liquiditySharesManager.model"
 
 /**
  * AMM2 pool details
@@ -28,8 +28,8 @@ export class NeoPool {
     @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
     liquidityParameter!: bigint
 
-    @Column_("jsonb", {transformer: {to: obj => obj.toJSON(), from: obj => obj == null ? undefined : new LiquiditySharesManager(undefined, obj)}, nullable: false})
-    liquiditySharesManager!: LiquiditySharesManager
+    @OneToMany_(() => LiquiditySharesManager, e => e.neoPool)
+    liquiditySharesManager!: LiquiditySharesManager[]
 
     @Index_()
     @Column_("int4", {nullable: false})
@@ -41,4 +41,7 @@ export class NeoPool {
 
     @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
     swapFee!: bigint
+
+    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+    totalStake!: bigint
 }

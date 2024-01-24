@@ -3,8 +3,9 @@ import { DecodedMarketMetadata } from '@zeitgeistpm/sdk/dist/types';
 import { util } from '@zeitgeistpm/sdk';
 import { Store } from '@subsquid/typeorm-store';
 import Decimal from 'decimal.js';
-import { Account, AccountBalance, Extrinsic, HistoricalAccountBalance, MarketStatus } from './model';
-import { Asset, MarketType, MarketStatus as _MarketStatus } from './types/v51';
+import { Account, AccountBalance, Extrinsic, HistoricalAccountBalance, MarketStatus, ScoringRule } from './model';
+import { Asset, MarketType, MarketStatus as MarketStatus_v51, ScoringRule as ScoringRule_v51 } from './types/v51';
+import { MarketStatus as MarketStatus_v53, ScoringRule as ScoringRule_v53 } from './types/v53';
 import { CacheHint, _Asset } from './consts';
 import { Block, Extrinsic as _Extrinsic } from './processor';
 import { Cache, IPFS, Tools } from './util';
@@ -98,7 +99,22 @@ export const formatAssetId = (assetId: Asset): string => {
   }
 };
 
-export const formatMarketStatus = (status: _MarketStatus): MarketStatus => {
+export const formatScoringRule = (scoringRule: ScoringRule_v51 | ScoringRule_v53): ScoringRule => {
+  switch (scoringRule.__kind) {
+    case 'CPMM':
+      return ScoringRule.CPMM;
+    case 'Lmsr':
+      return ScoringRule.Lmsr;
+    case 'Orderbook':
+      return ScoringRule.Orderbook;
+    case 'Parimutuel':
+      return ScoringRule.Parimutuel;
+    case 'RikiddoSigmoidFeeMarketEma':
+      return ScoringRule.RikiddoSigmoidFeeMarketEma;
+  }
+};
+
+export const formatMarketStatus = (status: MarketStatus_v51 | MarketStatus_v53): MarketStatus => {
   switch (status.__kind) {
     case 'Active':
       return MarketStatus.Active;
@@ -118,8 +134,6 @@ export const formatMarketStatus = (status: _MarketStatus): MarketStatus => {
       return MarketStatus.Resolved;
     case 'Suspended':
       return MarketStatus.Suspended;
-    default:
-      return MarketStatus.Active;
   }
 };
 

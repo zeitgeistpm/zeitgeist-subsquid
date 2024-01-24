@@ -254,10 +254,11 @@ type NeoPool @entity {
   collateral: String!
   createdAt: DateTime!
   liquidityParameter: BigInt!
-  liquiditySharesManager: LiquiditySharesManager!
+  liquiditySharesManager: [LiquiditySharesManager!]! @derivedFrom(field: "neoPool")
   marketId: Int! @index
   poolId: Int! @index
   swapFee: BigInt!
+  totalStake: BigInt!
 }
 
 """
@@ -394,10 +395,11 @@ type OutcomeReport @jsonField {
   scalar: BigInt
 }
 
-type LiquiditySharesManager @jsonField {
+type LiquiditySharesManager @entity {
+  account: String! @index
   fees: BigInt!
-  owner: String!
-  totalShares: BigInt!
+  neoPool: NeoPool!
+  stake: BigInt!
 }
 
 """
@@ -475,7 +477,8 @@ Markets' scoring rule options
 """
 enum ScoringRule {
   CPMM
-  RikiddoSigmoidFeeMarketEma
   Lmsr
   Orderbook
+  Parimutuel
+  RikiddoSigmoidFeeMarketEma
 }

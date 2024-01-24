@@ -13,6 +13,7 @@ import * as v46 from '../v46'
 import * as v49 from '../v49'
 import * as v50 from '../v50'
 import * as v51 from '../v51'
+import * as v53 from '../v53'
 
 export const boughtCompleteSet =  {
     name: 'PredictionMarkets.BoughtCompleteSet',
@@ -47,6 +48,13 @@ export const marketApproved =  {
     v29: new EventType(
         'PredictionMarkets.MarketApproved',
         sts.tuple([v29.MarketIdOf, v29.MarketStatus])
+    ),
+    /**
+     * A market has been approved. \[market_id, new_market_status\]
+     */
+    v53: new EventType(
+        'PredictionMarkets.MarketApproved',
+        sts.tuple([sts.bigint(), v53.MarketStatus])
     ),
 }
 
@@ -136,6 +144,13 @@ export const marketCreated =  {
         'PredictionMarkets.MarketCreated',
         sts.tuple([sts.bigint(), v51.AccountId32, v51.Market])
     ),
+    /**
+     * A market has been created. \[market_id, market_account, market\]
+     */
+    v53: new EventType(
+        'PredictionMarkets.MarketCreated',
+        sts.tuple([sts.bigint(), v53.AccountId32, v53.Market])
+    ),
 }
 
 export const marketStartedWithSubsidy =  {
@@ -204,6 +219,13 @@ export const marketDisputed =  {
         'PredictionMarkets.MarketDisputed',
         sts.tuple([sts.bigint(), v51.MarketStatus, v51.AccountId32])
     ),
+    /**
+     * A market has been disputed \[market_id, new_market_status, disputant\]
+     */
+    v53: new EventType(
+        'PredictionMarkets.MarketDisputed',
+        sts.tuple([sts.bigint(), v53.MarketStatus, v53.AccountId32])
+    ),
 }
 
 export const marketRejected =  {
@@ -241,6 +263,13 @@ export const marketReported =  {
         'PredictionMarkets.MarketReported',
         sts.tuple([v29.MarketIdOf, v29.MarketStatus, v29.Report])
     ),
+    /**
+     * A market has been reported on. \[market_id, new_market_status, reported_outcome\]
+     */
+    v53: new EventType(
+        'PredictionMarkets.MarketReported',
+        sts.tuple([sts.bigint(), v53.MarketStatus, v53.Report])
+    ),
 }
 
 export const marketResolved =  {
@@ -258,6 +287,13 @@ export const marketResolved =  {
     v29: new EventType(
         'PredictionMarkets.MarketResolved',
         sts.tuple([v29.MarketIdOf, v29.MarketStatus, v29.OutcomeReport])
+    ),
+    /**
+     * A market has been resolved. \[market_id, new_market_status, real_outcome\]
+     */
+    v53: new EventType(
+        'PredictionMarkets.MarketResolved',
+        sts.tuple([sts.bigint(), v53.MarketStatus, v53.OutcomeReport])
     ),
 }
 

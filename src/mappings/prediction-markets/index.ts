@@ -32,6 +32,7 @@ import {
   extrinsicFromEvent,
   formatAssetId,
   formatMarketStatus,
+  formatScoringRule,
   rescale,
 } from '../../helper';
 import { Call, Event } from '../../processor';
@@ -248,24 +249,8 @@ export const marketCreated = async (store: Store, event: Event) => {
       break;
   }
 
-  let scoringRule;
-  switch (market.scoringRule.__kind) {
-    case 'CPMM':
-      scoringRule = ScoringRule.CPMM;
-      break;
-    case 'RikiddoSigmoidFeeMarketEma':
-      scoringRule = ScoringRule.RikiddoSigmoidFeeMarketEma;
-      break;
-    case 'Lmsr':
-      scoringRule = ScoringRule.Lmsr;
-      break;
-    case 'Orderbook':
-      scoringRule = ScoringRule.Orderbook;
-      break;
-  }
-
   const newMarket = new Market({
-    baseAsset: market.baseAsset ? formatAssetId(market.baseAsset) : 'Ztg',
+    baseAsset: market.baseAsset ? formatAssetId(market.baseAsset) : _Asset.Ztg,
     creation: market.creation.__kind == 'Advised' ? MarketCreation.Advised : MarketCreation.Permissionless,
     creator: ss58.encode({ prefix: 73, bytes: market.creator }),
     creatorFee: +market.creatorFee.toString(),
@@ -275,7 +260,7 @@ export const marketCreated = async (store: Store, event: Event) => {
     metadata: market.metadata.toString(),
     oracle: ss58.encode({ prefix: 73, bytes: market.oracle }),
     outcomeAssets: (await createAssetsForMarket(marketId, market.marketType)) as string[],
-    scoringRule,
+    scoringRule: formatScoringRule(market.scoringRule),
     status: formatMarketStatus(market.status),
     volume: BigInt(0),
   });
