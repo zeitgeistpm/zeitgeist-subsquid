@@ -59,7 +59,7 @@ export const issuanceHistory = (assetId: string) => `
     date(timestamp)
   ORDER BY
     date ASC;
-`
+`;
 
 export const marketParticipants = (ids: number[]) => `
   SELECT
@@ -109,6 +109,22 @@ export const marketLiquidity = (ids: number[]) => `
     SELECT * FROM t1 UNION SELECT * FROM t2 UNION SELECT * FROM t3
   )
   SELECT * FROM t4;
+`;
+
+export const marketTraders = (ids: number[]) => `
+  SELECT
+    m.market_id,
+    COALESCE(COUNT(DISTINCT hs.account_id), 0) AS traders
+  FROM
+    market m
+  LEFT JOIN
+    historical_swap hs ON
+    hs.asset_in LIKE '%'||'['||(m.market_id)::text||','||'%' OR
+    hs.asset_out LIKE '%'||'['||(m.market_id)::text||','||'%'
+  WHERE
+    m.market_id in (${ids})
+  GROUP BY
+    m.market_id;
 `;
 
 export const marketVolume = (ids: number[], prices: Map<BaseAsset, number>) => `
@@ -255,4 +271,4 @@ export const volumeHistory = (prices: Map<BaseAsset, number>) => `
     date
   ORDER BY
     date ASC;
-`
+`;
