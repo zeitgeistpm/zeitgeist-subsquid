@@ -70,7 +70,7 @@ export const marketParticipants = (ids: number[]) => `
   LEFT JOIN
     historical_asset ha ON ha.asset_id = ANY (m.outcome_assets)
   WHERE
-    m.market_id in (${ids})
+    m.market_id IN (${ids})
   GROUP BY
     m.market_id;
 `;
@@ -122,7 +122,7 @@ export const marketTraders = (ids: number[]) => `
     hs.asset_in LIKE '%'||'['||(m.market_id)::text||','||'%' OR
     hs.asset_out LIKE '%'||'['||(m.market_id)::text||','||'%'
   WHERE
-    m.market_id in (${ids})
+    m.market_id IN (${ids})
   GROUP BY
     m.market_id;
 `;
