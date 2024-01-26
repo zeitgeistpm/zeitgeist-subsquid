@@ -303,6 +303,10 @@ const mapPredictionMarkets = async (store: Store, event: Event) => {
       await mappings.predictionMarkets.marketDisputed(store, event);
       break;
     }
+    case events.predictionMarkets.marketEarlyCloseScheduled.name: {
+      await mappings.predictionMarkets.marketEarlyCloseScheduled(store, event);
+      break;
+    }
     case events.predictionMarkets.marketExpired.name: {
       await mappings.predictionMarkets.marketExpired(store, event);
       break;
