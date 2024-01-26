@@ -385,3 +385,18 @@ export const globalDisputeStarted =  {
         sts.bigint()
     ),
 }
+
+export const marketEarlyCloseScheduled =  {
+    name: 'PredictionMarkets.MarketEarlyCloseScheduled',
+    /**
+     * A market has been scheduled to close early.
+     */
+    v51: new EventType(
+        'PredictionMarkets.MarketEarlyCloseScheduled',
+        sts.struct({
+            marketId: sts.bigint(),
+            newPeriod: v51.MarketPeriod,
+            state: v51.EarlyCloseState,
+        })
+    ),
+}

@@ -47,6 +47,7 @@
         "MarketCreated",
         "MarketDestroyed",
         "MarketDisputed",
+        "MarketEarlyCloseScheduled",
         "MarketExpired",
         "MarketInsufficientSubsidy",
         "MarketRejected",
