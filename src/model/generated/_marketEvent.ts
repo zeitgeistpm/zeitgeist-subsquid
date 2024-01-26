@@ -6,6 +6,7 @@ export enum MarketEvent {
     MarketCreated = "MarketCreated",
     MarketDestroyed = "MarketDestroyed",
     MarketDisputed = "MarketDisputed",
+    MarketEarlyCloseScheduled = "MarketEarlyCloseScheduled",
     MarketExpired = "MarketExpired",
     MarketInsufficientSubsidy = "MarketInsufficientSubsidy",
     MarketRejected = "MarketRejected",
