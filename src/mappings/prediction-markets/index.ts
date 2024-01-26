@@ -18,7 +18,6 @@ import {
   MarketCreation,
   MarketDeadlines,
   MarketEvent,
-  MarketPeriod,
   MarketReport,
   MarketStatus,
   MarketType,
@@ -36,7 +35,6 @@ import {
   rescale,
 } from '../../helper';
 import { Call, Event } from '../../processor';
-import { Tools } from '../../util';
 import { decodeMarketsStorage } from '../market-commons/decode';
 import {
   decodeBoughtCompleteSetEvent,
@@ -57,6 +55,7 @@ import {
   decodeSoldCompleteSetEvent,
   decodeTokensRedeemedEvent,
 } from './decode';
+import { mapMarketPeriod } from './helper';
 
 export const boughtCompleteSet = async (
   store: Store,
@@ -262,6 +261,7 @@ export const marketCreated = async (store: Store, event: Event) => {
     metadata: market.metadata.toString(),
     oracle: ss58.encode({ prefix: 73, bytes: market.oracle }),
     outcomeAssets: (await createAssetsForMarket(marketId, market.marketType)) as string[],
+    period: await mapMarketPeriod(market.period),
     scoringRule: formatScoringRule(market.scoringRule),
     status: formatMarketStatus(market.status),
     volume: BigInt(0),
@@ -343,30 +343,6 @@ export const marketCreated = async (store: Store, event: Event) => {
     }
   }
   newMarket.marketType = marketType;
-
-  const period = new MarketPeriod();
-  const p = market.period;
-  if (p.__kind == 'Block') {
-    const sdk = await Tools.getSDK();
-    const now = BigInt((await sdk.api.query.timestamp.now()).toString());
-    const headBlock = (await sdk.api.rpc.chain.getHeader()).number.toBigInt();
-    const blockCreationPeriod = BigInt(2 * Number(sdk.api.consts.timestamp.minimumPeriod));
-    const startDiffInMs = blockCreationPeriod * (BigInt(p.start) - headBlock);
-    const endDiffInMs = blockCreationPeriod * (BigInt(p.end) - headBlock);
-
-    period.block = [];
-    period.block.push(BigInt(p.start));
-    period.block.push(BigInt(p.end));
-    period.start = now + startDiffInMs;
-    period.end = now + endDiffInMs;
-  } else if (p.__kind == 'Timestamp') {
-    period.timestamp = [];
-    period.timestamp.push(BigInt(p.start));
-    period.timestamp.push(BigInt(p.end));
-    period.start = BigInt(p.start);
-    period.end = BigInt(p.end);
-  }
-  newMarket.period = period;
 
   if (market.bonds) {
     const marketBonds = new MarketBonds();
@@ -529,31 +505,8 @@ export const marketEarlyCloseScheduled = async (store: Store, event: Event) => {
 
   const market = await store.get(Market, { where: { marketId } });
   if (!market) return;
-
-  const period = new MarketPeriod();
-  const p = newPeriod;
-  if (p.__kind == 'Block') {
-    const sdk = await Tools.getSDK();
-    const now = BigInt((await sdk.api.query.timestamp.now()).toString());
-    const headBlock = (await sdk.api.rpc.chain.getHeader()).number.toBigInt();
-    const blockCreationPeriod = BigInt(2 * Number(sdk.api.consts.timestamp.minimumPeriod));
-    const startDiffInMs = blockCreationPeriod * (BigInt(p.value.start) - headBlock);
-    const endDiffInMs = blockCreationPeriod * (BigInt(p.value.end) - headBlock);
-
-    period.block = [];
-    period.block.push(BigInt(p.value.start));
-    period.block.push(BigInt(p.value.end));
-    period.start = now + startDiffInMs;
-    period.end = now + endDiffInMs;
-  } else if (p.__kind == 'Timestamp') {
-    period.timestamp = [];
-    period.timestamp.push(BigInt(p.value.start));
-    period.timestamp.push(BigInt(p.value.end));
-    period.start = BigInt(p.value.start);
-    period.end = BigInt(p.value.end);
-  }
-  market.period = period;
   market.earlyClose = true;
+  market.period = await mapMarketPeriod(newPeriod);
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await store.save<Market>(market);
 

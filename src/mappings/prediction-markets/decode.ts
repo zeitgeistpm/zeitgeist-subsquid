@@ -74,24 +74,18 @@ export const decodeMarketCreatedEvent = (event: Event, specVersion: number): Mar
   ) {
     market = param1;
     market.disputeMechanism = market.mdm;
-    market.period.start = market.period.value[0];
-    market.period.end = market.period.value[1];
+    market.period.value.start = market.period.value[0];
+    market.period.value.end = market.period.value[1];
   } else if (events.predictionMarkets.marketCreated.v32.is(event)) {
     market = param1;
     market.disputeMechanism = market.mdm;
-    market.period.start = market.period.value.start;
-    market.period.end = market.period.value.end;
   } else if (events.predictionMarkets.marketCreated.v36.is(event)) {
     accountId = param1;
     market = param2;
     market.disputeMechanism = market.mdm;
-    market.period.start = market.period.value.start;
-    market.period.end = market.period.value.end;
   } else {
     accountId = param1;
     market = param2;
-    market.period.start = market.period.value.start;
-    market.period.end = market.period.value.end;
   }
   return {
     marketId: Number(param0),
