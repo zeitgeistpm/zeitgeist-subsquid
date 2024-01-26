@@ -206,7 +206,7 @@ export const isBatteryStation = (): boolean => {
 };
 
 export const isLocalEnv = (): boolean => {
-  return process.env.NODE_ENV === 'local' && !process.env.WS_NODE_URL!.includes('bs');
+  return process.env.NODE_ENV === 'local' && process.env.WS_NODE_URL!.includes('blockchain');
 };
 
 export const mergeByAssetId = (balances: any[], weights: any[]): AssetAmountInPoolAndWeight[] =>
