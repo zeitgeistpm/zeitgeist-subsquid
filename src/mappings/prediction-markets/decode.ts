@@ -1,6 +1,6 @@
 import * as ss58 from '@subsquid/ss58';
 import { OutcomeReport } from '../../types/v29';
-import { MarketStatus } from '../../types/v51';
+import { MarketPeriod, MarketStatus } from '../../types/v51';
 import { calls, events } from '../../types';
 import { formatAssetId } from '../../helper';
 import { Call, Event } from '../../processor';
@@ -133,6 +133,22 @@ export const decodeMarketDisputedEvent = (event: Event): MarketDisputedEvent => 
     marketId: Number(marketId),
     accountId,
     outcome,
+  };
+};
+
+export const decodeMarketEarlyCloseScheduledEvent = (event: Event): MarketEarlyCloseEvent => {
+  let decoded: {
+    marketId: bigint;
+    newPeriod: MarketPeriod;
+  };
+  if (events.predictionMarkets.marketEarlyCloseScheduled.v51.is(event)) {
+    decoded = events.predictionMarkets.marketEarlyCloseScheduled.v51.decode(event);
+  } else {
+    decoded = event.args;
+  }
+  return {
+    marketId: Number(decoded.marketId),
+    newPeriod: decoded.newPeriod,
   };
 };
 
@@ -299,6 +315,11 @@ interface MarketDisputedEvent {
   marketId: number;
   accountId?: string;
   outcome?: OutcomeReport;
+}
+
+interface MarketEarlyCloseEvent {
+  marketId: number;
+  newPeriod: MarketPeriod;
 }
 
 interface MarketRejectedEvent {

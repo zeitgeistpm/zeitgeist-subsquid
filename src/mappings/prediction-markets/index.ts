@@ -46,6 +46,7 @@ import {
   decodeMarketCreatedEvent,
   decodeMarketDestroyedEvent,
   decodeMarketDisputedEvent,
+  decodeMarketEarlyCloseScheduledEvent,
   decodeMarketExpiredEvent,
   decodeMarketInsufficientSubsidyEvent,
   decodeMarketRejectedEvent,
@@ -255,6 +256,7 @@ export const marketCreated = async (store: Store, event: Event) => {
     creator: ss58.encode({ prefix: 73, bytes: market.creator }),
     creatorFee: +market.creatorFee.toString(),
     disputeMechanism,
+    earlyClose: false,
     id: event.id + '-' + marketId,
     marketId,
     metadata: market.metadata.toString(),
@@ -513,6 +515,56 @@ export const marketDisputed = async (store: Store, event: Event) => {
     id: event.id + '-' + marketId,
     market,
     outcome: marketReport.outcome,
+    resolvedOutcome: null,
+    status: market.status,
+    timestamp: new Date(event.block.timestamp!),
+    volume: market.volume,
+  });
+  console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
+  await store.save<HistoricalMarket>(hm);
+};
+
+export const marketEarlyCloseScheduled = async (store: Store, event: Event) => {
+  const { marketId, newPeriod } = decodeMarketEarlyCloseScheduledEvent(event);
+
+  const market = await store.get(Market, { where: { marketId } });
+  if (!market) return;
+
+  const period = new MarketPeriod();
+  const p = newPeriod;
+  if (p.__kind == 'Block') {
+    const sdk = await Tools.getSDK();
+    const now = BigInt((await sdk.api.query.timestamp.now()).toString());
+    const headBlock = (await sdk.api.rpc.chain.getHeader()).number.toBigInt();
+    const blockCreationPeriod = BigInt(2 * Number(sdk.api.consts.timestamp.minimumPeriod));
+    const startDiffInMs = blockCreationPeriod * (BigInt(p.value.start) - headBlock);
+    const endDiffInMs = blockCreationPeriod * (BigInt(p.value.end) - headBlock);
+
+    period.block = [];
+    period.block.push(BigInt(p.value.start));
+    period.block.push(BigInt(p.value.end));
+    period.start = now + startDiffInMs;
+    period.end = now + endDiffInMs;
+  } else if (p.__kind == 'Timestamp') {
+    period.timestamp = [];
+    period.timestamp.push(BigInt(p.value.start));
+    period.timestamp.push(BigInt(p.value.end));
+    period.start = BigInt(p.value.start);
+    period.end = BigInt(p.value.end);
+  }
+  market.period = period;
+  market.earlyClose = true;
+  console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
+  await store.save<Market>(market);
+
+  const hm = new HistoricalMarket({
+    blockNumber: event.block.height,
+    by: null,
+    dVolume: BigInt(0),
+    event: MarketEvent.MarketEarlyCloseScheduled,
+    id: event.id + '-' + marketId,
+    market,
+    outcome: null,
     resolvedOutcome: null,
     status: market.status,
     timestamp: new Date(event.block.timestamp!),
