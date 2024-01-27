@@ -214,9 +214,10 @@ const mapNeoSwaps = async (store: Store, event: Event) => {
     }
     case events.neoSwaps.exitExecuted.name: {
       await saveAccounts(store);
-      const historicalAssets = await mappings.neoSwaps.exitExecuted(store, event);
-      if (!historicalAssets) break;
-      assetHistory.push(...historicalAssets);
+      const res = await mappings.neoSwaps.exitExecuted(store, event);
+      if (!res) break;
+      assetHistory.push(...res.historicalAssets);
+      marketHistory.push(res.historicalMarket);
       break;
     }
     case events.neoSwaps.feesWithdrawn.name: {
@@ -225,9 +226,10 @@ const mapNeoSwaps = async (store: Store, event: Event) => {
     }
     case events.neoSwaps.joinExecuted.name: {
       await saveAccounts(store);
-      const historicalAssets = await mappings.neoSwaps.joinExecuted(store, event);
-      if (!historicalAssets) break;
-      assetHistory.push(...historicalAssets);
+      const res = await mappings.neoSwaps.joinExecuted(store, event);
+      if (!res) break;
+      assetHistory.push(...res.historicalAssets);
+      marketHistory.push(res.historicalMarket);
       break;
     }
     case events.neoSwaps.poolDeployed.name: {
