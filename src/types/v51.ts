@@ -934,6 +934,29 @@ export interface MarketCreation_Permissionless {
 
 export type AccountId32 = Bytes
 
+export const EarlyCloseState: sts.Type<EarlyCloseState> = sts.closedEnum(() => {
+    return  {
+        Disputed: sts.unit(),
+        Rejected: sts.unit(),
+        ScheduledAsMarketCreator: sts.unit(),
+        ScheduledAsOther: sts.unit(),
+    }
+})
+
+export const MarketPeriod: sts.Type<MarketPeriod> = sts.closedEnum(() => {
+    return  {
+        Block: Range,
+        Timestamp: Range,
+    }
+})
+
+export const Range: sts.Type<Range> = sts.struct(() => {
+    return  {
+        start: sts.bigint(),
+        end: sts.bigint(),
+    }
+})
+
 export const MarketStatus: sts.Type<MarketStatus> = sts.closedEnum(() => {
     return  {
         Active: sts.unit(),
@@ -974,15 +997,6 @@ export const EarlyClose: sts.Type<EarlyClose> = sts.struct(() => {
         old: MarketPeriod,
         new: MarketPeriod,
         state: EarlyCloseState,
-    }
-})
-
-export const EarlyCloseState: sts.Type<EarlyCloseState> = sts.closedEnum(() => {
-    return  {
-        Disputed: sts.unit(),
-        Rejected: sts.unit(),
-        ScheduledAsMarketCreator: sts.unit(),
-        ScheduledAsOther: sts.unit(),
     }
 })
 
@@ -1043,20 +1057,6 @@ export const Deadlines: sts.Type<Deadlines> = sts.struct(() => {
         gracePeriod: sts.bigint(),
         oracleDuration: sts.bigint(),
         disputeDuration: sts.bigint(),
-    }
-})
-
-export const MarketPeriod: sts.Type<MarketPeriod> = sts.closedEnum(() => {
-    return  {
-        Block: Range,
-        Timestamp: Range,
-    }
-})
-
-export const Range: sts.Type<Range> = sts.struct(() => {
-    return  {
-        start: sts.bigint(),
-        end: sts.bigint(),
     }
 })
 

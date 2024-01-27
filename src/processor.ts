@@ -48,6 +48,7 @@ export const processor = new SubstrateBatchProcessor()
       events.predictionMarkets.marketCreated.name,
       events.predictionMarkets.marketDestroyed.name,
       events.predictionMarkets.marketDisputed.name,
+      events.predictionMarkets.marketEarlyCloseScheduled.name,
       events.predictionMarkets.marketExpired.name,
       events.predictionMarkets.marketInsufficientSubsidy.name,
       events.predictionMarkets.marketRejected.name,

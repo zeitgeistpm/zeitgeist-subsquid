@@ -105,6 +105,12 @@ export class Market {
     disputeMechanism!: DisputeMechanism
 
     /**
+     * `True` if early closure is scheduled
+     */
+    @Column_("bool", {nullable: false})
+    earlyClose!: boolean
+
+    /**
      * Checks if each category has a name for display on UI
      */
     @Column_("bool", {nullable: false})

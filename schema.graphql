@@ -149,6 +149,8 @@ type Market @entity {
   disputes: [MarketReport]
   "Can be `Authorized` or `Court` or `SimpleDisputes`"
   disputeMechanism: DisputeMechanism!
+  "`True` if early closure is scheduled"
+  earlyClose: Boolean!
   "Checks if each category has a name for display on UI"
   hasValidMetaCategories: Boolean!
   "Image for the market"
@@ -430,6 +432,7 @@ enum MarketEvent {
   MarketCreated
   MarketDestroyed
   MarketDisputed
+  MarketEarlyCloseScheduled
   MarketExpired
   MarketInsufficientSubsidy
   MarketRejected

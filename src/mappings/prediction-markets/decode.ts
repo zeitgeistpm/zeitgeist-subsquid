@@ -1,6 +1,6 @@
 import * as ss58 from '@subsquid/ss58';
 import { OutcomeReport } from '../../types/v29';
-import { MarketStatus } from '../../types/v51';
+import { MarketPeriod, MarketStatus } from '../../types/v51';
 import { calls, events } from '../../types';
 import { formatAssetId } from '../../helper';
 import { Call, Event } from '../../processor';
@@ -74,24 +74,18 @@ export const decodeMarketCreatedEvent = (event: Event, specVersion: number): Mar
   ) {
     market = param1;
     market.disputeMechanism = market.mdm;
-    market.period.start = market.period.value[0];
-    market.period.end = market.period.value[1];
+    market.period.value.start = market.period.value[0];
+    market.period.value.end = market.period.value[1];
   } else if (events.predictionMarkets.marketCreated.v32.is(event)) {
     market = param1;
     market.disputeMechanism = market.mdm;
-    market.period.start = market.period.value.start;
-    market.period.end = market.period.value.end;
   } else if (events.predictionMarkets.marketCreated.v36.is(event)) {
     accountId = param1;
     market = param2;
     market.disputeMechanism = market.mdm;
-    market.period.start = market.period.value.start;
-    market.period.end = market.period.value.end;
   } else {
     accountId = param1;
     market = param2;
-    market.period.start = market.period.value.start;
-    market.period.end = market.period.value.end;
   }
   return {
     marketId: Number(param0),
@@ -133,6 +127,22 @@ export const decodeMarketDisputedEvent = (event: Event): MarketDisputedEvent => 
     marketId: Number(marketId),
     accountId,
     outcome,
+  };
+};
+
+export const decodeMarketEarlyCloseScheduledEvent = (event: Event): MarketEarlyCloseEvent => {
+  let decoded: {
+    marketId: bigint;
+    newPeriod: MarketPeriod;
+  };
+  if (events.predictionMarkets.marketEarlyCloseScheduled.v51.is(event)) {
+    decoded = events.predictionMarkets.marketEarlyCloseScheduled.v51.decode(event);
+  } else {
+    decoded = event.args;
+  }
+  return {
+    marketId: Number(decoded.marketId),
+    newPeriod: decoded.newPeriod,
   };
 };
 
@@ -299,6 +309,11 @@ interface MarketDisputedEvent {
   marketId: number;
   accountId?: string;
   outcome?: OutcomeReport;
+}
+
+interface MarketEarlyCloseEvent {
+  marketId: number;
+  newPeriod: MarketPeriod;
 }
 
 interface MarketRejectedEvent {
