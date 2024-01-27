@@ -706,27 +706,9 @@ export const marketResolved = async (store: Store, event: Event) => {
     market.bonds.oracle.isSettled = true;
     if (market.bonds.outsider) market.bonds.outsider.isSettled = true;
   }
-  console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
-  await store.save<Market>(market);
 
-  const hm = new HistoricalMarket({
-    blockNumber: event.block.height,
-    by: null,
-    dLiquidity: BigInt(0),
-    dVolume: BigInt(0),
-    event: MarketEvent.MarketResolved,
-    id: event.id + '-' + marketId,
-    liquidity: market.liquidity,
-    market,
-    outcome: null,
-    resolvedOutcome: market.resolvedOutcome,
-    status: market.status,
-    timestamp: new Date(event.block.timestamp!),
-    volume: market.volume,
-  });
-  console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
-  await store.save<HistoricalMarket>(hm);
-
+  const oldLiquidity = market.liquidity;
+  let newLiquidity = BigInt(0);
   await Promise.all(
     market.outcomeAssets.map(async (outcomeAsset, i) => {
       if (market.marketType.categorical && event.block.specVersion < 40 && i !== +market.resolvedOutcome!) {
@@ -787,6 +769,8 @@ export const marketResolved = async (store: Store, event: Event) => {
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
       await store.save<Asset>(asset);
 
+      newLiquidity += BigInt(Math.round(asset.price * +asset.amountInPool.toString()));
+
       const ha = new HistoricalAsset({
         accountId: null,
         assetId: asset.assetId,
@@ -803,6 +787,28 @@ export const marketResolved = async (store: Store, event: Event) => {
       await store.save<HistoricalAsset>(ha);
     })
   );
+
+  market.liquidity = newLiquidity;
+  console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
+  await store.save<Market>(market);
+
+  const hm = new HistoricalMarket({
+    blockNumber: event.block.height,
+    by: null,
+    dLiquidity: newLiquidity - oldLiquidity,
+    dVolume: BigInt(0),
+    event: MarketEvent.MarketResolved,
+    id: event.id + '-' + marketId,
+    liquidity: newLiquidity,
+    market,
+    outcome: null,
+    resolvedOutcome: market.resolvedOutcome,
+    status: market.status,
+    timestamp: new Date(event.block.timestamp!),
+    volume: market.volume,
+  });
+  console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
+  await store.save<HistoricalMarket>(hm);
 };
 
 export const marketStartedWithSubsidy = async (store: Store, event: Event) => {
