@@ -1,4 +1,6 @@
 export enum MarketEvent {
+    ArbitrageBuyBurn = "ArbitrageBuyBurn",
+    ArbritrageMintSell = "ArbritrageMintSell",
     BuyExecuted = "BuyExecuted",
     ExitExecuted = "ExitExecuted",
     GlobalDisputeStarted = "GlobalDisputeStarted",
@@ -16,6 +18,9 @@ export enum MarketEvent {
     MarketResolved = "MarketResolved",
     MarketStartedWithSubsidy = "MarketStartedWithSubsidy",
     PoolDeployed = "PoolDeployed",
+    PoolDestroyed = "PoolDestroyed",
+    PoolExit = "PoolExit",
+    PoolJoin = "PoolJoin",
     SellExecuted = "SellExecuted",
     SwapExactAmountIn = "SwapExactAmountIn",
     SwapExactAmountOut = "SwapExactAmountOut",

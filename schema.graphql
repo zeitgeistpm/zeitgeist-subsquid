@@ -431,6 +431,8 @@ enum DisputeMechanism {
 Markets' event options
 """
 enum MarketEvent {
+  ArbitrageBuyBurn
+  ArbritrageMintSell
   BuyExecuted
   ExitExecuted
   GlobalDisputeStarted
@@ -448,6 +450,9 @@ enum MarketEvent {
   MarketResolved
   MarketStartedWithSubsidy
   PoolDeployed
+  PoolDestroyed
+  PoolExit
+  PoolJoin
   SellExecuted
   SwapExactAmountIn
   SwapExactAmountOut
