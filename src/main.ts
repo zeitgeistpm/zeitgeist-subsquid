@@ -360,16 +360,18 @@ const mapSwaps = async (store: Store, event: Event) => {
   switch (event.name) {
     case events.swaps.arbitrageBuyBurn.name: {
       await saveAccounts(store);
-      const historicalAssets = await mappings.swaps.arbitrageBuyBurn(store, event);
-      if (!historicalAssets) break;
-      assetHistory.push(...historicalAssets);
+      const res = await mappings.swaps.arbitrageBuyBurn(store, event);
+      if (!res) break;
+      assetHistory.push(...res.historicalAssets);
+      marketHistory.push(res.historicalMarket);
       break;
     }
     case events.swaps.arbitrageMintSell.name: {
       await saveAccounts(store);
-      const historicalAssets = await mappings.swaps.arbitrageMintSell(store, event);
-      if (!historicalAssets) break;
-      assetHistory.push(...historicalAssets);
+      const res = await mappings.swaps.arbitrageMintSell(store, event);
+      if (!res) break;
+      assetHistory.push(...res.historicalAssets);
+      marketHistory.push(res.historicalMarket);
       break;
     }
     case events.swaps.marketCreatorFeesPaid.name: {
@@ -403,6 +405,7 @@ const mapSwaps = async (store: Store, event: Event) => {
       if (!res) break;
       assetHistory.push(...res.historicalAssets);
       poolHistory.push(res.historicalPool);
+      marketHistory.push(res.historicalMarket);
       break;
     }
     case events.swaps.poolDestroyed.name: {
@@ -412,34 +415,39 @@ const mapSwaps = async (store: Store, event: Event) => {
       await storeBalanceChanges(res.historicalAccountBalances);
       assetHistory.push(...res.historicalAssets);
       poolHistory.push(res.historicalPool);
+      marketHistory.push(res.historicalMarket);
       break;
     }
     case events.swaps.poolExit.name: {
       await saveAccounts(store);
-      const historicalAssets = await mappings.swaps.poolExit(store, event);
-      if (!historicalAssets) break;
-      assetHistory.push(...historicalAssets);
+      const res = await mappings.swaps.poolExit(store, event);
+      if (!res) break;
+      assetHistory.push(...res.historicalAssets);
+      marketHistory.push(res.historicalMarket);
       break;
     }
     case events.swaps.poolExitWithExactAssetAmount.name: {
       await saveAccounts(store);
-      const historicalAssets = await mappings.swaps.poolExitWithExactAssetAmount(store, event);
-      if (!historicalAssets) break;
-      assetHistory.push(...historicalAssets);
+      const res = await mappings.swaps.poolExitWithExactAssetAmount(store, event);
+      if (!res) break;
+      assetHistory.push(...res.historicalAssets);
+      marketHistory.push(res.historicalMarket);
       break;
     }
     case events.swaps.poolJoin.name: {
       await saveAccounts(store);
-      const historicalAssets = await mappings.swaps.poolJoin(store, event);
-      if (!historicalAssets) break;
-      assetHistory.push(...historicalAssets);
+      const res = await mappings.swaps.poolJoin(store, event);
+      if (!res) break;
+      assetHistory.push(...res.historicalAssets);
+      marketHistory.push(res.historicalMarket);
       break;
     }
     case events.swaps.poolJoinWithExactAssetAmount.name: {
       await saveAccounts(store);
-      const historicalAssets = await mappings.swaps.poolJoinWithExactAssetAmount(store, event);
-      if (!historicalAssets) break;
-      assetHistory.push(...historicalAssets);
+      const res = await mappings.swaps.poolJoinWithExactAssetAmount(store, event);
+      if (!res) break;
+      assetHistory.push(...res.historicalAssets);
+      marketHistory.push(res.historicalMarket);
       break;
     }
     case events.swaps.swapExactAmountIn.name: {
@@ -448,7 +456,7 @@ const mapSwaps = async (store: Store, event: Event) => {
       if (!res) break;
       assetHistory.push(...res.historicalAssets);
       swapHistory.push(res.historicalSwap);
-      if (res.historicalMarket) marketHistory.push(res.historicalMarket);
+      marketHistory.push(res.historicalMarket);
       break;
     }
     case events.swaps.swapExactAmountOut.name: {
@@ -457,7 +465,7 @@ const mapSwaps = async (store: Store, event: Event) => {
       if (!res) break;
       assetHistory.push(...res.historicalAssets);
       swapHistory.push(res.historicalSwap);
-      if (res.historicalMarket) marketHistory.push(res.historicalMarket);
+      marketHistory.push(res.historicalMarket);
       break;
     }
   }
