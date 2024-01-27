@@ -155,6 +155,8 @@ type Market @entity {
   hasValidMetaCategories: Boolean!
   "Image for the market"
   img: String
+  "Liquidity on the market's pool"
+  liquidity: BigInt!
   "Zeitgeist's identifier for market"
   marketId: Int! @index
   "Type of the market"
@@ -202,10 +204,14 @@ type HistoricalMarket @entity {
   blockNumber: Int!
   "The account that reported or disputed"
   by: String
+  "Change in market liquidity"
+  dLiquidity: BigInt!
   "Change in market volume"
   dVolume: BigInt!
   "Event method which initiated this change"
   event: MarketEvent!
+  "New updated liquidity"
+  liquidity: BigInt!
   "Details of the connected market"
   market: Market!
   "Reported or disputed outcome for the market"
@@ -426,7 +432,9 @@ Markets' event options
 """
 enum MarketEvent {
   BuyExecuted
+  ExitExecuted
   GlobalDisputeStarted
+  JoinExecuted
   MarketApproved
   MarketClosed
   MarketCreated
