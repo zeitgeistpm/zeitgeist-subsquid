@@ -31,6 +31,12 @@ export class HistoricalMarket {
     by!: string | undefined | null
 
     /**
+     * Change in market liquidity
+     */
+    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+    dLiquidity!: bigint
+
+    /**
      * Change in market volume
      */
     @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
@@ -41,6 +47,12 @@ export class HistoricalMarket {
      */
     @Column_("varchar", {length: 25, nullable: false})
     event!: MarketEvent
+
+    /**
+     * New updated liquidity
+     */
+    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+    liquidity!: bigint
 
     /**
      * Details of the connected market

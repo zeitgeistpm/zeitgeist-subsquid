@@ -123,6 +123,12 @@ export class Market {
     img!: string | undefined | null
 
     /**
+     * Liquidity on the market's pool
+     */
+    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+    liquidity!: bigint
+
+    /**
      * Zeitgeist's identifier for market
      */
     @Index_()
