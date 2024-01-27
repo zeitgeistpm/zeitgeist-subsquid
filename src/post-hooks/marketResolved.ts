@@ -33,9 +33,11 @@ export const resolveMarkets = async (store: Store, blockHeight: number): Promise
         const hm = new HistoricalMarket({
           blockNumber: rm.blockHeight,
           by: null,
+          dLiquidity: BigInt(0),
           dVolume: BigInt(0),
           event: MarketEvent.MarketResolved,
           id: rm.eventId + '-' + rm.marketId,
+          liquidity: market.liquidity,
           market,
           outcome: null,
           resolvedOutcome: market.resolvedOutcome,

@@ -25,10 +25,12 @@ export const authorityReported = async (store: Store, event: Event) => {
 
   const hm = new HistoricalMarket({
     blockNumber: event.block.height,
+    dLiquidity: BigInt(0),
     by: null,
     dVolume: BigInt(0),
     event: MarketEvent.MarketReported,
     id: event.id + '-' + market.marketId,
+    liquidity: market.liquidity,
     market: market,
     outcome: ocr,
     resolvedOutcome: null,
