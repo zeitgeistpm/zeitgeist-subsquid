@@ -159,7 +159,7 @@ export const exitExecuted = async (
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
       await store.save<Asset>(asset);
 
-      newLiquidity += BigInt(asset.price * +ab.balance.toString());
+      newLiquidity += BigInt(Math.round(asset.price * +ab.balance.toString()));
 
       const ha = new HistoricalAsset({
         accountId: who,
@@ -264,7 +264,7 @@ export const joinExecuted = async (
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
       await store.save<Asset>(asset);
 
-      newLiquidity += BigInt(asset.price * +ab.balance.toString());
+      newLiquidity += BigInt(Math.round(asset.price * +ab.balance.toString()));
 
       const ha = new HistoricalAsset({
         accountId: who,
@@ -365,7 +365,7 @@ export const poolDeployed = async (
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
       await store.save<Asset>(asset);
 
-      newLiquidity += BigInt(asset.price * +ab.balance.toString());
+      newLiquidity += BigInt(Math.round(asset.price * +ab.balance.toString()));
 
       const ha = new HistoricalAsset({
         accountId: who,
@@ -448,7 +448,7 @@ export const sellExecuted = async (
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
       await store.save<Asset>(asset);
 
-      newLiquidity += BigInt(asset.price * +ab.balance.toString());
+      newLiquidity += BigInt(Math.round(asset.price * +ab.balance.toString()));
 
       const ha = new HistoricalAsset({
         accountId: asset.assetId === assetExecuted ? who : null,
