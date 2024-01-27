@@ -795,11 +795,11 @@ export const marketResolved = async (store: Store, event: Event) => {
   const hm = new HistoricalMarket({
     blockNumber: event.block.height,
     by: null,
-    dLiquidity: newLiquidity - oldLiquidity,
+    dLiquidity: market.liquidity - oldLiquidity,
     dVolume: BigInt(0),
     event: MarketEvent.MarketResolved,
     id: event.id + '-' + marketId,
-    liquidity: newLiquidity,
+    liquidity: market.liquidity,
     market,
     outcome: null,
     resolvedOutcome: market.resolvedOutcome,
