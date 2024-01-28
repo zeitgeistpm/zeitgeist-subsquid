@@ -61,6 +61,18 @@ export const issuanceHistory = (assetId: string) => `
     date ASC;
 `;
 
+export const liquidityHistory = () => `
+  SELECT
+    date(timestamp),
+    SUM(d_liquidity) AS liquidity
+  FROM
+    historical_market
+  GROUP BY
+    date(timestamp)
+  ORDER BY
+    date ASC;
+`;
+
 export const marketParticipants = (ids: number[]) => `
   SELECT
     m.market_id,
