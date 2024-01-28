@@ -32,9 +32,11 @@ export const destroyMarkets = async (store: Store) => {
       const hm = new HistoricalMarket({
         blockNumber,
         by: null,
+        dLiquidity: BigInt(0),
         dVolume: BigInt(0),
         event: MarketEvent.MarketDestroyed,
         id: eventId + '-' + marketId,
+        liquidity: market.liquidity,
         market,
         outcome: null,
         resolvedOutcome: null,

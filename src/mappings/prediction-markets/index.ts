@@ -118,9 +118,11 @@ export const globalDisputeStarted = async (store: Store, event: Event) => {
   const hm = new HistoricalMarket({
     blockNumber: event.block.height,
     by: null,
+    dLiquidity: BigInt(0),
     dVolume: BigInt(0),
     event: MarketEvent.GlobalDisputeStarted,
     id: event.id + '-' + marketId,
+    liquidity: market.liquidity,
     market,
     outcome: null,
     resolvedOutcome: null,
@@ -152,9 +154,11 @@ export const marketApproved = async (store: Store, event: Event) => {
   const hm = new HistoricalMarket({
     blockNumber: event.block.height,
     by: null,
+    dLiquidity: BigInt(0),
     dVolume: BigInt(0),
     event: MarketEvent.MarketApproved,
     id: event.id + '-' + marketId,
+    liquidity: market.liquidity,
     market,
     outcome: null,
     resolvedOutcome: null,
@@ -178,9 +182,11 @@ export const marketClosed = async (store: Store, event: Event) => {
   const hm = new HistoricalMarket({
     blockNumber: event.block.height,
     by: null,
+    dLiquidity: BigInt(0),
     dVolume: BigInt(0),
     event: MarketEvent.MarketClosed,
     id: event.id + '-' + marketId,
+    liquidity: market.liquidity,
     market,
     outcome: null,
     resolvedOutcome: null,
@@ -257,6 +263,7 @@ export const marketCreated = async (store: Store, event: Event) => {
     disputeMechanism,
     earlyClose: false,
     id: event.id + '-' + marketId,
+    liquidity: BigInt(0),
     marketId,
     metadata: market.metadata.toString(),
     oracle: ss58.encode({ prefix: 73, bytes: market.oracle }),
@@ -372,9 +379,11 @@ export const marketCreated = async (store: Store, event: Event) => {
   const hm = new HistoricalMarket({
     blockNumber: event.block.height,
     by: newMarket.creator,
+    dLiquidity: BigInt(0),
     dVolume: BigInt(0),
     event: MarketEvent.MarketCreated,
     id: event.id + '-' + marketId,
+    liquidity: newMarket.liquidity,
     market: newMarket,
     outcome: null,
     resolvedOutcome: null,
@@ -403,9 +412,11 @@ export const marketDestroyed = async (store: Store, event: Event) => {
   const hm = new HistoricalMarket({
     blockNumber: event.block.height,
     by: null,
+    dLiquidity: BigInt(0),
     dVolume: BigInt(0),
     event: MarketEvent.MarketDestroyed,
     id: event.id + '-' + marketId,
+    liquidity: market.liquidity,
     market,
     outcome: null,
     resolvedOutcome: null,
@@ -486,9 +497,11 @@ export const marketDisputed = async (store: Store, event: Event) => {
   const hm = new HistoricalMarket({
     blockNumber: event.block.height,
     by: accountId || market.bonds?.dispute?.who,
+    dLiquidity: BigInt(0),
     dVolume: BigInt(0),
     event: MarketEvent.MarketDisputed,
     id: event.id + '-' + marketId,
+    liquidity: market.liquidity,
     market,
     outcome: marketReport.outcome,
     resolvedOutcome: null,
@@ -513,9 +526,11 @@ export const marketEarlyCloseScheduled = async (store: Store, event: Event) => {
   const hm = new HistoricalMarket({
     blockNumber: event.block.height,
     by: null,
+    dLiquidity: BigInt(0),
     dVolume: BigInt(0),
     event: MarketEvent.MarketEarlyCloseScheduled,
     id: event.id + '-' + marketId,
+    liquidity: market.liquidity,
     market,
     outcome: null,
     resolvedOutcome: null,
@@ -543,9 +558,11 @@ export const marketExpired = async (store: Store, event: Event) => {
   const hm = new HistoricalMarket({
     blockNumber: event.block.height,
     by: null,
+    dLiquidity: BigInt(0),
     dVolume: BigInt(0),
     event: MarketEvent.MarketExpired,
     id: event.id + '-' + marketId,
+    liquidity: market.liquidity,
     market,
     outcome: null,
     resolvedOutcome: null,
@@ -569,9 +586,11 @@ export const marketInsufficientSubsidy = async (store: Store, event: Event) => {
   const hm = new HistoricalMarket({
     blockNumber: event.block.height,
     by: null,
+    dLiquidity: BigInt(0),
     dVolume: BigInt(0),
     event: MarketEvent.MarketInsufficientSubsidy,
     id: event.id + '-' + marketId,
+    liquidity: market.liquidity,
     market,
     outcome: null,
     resolvedOutcome: null,
@@ -600,9 +619,11 @@ export const marketRejected = async (store: Store, event: Event) => {
   const hm = new HistoricalMarket({
     blockNumber: event.block.height,
     by: null,
+    dLiquidity: BigInt(0),
     dVolume: BigInt(0),
     event: MarketEvent.MarketRejected,
     id: event.id + '-' + marketId,
+    liquidity: market.liquidity,
     market,
     outcome: null,
     resolvedOutcome: null,
@@ -652,9 +673,11 @@ export const marketReported = async (store: Store, event: Event) => {
   const hm = new HistoricalMarket({
     blockNumber: event.block.height,
     by: marketReport.by,
+    dLiquidity: BigInt(0),
     dVolume: BigInt(0),
     event: MarketEvent.MarketReported,
     id: event.id + '-' + marketId,
+    liquidity: market.liquidity,
     market,
     outcome: outcomeReport,
     resolvedOutcome: null,
@@ -683,25 +706,9 @@ export const marketResolved = async (store: Store, event: Event) => {
     market.bonds.oracle.isSettled = true;
     if (market.bonds.outsider) market.bonds.outsider.isSettled = true;
   }
-  console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
-  await store.save<Market>(market);
 
-  const hm = new HistoricalMarket({
-    blockNumber: event.block.height,
-    by: null,
-    dVolume: BigInt(0),
-    event: MarketEvent.MarketResolved,
-    id: event.id + '-' + marketId,
-    market,
-    outcome: null,
-    resolvedOutcome: market.resolvedOutcome,
-    status: market.status,
-    timestamp: new Date(event.block.timestamp!),
-    volume: market.volume,
-  });
-  console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
-  await store.save<HistoricalMarket>(hm);
-
+  const oldLiquidity = market.liquidity;
+  let newLiquidity = BigInt(0);
   await Promise.all(
     market.outcomeAssets.map(async (outcomeAsset, i) => {
       if (market.marketType.categorical && event.block.specVersion < 40 && i !== +market.resolvedOutcome!) {
@@ -762,6 +769,8 @@ export const marketResolved = async (store: Store, event: Event) => {
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
       await store.save<Asset>(asset);
 
+      newLiquidity += BigInt(Math.round(asset.price * +asset.amountInPool.toString()));
+
       const ha = new HistoricalAsset({
         accountId: null,
         assetId: asset.assetId,
@@ -778,6 +787,28 @@ export const marketResolved = async (store: Store, event: Event) => {
       await store.save<HistoricalAsset>(ha);
     })
   );
+
+  market.liquidity = newLiquidity;
+  console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
+  await store.save<Market>(market);
+
+  const hm = new HistoricalMarket({
+    blockNumber: event.block.height,
+    by: null,
+    dLiquidity: market.liquidity - oldLiquidity,
+    dVolume: BigInt(0),
+    event: MarketEvent.MarketResolved,
+    id: event.id + '-' + marketId,
+    liquidity: market.liquidity,
+    market,
+    outcome: null,
+    resolvedOutcome: market.resolvedOutcome,
+    status: market.status,
+    timestamp: new Date(event.block.timestamp!),
+    volume: market.volume,
+  });
+  console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
+  await store.save<HistoricalMarket>(hm);
 };
 
 export const marketStartedWithSubsidy = async (store: Store, event: Event) => {
@@ -792,9 +823,11 @@ export const marketStartedWithSubsidy = async (store: Store, event: Event) => {
   const hm = new HistoricalMarket({
     blockNumber: event.block.height,
     by: null,
+    dLiquidity: BigInt(0),
     dVolume: BigInt(0),
     event: MarketEvent.MarketStartedWithSubsidy,
     id: event.id + '-' + marketId,
+    liquidity: market.liquidity,
     market,
     outcome: null,
     resolvedOutcome: null,
