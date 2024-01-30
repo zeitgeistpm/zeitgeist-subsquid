@@ -82,7 +82,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           break;
       }
     }
-    if (isBatteryStation() && block.header.height <= 579140) {
+    if (isBatteryStation()) {
       await handlePostHooks(ctx.store, block.header.height);
     }
   }
@@ -100,6 +100,8 @@ const handlePostHooks = async (store: Store, blockHeight: number) => {
   } else if (blockHeight === 579140) {
     await saveAccounts(store);
     await postHooks.destroyMarkets(store);
+  } else if (blockHeight === 4772454) {
+    await postHooks.migrateScoringRule(store);
   }
 };
 
