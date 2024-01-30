@@ -3,16 +3,15 @@ import { Market, ScoringRule } from '../model';
 
 export const migrateScoringRule = async (store: Store) => {
   const eventName = 'PostHooks.MigrateScoringRule';
+  const updatedMarkets: Market[] = [];
 
-  const marketIds = [0, 9, 534];
-
+  const markets = await store.findBy(Market, { scoringRule: ScoringRule.CPMM });
   await Promise.all(
-    marketIds.map(async (marketId) => {
-      const market = await store.get(Market, { where: { marketId } });
-      if (!market) return;
+    markets.map(async (market) => {
       market.scoringRule = ScoringRule.Lmsr;
-      console.log(`[${eventName}] Saving market: ${JSON.stringify(market, null, 2)}`);
-      await store.save<Market>(market);
+      updatedMarkets.push(market);
     })
   );
+  console.log(`[${eventName}] Saving markets: ${JSON.stringify(updatedMarkets, null, 2)}`);
+  await store.save<Market>(updatedMarkets);
 };
