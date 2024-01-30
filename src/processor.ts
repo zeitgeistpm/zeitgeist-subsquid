@@ -119,7 +119,8 @@ if (isBatteryStation()) {
       range: { from: 0, to: 588249 },
       call: true,
       extrinsic: true,
-    });
+    })
+    .includeAllBlocks({ from: 35683, to: 211391 });
 }
 
 if (!isLocalEnv()) {
