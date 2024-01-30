@@ -3,6 +3,7 @@ import { BalanceInfoEvent, BaseAsset, OrderBy, TargetAsset, Unit, _Asset } from 
 import { AssetPriceResolver } from './assetPrice';
 import { BalanceInfoResolver } from './balanceInfo';
 import { IssuanceHistoryResolver } from './issuanceHistory';
+import { LiquidityHistoryResolver } from './liquidityHistory';
 import { MarketMetadataResolver } from './marketMetadata';
 import { MarketStatsResolver } from './marketStats';
 import { MarketStatsWithOrderResolver } from './marketStatsWithOrder';
@@ -42,6 +43,7 @@ export {
   AssetPriceResolver,
   BalanceInfoResolver,
   IssuanceHistoryResolver,
+  LiquidityHistoryResolver,
   MarketMetadataResolver,
   MarketStatsResolver,
   MarketStatsWithOrderResolver,
