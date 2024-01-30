@@ -97,10 +97,10 @@ const handlePostHooks = async (store: Store, blockHeight: number) => {
     await storeBalanceChanges(historicalAccountBalances);
     const historicalAssets = await postHooks.resolveMarkets(store, blockHeight);
     assetHistory.push(...historicalAssets);
-  } else if (blockHeight === 579140) {
+  } else if (blockHeight === 579750) {
     await saveAccounts(store);
     await postHooks.destroyMarkets(store);
-  } else if (blockHeight === 4772454) {
+  } else if (blockHeight === 4772816) {
     await postHooks.migrateScoringRule(store);
   }
 };
