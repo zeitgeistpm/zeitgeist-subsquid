@@ -209,6 +209,10 @@ export const isLocalEnv = (): boolean => {
   return process.env.NODE_ENV === 'local' && process.env.WS_NODE_URL!.includes('blockchain');
 };
 
+export const isMainnet = (): boolean => {
+  return process.env.WS_NODE_URL!.includes('main');
+};
+
 export const mergeByAssetId = (balances: any[], weights: any[]): AssetAmountInPoolAndWeight[] =>
   balances.map((b) => ({
     ...b,

@@ -12,7 +12,7 @@ import {
 import * as postHooks from './post-hooks';
 import { calls, events } from './types';
 import { Pallet } from './consts';
-import { initBalance, isBatteryStation } from './helper';
+import { initBalance, isBatteryStation, isMainnet } from './helper';
 import { processor, Event } from './processor';
 
 const accounts = new Map<string, Map<string, bigint>>();
@@ -83,14 +83,16 @@ processor.run(new TypeormDatabase(), async (ctx) => {
       }
     }
     if (isBatteryStation()) {
-      await handlePostHooks(ctx.store, block.header.height);
+      await handleBsrPostHooks(ctx.store, block.header.height);
+    } else if (isMainnet()) {
+      await handleMainPostHooks(ctx.store, block.header.height);
     }
   }
   await saveAccounts(ctx.store);
   await saveHistory(ctx.store);
 });
 
-const handlePostHooks = async (store: Store, blockHeight: number) => {
+const handleBsrPostHooks = async (store: Store, blockHeight: number) => {
   if (blockHeight >= 35683 && blockHeight <= 211391) {
     await saveAccounts(store);
     const historicalAccountBalances = await postHooks.unreserveBalances(blockHeight);
@@ -101,6 +103,12 @@ const handlePostHooks = async (store: Store, blockHeight: number) => {
     await saveAccounts(store);
     await postHooks.destroyMarkets(store);
   } else if (blockHeight === 4772816) {
+    await postHooks.migrateScoringRule(store);
+  }
+};
+
+const handleMainPostHooks = async (store: Store, blockHeight: number) => {
+  if (blockHeight === 4793019) {
     await postHooks.migrateScoringRule(store);
   }
 };
