@@ -1,11 +1,11 @@
 import { Store } from '@subsquid/typeorm-store';
-import { Market, ScoringRule } from '../model';
+import { Market, MarketStatus, ScoringRule } from '../model';
 
 export const migrateScoringRule = async (store: Store) => {
   const eventName = 'PostHooks.MigrateScoringRule';
   const updatedMarkets: Market[] = [];
 
-  const markets = await store.findBy(Market, { scoringRule: ScoringRule.CPMM });
+  const markets = await store.findBy(Market, { status: MarketStatus.Active, scoringRule: ScoringRule.CPMM });
   await Promise.all(
     markets.map(async (market) => {
       market.scoringRule = ScoringRule.Lmsr;
