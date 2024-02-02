@@ -348,6 +348,7 @@ export const poolDeployed = async (
 
   const market = await store.get(Market, {
     where: { marketId },
+    relations: { assets: true },
   });
   if (!market) return;
 
