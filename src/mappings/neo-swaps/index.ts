@@ -351,6 +351,14 @@ export const poolDeployed = async (
   });
   if (!market) return;
 
+  if (market.assets.length !== 0) {
+    await Promise.all(
+      market.assets.map(async (asset) => {
+        console.log(`[${event.name}] Removing asset: ${JSON.stringify(asset, null, 2)}`);
+        await store.remove<Asset>(asset);
+      })
+    );
+  }
   const oldLiquidity = market.liquidity;
   let newLiquidity = BigInt(0);
   const historicalAssets: HistoricalAsset[] = [];
