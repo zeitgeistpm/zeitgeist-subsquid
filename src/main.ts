@@ -12,7 +12,7 @@ import {
 import * as postHooks from './post-hooks';
 import { calls, events } from './types';
 import { Pallet } from './consts';
-import { initBalance, isBatteryStation, isMainnet, isPreviousEvent } from './helper';
+import { initBalance, isBatteryStation, isEventOrderValid, isMainnet } from './helper';
 import { processor, Event } from './processor';
 
 const accounts = new Map<string, Map<string, bigint>>();
@@ -389,7 +389,7 @@ const mapSwaps = async (store: Store, event: Event) => {
       if (balanceHistory.length < 2) break;
       for (let i = 1; i < 3; i++) {
         const hab = balanceHistory[balanceHistory.length - i];
-        if (hab.event === 'Transfer' && isPreviousEvent(event.id, hab.id.slice(0, -6))) {
+        if (hab.event === 'Transfer' && isEventOrderValid(event.id, hab.id.slice(0, -6))) {
           hab.id = event.id + hab.id.slice(-6);
           hab.event = event.name.split('.')[1];
           balanceHistory[balanceHistory.length - i] = hab;
