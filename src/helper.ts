@@ -213,6 +213,11 @@ export const isMainnet = (): boolean => {
   return process.env.WS_NODE_URL!.includes('main');
 };
 
+export const isPreviousEvent = (latterEventId: string, formerEventId: string): boolean => {
+  if (+latterEventId.split('-')[2] === +formerEventId.split('-')[2] + 1) return true;
+  return false;
+};
+
 export const mergeByAssetId = (balances: any[], weights: any[]): AssetAmountInPoolAndWeight[] =>
   balances.map((b) => ({
     ...b,
