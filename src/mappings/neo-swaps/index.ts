@@ -348,12 +348,24 @@ export const poolDeployed = async (
 
   const market = await store.get(Market, {
     where: { marketId },
+    relations: { assets: true },
   });
   if (!market) return;
 
+  // Check if market has swap pool and their assets attached to it
+  // Applicable for markets which have been migrated to neo-swap pool
+  if (market.assets.length !== 0) {
+    await Promise.all(
+      market.assets.map(async (asset) => {
+        console.log(`[${event.name}] Removing asset: ${JSON.stringify(asset, null, 2)}`);
+        await store.remove<Asset>(asset);
+      })
+    );
+  }
   const oldLiquidity = market.liquidity;
   let newLiquidity = BigInt(0);
   const historicalAssets: HistoricalAsset[] = [];
+
   await Promise.all(
     neoPool.account.balances.map(async (ab, i) => {
       if (isBaseAsset(ab.assetId)) return;
