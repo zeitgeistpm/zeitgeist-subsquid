@@ -1,5 +1,6 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_} from "typeorm"
 import * as marshal from "./marshal"
+import {SwapEvent} from "./_swapEvent"
 import {Extrinsic} from "./_extrinsic"
 
 /**
@@ -51,8 +52,14 @@ export class HistoricalSwap {
     /**
      * Event method which initiated this swap
      */
-    @Column_("text", {nullable: false})
-    event!: string
+    @Column_("varchar", {length: 18, nullable: false})
+    event!: SwapEvent
+
+    /**
+     * External fees occuring out of trade
+     */
+    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
+    externalFeeAmount!: bigint | undefined | null
 
     /**
      * Extrinsic responsible for this change
@@ -65,6 +72,12 @@ export class HistoricalSwap {
      */
     @Column_("int4", {nullable: false})
     blockNumber!: number
+
+    /**
+     * Swap fees for the trade
+     */
+    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
+    swapFeeAmount!: bigint | undefined | null
 
     /**
      * Timestamp of the block
