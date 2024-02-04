@@ -110,11 +110,15 @@ type HistoricalSwap @entity {
   "Units of asset user bought"
   assetAmountOut: BigInt!
   "Event method which initiated this swap"
-  event: String!
+  event: SwapEvent!
+  "External fees occuring out of trade"
+  externalFeeAmount: BigInt
   "Extrinsic responsible for this change"
   extrinsic: Extrinsic
   "Height of the block"
   blockNumber: Int!
+  "Swap fees for the trade"
+  swapFeeAmount: BigInt
   "Timestamp of the block"
   timestamp: DateTime!
 }
@@ -497,4 +501,14 @@ enum ScoringRule {
   Orderbook
   Parimutuel
   RikiddoSigmoidFeeMarketEma
+}
+
+"""
+Swaps' event options
+"""
+enum SwapEvent {
+  BuyExecuted
+  SellExecuted
+  SwapExactAmountIn
+  SwapExactAmountOut
 }
