@@ -117,7 +117,7 @@ type HistoricalSwap @entity {
   extrinsic: Extrinsic
   "Height of the block"
   blockNumber: Int!
-  "Swap fees for the trade"
+  "Swap fees"
   swapFeeAmount: BigInt
   "Timestamp of the block"
   timestamp: DateTime!

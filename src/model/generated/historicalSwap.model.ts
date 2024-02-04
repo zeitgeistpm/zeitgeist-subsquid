@@ -74,7 +74,7 @@ export class HistoricalSwap {
     blockNumber!: number
 
     /**
-     * Swap fees for the trade
+     * Swap fees
      */
     @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
     swapFeeAmount!: bigint | undefined | null
