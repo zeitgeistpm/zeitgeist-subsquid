@@ -10,8 +10,8 @@ export const authorityReported = async (store: Store, event: Event) => {
   if (!market) return;
 
   const ocr = new OutcomeReport({
-    categorical: outcome.__kind == 'Categorical' ? outcome.value : null,
-    scalar: outcome.__kind == 'Scalar' ? outcome.value : null,
+    categorical: outcome.__kind === 'Categorical' ? outcome.value : undefined,
+    scalar: outcome.__kind === 'Scalar' ? outcome.value : undefined,
   });
   const mr = new MarketReport({
     at: event.block.height,
