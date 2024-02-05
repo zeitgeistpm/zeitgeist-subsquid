@@ -483,8 +483,8 @@ export const marketDisputed = async (store: Store, event: Event) => {
       by: accountId,
       outcome: outcome
         ? new OutcomeReport({
-            categorical: outcome.__kind == 'Categorical' ? outcome.value : null,
-            scalar: outcome.__kind == 'Scalar' ? outcome.value : null,
+            categorical: outcome.__kind === 'Categorical' ? outcome.value : undefined,
+            scalar: outcome.__kind === 'Scalar' ? outcome.value : undefined,
           })
         : null,
     });
