@@ -147,8 +147,8 @@ type Market @entity {
   description: String
   "The dispute information for each dispute that's been issued"
   disputes: [MarketReport]
-  "Can be `Authorized` or `Court` or `SimpleDisputes`"
-  disputeMechanism: DisputeMechanism!
+  "Can be `Authorized`/`Court`/`SimpleDisputes` or undefined"
+  disputeMechanism: DisputeMechanism
   "`True` if early closure is scheduled"
   earlyClose: Boolean!
   "Checks if each category has a name for display on UI"
