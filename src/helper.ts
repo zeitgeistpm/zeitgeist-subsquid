@@ -3,8 +3,22 @@ import { DecodedMarketMetadata } from '@zeitgeistpm/sdk/dist/types';
 import { util } from '@zeitgeistpm/sdk';
 import { Store } from '@subsquid/typeorm-store';
 import Decimal from 'decimal.js';
-import { Account, AccountBalance, Extrinsic, HistoricalAccountBalance, MarketStatus, ScoringRule } from './model';
-import { Asset, MarketType, MarketStatus as MarketStatus_v51, ScoringRule as ScoringRule_v51 } from './types/v51';
+import {
+  Account,
+  AccountBalance,
+  DisputeMechanism,
+  Extrinsic,
+  HistoricalAccountBalance,
+  MarketStatus,
+  ScoringRule,
+} from './model';
+import {
+  Asset,
+  MarketDisputeMechanism as _DisputeMechanism,
+  MarketType,
+  MarketStatus as MarketStatus_v51,
+  ScoringRule as ScoringRule_v51,
+} from './types/v51';
 import { MarketStatus as MarketStatus_v53, ScoringRule as ScoringRule_v53 } from './types/v53';
 import { CacheHint, _Asset } from './consts';
 import { Block, Extrinsic as _Extrinsic } from './processor';
@@ -96,6 +110,19 @@ export const formatAssetId = (assetId: Asset): string => {
       return _Asset.Ztg;
     default:
       return assetId.__kind;
+  }
+};
+
+export const formatDisputeMechanism = (
+  disputeMechanism: _DisputeMechanism | undefined
+): DisputeMechanism | undefined => {
+  switch (disputeMechanism?.__kind) {
+    case 'Authorized':
+      return DisputeMechanism.Authorized;
+    case 'Court':
+      return DisputeMechanism.Court;
+    case 'SimpleDisputes':
+      return DisputeMechanism.SimpleDisputes;
   }
 };
 

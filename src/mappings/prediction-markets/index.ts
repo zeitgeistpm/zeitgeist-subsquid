@@ -7,7 +7,6 @@ import {
   AccountBalance,
   Asset,
   CategoryMetadata,
-  DisputeMechanism,
   Extrinsic,
   HistoricalAccountBalance,
   HistoricalAsset,
@@ -30,6 +29,7 @@ import {
   decodeMarketMetadata,
   extrinsicFromEvent,
   formatAssetId,
+  formatDisputeMechanism,
   formatMarketStatus,
   formatScoringRule,
   rescale,
@@ -242,25 +242,12 @@ export const marketCreated = async (store: Store, event: Event) => {
     }
   }
 
-  let disputeMechanism;
-  switch (market.disputeMechanism.__kind) {
-    case 'Authorized':
-      disputeMechanism = DisputeMechanism.Authorized;
-      break;
-    case 'Court':
-      disputeMechanism = DisputeMechanism.Court;
-      break;
-    case 'SimpleDisputes':
-      disputeMechanism = DisputeMechanism.SimpleDisputes;
-      break;
-  }
-
   const newMarket = new Market({
     baseAsset: market.baseAsset ? formatAssetId(market.baseAsset) : _Asset.Ztg,
     creation: market.creation.__kind == 'Advised' ? MarketCreation.Advised : MarketCreation.Permissionless,
     creator: ss58.encode({ prefix: 73, bytes: market.creator }),
     creatorFee: +market.creatorFee.toString(),
-    disputeMechanism,
+    disputeMechanism: formatDisputeMechanism(market.disputeMechanism),
     earlyClose: false,
     id: event.id + '-' + marketId,
     liquidity: BigInt(0),
@@ -274,7 +261,7 @@ export const marketCreated = async (store: Store, event: Event) => {
     volume: BigInt(0),
   });
 
-  if (market.disputeMechanism.__kind === 'Authorized') {
+  if (market.disputeMechanism?.__kind === 'Authorized') {
     newMarket.authorizedAddress = market.disputeMechanism.value
       ? ss58.encode({ prefix: 73, bytes: market.disputeMechanism.value })
       : null;
