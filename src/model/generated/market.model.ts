@@ -99,10 +99,10 @@ export class Market {
     disputes!: (MarketReport | undefined | null)[] | undefined | null
 
     /**
-     * Can be `Authorized` or `Court` or `SimpleDisputes`
+     * Can be `Authorized`/`Court`/`SimpleDisputes` or undefined
      */
-    @Column_("varchar", {length: 14, nullable: false})
-    disputeMechanism!: DisputeMechanism
+    @Column_("varchar", {length: 14, nullable: true})
+    disputeMechanism!: DisputeMechanism | undefined | null
 
     /**
      * `True` if early closure is scheduled
