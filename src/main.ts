@@ -108,7 +108,10 @@ const handleBsrPostHooks = async (store: Store, blockHeight: number) => {
 };
 
 const handleMainPostHooks = async (store: Store, blockHeight: number) => {
-  if (blockHeight === 4793019) {
+  if (blockHeight === 0) {
+    const historicalAccountBalances = await postHooks.initBalance();
+    await storeBalanceChanges(historicalAccountBalances);
+  } else if (blockHeight === 4793019) {
     await postHooks.migrateScoringRule(store);
   }
 };
