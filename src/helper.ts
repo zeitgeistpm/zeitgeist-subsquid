@@ -187,40 +187,6 @@ export const getFees = async (block: Block, extrinsic: _Extrinsic): Promise<bigi
   return totalFees;
 };
 
-export const initBalance = async (acc: Account, store: Store) => {
-  const event = {
-    id: '0000000000-000000-b3cc3',
-    name: 'Balances.Initialised',
-    timestamp: '1970-01-01T00:00:00.000Z',
-  };
-  const sdk = await Tools.getSDK();
-  const blockZero = await sdk.api.rpc.chain.getBlockHash(0);
-  const {
-    data: { free: amt },
-  } = (await sdk.api.query.system.account.at(blockZero, acc.accountId)) as AccountInfo;
-
-  const ab = new AccountBalance({
-    account: acc,
-    assetId: _Asset.Ztg,
-    balance: amt.toBigInt(),
-    id: event.id + '-' + acc.accountId.slice(-5),
-  });
-  console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-  await store.save<AccountBalance>(ab);
-
-  const hab = new HistoricalAccountBalance({
-    accountId: acc.accountId,
-    assetId: _Asset.Ztg,
-    blockNumber: 0,
-    dBalance: amt.toBigInt(),
-    event: event.name.split('.')[1],
-    id: event.id + '-' + acc.accountId.slice(-5),
-    timestamp: new Date(event.timestamp),
-  });
-  console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
-  await store.save<HistoricalAccountBalance>(hab);
-};
-
 export const isBaseAsset = (assetId: Asset | string): boolean => {
   if (typeof assetId === 'string') {
     return assetId.includes('Ztg') || assetId.includes('foreignAsset');

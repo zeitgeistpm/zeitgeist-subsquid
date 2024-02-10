@@ -1,7 +1,7 @@
 import { Store } from '@subsquid/typeorm-store';
 import { Account, AccountBalance, HistoricalAccountBalance } from '../../model';
 import { _Asset } from '../../consts';
-import { extrinsicFromEvent, initBalance } from '../../helper';
+import { extrinsicFromEvent } from '../../helper';
 import { Event } from '../../processor';
 import {
   decodeBalanceSetEvent,
@@ -25,7 +25,6 @@ export const balanceSet = async (store: Store, event: Event) => {
     });
     console.log(`[${event.name}] Saving account: ${JSON.stringify(account, null, 2)}`);
     await store.save<Account>(account);
-    await initBalance(account, store);
   }
 
   const ab = await store.findOneBy(AccountBalance, {

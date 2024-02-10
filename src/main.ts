@@ -549,7 +549,6 @@ const saveAccounts = async (store: Store) => {
         });
         console.log(`Saving account: ${JSON.stringify(account, null, 2)}`);
         await store.save<Account>(account);
-        await initBalance(account, store);
       }
 
       await Promise.all(
