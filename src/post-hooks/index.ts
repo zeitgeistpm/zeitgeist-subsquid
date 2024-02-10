@@ -17,7 +17,7 @@ export interface ResolvedMarket {
 export interface PostHookBalance {
   accountId: string;
   amount: bigint;
-  blockHeight: number;
-  blockTimestamp: string;
-  eventId: string;
+  blockHeight?: number;
+  blockTimestamp?: string;
+  eventId?: string;
 }

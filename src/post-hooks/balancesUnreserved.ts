@@ -18,7 +18,7 @@ export const unreserveBalances = async (blockHeight: number): Promise<Historical
           dBalance: ub.amount,
           event: 'Unreserved',
           id: ub.eventId + '-' + ub.accountId.slice(-5),
-          timestamp: new Date(ub.blockTimestamp),
+          timestamp: new Date(ub.blockTimestamp!),
         });
         habs.push(hab);
       })
