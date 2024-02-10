@@ -12,7 +12,7 @@ import {
 import * as postHooks from './post-hooks';
 import { calls, events } from './types';
 import { Pallet } from './consts';
-import { initBalance, isBatteryStation, isEventOrderValid, isMainnet } from './helper';
+import { isBatteryStation, isEventOrderValid, isMainnet } from './helper';
 import { processor, Event } from './processor';
 
 const accounts = new Map<string, Map<string, bigint>>();
@@ -93,7 +93,10 @@ processor.run(new TypeormDatabase(), async (ctx) => {
 });
 
 const handleBsrPostHooks = async (store: Store, blockHeight: number) => {
-  if (blockHeight >= 35683 && blockHeight <= 211391) {
+  if (blockHeight === 0) {
+    const historicalAccountBalances = await postHooks.initBalance();
+    await storeBalanceChanges(historicalAccountBalances);
+  } else if (blockHeight >= 35683 && blockHeight <= 211391) {
     await saveAccounts(store);
     const historicalAccountBalances = await postHooks.unreserveBalances(blockHeight);
     await storeBalanceChanges(historicalAccountBalances);
