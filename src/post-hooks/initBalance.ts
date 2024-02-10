@@ -10,23 +10,23 @@ export const initBalance = async (): Promise<HistoricalAccountBalance[]> => {
     timestamp: '1970-01-01T00:00:00.000Z',
   };
 
-  let initialBalances: PostHookBalance[] = [];
+  let genesisBalances: PostHookBalance[] = [];
   if (isBatteryStation()) {
-    initialBalances = bsrInitialBalances;
+    genesisBalances = bsrGenesisBalances;
   } else if (isMainnet()) {
-    initialBalances = mainInitialBalances;
+    genesisBalances = mainGenesisBalances;
   }
 
   const habs: HistoricalAccountBalance[] = [];
   await Promise.all(
-    initialBalances.map(async (ib: PostHookBalance) => {
+    genesisBalances.map(async (gb: PostHookBalance) => {
       const hab = new HistoricalAccountBalance({
-        accountId: ib.accountId,
+        accountId: gb.accountId,
         assetId: _Asset.Ztg,
         blockNumber: 0,
-        dBalance: ib.amount,
+        dBalance: gb.amount,
         event: event.name.split('.')[1],
-        id: event.id + '-' + ib.accountId.slice(-5),
+        id: event.id + '-' + gb.accountId.slice(-5),
         timestamp: new Date(event.timestamp),
       });
       habs.push(hab);
@@ -35,7 +35,7 @@ export const initBalance = async (): Promise<HistoricalAccountBalance[]> => {
   return habs;
 };
 
-const bsrInitialBalances: PostHookBalance[] = [
+const bsrGenesisBalances: PostHookBalance[] = [
   {
     accountId: 'dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ',
     amount: BigInt(10 ** 8),
@@ -54,7 +54,7 @@ const bsrInitialBalances: PostHookBalance[] = [
   },
 ];
 
-const mainInitialBalances: PostHookBalance[] = [
+const mainGenesisBalances: PostHookBalance[] = [
   {
     accountId: 'dDykRtA8VyuVVtWTD5PWst3f33L1NMVKseQEji8e3B4ZCHrjK',
     amount: BigInt(100 * 10 ** 10),
