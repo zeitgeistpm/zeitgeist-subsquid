@@ -1,6 +1,6 @@
 import { HistoricalAccountBalance } from '../model';
 import { _Asset } from '../consts';
-import { UnreservedBalance } from '.';
+import { PostHookBalance } from '.';
 
 export const unreserveBalances = async (blockHeight: number): Promise<HistoricalAccountBalance[]> => {
   const habs: HistoricalAccountBalance[] = [];
@@ -10,7 +10,7 @@ export const unreserveBalances = async (blockHeight: number): Promise<Historical
       .filter((ub) => {
         return ub.blockHeight === blockHeight;
       })
-      .map(async (ub: UnreservedBalance) => {
+      .map(async (ub: PostHookBalance) => {
         const hab = new HistoricalAccountBalance({
           accountId: ub.accountId,
           assetId: _Asset.Ztg,
@@ -26,7 +26,7 @@ export const unreserveBalances = async (blockHeight: number): Promise<Historical
   return habs;
 };
 
-const unreservedBalances: UnreservedBalance[] = [
+const unreservedBalances: PostHookBalance[] = [
   {
     accountId: 'dDzCbtpYLKGKgV3xmuAbQdGNs6puwev2ZpbVP1L5VYSd2uF1Y',
     amount: BigInt(5 * 10 ** 10),

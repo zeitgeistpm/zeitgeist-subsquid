@@ -13,7 +13,7 @@ export interface ResolvedMarket {
   resolvedOutcome: string;
 }
 
-export interface UnreservedBalance {
+export interface PostHookBalance {
   accountId: string;
   amount: bigint;
   blockHeight: number;
