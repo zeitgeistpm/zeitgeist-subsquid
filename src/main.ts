@@ -69,7 +69,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           await mapPredictionMarkets(ctx.store, event);
           break;
         case Pallet.Styx:
-          await mapStyx(ctx.store, event);
+          await mapStyx(event);
           break;
         case Pallet.Swaps:
           await mapSwaps(ctx.store, event);
@@ -365,10 +365,11 @@ const mapPredictionMarkets = async (store: Store, event: Event) => {
   }
 };
 
-const mapStyx = async (store: Store, event: Event) => {
+const mapStyx = async (event: Event) => {
   switch (event.name) {
     case events.styx.accountCrossed.name:
-      await mappings.styx.accountCrossed(store, event);
+      const hab = await mappings.styx.accountCrossed(event);
+      await storeBalanceChanges([hab]);
       break;
   }
 };
