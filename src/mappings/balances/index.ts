@@ -22,11 +22,13 @@ export const balanceSet = async (store: Store, event: Event): Promise<Historical
     assetId: _Asset.Ztg,
   });
   const oldBalance = ab ? ab.balance : BigInt(0);
+  const newBalance = amount;
+
   const hab = new HistoricalAccountBalance({
     accountId,
     assetId: _Asset.Ztg,
     blockNumber: event.block.height,
-    dBalance: amount - oldBalance,
+    dBalance: newBalance - oldBalance,
     event: event.name.split('.')[1],
     extrinsic: extrinsicFromEvent(event),
     id: event.id + '-' + accountId.slice(-5),
