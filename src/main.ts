@@ -501,10 +501,6 @@ const mapSystem = async (store: Store, event: Event) => {
       await storeBalanceChanges([hab]);
       break;
     }
-    case events.system.newAccount.name: {
-      await mappings.system.newAccount(store, event);
-      break;
-    }
   }
 };
 
