@@ -535,6 +535,7 @@ const mapTokens = async (store: Store, event: Event) => {
 };
 
 const saveAccounts = async (store: Store) => {
+  const accountBalances: AccountBalance[] = [];
   await Promise.all(
     Array.from(accounts).map(async ([accountId, balances]) => {
       let account = await store.get(Account, { where: { accountId } });
@@ -562,12 +563,15 @@ const saveAccounts = async (store: Store) => {
             });
           }
           ab.balance += amount;
-          console.log(`Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-          await store.save<AccountBalance>(ab);
+          accountBalances.push(ab);
         })
       );
     })
   );
+  if (accountBalances.length > 0) {
+    console.log(`Saving account balances: ${JSON.stringify(accountBalances, null, 2)}`);
+    await store.save<AccountBalance>(accountBalances);
+  }
   accounts.clear();
 };
 
