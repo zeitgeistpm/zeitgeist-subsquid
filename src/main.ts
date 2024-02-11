@@ -141,7 +141,8 @@ const mapBalances = async (store: Store, event: Event) => {
   switch (event.name) {
     case events.balances.balanceSet.name: {
       await saveAccounts(store);
-      await mappings.balances.balanceSet(store, event);
+      const hab = await mappings.balances.balanceSet(store, event);
+      await storeBalanceChanges([hab]);
       break;
     }
     case events.balances.deposit.name: {
