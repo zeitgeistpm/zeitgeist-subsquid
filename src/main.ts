@@ -75,7 +75,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           await mapSwaps(ctx.store, event);
           break;
         case Pallet.System:
-          await mapSystem(ctx.store, event);
+          await mapSystem(event);
           break;
         case Pallet.Tokens:
           await mapTokens(ctx.store, event);
@@ -489,7 +489,7 @@ const mapSwaps = async (store: Store, event: Event) => {
   }
 };
 
-const mapSystem = async (store: Store, event: Event) => {
+const mapSystem = async (event: Event) => {
   switch (event.name) {
     case events.system.extrinsicFailed.name: {
       const hab = await mappings.system.extrinsicFailed(event);
