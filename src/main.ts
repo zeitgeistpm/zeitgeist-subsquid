@@ -69,13 +69,13 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           await mapPredictionMarkets(ctx.store, event);
           break;
         case Pallet.Styx:
-          await mapStyx(ctx.store, event);
+          await mapStyx(event);
           break;
         case Pallet.Swaps:
           await mapSwaps(ctx.store, event);
           break;
         case Pallet.System:
-          await mapSystem(ctx.store, event);
+          await mapSystem(event);
           break;
         case Pallet.Tokens:
           await mapTokens(ctx.store, event);
@@ -141,7 +141,8 @@ const mapBalances = async (store: Store, event: Event) => {
   switch (event.name) {
     case events.balances.balanceSet.name: {
       await saveAccounts(store);
-      await mappings.balances.balanceSet(store, event);
+      const hab = await mappings.balances.balanceSet(store, event);
+      await storeBalanceChanges([hab]);
       break;
     }
     case events.balances.deposit.name: {
@@ -364,10 +365,11 @@ const mapPredictionMarkets = async (store: Store, event: Event) => {
   }
 };
 
-const mapStyx = async (store: Store, event: Event) => {
+const mapStyx = async (event: Event) => {
   switch (event.name) {
     case events.styx.accountCrossed.name:
-      await mappings.styx.accountCrossed(store, event);
+      const hab = await mappings.styx.accountCrossed(event);
+      await storeBalanceChanges([hab]);
       break;
   }
 };
@@ -487,7 +489,7 @@ const mapSwaps = async (store: Store, event: Event) => {
   }
 };
 
-const mapSystem = async (store: Store, event: Event) => {
+const mapSystem = async (event: Event) => {
   switch (event.name) {
     case events.system.extrinsicFailed.name: {
       const hab = await mappings.system.extrinsicFailed(event);
@@ -499,10 +501,6 @@ const mapSystem = async (store: Store, event: Event) => {
       const hab = await mappings.system.extrinsicSuccess(event);
       if (!hab) break;
       await storeBalanceChanges([hab]);
-      break;
-    }
-    case events.system.newAccount.name: {
-      await mappings.system.newAccount(store, event);
       break;
     }
   }
@@ -539,6 +537,7 @@ const mapTokens = async (store: Store, event: Event) => {
 };
 
 const saveAccounts = async (store: Store) => {
+  const accountBalances: AccountBalance[] = [];
   await Promise.all(
     Array.from(accounts).map(async ([accountId, balances]) => {
       let account = await store.get(Account, { where: { accountId } });
@@ -566,12 +565,15 @@ const saveAccounts = async (store: Store) => {
             });
           }
           ab.balance += amount;
-          console.log(`Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-          await store.save<AccountBalance>(ab);
+          accountBalances.push(ab);
         })
       );
     })
   );
+  if (accountBalances.length > 0) {
+    console.log(`Saving account balances: ${JSON.stringify(accountBalances, null, 2)}`);
+    await store.save<AccountBalance>(accountBalances);
+  }
   accounts.clear();
 };
 

@@ -81,7 +81,7 @@
       ]
     },
     "System": {
-      "events": ["ExtrinsicFailed", "ExtrinsicSuccess", "NewAccount"]
+      "events": ["ExtrinsicFailed", "ExtrinsicSuccess"]
     },
     "Tokens": {
       "events": ["BalanceSet", "Deposited", "Reserved", "Transfer", "Withdrawn"]

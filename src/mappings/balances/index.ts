@@ -1,5 +1,5 @@
 import { Store } from '@subsquid/typeorm-store';
-import { Account, AccountBalance, HistoricalAccountBalance } from '../../model';
+import { AccountBalance, HistoricalAccountBalance } from '../../model';
 import { _Asset } from '../../consts';
 import { extrinsicFromEvent } from '../../helper';
 import { Event } from '../../processor';
@@ -14,41 +14,27 @@ import {
   decodeWithdrawEvent,
 } from './decode';
 
-export const balanceSet = async (store: Store, event: Event) => {
+export const balanceSet = async (store: Store, event: Event): Promise<HistoricalAccountBalance> => {
   const { accountId, amount } = decodeBalanceSetEvent(event);
-
-  let account = await store.get(Account, { where: { accountId } });
-  if (!account) {
-    account = new Account({
-      accountId,
-      id: accountId,
-    });
-    console.log(`[${event.name}] Saving account: ${JSON.stringify(account, null, 2)}`);
-    await store.save<Account>(account);
-  }
 
   const ab = await store.findOneBy(AccountBalance, {
     account: { accountId },
     assetId: _Asset.Ztg,
   });
-  if (!ab) return;
-  const oldBalance = ab.balance;
-  ab.balance = amount;
-  console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-  await store.save<AccountBalance>(ab);
+  const oldBalance = ab ? ab.balance : BigInt(0);
+  const newBalance = amount;
 
   const hab = new HistoricalAccountBalance({
     accountId,
     assetId: _Asset.Ztg,
     blockNumber: event.block.height,
-    dBalance: ab.balance - oldBalance,
+    dBalance: newBalance - oldBalance,
     event: event.name.split('.')[1],
     extrinsic: extrinsicFromEvent(event),
     id: event.id + '-' + accountId.slice(-5),
     timestamp: new Date(event.block.timestamp!),
   });
-  console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
-  await store.save<HistoricalAccountBalance>(hab);
+  return hab;
 };
 
 export const deposit = async (event: Event): Promise<HistoricalAccountBalance> => {

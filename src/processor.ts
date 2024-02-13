@@ -68,7 +68,6 @@ export const processor = new SubstrateBatchProcessor()
       events.swaps.poolExitWithExactAssetAmount.name,
       events.swaps.poolJoin.name,
       events.swaps.poolJoinWithExactAssetAmount.name,
-      events.system.newAccount.name,
       events.tokens.balanceSet.name,
       events.tokens.deposited.name,
       events.tokens.reserved.name,

@@ -112,23 +112,3 @@ export const extrinsicFailed =  {
         })
     ),
 }
-
-export const newAccount =  {
-    name: 'System.NewAccount',
-    /**
-     *  A new \[account\] was created.
-     */
-    v23: new EventType(
-        'System.NewAccount',
-        v23.AccountId
-    ),
-    /**
-     * A new account was created.
-     */
-    v34: new EventType(
-        'System.NewAccount',
-        sts.struct({
-            account: v34.AccountId32,
-        })
-    ),
-}
