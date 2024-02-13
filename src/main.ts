@@ -100,7 +100,7 @@ const handleBsrPostHooks = async (store: Store, blockHeight: number) => {
     await saveAccounts(store);
     const historicalAccountBalances = await postHooks.unreserveBalances(blockHeight);
     await storeBalanceChanges(historicalAccountBalances);
-    const res = await postHooks.resolveMarkets(store, blockHeight);
+    const res = await postHooks.resolveMarket(store, blockHeight);
     await storeBalanceChanges(res.historicalAccountBalances);
     assetHistory.push(...res.historicalAssets);
     marketHistory.push(...res.historicalMarkets);

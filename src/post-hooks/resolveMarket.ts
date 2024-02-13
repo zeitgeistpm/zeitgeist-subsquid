@@ -11,7 +11,7 @@ import {
 } from '../model';
 import { ResolvedMarket } from '.';
 
-export const resolveMarkets = async (
+export const resolveMarket = async (
   store: Store,
   blockHeight: number
 ): Promise<{
@@ -19,7 +19,6 @@ export const resolveMarkets = async (
   historicalAssets: HistoricalAsset[];
   historicalMarkets: HistoricalMarket[];
 }> => {
-  const eventName = 'PostHooks.MarketResolved';
   const historicalAccountBalances: HistoricalAccountBalance[] = [];
   const historicalAssets: HistoricalAsset[] = [];
   const historicalMarkets: HistoricalMarket[] = [];
@@ -52,7 +51,7 @@ export const resolveMarkets = async (
                   assetId: ab.assetId,
                   blockNumber: rm.blockHeight,
                   dBalance: -ab.balance,
-                  event: eventName.split('.')[1],
+                  event: MarketEvent.MarketResolved,
                   id: rm.eventId + '-' + market.marketId + i + '-' + ab.account.accountId.slice(-5),
                   timestamp: new Date(rm.blockTimestamp),
                 });
@@ -83,7 +82,7 @@ export const resolveMarkets = async (
             }
             asset.price = newPrice;
             asset.amountInPool = newAssetQty;
-            console.log(`[${eventName}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
+            console.log(`[PostHooks.MarketResolved] Saving asset: ${JSON.stringify(asset, null, 2)}`);
             await store.save<Asset>(asset);
 
             newLiquidity += BigInt(Math.round(asset.price * +asset.amountInPool.toString()));
@@ -94,7 +93,7 @@ export const resolveMarkets = async (
               blockNumber: rm.blockHeight,
               dAmountInPool: newAssetQty - oldAssetQty,
               dPrice: newPrice - oldPrice,
-              event: eventName.split('.')[1],
+              event: MarketEvent.MarketResolved,
               id: rm.eventId + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
               newAmountInPool: newAssetQty,
               newPrice: newPrice,
@@ -106,7 +105,7 @@ export const resolveMarkets = async (
 
         market.liquidity = newLiquidity;
         market.status = MarketStatus.Resolved;
-        console.log(`[${eventName}] Saving market: ${JSON.stringify(market, null, 2)}`);
+        console.log(`[PostHooks.MarketResolved] Saving market: ${JSON.stringify(market, null, 2)}`);
         await store.save<Market>(market);
 
         const hm = new HistoricalMarket({
