@@ -1,7 +1,6 @@
 import { Store } from '@subsquid/typeorm-store';
 import * as ss58 from '@subsquid/ss58';
 import { util } from '@zeitgeistpm/sdk';
-import { Like } from 'typeorm';
 import {
   Account,
   AccountBalance,
