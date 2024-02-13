@@ -344,7 +344,11 @@ const mapPredictionMarkets = async (store: Store, event: Event) => {
     }
     case events.predictionMarkets.marketResolved.name: {
       await saveAccounts(store);
-      await mappings.predictionMarkets.marketResolved(store, event);
+      const res = await mappings.predictionMarkets.marketResolved(store, event);
+      if (!res) break;
+      await storeBalanceChanges(res.historicalAccountBalances);
+      assetHistory.push(...res.historicalAssets);
+      marketHistory.push(res.historicalMarket);
       break;
     }
     case events.predictionMarkets.marketStartedWithSubsidy.name: {
