@@ -100,8 +100,10 @@ const handleBsrPostHooks = async (store: Store, blockHeight: number) => {
     await saveAccounts(store);
     const historicalAccountBalances = await postHooks.unreserveBalances(blockHeight);
     await storeBalanceChanges(historicalAccountBalances);
-    const historicalAssets = await postHooks.resolveMarkets(store, blockHeight);
-    assetHistory.push(...historicalAssets);
+    const res = await postHooks.resolveMarket(store, blockHeight);
+    await storeBalanceChanges(res.historicalAccountBalances);
+    assetHistory.push(...res.historicalAssets);
+    marketHistory.push(...res.historicalMarkets);
   } else if (blockHeight === 579750) {
     await saveAccounts(store);
     await postHooks.destroyMarkets(store);
@@ -344,7 +346,11 @@ const mapPredictionMarkets = async (store: Store, event: Event) => {
     }
     case events.predictionMarkets.marketResolved.name: {
       await saveAccounts(store);
-      await mappings.predictionMarkets.marketResolved(store, event);
+      const res = await mappings.predictionMarkets.marketResolved(store, event);
+      if (!res) break;
+      await storeBalanceChanges(res.historicalAccountBalances);
+      assetHistory.push(...res.historicalAssets);
+      marketHistory.push(res.historicalMarket);
       break;
     }
     case events.predictionMarkets.marketStartedWithSubsidy.name: {

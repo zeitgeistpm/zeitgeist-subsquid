@@ -217,10 +217,6 @@ export const mergeByAssetId = (balances: any[], weights: any[]): AssetAmountInPo
     ...weights.find((w) => w['_assetId'].toString() == b['assetId'].toString() && w),
   }));
 
-export const rescale = (value: string): string => {
-  return (BigInt(value) * BigInt(10 ** 10)).toString();
-};
-
 interface AssetAmountInPoolAndWeight {
   assetId: string;
   balance: bigint;
