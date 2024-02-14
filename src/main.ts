@@ -579,10 +579,14 @@ const saveAccounts = async (store: Store) => {
       );
     })
   );
-  console.log(`Saving account balances: ${JSON.stringify(balancesToBeSaved, null, 2)}`);
-  await store.save<AccountBalance>(balancesToBeSaved);
-  console.log(`Removing account balances: ${JSON.stringify(balancesToBeRemoved, null, 2)}`);
-  await store.remove<AccountBalance>(balancesToBeRemoved);
+  if (balancesToBeSaved.length > 0) {
+    console.log(`Saving account balances: ${JSON.stringify(balancesToBeSaved, null, 2)}`);
+    await store.save<AccountBalance>(balancesToBeSaved);
+  }
+  if (balancesToBeRemoved.length > 0) {
+    console.log(`Removing account balances: ${JSON.stringify(balancesToBeRemoved, null, 2)}`);
+    await store.remove<AccountBalance>(balancesToBeRemoved);
+  }
   accounts.clear();
 };
 
