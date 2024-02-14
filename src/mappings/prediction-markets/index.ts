@@ -31,7 +31,6 @@ import {
   formatDisputeMechanism,
   formatMarketStatus,
   formatScoringRule,
-  rescale,
 } from '../../helper';
 import { Call, Event } from '../../processor';
 import { decodeMarketsStorage } from '../market-commons/decode';
@@ -54,7 +53,7 @@ import {
   decodeSoldCompleteSetEvent,
   decodeTokensRedeemedEvent,
 } from './decode';
-import { mapMarketPeriod } from './helper';
+import { mapMarketPeriod, scaleUp } from './helper';
 
 export const boughtCompleteSet = async (
   store: Store,
@@ -323,12 +322,12 @@ export const marketCreated = async (store: Store, event: Event) => {
     marketType.scalar = [];
     if (event.block.specVersion < 41) {
       if (type.value.start) {
-        marketType.scalar.push(rescale(type.value.start.toString()));
-        marketType.scalar.push(rescale(type.value.end.toString()));
+        marketType.scalar.push(scaleUp(type.value.start.toString()));
+        marketType.scalar.push(scaleUp(type.value.end.toString()));
       } else {
         const [start, end] = type.value.toString().split(`,`);
-        marketType.scalar.push(rescale(start));
-        marketType.scalar.push(rescale(end));
+        marketType.scalar.push(scaleUp(start));
+        marketType.scalar.push(scaleUp(end));
       }
     } else {
       marketType.scalar.push(type.value.start.toString());
@@ -693,7 +692,7 @@ export const marketResolved = async (
 
   market.resolvedOutcome =
     market.marketType.scalar && event.block.specVersion < 41
-      ? rescale(report.value.toString())
+      ? scaleUp(report.value.toString())
       : report.value.toString();
   market.status = MarketStatus.Resolved;
   if (market.bonds) {

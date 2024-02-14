@@ -26,3 +26,7 @@ export const mapMarketPeriod = async (p: _MarketPeriod): Promise<MarketPeriod> =
   }
   return period;
 };
+
+export const scaleUp = (value: string): string => {
+  return (BigInt(value) * BigInt(10 ** 10)).toString();
+};
