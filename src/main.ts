@@ -543,6 +543,7 @@ const mapTokens = async (store: Store, event: Event) => {
 };
 
 const saveAccounts = async (store: Store) => {
+  const accountsToBeSaved: Account[] = [];
   const balancesToBeSaved: AccountBalance[] = [];
   const balancesToBeRemoved: AccountBalance[] = [];
 
@@ -554,8 +555,7 @@ const saveAccounts = async (store: Store) => {
           accountId,
           id: accountId,
         });
-        console.log(`Saving account: ${JSON.stringify(account, null, 2)}`);
-        await store.save<Account>(account);
+        accountsToBeSaved.push(account);
       }
 
       await Promise.all(
@@ -579,6 +579,10 @@ const saveAccounts = async (store: Store) => {
       );
     })
   );
+  if (accountsToBeSaved.length > 0) {
+    console.log(`Saving accounts: ${JSON.stringify(accountsToBeSaved, null, 2)}`);
+    await store.save<Account>(accountsToBeSaved);
+  }
   if (balancesToBeSaved.length > 0) {
     console.log(`Saving account balances: ${JSON.stringify(balancesToBeSaved, null, 2)}`);
     await store.save<AccountBalance>(balancesToBeSaved);
