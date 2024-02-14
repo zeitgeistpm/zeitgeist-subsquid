@@ -710,6 +710,9 @@ export const marketResolved = async (
 
   await Promise.all(
     market.outcomeAssets.map(async (outcomeAsset, i) => {
+      // Outcome assets are only destroyed for categorical markets
+      // On specVersion:40, node halted destruction on-chain
+      // Only losing asset is removed from the user account
       if (market.marketType.categorical && event.block.specVersion < 40 && i !== +market.resolvedOutcome!) {
         const abs = await store.find(AccountBalance, {
           where: { assetId: outcomeAsset },
@@ -732,7 +735,7 @@ export const marketResolved = async (
       }
 
       const asset = await store.get(Asset, {
-        where: { assetId: market.outcomeAssets[i] },
+        where: { assetId: outcomeAsset },
       });
       if (!asset) return;
       const oldPrice = asset.price;
@@ -750,6 +753,7 @@ export const marketResolved = async (
         }
       } else {
         newPrice = i == +market.resolvedOutcome! ? 1 : 0;
+        // On specVersion:40, node halted destruction on-chain
         if (event.block.specVersion < 40) {
           newAssetQty = i == +market.resolvedOutcome! ? oldAssetQty : BigInt(0);
         }
