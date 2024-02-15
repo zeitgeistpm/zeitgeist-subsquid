@@ -543,7 +543,10 @@ const mapTokens = async (store: Store, event: Event) => {
 };
 
 const saveAccounts = async (store: Store) => {
-  const accountBalances: AccountBalance[] = [];
+  const accountsToBeSaved: Account[] = [];
+  const balancesToBeSaved: AccountBalance[] = [];
+  const balancesToBeRemoved: AccountBalance[] = [];
+
   await Promise.all(
     Array.from(accounts).map(async ([accountId, balances]) => {
       let account = await store.get(Account, { where: { accountId } });
@@ -552,8 +555,7 @@ const saveAccounts = async (store: Store) => {
           accountId,
           id: accountId,
         });
-        console.log(`Saving account: ${JSON.stringify(account, null, 2)}`);
-        await store.save<Account>(account);
+        accountsToBeSaved.push(account);
       }
 
       await Promise.all(
@@ -571,14 +573,23 @@ const saveAccounts = async (store: Store) => {
             });
           }
           ab.balance += amount;
-          accountBalances.push(ab);
+          if (ab.balance === BigInt(0)) balancesToBeRemoved.push(ab);
+          else balancesToBeSaved.push(ab);
         })
       );
     })
   );
-  if (accountBalances.length > 0) {
-    console.log(`Saving account balances: ${JSON.stringify(accountBalances, null, 2)}`);
-    await store.save<AccountBalance>(accountBalances);
+  if (accountsToBeSaved.length > 0) {
+    console.log(`Saving accounts: ${JSON.stringify(accountsToBeSaved, null, 2)}`);
+    await store.save<Account>(accountsToBeSaved);
+  }
+  if (balancesToBeSaved.length > 0) {
+    console.log(`Saving account balances: ${JSON.stringify(balancesToBeSaved, null, 2)}`);
+    await store.save<AccountBalance>(balancesToBeSaved);
+  }
+  if (balancesToBeRemoved.length > 0) {
+    console.log(`Removing account balances: ${JSON.stringify(balancesToBeRemoved, null, 2)}`);
+    await store.remove<AccountBalance>(balancesToBeRemoved);
   }
   accounts.clear();
 };
