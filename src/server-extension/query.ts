@@ -163,7 +163,7 @@ export const marketInfo = (marketId: number) => `
     historical_market hm ON hm.market_id = m.id
   WHERE
     m.market_id = ${marketId}
-    AND hm.event ~ '(Pool|Resolved)'
+    AND hm.event ~ '(Created|Resolved)'
   GROUP BY
     m.outcome_assets,
     hm.timestamp;
