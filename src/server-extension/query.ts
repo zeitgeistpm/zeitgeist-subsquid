@@ -73,18 +73,20 @@ export const liquidityHistory = () => `
     date ASC;
 `;
 
-export const marketParticipants = (ids: number[]) => `
+export const marketInfo = (marketId: number) => `
   SELECT
-    m.market_id,
-    COALESCE(COUNT(DISTINCT ha.account_id), 0) AS participants
+    hm.timestamp,
+    m.outcome_assets
   FROM
     market m
-  LEFT JOIN
-    historical_asset ha ON ha.asset_id = ANY (m.outcome_assets)
+  JOIN
+    historical_market hm ON hm.market_id = m.id
   WHERE
-    m.market_id IN (${ids})
+    m.market_id = ${marketId}
+    AND hm.event ~ '(Created|Resolved)'
   GROUP BY
-    m.market_id;
+    m.outcome_assets,
+    hm.timestamp;
 `;
 
 export const marketLiquidity = (ids: number[]) => `
@@ -123,52 +125,6 @@ export const marketLiquidity = (ids: number[]) => `
   SELECT * FROM t4;
 `;
 
-export const marketTraders = (ids: number[]) => `
-  SELECT
-    m.market_id,
-    COALESCE(COUNT(DISTINCT hs.account_id), 0) AS traders
-  FROM
-    market m
-  LEFT JOIN
-    historical_swap hs ON
-    hs.asset_in LIKE '%'||'['||(m.market_id)::text||','||'%' OR
-    hs.asset_out LIKE '%'||'['||(m.market_id)::text||','||'%'
-  WHERE
-    m.market_id IN (${ids})
-  GROUP BY
-    m.market_id;
-`;
-
-export const marketVolume = (ids: number[], prices: Map<BaseAsset, number>) => `
-  SELECT
-    market_id,
-    CASE
-      WHEN base_asset = 'Ztg' THEN ROUND(volume * ${prices.get(BaseAsset.ZTG)}, 0)
-      WHEN base_asset = '{\"foreignAsset\":0}' THEN ROUND(volume * ${prices.get(BaseAsset.DOT)}, 0)
-      ELSE volume
-    END AS volume
-  FROM
-    market
-  WHERE
-    market_id IN (${ids});
-`;
-
-export const marketInfo = (marketId: number) => `
-  SELECT
-    hm.timestamp,
-    m.outcome_assets
-  FROM
-    market m
-  JOIN
-    historical_market hm ON hm.market_id = m.id
-  WHERE
-    m.market_id = ${marketId}
-    AND hm.event ~ '(Created|Resolved)'
-  GROUP BY
-    m.outcome_assets,
-    hm.timestamp;
-`;
-
 export const marketMetadata = (ids: number[]) => `
   SELECT
     m.market_id,
@@ -177,6 +133,20 @@ export const marketMetadata = (ids: number[]) => `
     market m
   WHERE
     m.market_id IN (${ids});
+`;
+
+export const marketParticipants = (ids: number[]) => `
+  SELECT
+    m.market_id,
+    COALESCE(COUNT(DISTINCT ha.account_id), 0) AS participants
+  FROM
+    market m
+  LEFT JOIN
+    historical_asset ha ON ha.asset_id = ANY (m.outcome_assets)
+  WHERE
+    m.market_id IN (${ids})
+  GROUP BY
+    m.market_id;
 `;
 
 export const marketStatsWithOrder = (
@@ -215,6 +185,36 @@ export const marketStatsWithOrder = (
     ${limit}
   OFFSET 
     ${offset};
+`;
+
+export const marketTraders = (ids: number[]) => `
+  SELECT
+    m.market_id,
+    COALESCE(COUNT(DISTINCT hs.account_id), 0) AS traders
+  FROM
+    market m
+  LEFT JOIN
+    historical_swap hs ON
+    hs.asset_in LIKE '%'||'['||(m.market_id)::text||','||'%' OR
+    hs.asset_out LIKE '%'||'['||(m.market_id)::text||','||'%'
+  WHERE
+    m.market_id IN (${ids})
+  GROUP BY
+    m.market_id;
+`;
+
+export const marketVolume = (ids: number[], prices: Map<BaseAsset, number>) => `
+  SELECT
+    market_id,
+    CASE
+      WHEN base_asset = 'Ztg' THEN ROUND(volume * ${prices.get(BaseAsset.ZTG)}, 0)
+      WHEN base_asset = '{\"foreignAsset\":0}' THEN ROUND(volume * ${prices.get(BaseAsset.DOT)}, 0)
+      ELSE volume
+    END AS volume
+  FROM
+    market
+  WHERE
+    market_id IN (${ids});
 `;
 
 export const totalLiquidityAndVolume = () => `
