@@ -481,7 +481,7 @@ export const marketDisputed = async (store: Store, event: Event) => {
 
   const hm = new HistoricalMarket({
     blockNumber: event.block.height,
-    by: accountId,
+    by: accountId || market.bonds?.dispute?.who,
     dLiquidity: BigInt(0),
     dVolume: BigInt(0),
     event: MarketEvent.MarketDisputed,
