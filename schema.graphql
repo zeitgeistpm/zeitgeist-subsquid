@@ -110,7 +110,7 @@ type HistoricalSwap @entity {
   "Units of asset user bought"
   assetAmountOut: BigInt!
   "Event method which initiated this swap"
-  event: SwapEvent!
+  event: String!
   "External fees occuring out of trade"
   externalFeeAmount: BigInt
   "Extrinsic responsible for this change"

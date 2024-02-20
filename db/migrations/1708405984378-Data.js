@@ -1,5 +1,5 @@
-module.exports = class Data1707058326586 {
-    name = 'Data1707058326586'
+module.exports = class Data1708405984378 {
+    name = 'Data1708405984378'
 
     async up(db) {
         await db.query(`CREATE TABLE "account_balance" ("asset_id" text NOT NULL, "balance" numeric NOT NULL, "id" character varying NOT NULL, "account_id" character varying, CONSTRAINT "PK_bd893045760f719e24a95a42562" PRIMARY KEY ("id"))`)
@@ -28,7 +28,7 @@ module.exports = class Data1707058326586 {
         await db.query(`CREATE TABLE "historical_asset" ("id" character varying NOT NULL, "account_id" text, "asset_id" text NOT NULL, "d_price" numeric, "d_amount_in_pool" numeric, "new_price" numeric, "new_amount_in_pool" numeric, "event" text NOT NULL, "block_number" integer NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_24bfbff0fb73bae4960d7301293" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_a80a99f03b440bfec08b2926d6" ON "historical_asset" ("account_id") `)
         await db.query(`CREATE INDEX "IDX_d9ec182f218dc183716b8807cf" ON "historical_asset" ("asset_id") `)
-        await db.query(`CREATE TABLE "historical_swap" ("id" character varying NOT NULL, "account_id" text NOT NULL, "asset_in" text NOT NULL, "asset_out" text NOT NULL, "asset_amount_in" numeric NOT NULL, "asset_amount_out" numeric NOT NULL, "event" character varying(18) NOT NULL, "external_fee_amount" numeric, "extrinsic" jsonb, "block_number" integer NOT NULL, "swap_fee_amount" numeric, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_fae24759f3f207b19d75d63314f" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "historical_swap" ("id" character varying NOT NULL, "account_id" text NOT NULL, "asset_in" text NOT NULL, "asset_out" text NOT NULL, "asset_amount_in" numeric NOT NULL, "asset_amount_out" numeric NOT NULL, "event" text NOT NULL, "external_fee_amount" numeric, "extrinsic" jsonb, "block_number" integer NOT NULL, "swap_fee_amount" numeric, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_fae24759f3f207b19d75d63314f" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_275903cccb306ca3529eb5bedf" ON "historical_swap" ("account_id") `)
         await db.query(`CREATE TABLE "historical_market" ("id" character varying NOT NULL, "block_number" integer NOT NULL, "by" text, "d_liquidity" numeric NOT NULL, "d_volume" numeric NOT NULL, "event" character varying(25) NOT NULL, "liquidity" numeric NOT NULL, "outcome" jsonb, "resolved_outcome" text, "status" character varying(19) NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "volume" numeric NOT NULL, "market_id" character varying, CONSTRAINT "PK_8b5b3dfdac79a88102b94d55498" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_37393fa690692f119c5473d515" ON "historical_market" ("market_id") `)
