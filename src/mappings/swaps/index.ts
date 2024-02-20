@@ -15,10 +15,9 @@ import {
   MarketEvent,
   Pool,
   PoolStatus,
-  SwapEvent,
   Weight,
 } from '../../model';
-import { Pallet, SWAP_EXACT_AMOUNT_IN, SWAP_EXACT_AMOUNT_OUT } from '../../consts';
+import { Pallet, SWAP_EXACT_AMOUNT_IN, SWAP_EXACT_AMOUNT_OUT, SwapEvent } from '../../consts';
 import { computeSwapSpotPrice, extrinsicFromEvent, formatAssetId, isBaseAsset, mergeByAssetId } from '../../helper';
 import { Call, Event } from '../../processor';
 import { Tools } from '../../util';

@@ -47,6 +47,13 @@ export enum Pallet {
   Tokens = 'Tokens',
 }
 
+export enum SwapEvent {
+  BuyExecuted = 'BuyExecuted',
+  SellExecuted = 'SellExecuted',
+  SwapExactAmountIn = 'SwapExactAmountIn',
+  SwapExactAmountOut = 'SwapExactAmountOut',
+}
+
 export enum TargetAsset {
   USD = 'usd',
 }

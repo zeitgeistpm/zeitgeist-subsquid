@@ -9,8 +9,8 @@ import {
   Market,
   MarketEvent,
   NeoPool,
-  SwapEvent,
 } from '../../model';
+import { SwapEvent } from '../../consts';
 import { computeNeoSwapSpotPrice, extrinsicFromEvent, isBaseAsset } from '../../helper';
 import { Event } from '../../processor';
 import {
