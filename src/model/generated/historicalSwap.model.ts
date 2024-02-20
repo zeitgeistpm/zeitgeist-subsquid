@@ -1,6 +1,5 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_} from "typeorm"
 import * as marshal from "./marshal"
-import {SwapEvent} from "./_swapEvent"
 import {Extrinsic} from "./_extrinsic"
 
 /**
@@ -52,8 +51,8 @@ export class HistoricalSwap {
     /**
      * Event method which initiated this swap
      */
-    @Column_("varchar", {length: 18, nullable: false})
-    event!: SwapEvent
+    @Column_("text", {nullable: false})
+    event!: string
 
     /**
      * External fees occuring out of trade
