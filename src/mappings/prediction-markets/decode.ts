@@ -125,7 +125,7 @@ export const decodeMarketDisputedEvent = (event: Event): MarketDisputedEvent => 
   }
   return {
     marketId: Number(marketId),
-    accountId,
+    accountId: accountId ? ss58.encode({ prefix: 73, bytes: accountId }) : undefined,
     outcome,
   };
 };

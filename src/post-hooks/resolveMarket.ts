@@ -1,7 +1,5 @@
 import { Store } from '@subsquid/typeorm-store';
-import { Like } from 'typeorm';
 import {
-  Account,
   AccountBalance,
   Asset,
   HistoricalAccountBalance,
@@ -13,9 +11,17 @@ import {
 } from '../model';
 import { ResolvedMarket } from '.';
 
-export const resolveMarkets = async (store: Store, blockHeight: number): Promise<HistoricalAsset[]> => {
-  const eventName = 'PostHooks.MarketResolved';
+export const resolveMarket = async (
+  store: Store,
+  blockHeight: number
+): Promise<{
+  historicalAccountBalances: HistoricalAccountBalance[];
+  historicalAssets: HistoricalAsset[];
+  historicalMarkets: HistoricalMarket[];
+}> => {
+  const historicalAccountBalances: HistoricalAccountBalance[] = [];
   const historicalAssets: HistoricalAsset[] = [];
+  const historicalMarkets: HistoricalMarket[] = [];
 
   await Promise.all(
     resolvedMarkets
@@ -29,36 +35,27 @@ export const resolveMarkets = async (store: Store, blockHeight: number): Promise
         market.resolvedOutcome = rm.resolvedOutcome;
         const oldLiquidity = market.liquidity;
         let newLiquidity = BigInt(0);
-        
+
         await Promise.all(
           market.outcomeAssets.map(async (outcomeAsset, i) => {
             if (market.marketType.categorical && i !== +market.resolvedOutcome!) {
               let abs = await store.find(AccountBalance, {
-                where: { assetId: outcomeAsset! },
+                where: { assetId: outcomeAsset },
+                relations: { account: true },
               });
               abs.map(async (ab) => {
-                const accLookupKey = ab.id.substring(0, ab.id.indexOf('-'));
-                let acc = await store.get(Account, {
-                  where: { id: Like(`%${accLookupKey}%`) },
-                });
-                if (!acc || ab.balance === BigInt(0)) return;
-                const oldBalance = ab.balance;
-                const newBalance = BigInt(0);
-                ab.balance = newBalance;
-                console.log(`[${eventName}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-                await store.save<AccountBalance>(ab);
+                if (ab.balance === BigInt(0)) return;
 
                 const hab = new HistoricalAccountBalance({
-                  accountId: acc.accountId,
+                  accountId: ab.account.accountId,
                   assetId: ab.assetId,
                   blockNumber: rm.blockHeight,
-                  dBalance: newBalance - oldBalance,
-                  event: eventName.split('.')[1],
-                  id: rm.eventId + '-' + market.marketId + i + '-' + acc.accountId.slice(-5),
+                  dBalance: -ab.balance,
+                  event: MarketEvent.MarketResolved,
+                  id: rm.eventId + '-' + market.marketId + i + '-' + ab.account.accountId.slice(-5),
                   timestamp: new Date(rm.blockTimestamp),
                 });
-                console.log(`[${eventName}] Saving historical account balance: ${JSON.stringify(ab, null, 2)}`);
-                await store.save<HistoricalAccountBalance>(hab);
+                historicalAccountBalances.push(hab);
               });
             }
 
@@ -85,7 +82,7 @@ export const resolveMarkets = async (store: Store, blockHeight: number): Promise
             }
             asset.price = newPrice;
             asset.amountInPool = newAssetQty;
-            console.log(`[${eventName}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
+            console.log(`[PostHooks.MarketResolved] Saving asset: ${JSON.stringify(asset, null, 2)}`);
             await store.save<Asset>(asset);
 
             newLiquidity += BigInt(Math.round(asset.price * +asset.amountInPool.toString()));
@@ -96,7 +93,7 @@ export const resolveMarkets = async (store: Store, blockHeight: number): Promise
               blockNumber: rm.blockHeight,
               dAmountInPool: newAssetQty - oldAssetQty,
               dPrice: newPrice - oldPrice,
-              event: eventName.split('.')[1],
+              event: MarketEvent.MarketResolved,
               id: rm.eventId + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
               newAmountInPool: newAssetQty,
               newPrice: newPrice,
@@ -108,7 +105,7 @@ export const resolveMarkets = async (store: Store, blockHeight: number): Promise
 
         market.liquidity = newLiquidity;
         market.status = MarketStatus.Resolved;
-        console.log(`[${eventName}] Saving market: ${JSON.stringify(market, null, 2)}`);
+        console.log(`[PostHooks.MarketResolved] Saving market: ${JSON.stringify(market, null, 2)}`);
         await store.save<Market>(market);
 
         const hm = new HistoricalMarket({
@@ -126,11 +123,10 @@ export const resolveMarkets = async (store: Store, blockHeight: number): Promise
           timestamp: new Date(rm.blockTimestamp),
           volume: market.volume,
         });
-        console.log(`[${eventName}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
-        await store.save<HistoricalMarket>(hm);
+        historicalMarkets.push(hm);
       })
   );
-  return historicalAssets;
+  return { historicalAccountBalances, historicalAssets, historicalMarkets };
 };
 
 const resolvedMarkets: ResolvedMarket[] = [

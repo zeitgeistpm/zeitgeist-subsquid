@@ -7,7 +7,7 @@ import {
   Extrinsic as _Extrinsic,
 } from '@subsquid/substrate-processor';
 import { calls, events } from './types';
-import { isBatteryStation, isLocalEnv } from './helper';
+import { isBatteryStation, isLocalEnv, isMainnet } from './helper';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -68,7 +68,6 @@ export const processor = new SubstrateBatchProcessor()
       events.swaps.poolExitWithExactAssetAmount.name,
       events.swaps.poolJoin.name,
       events.swaps.poolJoinWithExactAssetAmount.name,
-      events.system.newAccount.name,
       events.tokens.balanceSet.name,
       events.tokens.deposited.name,
       events.tokens.reserved.name,
@@ -120,7 +119,12 @@ if (isBatteryStation()) {
       call: true,
       extrinsic: true,
     })
+    .includeAllBlocks({ from: 0, to: 0 })
     .includeAllBlocks({ from: 35683, to: 211391 });
+}
+
+if (isMainnet()) {
+  processor.includeAllBlocks({ from: 0, to: 0 });
 }
 
 if (!isLocalEnv()) {

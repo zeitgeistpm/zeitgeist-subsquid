@@ -3,8 +3,22 @@ import { DecodedMarketMetadata } from '@zeitgeistpm/sdk/dist/types';
 import { util } from '@zeitgeistpm/sdk';
 import { Store } from '@subsquid/typeorm-store';
 import Decimal from 'decimal.js';
-import { Account, AccountBalance, Extrinsic, HistoricalAccountBalance, MarketStatus, ScoringRule } from './model';
-import { Asset, MarketType, MarketStatus as MarketStatus_v51, ScoringRule as ScoringRule_v51 } from './types/v51';
+import {
+  Account,
+  AccountBalance,
+  DisputeMechanism,
+  Extrinsic,
+  HistoricalAccountBalance,
+  MarketStatus,
+  ScoringRule,
+} from './model';
+import {
+  Asset,
+  MarketDisputeMechanism as _DisputeMechanism,
+  MarketType,
+  MarketStatus as MarketStatus_v51,
+  ScoringRule as ScoringRule_v51,
+} from './types/v51';
 import { MarketStatus as MarketStatus_v53, ScoringRule as ScoringRule_v53 } from './types/v53';
 import { CacheHint, _Asset } from './consts';
 import { Block, Extrinsic as _Extrinsic } from './processor';
@@ -99,6 +113,19 @@ export const formatAssetId = (assetId: Asset): string => {
   }
 };
 
+export const formatDisputeMechanism = (
+  disputeMechanism: _DisputeMechanism | undefined
+): DisputeMechanism | undefined => {
+  switch (disputeMechanism?.__kind) {
+    case 'Authorized':
+      return DisputeMechanism.Authorized;
+    case 'Court':
+      return DisputeMechanism.Court;
+    case 'SimpleDisputes':
+      return DisputeMechanism.SimpleDisputes;
+  }
+};
+
 export const formatScoringRule = (scoringRule: ScoringRule_v51 | ScoringRule_v53): ScoringRule => {
   switch (scoringRule.__kind) {
     case 'CPMM':
@@ -160,40 +187,6 @@ export const getFees = async (block: Block, extrinsic: _Extrinsic): Promise<bigi
   return totalFees;
 };
 
-export const initBalance = async (acc: Account, store: Store) => {
-  const event = {
-    id: '0000000000-000000-b3cc3',
-    name: 'Balances.Initialised',
-    timestamp: '1970-01-01T00:00:00.000Z',
-  };
-  const sdk = await Tools.getSDK();
-  const blockZero = await sdk.api.rpc.chain.getBlockHash(0);
-  const {
-    data: { free: amt },
-  } = (await sdk.api.query.system.account.at(blockZero, acc.accountId)) as AccountInfo;
-
-  const ab = new AccountBalance({
-    account: acc,
-    assetId: _Asset.Ztg,
-    balance: amt.toBigInt(),
-    id: event.id + '-' + acc.accountId.slice(-5),
-  });
-  console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-  await store.save<AccountBalance>(ab);
-
-  const hab = new HistoricalAccountBalance({
-    accountId: acc.accountId,
-    assetId: _Asset.Ztg,
-    blockNumber: 0,
-    dBalance: amt.toBigInt(),
-    event: event.name.split('.')[1],
-    id: event.id + '-' + acc.accountId.slice(-5),
-    timestamp: new Date(event.timestamp),
-  });
-  console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
-  await store.save<HistoricalAccountBalance>(hab);
-};
-
 export const isBaseAsset = (assetId: Asset | string): boolean => {
   if (typeof assetId === 'string') {
     return assetId.includes('Ztg') || assetId.includes('foreignAsset');
@@ -223,10 +216,6 @@ export const mergeByAssetId = (balances: any[], weights: any[]): AssetAmountInPo
     ...b,
     ...weights.find((w) => w['_assetId'].toString() == b['assetId'].toString() && w),
   }));
-
-export const rescale = (value: string): string => {
-  return (BigInt(value) * BigInt(10 ** 10)).toString();
-};
 
 interface AssetAmountInPoolAndWeight {
   assetId: string;

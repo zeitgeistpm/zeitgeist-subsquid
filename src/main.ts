@@ -12,7 +12,7 @@ import {
 import * as postHooks from './post-hooks';
 import { calls, events } from './types';
 import { Pallet } from './consts';
-import { initBalance, isBatteryStation, isEventOrderValid, isMainnet } from './helper';
+import { isBatteryStation, isEventOrderValid, isMainnet } from './helper';
 import { processor, Event } from './processor';
 
 const accounts = new Map<string, Map<string, bigint>>();
@@ -69,13 +69,13 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           await mapPredictionMarkets(ctx.store, event);
           break;
         case Pallet.Styx:
-          await mapStyx(ctx.store, event);
+          await mapStyx(event);
           break;
         case Pallet.Swaps:
           await mapSwaps(ctx.store, event);
           break;
         case Pallet.System:
-          await mapSystem(ctx.store, event);
+          await mapSystem(event);
           break;
         case Pallet.Tokens:
           await mapTokens(ctx.store, event);
@@ -93,12 +93,17 @@ processor.run(new TypeormDatabase(), async (ctx) => {
 });
 
 const handleBsrPostHooks = async (store: Store, blockHeight: number) => {
-  if (blockHeight >= 35683 && blockHeight <= 211391) {
+  if (blockHeight === 0) {
+    const historicalAccountBalances = await postHooks.initBalance();
+    await storeBalanceChanges(historicalAccountBalances);
+  } else if (blockHeight >= 35683 && blockHeight <= 211391) {
     await saveAccounts(store);
     const historicalAccountBalances = await postHooks.unreserveBalances(blockHeight);
     await storeBalanceChanges(historicalAccountBalances);
-    const historicalAssets = await postHooks.resolveMarkets(store, blockHeight);
-    assetHistory.push(...historicalAssets);
+    const res = await postHooks.resolveMarket(store, blockHeight);
+    await storeBalanceChanges(res.historicalAccountBalances);
+    assetHistory.push(...res.historicalAssets);
+    marketHistory.push(...res.historicalMarkets);
   } else if (blockHeight === 579750) {
     await saveAccounts(store);
     await postHooks.destroyMarkets(store);
@@ -108,7 +113,10 @@ const handleBsrPostHooks = async (store: Store, blockHeight: number) => {
 };
 
 const handleMainPostHooks = async (store: Store, blockHeight: number) => {
-  if (blockHeight === 4793019) {
+  if (blockHeight === 0) {
+    const historicalAccountBalances = await postHooks.initBalance();
+    await storeBalanceChanges(historicalAccountBalances);
+  } else if (blockHeight === 4793019) {
     await postHooks.migrateScoringRule(store);
   }
 };
@@ -135,7 +143,8 @@ const mapBalances = async (store: Store, event: Event) => {
   switch (event.name) {
     case events.balances.balanceSet.name: {
       await saveAccounts(store);
-      await mappings.balances.balanceSet(store, event);
+      const hab = await mappings.balances.balanceSet(store, event);
+      await storeBalanceChanges([hab]);
       break;
     }
     case events.balances.deposit.name: {
@@ -337,7 +346,11 @@ const mapPredictionMarkets = async (store: Store, event: Event) => {
     }
     case events.predictionMarkets.marketResolved.name: {
       await saveAccounts(store);
-      await mappings.predictionMarkets.marketResolved(store, event);
+      const res = await mappings.predictionMarkets.marketResolved(store, event);
+      if (!res) break;
+      await storeBalanceChanges(res.historicalAccountBalances);
+      assetHistory.push(...res.historicalAssets);
+      marketHistory.push(res.historicalMarket);
       break;
     }
     case events.predictionMarkets.marketStartedWithSubsidy.name: {
@@ -358,10 +371,11 @@ const mapPredictionMarkets = async (store: Store, event: Event) => {
   }
 };
 
-const mapStyx = async (store: Store, event: Event) => {
+const mapStyx = async (event: Event) => {
   switch (event.name) {
     case events.styx.accountCrossed.name:
-      await mappings.styx.accountCrossed(store, event);
+      const hab = await mappings.styx.accountCrossed(event);
+      await storeBalanceChanges([hab]);
       break;
   }
 };
@@ -481,7 +495,7 @@ const mapSwaps = async (store: Store, event: Event) => {
   }
 };
 
-const mapSystem = async (store: Store, event: Event) => {
+const mapSystem = async (event: Event) => {
   switch (event.name) {
     case events.system.extrinsicFailed.name: {
       const hab = await mappings.system.extrinsicFailed(event);
@@ -493,10 +507,6 @@ const mapSystem = async (store: Store, event: Event) => {
       const hab = await mappings.system.extrinsicSuccess(event);
       if (!hab) break;
       await storeBalanceChanges([hab]);
-      break;
-    }
-    case events.system.newAccount.name: {
-      await mappings.system.newAccount(store, event);
       break;
     }
   }
@@ -533,6 +543,10 @@ const mapTokens = async (store: Store, event: Event) => {
 };
 
 const saveAccounts = async (store: Store) => {
+  const accountsToBeSaved: Account[] = [];
+  const balancesToBeSaved: AccountBalance[] = [];
+  const balancesToBeRemoved: AccountBalance[] = [];
+
   await Promise.all(
     Array.from(accounts).map(async ([accountId, balances]) => {
       let account = await store.get(Account, { where: { accountId } });
@@ -541,9 +555,7 @@ const saveAccounts = async (store: Store) => {
           accountId,
           id: accountId,
         });
-        console.log(`Saving account: ${JSON.stringify(account, null, 2)}`);
-        await store.save<Account>(account);
-        await initBalance(account, store);
+        accountsToBeSaved.push(account);
       }
 
       await Promise.all(
@@ -561,12 +573,24 @@ const saveAccounts = async (store: Store) => {
             });
           }
           ab.balance += amount;
-          console.log(`Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-          await store.save<AccountBalance>(ab);
+          if (ab.balance === BigInt(0)) balancesToBeRemoved.push(ab);
+          else balancesToBeSaved.push(ab);
         })
       );
     })
   );
+  if (accountsToBeSaved.length > 0) {
+    console.log(`Saving accounts: ${JSON.stringify(accountsToBeSaved, null, 2)}`);
+    await store.save<Account>(accountsToBeSaved);
+  }
+  if (balancesToBeSaved.length > 0) {
+    console.log(`Saving account balances: ${JSON.stringify(balancesToBeSaved, null, 2)}`);
+    await store.save<AccountBalance>(balancesToBeSaved);
+  }
+  if (balancesToBeRemoved.length > 0) {
+    console.log(`Removing account balances: ${JSON.stringify(balancesToBeRemoved, null, 2)}`);
+    await store.remove<AccountBalance>(balancesToBeRemoved);
+  }
   accounts.clear();
 };
 

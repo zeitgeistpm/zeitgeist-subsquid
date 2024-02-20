@@ -577,7 +577,7 @@ export const poolExit = async (
   });
   if (!market) return;
 
-  let baseAssetQty = pool.account.balances[pool.account.balances.length - 1].balance;
+  let baseAssetQty = BigInt(0);
   await Promise.all(
     pool.account.balances.map(async (ab) => {
       if (ab.assetId === pool.baseAsset) baseAssetQty = ab.balance;

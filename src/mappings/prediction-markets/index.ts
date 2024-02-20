@@ -1,13 +1,11 @@
 import { Store } from '@subsquid/typeorm-store';
 import * as ss58 from '@subsquid/ss58';
 import { util } from '@zeitgeistpm/sdk';
-import { Like } from 'typeorm';
 import {
   Account,
   AccountBalance,
   Asset,
   CategoryMetadata,
-  DisputeMechanism,
   Extrinsic,
   HistoricalAccountBalance,
   HistoricalAsset,
@@ -30,9 +28,9 @@ import {
   decodeMarketMetadata,
   extrinsicFromEvent,
   formatAssetId,
+  formatDisputeMechanism,
   formatMarketStatus,
   formatScoringRule,
-  rescale,
 } from '../../helper';
 import { Call, Event } from '../../processor';
 import { decodeMarketsStorage } from '../market-commons/decode';
@@ -55,7 +53,7 @@ import {
   decodeSoldCompleteSetEvent,
   decodeTokensRedeemedEvent,
 } from './decode';
-import { mapMarketPeriod } from './helper';
+import { mapMarketPeriod, scaleUp } from './helper';
 
 export const boughtCompleteSet = async (
   store: Store,
@@ -242,25 +240,12 @@ export const marketCreated = async (store: Store, event: Event) => {
     }
   }
 
-  let disputeMechanism;
-  switch (market.disputeMechanism.__kind) {
-    case 'Authorized':
-      disputeMechanism = DisputeMechanism.Authorized;
-      break;
-    case 'Court':
-      disputeMechanism = DisputeMechanism.Court;
-      break;
-    case 'SimpleDisputes':
-      disputeMechanism = DisputeMechanism.SimpleDisputes;
-      break;
-  }
-
   const newMarket = new Market({
     baseAsset: market.baseAsset ? formatAssetId(market.baseAsset) : _Asset.Ztg,
     creation: market.creation.__kind == 'Advised' ? MarketCreation.Advised : MarketCreation.Permissionless,
     creator: ss58.encode({ prefix: 73, bytes: market.creator }),
     creatorFee: +market.creatorFee.toString(),
-    disputeMechanism,
+    disputeMechanism: formatDisputeMechanism(market.disputeMechanism),
     earlyClose: false,
     id: event.id + '-' + marketId,
     liquidity: BigInt(0),
@@ -274,7 +259,7 @@ export const marketCreated = async (store: Store, event: Event) => {
     volume: BigInt(0),
   });
 
-  if (market.disputeMechanism.__kind === 'Authorized') {
+  if (market.disputeMechanism?.__kind === 'Authorized') {
     newMarket.authorizedAddress = market.disputeMechanism.value
       ? ss58.encode({ prefix: 73, bytes: market.disputeMechanism.value })
       : null;
@@ -337,12 +322,12 @@ export const marketCreated = async (store: Store, event: Event) => {
     marketType.scalar = [];
     if (event.block.specVersion < 41) {
       if (type.value.start) {
-        marketType.scalar.push(rescale(type.value.start.toString()));
-        marketType.scalar.push(rescale(type.value.end.toString()));
+        marketType.scalar.push(scaleUp(type.value.start.toString()));
+        marketType.scalar.push(scaleUp(type.value.end.toString()));
       } else {
         const [start, end] = type.value.toString().split(`,`);
-        marketType.scalar.push(rescale(start));
-        marketType.scalar.push(rescale(end));
+        marketType.scalar.push(scaleUp(start));
+        marketType.scalar.push(scaleUp(end));
       }
     } else {
       marketType.scalar.push(type.value.start.toString());
@@ -483,8 +468,8 @@ export const marketDisputed = async (store: Store, event: Event) => {
       by: accountId,
       outcome: outcome
         ? new OutcomeReport({
-            categorical: outcome.__kind == 'Categorical' ? outcome.value : null,
-            scalar: outcome.__kind == 'Scalar' ? outcome.value : null,
+            categorical: outcome.__kind === 'Categorical' ? outcome.value : undefined,
+            scalar: outcome.__kind === 'Scalar' ? outcome.value : undefined,
           })
         : null,
     });
@@ -642,8 +627,8 @@ export const marketReported = async (store: Store, event: Event) => {
   if (!market) return;
 
   const outcomeReport = new OutcomeReport({
-    categorical: outcome.__kind == 'Categorical' ? outcome.value : null,
-    scalar: outcome.__kind == 'Scalar' ? outcome.value : null,
+    categorical: outcome.__kind === 'Categorical' ? outcome.value : undefined,
+    scalar: outcome.__kind === 'Scalar' ? outcome.value : undefined,
   });
 
   const marketReport = new MarketReport({
@@ -689,7 +674,17 @@ export const marketReported = async (store: Store, event: Event) => {
   await store.save<HistoricalMarket>(hm);
 };
 
-export const marketResolved = async (store: Store, event: Event) => {
+export const marketResolved = async (
+  store: Store,
+  event: Event
+): Promise<
+  | {
+      historicalAccountBalances: HistoricalAccountBalance[];
+      historicalAssets: HistoricalAsset[];
+      historicalMarket: HistoricalMarket;
+    }
+  | undefined
+> => {
   const { marketId, report } = decodeMarketResolvedEvent(event);
 
   const market = await store.get(Market, { where: { marketId } });
@@ -697,7 +692,7 @@ export const marketResolved = async (store: Store, event: Event) => {
 
   market.resolvedOutcome =
     market.marketType.scalar && event.block.specVersion < 41
-      ? rescale(report.value.toString())
+      ? scaleUp(report.value.toString())
       : report.value.toString();
   market.status = MarketStatus.Resolved;
   if (market.bonds) {
@@ -707,42 +702,39 @@ export const marketResolved = async (store: Store, event: Event) => {
     if (market.bonds.outsider) market.bonds.outsider.isSettled = true;
   }
 
+  const historicalAccountBalances: HistoricalAccountBalance[] = [];
+  const historicalAssets: HistoricalAsset[] = [];
   const oldLiquidity = market.liquidity;
   let newLiquidity = BigInt(0);
+
   await Promise.all(
     market.outcomeAssets.map(async (outcomeAsset, i) => {
+      // Outcome assets are only destroyed for categorical markets
+      // On specVersion:40, node halted destruction on-chain
+      // Only losing asset is removed from the user account
       if (market.marketType.categorical && event.block.specVersion < 40 && i !== +market.resolvedOutcome!) {
         const abs = await store.find(AccountBalance, {
-          where: { assetId: outcomeAsset! },
+          where: { assetId: outcomeAsset },
+          relations: { account: true },
         });
         abs.map(async (ab) => {
-          const accLookupKey = ab.id.substring(0, ab.id.indexOf('-'));
-          const account = await store.get(Account, {
-            where: { id: Like(`%${accLookupKey}%`) },
-          });
-          if (!account || ab.balance === BigInt(0)) return;
-          const oldBalance = ab.balance;
-          ab.balance = BigInt(0);
-          console.log(`[${event.name}] Saving account balance: ${JSON.stringify(ab, null, 2)}`);
-          await store.save<AccountBalance>(ab);
-
+          if (ab.balance === BigInt(0)) return;
           const hab = new HistoricalAccountBalance({
-            accountId: account.accountId,
+            accountId: ab.account.accountId,
             assetId: ab.assetId,
             blockNumber: event.block.height,
-            dBalance: ab.balance - oldBalance,
+            dBalance: -ab.balance,
             event: event.name.split('.')[1],
             extrinsic: extrinsicFromEvent(event),
-            id: event.id + '-' + marketId + i + '-' + account.accountId.slice(-5),
+            id: event.id + '-' + marketId + i + '-' + ab.account.accountId.slice(-5),
             timestamp: new Date(event.block.timestamp!),
           });
-          console.log(`[${event.name}] Saving historical account balance: ${JSON.stringify(hab, null, 2)}`);
-          await store.save<HistoricalAccountBalance>(hab);
+          historicalAccountBalances.push(hab);
         });
       }
 
       const asset = await store.get(Asset, {
-        where: { assetId: market.outcomeAssets[i] },
+        where: { assetId: outcomeAsset },
       });
       if (!asset) return;
       const oldPrice = asset.price;
@@ -760,6 +752,7 @@ export const marketResolved = async (store: Store, event: Event) => {
         }
       } else {
         newPrice = i == +market.resolvedOutcome! ? 1 : 0;
+        // On specVersion:40, node halted destruction on-chain
         if (event.block.specVersion < 40) {
           newAssetQty = i == +market.resolvedOutcome! ? oldAssetQty : BigInt(0);
         }
@@ -783,8 +776,7 @@ export const marketResolved = async (store: Store, event: Event) => {
         newPrice,
         timestamp: new Date(event.block.timestamp!),
       });
-      console.log(`[${event.name}] Saving historical asset: ${JSON.stringify(ha, null, 2)}`);
-      await store.save<HistoricalAsset>(ha);
+      historicalAssets.push(ha);
     })
   );
 
@@ -792,7 +784,7 @@ export const marketResolved = async (store: Store, event: Event) => {
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await store.save<Market>(market);
 
-  const hm = new HistoricalMarket({
+  const historicalMarket = new HistoricalMarket({
     blockNumber: event.block.height,
     by: null,
     dLiquidity: market.liquidity - oldLiquidity,
@@ -807,8 +799,8 @@ export const marketResolved = async (store: Store, event: Event) => {
     timestamp: new Date(event.block.timestamp!),
     volume: market.volume,
   });
-  console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
-  await store.save<HistoricalMarket>(hm);
+
+  return { historicalAccountBalances, historicalAssets, historicalMarket };
 };
 
 export const marketStartedWithSubsidy = async (store: Store, event: Event) => {
