@@ -10,6 +10,7 @@ import {
   MarketEvent,
   NeoPool,
 } from '../../model';
+import { SwapEvent } from '../../consts';
 import { computeNeoSwapSpotPrice, extrinsicFromEvent, isBaseAsset } from '../../helper';
 import { Event } from '../../processor';
 import {
@@ -28,7 +29,8 @@ export const buyExecuted = async (
   | { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalMarket: HistoricalMarket }
   | undefined
 > => {
-  const { who, marketId, assetExecuted, amountIn, amountOut, swapFeeAmount } = decodeBuyExecutedEvent(event);
+  const { who, marketId, assetExecuted, amountIn, amountOut, swapFeeAmount, externalFeeAmount } =
+    decodeBuyExecutedEvent(event);
 
   const market = await store.get(Market, {
     where: { marketId },
@@ -108,9 +110,11 @@ export const buyExecuted = async (
     assetIn: market.baseAsset,
     assetOut: assetExecuted,
     blockNumber: event.block.height,
-    event: event.name.split('.')[1],
+    event: SwapEvent.BuyExecuted,
+    externalFeeAmount,
     extrinsic: extrinsicFromEvent(event),
     id: event.id,
+    swapFeeAmount,
     timestamp: new Date(event.block.timestamp!),
   });
 
@@ -428,7 +432,8 @@ export const sellExecuted = async (
   | { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalMarket: HistoricalMarket }
   | undefined
 > => {
-  const { who, marketId, assetExecuted, amountIn, amountOut, swapFeeAmount } = decodeSellExecutedEvent(event);
+  const { who, marketId, assetExecuted, amountIn, amountOut, swapFeeAmount, externalFeeAmount } =
+    decodeSellExecutedEvent(event);
 
   const market = await store.get(Market, {
     where: { marketId },
@@ -508,9 +513,11 @@ export const sellExecuted = async (
     assetIn: assetExecuted,
     assetOut: market.baseAsset,
     blockNumber: event.block.height,
-    event: event.name.split('.')[1],
+    event: SwapEvent.SellExecuted,
+    externalFeeAmount,
     extrinsic: extrinsicFromEvent(event),
     id: event.id,
+    swapFeeAmount,
     timestamp: new Date(event.block.timestamp!),
   });
 

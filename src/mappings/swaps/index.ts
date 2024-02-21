@@ -17,7 +17,7 @@ import {
   PoolStatus,
   Weight,
 } from '../../model';
-import { Pallet, SWAP_EXACT_AMOUNT_IN, SWAP_EXACT_AMOUNT_OUT } from '../../consts';
+import { Pallet, SWAP_EXACT_AMOUNT_IN, SWAP_EXACT_AMOUNT_OUT, SwapEvent } from '../../consts';
 import { computeSwapSpotPrice, extrinsicFromEvent, formatAssetId, isBaseAsset, mergeByAssetId } from '../../helper';
 import { Call, Event } from '../../processor';
 import { Tools } from '../../util';
@@ -1251,7 +1251,7 @@ export const swapExactAmountIn = async (
     assetIn: formatAssetId(assetSold),
     assetOut: formatAssetId(assetBought),
     blockNumber: event.block.height,
-    event: event.name.split('.')[1],
+    event: SwapEvent.SwapExactAmountIn,
     extrinsic: extrinsicFromEvent(event),
     id: event.id,
     timestamp: new Date(event.block.timestamp!),
@@ -1405,7 +1405,7 @@ export const swapExactAmountOut = async (
     assetIn: formatAssetId(assetSold),
     assetOut: formatAssetId(assetBought),
     blockNumber: event.block.height,
-    event: event.name.split('.')[1],
+    event: SwapEvent.SwapExactAmountOut,
     extrinsic: extrinsicFromEvent(event),
     id: event.id,
     timestamp: new Date(event.block.timestamp!),

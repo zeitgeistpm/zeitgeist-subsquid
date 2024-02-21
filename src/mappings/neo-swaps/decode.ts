@@ -13,6 +13,7 @@ export const decodeBuyExecutedEvent = (event: Event): BuySellExecutedEvent => {
     amountOut: bigint;
     assetOut: Asset;
     swapFeeAmount: bigint;
+    externalFeeAmount: bigint;
   };
   if (events.neoSwaps.buyExecuted.v50.is(event)) {
     decoded = events.neoSwaps.buyExecuted.v50.decode(event);
@@ -28,6 +29,7 @@ export const decodeBuyExecutedEvent = (event: Event): BuySellExecutedEvent => {
     amountIn: BigInt(decoded.amountIn),
     amountOut: BigInt(decoded.amountOut),
     swapFeeAmount: BigInt(decoded.swapFeeAmount),
+    externalFeeAmount: BigInt(decoded.externalFeeAmount),
   };
 };
 
@@ -128,6 +130,7 @@ export const decodeSellExecutedEvent = (event: Event): BuySellExecutedEvent => {
     amountIn: bigint;
     amountOut: bigint;
     swapFeeAmount: bigint;
+    externalFeeAmount: bigint;
   };
   if (events.neoSwaps.sellExecuted.v50.is(event)) {
     decoded = events.neoSwaps.sellExecuted.v50.decode(event);
@@ -143,6 +146,7 @@ export const decodeSellExecutedEvent = (event: Event): BuySellExecutedEvent => {
     amountIn: BigInt(decoded.amountIn),
     amountOut: BigInt(decoded.amountOut),
     swapFeeAmount: BigInt(decoded.swapFeeAmount),
+    externalFeeAmount: BigInt(decoded.externalFeeAmount),
   };
 };
 
@@ -161,6 +165,7 @@ interface BuySellExecutedEvent {
   amountIn: bigint;
   amountOut: bigint;
   swapFeeAmount: bigint;
+  externalFeeAmount: bigint;
 }
 
 interface FeesWithdrawnEvent {

@@ -55,6 +55,12 @@ export class HistoricalSwap {
     event!: string
 
     /**
+     * External fees occuring out of trade
+     */
+    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
+    externalFeeAmount!: bigint | undefined | null
+
+    /**
      * Extrinsic responsible for this change
      */
     @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new Extrinsic(undefined, obj)}, nullable: true})
@@ -65,6 +71,12 @@ export class HistoricalSwap {
      */
     @Column_("int4", {nullable: false})
     blockNumber!: number
+
+    /**
+     * Swap fees
+     */
+    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
+    swapFeeAmount!: bigint | undefined | null
 
     /**
      * Timestamp of the block
