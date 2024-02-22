@@ -20,6 +20,7 @@ export const fetchFromCache = async (b: string, t: string): Promise<{ pair: stri
   const target = Object.keys(TargetAsset)[Object.values(TargetAsset).indexOf(<any>t)];
   const pair = `${base}/${target}`;
 
+  if (isLocalEnv()) return { pair, price: 1 };
   const price = await (await Cache.init()).getData(CacheHint.Price, pair);
   return { pair, price: price ? +price : 1 };
 };
@@ -50,6 +51,7 @@ export const mergeByField = (array1: any[], array2: any[], field: string) =>
 
 // Fetch prices from Coingecko for all supported assets
 export const refreshPrices = async () => {
+  if (isLocalEnv()) return;
   const ids = Object.values(BaseAsset).join(',');
   const vs_currencies = Object.values(TargetAsset).join(',');
   let res;
