@@ -6,16 +6,18 @@ import { concat, toString } from 'uint8arrays';
 import CID from 'cids';
 import all from 'it-all';
 import { CacheHint } from './consts';
+import { isLocalEnv } from './helper';
 
 export class Cache {
   private static _instance: Cache;
   private client: RedisClient;
 
-  constructor(redisOptions: ClientOpts) {
+  constructor(redisOptions?: ClientOpts) {
     this.client = createClient(redisOptions);
   }
 
   public static async init() {
+    if (isLocalEnv()) this._instance = new Cache();
     if (!this._instance) {
       console.log('Connecting to Redis DB...');
       this._instance = new Cache({
