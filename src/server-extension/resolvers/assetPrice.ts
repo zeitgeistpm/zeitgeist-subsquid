@@ -1,7 +1,6 @@
 import { Arg, Field, ObjectType, Query, Resolver } from 'type-graphql';
 import { EntityManager } from 'typeorm';
 import { BaseAsset, EPOCH_TIME, TargetAsset } from '../../consts';
-import { isLocalEnv } from '../../helper';
 import { fetchFromCache, refreshPrices } from '../helper';
 
 @ObjectType()
@@ -31,8 +30,6 @@ export class AssetPriceResolver {
     @Arg('base', () => [BaseAsset], { nullable: false }) base: BaseAsset[],
     @Arg('target', () => [TargetAsset], { nullable: false }) target: TargetAsset[]
   ): Promise<AssetPrice[] | undefined> {
-    if (isLocalEnv()) return;
-
     // Refresh prices if they are older than 60 minutes
     if (new Date().getTime() - AssetPriceResolver.cachedAt.getTime() > 60 * 60 * 1000) refreshPrices();
 
