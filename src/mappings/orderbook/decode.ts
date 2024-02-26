@@ -20,9 +20,9 @@ export const orderPlaced = (event: Event): OrderPlacedEvent => {
     marketId: Number(decoded.order.marketId),
     maker: ss58.encode({ prefix: 73, bytes: decoded.order.maker }),
     makerAsset: formatAssetId(decoded.order.makerAsset ?? decoded.order.baseAsset),
-    makerAmount: BigInt(decoded.order.makerAssetAmount ?? decoded.order.baseAssetAmount),
+    makerAmount: BigInt(decoded.order.makerAmount ?? decoded.order.baseAssetAmount),
     takerAsset: formatAssetId(decoded.order.takerAsset ?? decoded.order.outcomeAsset),
-    takerAmount: BigInt(decoded.order.makerAssetAmount ?? decoded.order.baseAssetAmount),
+    takerAmount: BigInt(decoded.order.takerAmount ?? decoded.order.baseAssetAmount),
   };
 };
 
