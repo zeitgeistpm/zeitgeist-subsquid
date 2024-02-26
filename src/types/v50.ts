@@ -215,6 +215,45 @@ export interface ScalarPosition_Short {
 
 export type SerdeWrapper = bigint
 
+export const Order: sts.Type<Order> = sts.struct(() => {
+    return  {
+        marketId: sts.bigint(),
+        side: OrderSide,
+        maker: AccountId32,
+        outcomeAsset: Asset,
+        baseAsset: Asset,
+        outcomeAssetAmount: sts.bigint(),
+        baseAssetAmount: sts.bigint(),
+    }
+})
+
+export const OrderSide: sts.Type<OrderSide> = sts.closedEnum(() => {
+    return  {
+        Ask: sts.unit(),
+        Bid: sts.unit(),
+    }
+})
+
+export type OrderSide = OrderSide_Ask | OrderSide_Bid
+
+export interface OrderSide_Ask {
+    __kind: 'Ask'
+}
+
+export interface OrderSide_Bid {
+    __kind: 'Bid'
+}
+
+export interface Order {
+    marketId: bigint
+    side: OrderSide
+    maker: AccountId32
+    outcomeAsset: Asset
+    baseAsset: Asset
+    outcomeAssetAmount: bigint
+    baseAssetAmount: bigint
+}
+
 export const Asset: sts.Type<Asset> = sts.closedEnum(() => {
     return  {
         CategoricalOutcome: sts.tuple(() => [sts.bigint(), sts.number()]),

@@ -35,6 +35,9 @@
     "NeoSwaps": {
       "events": ["BuyExecuted", "ExitExecuted", "FeesWithdrawn", "JoinExecuted", "PoolDeployed", "SellExecuted"]
     },
+    "Orderbook": {
+      "events": ["OrderPlaced"]
+    },
     "ParachainStaking": {
       "events": ["Rewarded"]
     },
