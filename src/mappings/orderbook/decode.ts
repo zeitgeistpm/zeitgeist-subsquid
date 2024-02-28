@@ -41,6 +41,16 @@ export const orderPlaced = (event: Event): OrderPlacedEvent => {
   };
 };
 
+export const orderRemoved = (event: Event): OrderRemovedEvent => {
+  let decoded: { orderId: bigint };
+  if (events.orderbook.orderRemoved.v50.is(event)) {
+    decoded = events.orderbook.orderRemoved.v50.decode(event);
+  } else {
+    decoded = event.args;
+  }
+  return decoded;
+};
+
 interface OrderPlacedEvent {
   orderId: string;
   marketId: number;
@@ -49,4 +59,8 @@ interface OrderPlacedEvent {
   makerAmount: bigint;
   takerAsset: string;
   takerAmount: bigint;
+}
+
+interface OrderRemovedEvent {
+  orderId: bigint;
 }
