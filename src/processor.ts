@@ -42,6 +42,7 @@ export const processor = new SubstrateBatchProcessor()
       events.neoSwaps.poolDeployed.name,
       events.neoSwaps.sellExecuted.name,
       events.orderbook.orderPlaced.name,
+      events.orderbook.orderRemoved.name,
       events.parachainStaking.rewarded.name,
       events.predictionMarkets.globalDisputeStarted.name,
       events.predictionMarkets.marketApproved.name,
