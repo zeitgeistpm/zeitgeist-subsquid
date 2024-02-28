@@ -124,6 +124,30 @@ type HistoricalSwap @entity {
 }
 
 """
+A type that records the order history of a market.
+"""
+type HistoricalOrder @entity {
+  "Height of the block"
+  blockNumber: Int!
+  "Unique identifier of the object"
+  id: ID!
+  "Maker's account address"
+  maker: String!
+  "Base asset amount"
+  makerAmount: BigInt!
+  "Base asset"
+  makerAsset: String!
+  "Zeitgeist's identifier for market"
+  marketId: Int! @index
+  "Outcome asset amount"
+  takerAmount: BigInt!
+  "Outcome asset"
+  takerAsset: String!
+  "Timestamp of the block"
+  timestamp: DateTime!
+}
+
+"""
 Prediction market details
 """
 type Market @entity {

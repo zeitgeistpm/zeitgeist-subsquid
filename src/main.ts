@@ -6,6 +6,7 @@ import {
   HistoricalAccountBalance,
   HistoricalAsset,
   HistoricalMarket,
+  HistoricalOrder,
   HistoricalPool,
   HistoricalSwap,
 } from './model';
@@ -19,6 +20,7 @@ const accounts = new Map<string, Map<string, bigint>>();
 let assetHistory: HistoricalAsset[];
 let balanceHistory: HistoricalAccountBalance[];
 let marketHistory: HistoricalMarket[];
+let orderHistory: HistoricalOrder[];
 let poolHistory: HistoricalPool[];
 let swapHistory: HistoricalSwap[];
 
@@ -26,6 +28,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   assetHistory = [];
   balanceHistory = [];
   marketHistory = [];
+  orderHistory = [];
   poolHistory = [];
   swapHistory = [];
 
@@ -61,6 +64,9 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           break;
         case Pallet.NeoSwaps:
           await mapNeoSwaps(ctx.store, event);
+          break;
+        case Pallet.Orderbook:
+          await mapOrderbook(event);
           break;
         case Pallet.ParachainStaking:
           await mapParachainStaking(event);
@@ -268,6 +274,15 @@ const mapNeoSwaps = async (store: Store, event: Event) => {
       marketHistory.push(res.historicalMarket);
       break;
     }
+  }
+};
+
+const mapOrderbook = async (event: Event) => {
+  switch (event.name) {
+    case events.orderbook.orderPlaced.name:
+      const historicalOrder = await mappings.orderbook.orderPlaced(event);
+      orderHistory.push(historicalOrder);
+      break;
   }
 };
 
@@ -606,6 +621,10 @@ const saveHistory = async (store: Store) => {
   if (marketHistory.length > 0) {
     console.log(`Saving historical markets: ${JSON.stringify(marketHistory, null, 2)}`);
     await store.save<HistoricalMarket>(marketHistory);
+  }
+  if (orderHistory.length > 0) {
+    console.log(`Saving historical orders: ${JSON.stringify(orderHistory, null, 2)}`);
+    await store.save<HistoricalOrder>(orderHistory);
   }
   if (poolHistory.length > 0) {
     console.log(`Saving historical pools: ${JSON.stringify(poolHistory, null, 2)}`);

@@ -3,6 +3,7 @@ export * as authorized from './authorized';
 export * as balances from './balances';
 export * as currency from './currency';
 export * as neoSwaps from './neo-swaps';
+export * as orderbook from './orderbook';
 export * as parachainStaking from './parachain-staking';
 export * as predictionMarkets from './prediction-markets';
 export * as styx from './styx';
