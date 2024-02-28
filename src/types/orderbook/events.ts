@@ -27,3 +27,14 @@ export const orderPlaced =  {
         })
     ),
 }
+
+export const orderRemoved =  {
+    name: 'Orderbook.OrderRemoved',
+    v50: new EventType(
+        'Orderbook.OrderRemoved',
+        sts.struct({
+            orderId: sts.bigint(),
+            maker: v50.AccountId32,
+        })
+    ),
+}
