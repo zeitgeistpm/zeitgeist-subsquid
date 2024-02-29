@@ -18,15 +18,27 @@ export const orderPlaced = (event: Event): OrderPlacedEvent => {
     decoded = event.args;
   }
 
-  if ('baseAsset' in decoded.order) {
+  if ('side' in decoded.order) {
+    let makerAsset, makerAmount, takerAsset, takerAmount;
+    if (decoded.order.side.__kind === 'Ask') {
+      makerAsset = decoded.order.outcomeAsset;
+      makerAmount = decoded.order.outcomeAssetAmount;
+      takerAsset = decoded.order.baseAsset;
+      takerAmount = decoded.order.baseAssetAmount;
+    } else {
+      makerAsset = decoded.order.baseAsset;
+      makerAmount = decoded.order.baseAssetAmount;
+      takerAsset = decoded.order.outcomeAsset;
+      takerAmount = decoded.order.outcomeAssetAmount;
+    }
     return {
       orderId: decoded.orderId.toString(),
       marketId: Number(decoded.order.marketId),
       maker: ss58.encode({ prefix: 73, bytes: decoded.order.maker }),
-      makerAsset: formatAssetId(decoded.order.baseAsset),
-      makerAmount: BigInt(decoded.order.baseAssetAmount),
-      takerAsset: formatAssetId(decoded.order.outcomeAsset),
-      takerAmount: BigInt(decoded.order.outcomeAssetAmount),
+      makerAsset: formatAssetId(makerAsset),
+      makerAmount: BigInt(makerAmount),
+      takerAsset: formatAssetId(takerAsset),
+      takerAmount: BigInt(takerAmount),
     };
   }
 
@@ -41,6 +53,16 @@ export const orderPlaced = (event: Event): OrderPlacedEvent => {
   };
 };
 
+export const orderRemoved = (event: Event): OrderRemovedEvent => {
+  let decoded: { orderId: bigint };
+  if (events.orderbook.orderRemoved.v50.is(event)) {
+    decoded = events.orderbook.orderRemoved.v50.decode(event);
+  } else {
+    decoded = event.args;
+  }
+  return decoded;
+};
+
 interface OrderPlacedEvent {
   orderId: string;
   marketId: number;
@@ -49,4 +71,8 @@ interface OrderPlacedEvent {
   makerAmount: bigint;
   takerAsset: string;
   takerAmount: bigint;
+}
+
+interface OrderRemovedEvent {
+  orderId: bigint;
 }

@@ -66,7 +66,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           await mapNeoSwaps(ctx.store, event);
           break;
         case Pallet.Orderbook:
-          await mapOrderbook(event);
+          await mapOrderbook(ctx.store, event);
           break;
         case Pallet.ParachainStaking:
           await mapParachainStaking(event);
@@ -277,11 +277,15 @@ const mapNeoSwaps = async (store: Store, event: Event) => {
   }
 };
 
-const mapOrderbook = async (event: Event) => {
+const mapOrderbook = async (store: Store, event: Event) => {
   switch (event.name) {
     case events.orderbook.orderPlaced.name:
       const historicalOrder = await mappings.orderbook.orderPlaced(event);
       orderHistory.push(historicalOrder);
+      break;
+    case events.orderbook.orderRemoved.name:
+      await saveHistory(store);
+      await mappings.orderbook.orderRemoved(store, event);
       break;
   }
 };
