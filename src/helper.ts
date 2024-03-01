@@ -87,8 +87,8 @@ export const extrinsicFromEvent = (event: any): Extrinsic | null => {
 
 const fetchFromIPFS = async (metadata: string): Promise<string | undefined> => {
   const cid = new CID(`f0155` + metadata.slice(2));
-  const res = await axios.get(`https://ipfs-gateway.zeitgeist.pm/ipfs/${cid}`);
-  return res.status === 200 ? JSON.stringify(res.data) : undefined;
+  const { status, data } = await axios.get(`https://ipfs-gateway.zeitgeist.pm/ipfs/${cid}`);
+  return status === 200 ? JSON.stringify(data) : undefined;
 };
 
 export const formatAssetId = (assetId: Asset): string => {
