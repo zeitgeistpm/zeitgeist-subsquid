@@ -6,9 +6,9 @@ import {
   HistoricalAccountBalance,
   HistoricalAsset,
   HistoricalMarket,
-  HistoricalOrder,
   HistoricalPool,
   HistoricalSwap,
+  Order,
 } from './model';
 import * as postHooks from './post-hooks';
 import { calls, events } from './types';
@@ -17,10 +17,11 @@ import { isBatteryStation, isEventOrderValid, isMainnet } from './helper';
 import { processor, Event } from './processor';
 
 const accounts = new Map<string, Map<string, bigint>>();
+let orders: Order[] = [];
+
 let assetHistory: HistoricalAsset[];
 let balanceHistory: HistoricalAccountBalance[];
 let marketHistory: HistoricalMarket[];
-let orderHistory: HistoricalOrder[];
 let poolHistory: HistoricalPool[];
 let swapHistory: HistoricalSwap[];
 
@@ -28,7 +29,6 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   assetHistory = [];
   balanceHistory = [];
   marketHistory = [];
-  orderHistory = [];
   poolHistory = [];
   swapHistory = [];
 
@@ -96,6 +96,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   }
   await saveAccounts(ctx.store);
   await saveHistory(ctx.store);
+  await saveOrders(ctx.store);
 });
 
 const handleBsrPostHooks = async (store: Store, blockHeight: number) => {
@@ -279,14 +280,23 @@ const mapNeoSwaps = async (store: Store, event: Event) => {
 
 const mapOrderbook = async (store: Store, event: Event) => {
   switch (event.name) {
-    case events.orderbook.orderPlaced.name:
-      const historicalOrder = await mappings.orderbook.orderPlaced(event);
-      orderHistory.push(historicalOrder);
+    case events.orderbook.orderFilled.name: {
+      await saveOrders(store);
+      const order = await mappings.orderbook.orderFilled(store, event);
+      if (!order) return;
+      orders.push(order);
       break;
-    case events.orderbook.orderRemoved.name:
-      await saveHistory(store);
+    }
+    case events.orderbook.orderPlaced.name: {
+      const order = await mappings.orderbook.orderPlaced(event);
+      orders.push(order);
+      break;
+    }
+    case events.orderbook.orderRemoved.name: {
+      await saveOrders(store);
       await mappings.orderbook.orderRemoved(store, event);
       break;
+    }
   }
 };
 
@@ -626,10 +636,6 @@ const saveHistory = async (store: Store) => {
     console.log(`Saving historical markets: ${JSON.stringify(marketHistory, null, 2)}`);
     await store.save<HistoricalMarket>(marketHistory);
   }
-  if (orderHistory.length > 0) {
-    console.log(`Saving historical orders: ${JSON.stringify(orderHistory, null, 2)}`);
-    await store.save<HistoricalOrder>(orderHistory);
-  }
   if (poolHistory.length > 0) {
     console.log(`Saving historical pools: ${JSON.stringify(poolHistory, null, 2)}`);
     await store.save<HistoricalPool>(poolHistory);
@@ -637,6 +643,14 @@ const saveHistory = async (store: Store) => {
   if (swapHistory.length > 0) {
     console.log(`Saving historical swaps: ${JSON.stringify(swapHistory, null, 2)}`);
     await store.save<HistoricalSwap>(swapHistory);
+  }
+};
+
+const saveOrders = async (store: Store) => {
+  if (orders.length > 0) {
+    console.log(`Saving orders: ${JSON.stringify(orders, null, 2)}`);
+    await store.save<Order>(orders);
+    orders = [];
   }
 };
 
