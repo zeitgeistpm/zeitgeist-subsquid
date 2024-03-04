@@ -1,8 +1,19 @@
 import { Store } from '@subsquid/typeorm-store';
-import { HistoricalOrder } from '../../model';
+import { Order, OrderRecord } from '../../model';
 import { Event } from '../../processor';
 import * as decode from './decode';
 
+export const orderFilled = async (store: Store, event: Event): Promise<Order | undefined> => {
+  const { orderId, filledMakerAmount, filledTakerAmount } = decode.orderFilled(event);
+
+  const order = await store.get(Order, { where: { id: orderId.toString() } });
+  if (!order) return;
+
+  order.maker.filledAmount += filledMakerAmount;
+  order.taker.filledAmount += filledTakerAmount;
+  order.updatedAt = new Date(event.block.timestamp!);
+  return order;
+};
 
 export const orderPlaced = async (event: Event): Promise<Order> => {
   const { orderId, marketId, maker, makerAsset, makerAmount, takerAsset, takerAmount } = decode.orderPlaced(event);
