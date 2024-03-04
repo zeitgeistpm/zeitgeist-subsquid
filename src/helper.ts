@@ -1,17 +1,9 @@
-import { AccountInfo } from '@polkadot/types/interfaces/system';
 import { DecodedMarketMetadata } from '@zeitgeistpm/sdk/dist/types';
 import { util } from '@zeitgeistpm/sdk';
-import { Store } from '@subsquid/typeorm-store';
 import Decimal from 'decimal.js';
-import {
-  Account,
-  AccountBalance,
-  DisputeMechanism,
-  Extrinsic,
-  HistoricalAccountBalance,
-  MarketStatus,
-  ScoringRule,
-} from './model';
+import axios from 'axios';
+import CID from 'cids';
+import { DisputeMechanism, Extrinsic, MarketStatus, ScoringRule } from './model';
 import {
   Asset,
   MarketDisputeMechanism as _DisputeMechanism,
@@ -22,7 +14,7 @@ import {
 import { MarketStatus as MarketStatus_v53, ScoringRule as ScoringRule_v53 } from './types/v53';
 import { CacheHint, _Asset } from './consts';
 import { Block, Extrinsic as _Extrinsic } from './processor';
-import { Cache, IPFS, Tools } from './util';
+import { Cache, Tools } from './util';
 
 export const computeNeoSwapSpotPrice = (amountInPool: bigint, liquidityParameter: bigint): number => {
   const reserve = new Decimal(+amountInPool.toString());
@@ -70,7 +62,7 @@ export const decodeMarketMetadata = async (metadata: string): Promise<DecodedMar
   if (!cachedData) {
     let dataToCache;
     try {
-      dataToCache = await new IPFS().read(metadata);
+      dataToCache = await fetchFromIPFS(metadata);
     } catch (err) {
       console.error(err);
       if (err instanceof SyntaxError) dataToCache = '0';
@@ -91,6 +83,12 @@ export const extrinsicFromEvent = (event: any): Extrinsic | null => {
     hash: event.extrinsic.hash,
     name: event.extrinsic.call ? event.extrinsic.call.name : null,
   });
+};
+
+const fetchFromIPFS = async (metadata: string): Promise<string | undefined> => {
+  const cid = new CID(`f0155` + metadata.slice(2));
+  const { status, data } = await axios.get(`https://ipfs-gateway.zeitgeist.pm/ipfs/${cid}`);
+  return status === 200 ? JSON.stringify(data) : undefined;
 };
 
 export const formatAssetId = (assetId: Asset): string => {
