@@ -6,6 +6,33 @@ import { _Asset } from '../../consts';
 import { formatAssetId } from '../../helper';
 import { Event } from '../../processor';
 
+export const orderFilled = (event: Event): OrderFilledEvent => {
+  let decoded: {
+    orderId: bigint;
+    maker: string;
+    taker: string;
+    filledMakerAmount: bigint;
+    filledTakerAmount: bigint;
+    unfilledMakerAmount: bigint;
+    unfilledTakerAmount: bigint;
+  };
+  if (events.orderbook.orderFilled.v53.is(event)) {
+    decoded = events.orderbook.orderFilled.v53.decode(event);
+  } else {
+    decoded = event.args;
+  }
+
+  return {
+    orderId: decoded.orderId.toString(),
+    maker: ss58.encode({ prefix: 73, bytes: decoded.maker }),
+    taker: ss58.encode({ prefix: 73, bytes: decoded.taker }),
+    filledMakerAmount: BigInt(decoded.filledMakerAmount),
+    filledTakerAmount: BigInt(decoded.filledTakerAmount),
+    unfilledMakerAmount: BigInt(decoded.unfilledMakerAmount),
+    unfilledTakerAmount: BigInt(decoded.unfilledTakerAmount),
+  };
+};
+
 export const orderPlaced = (event: Event): OrderPlacedEvent => {
   let decoded: { orderId: bigint; order: Order_v51 | Order_v53 };
   if (events.orderbook.orderPlaced.v50.is(event)) {
@@ -62,6 +89,16 @@ export const orderRemoved = (event: Event): OrderRemovedEvent => {
   }
   return decoded;
 };
+
+interface OrderFilledEvent {
+  orderId: string;
+  maker: string;
+  taker: string;
+  filledMakerAmount: bigint;
+  filledTakerAmount: bigint;
+  unfilledMakerAmount: bigint;
+  unfilledTakerAmount: bigint;
+}
 
 interface OrderPlacedEvent {
   orderId: string;

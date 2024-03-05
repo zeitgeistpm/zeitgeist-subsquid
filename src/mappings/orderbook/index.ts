@@ -1,31 +1,49 @@
 import { Store } from '@subsquid/typeorm-store';
-import { HistoricalOrder } from '../../model';
+import { Order, OrderRecord } from '../../model';
 import { Event } from '../../processor';
 import * as decode from './decode';
 
-export const orderPlaced = async (event: Event): Promise<HistoricalOrder> => {
+export const orderFilled = async (store: Store, event: Event): Promise<Order | undefined> => {
+  const { orderId, filledMakerAmount, filledTakerAmount } = decode.orderFilled(event);
+
+  const order = await store.get(Order, { where: { id: orderId.toString() } });
+  if (!order) return;
+
+  order.maker.filledAmount += filledMakerAmount;
+  order.taker.filledAmount += filledTakerAmount;
+  order.updatedAt = new Date(event.block.timestamp!);
+  return order;
+};
+
+export const orderPlaced = async (event: Event): Promise<Order> => {
   const { orderId, marketId, maker, makerAsset, makerAmount, takerAsset, takerAmount } = decode.orderPlaced(event);
 
-  const historicalOrder = new HistoricalOrder({
-    blockNumber: event.block.height,
+  const order = new Order({
+    createdAt: new Date(event.block.timestamp!),
     id: orderId,
-    maker,
-    makerAmount,
-    makerAsset,
+    makerAccountId: maker,
+    maker: new OrderRecord({
+      asset: makerAsset,
+      filledAmount: BigInt(0),
+      initialAmount: makerAmount,
+    }),
     marketId,
-    takerAmount,
-    takerAsset,
-    timestamp: new Date(event.block.timestamp!),
+    taker: new OrderRecord({
+      asset: takerAsset,
+      filledAmount: BigInt(0),
+      initialAmount: takerAmount,
+    }),
+    updatedAt: new Date(event.block.timestamp!),
   });
-  return historicalOrder;
+  return order;
 };
 
 export const orderRemoved = async (store: Store, event: Event) => {
   const { orderId } = decode.orderRemoved(event);
 
-  const historicalOrder = await store.get(HistoricalOrder, { where: { id: orderId.toString() } });
-  if (!historicalOrder) return;
+  const order = await store.get(Order, { where: { id: orderId.toString() } });
+  if (!order) return;
 
-  console.log(`[${event.name}] Removing historical-order: ${JSON.stringify(historicalOrder, null, 2)}`);
-  await store.remove<HistoricalOrder>(historicalOrder);
+  console.log(`[${event.name}] Removing order: ${JSON.stringify(order, null, 2)}`);
+  await store.remove<Order>(order);
 };

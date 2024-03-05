@@ -36,7 +36,7 @@
       "events": ["BuyExecuted", "ExitExecuted", "FeesWithdrawn", "JoinExecuted", "PoolDeployed", "SellExecuted"]
     },
     "Orderbook": {
-      "events": ["OrderPlaced", "OrderRemoved"]
+      "events": ["OrderFilled", "OrderPlaced", "OrderRemoved"]
     },
     "ParachainStaking": {
       "events": ["Rewarded"]
