@@ -282,9 +282,10 @@ const mapOrderbook = async (store: Store, event: Event) => {
   switch (event.name) {
     case events.orderbook.orderFilled.name: {
       await saveOrders(store);
-      const order = await mappings.orderbook.orderFilled(store, event);
-      if (!order) return;
-      orders.push(order);
+      const res = await mappings.orderbook.orderFilled(store, event);
+      if (!res) return;
+      orders.push(res.order);
+      swapHistory.push(res.historicalSwap);
       break;
     }
     case events.orderbook.orderPlaced.name: {
