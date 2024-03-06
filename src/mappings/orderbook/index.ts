@@ -9,13 +9,16 @@ export const orderFilled = async (
   store: Store,
   event: Event
 ): Promise<{ order: Order; historicalSwap: HistoricalSwap } | undefined> => {
-  const { orderId, taker, filledMakerAmount, filledTakerAmount } = decode.orderFilled(event);
+  const { orderId, taker, filledMakerAmount, filledTakerAmount, unfilledMakerAmount, unfilledTakerAmount } =
+    decode.orderFilled(event);
 
   const order = await store.get(Order, { where: { id: orderId.toString() } });
   if (!order) return;
 
   order.maker.filledAmount += filledMakerAmount;
   order.taker.filledAmount += filledTakerAmount;
+  order.maker.unfilledAmount = unfilledMakerAmount;
+  order.taker.unfilledAmount = unfilledTakerAmount;
   order.updatedAt = new Date(event.block.timestamp!);
 
   const historicalSwap = new HistoricalSwap({
@@ -46,13 +49,13 @@ export const orderPlaced = async (event: Event): Promise<Order> => {
     maker: new OrderRecord({
       asset: makerAsset,
       filledAmount: BigInt(0),
-      initialAmount: makerAmount,
+      unfilledAmount: makerAmount,
     }),
     marketId,
     taker: new OrderRecord({
       asset: takerAsset,
       filledAmount: BigInt(0),
-      initialAmount: takerAmount,
+      unfilledAmount: takerAmount,
     }),
     updatedAt: new Date(event.block.timestamp!),
   });

@@ -423,7 +423,7 @@ type OutcomeReport @jsonField {
 type OrderRecord @jsonField {
   asset: String!
   filledAmount: BigInt!
-  initialAmount: BigInt!
+  unfilledAmount: BigInt!
 }
 
 type LiquiditySharesManager @entity {
