@@ -527,6 +527,7 @@ Swaps' event options
 """
 enum SwapEvent {
   BuyExecuted
+  OrderFilled
   SellExecuted
   SwapExactAmountIn
   SwapExactAmountOut
