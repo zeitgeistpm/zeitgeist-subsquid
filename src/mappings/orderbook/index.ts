@@ -1,10 +1,15 @@
 import { Store } from '@subsquid/typeorm-store';
-import { Order, OrderRecord } from '../../model';
+import { HistoricalSwap, Order, OrderRecord } from '../../model';
+import { SwapEvent } from '../../consts';
+import { extrinsicFromEvent } from '../../helper';
 import { Event } from '../../processor';
 import * as decode from './decode';
 
-export const orderFilled = async (store: Store, event: Event): Promise<Order | undefined> => {
-  const { orderId, filledMakerAmount, filledTakerAmount } = decode.orderFilled(event);
+export const orderFilled = async (
+  store: Store,
+  event: Event
+): Promise<{ order: Order; historicalSwap: HistoricalSwap } | undefined> => {
+  const { orderId, taker, filledMakerAmount, filledTakerAmount } = decode.orderFilled(event);
 
   const order = await store.get(Order, { where: { id: orderId.toString() } });
   if (!order) return;
@@ -12,7 +17,23 @@ export const orderFilled = async (store: Store, event: Event): Promise<Order | u
   order.maker.filledAmount += filledMakerAmount;
   order.taker.filledAmount += filledTakerAmount;
   order.updatedAt = new Date(event.block.timestamp!);
-  return order;
+
+  const historicalSwap = new HistoricalSwap({
+    accountId: taker,
+    assetAmountIn: filledTakerAmount,
+    assetAmountOut: filledMakerAmount,
+    assetIn: order?.taker.asset,
+    assetOut: order?.maker.asset,
+    blockNumber: event.block.height,
+    event: SwapEvent.OrderFilled,
+    externalFeeAmount: null,
+    extrinsic: extrinsicFromEvent(event),
+    id: event.id,
+    swapFeeAmount: null,
+    timestamp: new Date(event.block.timestamp!),
+  });
+
+  return { order, historicalSwap };
 };
 
 export const orderPlaced = async (event: Event): Promise<Order> => {
