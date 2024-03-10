@@ -3,7 +3,7 @@ import { util } from '@zeitgeistpm/sdk';
 import Decimal from 'decimal.js';
 import axios from 'axios';
 import CID from 'cids';
-import { DisputeMechanism, Extrinsic, MarketStatus, ScoringRule } from './model';
+import { AccountBalance, Asset as Asset_, DisputeMechanism, Extrinsic, MarketStatus, ScoringRule } from './model';
 import {
   Asset,
   MarketDisputeMechanism as _DisputeMechanism,
@@ -75,6 +75,10 @@ export const decodeMarketMetadata = async (metadata: string): Promise<DecodedMar
   }
   // Parse raw data fetched from either IPFS or redis
   return cachedData && cachedData !== '0' ? JSON.parse(cachedData) : undefined;
+};
+
+const extractCategoricalOutcomeIndex = (s: string): number => {
+  return +s.substring(s.indexOf(',') + 1, s.indexOf(']'));
 };
 
 export const extrinsicFromEvent = (event: any): Extrinsic | null => {
@@ -220,3 +224,14 @@ interface AssetAmountInPoolAndWeight {
   balance: bigint;
   _weight: bigint;
 }
+
+export const sortOutcomeAssets = (data: Asset_[]): Asset_[] => {
+  if (data[0].assetId.includes('scalar')) {
+    return data.sort((a, b) => {
+      return a.assetId.localeCompare(b.assetId);
+    });
+  }
+  return data.sort((a, b) => {
+    return extractCategoricalOutcomeIndex(a.assetId) - extractCategoricalOutcomeIndex(b.assetId);
+  });
+};
