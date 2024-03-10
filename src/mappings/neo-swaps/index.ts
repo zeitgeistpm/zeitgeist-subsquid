@@ -368,6 +368,7 @@ export const poolDeployed = async (
   }
   const oldLiquidity = market.liquidity;
   let newLiquidity = BigInt(0);
+  const assets: Asset[] = [];
   const historicalAssets: HistoricalAsset[] = [];
 
   await Promise.all(
@@ -380,9 +381,8 @@ export const poolDeployed = async (
         market,
         price: computeNeoSwapSpotPrice(ab.balance, neoPool.liquidityParameter),
       });
-      console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
-      await store.save<Asset>(asset);
 
+      assets.push(asset);
       newLiquidity += BigInt(Math.round(asset.price * +ab.balance.toString()));
 
       const ha = new HistoricalAsset({
@@ -400,6 +400,9 @@ export const poolDeployed = async (
       historicalAssets.push(ha);
     })
   );
+
+  console.log(`[${event.name}] Saving assets: ${JSON.stringify(assets, null, 2)}`);
+  await store.save<Asset>(assets);
 
   market.neoPool = neoPool;
   market.liquidity = newLiquidity;
