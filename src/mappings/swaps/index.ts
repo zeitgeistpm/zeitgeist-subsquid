@@ -18,7 +18,14 @@ import {
   Weight,
 } from '../../model';
 import { Pallet, SWAP_EXACT_AMOUNT_IN, SWAP_EXACT_AMOUNT_OUT, SwapEvent } from '../../consts';
-import { computeSwapSpotPrice, extrinsicFromEvent, formatAssetId, isBaseAsset, mergeByAssetId } from '../../helper';
+import {
+  computeSwapSpotPrice,
+  extrinsicFromEvent,
+  formatAssetId,
+  isBaseAsset,
+  mergeByAssetId,
+  sortOutcomeAssets,
+} from '../../helper';
 import { Call, Event } from '../../processor';
 import { Tools } from '../../util';
 import {
@@ -396,8 +403,9 @@ export const poolCreate = async (
     timestamp: new Date(event.block.timestamp!),
   });
 
-  console.log(`[${event.name}] Saving assets: ${JSON.stringify(assets, null, 2)}`);
-  await store.save<Asset>(assets);
+  const orderedAssets = sortOutcomeAssets(assets);
+  console.log(`[${event.name}] Saving assets: ${JSON.stringify(orderedAssets, null, 2)}`);
+  await store.save<Asset>(orderedAssets);
 
   market.liquidity = newLiquidity;
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
