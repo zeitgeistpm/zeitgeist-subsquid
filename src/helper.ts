@@ -225,6 +225,10 @@ interface AssetAmountInPoolAndWeight {
   _weight: bigint;
 }
 
+export const pad = (i: number): string => {
+  return i < 10 ? '0' + i.toString() : i.toString();
+};
+
 export const sortOutcomeAssets = (data: Asset_[]): Asset_[] => {
   if (data[0].assetId.includes('scalar')) {
     return data.sort((a, b) => {

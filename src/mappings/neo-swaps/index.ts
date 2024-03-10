@@ -11,7 +11,7 @@ import {
   NeoPool,
 } from '../../model';
 import { SwapEvent } from '../../consts';
-import { computeNeoSwapSpotPrice, extrinsicFromEvent, isBaseAsset, sortOutcomeAssets } from '../../helper';
+import { computeNeoSwapSpotPrice, extrinsicFromEvent, isBaseAsset, pad, sortOutcomeAssets } from '../../helper';
 import { Event } from '../../processor';
 import {
   decodeBuyExecutedEvent,
@@ -377,7 +377,7 @@ export const poolDeployed = async (
       const asset = new Asset({
         assetId: ab.assetId,
         amountInPool: ab.balance,
-        id: event.id + '-' + neoPool.marketId + i,
+        id: event.id + '-' + neoPool.marketId + pad(i),
         market,
         price: computeNeoSwapSpotPrice(ab.balance, neoPool.liquidityParameter),
       });

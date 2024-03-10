@@ -24,6 +24,7 @@ import {
   formatAssetId,
   isBaseAsset,
   mergeByAssetId,
+  pad,
   sortOutcomeAssets,
 } from '../../helper';
 import { Call, Event } from '../../processor';
@@ -366,7 +367,7 @@ export const poolCreate = async (
         const asset = new Asset({
           assetId: wt.assetId,
           amountInPool: BigInt(assetQty),
-          id: event.id + '-' + pool.marketId + i,
+          id: event.id + '-' + pool.marketId + pad(i),
           market,
           pool: newPool,
           price: computeSwapSpotPrice(+baseAssetQty.toString(), baseAssetWeight, assetQty, +wt.weight.toString()),
