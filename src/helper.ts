@@ -3,7 +3,7 @@ import { util } from '@zeitgeistpm/sdk';
 import Decimal from 'decimal.js';
 import axios from 'axios';
 import CID from 'cids';
-import { AccountBalance, Asset as Asset_, DisputeMechanism, Extrinsic, MarketStatus, ScoringRule } from './model';
+import { DisputeMechanism, Extrinsic, MarketStatus, ScoringRule } from './model';
 import {
   Asset,
   MarketDisputeMechanism as _DisputeMechanism,
