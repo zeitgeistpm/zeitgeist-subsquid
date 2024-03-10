@@ -25,7 +25,6 @@ import {
   isBaseAsset,
   mergeByAssetId,
   pad,
-  sortOutcomeAssets,
 } from '../../helper';
 import { Call, Event } from '../../processor';
 import { Tools } from '../../util';
@@ -404,9 +403,8 @@ export const poolCreate = async (
     timestamp: new Date(event.block.timestamp!),
   });
 
-  const orderedAssets = sortOutcomeAssets(assets);
-  console.log(`[${event.name}] Saving assets: ${JSON.stringify(orderedAssets, null, 2)}`);
-  await store.save<Asset>(orderedAssets);
+  console.log(`[${event.name}] Saving assets: ${JSON.stringify(assets, null, 2)}`);
+  await store.save<Asset>(assets);
 
   market.liquidity = newLiquidity;
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);

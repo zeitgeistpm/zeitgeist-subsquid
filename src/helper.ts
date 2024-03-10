@@ -77,10 +77,6 @@ export const decodeMarketMetadata = async (metadata: string): Promise<DecodedMar
   return cachedData && cachedData !== '0' ? JSON.parse(cachedData) : undefined;
 };
 
-const extractCategoricalOutcomeIndex = (s: string): number => {
-  return +s.substring(s.indexOf(',') + 1, s.indexOf(']'));
-};
-
 export const extrinsicFromEvent = (event: any): Extrinsic | null => {
   if (!event.extrinsic) return null;
   return new Extrinsic({
@@ -227,15 +223,4 @@ interface AssetAmountInPoolAndWeight {
 
 export const pad = (i: number): string => {
   return i < 10 ? '0' + i.toString() : i.toString();
-};
-
-export const sortOutcomeAssets = (data: Asset_[]): Asset_[] => {
-  if (data[0].assetId.includes('scalar')) {
-    return data.sort((a, b) => {
-      return a.assetId.localeCompare(b.assetId);
-    });
-  }
-  return data.sort((a, b) => {
-    return extractCategoricalOutcomeIndex(a.assetId) - extractCategoricalOutcomeIndex(b.assetId);
-  });
 };
