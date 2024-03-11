@@ -220,3 +220,7 @@ interface AssetAmountInPoolAndWeight {
   balance: bigint;
   _weight: bigint;
 }
+
+export const pad = (i: number): string => {
+  return i < 10 ? '0' + i.toString() : i.toString();
+};
