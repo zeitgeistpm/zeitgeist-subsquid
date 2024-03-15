@@ -6,6 +6,7 @@ import {
   HistoricalAccountBalance,
   HistoricalAsset,
   HistoricalMarket,
+  HistoricalOrder,
   HistoricalPool,
   HistoricalSwap,
   Order,
@@ -22,6 +23,7 @@ let orders: Order[] = [];
 let assetHistory: HistoricalAsset[];
 let balanceHistory: HistoricalAccountBalance[];
 let marketHistory: HistoricalMarket[];
+let orderHistory: HistoricalOrder[];
 let poolHistory: HistoricalPool[];
 let swapHistory: HistoricalSwap[];
 
@@ -29,6 +31,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   assetHistory = [];
   balanceHistory = [];
   marketHistory = [];
+  orderHistory = [];
   poolHistory = [];
   swapHistory = [];
 
@@ -285,6 +288,7 @@ const mapOrderbook = async (store: Store, event: Event) => {
       const res = await mappings.orderbook.orderFilled(store, event);
       if (!res) return;
       orders.push(res.order);
+      orderHistory.push(res.historicalOrder);
       swapHistory.push(res.historicalSwap);
       break;
     }
@@ -636,6 +640,10 @@ const saveHistory = async (store: Store) => {
   if (marketHistory.length > 0) {
     console.log(`Saving historical markets: ${JSON.stringify(marketHistory, null, 2)}`);
     await store.save<HistoricalMarket>(marketHistory);
+  }
+  if (orderHistory.length > 0) {
+    console.log(`Saving historical orders: ${JSON.stringify(orderHistory, null, 2)}`);
+    await store.save<HistoricalOrder>(orderHistory);
   }
   if (poolHistory.length > 0) {
     console.log(`Saving historical pools: ${JSON.stringify(poolHistory, null, 2)}`);

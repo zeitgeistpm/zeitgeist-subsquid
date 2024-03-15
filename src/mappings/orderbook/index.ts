@@ -1,5 +1,5 @@
 import { Store } from '@subsquid/typeorm-store';
-import { HistoricalSwap, Order, OrderRecord } from '../../model';
+import { HistoricalOrder, HistoricalSwap, Order, OrderEvent, OrderRecord } from '../../model';
 import { SwapEvent } from '../../consts';
 import { extrinsicFromEvent } from '../../helper';
 import { Event } from '../../processor';
@@ -8,7 +8,7 @@ import * as decode from './decode';
 export const orderFilled = async (
   store: Store,
   event: Event
-): Promise<{ order: Order; historicalSwap: HistoricalSwap } | undefined> => {
+): Promise<{ order: Order; historicalOrder: HistoricalOrder; historicalSwap: HistoricalSwap } | undefined> => {
   const { orderId, taker, filledMakerAmount, filledTakerAmount, unfilledMakerAmount, unfilledTakerAmount } =
     decode.orderFilled(event);
 
@@ -21,12 +21,27 @@ export const orderFilled = async (
   order.taker.unfilledAmount = unfilledTakerAmount;
   order.updatedAt = new Date(event.block.timestamp!);
 
-  const historicalSwap = new HistoricalSwap({
-    accountId: taker,
+  const historicalOrder = new HistoricalOrder({
+    accountId: order.makerAccountId,
     assetAmountIn: filledTakerAmount,
     assetAmountOut: filledMakerAmount,
     assetIn: order?.taker.asset,
     assetOut: order?.maker.asset,
+    blockNumber: event.block.height,
+    event: OrderEvent.OrderFilled,
+    externalFeeAmount: null,
+    extrinsic: extrinsicFromEvent(event),
+
+    orderId: +order.id,
+    timestamp: new Date(event.block.timestamp!),
+  });
+
+  const historicalSwap = new HistoricalSwap({
+    accountId: taker,
+    assetAmountIn: filledMakerAmount,
+    assetAmountOut: filledTakerAmount,
+    assetIn: order?.maker.asset,
+    assetOut: order?.taker.asset,
     blockNumber: event.block.height,
     event: SwapEvent.OrderFilled,
     externalFeeAmount: null,
@@ -36,7 +51,7 @@ export const orderFilled = async (
     timestamp: new Date(event.block.timestamp!),
   });
 
-  return { order, historicalSwap };
+  return { order, historicalOrder, historicalSwap };
 };
 
 export const orderPlaced = async (event: Event): Promise<Order> => {
