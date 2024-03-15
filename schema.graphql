@@ -129,11 +129,28 @@ A type that records the order history of a market.
 type Order @entity {
   createdAt: DateTime!
   id: ID!
-  makerAccountId: String!
+  makerAccountId: String! @index
   maker: OrderRecord!
   taker: OrderRecord!
   marketId: Int! @index
   updatedAt: DateTime!
+}
+
+"""
+A type that records the history of an order.
+"""
+type HistoricalOrder @entity {
+  accountId: String! @index
+  assetIn: String!
+  assetOut: String!
+  assetAmountIn: BigInt!
+  assetAmountOut: BigInt!
+  blockNumber: Int!
+  event: OrderEvent!
+  externalFeeAmount: BigInt
+  extrinsic: Extrinsic
+  orderId: Int! @index
+  timestamp: DateTime!
 }
 
 """
@@ -497,6 +514,13 @@ enum MarketStatus {
   Reported
   Resolved
   Suspended
+}
+
+"""
+Orders' event options
+"""
+enum OrderEvent {
+  OrderFilled
 }
 
 """
