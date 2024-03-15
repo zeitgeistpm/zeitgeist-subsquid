@@ -17,6 +17,7 @@ export class Order {
     @PrimaryColumn_()
     id!: string
 
+    @Index_()
     @Column_("text", {nullable: false})
     makerAccountId!: string
 
