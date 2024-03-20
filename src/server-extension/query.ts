@@ -109,8 +109,8 @@ export const marketLiquidity = (ids: number[]) => `
     SELECT t0.market_id, COALESCE(ROUND(SUM(a.price * ab.balance), 0), 0) AS liquidity
     FROM t0
     LEFT JOIN neo_pool np ON np.id = t0.neo_pool_id
-    LEFT JOIN account_balance ab ON ab.account_id = np.account_id
-    LEFT JOIN asset a ON a.market_id = t0.id AND a.asset_id = ab.asset_id
+    LEFT JOIN asset a ON a.market_id = t0.id
+    LEFT JOIN account_balance ab ON ab.account_id = np.account_id AND ab.asset_id = a.asset_id
     WHERE np.id IS NOT NULL AND a.asset_id ILIKE '%OUTCOME%'
     GROUP BY t0.market_id
   ),
