@@ -333,7 +333,6 @@ export const poolCreate = async (
     where: { marketId: newPool.marketId },
   });
   if (!market) return;
-  market.pool = newPool;
 
   let baseAssetQty = newPool.account.balances[newPool.account.balances.length - 1].balance;
   await Promise.all(
@@ -342,6 +341,7 @@ export const poolCreate = async (
     })
   );
 
+  const assetMetadata = market.categories;
   const oldLiquidity = market.liquidity;
   let newLiquidity = BigInt(0);
   const assets: Asset[] = [];
@@ -366,10 +366,14 @@ export const poolCreate = async (
         const asset = new Asset({
           assetId: wt.assetId,
           amountInPool: BigInt(assetQty),
+          color: assetMetadata ? assetMetadata[i].color : undefined,
           id: event.id + '-' + pool.marketId + pad(i),
+          img: assetMetadata ? assetMetadata[i].img : undefined,
           market,
+          name: assetMetadata ? assetMetadata[i].name : undefined,
           pool: newPool,
           price: computeSwapSpotPrice(+baseAssetQty.toString(), baseAssetWeight, assetQty, +wt.weight.toString()),
+          ticker: assetMetadata ? assetMetadata[i].ticker : undefined,
         });
 
         assets.push(asset);
@@ -406,7 +410,9 @@ export const poolCreate = async (
   console.log(`[${event.name}] Saving assets: ${JSON.stringify(assets, null, 2)}`);
   await store.save<Asset>(assets);
 
+  market.categories = [];
   market.liquidity = newLiquidity;
+  market.pool = newPool;
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await store.save<Market>(market);
 

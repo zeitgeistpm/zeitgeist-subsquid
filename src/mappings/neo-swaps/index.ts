@@ -366,6 +366,8 @@ export const poolDeployed = async (
       })
     );
   }
+
+  const assetMetadata = market.categories;
   const oldLiquidity = market.liquidity;
   let newLiquidity = BigInt(0);
   const assets: Asset[] = [];
@@ -377,9 +379,13 @@ export const poolDeployed = async (
       const asset = new Asset({
         assetId: ab.assetId,
         amountInPool: ab.balance,
+        color: assetMetadata ? assetMetadata[i].color : undefined,
         id: event.id + '-' + neoPool.marketId + pad(i),
+        img: assetMetadata ? assetMetadata[i].img : undefined,
         market,
+        name: assetMetadata ? assetMetadata[i].name : undefined,
         price: computeNeoSwapSpotPrice(ab.balance, neoPool.liquidityParameter),
+        ticker: assetMetadata ? assetMetadata[i].ticker : undefined,
       });
 
       assets.push(asset);
@@ -404,8 +410,9 @@ export const poolDeployed = async (
   console.log(`[${event.name}] Saving assets: ${JSON.stringify(assets, null, 2)}`);
   await store.save<Asset>(assets);
 
-  market.neoPool = neoPool;
+  market.categories = [];
   market.liquidity = newLiquidity;
+  market.neoPool = neoPool;
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await store.save<Market>(market);
 
