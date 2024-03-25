@@ -29,11 +29,29 @@ export class Asset {
     assetId!: string
 
     /**
+     * Color identifier
+     */
+    @Column_("text", {nullable: true})
+    color!: string | undefined | null
+
+    /**
+     * Image identifier
+     */
+    @Column_("text", {nullable: true})
+    img!: string | undefined | null
+
+    /**
      * Connected market
      */
     @Index_()
     @ManyToOne_(() => Market, {nullable: true})
     market!: Market
+
+    /**
+     * Title ex. `Locomotiv will not be defeated`
+     */
+    @Column_("text", {nullable: true})
+    name!: string | undefined | null
 
     /**
      * Connected pool
@@ -47,4 +65,10 @@ export class Asset {
      */
     @Column_("numeric", {transformer: marshal.floatTransformer, nullable: false})
     price!: number
+
+    /**
+     * Short abbreviation ex. `LMDRAW`
+     */
+    @Column_("text", {nullable: true})
+    ticker!: string | undefined | null
 }
