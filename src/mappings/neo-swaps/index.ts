@@ -2,6 +2,7 @@ import { Store } from '@subsquid/typeorm-store';
 import {
   Account,
   Asset,
+  CategoryMetadata,
   HistoricalAsset,
   HistoricalMarket,
   HistoricalSwap,
@@ -356,18 +357,30 @@ export const poolDeployed = async (
   });
   if (!market) return;
 
+  let assetMetadata = market.categories ?? [];
+  let assetsToBeRemoved: Asset[] = [];
+
   // Check if market has swap pool and their assets attached to it
   // Applicable for markets which have been migrated to neo-swap pool
   if (market.assets.length !== 0) {
-    await Promise.all(
-      market.assets.map(async (asset) => {
-        console.log(`[${event.name}] Removing asset: ${JSON.stringify(asset, null, 2)}`);
-        await store.remove<Asset>(asset);
+    assetsToBeRemoved = market.assets
+      .sort((a, b) => {
+        return +a.id - +b.id;
       })
-    );
+      .map((asset) => {
+        console.log(asset.assetId);
+        assetMetadata.push(
+          new CategoryMetadata({
+            color: asset.color,
+            img: asset.img,
+            name: asset.name,
+            ticker: asset.ticker,
+          })
+        );
+        return asset;
+      });
   }
 
-  const assetMetadata = market.categories;
   const oldLiquidity = market.liquidity;
   let newLiquidity = BigInt(0);
   const assets: Asset[] = [];
@@ -406,6 +419,9 @@ export const poolDeployed = async (
       historicalAssets.push(ha);
     })
   );
+
+  console.log(`[${event.name}] Removing assets: ${JSON.stringify(assetsToBeRemoved, null, 2)}`);
+  await store.remove<Asset>(assetsToBeRemoved);
 
   console.log(`[${event.name}] Saving assets: ${JSON.stringify(assets, null, 2)}`);
   await store.save<Asset>(assets);
