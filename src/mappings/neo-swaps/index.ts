@@ -357,52 +357,21 @@ export const poolDeployed = async (
   });
   if (!market) return;
 
-  let assetMetadata = market.categories ?? [];
-  let assetsToBeRemoved: Asset[] = [];
-
-  // Check if market has swap pool and their assets attached to it
-  // Applicable for markets which have been migrated to neo-swap pool
-  if (market.assets.length !== 0) {
-    assetsToBeRemoved = market.assets
-      .sort((a, b) => {
-        return +a.id - +b.id;
-      })
-      .map((asset) => {
-        console.log(asset.assetId);
-        assetMetadata.push(
-          new CategoryMetadata({
-            color: asset.color,
-            img: asset.img,
-            name: asset.name,
-            ticker: asset.ticker,
-          })
-        );
-        return asset;
-      });
-  }
-
-  const oldLiquidity = market.liquidity;
-  let newLiquidity = BigInt(0);
   const assets: Asset[] = [];
   const historicalAssets: HistoricalAsset[] = [];
+  const oldLiquidity = market.liquidity;
+  let newLiquidity = BigInt(0);
 
   await Promise.all(
     neoPool.account.balances.map(async (ab, i) => {
       if (isBaseAsset(ab.assetId)) return;
-      const asset = new Asset({
-        assetId: ab.assetId,
-        amountInPool: ab.balance,
-        color: assetMetadata ? assetMetadata[i].color : undefined,
-        id: event.id + '-' + neoPool.marketId + pad(i),
-        img: assetMetadata ? assetMetadata[i].img : undefined,
-        market,
-        name: assetMetadata ? assetMetadata[i].name : undefined,
-        price: computeNeoSwapSpotPrice(ab.balance, neoPool.liquidityParameter),
-        ticker: assetMetadata ? assetMetadata[i].ticker : undefined,
+      const asset = await store.get(Asset, {
+        where: { assetId: ab.assetId },
       });
-
+      if (!asset) return;
+      asset.amountInPool = ab.balance;
+      asset.price = computeNeoSwapSpotPrice(ab.balance, neoPool.liquidityParameter);
       assets.push(asset);
-      newLiquidity += BigInt(Math.round(asset.price * +ab.balance.toString()));
 
       const ha = new HistoricalAsset({
         accountId: who,
@@ -417,12 +386,10 @@ export const poolDeployed = async (
         timestamp: new Date(event.block.timestamp!),
       });
       historicalAssets.push(ha);
+
+      newLiquidity += BigInt(Math.round(asset.price * +ab.balance.toString()));
     })
   );
-
-  console.log(`[${event.name}] Removing assets: ${JSON.stringify(assetsToBeRemoved, null, 2)}`);
-  await store.remove<Asset>(assetsToBeRemoved);
-
   console.log(`[${event.name}] Saving assets: ${JSON.stringify(assets, null, 2)}`);
   await store.save<Asset>(assets);
 
