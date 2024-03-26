@@ -386,13 +386,13 @@ export const marketCreated = async (store: Store, event: Event) => {
       const asset = new Asset({
         assetId: outcomeAsset,
         amountInPool: BigInt(0),
-        color: metadata && metadata.categories ? metadata.categories[i].color : undefined,
+        color: metadata?.categories ? metadata.categories[i]?.color : undefined,
         id: event.id + '-' + marketId + pad(i),
-        img: metadata && metadata.categories ? metadata.categories[i].img : undefined,
+        img: metadata?.categories ? metadata.categories[i]?.img : undefined,
         market,
-        name: metadata && metadata.categories ? metadata.categories[i].name : undefined,
+        name: metadata?.categories ? metadata.categories[i]?.name : undefined,
         price: 0,
-        ticker: metadata && metadata.categories ? metadata.categories[i].ticker : undefined,
+        ticker: metadata?.categories ? metadata.categories[i]?.ticker : undefined,
       });
       assets.push(asset);
     })
