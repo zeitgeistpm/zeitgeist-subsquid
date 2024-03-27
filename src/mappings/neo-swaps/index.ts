@@ -393,7 +393,6 @@ export const poolDeployed = async (
   console.log(`[${event.name}] Saving assets: ${JSON.stringify(assets, null, 2)}`);
   await store.save<Asset>(assets);
 
-  market.categories = [];
   market.liquidity = newLiquidity;
   market.neoPool = neoPool;
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
