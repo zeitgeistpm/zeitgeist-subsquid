@@ -2,6 +2,7 @@ import { Store } from '@subsquid/typeorm-store';
 import {
   Account,
   Asset,
+  CategoryMetadata,
   HistoricalAsset,
   HistoricalMarket,
   HistoricalSwap,
@@ -356,34 +357,21 @@ export const poolDeployed = async (
   });
   if (!market) return;
 
-  // Check if market has swap pool and their assets attached to it
-  // Applicable for markets which have been migrated to neo-swap pool
-  if (market.assets.length !== 0) {
-    await Promise.all(
-      market.assets.map(async (asset) => {
-        console.log(`[${event.name}] Removing asset: ${JSON.stringify(asset, null, 2)}`);
-        await store.remove<Asset>(asset);
-      })
-    );
-  }
-  const oldLiquidity = market.liquidity;
-  let newLiquidity = BigInt(0);
   const assets: Asset[] = [];
   const historicalAssets: HistoricalAsset[] = [];
+  const oldLiquidity = market.liquidity;
+  let newLiquidity = BigInt(0);
 
   await Promise.all(
     neoPool.account.balances.map(async (ab, i) => {
       if (isBaseAsset(ab.assetId)) return;
-      const asset = new Asset({
-        assetId: ab.assetId,
-        amountInPool: ab.balance,
-        id: event.id + '-' + neoPool.marketId + pad(i),
-        market,
-        price: computeNeoSwapSpotPrice(ab.balance, neoPool.liquidityParameter),
+      const asset = await store.get(Asset, {
+        where: { assetId: ab.assetId },
       });
-
+      if (!asset) return;
+      asset.amountInPool = ab.balance;
+      asset.price = computeNeoSwapSpotPrice(ab.balance, neoPool.liquidityParameter);
       assets.push(asset);
-      newLiquidity += BigInt(Math.round(asset.price * +ab.balance.toString()));
 
       const ha = new HistoricalAsset({
         accountId: who,
@@ -398,14 +386,15 @@ export const poolDeployed = async (
         timestamp: new Date(event.block.timestamp!),
       });
       historicalAssets.push(ha);
+
+      newLiquidity += BigInt(Math.round(asset.price * +ab.balance.toString()));
     })
   );
-
   console.log(`[${event.name}] Saving assets: ${JSON.stringify(assets, null, 2)}`);
   await store.save<Asset>(assets);
 
-  market.neoPool = neoPool;
   market.liquidity = newLiquidity;
+  market.neoPool = neoPool;
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await store.save<Market>(market);
 
