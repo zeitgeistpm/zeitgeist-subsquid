@@ -31,6 +31,7 @@ import {
   formatDisputeMechanism,
   formatMarketStatus,
   formatScoringRule,
+  pad,
 } from '../../helper';
 import { Call, Event } from '../../processor';
 import { decodeMarketsStorage } from '../market-commons/decode';
@@ -378,6 +379,26 @@ export const marketCreated = async (store: Store, event: Event) => {
   });
   console.log(`[${event.name}] Saving historical market: ${JSON.stringify(hm, null, 2)}`);
   await store.save<HistoricalMarket>(hm);
+
+  const assets: Asset[] = [];
+  await Promise.all(
+    newMarket.outcomeAssets.map(async (outcomeAsset: any, i: number) => {
+      const asset = new Asset({
+        assetId: outcomeAsset,
+        amountInPool: BigInt(0),
+        color: metadata?.categories ? metadata.categories[i]?.color : undefined,
+        id: event.id + '-' + marketId + pad(i),
+        img: metadata?.categories ? metadata.categories[i]?.img : undefined,
+        market,
+        name: metadata?.categories ? metadata.categories[i]?.name : undefined,
+        price: 0,
+        ticker: metadata?.categories ? metadata.categories[i]?.ticker : undefined,
+      });
+      assets.push(asset);
+    })
+  );
+  console.log(`[${event.name}] Saving assets: ${JSON.stringify(assets, null, 2)}`);
+  await store.save<Asset>(assets);
 };
 
 export const marketDestroyed = async (store: Store, event: Event) => {

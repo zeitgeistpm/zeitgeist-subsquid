@@ -59,12 +59,20 @@ type Asset @entity {
   amountInPool: BigInt!
   "Zeitgeist's identifier for asset"
   assetId: String!
+  "Color identifier"
+  color: String
+  "Image identifier"
+  img: String
   "Connected market"
   market: Market!
+  "Title ex. `Locomotiv will not be defeated`"
+  name: String
   "Connected pool"
   pool: Pool
   "Spot price of the asset in the pool"
   price: Float!
+  "Short abbreviation ex. `LMDRAW`"
+  ticker: String
 }
 
 """
