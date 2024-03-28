@@ -31,7 +31,7 @@ export const orderFilled = async (
     event: OrderEvent.OrderFilled,
     externalFeeAmount: null,
     extrinsic: extrinsicFromEvent(event),
-
+    id: event.id,
     orderId: +order.id,
     timestamp: new Date(event.block.timestamp!),
   });
