@@ -4,14 +4,14 @@ import * as marshal from "./marshal"
 export class OrderRecord {
     private _asset!: string
     private _filledAmount!: bigint
-    private _initialAmount!: bigint
+    private _unfilledAmount!: bigint
 
     constructor(props?: Partial<Omit<OrderRecord, 'toJSON'>>, json?: any) {
         Object.assign(this, props)
         if (json != null) {
             this._asset = marshal.string.fromJSON(json.asset)
             this._filledAmount = marshal.bigint.fromJSON(json.filledAmount)
-            this._initialAmount = marshal.bigint.fromJSON(json.initialAmount)
+            this._unfilledAmount = marshal.bigint.fromJSON(json.unfilledAmount)
         }
     }
 
@@ -33,20 +33,20 @@ export class OrderRecord {
         this._filledAmount = value
     }
 
-    get initialAmount(): bigint {
-        assert(this._initialAmount != null, 'uninitialized access')
-        return this._initialAmount
+    get unfilledAmount(): bigint {
+        assert(this._unfilledAmount != null, 'uninitialized access')
+        return this._unfilledAmount
     }
 
-    set initialAmount(value: bigint) {
-        this._initialAmount = value
+    set unfilledAmount(value: bigint) {
+        this._unfilledAmount = value
     }
 
     toJSON(): object {
         return {
             asset: this.asset,
             filledAmount: marshal.bigint.toJSON(this.filledAmount),
-            initialAmount: marshal.bigint.toJSON(this.initialAmount),
+            unfilledAmount: marshal.bigint.toJSON(this.unfilledAmount),
         }
     }
 }

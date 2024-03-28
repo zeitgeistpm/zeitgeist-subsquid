@@ -50,6 +50,7 @@ export enum Pallet {
 
 export enum SwapEvent {
   BuyExecuted = 'BuyExecuted',
+  OrderFilled = 'OrderFilled',
   SellExecuted = 'SellExecuted',
   SwapExactAmountIn = 'SwapExactAmountIn',
   SwapExactAmountOut = 'SwapExactAmountOut',

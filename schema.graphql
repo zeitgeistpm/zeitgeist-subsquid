@@ -137,11 +137,28 @@ A type that records the order history of a market.
 type Order @entity {
   createdAt: DateTime!
   id: ID!
-  makerAccountId: String!
+  makerAccountId: String! @index
   maker: OrderRecord!
   taker: OrderRecord!
   marketId: Int! @index
   updatedAt: DateTime!
+}
+
+"""
+A type that records the history of an order.
+"""
+type HistoricalOrder @entity {
+  accountId: String! @index
+  assetIn: String!
+  assetOut: String!
+  assetAmountIn: BigInt!
+  assetAmountOut: BigInt!
+  blockNumber: Int!
+  event: OrderEvent!
+  externalFeeAmount: BigInt
+  extrinsic: Extrinsic
+  orderId: Int! @index
+  timestamp: DateTime!
 }
 
 """
@@ -431,7 +448,7 @@ type OutcomeReport @jsonField {
 type OrderRecord @jsonField {
   asset: String!
   filledAmount: BigInt!
-  initialAmount: BigInt!
+  unfilledAmount: BigInt!
 }
 
 type LiquiditySharesManager @entity {
@@ -508,6 +525,13 @@ enum MarketStatus {
 }
 
 """
+Orders' event options
+"""
+enum OrderEvent {
+  OrderFilled
+}
+
+"""
 Pools' status options
 """
 enum PoolStatus {
@@ -535,6 +559,7 @@ Swaps' event options
 """
 enum SwapEvent {
   BuyExecuted
+  OrderFilled
   SellExecuted
   SwapExactAmountIn
   SwapExactAmountOut
