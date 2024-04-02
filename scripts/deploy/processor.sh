@@ -42,7 +42,7 @@ else
 fi
 
 if [ "$1" = "test" ] || [ "$1" = "main" ]; then
-  docker run -d --network=host --rm -e NODE_ENV=$1 --env-file=.env.$1 --name=zeitgeist-processor processor
+  docker run -d --restart=always --network=host -e NODE_ENV=$1 --env-file=.env.$1 --name=zeitgeist-processor processor
 else
   echo "$__usage"
 fi
