@@ -1,18 +1,57 @@
 import { Store } from '@subsquid/typeorm-store';
-import { Order, OrderRecord } from '../../model';
+import { HistoricalOrder, HistoricalSwap, Order, OrderEvent, OrderRecord } from '../../model';
+import { SwapEvent } from '../../consts';
+import { extrinsicFromEvent } from '../../helper';
 import { Event } from '../../processor';
 import * as decode from './decode';
 
-export const orderFilled = async (store: Store, event: Event): Promise<Order | undefined> => {
-  const { orderId, filledMakerAmount, filledTakerAmount } = decode.orderFilled(event);
+export const orderFilled = async (
+  store: Store,
+  event: Event
+): Promise<{ order: Order; historicalOrder: HistoricalOrder; historicalSwap: HistoricalSwap } | undefined> => {
+  const { orderId, taker, filledMakerAmount, filledTakerAmount, unfilledMakerAmount, unfilledTakerAmount } =
+    decode.orderFilled(event);
 
   const order = await store.get(Order, { where: { id: orderId.toString() } });
   if (!order) return;
 
   order.maker.filledAmount += filledMakerAmount;
   order.taker.filledAmount += filledTakerAmount;
+  order.maker.unfilledAmount = unfilledMakerAmount;
+  order.taker.unfilledAmount = unfilledTakerAmount;
   order.updatedAt = new Date(event.block.timestamp!);
-  return order;
+
+  const historicalOrder = new HistoricalOrder({
+    accountId: order.makerAccountId,
+    assetAmountIn: filledTakerAmount,
+    assetAmountOut: filledMakerAmount,
+    assetIn: order?.taker.asset,
+    assetOut: order?.maker.asset,
+    blockNumber: event.block.height,
+    event: OrderEvent.OrderFilled,
+    externalFeeAmount: null,
+    extrinsic: extrinsicFromEvent(event),
+    id: event.id,
+    orderId: +order.id,
+    timestamp: new Date(event.block.timestamp!),
+  });
+
+  const historicalSwap = new HistoricalSwap({
+    accountId: taker,
+    assetAmountIn: filledMakerAmount,
+    assetAmountOut: filledTakerAmount,
+    assetIn: order?.maker.asset,
+    assetOut: order?.taker.asset,
+    blockNumber: event.block.height,
+    event: SwapEvent.OrderFilled,
+    externalFeeAmount: null,
+    extrinsic: extrinsicFromEvent(event),
+    id: event.id,
+    swapFeeAmount: null,
+    timestamp: new Date(event.block.timestamp!),
+  });
+
+  return { order, historicalOrder, historicalSwap };
 };
 
 export const orderPlaced = async (event: Event): Promise<Order> => {
@@ -25,13 +64,13 @@ export const orderPlaced = async (event: Event): Promise<Order> => {
     maker: new OrderRecord({
       asset: makerAsset,
       filledAmount: BigInt(0),
-      initialAmount: makerAmount,
+      unfilledAmount: makerAmount,
     }),
     marketId,
     taker: new OrderRecord({
       asset: takerAsset,
       filledAmount: BigInt(0),
-      initialAmount: takerAmount,
+      unfilledAmount: takerAmount,
     }),
     updatedAt: new Date(event.block.timestamp!),
   });
