@@ -389,7 +389,7 @@ export const marketCreated = async (store: Store, event: Event) => {
         color: metadata?.categories ? metadata.categories[i]?.color : undefined,
         id: event.id + '-' + marketId + pad(i),
         img: metadata?.categories ? metadata.categories[i]?.img : undefined,
-        market,
+        market: newMarket,
         name: metadata?.categories ? metadata.categories[i]?.name : undefined,
         price: 0,
         ticker: metadata?.categories ? metadata.categories[i]?.ticker : undefined,
