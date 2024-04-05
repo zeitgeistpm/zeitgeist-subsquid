@@ -497,6 +497,7 @@ enum MarketEvent {
   MarketReported
   MarketResolved
   MarketStartedWithSubsidy
+  OutcomeBought
   PoolDeployed
   PoolDestroyed
   PoolExit
@@ -560,6 +561,7 @@ Swaps' event options
 enum SwapEvent {
   BuyExecuted
   OrderFilled
+  OutcomeBought
   SellExecuted
   SwapExactAmountIn
   SwapExactAmountOut
