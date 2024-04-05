@@ -45,6 +45,7 @@ export const processor = new SubstrateBatchProcessor()
       events.orderbook.orderPlaced.name,
       events.orderbook.orderRemoved.name,
       events.parachainStaking.rewarded.name,
+      events.parimutuel.outcomeBought.name,
       events.predictionMarkets.globalDisputeStarted.name,
       events.predictionMarkets.marketApproved.name,
       events.predictionMarkets.marketClosed.name,
