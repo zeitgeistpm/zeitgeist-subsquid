@@ -1,5 +1,6 @@
 import * as ss58 from '@subsquid/ss58';
-import { Asset } from '../../types/v51';
+import { Asset as Asset_v51 } from '../../types/v51';
+import { Asset as Asset_v54 } from '../../types/v54';
 import { events } from '../../types';
 import { _Asset } from '../../consts';
 import { formatAssetId } from '../../helper';
@@ -11,7 +12,7 @@ export const decodeBuyExecutedEvent = (event: Event): BuySellExecutedEvent => {
     marketId: bigint;
     amountIn: bigint;
     amountOut: bigint;
-    assetOut: Asset;
+    assetOut: Asset_v51 | Asset_v54;
     swapFeeAmount: bigint;
     externalFeeAmount: bigint;
   };
@@ -19,6 +20,8 @@ export const decodeBuyExecutedEvent = (event: Event): BuySellExecutedEvent => {
     decoded = events.neoSwaps.buyExecuted.v50.decode(event);
   } else if (events.neoSwaps.buyExecuted.v51.is(event)) {
     decoded = events.neoSwaps.buyExecuted.v51.decode(event);
+  } else if (events.neoSwaps.buyExecuted.v54.is(event)) {
+    decoded = events.neoSwaps.buyExecuted.v54.decode(event);
   } else {
     decoded = event.args;
   }
@@ -96,7 +99,7 @@ export const decodePoolDeployedEvent = (event: Event): PoolDeployedEvent => {
     who: string;
     marketId: bigint;
     accountId: string;
-    collateral: Asset;
+    collateral: Asset_v51 | Asset_v54;
     liquidityParameter: bigint;
     poolSharesAmount: bigint;
     swapFee: bigint;
@@ -108,6 +111,8 @@ export const decodePoolDeployedEvent = (event: Event): PoolDeployedEvent => {
     decoded.swapFee = BigInt(10 ** 8);
   } else if (events.neoSwaps.poolDeployed.v51.is(event)) {
     decoded = events.neoSwaps.poolDeployed.v51.decode(event);
+  } else if (events.neoSwaps.poolDeployed.v54.is(event)) {
+    decoded = events.neoSwaps.poolDeployed.v54.decode(event);
   } else {
     decoded = event.args;
   }
@@ -126,7 +131,7 @@ export const decodeSellExecutedEvent = (event: Event): BuySellExecutedEvent => {
   let decoded: {
     who: string;
     marketId: bigint;
-    assetIn: Asset;
+    assetIn: Asset_v51 | Asset_v54;
     amountIn: bigint;
     amountOut: bigint;
     swapFeeAmount: bigint;
@@ -136,6 +141,8 @@ export const decodeSellExecutedEvent = (event: Event): BuySellExecutedEvent => {
     decoded = events.neoSwaps.sellExecuted.v50.decode(event);
   } else if (events.neoSwaps.sellExecuted.v51.is(event)) {
     decoded = events.neoSwaps.sellExecuted.v51.decode(event);
+  } else if (events.neoSwaps.sellExecuted.v54.is(event)) {
+    decoded = events.neoSwaps.sellExecuted.v54.decode(event);
   } else {
     decoded = event.args;
   }

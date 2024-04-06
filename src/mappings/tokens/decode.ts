@@ -13,6 +13,8 @@ export const decodeTokensBalanceSetEvent = (event: Event): TokensEvent => {
     decoded = events.tokens.balanceSet.v34.decode(event);
   } else if (events.tokens.balanceSet.v41.is(event)) {
     decoded = events.tokens.balanceSet.v41.decode(event);
+  } else if (events.tokens.balanceSet.v54.is(event)) {
+    decoded = events.tokens.balanceSet.v54.decode(event);
   } else {
     decoded = event.args;
   }
@@ -32,6 +34,8 @@ export const decodeTokensDepositedEvent = (event: Event): TokensEvent => {
     decoded = events.tokens.deposited.v36.decode(event);
   } else if (events.tokens.deposited.v41.is(event)) {
     decoded = events.tokens.deposited.v41.decode(event);
+  } else if (events.tokens.deposited.v54.is(event)) {
+    decoded = events.tokens.deposited.v54.decode(event);
   } else {
     decoded = event.args;
   }
@@ -46,6 +50,8 @@ export const decodeTokensReservedEvent = (event: Event): TokensEvent => {
   let decoded;
   if (events.tokens.reserved.v51.is(event)) {
     decoded = events.tokens.reserved.v51.decode(event);
+  } else if (events.tokens.reserved.v54.is(event)) {
+    decoded = events.tokens.reserved.v54.decode(event);
   } else {
     decoded = event.args;
   }
@@ -66,6 +72,8 @@ export const decodeTokensTransferEvent = (event: Event): TransferEvent => {
     decoded = events.tokens.transfer.v34.decode(event);
   } else if (events.tokens.transfer.v41.is(event)) {
     decoded = events.tokens.transfer.v41.decode(event);
+  } else if (events.tokens.transfer.v54.is(event)) {
+    decoded = events.tokens.transfer.v54.decode(event);
   } else {
     decoded = event.args;
   }
@@ -87,6 +95,8 @@ export const decodeTokensWithdrawnEvent = (event: Event): TokensEvent => {
     decoded = events.tokens.withdrawn.v36.decode(event);
   } else if (events.tokens.withdrawn.v41.is(event)) {
     decoded = events.tokens.withdrawn.v41.decode(event);
+  } else if (events.tokens.withdrawn.v54.is(event)) {
+    decoded = events.tokens.withdrawn.v54.decode(event);
   } else {
     decoded = event.args;
   }
