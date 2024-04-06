@@ -108,7 +108,7 @@ export const formatAssetId = (assetId: Asset_v51 | Asset_v54): string => {
     case _Asset.PoolShare:
       return JSON.stringify({ PoolShare: Number(assetId.value) });
     case _Asset.ScalarOutcome:
-      return JSON.stringify({ ScalarOutcome: assetId.value });
+      return JSON.stringify({ ScalarOutcome: [Number(assetId.value[0]), assetId.value[1].__kind] });
     case _Asset.Ztg:
       return _Asset.Ztg;
     default:
