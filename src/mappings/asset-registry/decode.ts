@@ -1,11 +1,11 @@
 import { AssetMetadata as AssetMetadata_v48 } from '../../types/v48';
-import { AssetMetadata as AssetMetadata_v54, XcmAssetClass_ForeignAsset } from '../../types/v54';
+import { AssetMetadata as AssetMetadata_v54, Asset_ForeignAsset } from '../../types/v54';
 import { storage } from '../../types';
 import { Block } from '../../processor';
 
 export const decodeMetadataStorage = async (
   block: Block,
-  assetId: XcmAssetClass_ForeignAsset
+  assetId: Asset_ForeignAsset
 ): Promise<AssetMetadata_v48 | AssetMetadata_v54 | undefined> => {
   let assetMetadata: AssetMetadata_v48 | AssetMetadata_v54 | undefined;
   if (storage.assetRegistry.metadata.v42.is(block)) {
