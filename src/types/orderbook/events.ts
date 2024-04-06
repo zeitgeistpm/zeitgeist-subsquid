@@ -2,6 +2,7 @@ import {sts, Block, Bytes, Option, Result, EventType, RuntimeCtx} from '../suppo
 import * as v50 from '../v50'
 import * as v51 from '../v51'
 import * as v53 from '../v53'
+import * as v54 from '../v54'
 
 export const orderFilled =  {
     name: 'Orderbook.OrderFilled',
@@ -51,6 +52,13 @@ export const orderPlaced =  {
         sts.struct({
             orderId: sts.bigint(),
             order: v53.Order,
+        })
+    ),
+    v54: new EventType(
+        'Orderbook.OrderPlaced',
+        sts.struct({
+            orderId: sts.bigint(),
+            order: v54.Order,
         })
     ),
 }

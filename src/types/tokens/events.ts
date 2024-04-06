@@ -5,6 +5,7 @@ import * as v34 from '../v34'
 import * as v36 from '../v36'
 import * as v41 from '../v41'
 import * as v51 from '../v51'
+import * as v54 from '../v54'
 
 export const transfer =  {
     name: 'Tokens.Transfer',
@@ -58,6 +59,18 @@ export const transfer =  {
             amount: sts.bigint(),
         })
     ),
+    /**
+     * Transfer succeeded.
+     */
+    v54: new EventType(
+        'Tokens.Transfer',
+        sts.struct({
+            currencyId: v54.CurrencyClass,
+            from: v54.AccountId32,
+            to: v54.AccountId32,
+            amount: sts.bigint(),
+        })
+    ),
 }
 
 export const reserved =  {
@@ -108,6 +121,17 @@ export const reserved =  {
         sts.struct({
             currencyId: v51.Asset,
             who: v51.AccountId32,
+            amount: sts.bigint(),
+        })
+    ),
+    /**
+     * Some balance was reserved (moved from free to reserved).
+     */
+    v54: new EventType(
+        'Tokens.Reserved',
+        sts.struct({
+            currencyId: v54.CurrencyClass,
+            who: v54.AccountId32,
             amount: sts.bigint(),
         })
     ),
@@ -165,6 +189,18 @@ export const balanceSet =  {
             reserved: sts.bigint(),
         })
     ),
+    /**
+     * A balance was set by root.
+     */
+    v54: new EventType(
+        'Tokens.BalanceSet',
+        sts.struct({
+            currencyId: v54.CurrencyClass,
+            who: v54.AccountId32,
+            free: sts.bigint(),
+            reserved: sts.bigint(),
+        })
+    ),
 }
 
 export const withdrawn =  {
@@ -202,6 +238,17 @@ export const withdrawn =  {
             amount: sts.bigint(),
         })
     ),
+    /**
+     * Some balances were withdrawn (e.g. pay for transaction fee)
+     */
+    v54: new EventType(
+        'Tokens.Withdrawn',
+        sts.struct({
+            currencyId: v54.CurrencyClass,
+            who: v54.AccountId32,
+            amount: sts.bigint(),
+        })
+    ),
 }
 
 export const deposited =  {
@@ -236,6 +283,17 @@ export const deposited =  {
         sts.struct({
             currencyId: v51.Asset,
             who: v51.AccountId32,
+            amount: sts.bigint(),
+        })
+    ),
+    /**
+     * Deposited some balance into an account
+     */
+    v54: new EventType(
+        'Tokens.Deposited',
+        sts.struct({
+            currencyId: v54.CurrencyClass,
+            who: v54.AccountId32,
             amount: sts.bigint(),
         })
     ),
