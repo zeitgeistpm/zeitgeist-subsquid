@@ -94,21 +94,19 @@ const fetchFromIPFS = async (metadata: string): Promise<string | undefined> => {
 export const formatAssetId = (assetId: Asset_v51 | Asset_v54): string => {
   switch (assetId.__kind) {
     case _Asset.CampaignAsset:
-      return JSON.stringify({ CampaignAsset: Number(assetId.value) });
+      return JSON.stringify({ campaignAsset: Number(assetId.value) });
     case _Asset.CategoricalOutcome:
-      return JSON.stringify({ CategoricalOutcome: assetId.value.map(Number) });
-    case _Asset.CampaignAsset:
-      return JSON.stringify({ CampaignAsset: Number(assetId.value) });
+      return JSON.stringify({ categoricalOutcome: assetId.value.map(Number) });
     case _Asset.CustomAsset:
-      return JSON.stringify({ CustomAsset: Number(assetId.value) });
+      return JSON.stringify({ customAsset: Number(assetId.value) });
     case _Asset.ForeignAsset:
-      return JSON.stringify({ ForeignAsset: Number(assetId.value) });
+      return JSON.stringify({ foreignAsset: Number(assetId.value) });
     case _Asset.ParimutuelShare:
-      return JSON.stringify({ ParimutuelShare: assetId.value.map(Number) });
+      return JSON.stringify({ parimutuelShare: assetId.value.map(Number) });
     case _Asset.PoolShare:
-      return JSON.stringify({ PoolShare: Number(assetId.value) });
+      return JSON.stringify({ poolShare: Number(assetId.value) });
     case _Asset.ScalarOutcome:
-      return JSON.stringify({ ScalarOutcome: [Number(assetId.value[0]), assetId.value[1].__kind] });
+      return JSON.stringify({ scalarOutcome: [Number(assetId.value[0]), assetId.value[1].__kind] });
     case _Asset.Ztg:
       return _Asset.Ztg;
     default:
