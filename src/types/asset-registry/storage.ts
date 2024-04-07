@@ -4,6 +4,7 @@ import * as v42 from '../v42'
 import * as v48 from '../v48'
 import * as v49 from '../v49'
 import * as v51 from '../v51'
+import * as v54 from '../v54'
 
 export const metadata =  {
     /**
@@ -26,6 +27,10 @@ export const metadata =  {
      *  The metadata of an asset, indexed by asset id.
      */
     v51: new StorageType('AssetRegistry.Metadata', 'Optional', [v51.Asset], v51.AssetMetadata) as MetadataV51,
+    /**
+     *  The metadata of an asset, indexed by asset id.
+     */
+    v54: new StorageType('AssetRegistry.Metadata', 'Optional', [v54.XcmAssetClass], v54.AssetMetadata) as MetadataV54,
 }
 
 /**
@@ -111,4 +116,21 @@ export interface MetadataV51  {
     getPairs(block: Block, key: v51.Asset): Promise<[k: v51.Asset, v: (v51.AssetMetadata | undefined)][]>
     getPairsPaged(pageSize: number, block: Block): AsyncIterable<[k: v51.Asset, v: (v51.AssetMetadata | undefined)][]>
     getPairsPaged(pageSize: number, block: Block, key: v51.Asset): AsyncIterable<[k: v51.Asset, v: (v51.AssetMetadata | undefined)][]>
+}
+
+/**
+ *  The metadata of an asset, indexed by asset id.
+ */
+export interface MetadataV54  {
+    is(block: RuntimeCtx): boolean
+    get(block: Block, key: v54.XcmAssetClass): Promise<(v54.AssetMetadata | undefined)>
+    getMany(block: Block, keys: v54.XcmAssetClass[]): Promise<(v54.AssetMetadata | undefined)[]>
+    getKeys(block: Block): Promise<v54.XcmAssetClass[]>
+    getKeys(block: Block, key: v54.XcmAssetClass): Promise<v54.XcmAssetClass[]>
+    getKeysPaged(pageSize: number, block: Block): AsyncIterable<v54.XcmAssetClass[]>
+    getKeysPaged(pageSize: number, block: Block, key: v54.XcmAssetClass): AsyncIterable<v54.XcmAssetClass[]>
+    getPairs(block: Block): Promise<[k: v54.XcmAssetClass, v: (v54.AssetMetadata | undefined)][]>
+    getPairs(block: Block, key: v54.XcmAssetClass): Promise<[k: v54.XcmAssetClass, v: (v54.AssetMetadata | undefined)][]>
+    getPairsPaged(pageSize: number, block: Block): AsyncIterable<[k: v54.XcmAssetClass, v: (v54.AssetMetadata | undefined)][]>
+    getPairsPaged(pageSize: number, block: Block, key: v54.XcmAssetClass): AsyncIterable<[k: v54.XcmAssetClass, v: (v54.AssetMetadata | undefined)][]>
 }

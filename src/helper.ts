@@ -1,17 +1,17 @@
 import { DecodedMarketMetadata } from '@zeitgeistpm/sdk/dist/types';
-import { util } from '@zeitgeistpm/sdk';
 import Decimal from 'decimal.js';
 import axios from 'axios';
 import CID from 'cids';
 import { DisputeMechanism, Extrinsic, MarketStatus, ScoringRule } from './model';
 import {
-  Asset,
+  Asset as Asset_v51,
   MarketDisputeMechanism as _DisputeMechanism,
   MarketType,
   MarketStatus as MarketStatus_v51,
   ScoringRule as ScoringRule_v51,
 } from './types/v51';
 import { MarketStatus as MarketStatus_v53, ScoringRule as ScoringRule_v53 } from './types/v53';
+import { Asset as Asset_v54 } from './types/v54';
 import { CacheHint, _Asset } from './consts';
 import { Block, Extrinsic as _Extrinsic } from './processor';
 import { Cache, Tools } from './util';
@@ -91,19 +91,22 @@ const fetchFromIPFS = async (metadata: string): Promise<string | undefined> => {
   return status === 200 ? JSON.stringify(data) : undefined;
 };
 
-export const formatAssetId = (assetId: Asset): string => {
+export const formatAssetId = (assetId: Asset_v51 | Asset_v54): string => {
   switch (assetId.__kind) {
+    case _Asset.CampaignAsset:
+      return JSON.stringify({ campaignAsset: Number(assetId.value) });
     case _Asset.CategoricalOutcome:
-      return JSON.stringify(util.AssetIdFromString('[' + assetId.value.toString() + ']'));
+      return JSON.stringify({ categoricalOutcome: assetId.value.map(Number) });
+    case _Asset.CustomAsset:
+      return JSON.stringify({ customAsset: Number(assetId.value) });
     case _Asset.ForeignAsset:
       return JSON.stringify({ foreignAsset: Number(assetId.value) });
+    case _Asset.ParimutuelShare:
+      return JSON.stringify({ parimutuelShare: assetId.value.map(Number) });
     case _Asset.PoolShare:
-      return JSON.stringify(util.AssetIdFromString('pool' + assetId.value.toString()));
+      return JSON.stringify({ poolShare: Number(assetId.value) });
     case _Asset.ScalarOutcome:
-      const scale = new Array();
-      scale.push(+assetId.value[0].toString());
-      scale.push(assetId.value[1].__kind);
-      return JSON.stringify(util.AssetIdFromString(JSON.stringify(scale)));
+      return JSON.stringify({ scalarOutcome: [Number(assetId.value[0]), assetId.value[1].__kind] });
     case _Asset.Ztg:
       return _Asset.Ztg;
     default:
@@ -185,7 +188,7 @@ export const getFees = async (block: Block, extrinsic: _Extrinsic): Promise<bigi
   return totalFees;
 };
 
-export const isBaseAsset = (assetId: Asset | string): boolean => {
+export const isBaseAsset = (assetId: Asset_v51 | Asset_v54 | string): boolean => {
   if (typeof assetId === 'string') {
     return assetId.includes('Ztg') || assetId.includes('foreignAsset');
   }
