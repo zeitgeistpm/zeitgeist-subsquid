@@ -17,6 +17,7 @@ export enum MarketEvent {
     MarketReported = "MarketReported",
     MarketResolved = "MarketResolved",
     MarketStartedWithSubsidy = "MarketStartedWithSubsidy",
+    OutcomeBought = "OutcomeBought",
     PoolDeployed = "PoolDeployed",
     PoolDestroyed = "PoolDestroyed",
     PoolExit = "PoolExit",

@@ -41,6 +41,9 @@
     "ParachainStaking": {
       "events": ["Rewarded"]
     },
+    "Parimutuel": {
+      "events": ["OutcomeBought"]
+    },
     "PredictionMarkets": {
       "events": [
         "BoughtCompleteSet",

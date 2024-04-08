@@ -43,6 +43,7 @@ export enum Pallet {
   Orderbook = 'Orderbook',
   ParachainStaking = 'ParachainStaking',
   ParachainSystem = 'ParachainSystem',
+  Parimutuel = 'Parimutuel',
   PredictionMarkets = 'PredictionMarkets',
   Styx = 'Styx',
   Sudo = 'Sudo',
@@ -54,6 +55,7 @@ export enum Pallet {
 export enum SwapEvent {
   BuyExecuted = 'BuyExecuted',
   OrderFilled = 'OrderFilled',
+  OutcomeBought = 'OutcomeBought',
   SellExecuted = 'SellExecuted',
   SwapExactAmountIn = 'SwapExactAmountIn',
   SwapExactAmountOut = 'SwapExactAmountOut',

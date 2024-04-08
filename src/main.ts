@@ -74,6 +74,9 @@ processor.run(new TypeormDatabase(), async (ctx) => {
         case Pallet.ParachainStaking:
           await mapParachainStaking(event);
           break;
+        case Pallet.Parimutuel:
+          await mapParimutuel(ctx.store, event);
+          break;
         case Pallet.PredictionMarkets:
           await mapPredictionMarkets(ctx.store, event);
           break;
@@ -321,6 +324,19 @@ const mapParachainStaking = async (event: Event) => {
         hab.id = event.id + hab.id.slice(-6);
         balanceHistory.push(hab);
       }
+      break;
+    }
+  }
+};
+
+const mapParimutuel = async (store: Store, event: Event) => {
+  switch (event.name) {
+    case events.parimutuel.outcomeBought.name: {
+      await saveOrders(store);
+      const res = await mappings.parimutuel.outcomeBought(store, event);
+      if (!res) return;
+      marketHistory.push(res.historicalMarket);
+      swapHistory.push(res.historicalSwap);
       break;
     }
   }
