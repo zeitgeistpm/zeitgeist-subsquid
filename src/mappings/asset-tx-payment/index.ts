@@ -1,5 +1,5 @@
 import { HistoricalAccountBalance } from '../../model';
-import { Asset_ForeignAsset } from '../../types/v49';
+import { Asset_ForeignAsset } from '../../types/v54';
 import { TREASURY_ACCOUNT, _Asset } from '../../consts';
 import { extrinsicFromEvent, formatAssetId, isBatteryStation } from '../../helper';
 import { Event } from '../../processor';

@@ -26,13 +26,11 @@ elif [ "$2" = "resume" ]; then
   docker build . --target processor -t processor
   echo "Resuming processor..."
 elif [ "$2" = "restart" ]; then
-  echo "Stopping processor..."
-  docker stop zeitgeist-processor
-  echo "Stopping api..."
-  docker stop api
-  docker stop sub-api
-  echo "Restarting database..."
-  yarn db:restart
+  echo "Shutting down..."
+  docker stop $(docker ps -a -q)
+  docker rm $(docker ps -a -q)
+  echo "Starting database..."
+  yarn db:up
   echo "Building processor..."
   docker build . --target processor -t processor
   echo "Starting processor..."

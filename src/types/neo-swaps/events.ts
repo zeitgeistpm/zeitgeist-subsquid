@@ -1,6 +1,7 @@
 import {sts, Block, Bytes, Option, Result, EventType, RuntimeCtx} from '../support'
 import * as v50 from '../v50'
 import * as v51 from '../v51'
+import * as v54 from '../v54'
 
 export const buyExecuted =  {
     name: 'NeoSwaps.BuyExecuted',
@@ -29,6 +30,22 @@ export const buyExecuted =  {
             who: v51.AccountId32,
             marketId: sts.bigint(),
             assetOut: v51.Asset,
+            amountIn: sts.bigint(),
+            amountOut: sts.bigint(),
+            swapFeeAmount: sts.bigint(),
+            externalFeeAmount: sts.bigint(),
+        })
+    ),
+    /**
+     * Informant bought a position. `amount_in` is the amount of collateral paid by `who`,
+     * including swap and external fees.
+     */
+    v54: new EventType(
+        'NeoSwaps.BuyExecuted',
+        sts.struct({
+            who: v54.AccountId32,
+            marketId: sts.bigint(),
+            assetOut: v54.Asset,
             amountIn: sts.bigint(),
             amountOut: sts.bigint(),
             swapFeeAmount: sts.bigint(),
@@ -64,6 +81,23 @@ export const sellExecuted =  {
             who: v51.AccountId32,
             marketId: sts.bigint(),
             assetIn: v51.Asset,
+            amountIn: sts.bigint(),
+            amountOut: sts.bigint(),
+            swapFeeAmount: sts.bigint(),
+            externalFeeAmount: sts.bigint(),
+        })
+    ),
+    /**
+     * Informant sold a position. `amount_out` is the amount of collateral received by `who`,
+     * with swap and external fees not yet deducted. The actual amount received is
+     * `amount_out - swap_fee_amount - external_fee_amount`.
+     */
+    v54: new EventType(
+        'NeoSwaps.SellExecuted',
+        sts.struct({
+            who: v54.AccountId32,
+            marketId: sts.bigint(),
+            assetIn: v54.Asset,
             amountIn: sts.bigint(),
             amountOut: sts.bigint(),
             swapFeeAmount: sts.bigint(),
@@ -147,6 +181,22 @@ export const poolDeployed =  {
             accountId: v51.AccountId32,
             reserves: sts.array(() => sts.tuple(() => [v51.Asset, sts.bigint()])),
             collateral: v51.Asset,
+            liquidityParameter: sts.bigint(),
+            poolSharesAmount: sts.bigint(),
+            swapFee: sts.bigint(),
+        })
+    ),
+    /**
+     * Pool was createed.
+     */
+    v54: new EventType(
+        'NeoSwaps.PoolDeployed',
+        sts.struct({
+            who: v54.AccountId32,
+            marketId: sts.bigint(),
+            accountId: v54.AccountId32,
+            reserves: sts.array(() => sts.tuple(() => [v54.Asset, sts.bigint()])),
+            collateral: v54.Asset,
             liquidityParameter: sts.bigint(),
             poolSharesAmount: sts.bigint(),
             swapFee: sts.bigint(),

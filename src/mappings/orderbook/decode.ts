@@ -1,6 +1,7 @@
 import * as ss58 from '@subsquid/ss58';
 import { Order as Order_v51 } from '../../types/v51';
 import { Order as Order_v53 } from '../../types/v53';
+import { Order as Order_v54 } from '../../types/v54';
 import { events } from '../../types';
 import { _Asset } from '../../consts';
 import { formatAssetId } from '../../helper';
@@ -34,13 +35,15 @@ export const orderFilled = (event: Event): OrderFilledEvent => {
 };
 
 export const orderPlaced = (event: Event): OrderPlacedEvent => {
-  let decoded: { orderId: bigint; order: Order_v51 | Order_v53 };
+  let decoded: { orderId: bigint; order: Order_v51 | Order_v53 | Order_v54 };
   if (events.orderbook.orderPlaced.v50.is(event)) {
     decoded = events.orderbook.orderPlaced.v50.decode(event);
   } else if (events.orderbook.orderPlaced.v51.is(event)) {
     decoded = events.orderbook.orderPlaced.v51.decode(event);
   } else if (events.orderbook.orderPlaced.v53.is(event)) {
     decoded = events.orderbook.orderPlaced.v53.decode(event);
+  } else if (events.orderbook.orderPlaced.v54.is(event)) {
+    decoded = events.orderbook.orderPlaced.v54.decode(event);
   } else {
     decoded = event.args;
   }

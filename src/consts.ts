@@ -6,8 +6,11 @@ export const SWAP_EXACT_AMOUNT_OUT = 'swap_exact_amount_out';
 export const TREASURY_ACCOUNT = 'dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYiBJ';
 
 export enum _Asset {
+  CampaignAsset = 'CampaignAsset',
   CategoricalOutcome = 'CategoricalOutcome',
+  CustomAsset = 'CustomAsset',
   ForeignAsset = 'ForeignAsset',
+  ParimutuelShare = 'ParimutuelShare',
   PoolShare = 'PoolShare',
   ScalarOutcome = 'ScalarOutcome',
   Ztg = 'Ztg',

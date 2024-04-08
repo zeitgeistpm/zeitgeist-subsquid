@@ -276,6 +276,8 @@ export const decodeTokensRedeemedEvent = (event: Event): TokensRedeemedEvent => 
     [marketId, assetId, amountRedeemed, payout, accountId] = events.predictionMarkets.tokensRedeemed.v35.decode(event);
   } else if (events.predictionMarkets.tokensRedeemed.v41.is(event)) {
     [marketId, assetId, amountRedeemed, payout, accountId] = events.predictionMarkets.tokensRedeemed.v41.decode(event);
+  } else if (events.predictionMarkets.tokensRedeemed.v54.is(event)) {
+    [marketId, assetId, amountRedeemed, payout, accountId] = events.predictionMarkets.tokensRedeemed.v54.decode(event);
   } else {
     [marketId, assetId, amountRedeemed, payout, accountId] = event.args;
   }
