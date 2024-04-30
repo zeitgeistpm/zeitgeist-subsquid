@@ -274,6 +274,7 @@ export const volumeHistory = (prices: Map<BaseAsset, number>) => `
       CASE 
         WHEN base_asset = 'Ztg' THEN ROUND(gross_volume * ${prices.get(BaseAsset.ZTG)}, 0) 
         WHEN base_asset = '{\"foreignAsset\":0}' THEN ROUND(gross_volume * ${prices.get(BaseAsset.DOT)}, 0) 
+        WHEN base_asset = '{\"foreignAsset\":2}' THEN ROUND(gross_volume * ${prices.get(BaseAsset.WSX)}, 0) 
         ELSE gross_volume 
       END
     ) AS volume
