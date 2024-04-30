@@ -30,6 +30,7 @@ export const getAssetUsdPrices = async (): Promise<Map<BaseAsset, number>> => {
   if (isLocalEnv() || isBatteryStation()) {
     prices = new Map([
       [BaseAsset.DOT, 1],
+      [BaseAsset.WSX, 1],
       [BaseAsset.ZTG, 1],
     ]);
   } else {
@@ -37,6 +38,7 @@ export const getAssetUsdPrices = async (): Promise<Map<BaseAsset, number>> => {
     if (new Date().getTime() - AssetPriceResolver.cachedAt.getTime() > 60 * 60 * 1000) refreshPrices();
     prices = new Map([
       [BaseAsset.DOT, (await fetchFromCache(BaseAsset.DOT, TargetAsset.USD)).price],
+      [BaseAsset.WSX, 0],
       [BaseAsset.ZTG, (await fetchFromCache(BaseAsset.ZTG, TargetAsset.USD)).price],
     ]);
   }
