@@ -24,6 +24,7 @@ export enum BaseAsset {
   DOT = 'polkadot',
   USDC = 'usd-coin',
   USDT = 'tether',
+  WSX = 'wsx',
   ZTG = 'zeitgeist',
 }
 
