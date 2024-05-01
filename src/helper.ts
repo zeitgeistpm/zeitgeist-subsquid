@@ -129,6 +129,9 @@ export const formatDisputeMechanism = (
 
 export const formatScoringRule = (scoringRule: ScoringRule_v51 | ScoringRule_v53): ScoringRule => {
   switch (scoringRule.__kind) {
+    //@ts-ignore
+    case 'AmmCdaHybrid':
+      return ScoringRule.AmmCdaHybrid;
     case 'CPMM':
       return ScoringRule.CPMM;
     case 'Lmsr':
@@ -204,7 +207,11 @@ export const isLocalEnv = (): boolean => {
 };
 
 export const isMainnet = (): boolean => {
-  return process.env.WS_NODE_URL!.includes('main');
+  return (
+    process.env.WS_NODE_URL!.includes('dwellir') ||
+    process.env.WS_NODE_URL!.includes('main') ||
+    process.env.WS_NODE_URL!.includes('onfinality')
+  );
 };
 
 export const isEventOrderValid = (latterEventId: string, formerEventId: string): boolean => {

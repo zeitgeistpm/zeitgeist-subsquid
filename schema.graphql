@@ -548,6 +548,7 @@ enum PoolStatus {
 Markets' scoring rule options
 """
 enum ScoringRule {
+  AmmCdaHybrid
   CPMM
   Lmsr
   Orderbook
