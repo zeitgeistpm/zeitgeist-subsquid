@@ -11,6 +11,7 @@ import * as v50 from '../v50'
 import * as v51 from '../v51'
 import * as v53 from '../v53'
 import * as v54 from '../v54'
+import * as v55 from '../v55'
 
 export const markets =  {
     /**
@@ -61,6 +62,10 @@ export const markets =  {
      *  Holds all markets
      */
     v54: new StorageType('MarketCommons.Markets', 'Optional', [sts.bigint()], v54.Market) as MarketsV54,
+    /**
+     *  Holds all markets
+     */
+    v55: new StorageType('MarketCommons.Markets', 'Optional', [sts.bigint()], v55.Market) as MarketsV55,
 }
 
 /**
@@ -265,4 +270,21 @@ export interface MarketsV54  {
     getPairs(block: Block, key: bigint): Promise<[k: bigint, v: (v54.Market | undefined)][]>
     getPairsPaged(pageSize: number, block: Block): AsyncIterable<[k: bigint, v: (v54.Market | undefined)][]>
     getPairsPaged(pageSize: number, block: Block, key: bigint): AsyncIterable<[k: bigint, v: (v54.Market | undefined)][]>
+}
+
+/**
+ *  Holds all markets
+ */
+export interface MarketsV55  {
+    is(block: RuntimeCtx): boolean
+    get(block: Block, key: bigint): Promise<(v55.Market | undefined)>
+    getMany(block: Block, keys: bigint[]): Promise<(v55.Market | undefined)[]>
+    getKeys(block: Block): Promise<bigint[]>
+    getKeys(block: Block, key: bigint): Promise<bigint[]>
+    getKeysPaged(pageSize: number, block: Block): AsyncIterable<bigint[]>
+    getKeysPaged(pageSize: number, block: Block, key: bigint): AsyncIterable<bigint[]>
+    getPairs(block: Block): Promise<[k: bigint, v: (v55.Market | undefined)][]>
+    getPairs(block: Block, key: bigint): Promise<[k: bigint, v: (v55.Market | undefined)][]>
+    getPairsPaged(pageSize: number, block: Block): AsyncIterable<[k: bigint, v: (v55.Market | undefined)][]>
+    getPairsPaged(pageSize: number, block: Block, key: bigint): AsyncIterable<[k: bigint, v: (v55.Market | undefined)][]>
 }
