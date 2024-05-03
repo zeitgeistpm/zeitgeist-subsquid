@@ -2,6 +2,7 @@ import * as ss58 from '@subsquid/ss58';
 import { Order as Order_v51 } from '../../types/v51';
 import { Order as Order_v53 } from '../../types/v53';
 import { Order as Order_v54 } from '../../types/v54';
+import { ExternalFee } from '../../types/v55';
 import { events } from '../../types';
 import { _Asset } from '../../consts';
 import { formatAssetId } from '../../helper';
@@ -16,9 +17,12 @@ export const orderFilled = (event: Event): OrderFilledEvent => {
     filledTakerAmount: bigint;
     unfilledMakerAmount: bigint;
     unfilledTakerAmount: bigint;
+    externalFee?: ExternalFee;
   };
   if (events.orderbook.orderFilled.v53.is(event)) {
     decoded = events.orderbook.orderFilled.v53.decode(event);
+  } else if (events.orderbook.orderFilled.v55.is(event)) {
+    decoded = events.orderbook.orderFilled.v55.decode(event);
   } else {
     decoded = event.args;
   }
@@ -31,6 +35,10 @@ export const orderFilled = (event: Event): OrderFilledEvent => {
     filledTakerAmount: BigInt(decoded.filledTakerAmount),
     unfilledMakerAmount: BigInt(decoded.unfilledMakerAmount),
     unfilledTakerAmount: BigInt(decoded.unfilledTakerAmount),
+    externalFeeAccount: decoded.externalFee
+      ? ss58.encode({ prefix: 73, bytes: decoded.externalFee.account })
+      : undefined,
+    externalFeeAmount: decoded.externalFee ? BigInt(decoded.externalFee.amount) : undefined,
   };
 };
 
@@ -101,6 +109,8 @@ interface OrderFilledEvent {
   filledTakerAmount: bigint;
   unfilledMakerAmount: bigint;
   unfilledTakerAmount: bigint;
+  externalFeeAccount?: string;
+  externalFeeAmount?: bigint;
 }
 
 interface OrderPlacedEvent {
