@@ -40,6 +40,7 @@ export enum Pallet {
   Balances = 'Balances',
   Court = 'Court',
   Currency = 'Currency',
+  MarketAssets = 'MarketAssets',
   NeoSwaps = 'NeoSwaps',
   Orderbook = 'Orderbook',
   ParachainStaking = 'ParachainStaking',

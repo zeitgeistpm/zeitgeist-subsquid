@@ -29,6 +29,9 @@
     "Currency": {
       "events": ["Deposited", "Transferred", "Withdrawn"]
     },
+    "MarketAssets": {
+      "events": ["Issued", "Transferred"]
+    },
     "MarketCommons": {
       "storage": ["Markets"]
     },
