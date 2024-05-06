@@ -96,6 +96,8 @@ export const formatAssetId = (assetId: Asset_v51 | Asset_v54): string => {
     case _Asset.CampaignAsset:
       return JSON.stringify({ campaignAsset: Number(assetId.value) });
     case _Asset.CategoricalOutcome:
+      if (typeof assetId.value === 'string')
+        return JSON.stringify({ categoricalOutcome: (assetId.value as any as string).split(',').map(Number) });
       return JSON.stringify({ categoricalOutcome: assetId.value.map(Number) });
     case _Asset.CustomAsset:
       return JSON.stringify({ customAsset: Number(assetId.value) });
