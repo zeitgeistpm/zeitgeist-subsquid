@@ -3,6 +3,7 @@ import * as v50 from '../v50'
 import * as v51 from '../v51'
 import * as v53 from '../v53'
 import * as v54 from '../v54'
+import * as v55 from '../v55'
 
 export const orderFilled =  {
     name: 'Orderbook.OrderFilled',
@@ -27,6 +28,19 @@ export const orderFilled =  {
             filledTakerAmount: sts.bigint(),
             unfilledMakerAmount: sts.bigint(),
             unfilledTakerAmount: sts.bigint(),
+        })
+    ),
+    v55: new EventType(
+        'Orderbook.OrderFilled',
+        sts.struct({
+            orderId: sts.bigint(),
+            maker: v55.AccountId32,
+            taker: v55.AccountId32,
+            filledMakerAmount: sts.bigint(),
+            filledTakerAmount: sts.bigint(),
+            unfilledMakerAmount: sts.bigint(),
+            unfilledTakerAmount: sts.bigint(),
+            externalFee: v55.ExternalFee,
         })
     ),
 }

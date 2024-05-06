@@ -9,8 +9,16 @@ export const orderFilled = async (
   store: Store,
   event: Event
 ): Promise<{ order: Order; historicalOrder: HistoricalOrder; historicalSwap: HistoricalSwap } | undefined> => {
-  const { orderId, taker, filledMakerAmount, filledTakerAmount, unfilledMakerAmount, unfilledTakerAmount } =
-    decode.orderFilled(event);
+  const {
+    orderId,
+    taker,
+    filledMakerAmount,
+    filledTakerAmount,
+    unfilledMakerAmount,
+    unfilledTakerAmount,
+    externalFeeAccount,
+    externalFeeAmount,
+  } = decode.orderFilled(event);
 
   const order = await store.get(Order, { where: { id: orderId.toString() } });
   if (!order) return;
@@ -29,7 +37,7 @@ export const orderFilled = async (
     assetOut: order?.maker.asset,
     blockNumber: event.block.height,
     event: OrderEvent.OrderFilled,
-    externalFeeAmount: null,
+    externalFeeAmount: externalFeeAccount === order.makerAccountId ? externalFeeAmount : undefined,
     extrinsic: extrinsicFromEvent(event),
     id: event.id,
     orderId: +order.id,
@@ -44,7 +52,7 @@ export const orderFilled = async (
     assetOut: order?.taker.asset,
     blockNumber: event.block.height,
     event: SwapEvent.OrderFilled,
-    externalFeeAmount: null,
+    externalFeeAmount: externalFeeAccount === order.makerAccountId ? externalFeeAmount : undefined,
     extrinsic: extrinsicFromEvent(event),
     id: event.id,
     swapFeeAmount: null,

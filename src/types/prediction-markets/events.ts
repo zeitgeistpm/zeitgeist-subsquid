@@ -15,6 +15,7 @@ import * as v50 from '../v50'
 import * as v51 from '../v51'
 import * as v53 from '../v53'
 import * as v54 from '../v54'
+import * as v55 from '../v55'
 
 export const boughtCompleteSet =  {
     name: 'PredictionMarkets.BoughtCompleteSet',
@@ -158,6 +159,13 @@ export const marketCreated =  {
     v54: new EventType(
         'PredictionMarkets.MarketCreated',
         sts.tuple([sts.bigint(), v54.AccountId32, v54.Market])
+    ),
+    /**
+     * A market has been created. \[market_id, market_account, market\]
+     */
+    v55: new EventType(
+        'PredictionMarkets.MarketCreated',
+        sts.tuple([sts.bigint(), v55.AccountId32, v55.Market])
     ),
 }
 
