@@ -10,8 +10,8 @@ import {
   MarketStatus as MarketStatus_v51,
   ScoringRule as ScoringRule_v51,
 } from './types/v51';
-import { MarketStatus as MarketStatus_v53, ScoringRule as ScoringRule_v53 } from './types/v53';
 import { Asset as Asset_v54 } from './types/v54';
+import { MarketStatus as MarketStatus_v55, ScoringRule as ScoringRule_v55 } from './types/v55';
 import { CacheHint, _Asset } from './consts';
 import { Block, Extrinsic as _Extrinsic } from './processor';
 import { Cache, Tools } from './util';
@@ -127,9 +127,8 @@ export const formatDisputeMechanism = (
   }
 };
 
-export const formatScoringRule = (scoringRule: ScoringRule_v51 | ScoringRule_v53): ScoringRule => {
+export const formatScoringRule = (scoringRule: ScoringRule_v51 | ScoringRule_v55): ScoringRule => {
   switch (scoringRule.__kind) {
-    //@ts-ignore
     case 'AmmCdaHybrid':
       return ScoringRule.AmmCdaHybrid;
     case 'CPMM':
@@ -145,7 +144,7 @@ export const formatScoringRule = (scoringRule: ScoringRule_v51 | ScoringRule_v53
   }
 };
 
-export const formatMarketStatus = (status: MarketStatus_v51 | MarketStatus_v53): MarketStatus => {
+export const formatMarketStatus = (status: MarketStatus_v51 | MarketStatus_v55): MarketStatus => {
   switch (status.__kind) {
     case 'Active':
       return MarketStatus.Active;
