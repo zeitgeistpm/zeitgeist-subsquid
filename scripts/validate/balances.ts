@@ -5,6 +5,7 @@
 import { AccountInfo } from '@polkadot/types/interfaces/system';
 import { util } from '@zeitgeistpm/sdk';
 import axios from 'axios';
+import Decimal from 'decimal.js';
 import { Account, AccountBalance } from '../../src/model';
 import { Tools } from '../../src/util';
 
@@ -82,29 +83,40 @@ const getOutliers = async (
     accounts.map(async (account) => {
       await Promise.all(
         account.balances.map(async (ab) => {
-          let chainBal;
+          let chainBalance;
           try {
             if (ab.assetId === 'Ztg') {
-              const {
-                data: { free },
-              } = (await sdk.api.query.system.account.at(blockHash, account.accountId)) as AccountInfo;
-              chainBal = free;
+              const bal = (await sdk.api.query.system.account.at(blockHash, account.accountId)) as AccountInfo;
+              chainBalance = new Decimal(bal.data.free.toString());
             } else {
-              const { free } = (await sdk.api.query.tokens.accounts.at(
-                blockHash,
-                account.accountId,
-                ab.assetId.includes('foreign')
-                  ? { ForeignAsset: ab.assetId.replace(/\D/g, '') }
-                  : util.AssetIdFromString(ab.assetId)
-              )) as any;
-              chainBal = free;
+              let marketId = 0;
+              if (ab.assetId.includes('Outcome'))
+                marketId = Number(ab.assetId.substring(ab.assetId.indexOf('[') + 1, ab.assetId.indexOf(',')));
+
+              // Last market using tokens pallet for their assets
+              if (marketId > 873) {
+                const bal = (await sdk.api.query.marketAssets.account(
+                  util.AssetIdFromString(ab.assetId),
+                  account.accountId
+                )) as any;
+                chainBalance = new Decimal(bal.balance.toString());
+              } else {
+                const bal = (await sdk.api.query.tokens.accounts.at(
+                  blockHash,
+                  account.accountId,
+                  ab.assetId.includes('foreign')
+                    ? { ForeignAsset: ab.assetId.replace(/\D/g, '') }
+                    : util.AssetIdFromString(ab.assetId)
+                )) as any;
+                chainBalance = new Decimal(bal.free.toString());
+              }
             }
           } catch (err) {
             if (PROGRESS) console.error(err);
           }
 
-          if (chainBal) {
-            if (!isSame(account.accountId, chainBal, ab)) {
+          if (chainBalance) {
+            if (!isSame(account.accountId, chainBalance, ab)) {
               let assets = outlierMap.get(account.accountId) || [];
               assets.push(ab.assetId);
               outlierMap.set(account.accountId, assets);
@@ -119,16 +131,16 @@ const getOutliers = async (
   return { validatedAccCount: validatedAccounts.size, validatedABCount, outlierMap };
 };
 
-const isSame = (accountId: string, chainBal: any, squidAB: AccountBalance): boolean => {
-  if (chainBal.toString() !== squidAB.balance.toString()) {
-    console.log(`\n${squidAB.assetId} balance don't match for ${accountId}`);
-    console.log(`On Chain: ${chainBal.toBigInt()}, On Subsquid: ${squidAB.balance}`);
+const isSame = (accountId: string, chainBalance: Decimal, squidBalance: AccountBalance): boolean => {
+  if (chainBalance.toString() !== squidBalance.balance.toString()) {
+    console.log(`\n${squidBalance.assetId} balance don't match for ${accountId}`);
+    console.log(`On Chain: ${chainBalance}, On Subsquid: ${squidBalance.balance}`);
     return false;
   }
 
   if (PROGRESS) {
-    console.log(`${squidAB.assetId} balance match for ${accountId}`);
-    console.log(`On Chain: ${chainBal.toBigInt()}, On Subsquid: ${squidAB.balance}`);
+    console.log(`${squidBalance.assetId} balance match for ${accountId}`);
+    console.log(`On Chain: ${chainBalance}, On Subsquid: ${squidBalance.balance}`);
   }
   return true;
 };
