@@ -65,6 +65,9 @@ processor.run(new TypeormDatabase(), async (ctx) => {
         case Pallet.Currency:
           await mapCurrency(event);
           break;
+        case Pallet.MarketAssets:
+          await mapMarketAssets(event);
+          break;
         case Pallet.NeoSwaps:
           await mapNeoSwaps(ctx.store, event);
           break;
@@ -228,6 +231,22 @@ const mapCurrency = async (event: Event) => {
     case events.currency.withdrawn.name: {
       const hab = await mappings.currency.withdrawn(event);
       await storeBalanceChanges([hab]);
+      break;
+    }
+  }
+};
+
+const mapMarketAssets = async (event: Event) => {
+  switch (event.name) {
+    case events.marketAssets.issued.name: {
+      const hab = await mappings.marketAssets.issued(event);
+      await storeBalanceChanges([hab]);
+      break;
+    }
+    case events.marketAssets.transferred.name: {
+      const habs = await mappings.marketAssets.transferred(event);
+      if (!habs) break;
+      await storeBalanceChanges(habs);
       break;
     }
   }

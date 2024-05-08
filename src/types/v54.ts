@@ -901,6 +901,54 @@ export interface BaseAssetClass_Ztg {
     __kind: 'Ztg'
 }
 
+export const MarketAssetClass: sts.Type<MarketAssetClass> = sts.closedEnum(() => {
+    return  {
+        CategoricalOutcome: sts.tuple(() => [sts.bigint(), sts.number()]),
+        ParimutuelShare: sts.tuple(() => [sts.bigint(), sts.number()]),
+        PoolShare: sts.bigint(),
+        ScalarOutcome: sts.tuple(() => [sts.bigint(), ScalarPosition]),
+    }
+})
+
+export const ScalarPosition: sts.Type<ScalarPosition> = sts.closedEnum(() => {
+    return  {
+        Long: sts.unit(),
+        Short: sts.unit(),
+    }
+})
+
+export type ScalarPosition = ScalarPosition_Long | ScalarPosition_Short
+
+export interface ScalarPosition_Long {
+    __kind: 'Long'
+}
+
+export interface ScalarPosition_Short {
+    __kind: 'Short'
+}
+
+export type MarketAssetClass = MarketAssetClass_CategoricalOutcome | MarketAssetClass_ParimutuelShare | MarketAssetClass_PoolShare | MarketAssetClass_ScalarOutcome
+
+export interface MarketAssetClass_CategoricalOutcome {
+    __kind: 'CategoricalOutcome'
+    value: [bigint, number]
+}
+
+export interface MarketAssetClass_ParimutuelShare {
+    __kind: 'ParimutuelShare'
+    value: [bigint, number]
+}
+
+export interface MarketAssetClass_PoolShare {
+    __kind: 'PoolShare'
+    value: bigint
+}
+
+export interface MarketAssetClass_ScalarOutcome {
+    __kind: 'ScalarOutcome'
+    value: [bigint, ScalarPosition]
+}
+
 export const Order: sts.Type<Order> = sts.struct(() => {
     return  {
         marketId: sts.bigint(),
@@ -962,16 +1010,6 @@ export interface Asset_Ztg {
     __kind: 'Ztg'
 }
 
-export type ScalarPosition = ScalarPosition_Long | ScalarPosition_Short
-
-export interface ScalarPosition_Long {
-    __kind: 'Long'
-}
-
-export interface ScalarPosition_Short {
-    __kind: 'Short'
-}
-
 export const Asset: sts.Type<Asset> = sts.closedEnum(() => {
     return  {
         CampaignAsset: sts.bigint(),
@@ -982,13 +1020,6 @@ export const Asset: sts.Type<Asset> = sts.closedEnum(() => {
         PoolShare: sts.bigint(),
         ScalarOutcome: sts.tuple(() => [sts.bigint(), ScalarPosition]),
         Ztg: sts.unit(),
-    }
-})
-
-export const ScalarPosition: sts.Type<ScalarPosition> = sts.closedEnum(() => {
-    return  {
-        Long: sts.unit(),
-        Short: sts.unit(),
     }
 })
 

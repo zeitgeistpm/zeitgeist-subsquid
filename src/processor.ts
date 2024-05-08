@@ -35,6 +35,8 @@ export const processor = new SubstrateBatchProcessor()
       events.currency.deposited.name,
       events.currency.transferred.name,
       events.currency.withdrawn.name,
+      events.marketAssets.issued.name,
+      events.marketAssets.transferred.name,
       events.neoSwaps.buyExecuted.name,
       events.neoSwaps.exitExecuted.name,
       events.neoSwaps.feesWithdrawn.name,
