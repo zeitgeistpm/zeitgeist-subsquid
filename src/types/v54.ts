@@ -949,6 +949,8 @@ export interface MarketAssetClass_ScalarOutcome {
     value: [bigint, ScalarPosition]
 }
 
+export const CampaignAssetClass = sts.bigint()
+
 export const Order: sts.Type<Order> = sts.struct(() => {
     return  {
         marketId: sts.bigint(),
