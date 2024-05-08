@@ -88,6 +88,12 @@ const getOutliers = async (
             if (ab.assetId === 'Ztg') {
               const bal = (await sdk.api.query.system.account.at(blockHash, account.accountId)) as AccountInfo;
               chainBalance = new Decimal(bal.data.free.toString());
+            } else if (ab.assetId.includes('campaign')) {
+              const bal = (await sdk.api.query.campaignAssets.account(
+                ab.assetId.replace(/\D/g, ''),
+                account.accountId
+              )) as any;
+              chainBalance = new Decimal(bal.unwrap().balance.toString());
             } else {
               let marketId = 0;
               if (ab.assetId.includes('Outcome'))
@@ -99,7 +105,7 @@ const getOutliers = async (
                   util.AssetIdFromString(ab.assetId),
                   account.accountId
                 )) as any;
-                chainBalance = new Decimal(bal.balance.toString());
+                chainBalance = new Decimal(bal.unwrap().balance.toString());
               } else {
                 const bal = (await sdk.api.query.tokens.accounts.at(
                   blockHash,
