@@ -59,6 +59,9 @@ processor.run(new TypeormDatabase(), async (ctx) => {
         case Pallet.Balances:
           await mapBalances(ctx.store, event);
           break;
+        case Pallet.CampaignAssets:
+          await mapCampaignAssets(event);
+          break;
         case Pallet.Court:
           await mapCourt(event);
           break;
@@ -197,6 +200,22 @@ const mapBalances = async (store: Store, event: Event) => {
     case events.balances.withdraw.name: {
       const hab = await mappings.balances.withdraw(event);
       await storeBalanceChanges([hab]);
+      break;
+    }
+  }
+};
+
+const mapCampaignAssets = async (event: Event) => {
+  switch (event.name) {
+    case events.campaignAssets.issued.name: {
+      const hab = await mappings.campaignAssets.issued(event);
+      await storeBalanceChanges([hab]);
+      break;
+    }
+    case events.campaignAssets.transferred.name: {
+      const habs = await mappings.campaignAssets.transferred(event);
+      if (!habs) break;
+      await storeBalanceChanges(habs);
       break;
     }
   }
