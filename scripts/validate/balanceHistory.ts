@@ -2,10 +2,11 @@
  * Script to validate asset balance history of an account against on-chain data
  * Run using the command: ts-node scripts/validate/balanceHistory.ts <env> <account-id> <asset-kind> <asset-value1> <asset-value2>
  */
-import axios from 'axios';
 import { AccountInfo } from '@polkadot/types/interfaces/system';
 import SDK, { util } from '@zeitgeistpm/sdk';
+import axios from 'axios';
 import { HistoricalAccountBalance } from '../../src/model';
+import { _Asset } from '../../src/consts';
 import { Tools } from '../../src/util';
 
 let NODE_URL: string;
@@ -41,22 +42,27 @@ let chainAssetId: any,
   assetValue: string | null,
   assetQuery = '';
 switch (ASSET_KIND) {
-  case 'CategoricalOutcome':
+  case _Asset.CampaignAsset:
+    assetValue = ASSET_VALUE1;
+    assetQuery = `assetId_contains: "campaign", AND: {assetId_contains: "${assetValue}"}`;
+    chainAssetId = { CampaignAsset: ASSET_VALUE1 };
+    break;
+  case _Asset.CategoricalOutcome:
     assetValue = `${ASSET_VALUE1},${ASSET_VALUE2}`;
     assetQuery = `assetId_contains: "[${assetValue}]"`;
     chainAssetId = util.AssetIdFromString(`[${assetValue}]`);
     break;
-  case 'ForeignAsset':
+  case _Asset.ForeignAsset:
     assetValue = ASSET_VALUE1;
     assetQuery = `assetId_contains: "foreign", AND: {assetId_contains: "${assetValue}"}`;
     chainAssetId = { ForeignAsset: ASSET_VALUE1 };
     break;
-  case 'PoolShare':
+  case _Asset.PoolShare:
     assetValue = ASSET_VALUE1;
     assetQuery = `assetId_contains: "pool", AND: {assetId_contains: "${assetValue}"}`;
     chainAssetId = util.AssetIdFromString(`pool ${assetValue}`);
     break;
-  case 'Ztg':
+  case _Asset.Ztg:
     assetValue = null;
     assetQuery = `assetId_eq: "${ASSET_KIND}"`;
     chainAssetId = ASSET_KIND;
@@ -146,11 +152,14 @@ const getSquidBalance = async (blockNumber: number): Promise<bigint> => {
 const getChainBalance = async (sdk: SDK, blockNumber: number) => {
   const blockHash = await sdk.api.rpc.chain.getBlockHash(blockNumber);
   try {
-    if (ASSET_KIND === 'Ztg') {
+    if (ASSET_KIND === _Asset.Ztg) {
       const {
         data: { free },
       } = (await sdk.api.query.system.account.at(blockHash, ACCOUNT_ID)) as AccountInfo;
       return free.toBigInt();
+    } else if (ASSET_KIND === _Asset.CampaignAsset) {
+      const bal = (await sdk.api.query.campaignAssets.account.at(blockHash, chainAssetId, ACCOUNT_ID)) as any;
+      return BigInt(bal.unwrap().balance.toString());
     } else {
       const { free } = (await sdk.api.query.tokens.accounts.at(blockHash, ACCOUNT_ID, chainAssetId)) as any;
       return free.toBigInt();
