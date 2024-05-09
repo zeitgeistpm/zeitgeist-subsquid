@@ -23,6 +23,9 @@
         "Withdraw"
       ]
     },
+    "CampaignAssets": {
+      "events": ["Issued", "Transferred"]
+    },
     "Court": {
       "events": ["MintedInCourt"]
     },
