@@ -127,7 +127,9 @@ const handleBsrPostHooks = async (store: Store, blockHeight: number) => {
     await saveAccounts(store);
     await postHooks.destroyMarkets(store);
   } else if (blockHeight === 4772816) {
-    await postHooks.migrateScoringRule(store);
+    await postHooks.migrateToLmsr(store);
+  } else if (blockHeight === 4969219) {
+    await postHooks.migrateToAmmCdaHybrid(store);
   }
 };
 
@@ -136,7 +138,7 @@ const handleMainPostHooks = async (store: Store, blockHeight: number) => {
     const historicalAccountBalances = await postHooks.initBalance();
     await storeBalanceChanges(historicalAccountBalances);
   } else if (blockHeight === 4793019) {
-    await postHooks.migrateScoringRule(store);
+    await postHooks.migrateToLmsr(store);
   }
 };
 

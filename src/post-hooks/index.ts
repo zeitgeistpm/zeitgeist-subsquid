@@ -1,10 +1,10 @@
 import { unreserveBalances } from './balancesUnreserved';
 import { initBalance } from './initBalance';
 import { destroyMarkets } from './marketDestroyed';
-import { migrateScoringRule } from './migrateScoringRule';
 import { resolveMarket } from './resolveMarket';
+import { migrateToAmmCdaHybrid, migrateToLmsr } from './scoringRule';
 
-export { destroyMarkets, initBalance, migrateScoringRule, unreserveBalances, resolveMarket };
+export { destroyMarkets, initBalance, migrateToAmmCdaHybrid, migrateToLmsr, unreserveBalances, resolveMarket };
 
 export interface ResolvedMarket {
   blockHeight: number;
