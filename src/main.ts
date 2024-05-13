@@ -139,6 +139,8 @@ const handleMainPostHooks = async (store: Store, blockHeight: number) => {
     await storeBalanceChanges(historicalAccountBalances);
   } else if (blockHeight === 4793019) {
     await postHooks.migrateToLmsr(store);
+  } else if (blockHeight === 5521822) {
+    await postHooks.migrateToAmmCdaHybrid(store);
   }
 };
 
