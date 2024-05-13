@@ -128,7 +128,7 @@ const handleBsrPostHooks = async (store: Store, blockHeight: number) => {
     await postHooks.destroyMarkets(store);
   } else if (blockHeight === 4772816) {
     await postHooks.migrateToLmsr(store);
-  } else if (blockHeight === 4969219) {
+  } else if (blockHeight === 4969221) {
     await postHooks.migrateToAmmCdaHybrid(store);
   }
 };
