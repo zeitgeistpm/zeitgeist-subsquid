@@ -139,8 +139,9 @@ type Order @entity {
   id: ID!
   makerAccountId: String! @index
   maker: OrderRecord!
-  taker: OrderRecord!
   marketId: Int! @index
+  status: OrderStatus!
+  taker: OrderRecord!
   updatedAt: DateTime!
 }
 
@@ -530,6 +531,15 @@ Orders' event options
 """
 enum OrderEvent {
   OrderFilled
+}
+
+"""
+Orders' status options
+"""
+enum OrderStatus {
+  Filled
+  Placed
+  Removed
 }
 
 """
