@@ -1,5 +1,5 @@
 import { Store } from '@subsquid/typeorm-store';
-import { HistoricalOrder, HistoricalSwap, Order, OrderEvent, OrderRecord } from '../../model';
+import { HistoricalOrder, HistoricalSwap, Order, OrderEvent, OrderRecord, OrderStatus } from '../../model';
 import { SwapEvent } from '../../consts';
 import { extrinsicFromEvent } from '../../helper';
 import { Event } from '../../processor';
@@ -26,6 +26,7 @@ export const orderFilled = async (
   order.maker.filledAmount += filledMakerAmount;
   order.taker.filledAmount += filledTakerAmount;
   order.maker.unfilledAmount = unfilledMakerAmount;
+  order.status = OrderStatus.Filled;
   order.taker.unfilledAmount = unfilledTakerAmount;
   order.updatedAt = new Date(event.block.timestamp!);
 
@@ -75,6 +76,7 @@ export const orderPlaced = async (event: Event): Promise<Order> => {
       unfilledAmount: makerAmount,
     }),
     marketId,
+    status: OrderStatus.Placed,
     taker: new OrderRecord({
       asset: takerAsset,
       filledAmount: BigInt(0),
@@ -85,12 +87,12 @@ export const orderPlaced = async (event: Event): Promise<Order> => {
   return order;
 };
 
-export const orderRemoved = async (store: Store, event: Event) => {
+export const orderRemoved = async (store: Store, event: Event): Promise<Order | undefined> => {
   const { orderId } = decode.orderRemoved(event);
 
   const order = await store.get(Order, { where: { id: orderId.toString() } });
   if (!order) return;
 
-  console.log(`[${event.name}] Removing order: ${JSON.stringify(order, null, 2)}`);
-  await store.remove<Order>(order);
+  order.status = OrderStatus.Removed;
+  return order;
 };
