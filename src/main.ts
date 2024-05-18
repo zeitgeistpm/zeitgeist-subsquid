@@ -3,6 +3,7 @@ import * as mappings from './mappings';
 import {
   Account,
   AccountBalance,
+  Court,
   HistoricalAccountBalance,
   HistoricalAsset,
   HistoricalMarket,
@@ -18,6 +19,7 @@ import { isBatteryStation, isEventOrderValid, isMainnet } from './helper';
 import { processor, Event } from './processor';
 
 const accounts = new Map<string, Map<string, bigint>>();
+let courts: Court[] = [];
 let orders: Order[] = [];
 
 let assetHistory: HistoricalAsset[];
@@ -108,6 +110,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   }
   await saveAccounts(ctx.store);
   await saveHistory(ctx.store);
+  await saveCourts(ctx.store);
   await saveOrders(ctx.store);
 });
 
@@ -227,7 +230,12 @@ const mapCampaignAssets = async (event: Event) => {
 
 const mapCourt = async (event: Event) => {
   switch (event.name) {
-    case events.court.mintedInCourt.name:
+    case events.court.courtOpened.name: {
+      const court = await mappings.court.courtOpened(event);
+      courts.push(court);
+      break;
+    }
+    case events.court.mintedInCourt.name: {
       const hab = balanceHistory.pop();
       if (hab && hab.event === 'Deposit') {
         hab.id = event.id + hab.id.slice(-6);
@@ -235,6 +243,7 @@ const mapCourt = async (event: Event) => {
         balanceHistory.push(hab);
       }
       break;
+    }
   }
 };
 
@@ -712,6 +721,14 @@ const saveHistory = async (store: Store) => {
   if (swapHistory.length > 0) {
     console.log(`Saving historical swaps: ${JSON.stringify(swapHistory, null, 2)}`);
     await store.save<HistoricalSwap>(swapHistory);
+  }
+};
+
+const saveCourts = async (store: Store) => {
+  if (courts.length > 0) {
+    console.log(`Saving courts: ${JSON.stringify(courts, null, 2)}`);
+    await store.save<Court>(courts);
+    courts = [];
   }
 };
 
