@@ -4,7 +4,25 @@ import { _Asset } from '../../consts';
 import { formatAssetId } from '../../helper';
 import { Event } from '../../processor';
 
-export const issued = (event: Event): CampaignAssetsIssued => {
+export const burned = (event: Event): CampaignAssetsEvent => {
+  let decoded: {
+    assetId: bigint;
+    owner: string;
+    balance: bigint;
+  };
+  if (events.campaignAssets.burned.v54.is(event)) {
+    decoded = events.campaignAssets.burned.v54.decode(event);
+  } else {
+    decoded = event.args;
+  }
+  return {
+    assetId: formatAssetId({ __kind: _Asset.CampaignAsset, value: BigInt(decoded.assetId) }),
+    owner: ss58.encode({ prefix: 73, bytes: decoded.owner }),
+    amount: BigInt(decoded.balance),
+  };
+};
+
+export const issued = (event: Event): CampaignAssetsEvent => {
   let decoded: {
     assetId: bigint;
     owner: string;
@@ -42,7 +60,7 @@ export const transferred = (event: Event): CampaignAssetsTransferred => {
   };
 };
 
-interface CampaignAssetsIssued {
+interface CampaignAssetsEvent {
   assetId: string;
   owner: string;
   amount: bigint;
