@@ -312,6 +312,13 @@ type NeoPool @entity {
   totalStake: BigInt!
 }
 
+type LiquiditySharesManager @entity {
+  account: String! @index
+  fees: BigInt!
+  neoPool: NeoPool!
+  stake: BigInt!
+}
+
 """
 Liquidity history of a particular pool. Records all transactions
 associated with the pool.
@@ -327,6 +334,16 @@ type HistoricalPool @entity {
   status: PoolStatus
   "Timestamp of the block"
   timestamp: DateTime!
+}
+
+"""
+Court details
+"""
+type Court @entity {
+  marketId: Int! @index
+  roundEnds: RoundEndsInfo!
+  status: CourtStatus!
+  voteItemType: VoteItemType!
 }
 
 """
@@ -452,19 +469,20 @@ type OrderRecord @jsonField {
   unfilledAmount: BigInt!
 }
 
-type LiquiditySharesManager @entity {
-  account: String! @index
-  fees: BigInt!
-  neoPool: NeoPool!
-  stake: BigInt!
+type RoundEndsInfo @jsonField {
+  preVote: BigInt
+  vote: BigInt
+  aggregation: BigInt
+  appeal: BigInt
 }
 
+
 """
-Markets' creation options
+Courts' status options
 """
-enum MarketCreation {
-  Advised
-  Permissionless
+enum CourtStatus {
+  Opened
+  Reassigned
 }
 
 """
@@ -474,6 +492,14 @@ enum DisputeMechanism {
   Authorized
   Court
   SimpleDisputes
+}
+
+"""
+Markets' creation options
+"""
+enum MarketCreation {
+  Advised
+  Permissionless
 }
 
 """
@@ -576,4 +602,11 @@ enum SwapEvent {
   SellExecuted
   SwapExactAmountIn
   SwapExactAmountOut
+}
+
+"""
+Types of vote items
+"""
+enum VoteItemType {
+  Outcome
 }
