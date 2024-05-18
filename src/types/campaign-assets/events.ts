@@ -31,3 +31,18 @@ export const transferred =  {
         })
     ),
 }
+
+export const burned =  {
+    name: 'CampaignAssets.Burned',
+    /**
+     * Some assets were destroyed.
+     */
+    v54: new EventType(
+        'CampaignAssets.Burned',
+        sts.struct({
+            assetId: v54.CampaignAssetClass,
+            owner: v54.AccountId32,
+            balance: sts.bigint(),
+        })
+    ),
+}
