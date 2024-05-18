@@ -3,6 +3,22 @@ import { extrinsicFromEvent } from '../../helper';
 import { Event } from '../../processor';
 import * as decode from './decode';
 
+export const burned = async (event: Event): Promise<HistoricalAccountBalance> => {
+  const { assetId, owner, amount } = decode.burned(event);
+
+  const hab = new HistoricalAccountBalance({
+    accountId: owner,
+    assetId,
+    blockNumber: event.block.height,
+    dBalance: -amount,
+    event: event.name.split('.')[1],
+    extrinsic: extrinsicFromEvent(event),
+    id: event.id + '-' + owner.slice(-5),
+    timestamp: new Date(event.block.timestamp!),
+  });
+  return hab;
+};
+
 export const issued = async (event: Event): Promise<HistoricalAccountBalance> => {
   const { assetId, owner, amount } = decode.issued(event);
 
