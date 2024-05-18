@@ -973,6 +973,120 @@ export interface Order {
     baseAssetAmount: bigint
 }
 
+export const CourtInfo: sts.Type<CourtInfo> = sts.struct(() => {
+    return  {
+        status: CourtStatus,
+        appeals: sts.array(() => AppealInfo),
+        roundEnds: RoundTiming,
+        voteItemType: VoteItemType,
+    }
+})
+
+export const VoteItemType: sts.Type<VoteItemType> = sts.closedEnum(() => {
+    return  {
+        Binary: sts.unit(),
+        Outcome: sts.unit(),
+    }
+})
+
+export type VoteItemType = VoteItemType_Binary | VoteItemType_Outcome
+
+export interface VoteItemType_Binary {
+    __kind: 'Binary'
+}
+
+export interface VoteItemType_Outcome {
+    __kind: 'Outcome'
+}
+
+export const RoundTiming: sts.Type<RoundTiming> = sts.struct(() => {
+    return  {
+        preVote: sts.bigint(),
+        vote: sts.bigint(),
+        aggregation: sts.bigint(),
+        appeal: sts.bigint(),
+    }
+})
+
+export interface RoundTiming {
+    preVote: bigint
+    vote: bigint
+    aggregation: bigint
+    appeal: bigint
+}
+
+export const AppealInfo: sts.Type<AppealInfo> = sts.struct(() => {
+    return  {
+        backer: AccountId32,
+        bond: sts.bigint(),
+        appealedVoteItem: VoteItem,
+    }
+})
+
+export const VoteItem: sts.Type<VoteItem> = sts.closedEnum(() => {
+    return  {
+        Binary: sts.boolean(),
+        Outcome: OutcomeReport,
+    }
+})
+
+export const OutcomeReport: sts.Type<OutcomeReport> = sts.closedEnum(() => {
+    return  {
+        Categorical: sts.number(),
+        Scalar: sts.bigint(),
+    }
+})
+
+export type VoteItem = VoteItem_Binary | VoteItem_Outcome
+
+export interface VoteItem_Binary {
+    __kind: 'Binary'
+    value: boolean
+}
+
+export interface VoteItem_Outcome {
+    __kind: 'Outcome'
+    value: OutcomeReport
+}
+
+export interface AppealInfo {
+    backer: AccountId32
+    bond: bigint
+    appealedVoteItem: VoteItem
+}
+
+export const CourtStatus: sts.Type<CourtStatus> = sts.closedEnum(() => {
+    return  {
+        Closed: sts.enumStruct({
+            winner: VoteItem,
+        }),
+        Open: sts.unit(),
+        Reassigned: sts.unit(),
+    }
+})
+
+export type CourtStatus = CourtStatus_Closed | CourtStatus_Open | CourtStatus_Reassigned
+
+export interface CourtStatus_Closed {
+    __kind: 'Closed'
+    winner: VoteItem
+}
+
+export interface CourtStatus_Open {
+    __kind: 'Open'
+}
+
+export interface CourtStatus_Reassigned {
+    __kind: 'Reassigned'
+}
+
+export interface CourtInfo {
+    status: CourtStatus
+    appeals: AppealInfo[]
+    roundEnds: RoundTiming
+    voteItemType: VoteItemType
+}
+
 export const EarlyCloseState: sts.Type<EarlyCloseState> = sts.closedEnum(() => {
     return  {
         Disputed: sts.unit(),
@@ -1063,13 +1177,6 @@ export const MarketDisputeMechanism: sts.Type<MarketDisputeMechanism> = sts.clos
         Authorized: sts.unit(),
         Court: sts.unit(),
         SimpleDisputes: sts.unit(),
-    }
-})
-
-export const OutcomeReport: sts.Type<OutcomeReport> = sts.closedEnum(() => {
-    return  {
-        Categorical: sts.number(),
-        Scalar: sts.bigint(),
     }
 })
 
