@@ -344,7 +344,9 @@ const mapOrderbook = async (store: Store, event: Event) => {
     }
     case events.orderbook.orderRemoved.name: {
       await saveOrders(store);
-      await mappings.orderbook.orderRemoved(store, event);
+      const order = await mappings.orderbook.orderRemoved(store, event);
+      if (!order) return;
+      orders.push(order);
       break;
     }
   }
