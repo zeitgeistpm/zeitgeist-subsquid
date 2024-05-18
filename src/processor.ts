@@ -31,6 +31,7 @@ export const processor = new SubstrateBatchProcessor()
       events.balances.transfer.name,
       events.balances.unreserved.name,
       events.balances.withdraw.name,
+      events.campaignAssets.burned.name,
       events.campaignAssets.issued.name,
       events.campaignAssets.transferred.name,
       events.court.mintedInCourt.name,
