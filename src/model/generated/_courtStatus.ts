@@ -1,4 +1,5 @@
 export enum CourtStatus {
-    Opened = "Opened",
+    Closed = "Closed",
+    Open = "Open",
     Reassigned = "Reassigned",
 }

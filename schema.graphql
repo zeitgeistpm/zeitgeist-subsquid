@@ -476,12 +476,12 @@ type RoundEndsInfo @jsonField {
   appeal: BigInt
 }
 
-
 """
 Courts' status options
 """
 enum CourtStatus {
-  Opened
+  Closed
+  Open
   Reassigned
 }
 
@@ -608,5 +608,6 @@ enum SwapEvent {
 Types of vote items
 """
 enum VoteItemType {
+  Binary
   Outcome
 }
