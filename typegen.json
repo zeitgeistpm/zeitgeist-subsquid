@@ -24,7 +24,7 @@
       ]
     },
     "CampaignAssets": {
-      "events": ["Issued", "Transferred"]
+      "events": ["Burned", "Issued", "Transferred"]
     },
     "Court": {
       "events": ["MintedInCourt"]

@@ -211,6 +211,11 @@ const mapBalances = async (store: Store, event: Event) => {
 
 const mapCampaignAssets = async (event: Event) => {
   switch (event.name) {
+    case events.campaignAssets.burned.name: {
+      const hab = await mappings.campaignAssets.burned(event);
+      await storeBalanceChanges([hab]);
+      break;
+    }
     case events.campaignAssets.issued.name: {
       const hab = await mappings.campaignAssets.issued(event);
       await storeBalanceChanges([hab]);
