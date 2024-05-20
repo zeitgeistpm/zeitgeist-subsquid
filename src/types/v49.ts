@@ -890,6 +890,8 @@ export interface MarketCreation_Permissionless {
 
 export type AccountId32 = Bytes
 
+export const H256 = sts.bytes()
+
 export const OutcomeReport: sts.Type<OutcomeReport> = sts.closedEnum(() => {
     return  {
         Categorical: sts.number(),
