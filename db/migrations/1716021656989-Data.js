@@ -1,5 +1,5 @@
-module.exports = class Data1715773883226 {
-    name = 'Data1715773883226'
+module.exports = class Data1716021656989 {
+    name = 'Data1716021656989'
 
     async up(db) {
         await db.query(`CREATE TABLE "account_balance" ("asset_id" text NOT NULL, "balance" numeric NOT NULL, "id" character varying NOT NULL, "account_id" character varying, CONSTRAINT "PK_bd893045760f719e24a95a42562" PRIMARY KEY ("id"))`)
@@ -39,6 +39,8 @@ module.exports = class Data1715773883226 {
         await db.query(`CREATE TABLE "historical_market" ("id" character varying NOT NULL, "block_number" integer NOT NULL, "by" text, "d_liquidity" numeric NOT NULL, "d_volume" numeric NOT NULL, "event" character varying(25) NOT NULL, "liquidity" numeric NOT NULL, "outcome" jsonb, "resolved_outcome" text, "status" character varying(19) NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "volume" numeric NOT NULL, "market_id" character varying, CONSTRAINT "PK_8b5b3dfdac79a88102b94d55498" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_37393fa690692f119c5473d515" ON "historical_market" ("market_id") `)
         await db.query(`CREATE TABLE "historical_pool" ("id" character varying NOT NULL, "block_number" integer NOT NULL, "event" text NOT NULL, "pool_id" integer NOT NULL, "status" character varying(17), "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_6ee31afe7b6dc3500a94effc951" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "court" ("id" character varying NOT NULL, "market_id" integer NOT NULL, "round_ends" jsonb NOT NULL, "status" character varying(10) NOT NULL, "vote_item_type" character varying(7) NOT NULL, CONSTRAINT "PK_d8f2118c52b422b03e0331a7b91" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_7adf666aafa50c13363fbddcaa" ON "court" ("market_id") `)
         await db.query(`ALTER TABLE "account_balance" ADD CONSTRAINT "FK_029576f147e256f1f93e4865c76" FOREIGN KEY ("account_id") REFERENCES "account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "pool" ADD CONSTRAINT "FK_7042da86b8de81cc3e9e448f9a7" FOREIGN KEY ("account_id") REFERENCES "account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "liquidity_shares_manager" ADD CONSTRAINT "FK_d5619d9184d06e28163e74afa55" FOREIGN KEY ("neo_pool_id") REFERENCES "neo_pool"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
@@ -88,6 +90,8 @@ module.exports = class Data1715773883226 {
         await db.query(`DROP TABLE "historical_market"`)
         await db.query(`DROP INDEX "public"."IDX_37393fa690692f119c5473d515"`)
         await db.query(`DROP TABLE "historical_pool"`)
+        await db.query(`DROP TABLE "court"`)
+        await db.query(`DROP INDEX "public"."IDX_7adf666aafa50c13363fbddcaa"`)
         await db.query(`ALTER TABLE "account_balance" DROP CONSTRAINT "FK_029576f147e256f1f93e4865c76"`)
         await db.query(`ALTER TABLE "pool" DROP CONSTRAINT "FK_7042da86b8de81cc3e9e448f9a7"`)
         await db.query(`ALTER TABLE "liquidity_shares_manager" DROP CONSTRAINT "FK_d5619d9184d06e28163e74afa55"`)

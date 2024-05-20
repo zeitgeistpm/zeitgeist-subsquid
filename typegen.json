@@ -27,7 +27,7 @@
       "events": ["Burned", "Issued", "Transferred"]
     },
     "Court": {
-      "events": ["MintedInCourt"]
+      "events": ["CourtOpened", "MintedInCourt"]
     },
     "Currency": {
       "events": ["Deposited", "Transferred", "Withdrawn"]

@@ -2,6 +2,7 @@ export * as assetTxPayment from './asset-tx-payment';
 export * as authorized from './authorized';
 export * as balances from './balances';
 export * as campaignAssets from './campaign-assets';
+export * as court from './court';
 export * as currency from './currency';
 export * as marketAssets from './market-assets';
 export * as neoSwaps from './neo-swaps';
