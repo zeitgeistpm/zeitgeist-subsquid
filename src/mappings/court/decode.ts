@@ -1,3 +1,4 @@
+import * as ss58 from '@subsquid/ss58';
 import { CourtInfo } from '../../types/v51';
 import { events } from '../../types';
 import { _Asset } from '../../consts';
@@ -18,6 +19,27 @@ export const courtOpened = (event: Event): CourtOpenedEvent => {
     courtInfo: decoded.courtInfo,
   };
 };
+
+export const jurorVoted = (event: Event): CourtEvent => {
+  let decoded: {
+    courtId: bigint;
+    juror: string;
+  };
+  if (events.court.jurorVoted.v49.is(event)) {
+    decoded = events.court.jurorVoted.v49.decode(event);
+  } else {
+    decoded = event.args;
+  }
+  return {
+    courtId: +decoded.courtId.toString(),
+    accountId: ss58.encode({ prefix: 73, bytes: decoded.juror }),
+  };
+};
+
+interface CourtEvent {
+  courtId: number;
+  accountId: string;
+}
 
 interface CourtOpenedEvent {
   marketId: number;
