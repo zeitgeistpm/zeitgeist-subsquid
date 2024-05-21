@@ -20,6 +20,24 @@ export const courtOpened = (event: Event): CourtOpenedEvent => {
   };
 };
 
+export const jurorRevealedVote = (event: Event): CourtEvent => {
+  let decoded: {
+    courtId: bigint;
+    juror: string;
+  };
+  if (events.court.jurorRevealedVote.v49.is(event)) {
+    decoded = events.court.jurorRevealedVote.v49.decode(event);
+  } else if (events.court.jurorRevealedVote.v53.is(event)) {
+    decoded = events.court.jurorRevealedVote.v53.decode(event);
+  } else {
+    decoded = event.args;
+  }
+  return {
+    courtId: +decoded.courtId.toString(),
+    accountId: ss58.encode({ prefix: 73, bytes: decoded.juror }),
+  };
+};
+
 export const jurorVoted = (event: Event): CourtEvent => {
   let decoded: {
     courtId: bigint;
