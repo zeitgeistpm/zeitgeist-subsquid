@@ -6,6 +6,7 @@ import {
   Court,
   HistoricalAccountBalance,
   HistoricalAsset,
+  HistoricalCourt,
   HistoricalMarket,
   HistoricalOrder,
   HistoricalPool,
@@ -24,6 +25,7 @@ let orders: Order[] = [];
 
 let assetHistory: HistoricalAsset[];
 let balanceHistory: HistoricalAccountBalance[];
+let courtHistory: HistoricalCourt[];
 let marketHistory: HistoricalMarket[];
 let orderHistory: HistoricalOrder[];
 let poolHistory: HistoricalPool[];
@@ -32,6 +34,7 @@ let swapHistory: HistoricalSwap[];
 processor.run(new TypeormDatabase(), async (ctx) => {
   assetHistory = [];
   balanceHistory = [];
+  courtHistory = [];
   marketHistory = [];
   orderHistory = [];
   poolHistory = [];
@@ -236,8 +239,14 @@ const mapCampaignAssets = async (event: Event) => {
 const mapCourt = async (event: Event) => {
   switch (event.name) {
     case events.court.courtOpened.name: {
-      const court = await mappings.court.courtOpened(event);
-      courts.push(court);
+      const res = await mappings.court.courtOpened(event);
+      courts.push(res.court);
+      courtHistory.push(res.historicalCourt);
+      break;
+    }
+    case events.court.jurorVoted.name: {
+      const hc = await mappings.court.jurorVoted(event);
+      courtHistory.push(hc);
       break;
     }
     case events.court.mintedInCourt.name: {
@@ -710,6 +719,10 @@ const saveHistory = async (store: Store) => {
   if (balanceHistory.length > 0) {
     console.log(`Saving historical account balances: ${JSON.stringify(balanceHistory, null, 2)}`);
     await store.save<HistoricalAccountBalance>(balanceHistory);
+  }
+  if (courtHistory.length > 0) {
+    console.log(`Saving historical courts: ${JSON.stringify(courtHistory, null, 2)}`);
+    await store.save<HistoricalCourt>(courtHistory);
   }
   if (marketHistory.length > 0) {
     console.log(`Saving historical markets: ${JSON.stringify(marketHistory, null, 2)}`);

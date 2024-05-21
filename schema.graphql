@@ -347,6 +347,17 @@ type Court @entity {
 }
 
 """
+History of a particular court capturing its lifecyle and juror participation.
+"""
+type HistoricalCourt @entity {
+  accountId: String @index
+  blockNumber: Int!
+  courtId: Int! @index
+  event: CourtEvent!
+  timestamp: DateTime!
+}
+
+"""
 Extrinsic data
 """
 type Extrinsic @jsonField {
@@ -474,6 +485,14 @@ type RoundEndsInfo @jsonField {
   vote: BigInt
   aggregation: BigInt
   appeal: BigInt
+}
+
+"""
+Courts' event options
+"""
+enum CourtEvent {
+  CourtOpened
+  JurorVoted
 }
 
 """
