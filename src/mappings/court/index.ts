@@ -7,7 +7,7 @@ export const courtOpened = async (event: Event): Promise<{ court: Court; histori
   const { marketId, courtInfo } = decode.courtOpened(event);
 
   const court = new Court({
-    id: marketId.toString(),
+    id: (await decode.marketIdToCourtId(event.block, marketId)) ?? marketId.toString(),
     marketId,
     roundEnds: new RoundEndsInfo({
       preVote: courtInfo.roundEnds.preVote,
