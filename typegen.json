@@ -27,6 +27,7 @@
       "events": ["Burned", "Issued", "Transferred"]
     },
     "Court": {
+      "calls": ["reassign_court_stakes"],
       "events": ["CourtOpened", "JurorRevealedVote", "JurorVoted", "MintedInCourt"],
       "storage": ["MarketIdToCourtId"]
     },
