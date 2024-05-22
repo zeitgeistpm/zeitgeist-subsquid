@@ -1,5 +1,10 @@
-import { Court, CourtEvent, HistoricalCourt, RoundEndsInfo } from '../../model';
-import { Event } from '../../processor';
+import { Store } from '@subsquid/typeorm-store';
+import { Court, CourtEvent, CourtStatus, HistoricalAccountBalance, HistoricalCourt, RoundEndsInfo } from '../../model';
+import { events } from '../../types';
+import { _Asset } from '../../consts';
+import { extrinsicFromEvent } from '../../helper';
+import { Call, Event } from '../../processor';
+import { decodeSlashedEvent } from '../balances/decode';
 import * as decode from './decode';
 import { mapCourtStatus, mapVoteItemType } from './helper';
 
@@ -57,4 +62,27 @@ export const jurorVoted = async (event: Event): Promise<HistoricalCourt> => {
     timestamp: new Date(event.block.timestamp!),
   });
   return historicalCourt;
+};
+
+export const reassignCourtStakes = async (
+  store: Store,
+  call: Call
+): Promise<{ court: Court; hc: HistoricalCourt } | undefined> => {
+  const courtId = decode.reassignCourtStakes(call);
+  const court = await store.findOneBy(Court, {
+    id: courtId.toString(),
+  });
+  if (!court) return;
+  court.status = CourtStatus.Reassigned;
+
+  const hc = new HistoricalCourt({
+    id: call.id + '-' + courtId.toString(),
+    accountId: undefined,
+    blockNumber: call.block.height,
+    courtId,
+    event: CourtEvent.StakesReassigned,
+    timestamp: new Date(call.block.timestamp!),
+  });
+
+  return { court, hc };
 };
