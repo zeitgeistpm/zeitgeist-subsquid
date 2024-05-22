@@ -27,7 +27,8 @@
       "events": ["Burned", "Issued", "Transferred"]
     },
     "Court": {
-      "events": ["CourtOpened", "JurorRevealedVote", "JurorVoted", "MintedInCourt"]
+      "events": ["CourtOpened", "JurorRevealedVote", "JurorVoted", "MintedInCourt"],
+      "storage": ["MarketIdToCourtId"]
     },
     "Currency": {
       "events": ["Deposited", "Transferred", "Withdrawn"]
