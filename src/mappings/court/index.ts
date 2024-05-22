@@ -31,6 +31,20 @@ export const courtOpened = async (event: Event): Promise<{ court: Court; histori
   return { court, historicalCourt };
 };
 
+export const jurorRevealedVote = async (event: Event): Promise<HistoricalCourt> => {
+  const { courtId, accountId } = decode.jurorRevealedVote(event);
+
+  const historicalCourt = new HistoricalCourt({
+    id: event.id + '-' + courtId.toString(),
+    accountId,
+    blockNumber: event.block.height,
+    courtId,
+    event: CourtEvent.JurorRevealedVote,
+    timestamp: new Date(event.block.timestamp!),
+  });
+  return historicalCourt;
+};
+
 export const jurorVoted = async (event: Event): Promise<HistoricalCourt> => {
   const { courtId, accountId } = decode.jurorVoted(event);
 

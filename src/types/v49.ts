@@ -890,6 +890,25 @@ export interface MarketCreation_Permissionless {
 
 export type AccountId32 = Bytes
 
+export const VoteItem: sts.Type<VoteItem> = sts.closedEnum(() => {
+    return  {
+        Binary: sts.boolean(),
+        Outcome: OutcomeReport,
+    }
+})
+
+export type VoteItem = VoteItem_Binary | VoteItem_Outcome
+
+export interface VoteItem_Binary {
+    __kind: 'Binary'
+    value: boolean
+}
+
+export interface VoteItem_Outcome {
+    __kind: 'Outcome'
+    value: OutcomeReport
+}
+
 export const H256 = sts.bytes()
 
 export const OutcomeReport: sts.Type<OutcomeReport> = sts.closedEnum(() => {
