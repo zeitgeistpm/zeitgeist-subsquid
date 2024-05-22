@@ -494,6 +494,7 @@ enum CourtEvent {
   CourtOpened
   JurorRevealedVote
   JurorVoted
+  StakesReassigned
 }
 
 """
