@@ -4,7 +4,6 @@ import { events } from '../../types';
 import { _Asset } from '../../consts';
 import { extrinsicFromEvent } from '../../helper';
 import { Call, Event } from '../../processor';
-import { decodeSlashedEvent } from '../balances/decode';
 import * as decode from './decode';
 import { mapCourtStatus, mapVoteItemType } from './helper';
 
