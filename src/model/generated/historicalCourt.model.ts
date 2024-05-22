@@ -24,7 +24,7 @@ export class HistoricalCourt {
     @Column_("int4", {nullable: false})
     courtId!: number
 
-    @Column_("varchar", {length: 11, nullable: false})
+    @Column_("varchar", {length: 17, nullable: false})
     event!: CourtEvent
 
     @Column_("timestamp with time zone", {nullable: false})

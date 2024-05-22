@@ -244,6 +244,11 @@ const mapCourt = async (event: Event) => {
       courtHistory.push(res.historicalCourt);
       break;
     }
+    case events.court.jurorRevealedVote.name: {
+      const hc = await mappings.court.jurorRevealedVote(event);
+      courtHistory.push(hc);
+      break;
+    }
     case events.court.jurorVoted.name: {
       const hc = await mappings.court.jurorVoted(event);
       courtHistory.push(hc);

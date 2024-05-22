@@ -492,6 +492,7 @@ Courts' event options
 """
 enum CourtEvent {
   CourtOpened
+  JurorRevealedVote
   JurorVoted
 }
 
