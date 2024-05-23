@@ -18,6 +18,10 @@ console.log(`ENVIRONMENT: ${process.env.NODE_ENV}`);
 
 export const processor = new SubstrateBatchProcessor()
   .setRpcEndpoint(process.env.WS_NODE_URL!)
+  .addCall({
+    name: [calls.court.reassignCourtStakes.name],
+    extrinsic: true,
+  })
   .addEvent({
     name: [
       events.assetTxPayment.assetTxFeePaid.name,

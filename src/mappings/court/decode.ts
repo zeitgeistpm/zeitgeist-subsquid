@@ -1,8 +1,8 @@
 import * as ss58 from '@subsquid/ss58';
 import { CourtInfo } from '../../types/v51';
-import { events, storage } from '../../types';
+import { calls, events, storage } from '../../types';
 import { _Asset } from '../../consts';
-import { Block, Event } from '../../processor';
+import { Block, Call, Event } from '../../processor';
 
 export const courtOpened = (event: Event): CourtOpenedEvent => {
   let decoded: {
@@ -60,6 +60,16 @@ export const marketIdToCourtId = async (block: Block, marketId: number): Promise
     courtId = await storage.court.marketIdToCourtId.v49.get(block, BigInt(marketId));
   }
   return courtId?.toString();
+};
+
+export const reassignCourtStakes = (call: Call): number => {
+  let decoded: { courtId: bigint };
+  if (calls.court.reassignCourtStakes.v49.is(call)) {
+    decoded = calls.court.reassignCourtStakes.v49.decode(call);
+  } else {
+    decoded = call.args;
+  }
+  return +decoded.courtId.toString();
 };
 
 interface CourtEvent {

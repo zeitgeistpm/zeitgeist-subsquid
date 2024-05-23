@@ -53,6 +53,16 @@ processor.run(new TypeormDatabase(), async (ctx) => {
         }
       }
     }
+    for (let call of block.calls) {
+      if (!call.success) continue;
+      if (call.name === calls.court.reassignCourtStakes.name) {
+        await saveCourts(ctx.store);
+        const res = await mappings.court.reassignCourtStakes(ctx.store, call);
+        if (!res) break;
+        courts.push(res.court);
+        courtHistory.push(res.hc);
+      }
+    }
     for (let event of block.events) {
       switch (event.name.split('.')[0]) {
         case Pallet.AssetTxPayment:
