@@ -4,6 +4,7 @@ import { events } from '../../types';
 import { _Asset } from '../../consts';
 import { extrinsicFromEvent } from '../../helper';
 import { Call, Event } from '../../processor';
+import { decodeSlashedEvent } from '../balances/decode';
 import * as decode from './decode';
 import { mapCourtStatus, mapVoteItemType } from './helper';
 
@@ -66,7 +67,7 @@ export const jurorVoted = async (event: Event): Promise<HistoricalCourt> => {
 export const reassignCourtStakes = async (
   store: Store,
   call: Call
-): Promise<{ court: Court; hc: HistoricalCourt } | undefined> => {
+): Promise<{ court: Court; hc: HistoricalCourt; habs: HistoricalAccountBalance[] } | undefined> => {
   const courtId = decode.reassignCourtStakes(call);
   const court = await store.findOneBy(Court, {
     id: courtId.toString(),
@@ -83,5 +84,24 @@ export const reassignCourtStakes = async (
     timestamp: new Date(call.block.timestamp!),
   });
 
-  return { court, hc };
+  const habs: HistoricalAccountBalance[] = [];
+  await Promise.all(
+    call.events.map(async (event) => {
+      if (event.name === events.balances.slashed.name) {
+        const { accountId, amount } = decodeSlashedEvent(event);
+        const hab = new HistoricalAccountBalance({
+          accountId,
+          assetId: _Asset.Ztg,
+          blockNumber: event.block.height,
+          dBalance: -amount,
+          event: event.name.split('.')[1],
+          extrinsic: extrinsicFromEvent(event),
+          id: event.id + '-' + accountId.slice(-5),
+          timestamp: new Date(event.block.timestamp!),
+        });
+        habs.push(hab);
+      }
+    })
+  );
+  return { court, hc, habs };
 };
