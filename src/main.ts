@@ -61,6 +61,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
         if (!res) break;
         courts.push(res.court);
         courtHistory.push(res.hc);
+        await storeBalanceChanges(res.habs);
       }
     }
     for (let event of block.events) {
