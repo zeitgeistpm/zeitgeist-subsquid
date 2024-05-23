@@ -179,3 +179,25 @@ export const withdraw =  {
         })
     ),
 }
+
+export const slashed =  {
+    name: 'Balances.Slashed',
+    /**
+     * Some amount was removed from the account (e.g. for misbehavior). \[who,
+     * amount_slashed\]
+     */
+    v33: new EventType(
+        'Balances.Slashed',
+        sts.tuple([v33.AccountId32, sts.bigint()])
+    ),
+    /**
+     * Some amount was removed from the account (e.g. for misbehavior).
+     */
+    v34: new EventType(
+        'Balances.Slashed',
+        sts.struct({
+            who: v34.AccountId32,
+            amount: sts.bigint(),
+        })
+    ),
+}

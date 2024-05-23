@@ -18,6 +18,7 @@
         "DustLost",
         "Reserved",
         "ReserveRepatriated",
+        "Slashed",
         "Transfer",
         "Unreserved",
         "Withdraw"
