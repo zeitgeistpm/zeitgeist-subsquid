@@ -119,6 +119,28 @@ export const decodeReservedEvent = (event: Event): BalancesEvent => {
   }
 };
 
+export const decodeSlashedEvent = (event: Event): BalancesEvent => {
+  if (events.balances.slashed.v33.is(event)) {
+    const [who, amount] = events.balances.slashed.v33.decode(event);
+    return {
+      accountId: ss58.encode({ prefix: 73, bytes: who }),
+      amount,
+    };
+  } else if (events.balances.slashed.v34.is(event)) {
+    const { who, amount } = events.balances.slashed.v34.decode(event);
+    return {
+      accountId: ss58.encode({ prefix: 73, bytes: who }),
+      amount,
+    };
+  } else {
+    const [who, amount] = event.args;
+    return {
+      accountId: ss58.encode({ prefix: 73, bytes: who }),
+      amount: BigInt(amount),
+    };
+  }
+};
+
 export const decodeTransferEvent = (event: Event): TransferEvent => {
   if (events.balances.transfer.v23.is(event)) {
     const [from, to, amount] = events.balances.transfer.v23.decode(event);
