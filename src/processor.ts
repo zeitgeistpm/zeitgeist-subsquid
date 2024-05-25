@@ -29,7 +29,6 @@ export const processor = new SubstrateBatchProcessor()
       events.balances.balanceSet.name,
       events.balances.deposit.name,
       events.balances.dustLost.name,
-      events.balances.transfer.name,
       events.balances.reserveRepatriated.name,
       events.balances.reserved.name,
       events.balances.transfer.name,
@@ -135,12 +134,25 @@ if (isBatteryStation()) {
       call: true,
       extrinsic: true,
     })
+    .addEvent({
+      name: [events.balances.slashed.name],
+      range: { from: 4279537 },
+      call: true,
+      extrinsic: true,
+    })
     .includeAllBlocks({ from: 0, to: 0 })
     .includeAllBlocks({ from: 35683, to: 211391 });
 }
 
 if (isMainnet()) {
-  processor.includeAllBlocks({ from: 0, to: 0 });
+  processor
+    .addEvent({
+      name: [events.balances.slashed.name],
+      range: { from: 4053458 },
+      call: true,
+      extrinsic: true,
+    })
+    .includeAllBlocks({ from: 0, to: 0 });
 }
 
 if (!isLocalEnv()) {
