@@ -87,6 +87,7 @@ export const processor = new SubstrateBatchProcessor()
       events.tokens.deposited.name,
       events.tokens.reserved.name,
       events.tokens.transfer.name,
+      events.tokens.unreserved.name,
       events.tokens.withdrawn.name,
     ],
     call: true,
