@@ -2,6 +2,7 @@ import {sts, Block, Bytes, Option, Result, EventType, RuntimeCtx} from '../suppo
 import * as v23 from '../v23'
 import * as v33 from '../v33'
 import * as v34 from '../v34'
+import * as v56 from '../v56'
 
 export const dustLost =  {
     name: 'Balances.DustLost',
@@ -66,6 +67,16 @@ export const balanceSet =  {
             who: v34.AccountId32,
             free: sts.bigint(),
             reserved: sts.bigint(),
+        })
+    ),
+    /**
+     * A balance was set by root.
+     */
+    v56: new EventType(
+        'Balances.BalanceSet',
+        sts.struct({
+            who: v56.AccountId32,
+            free: sts.bigint(),
         })
     ),
 }
