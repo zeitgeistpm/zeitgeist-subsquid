@@ -12,6 +12,7 @@ import * as v50 from '../v50'
 import * as v51 from '../v51'
 import * as v53 from '../v53'
 import * as v54 from '../v54'
+import * as v56 from '../v56'
 
 export const poolCreate =  {
     name: 'Swaps.PoolCreate',
@@ -97,6 +98,18 @@ export const poolCreate =  {
             poolAccount: v54.AccountId32,
         })
     ),
+    /**
+     * A new pool has been created.
+     */
+    v56: new EventType(
+        'Swaps.PoolCreate',
+        sts.struct({
+            common: v56.CommonPoolEventParams,
+            pool: v56.Pool,
+            poolAmount: sts.bigint(),
+            poolAccount: v56.AccountId32,
+        })
+    ),
 }
 
 export const poolExit =  {
@@ -149,6 +162,13 @@ export const poolExit =  {
     v54: new EventType(
         'Swaps.PoolExit',
         v54.PoolAssetsEvent
+    ),
+    /**
+     * Someone has exited a pool.
+     */
+    v56: new EventType(
+        'Swaps.PoolExit',
+        v56.PoolAssetsEvent
     ),
 }
 
@@ -203,6 +223,13 @@ export const poolExitWithExactAssetAmount =  {
         'Swaps.PoolExitWithExactAssetAmount',
         v54.PoolAssetEvent
     ),
+    /**
+     * Exits a pool given an exact amount of an asset.
+     */
+    v56: new EventType(
+        'Swaps.PoolExitWithExactAssetAmount',
+        v56.PoolAssetEvent
+    ),
 }
 
 export const poolJoin =  {
@@ -255,6 +282,13 @@ export const poolJoin =  {
     v54: new EventType(
         'Swaps.PoolJoin',
         v54.PoolAssetsEvent
+    ),
+    /**
+     * Someone has joined a pool.
+     */
+    v56: new EventType(
+        'Swaps.PoolJoin',
+        v56.PoolAssetsEvent
     ),
 }
 
@@ -309,6 +343,13 @@ export const poolJoinWithExactAssetAmount =  {
         'Swaps.PoolJoinWithExactAssetAmount',
         v54.PoolAssetEvent
     ),
+    /**
+     * Joins a pool given an exact amount of an asset.
+     */
+    v56: new EventType(
+        'Swaps.PoolJoinWithExactAssetAmount',
+        v56.PoolAssetEvent
+    ),
 }
 
 export const swapExactAmountIn =  {
@@ -362,6 +403,13 @@ export const swapExactAmountIn =  {
         'Swaps.SwapExactAmountIn',
         v54.SwapEvent
     ),
+    /**
+     * An exact amount of an asset is entering the pool.
+     */
+    v56: new EventType(
+        'Swaps.SwapExactAmountIn',
+        v56.SwapEvent
+    ),
 }
 
 export const swapExactAmountOut =  {
@@ -414,6 +462,13 @@ export const swapExactAmountOut =  {
     v54: new EventType(
         'Swaps.SwapExactAmountOut',
         v54.SwapEvent
+    ),
+    /**
+     * An exact amount of an asset is leaving the pool.
+     */
+    v56: new EventType(
+        'Swaps.SwapExactAmountOut',
+        v56.SwapEvent
     ),
 }
 

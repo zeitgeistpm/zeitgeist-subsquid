@@ -7,6 +7,7 @@ import {
   decodeTokensDepositedEvent,
   decodeTokensReservedEvent,
   decodeTokensTransferEvent,
+  decodeTokensUnreservedEvent,
   decodeTokensWithdrawnEvent,
 } from './decode';
 
@@ -108,6 +109,22 @@ export const transfer = async (event: Event): Promise<HistoricalAccountBalance[]
 
   habs.push(fromHab, toHab);
   return habs;
+};
+
+export const unreserved = async (event: Event): Promise<HistoricalAccountBalance> => {
+  const { assetId, accountId, amount } = decodeTokensUnreservedEvent(event);
+
+  const hab = new HistoricalAccountBalance({
+    accountId,
+    assetId,
+    blockNumber: event.block.height,
+    dBalance: amount,
+    event: event.name.split('.')[1],
+    extrinsic: extrinsicFromEvent(event),
+    id: event.id + '-' + accountId.slice(-5),
+    timestamp: new Date(event.block.timestamp!),
+  });
+  return hab;
 };
 
 export const withdrawn = async (event: Event): Promise<HistoricalAccountBalance> => {

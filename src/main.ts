@@ -667,6 +667,11 @@ const mapTokens = async (store: Store, event: Event) => {
       await storeBalanceChanges(habs);
       break;
     }
+    case events.tokens.unreserved.name: {
+      const hab = await mappings.tokens.unreserved(event);
+      await storeBalanceChanges([hab]);
+      break;
+    }
     case events.tokens.withdrawn.name: {
       const hab = await mappings.tokens.withdrawn(event);
       await storeBalanceChanges([hab]);

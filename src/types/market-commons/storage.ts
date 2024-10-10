@@ -12,6 +12,8 @@ import * as v51 from '../v51'
 import * as v53 from '../v53'
 import * as v54 from '../v54'
 import * as v55 from '../v55'
+import * as v56 from '../v56'
+import * as v57 from '../v57'
 
 export const markets =  {
     /**
@@ -66,6 +68,14 @@ export const markets =  {
      *  Holds all markets
      */
     v55: new StorageType('MarketCommons.Markets', 'Optional', [sts.bigint()], v55.Market) as MarketsV55,
+    /**
+     *  Holds all markets
+     */
+    v56: new StorageType('MarketCommons.Markets', 'Optional', [sts.bigint()], v56.Market) as MarketsV56,
+    /**
+     *  Holds all markets
+     */
+    v57: new StorageType('MarketCommons.Markets', 'Optional', [sts.bigint()], v57.Market) as MarketsV57,
 }
 
 /**
@@ -287,4 +297,38 @@ export interface MarketsV55  {
     getPairs(block: Block, key: bigint): Promise<[k: bigint, v: (v55.Market | undefined)][]>
     getPairsPaged(pageSize: number, block: Block): AsyncIterable<[k: bigint, v: (v55.Market | undefined)][]>
     getPairsPaged(pageSize: number, block: Block, key: bigint): AsyncIterable<[k: bigint, v: (v55.Market | undefined)][]>
+}
+
+/**
+ *  Holds all markets
+ */
+export interface MarketsV56  {
+    is(block: RuntimeCtx): boolean
+    get(block: Block, key: bigint): Promise<(v56.Market | undefined)>
+    getMany(block: Block, keys: bigint[]): Promise<(v56.Market | undefined)[]>
+    getKeys(block: Block): Promise<bigint[]>
+    getKeys(block: Block, key: bigint): Promise<bigint[]>
+    getKeysPaged(pageSize: number, block: Block): AsyncIterable<bigint[]>
+    getKeysPaged(pageSize: number, block: Block, key: bigint): AsyncIterable<bigint[]>
+    getPairs(block: Block): Promise<[k: bigint, v: (v56.Market | undefined)][]>
+    getPairs(block: Block, key: bigint): Promise<[k: bigint, v: (v56.Market | undefined)][]>
+    getPairsPaged(pageSize: number, block: Block): AsyncIterable<[k: bigint, v: (v56.Market | undefined)][]>
+    getPairsPaged(pageSize: number, block: Block, key: bigint): AsyncIterable<[k: bigint, v: (v56.Market | undefined)][]>
+}
+
+/**
+ *  Holds all markets
+ */
+export interface MarketsV57  {
+    is(block: RuntimeCtx): boolean
+    get(block: Block, key: bigint): Promise<(v57.Market | undefined)>
+    getMany(block: Block, keys: bigint[]): Promise<(v57.Market | undefined)[]>
+    getKeys(block: Block): Promise<bigint[]>
+    getKeys(block: Block, key: bigint): Promise<bigint[]>
+    getKeysPaged(pageSize: number, block: Block): AsyncIterable<bigint[]>
+    getKeysPaged(pageSize: number, block: Block, key: bigint): AsyncIterable<bigint[]>
+    getPairs(block: Block): Promise<[k: bigint, v: (v57.Market | undefined)][]>
+    getPairs(block: Block, key: bigint): Promise<[k: bigint, v: (v57.Market | undefined)][]>
+    getPairsPaged(pageSize: number, block: Block): AsyncIterable<[k: bigint, v: (v57.Market | undefined)][]>
+    getPairsPaged(pageSize: number, block: Block, key: bigint): AsyncIterable<[k: bigint, v: (v57.Market | undefined)][]>
 }

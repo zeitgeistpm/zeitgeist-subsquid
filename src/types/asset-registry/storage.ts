@@ -5,6 +5,7 @@ import * as v48 from '../v48'
 import * as v49 from '../v49'
 import * as v51 from '../v51'
 import * as v54 from '../v54'
+import * as v56 from '../v56'
 
 export const metadata =  {
     /**
@@ -31,6 +32,10 @@ export const metadata =  {
      *  The metadata of an asset, indexed by asset id.
      */
     v54: new StorageType('AssetRegistry.Metadata', 'Optional', [v54.XcmAssetClass], v54.AssetMetadata) as MetadataV54,
+    /**
+     *  The metadata of an asset, indexed by asset id.
+     */
+    v56: new StorageType('AssetRegistry.Metadata', 'Optional', [v56.Asset], v56.AssetMetadata) as MetadataV56,
 }
 
 /**
@@ -133,4 +138,21 @@ export interface MetadataV54  {
     getPairs(block: Block, key: v54.XcmAssetClass): Promise<[k: v54.XcmAssetClass, v: (v54.AssetMetadata | undefined)][]>
     getPairsPaged(pageSize: number, block: Block): AsyncIterable<[k: v54.XcmAssetClass, v: (v54.AssetMetadata | undefined)][]>
     getPairsPaged(pageSize: number, block: Block, key: v54.XcmAssetClass): AsyncIterable<[k: v54.XcmAssetClass, v: (v54.AssetMetadata | undefined)][]>
+}
+
+/**
+ *  The metadata of an asset, indexed by asset id.
+ */
+export interface MetadataV56  {
+    is(block: RuntimeCtx): boolean
+    get(block: Block, key: v56.Asset): Promise<(v56.AssetMetadata | undefined)>
+    getMany(block: Block, keys: v56.Asset[]): Promise<(v56.AssetMetadata | undefined)[]>
+    getKeys(block: Block): Promise<v56.Asset[]>
+    getKeys(block: Block, key: v56.Asset): Promise<v56.Asset[]>
+    getKeysPaged(pageSize: number, block: Block): AsyncIterable<v56.Asset[]>
+    getKeysPaged(pageSize: number, block: Block, key: v56.Asset): AsyncIterable<v56.Asset[]>
+    getPairs(block: Block): Promise<[k: v56.Asset, v: (v56.AssetMetadata | undefined)][]>
+    getPairs(block: Block, key: v56.Asset): Promise<[k: v56.Asset, v: (v56.AssetMetadata | undefined)][]>
+    getPairsPaged(pageSize: number, block: Block): AsyncIterable<[k: v56.Asset, v: (v56.AssetMetadata | undefined)][]>
+    getPairsPaged(pageSize: number, block: Block, key: v56.Asset): AsyncIterable<[k: v56.Asset, v: (v56.AssetMetadata | undefined)][]>
 }

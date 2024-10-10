@@ -6,6 +6,7 @@ import * as v35 from '../v35'
 import * as v36 from '../v36'
 import * as v42 from '../v42'
 import * as v46 from '../v46'
+import * as v56 from '../v56'
 
 export const extrinsicSuccess =  {
     name: 'System.ExtrinsicSuccess',
@@ -109,6 +110,16 @@ export const extrinsicFailed =  {
         sts.struct({
             dispatchError: v46.DispatchError,
             dispatchInfo: v46.DispatchInfo,
+        })
+    ),
+    /**
+     * An extrinsic failed.
+     */
+    v56: new EventType(
+        'System.ExtrinsicFailed',
+        sts.struct({
+            dispatchError: v56.DispatchError,
+            dispatchInfo: v56.DispatchInfo,
         })
     ),
 }

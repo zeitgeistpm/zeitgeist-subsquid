@@ -99,7 +99,7 @@
       "events": ["ExtrinsicFailed", "ExtrinsicSuccess"]
     },
     "Tokens": {
-      "events": ["BalanceSet", "Deposited", "Reserved", "Transfer", "Withdrawn"]
+      "events": ["BalanceSet", "Deposited", "Reserved", "Transfer", "Unreserved", "Withdrawn"]
     }
   }
 }

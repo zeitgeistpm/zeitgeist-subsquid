@@ -89,6 +89,24 @@ export const decodeTokensTransferEvent = (event: Event): TransferEvent => {
   };
 };
 
+export const decodeTokensUnreservedEvent = (event: Event): TokensEvent => {
+  let decoded;
+  if (events.tokens.unreserved.v51.is(event)) {
+    decoded = events.tokens.unreserved.v51.decode(event);
+  } else if (events.tokens.unreserved.v54.is(event)) {
+    decoded = events.tokens.unreserved.v54.decode(event);
+  } else if (events.tokens.unreserved.v56.is(event)) {
+    decoded = events.tokens.unreserved.v56.decode(event);
+  } else {
+    decoded = event.args;
+  }
+  return {
+    assetId: formatAssetId(decoded.currencyId),
+    accountId: ss58.encode({ prefix: 73, bytes: decoded.who }),
+    amount: BigInt(decoded.amount),
+  };
+};
+
 export const decodeTokensWithdrawnEvent = (event: Event): TokensEvent => {
   let decoded;
   if (events.tokens.withdrawn.v36.is(event)) {
