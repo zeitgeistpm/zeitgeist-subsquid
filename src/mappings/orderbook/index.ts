@@ -94,5 +94,6 @@ export const orderRemoved = async (store: Store, event: Event): Promise<Order | 
   if (!order) return;
 
   order.status = OrderStatus.Removed;
+  order.updatedAt = new Date(event.block.timestamp!);
   return order;
 };
