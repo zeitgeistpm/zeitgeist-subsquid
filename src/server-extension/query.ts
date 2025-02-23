@@ -219,10 +219,11 @@ export const marketVolume = (ids: number[], prices: Map<BaseAsset, number>) => `
 
 export const totalLiquidityAndVolume = () => `
   WITH pool_stats AS (
+    -- Traditional pools
     SELECT
       m.market_id,
-      COALESCE(SUM(COALESCE(a.price, 1) * ab.balance), 0) AS liquidity,
-      COALESCE(p.volume, 0) AS volume
+      COALESCE(SUM(COALESCE(a.price, 1) * ab.balance), 0) as liquidity,
+      COALESCE(p.volume, 0) as volume
     FROM
       market m
     LEFT JOIN pool p ON p.id = m.pool_id
@@ -230,28 +231,26 @@ export const totalLiquidityAndVolume = () => `
     LEFT JOIN asset a ON a.market_id = m.id AND a.asset_id = ab.asset_id
     WHERE p.id IS NOT NULL
     GROUP BY m.market_id, p.volume
-  ),
-  neo_pool_stats AS (
+    
+    UNION ALL
+    
+    -- Neo pools
     SELECT
       m.market_id,
-      COALESCE(SUM(a.price * ab.balance), 0) AS liquidity,
-      0 AS volume
+      COALESCE(SUM(a.price * ab.balance), 0) as liquidity,
+      COALESCE(np.volume, 0) as volume
     FROM
       market m
     LEFT JOIN neo_pool np ON np.id = m.neo_pool_id
     LEFT JOIN asset a ON a.market_id = m.id
     LEFT JOIN account_balance ab ON ab.account_id = np.account_id AND ab.asset_id = a.asset_id
     WHERE np.id IS NOT NULL AND a.asset_id ILIKE '%OUTCOME%'
-    GROUP BY m.market_id
+    GROUP BY m.market_id, np.volume
   )
   SELECT
     ROUND(SUM(liquidity), 0) AS total_liquidity,
     SUM(volume) AS total_volume
-  FROM (
-    SELECT * FROM pool_stats
-    UNION ALL
-    SELECT * FROM neo_pool_stats
-  ) AS combined_stats;
+  FROM pool_stats;
 `;
 
 export const totalMintedInCourt = () => `
