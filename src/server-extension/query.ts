@@ -225,10 +225,13 @@ export const totalLiquidityAndVolume = () => `
     SELECT
       m.market_id,
       SUM(a.price*a.amount_in_pool)+ab.balance AS liquidity,
-      CASE 
-        WHEN p.id IS NOT NULL THEN (SELECT volume FROM pool WHERE id = m.pool_id)
-        WHEN np.id IS NOT NULL THEN m.volume
-      END as volume
+      COALESCE(
+        CASE 
+          WHEN p.id IS NOT NULL THEN p.volume
+          WHEN np.id IS NOT NULL THEN m.volume
+        END,
+        0
+      ) as volume
     FROM
       market m
     JOIN
@@ -249,6 +252,7 @@ export const totalLiquidityAndVolume = () => `
       m.market_id,
       m.volume,
       p.id,
+      CASE WHEN p.id IS NOT NULL THEN p.volume END,
       np.id,
       ab.balance
   ) AS market_stats;
