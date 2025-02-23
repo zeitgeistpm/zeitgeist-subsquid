@@ -225,21 +225,22 @@ export const totalLiquidityAndVolume = () => `
     SELECT
       m.market_id,
       SUM(a.price*a.amount_in_pool)+ab.balance AS liquidity,
-      m.volume
+      COALESCE(p.volume, m.volume) as volume
     FROM
       market m
     JOIN
       asset a ON a.asset_id = ANY (m.outcome_assets)
-    JOIN
+    LEFT JOIN
       pool p ON p.id = m.pool_id
     JOIN
-      account_balance ab ON ab.account_id = p.account_id
+      account_balance ab ON ab.account_id = COALESCE(p.account_id, m.account_id)
     WHERE
       ab.asset_id NOT LIKE '%Outcome%'
       AND ab.balance > 0
     GROUP BY
       m.market_id,
       ab.balance,
+      p.volume,
       m.volume
   ) AS market_stats;
 `;
