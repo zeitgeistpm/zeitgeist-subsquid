@@ -218,10 +218,17 @@ export const marketVolume = (ids: number[], prices: Map<BaseAsset, number>) => `
 `;
 
 export const totalLiquidityAndVolume = () => `
-  WITH market_liquidity AS (
+  SELECT
+    ROUND(SUM(liquidity),0) AS total_liquidity,
+    SUM(volume) AS total_volume
+  FROM (
     SELECT
       m.market_id,
-      SUM(a.price*a.amount_in_pool)+ab.balance AS liquidity
+      SUM(a.price*a.amount_in_pool)+ab.balance AS liquidity,
+      CASE 
+        WHEN p.id IS NOT NULL THEN p.volume
+        WHEN np.id IS NOT NULL THEN m.volume
+      END as volume
     FROM
       market m
     JOIN
@@ -240,20 +247,13 @@ export const totalLiquidityAndVolume = () => `
       AND ab.balance > 0
     GROUP BY
       m.market_id,
+      m.volume,
+      p.id,
+      p.volume,
+      np.id,
+      np.volume,
       ab.balance
-  )
-  SELECT
-    ROUND(SUM(ml.liquidity),0) AS total_liquidity,
-    SUM(
-      COALESCE(
-        (SELECT volume FROM pool WHERE id = m.pool_id),
-        (SELECT volume FROM neo_pool WHERE id = m.neo_pool_id),
-        0
-      )
-    ) AS total_volume
-  FROM
-    market_liquidity ml
-    JOIN market m ON m.market_id = ml.market_id;
+  ) AS market_stats;
 `;
 
 export const totalMintedInCourt = () => `
