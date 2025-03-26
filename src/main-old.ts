@@ -16,7 +16,7 @@ import {
 import * as postHooks from './post-hooks';
 import { calls, events } from './types';
 import { Pallet } from './consts';
-import { isEventOrderValid, isMainnet } from './helper';
+import { isBatteryStation, isEventOrderValid, isMainnet } from './helper';
 import { processor, Event } from './processor';
 
 const accounts = new Map<string, Map<string, bigint>>();
@@ -41,6 +41,18 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   swapHistory = [];
 
   for (let block of ctx.blocks) {
+    if (isBatteryStation() && block.header.height < 1089818) {
+      for (let call of block.calls) {
+        if (!call.success) continue;
+        if (call.name === calls.predictionMarkets.redeemShares.name) {
+          await saveAccounts(ctx.store);
+          await mappings.predictionMarkets.redeemShares(ctx.store, call);
+        } else if (call.name === calls.swaps.poolExit.name) {
+          await saveAccounts(ctx.store);
+          await mappings.swaps.poolExitCall(ctx.store, call);
+        }
+      }
+    }
     for (let call of block.calls) {
       if (!call.success) continue;
       if (call.name === calls.court.reassignCourtStakes.name) {
@@ -96,12 +108,17 @@ processor.run(new TypeormDatabase(), async (ctx) => {
         case Pallet.Swaps:
           await mapSwaps(ctx.store, event);
           break;
+        case Pallet.System:
+          await mapSystem(event);
+          break;
         case Pallet.Tokens:
           await mapTokens(ctx.store, event);
           break;
       }
     }
-    if (isMainnet()) {
+    if (isBatteryStation()) {
+      await handleBsrPostHooks(ctx.store, block.header.height);
+    } else if (isMainnet()) {
       await handleMainPostHooks(ctx.store, block.header.height);
     }
   }
@@ -110,6 +127,28 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   await saveCourts(ctx.store);
   await saveOrders(ctx.store);
 });
+
+const handleBsrPostHooks = async (store: Store, blockHeight: number) => {
+  if (blockHeight === 0) {
+    const historicalAccountBalances = await postHooks.initBalance();
+    await storeBalanceChanges(historicalAccountBalances);
+  } else if (blockHeight >= 35683 && blockHeight <= 211391) {
+    await saveAccounts(store);
+    const historicalAccountBalances = await postHooks.unreserveBalances(blockHeight);
+    await storeBalanceChanges(historicalAccountBalances);
+    const res = await postHooks.resolveMarket(store, blockHeight);
+    await storeBalanceChanges(res.historicalAccountBalances);
+    assetHistory.push(...res.historicalAssets);
+    marketHistory.push(...res.historicalMarkets);
+  } else if (blockHeight === 579750) {
+    await saveAccounts(store);
+    await postHooks.destroyMarkets(store);
+  } else if (blockHeight === 4772816) {
+    await postHooks.migrateToLmsr(store);
+  } else if (blockHeight === 4969221) {
+    await postHooks.migrateToAmmCdaHybrid(store);
+  }
+};
 
 const handleMainPostHooks = async (store: Store, blockHeight: number) => {
   if (blockHeight === 0) {
@@ -584,6 +623,23 @@ const mapSwaps = async (store: Store, event: Event) => {
       assetHistory.push(...res.historicalAssets);
       swapHistory.push(res.historicalSwap);
       marketHistory.push(res.historicalMarket);
+      break;
+    }
+  }
+};
+
+const mapSystem = async (event: Event) => {
+  switch (event.name) {
+    case events.system.extrinsicFailed.name: {
+      const hab = await mappings.system.extrinsicFailed(event);
+      if (!hab) break;
+      await storeBalanceChanges([hab]);
+      break;
+    }
+    case events.system.extrinsicSuccess.name: {
+      const hab = await mappings.system.extrinsicSuccess(event);
+      if (!hab) break;
+      await storeBalanceChanges([hab]);
       break;
     }
   }

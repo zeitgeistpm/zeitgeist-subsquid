@@ -31,7 +31,6 @@ export const processor = new SubstrateBatchProcessor()
       events.balances.dustLost.name,
       events.balances.reserveRepatriated.name,
       events.balances.reserved.name,
-      events.balances.slashed.name,
       events.balances.transfer.name,
       events.balances.unreserved.name,
       events.balances.withdraw.name,
@@ -123,8 +122,38 @@ export const processor = new SubstrateBatchProcessor()
     },
   });
 
+if (isBatteryStation()) {
+  processor
+    .addCall({
+      name: [calls.predictionMarkets.redeemShares.name, calls.swaps.poolExit.name],
+      range: { from: 0, to: 1089818 },
+      extrinsic: true,
+    })
+    .addEvent({
+      name: [events.system.extrinsicFailed.name, events.system.extrinsicSuccess.name],
+      range: { from: 0, to: 588249 },
+      call: true,
+      extrinsic: true,
+    })
+    .addEvent({
+      name: [events.balances.slashed.name],
+      range: { from: 4279537 },
+      call: true,
+      extrinsic: true,
+    })
+    .includeAllBlocks({ from: 0, to: 0 })
+    .includeAllBlocks({ from: 35683, to: 211391 });
+}
+
 if (isMainnet()) {
-  processor.includeAllBlocks({ from: 0, to: 0 });
+  processor
+    .addEvent({
+      name: [events.balances.slashed.name],
+      range: { from: 4053458 },
+      call: true,
+      extrinsic: true,
+    })
+    .includeAllBlocks({ from: 0, to: 0 });
 }
 
 if (!isLocalEnv()) {
