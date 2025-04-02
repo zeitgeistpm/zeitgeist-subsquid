@@ -46,18 +46,22 @@ export const decodeBuyExecutedEvent = (event: Event): BuySellExecutedEvent => {
 export const decodeExitExecutedEvent = (event: Event): JoinExitExecutedEvent => {
   let decoded: {
     who: string;
-    marketId: bigint;
+    poolId?: bigint;
+    marketId?: bigint;
     poolSharesAmount: bigint;
     newLiquidityParameter: bigint;
   };
   if (events.neoSwaps.exitExecuted.v50.is(event)) {
     decoded = events.neoSwaps.exitExecuted.v50.decode(event);
+  } else if (events.neoSwaps.exitExecuted.v60.is(event)) {
+    decoded = events.neoSwaps.exitExecuted.v60.decode(event);
   } else {
     decoded = event.args;
   }
   return {
     who: ss58.encode({ prefix: 73, bytes: decoded.who }),
-    marketId: Number(decoded.marketId),
+    poolId: decoded.poolId ? Number(decoded.poolId) : undefined,
+    marketId: decoded.marketId ?  Number(decoded.marketId) : undefined,
     poolSharesAmount: BigInt(decoded.poolSharesAmount),
     newLiquidityParameter: BigInt(decoded.newLiquidityParameter),
   };
@@ -66,17 +70,21 @@ export const decodeExitExecutedEvent = (event: Event): JoinExitExecutedEvent => 
 export const decodeFeesWithdrawnEvent = (event: Event): FeesWithdrawnEvent => {
   let decoded: {
     who: string;
-    marketId: bigint;
+    poolId?: bigint;
+    marketId?: bigint;
     amount: bigint;
   };
   if (events.neoSwaps.feesWithdrawn.v50.is(event)) {
     decoded = events.neoSwaps.feesWithdrawn.v50.decode(event);
+  } else if (events.neoSwaps.feesWithdrawn.v60.is(event)) {
+    decoded = events.neoSwaps.feesWithdrawn.v60.decode(event);
   } else {
     decoded = event.args;
   }
   return {
     who: ss58.encode({ prefix: 73, bytes: decoded.who }),
-    marketId: Number(decoded.marketId),
+    poolId: decoded.poolId ? Number(decoded.poolId) : undefined,
+    marketId: decoded.marketId ?  Number(decoded.marketId) : undefined,
     amount: BigInt(decoded.amount),
   };
 };
@@ -84,18 +92,22 @@ export const decodeFeesWithdrawnEvent = (event: Event): FeesWithdrawnEvent => {
 export const decodeJoinExecutedEvent = (event: Event): JoinExitExecutedEvent => {
   let decoded: {
     who: string;
-    marketId: bigint;
+    poolId?: bigint;
+    marketId?: bigint;
     poolSharesAmount: bigint;
     newLiquidityParameter: bigint;
   };
   if (events.neoSwaps.joinExecuted.v50.is(event)) {
     decoded = events.neoSwaps.joinExecuted.v50.decode(event);
+  } else if (events.neoSwaps.joinExecuted.v60.is(event)) {
+    decoded = events.neoSwaps.joinExecuted.v60.decode(event);
   } else {
     decoded = event.args;
   }
   return {
     who: ss58.encode({ prefix: 73, bytes: decoded.who }),
-    marketId: Number(decoded.marketId),
+    poolId: decoded.poolId ? Number(decoded.poolId) : undefined,
+    marketId: decoded.marketId ? Number(decoded.marketId) : undefined,
     poolSharesAmount: BigInt(decoded.poolSharesAmount),
     newLiquidityParameter: BigInt(decoded.newLiquidityParameter),
   };
@@ -191,13 +203,15 @@ interface BuySellExecutedEvent {
 
 interface FeesWithdrawnEvent {
   who: string;
-  marketId: number;
+  poolId?: number;
+  marketId?: number;
   amount: bigint;
 }
 
 interface JoinExitExecutedEvent {
   who: string;
-  marketId: number;
+  poolId?: number;
+  marketId?: number;
   poolSharesAmount: bigint;
   newLiquidityParameter: bigint;
 }
