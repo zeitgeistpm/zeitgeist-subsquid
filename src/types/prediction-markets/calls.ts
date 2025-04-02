@@ -1,5 +1,5 @@
 import {sts, Block, Bytes, Option, Result, CallType, RuntimeCtx} from '../support'
-import * as v23 from '../v23'
+import * as v26 from '../v26'
 
 export const redeemShares =  {
     name: 'PredictionMarkets.redeem_shares',
@@ -7,10 +7,10 @@ export const redeemShares =  {
      *  Redeems the winning shares of a prediction market.
      * 
      */
-    v23: new CallType(
+    v26: new CallType(
         'PredictionMarkets.redeem_shares',
         sts.struct({
-            marketId: v23.MarketIdOf,
+            marketId: v26.MarketIdOf,
         })
     ),
 }

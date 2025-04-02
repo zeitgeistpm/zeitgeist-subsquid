@@ -1,5 +1,5 @@
 import {sts, Block, Bytes, Option, Result, EventType, RuntimeCtx} from '../support'
-import * as v23 from '../v23'
+import * as v26 from '../v26'
 import * as v29 from '../v29'
 import * as v32 from '../v32'
 import * as v34 from '../v34'
@@ -18,15 +18,16 @@ import * as v54 from '../v54'
 import * as v55 from '../v55'
 import * as v56 from '../v56'
 import * as v57 from '../v57'
+import * as v60 from '../v60'
 
 export const boughtCompleteSet =  {
     name: 'PredictionMarkets.BoughtCompleteSet',
     /**
      *  A complete set of shares has been bought \[market_id, buyer\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'PredictionMarkets.BoughtCompleteSet',
-        sts.tuple([v23.MarketIdOf, v23.AccountId])
+        sts.tuple([v26.MarketIdOf, v26.AccountId])
     ),
     /**
      * A complete set of assets has been bought \[market_id, amount_per_asset, buyer\]
@@ -42,9 +43,9 @@ export const marketApproved =  {
     /**
      *  A market has been approved \[market_id\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'PredictionMarkets.MarketApproved',
-        v23.MarketIdOf
+        v26.MarketIdOf
     ),
     /**
      *  A market has been approved \[market_id, new_market_status\]
@@ -67,9 +68,9 @@ export const marketCreated =  {
     /**
      *  A market has been created \[market_id, creator\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'PredictionMarkets.MarketCreated',
-        sts.tuple([v23.MarketIdOf, v23.Market, v23.AccountId])
+        sts.tuple([v26.MarketIdOf, v26.Market, v26.AccountId])
     ),
     /**
      *  A market has been created \[market_id, creator\]
@@ -183,6 +184,13 @@ export const marketCreated =  {
         'PredictionMarkets.MarketCreated',
         sts.tuple([sts.bigint(), v57.AccountId32, v57.Market])
     ),
+    /**
+     * A market has been created. \[market_id, market_account, market\]
+     */
+    v60: new EventType(
+        'PredictionMarkets.MarketCreated',
+        sts.tuple([sts.bigint(), v60.AccountId32, v60.Market])
+    ),
 }
 
 export const marketStartedWithSubsidy =  {
@@ -190,9 +198,9 @@ export const marketStartedWithSubsidy =  {
     /**
      *  A market was started after gathering enough subsidy. \[market_id\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'PredictionMarkets.MarketStartedWithSubsidy',
-        v23.MarketIdOf
+        v26.MarketIdOf
     ),
     /**
      *  A market was started after gathering enough subsidy. \[market_id, new_market_status\]
@@ -208,9 +216,9 @@ export const marketInsufficientSubsidy =  {
     /**
      * A market was discarded after failing to gather enough subsidy. \[market_id\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'PredictionMarkets.MarketInsufficientSubsidy',
-        v23.MarketIdOf
+        v26.MarketIdOf
     ),
     /**
      *  A market was discarded after failing to gather enough subsidy. \[market_id, new_market_status\]
@@ -226,9 +234,9 @@ export const marketDisputed =  {
     /**
      *  A market has been disputed \[market_id, new_outcome\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'PredictionMarkets.MarketDisputed',
-        sts.tuple([v23.MarketIdOf, v23.OutcomeReport])
+        sts.tuple([v26.MarketIdOf, v26.OutcomeReport])
     ),
     /**
      *  A market has been disputed \[market_id, new_market_status, new_outcome\]
@@ -266,9 +274,9 @@ export const marketRejected =  {
      *  NOTE: Maybe we should only allow rejections.
      *  A pending market has been rejected as invalid. \[market_id\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'PredictionMarkets.MarketRejected',
-        v23.MarketIdOf
+        v26.MarketIdOf
     ),
     /**
      * A pending market has been rejected as invalid with a reason. \[market_id, reject_reason\]
@@ -284,9 +292,9 @@ export const marketReported =  {
     /**
      *  A market has been reported on \[market_id, reported_outcome\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'PredictionMarkets.MarketReported',
-        sts.tuple([v23.MarketIdOf, v23.OutcomeReport])
+        sts.tuple([v26.MarketIdOf, v26.OutcomeReport])
     ),
     /**
      *  A market has been reported on \[market_id, new_market_status, reported_outcome\]
@@ -309,9 +317,9 @@ export const marketResolved =  {
     /**
      *  A market has been resolved \[market_id, real_outcome\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'PredictionMarkets.MarketResolved',
-        sts.tuple([v23.MarketIdOf, sts.number()])
+        sts.tuple([v26.MarketIdOf, sts.number()])
     ),
     /**
      *  A market has been resolved \[market_id, new_market_status, real_outcome\]
@@ -334,9 +342,9 @@ export const soldCompleteSet =  {
     /**
      *  A complete set of shares has been sold \[market_id, seller\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'PredictionMarkets.SoldCompleteSet',
-        sts.tuple([v23.MarketIdOf, v23.AccountId])
+        sts.tuple([v26.MarketIdOf, v26.AccountId])
     ),
     /**
      * A complete set of assets has been sold \[market_id, amount_per_asset, seller\]
@@ -398,6 +406,14 @@ export const tokensRedeemed =  {
     v56: new EventType(
         'PredictionMarkets.TokensRedeemed',
         sts.tuple([sts.bigint(), v56.Asset, sts.bigint(), sts.bigint(), v56.AccountId32])
+    ),
+    /**
+     * An amount of winning outcomes have been redeemed.
+     * \[market_id, currency_id, amount_redeemed, payout, who\]
+     */
+    v60: new EventType(
+        'PredictionMarkets.TokensRedeemed',
+        sts.tuple([sts.bigint(), v60.Asset, sts.bigint(), sts.bigint(), v60.AccountId32])
     ),
 }
 

@@ -1,5 +1,5 @@
 import {sts, Block, Bytes, Option, Result, EventType, RuntimeCtx} from '../support'
-import * as v23 from '../v23'
+import * as v26 from '../v26'
 import * as v32 from '../v32'
 import * as v34 from '../v34'
 import * as v35 from '../v35'
@@ -13,9 +13,9 @@ export const extrinsicSuccess =  {
     /**
      *  An extrinsic completed successfully. \[info\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'System.ExtrinsicSuccess',
-        v23.DispatchInfo
+        v26.DispatchInfo
     ),
     /**
      * An extrinsic completed successfully.
@@ -51,9 +51,9 @@ export const extrinsicFailed =  {
     /**
      *  An extrinsic failed. \[error, info\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'System.ExtrinsicFailed',
-        sts.tuple([v23.DispatchError, v23.DispatchInfo])
+        sts.tuple([v26.DispatchError, v26.DispatchInfo])
     ),
     /**
      * An extrinsic failed. \[error, info\]

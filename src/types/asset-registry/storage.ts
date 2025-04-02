@@ -6,6 +6,7 @@ import * as v49 from '../v49'
 import * as v51 from '../v51'
 import * as v54 from '../v54'
 import * as v56 from '../v56'
+import * as v60 from '../v60'
 
 export const metadata =  {
     /**
@@ -36,6 +37,10 @@ export const metadata =  {
      *  The metadata of an asset, indexed by asset id.
      */
     v56: new StorageType('AssetRegistry.Metadata', 'Optional', [v56.Asset], v56.AssetMetadata) as MetadataV56,
+    /**
+     *  The metadata of an asset, indexed by asset id.
+     */
+    v60: new StorageType('AssetRegistry.Metadata', 'Optional', [v60.Asset], v60.AssetMetadata) as MetadataV60,
 }
 
 /**
@@ -155,4 +160,21 @@ export interface MetadataV56  {
     getPairs(block: Block, key: v56.Asset): Promise<[k: v56.Asset, v: (v56.AssetMetadata | undefined)][]>
     getPairsPaged(pageSize: number, block: Block): AsyncIterable<[k: v56.Asset, v: (v56.AssetMetadata | undefined)][]>
     getPairsPaged(pageSize: number, block: Block, key: v56.Asset): AsyncIterable<[k: v56.Asset, v: (v56.AssetMetadata | undefined)][]>
+}
+
+/**
+ *  The metadata of an asset, indexed by asset id.
+ */
+export interface MetadataV60  {
+    is(block: RuntimeCtx): boolean
+    get(block: Block, key: v60.Asset): Promise<(v60.AssetMetadata | undefined)>
+    getMany(block: Block, keys: v60.Asset[]): Promise<(v60.AssetMetadata | undefined)[]>
+    getKeys(block: Block): Promise<v60.Asset[]>
+    getKeys(block: Block, key: v60.Asset): Promise<v60.Asset[]>
+    getKeysPaged(pageSize: number, block: Block): AsyncIterable<v60.Asset[]>
+    getKeysPaged(pageSize: number, block: Block, key: v60.Asset): AsyncIterable<v60.Asset[]>
+    getPairs(block: Block): Promise<[k: v60.Asset, v: (v60.AssetMetadata | undefined)][]>
+    getPairs(block: Block, key: v60.Asset): Promise<[k: v60.Asset, v: (v60.AssetMetadata | undefined)][]>
+    getPairsPaged(pageSize: number, block: Block): AsyncIterable<[k: v60.Asset, v: (v60.AssetMetadata | undefined)][]>
+    getPairsPaged(pageSize: number, block: Block, key: v60.Asset): AsyncIterable<[k: v60.Asset, v: (v60.AssetMetadata | undefined)][]>
 }

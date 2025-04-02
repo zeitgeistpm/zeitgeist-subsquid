@@ -1,5 +1,5 @@
 import {sts, Block, Bytes, Option, Result, EventType, RuntimeCtx} from '../support'
-import * as v23 from '../v23'
+import * as v26 from '../v26'
 import * as v35 from '../v35'
 
 export const rewarded =  {
@@ -7,9 +7,9 @@ export const rewarded =  {
     /**
      *  Paid the account (nominator or collator) the balance as liquid rewards
      */
-    v23: new EventType(
+    v26: new EventType(
         'ParachainStaking.Rewarded',
-        sts.tuple([v23.AccountId, v23.BalanceOf])
+        sts.tuple([v26.AccountId, v26.BalanceOf])
     ),
     /**
      * Paid the account (delegator or collator) the balance as liquid rewards.

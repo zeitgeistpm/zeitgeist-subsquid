@@ -1,5 +1,5 @@
 import {sts, Block, Bytes, Option, Result, EventType, RuntimeCtx} from '../support'
-import * as v23 from '../v23'
+import * as v26 from '../v26'
 import * as v32 from '../v32'
 import * as v34 from '../v34'
 
@@ -8,9 +8,9 @@ export const transferred =  {
     /**
      *  Currency transfer success. \[currency_id, from, to, amount\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'Currency.Transferred',
-        sts.tuple([v23.Currency, v23.AccountId, v23.AccountId, v23.Balance])
+        sts.tuple([v26.Currency, v26.AccountId, v26.AccountId, v26.Balance])
     ),
     /**
      * Currency transfer success. \[currency_id, from, to, amount\]
@@ -38,9 +38,9 @@ export const deposited =  {
     /**
      *  Deposit success. \[currency_id, who, amount\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'Currency.Deposited',
-        sts.tuple([v23.Currency, v23.AccountId, v23.Balance])
+        sts.tuple([v26.Currency, v26.AccountId, v26.Balance])
     ),
     /**
      * Deposit success. \[currency_id, who, amount\]
@@ -67,9 +67,9 @@ export const withdrawn =  {
     /**
      *  Withdraw success. \[currency_id, who, amount\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'Currency.Withdrawn',
-        sts.tuple([v23.Currency, v23.AccountId, v23.Balance])
+        sts.tuple([v26.Currency, v26.AccountId, v26.Balance])
     ),
     /**
      * Withdraw success. \[currency_id, who, amount\]

@@ -1,6 +1,6 @@
 {
   "outDir": "src/types",
-  "specVersions": "https://v2.archive.subsquid.io/metadata/zeitgeist-testnet",
+  "specVersions": "https://v2.archive.subsquid.io/metadata/zeitgeist",
   "pallets": {
     "AssetRegistry": {
       "storage": ["Metadata"]
