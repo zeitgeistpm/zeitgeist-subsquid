@@ -5,9 +5,10 @@ import { Event } from '../../processor';
 
 export const decodeTokensBalanceSetEvent = (event: Event): TokensEvent => {
   let decoded;
-  if (events.tokens.balanceSet.v23.is(event)) {
-    decoded = events.tokens.balanceSet.v23.decode(event);
-  } else if (events.tokens.balanceSet.v32.is(event)) {
+  // if (events.tokens.balanceSet.v23.is(event)) {
+  //   decoded = events.tokens.balanceSet.v23.decode(event);
+  // } 
+  if (events.tokens.balanceSet.v32.is(event)) {
     decoded = events.tokens.balanceSet.v32.decode(event);
   } else if (events.tokens.balanceSet.v34.is(event)) {
     decoded = events.tokens.balanceSet.v34.decode(event);
@@ -64,9 +65,10 @@ export const decodeTokensReservedEvent = (event: Event): TokensEvent => {
 
 export const decodeTokensTransferEvent = (event: Event): TransferEvent => {
   let decoded;
-  if (events.tokens.transfer.v23.is(event)) {
-    decoded = events.tokens.transfer.v23.decode(event);
-  } else if (events.tokens.transfer.v32.is(event)) {
+  // if (events.tokens.transfer.v23.is(event)) {
+  //   decoded = events.tokens.transfer.v23.decode(event);
+  // } 
+  if (events.tokens.transfer.v32.is(event)) {
     decoded = events.tokens.transfer.v32.decode(event);
   } else if (events.tokens.transfer.v34.is(event)) {
     decoded = events.tokens.transfer.v34.decode(event);

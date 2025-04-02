@@ -1,10 +1,16 @@
 import * as ss58 from '@subsquid/ss58';
+// import {
+//   Pool as Pool_v23,
+//   PoolAssetEvent as PoolAssetEvent_v23,
+//   PoolAssetsEvent as PoolAssetsEvent_v23,
+//   SwapEvent as SwapEvent_v23,
+// } from '../../types/v23';
 import {
-  Pool as Pool_v23,
-  PoolAssetEvent as PoolAssetEvent_v23,
-  PoolAssetsEvent as PoolAssetsEvent_v23,
-  SwapEvent as SwapEvent_v23,
-} from '../../types/v23';
+  Pool as Pool_v32,
+  PoolAssetEvent as PoolAssetEvent_v32,
+  PoolAssetsEvent as PoolAssetsEvent_v32,
+  SwapEvent as SwapEvent_v32
+} from '../../types/v32';
 import {
   CommonPoolEventParams,
   Pool as Pool_v41,
@@ -56,10 +62,11 @@ export const decodePoolClosedEvent = (event: Event): PoolEvent => {
 };
 
 export const decodePoolCreateEvent = (event: Event): PoolCreateEvent => {
-  let cpep: CommonPoolEventParams, pool: Pool_v23 | Pool_v41, amount: bigint | undefined, accountId: string | undefined;
-  if (events.swaps.poolCreate.v23.is(event)) {
-    [cpep, pool] = events.swaps.poolCreate.v23.decode(event);
-  } else if (events.swaps.poolCreate.v32.is(event)) {
+  let cpep: CommonPoolEventParams, pool: Pool_v32 | Pool_v41, amount: bigint | undefined, accountId: string | undefined;
+  // if (events.swaps.poolCreate.v23.is(event)) {
+  //   [cpep, pool] = events.swaps.poolCreate.v23.decode(event);
+  // } 
+  if (events.swaps.poolCreate.v32.is(event)) {
     [cpep, pool] = events.swaps.poolCreate.v32.decode(event);
   } else if (events.swaps.poolCreate.v35.is(event)) {
     [cpep, pool, amount] = events.swaps.poolCreate.v35.decode(event);
@@ -93,10 +100,11 @@ export const decodePoolDestroyedEvent = (event: Event): PoolEvent => {
 };
 
 export const decodePoolExitEvent = (event: Event): PoolExitJoinEvent => {
-  let pae: PoolAssetsEvent_v23 | PoolAssetsEvent_v41;
-  if (events.swaps.poolExit.v23.is(event)) {
-    pae = events.swaps.poolExit.v23.decode(event);
-  } else if (events.swaps.poolExit.v26.is(event)) {
+  let pae: PoolAssetsEvent_v32 | PoolAssetsEvent_v41;
+  // if (events.swaps.poolExit.v23.is(event)) {
+  //   pae = events.swaps.poolExit.v23.decode(event);
+  // } 
+  if (events.swaps.poolExit.v26.is(event)) {
     pae = events.swaps.poolExit.v26.decode(event);
   } else if (events.swaps.poolExit.v32.is(event)) {
     pae = events.swaps.poolExit.v32.decode(event);
@@ -111,10 +119,11 @@ export const decodePoolExitEvent = (event: Event): PoolExitJoinEvent => {
 };
 
 export const decodePoolExitWithExactAssetAmountEvent = (event: Event): ExactAssetAmountEvent => {
-  let pae: PoolAssetEvent_v23 | PoolAssetEvent_v41;
-  if (events.swaps.poolExitWithExactAssetAmount.v23.is(event)) {
-    pae = events.swaps.poolExitWithExactAssetAmount.v23.decode(event);
-  } else if (events.swaps.poolExitWithExactAssetAmount.v26.is(event)) {
+  let pae: PoolAssetEvent_v32 | PoolAssetEvent_v41;
+  // if (events.swaps.poolExitWithExactAssetAmount.v23.is(event)) {
+  //   pae = events.swaps.poolExitWithExactAssetAmount.v23.decode(event);
+  // } 
+  if (events.swaps.poolExitWithExactAssetAmount.v26.is(event)) {
     pae = events.swaps.poolExitWithExactAssetAmount.v26.decode(event);
   } else if (events.swaps.poolExitWithExactAssetAmount.v32.is(event)) {
     pae = events.swaps.poolExitWithExactAssetAmount.v32.decode(event);
@@ -129,10 +138,11 @@ export const decodePoolExitWithExactAssetAmountEvent = (event: Event): ExactAsse
 };
 
 export const decodePoolJoinEvent = (event: Event): PoolExitJoinEvent => {
-  let pae: PoolAssetsEvent_v23 | PoolAssetsEvent_v41;
-  if (events.swaps.poolJoin.v23.is(event)) {
-    pae = events.swaps.poolJoin.v23.decode(event);
-  } else if (events.swaps.poolJoin.v26.is(event)) {
+  let pae: PoolAssetsEvent_v32 | PoolAssetsEvent_v41;
+  // if (events.swaps.poolJoin.v23.is(event)) {
+  //   pae = events.swaps.poolJoin.v23.decode(event);
+  // } 
+  if (events.swaps.poolJoin.v26.is(event)) {
     pae = events.swaps.poolJoin.v26.decode(event);
   } else if (events.swaps.poolJoin.v32.is(event)) {
     pae = events.swaps.poolJoin.v32.decode(event);
@@ -147,10 +157,11 @@ export const decodePoolJoinEvent = (event: Event): PoolExitJoinEvent => {
 };
 
 export const decodePoolJoinWithExactAssetAmountEvent = (event: Event): ExactAssetAmountEvent => {
-  let pae: PoolAssetEvent_v23 | PoolAssetEvent_v41;
-  if (events.swaps.poolJoinWithExactAssetAmount.v23.is(event)) {
-    pae = events.swaps.poolJoinWithExactAssetAmount.v23.decode(event);
-  } else if (events.swaps.poolJoinWithExactAssetAmount.v26.is(event)) {
+  let pae: PoolAssetEvent_v32 | PoolAssetEvent_v41;
+  // if (events.swaps.poolJoinWithExactAssetAmount.v23.is(event)) {
+  //   pae = events.swaps.poolJoinWithExactAssetAmount.v23.decode(event);
+  // } 
+  if (events.swaps.poolJoinWithExactAssetAmount.v26.is(event)) {
     pae = events.swaps.poolJoinWithExactAssetAmount.v26.decode(event);
   } else if (events.swaps.poolJoinWithExactAssetAmount.v32.is(event)) {
     pae = events.swaps.poolJoinWithExactAssetAmount.v32.decode(event);
@@ -165,10 +176,11 @@ export const decodePoolJoinWithExactAssetAmountEvent = (event: Event): ExactAsse
 };
 
 export const decodeSwapExactAmountInEvent = (event: Event): SwapEvent => {
-  let swapEvent: SwapEvent_v23 | SwapEvent_v41;
-  if (events.swaps.swapExactAmountIn.v23.is(event)) {
-    swapEvent = events.swaps.swapExactAmountIn.v23.decode(event);
-  } else if (events.swaps.swapExactAmountIn.v32.is(event)) {
+  let swapEvent: SwapEvent_v32 | SwapEvent_v41;
+  // if (events.swaps.swapExactAmountIn.v23.is(event)) {
+  //   swapEvent = events.swaps.swapExactAmountIn.v23.decode(event);
+  // } 
+  if (events.swaps.swapExactAmountIn.v32.is(event)) {
     swapEvent = events.swaps.swapExactAmountIn.v32.decode(event);
   } else if (events.swaps.swapExactAmountIn.v37.is(event)) {
     swapEvent = events.swaps.swapExactAmountIn.v37.decode(event);
@@ -181,10 +193,11 @@ export const decodeSwapExactAmountInEvent = (event: Event): SwapEvent => {
 };
 
 export const decodeSwapExactAmountOutEvent = (event: Event): SwapEvent => {
-  let swapEvent: SwapEvent_v23 | SwapEvent_v41;
-  if (events.swaps.swapExactAmountOut.v23.is(event)) {
-    swapEvent = events.swaps.swapExactAmountOut.v23.decode(event);
-  } else if (events.swaps.swapExactAmountOut.v32.is(event)) {
+  let swapEvent: SwapEvent_v32 | SwapEvent_v41;
+  // if (events.swaps.swapExactAmountOut.v23.is(event)) {
+  //   swapEvent = events.swaps.swapExactAmountOut.v23.decode(event);
+  // } 
+  if (events.swaps.swapExactAmountOut.v32.is(event)) {
     swapEvent = events.swaps.swapExactAmountOut.v32.decode(event);
   } else if (events.swaps.swapExactAmountOut.v37.is(event)) {
     swapEvent = events.swaps.swapExactAmountOut.v37.decode(event);
@@ -198,8 +211,8 @@ export const decodeSwapExactAmountOutEvent = (event: Event): SwapEvent => {
 
 export const decodePoolExitCall = (call: Call): PoolExitCall => {
   let decoded: { poolId: bigint; poolAmount: bigint };
-  if (calls.swaps.poolExit.v23.is(call)) {
-    decoded = calls.swaps.poolExit.v23.decode(call);
+  if (calls.swaps.poolExit.v26.is(call)) {
+    decoded = calls.swaps.poolExit.v26.decode(call);
   } else {
     decoded = call.args;
   }
@@ -207,12 +220,12 @@ export const decodePoolExitCall = (call: Call): PoolExitCall => {
 };
 
 interface ExactAssetAmountEvent {
-  pae: PoolAssetEvent_v23 | PoolAssetEvent_v41;
+  pae: PoolAssetEvent_v32 | PoolAssetEvent_v41;
 }
 
 interface PoolCreateEvent {
   cpep: CommonPoolEventParams;
-  pool: Pool_v23 | Pool_v41;
+  pool: Pool_v32 | Pool_v41;
   amount?: bigint;
   accountId?: string;
 }
@@ -222,7 +235,7 @@ interface PoolEvent {
 }
 
 interface PoolExitJoinEvent {
-  pae: PoolAssetsEvent_v23 | PoolAssetsEvent_v41;
+  pae: PoolAssetsEvent_v32 | PoolAssetsEvent_v41;
 }
 
 interface PoolExitCall {
@@ -231,5 +244,5 @@ interface PoolExitCall {
 }
 
 interface SwapEvent {
-  swapEvent: SwapEvent_v23 | SwapEvent_v41;
+  swapEvent: SwapEvent_v32 | SwapEvent_v41;
 }

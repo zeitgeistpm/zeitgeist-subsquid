@@ -5,9 +5,10 @@ import { Event } from '../../processor';
 
 export const decodeDepositedEvent = (event: Event): CurrencyEvent => {
   let currencyId, who, amount;
-  if (events.currency.deposited.v23.is(event)) {
-    [currencyId, who, amount] = events.currency.deposited.v23.decode(event);
-  } else if (events.currency.deposited.v32.is(event)) {
+  // if (events.currency.deposited.v23.is(event)) {
+  //   [currencyId, who, amount] = events.currency.deposited.v23.decode(event);
+  // } 
+  if (events.currency.deposited.v32.is(event)) {
     [currencyId, who, amount] = events.currency.deposited.v32.decode(event);
   } else if (events.currency.deposited.v34.is(event)) {
     const decoded = events.currency.deposited.v34.decode(event);
@@ -26,9 +27,10 @@ export const decodeDepositedEvent = (event: Event): CurrencyEvent => {
 
 export const decodeTransferredEvent = (event: Event): TransferredEvent => {
   let currencyId, from, to, amount;
-  if (events.currency.transferred.v23.is(event)) {
-    [currencyId, from, to, amount] = events.currency.transferred.v23.decode(event);
-  } else if (events.currency.transferred.v32.is(event)) {
+  // if (events.currency.transferred.v23.is(event)) {
+  //   [currencyId, from, to, amount] = events.currency.transferred.v23.decode(event);
+  // } 
+  if (events.currency.transferred.v32.is(event)) {
     [currencyId, from, to, amount] = events.currency.transferred.v32.decode(event);
   } else if (events.currency.transferred.v34.is(event)) {
     const decoded = events.currency.transferred.v34.decode(event);
@@ -49,9 +51,10 @@ export const decodeTransferredEvent = (event: Event): TransferredEvent => {
 
 export const decodeWithdrawnEvent = (event: Event): CurrencyEvent => {
   let currencyId, who, amount;
-  if (events.currency.withdrawn.v23.is(event)) {
-    [currencyId, who, amount] = events.currency.withdrawn.v23.decode(event);
-  } else if (events.currency.withdrawn.v32.is(event)) {
+  // if (events.currency.withdrawn.v23.is(event)) {
+  //   [currencyId, who, amount] = events.currency.withdrawn.v23.decode(event);
+  // } 
+  if (events.currency.withdrawn.v32.is(event)) {
     [currencyId, who, amount] = events.currency.withdrawn.v32.decode(event);
   } else if (events.currency.withdrawn.v34.is(event)) {
     const decoded = events.currency.withdrawn.v34.decode(event);
