@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_} from "typeorm"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, IntColumn as IntColumn_, StringColumn as StringColumn_, DateTimeColumn as DateTimeColumn_} from "@subsquid/typeorm-store"
 import {PoolStatus} from "./_poolStatus"
 
 /**
@@ -17,19 +17,19 @@ export class HistoricalPool {
     /**
      * Height of the block
      */
-    @Column_("int4", {nullable: false})
+    @IntColumn_({nullable: false})
     blockNumber!: number
 
     /**
      * Event method which initiated this change
      */
-    @Column_("text", {nullable: false})
+    @StringColumn_({nullable: false})
     event!: string
 
     /**
      * Zeitgeist's identifier for pool
      */
-    @Column_("int4", {nullable: false})
+    @IntColumn_({nullable: false})
     poolId!: number
 
     /**
@@ -41,6 +41,6 @@ export class HistoricalPool {
     /**
      * Timestamp of the block
      */
-    @Column_("timestamp with time zone", {nullable: false})
+    @DateTimeColumn_({nullable: false})
     timestamp!: Date
 }

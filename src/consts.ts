@@ -59,6 +59,9 @@ export enum Pallet {
 
 export enum SwapEvent {
   BuyExecuted = 'BuyExecuted',
+  CombinatorialPoolDeployed = 'CombinatorialPoolDeployed',
+  ComboBuyExecuted = 'ComboBuyExecuted',
+  ComboSellExecuted = 'ComboSellExecuted',
   OrderFilled = 'OrderFilled',
   OutcomeBought = 'OutcomeBought',
   SellExecuted = 'SellExecuted',

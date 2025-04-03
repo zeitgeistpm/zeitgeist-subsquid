@@ -339,3 +339,66 @@ export const poolDeployed =  {
         })
     ),
 }
+
+export const comboBuyExecuted =  {
+    name: 'NeoSwaps.ComboBuyExecuted',
+    /**
+     * A combinatorial position was opened.
+     */
+    v60: new EventType(
+        'NeoSwaps.ComboBuyExecuted',
+        sts.struct({
+            who: v60.AccountId32,
+            poolId: sts.bigint(),
+            buy: sts.array(() => v60.Asset),
+            sell: sts.array(() => v60.Asset),
+            amountIn: sts.bigint(),
+            amountOut: sts.bigint(),
+            swapFeeAmount: sts.bigint(),
+            externalFeeAmount: sts.bigint(),
+        })
+    ),
+}
+
+export const comboSellExecuted =  {
+    name: 'NeoSwaps.ComboSellExecuted',
+    /**
+     * A combinatorial position was closed.
+     */
+    v60: new EventType(
+        'NeoSwaps.ComboSellExecuted',
+        sts.struct({
+            who: v60.AccountId32,
+            poolId: sts.bigint(),
+            buy: sts.array(() => v60.Asset),
+            keep: sts.array(() => v60.Asset),
+            sell: sts.array(() => v60.Asset),
+            amountBuy: sts.bigint(),
+            amountKeep: sts.bigint(),
+            amountOut: sts.bigint(),
+            swapFeeAmount: sts.bigint(),
+            externalFeeAmount: sts.bigint(),
+        })
+    ),
+}
+
+export const combinatorialPoolDeployed =  {
+    name: 'NeoSwaps.CombinatorialPoolDeployed',
+    /**
+     * Pool was createed.
+     */
+    v60: new EventType(
+        'NeoSwaps.CombinatorialPoolDeployed',
+        sts.struct({
+            who: v60.AccountId32,
+            marketIds: sts.array(() => sts.bigint()),
+            poolId: sts.bigint(),
+            accountId: v60.AccountId32,
+            reserves: sts.array(() => sts.tuple(() => [v60.Asset, sts.bigint()])),
+            collateral: v60.Asset,
+            liquidityParameter: sts.bigint(),
+            poolSharesAmount: sts.bigint(),
+            swapFee: sts.bigint(),
+        })
+    ),
+}

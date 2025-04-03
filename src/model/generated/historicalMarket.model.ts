@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_} from "typeorm"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, IntColumn as IntColumn_, StringColumn as StringColumn_, BigIntColumn as BigIntColumn_, ManyToOne as ManyToOne_, Index as Index_, DateTimeColumn as DateTimeColumn_} from "@subsquid/typeorm-store"
 import * as marshal from "./marshal"
 import {MarketEvent} from "./_marketEvent"
 import {Market} from "./market.model"
@@ -21,25 +21,25 @@ export class HistoricalMarket {
     /**
      * Height of the block
      */
-    @Column_("int4", {nullable: false})
+    @IntColumn_({nullable: false})
     blockNumber!: number
 
     /**
      * The account that reported or disputed
      */
-    @Column_("text", {nullable: true})
+    @StringColumn_({nullable: true})
     by!: string | undefined | null
 
     /**
      * Change in market liquidity
      */
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+    @BigIntColumn_({nullable: false})
     dLiquidity!: bigint
 
     /**
      * Change in market volume
      */
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+    @BigIntColumn_({nullable: false})
     dVolume!: bigint
 
     /**
@@ -51,7 +51,7 @@ export class HistoricalMarket {
     /**
      * New updated liquidity
      */
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+    @BigIntColumn_({nullable: false})
     liquidity!: bigint
 
     /**
@@ -70,7 +70,7 @@ export class HistoricalMarket {
     /**
      * Latest resolved outcome
      */
-    @Column_("text", {nullable: true})
+    @StringColumn_({nullable: true})
     resolvedOutcome!: string | undefined | null
 
     /**
@@ -82,12 +82,12 @@ export class HistoricalMarket {
     /**
      * Timestamp of the block
      */
-    @Column_("timestamp with time zone", {nullable: false})
+    @DateTimeColumn_({nullable: false})
     timestamp!: Date
 
     /**
      * New updated volume
      */
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+    @BigIntColumn_({nullable: false})
     volume!: bigint
 }

@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_} from "typeorm"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, IntColumn as IntColumn_, Index as Index_} from "@subsquid/typeorm-store"
 import * as marshal from "./marshal"
 import {RoundEndsInfo} from "./_roundEndsInfo"
 import {CourtStatus} from "./_courtStatus"
@@ -17,7 +17,7 @@ export class Court {
     id!: string
 
     @Index_()
-    @Column_("int4", {nullable: false})
+    @IntColumn_({nullable: false})
     marketId!: number
 
     @Column_("jsonb", {transformer: {to: obj => obj.toJSON(), from: obj => obj == null ? undefined : new RoundEndsInfo(undefined, obj)}, nullable: false})

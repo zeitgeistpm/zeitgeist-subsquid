@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, OneToMany as OneToMany_} from "typeorm"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, OneToMany as OneToMany_, IntColumn as IntColumn_} from "@subsquid/typeorm-store"
 import {AccountBalance} from "./accountBalance.model"
 
 /**
@@ -14,7 +14,7 @@ export class Account {
     /**
      * Account address
      */
-    @Column_("text", {nullable: false})
+    @StringColumn_({nullable: false})
     accountId!: string
 
     /**
@@ -32,6 +32,6 @@ export class Account {
     /**
      * Zeitgeist's identifier for market. Valid only for market account.
      */
-    @Column_("int4", {nullable: true})
+    @IntColumn_({nullable: true})
     marketId!: number | undefined | null
 }

@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_} from "typeorm"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, Index as Index_, BigIntColumn as BigIntColumn_, IntColumn as IntColumn_, DateTimeColumn as DateTimeColumn_} from "@subsquid/typeorm-store"
 import * as marshal from "./marshal"
 import {Extrinsic} from "./_extrinsic"
 
@@ -21,43 +21,43 @@ export class HistoricalSwap {
      * Account which executed the trade
      */
     @Index_()
-    @Column_("text", {nullable: false})
+    @StringColumn_({nullable: false})
     accountId!: string
 
     /**
      * Asset sold by the user
      */
-    @Column_("text", {nullable: false})
+    @StringColumn_({nullable: false})
     assetIn!: string
 
     /**
      * Asset bought by the user
      */
-    @Column_("text", {nullable: false})
+    @StringColumn_({nullable: false})
     assetOut!: string
 
     /**
      * Units of asset user sold
      */
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+    @BigIntColumn_({nullable: false})
     assetAmountIn!: bigint
 
     /**
      * Units of asset user bought
      */
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+    @BigIntColumn_({nullable: false})
     assetAmountOut!: bigint
 
     /**
      * Event method which initiated this swap
      */
-    @Column_("text", {nullable: false})
+    @StringColumn_({nullable: false})
     event!: string
 
     /**
      * External fees occuring out of trade
      */
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
+    @BigIntColumn_({nullable: true})
     externalFeeAmount!: bigint | undefined | null
 
     /**
@@ -69,18 +69,18 @@ export class HistoricalSwap {
     /**
      * Height of the block
      */
-    @Column_("int4", {nullable: false})
+    @IntColumn_({nullable: false})
     blockNumber!: number
 
     /**
      * Swap fees
      */
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
+    @BigIntColumn_({nullable: true})
     swapFeeAmount!: bigint | undefined | null
 
     /**
      * Timestamp of the block
      */
-    @Column_("timestamp with time zone", {nullable: false})
+    @DateTimeColumn_({nullable: false})
     timestamp!: Date
 }
