@@ -357,6 +357,17 @@ type HistoricalCourt @entity {
   timestamp: DateTime!
 }
 
+type HistoricalToken @entity {
+  accountId: String! @index
+  amount: BigInt!
+  assetIn: [String!]!
+  assetOut: [String!]!
+  blockNumber: Int!
+  marketId: Int! @index
+  event: TokenEvent!
+  timestamp: DateTime!
+}
+
 """
 Extrinsic data
 """
@@ -626,6 +637,12 @@ enum SwapEvent {
   SellExecuted
   SwapExactAmountIn
   SwapExactAmountOut
+}
+
+enum TokenEvent {
+  TokenMerged
+  TokenRedeemed
+  TokenSplit
 }
 
 """
