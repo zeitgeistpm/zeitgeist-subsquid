@@ -43,6 +43,86 @@ export const decodeBuyExecutedEvent = (event: Event): BuySellExecutedEvent => {
   };
 };
 
+export const decodeCombinatorialPoolDeployed = (event: Event): PoolDeployedEvent => {
+  let decoded: {
+    who: string;
+    marketIds: bigint[];
+    poolId: bigint;
+    accountId: string;
+    collateral: Asset_v60;
+    liquidityParameter: bigint;
+    poolSharesAmount: bigint;
+    swapFee: bigint;
+  };
+  if (events.neoSwaps.combinatorialPoolDeployed.v60.is(event)) {
+    decoded = events.neoSwaps.combinatorialPoolDeployed.v60.decode(event);
+  } else {
+    decoded = event.args;
+  }
+  return {
+    who: ss58.encode({ prefix: 73, bytes: decoded.who }),
+    marketId: Number(decoded.marketIds[0]),
+    poolId: Number(decoded.poolId),
+    accountId: ss58.encode({ prefix: 73, bytes: decoded.accountId }),
+    collateral: formatAssetId(decoded.collateral),
+    liquidityParameter: BigInt(decoded.liquidityParameter),
+    poolSharesAmount: BigInt(decoded.poolSharesAmount),
+    swapFee: BigInt(decoded.swapFee),
+  };
+};
+
+export const decodeComboBuyExecuted = (event: Event): BuySellExecutedEvent => {
+  let decoded: {
+    who: string;
+    poolId: bigint;
+    buy: Asset_v60[];
+    amountIn: bigint;
+    amountOut: bigint;
+    swapFeeAmount: bigint;
+    externalFeeAmount: bigint;
+  };
+  if (events.neoSwaps.comboBuyExecuted.v60.is(event)) {
+    decoded = events.neoSwaps.comboBuyExecuted.v60.decode(event);
+  } else {
+    decoded = event.args;
+  }
+  return {
+    who: ss58.encode({ prefix: 73, bytes: decoded.who }),
+    poolId: Number(decoded.poolId),
+    assetExecuted: formatAssetId(decoded.buy[0]),
+    amountIn: BigInt(decoded.amountIn),
+    amountOut: BigInt(decoded.amountOut),
+    swapFeeAmount: BigInt(decoded.swapFeeAmount),
+    externalFeeAmount: BigInt(decoded.externalFeeAmount),
+  };
+};
+
+export const decodeComboSellExecuted = (event: Event): BuySellExecutedEvent => {
+  let decoded: {
+    who: string;
+    poolId?: bigint;
+    sell: Asset_v60[];
+    amountKeep: bigint;
+    amountOut: bigint;
+    swapFeeAmount: bigint;
+    externalFeeAmount: bigint;
+  };
+  if (events.neoSwaps.comboSellExecuted.v60.is(event)) {
+    decoded = events.neoSwaps.comboSellExecuted.v60.decode(event);
+  } else {
+    decoded = event.args;
+  }
+  return {
+    who: ss58.encode({ prefix: 73, bytes: decoded.who }),
+    poolId: decoded.poolId ? Number(decoded.poolId) : undefined,
+    assetExecuted: formatAssetId(decoded.sell[0]),
+    amountIn: BigInt(decoded.amountKeep),
+    amountOut: BigInt(decoded.amountOut),
+    swapFeeAmount: BigInt(decoded.swapFeeAmount),
+    externalFeeAmount: BigInt(decoded.externalFeeAmount),
+  };
+};
+
 export const decodeExitExecutedEvent = (event: Event): JoinExitExecutedEvent => {
   let decoded: {
     who: string;
@@ -219,6 +299,7 @@ interface JoinExitExecutedEvent {
 interface PoolDeployedEvent {
   who: string;
   marketId: number;
+  poolId?: number;
   accountId: string;
   collateral: string;
   liquidityParameter: bigint;
