@@ -42,7 +42,7 @@
       "storage": ["Markets"]
     },
     "NeoSwaps": {
-      "events": ["BuyExecuted", "ExitExecuted", "FeesWithdrawn", "JoinExecuted", "PoolDeployed", "SellExecuted"]
+      "events": ["BuyExecuted", "CombinatorialPoolDeployed", "ComboBuyExecuted", "ComboSellExecuted", "ExitExecuted", "FeesWithdrawn", "JoinExecuted", "PoolDeployed", "SellExecuted"]
     },
     "Orderbook": {
       "events": ["OrderFilled", "OrderPlaced", "OrderRemoved"]
