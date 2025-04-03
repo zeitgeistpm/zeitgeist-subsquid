@@ -1,5 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_} from "typeorm"
-import * as marshal from "./marshal"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, BigIntColumn as BigIntColumn_, StringColumn as StringColumn_, ManyToOne as ManyToOne_, Index as Index_, FloatColumn as FloatColumn_} from "@subsquid/typeorm-store"
 import {Market} from "./market.model"
 import {Pool} from "./pool.model"
 
@@ -19,25 +18,25 @@ export class Asset {
     /**
      * Balance of the asset present in the pool account
      */
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+    @BigIntColumn_({nullable: false})
     amountInPool!: bigint
 
     /**
      * Zeitgeist's identifier for asset
      */
-    @Column_("text", {nullable: false})
+    @StringColumn_({nullable: false})
     assetId!: string
 
     /**
      * Color identifier
      */
-    @Column_("text", {nullable: true})
+    @StringColumn_({nullable: true})
     color!: string | undefined | null
 
     /**
      * Image identifier
      */
-    @Column_("text", {nullable: true})
+    @StringColumn_({nullable: true})
     img!: string | undefined | null
 
     /**
@@ -50,7 +49,7 @@ export class Asset {
     /**
      * Title ex. `Locomotiv will not be defeated`
      */
-    @Column_("text", {nullable: true})
+    @StringColumn_({nullable: true})
     name!: string | undefined | null
 
     /**
@@ -63,12 +62,12 @@ export class Asset {
     /**
      * Spot price of the asset in the pool
      */
-    @Column_("numeric", {transformer: marshal.floatTransformer, nullable: false})
+    @FloatColumn_({nullable: false})
     price!: number
 
     /**
      * Short abbreviation ex. `LMDRAW`
      */
-    @Column_("text", {nullable: true})
+    @StringColumn_({nullable: true})
     ticker!: string | undefined | null
 }

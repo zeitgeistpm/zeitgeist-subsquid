@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_} from "typeorm"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, Index as Index_, IntColumn as IntColumn_, BigIntColumn as BigIntColumn_, DateTimeColumn as DateTimeColumn_} from "@subsquid/typeorm-store"
 import * as marshal from "./marshal"
 import {Extrinsic} from "./_extrinsic"
 
@@ -16,31 +16,31 @@ export class HistoricalAccountBalance {
      * Account address
      */
     @Index_()
-    @Column_("text", {nullable: false})
+    @StringColumn_({nullable: false})
     accountId!: string
 
     /**
      * Zeitgeist's identifier for asset
      */
-    @Column_("text", {nullable: false})
+    @StringColumn_({nullable: false})
     assetId!: string
 
     /**
      * Height of the block
      */
-    @Column_("int4", {nullable: false})
+    @IntColumn_({nullable: false})
     blockNumber!: number
 
     /**
      * Balance difference
      */
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+    @BigIntColumn_({nullable: false})
     dBalance!: bigint
 
     /**
      * Event method which initiated this change
      */
-    @Column_("text", {nullable: false})
+    @StringColumn_({nullable: false})
     event!: string
 
     /**
@@ -58,6 +58,6 @@ export class HistoricalAccountBalance {
     /**
      * Timestamp of the block
      */
-    @Column_("timestamp with time zone", {nullable: false})
+    @DateTimeColumn_({nullable: false})
     timestamp!: Date
 }

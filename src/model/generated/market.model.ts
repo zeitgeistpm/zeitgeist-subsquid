@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, OneToMany as OneToMany_, Index as Index_, ManyToOne as ManyToOne_} from "typeorm"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, OneToMany as OneToMany_, IntColumn as IntColumn_, BooleanColumn as BooleanColumn_, BigIntColumn as BigIntColumn_, Index as Index_, ManyToOne as ManyToOne_} from "@subsquid/typeorm-store"
 import * as marshal from "./marshal"
 import {Asset} from "./asset.model"
 import {MarketBonds} from "./_marketBonds"
@@ -29,7 +29,7 @@ export class Market {
     /**
      * Address responsible for authorizing disputes. Null if Adv Comm is the authority
      */
-    @Column_("text", {nullable: true})
+    @StringColumn_({nullable: true})
     authorizedAddress!: string | undefined | null
 
     /**
@@ -41,7 +41,7 @@ export class Market {
     /**
      * The base asset in the market swap pool (usually a currency)
      */
-    @Column_("text", {nullable: false})
+    @StringColumn_({nullable: false})
     baseAsset!: string
 
     /**
@@ -53,7 +53,7 @@ export class Market {
     /**
      * Name of all categories glued together
      */
-    @Column_("text", {nullable: true})
+    @StringColumn_({nullable: true})
     categoryNames!: string | undefined | null
 
     /**
@@ -71,13 +71,13 @@ export class Market {
     /**
      * Account address of the market creator
      */
-    @Column_("text", {nullable: false})
+    @StringColumn_({nullable: false})
     creator!: string
 
     /**
      * The creator's fee
      */
-    @Column_("int4", {nullable: true})
+    @IntColumn_({nullable: true})
     creatorFee!: number | undefined | null
 
     /**
@@ -89,7 +89,7 @@ export class Market {
     /**
      * Description of the market
      */
-    @Column_("text", {nullable: true})
+    @StringColumn_({nullable: true})
     description!: string | undefined | null
 
     /**
@@ -107,32 +107,32 @@ export class Market {
     /**
      * `True` if early closure is scheduled
      */
-    @Column_("bool", {nullable: false})
+    @BooleanColumn_({nullable: false})
     earlyClose!: boolean
 
     /**
      * Checks if each category has a name for display on UI
      */
-    @Column_("bool", {nullable: false})
+    @BooleanColumn_({nullable: false})
     hasValidMetaCategories!: boolean
 
     /**
      * Image for the market
      */
-    @Column_("text", {nullable: true})
+    @StringColumn_({nullable: true})
     img!: string | undefined | null
 
     /**
      * Liquidity on the market's pool
      */
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+    @BigIntColumn_({nullable: false})
     liquidity!: bigint
 
     /**
      * Zeitgeist's identifier for market
      */
     @Index_()
-    @Column_("int4", {nullable: false})
+    @IntColumn_({nullable: false})
     marketId!: number
 
     /**
@@ -144,19 +144,19 @@ export class Market {
     /**
      * IPFS cid for market metadata
      */
-    @Column_("text", {nullable: false})
+    @StringColumn_({nullable: false})
     metadata!: string
 
     /**
      * Account designated to report on the market
      */
-    @Column_("text", {nullable: false})
+    @StringColumn_({nullable: false})
     oracle!: string
 
     /**
      * Share identifiers
      */
-    @Column_("text", {array: true, nullable: false})
+    @StringColumn_({array: true, nullable: false})
     outcomeAssets!: (string)[]
 
     /**
@@ -182,7 +182,7 @@ export class Market {
     /**
      * Reasoning for market rejection
      */
-    @Column_("text", {nullable: true})
+    @StringColumn_({nullable: true})
     rejectReason!: string | undefined | null
 
     /**
@@ -194,13 +194,13 @@ export class Market {
     /**
      * Resolved outcome for the market
      */
-    @Column_("text", {nullable: true})
+    @StringColumn_({nullable: true})
     resolvedOutcome!: string | undefined | null
 
     /**
      * Type of scalar range if market is of type scalar
      */
-    @Column_("text", {nullable: true})
+    @StringColumn_({nullable: true})
     scalarType!: string | undefined | null
 
     /**
@@ -212,7 +212,7 @@ export class Market {
     /**
      * Short name for the market
      */
-    @Column_("text", {nullable: true})
+    @StringColumn_({nullable: true})
     slug!: string | undefined | null
 
     /**
@@ -224,18 +224,18 @@ export class Market {
     /**
      * Market tags
      */
-    @Column_("text", {array: true, nullable: true})
+    @StringColumn_({array: true, nullable: true})
     tags!: (string | undefined | null)[] | undefined | null
 
     /**
      * Total amount of base-asset that has moved through a market's liquidity pool
      */
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+    @BigIntColumn_({nullable: false})
     volume!: bigint
 
     /**
      * Market question
      */
-    @Column_("text", {nullable: true})
+    @StringColumn_({nullable: true})
     question!: string | undefined | null
 }

@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_, OneToMany as OneToMany_} from "typeorm"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_, OneToMany as OneToMany_, StringColumn as StringColumn_, DateTimeColumn as DateTimeColumn_, IntColumn as IntColumn_} from "@subsquid/typeorm-store"
 import * as marshal from "./marshal"
 import {Account} from "./account.model"
 import {Asset} from "./asset.model"
@@ -33,27 +33,27 @@ export class Pool {
     /**
      * The base asset in the market swap pool (usually a currency)
      */
-    @Column_("text", {nullable: false})
+    @StringColumn_({nullable: false})
     baseAsset!: string
 
     /**
      * Timestamp of pool creation
      */
-    @Column_("timestamp with time zone", {nullable: false})
+    @DateTimeColumn_({nullable: false})
     createdAt!: Date
 
     /**
      * Zeitgeist's identifier for market connected to the pool
      */
     @Index_()
-    @Column_("int4", {nullable: false})
+    @IntColumn_({nullable: false})
     marketId!: number
 
     /**
      * Zeitgeist's identifier for pool
      */
     @Index_()
-    @Column_("int4", {nullable: false})
+    @IntColumn_({nullable: false})
     poolId!: number
 
     /**
@@ -65,19 +65,19 @@ export class Pool {
     /**
      * Fee applied to each swap
      */
-    @Column_("text", {nullable: true})
+    @StringColumn_({nullable: true})
     swapFee!: string | undefined | null
 
     /**
      * Subsidy gathered for the market
      */
-    @Column_("text", {nullable: true})
+    @StringColumn_({nullable: true})
     totalSubsidy!: string | undefined | null
 
     /**
      * Sum of `weights`
      */
-    @Column_("text", {nullable: false})
+    @StringColumn_({nullable: false})
     totalWeight!: string
 
     /**

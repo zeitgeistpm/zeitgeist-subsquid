@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_} from "typeorm"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, DateTimeColumn as DateTimeColumn_, StringColumn as StringColumn_, Index as Index_, IntColumn as IntColumn_} from "@subsquid/typeorm-store"
 import * as marshal from "./marshal"
 import {OrderRecord} from "./_orderRecord"
 import {OrderStatus} from "./_orderStatus"
@@ -12,21 +12,21 @@ export class Order {
         Object.assign(this, props)
     }
 
-    @Column_("timestamp with time zone", {nullable: false})
+    @DateTimeColumn_({nullable: false})
     createdAt!: Date
 
     @PrimaryColumn_()
     id!: string
 
     @Index_()
-    @Column_("text", {nullable: false})
+    @StringColumn_({nullable: false})
     makerAccountId!: string
 
     @Column_("jsonb", {transformer: {to: obj => obj.toJSON(), from: obj => obj == null ? undefined : new OrderRecord(undefined, obj)}, nullable: false})
     maker!: OrderRecord
 
     @Index_()
-    @Column_("int4", {nullable: false})
+    @IntColumn_({nullable: false})
     marketId!: number
 
     @Column_("varchar", {length: 7, nullable: false})
@@ -35,6 +35,6 @@ export class Order {
     @Column_("jsonb", {transformer: {to: obj => obj.toJSON(), from: obj => obj == null ? undefined : new OrderRecord(undefined, obj)}, nullable: false})
     taker!: OrderRecord
 
-    @Column_("timestamp with time zone", {nullable: false})
+    @DateTimeColumn_({nullable: false})
     updatedAt!: Date
 }
