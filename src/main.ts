@@ -286,6 +286,28 @@ const mapNeoSwaps = async (store: Store, event: Event) => {
       marketHistory.push(res.historicalMarket);
       break;
     }
+    case events.neoSwaps.combinatorialPoolDeployed.name: {
+      await saveAccounts(store);
+      const res = await mappings.neoSwaps.combinatorialPoolDeployed(store, event);
+      if (!res) break;
+      assetHistory.push(...res.historicalAssets);
+      marketHistory.push(res.historicalMarket);
+      break;
+    }
+    case events.neoSwaps.comboBuyExecuted.name: {
+      await saveAccounts(store);
+      const historicalSwap = await mappings.neoSwaps.comboBuyExecuted(store, event);
+      if (!historicalSwap) break;
+      swapHistory.push(historicalSwap);
+      break;
+    }
+    case events.neoSwaps.comboSellExecuted.name: {
+      await saveAccounts(store);
+      const historicalSwap = await mappings.neoSwaps.comboSellExecuted(store, event);
+      if (!historicalSwap) break;
+      swapHistory.push(historicalSwap);
+      break;
+    }
     case events.neoSwaps.exitExecuted.name: {
       await saveAccounts(store);
       const res = await mappings.neoSwaps.exitExecuted(store, event);
