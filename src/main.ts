@@ -11,6 +11,7 @@ import {
   HistoricalOrder,
   HistoricalPool,
   HistoricalSwap,
+  HistoricalToken,
   Order,
 } from './model';
 import * as postHooks from './post-hooks';
@@ -30,6 +31,7 @@ let marketHistory: HistoricalMarket[];
 let orderHistory: HistoricalOrder[];
 let poolHistory: HistoricalPool[];
 let swapHistory: HistoricalSwap[];
+let tokenHistory: HistoricalToken[];
 
 processor.run(new TypeormDatabase(), async (ctx) => {
   assetHistory = [];
@@ -39,6 +41,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   orderHistory = [];
   poolHistory = [];
   swapHistory = [];
+  tokenHistory = [];
 
   for (let block of ctx.blocks) {
     for (let call of block.calls) {
@@ -65,6 +68,9 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           break;
         case Pallet.CampaignAssets:
           await mapCampaignAssets(event);
+          break;
+        case Pallet.CombinatorialTokens:
+          await mapCombinatorialTokens(event);
           break;
         case Pallet.Court:
           await mapCourt(event);
@@ -203,6 +209,26 @@ const mapCampaignAssets = async (event: Event) => {
       const habs = await mappings.campaignAssets.transferred(event);
       if (!habs) break;
       await storeBalanceChanges(habs);
+      break;
+    }
+  }
+};
+
+const mapCombinatorialTokens = async (event: Event) => {
+  switch (event.name) {
+    case events.combinatorialTokens.tokenMerged.name: {
+      const ht = await mappings.combinatorialTokens.tokenMerged(event);
+      tokenHistory.push(ht);
+      break;
+    }
+    case events.combinatorialTokens.tokenRedeemed.name: {
+      const ht = await mappings.combinatorialTokens.tokenRedeemed(event);
+      tokenHistory.push(ht);
+      break;
+    }
+    case events.combinatorialTokens.tokenSplit.name: {
+      const ht = await mappings.combinatorialTokens.tokenSplit(event);
+      tokenHistory.push(ht);
       break;
     }
   }
@@ -726,6 +752,10 @@ const saveHistory = async (store: Store) => {
   if (swapHistory.length > 0) {
     console.log(`Saving historical swaps: ${JSON.stringify(swapHistory, null, 2)}`);
     await store.save<HistoricalSwap>(swapHistory);
+  }
+  if (tokenHistory.length > 0) {
+    console.log(`Saving historical tokens: ${JSON.stringify(tokenHistory, null, 2)}`);
+    await store.save<HistoricalToken>(tokenHistory);
   }
 };
 

@@ -41,6 +41,7 @@ export enum Pallet {
   Authorized = 'Authorized',
   Balances = 'Balances',
   CampaignAssets = 'CampaignAssets',
+  CombinatorialTokens = 'CombinatorialTokens',
   Court = 'Court',
   Currency = 'Currency',
   MarketAssets = 'MarketAssets',
