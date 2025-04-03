@@ -7,10 +7,11 @@ import { Call, Event } from '../../processor';
 
 export const decodeBoughtCompleteSetEvent = (event: Event): CompleteSetEvent => {
   let marketId: bigint, amount: bigint, accountId: string;
-  if (events.predictionMarkets.boughtCompleteSet.v23.is(event)) {
-    [marketId, accountId] = events.predictionMarkets.boughtCompleteSet.v23.decode(event);
-    amount = BigInt(0);
-  } else if (events.predictionMarkets.boughtCompleteSet.v34.is(event)) {
+  // if (events.predictionMarkets.boughtCompleteSet.v23.is(event)) {
+  //   [marketId, accountId] = events.predictionMarkets.boughtCompleteSet.v23.decode(event);
+  //   amount = BigInt(0);
+  // } 
+  if (events.predictionMarkets.boughtCompleteSet.v34.is(event)) {
     [marketId, amount, accountId] = events.predictionMarkets.boughtCompleteSet.v34.decode(event);
   } else {
     [marketId, amount, accountId] = event.args;
@@ -36,9 +37,10 @@ export const decodeGlobalDisputeStartedEvent = (event: Event): MarketEvent => {
 
 export const decodeMarketApprovedEvent = (event: Event): MarketEvent => {
   let marketId: bigint, status: MarketStatus | undefined;
-  if (events.predictionMarkets.marketApproved.v23.is(event)) {
-    marketId = events.predictionMarkets.marketApproved.v23.decode(event);
-  } else if (events.predictionMarkets.marketApproved.v29.is(event)) {
+  // if (events.predictionMarkets.marketApproved.v23.is(event)) {
+  //   marketId = events.predictionMarkets.marketApproved.v23.decode(event);
+  // } 
+  if (events.predictionMarkets.marketApproved.v29.is(event)) {
     [marketId, status] = events.predictionMarkets.marketApproved.v29.decode(event);
   } else if (events.predictionMarkets.marketApproved.v53.is(event)) {
     [marketId, status] = events.predictionMarkets.marketApproved.v53.decode(event);
@@ -67,9 +69,9 @@ export const decodeMarketCreatedEvent = (event: Event, specVersion: number): Mar
   let accountId: string | undefined, market: any;
   const [param0, param1, param2] = event.args;
   if (
-    events.predictionMarkets.marketCreated.v23.is(event) ||
+    //events.predictionMarkets.marketCreated.v23.is(event) ||
     events.predictionMarkets.marketCreated.v29.is(event) ||
-    specVersion === 23 ||
+    //specVersion === 23 ||
     specVersion === 29
   ) {
     market = param1;
@@ -108,9 +110,10 @@ export const decodeMarketDestroyedEvent = (event: Event): MarketEvent => {
 
 export const decodeMarketDisputedEvent = (event: Event): MarketDisputedEvent => {
   let accountId: string | undefined, marketId: bigint, outcome: OutcomeReport | undefined, status: any;
-  if (events.predictionMarkets.marketDisputed.v23.is(event)) {
-    [marketId, outcome] = events.predictionMarkets.marketDisputed.v23.decode(event);
-  } else if (events.predictionMarkets.marketDisputed.v29.is(event)) {
+  // if (events.predictionMarkets.marketDisputed.v23.is(event)) {
+  //   [marketId, outcome] = events.predictionMarkets.marketDisputed.v23.decode(event);
+  // } 
+  if (events.predictionMarkets.marketDisputed.v29.is(event)) {
     let by;
     [marketId, status, { by, outcome }] = events.predictionMarkets.marketDisputed.v29.decode(event);
     accountId = by;
@@ -160,9 +163,10 @@ export const decodeMarketExpiredEvent = (event: Event): MarketEvent => {
 
 export const decodeMarketInsufficientSubsidyEvent = (event: Event): MarketEvent => {
   let marketId: bigint, status: MarketStatus | undefined;
-  if (events.predictionMarkets.marketInsufficientSubsidy.v23.is(event)) {
-    marketId = events.predictionMarkets.marketInsufficientSubsidy.v23.decode(event);
-  } else if (events.predictionMarkets.marketInsufficientSubsidy.v29.is(event)) {
+  // if (events.predictionMarkets.marketInsufficientSubsidy.v23.is(event)) {
+  //   marketId = events.predictionMarkets.marketInsufficientSubsidy.v23.decode(event);
+  // } 
+  if (events.predictionMarkets.marketInsufficientSubsidy.v29.is(event)) {
     [marketId, status] = events.predictionMarkets.marketInsufficientSubsidy.v29.decode(event);
   } else {
     [marketId, status] = event.args;
@@ -175,9 +179,10 @@ export const decodeMarketInsufficientSubsidyEvent = (event: Event): MarketEvent 
 
 export const decodeMarketRejectedEvent = (event: Event): MarketRejectedEvent => {
   let marketId: bigint, reason: string | undefined;
-  if (events.predictionMarkets.marketRejected.v23.is(event)) {
-    marketId = events.predictionMarkets.marketRejected.v23.decode(event);
-  } else if (events.predictionMarkets.marketRejected.v41.is(event)) {
+  // if (events.predictionMarkets.marketRejected.v23.is(event)) {
+  //   marketId = events.predictionMarkets.marketRejected.v23.decode(event);
+  // } 
+  if (events.predictionMarkets.marketRejected.v41.is(event)) {
     [marketId, reason] = events.predictionMarkets.marketRejected.v41.decode(event);
   } else {
     [marketId, reason] = event.args;
@@ -192,9 +197,10 @@ export const decodeMarketReportedEvent = (event: Event): MarketReportedEvent => 
   let marketId: bigint,
     status: MarketStatus | undefined,
     report: any = {};
-  if (events.predictionMarkets.marketReported.v23.is(event)) {
-    [marketId, report.outcome] = events.predictionMarkets.marketReported.v23.decode(event);
-  } else if (events.predictionMarkets.marketReported.v29.is(event)) {
+  // if (events.predictionMarkets.marketReported.v23.is(event)) {
+  //   [marketId, report.outcome] = events.predictionMarkets.marketReported.v23.decode(event);
+  // } 
+  if (events.predictionMarkets.marketReported.v29.is(event)) {
     [marketId, status, report] = events.predictionMarkets.marketReported.v29.decode(event);
   } else if (events.predictionMarkets.marketReported.v53.is(event)) {
     [marketId, status, report] = events.predictionMarkets.marketReported.v53.decode(event);
@@ -211,11 +217,12 @@ export const decodeMarketReportedEvent = (event: Event): MarketReportedEvent => 
 
 export const decodeMarketResolvedEvent = (event: Event): MarketResolvedEvent => {
   let marketId: bigint, status: MarketStatus | undefined, report: any;
-  if (events.predictionMarkets.marketResolved.v23.is(event)) {
-    let outcome;
-    [marketId, outcome] = events.predictionMarkets.marketResolved.v23.decode(event);
-    report.value = outcome;
-  } else if (events.predictionMarkets.marketResolved.v29.is(event)) {
+  // if (events.predictionMarkets.marketResolved.v23.is(event)) {
+  //   let outcome;
+  //   [marketId, outcome] = events.predictionMarkets.marketResolved.v23.decode(event);
+  //   report.value = outcome;
+  // } 
+  if (events.predictionMarkets.marketResolved.v29.is(event)) {
     [marketId, status, report] = events.predictionMarkets.marketResolved.v29.decode(event);
   } else if (events.predictionMarkets.marketResolved.v53.is(event)) {
     [marketId, status, report] = events.predictionMarkets.marketResolved.v53.decode(event);
@@ -230,9 +237,10 @@ export const decodeMarketResolvedEvent = (event: Event): MarketResolvedEvent => 
 
 export const decodeMarketStartedWithSubsidyEvent = (event: Event): MarketEvent => {
   let marketId: bigint, status: MarketStatus | undefined;
-  if (events.predictionMarkets.marketStartedWithSubsidy.v23.is(event)) {
-    marketId = events.predictionMarkets.marketStartedWithSubsidy.v23.decode(event);
-  } else if (events.predictionMarkets.marketStartedWithSubsidy.v29.is(event)) {
+  // if (events.predictionMarkets.marketStartedWithSubsidy.v23.is(event)) {
+  //   marketId = events.predictionMarkets.marketStartedWithSubsidy.v23.decode(event);
+  // } 
+  if (events.predictionMarkets.marketStartedWithSubsidy.v29.is(event)) {
     [marketId, status] = events.predictionMarkets.marketStartedWithSubsidy.v29.decode(event);
   } else {
     [marketId, status] = event.args;
@@ -245,8 +253,8 @@ export const decodeMarketStartedWithSubsidyEvent = (event: Event): MarketEvent =
 
 export const decodeRedeemSharesCall = (call: Call): MarketEvent => {
   let marketId: bigint;
-  if (calls.predictionMarkets.redeemShares.v23.is(call)) {
-    marketId = calls.predictionMarkets.redeemShares.v23.decode(call).marketId;
+  if (calls.predictionMarkets.redeemShares.v26.is(call)) {
+    marketId = calls.predictionMarkets.redeemShares.v26.decode(call).marketId;
   } else {
     marketId = call.args.marketId;
   }
@@ -255,10 +263,11 @@ export const decodeRedeemSharesCall = (call: Call): MarketEvent => {
 
 export const decodeSoldCompleteSetEvent = (event: Event): CompleteSetEvent => {
   let marketId: bigint, amount: bigint, accountId: string;
-  if (events.predictionMarkets.soldCompleteSet.v23.is(event)) {
-    [marketId, accountId] = events.predictionMarkets.soldCompleteSet.v23.decode(event);
-    amount = BigInt(0);
-  } else if (events.predictionMarkets.soldCompleteSet.v34.is(event)) {
+  // if (events.predictionMarkets.soldCompleteSet.v23.is(event)) {
+  //   [marketId, accountId] = events.predictionMarkets.soldCompleteSet.v23.decode(event);
+  //   amount = BigInt(0);
+  // } 
+  if (events.predictionMarkets.soldCompleteSet.v34.is(event)) {
     [marketId, amount, accountId] = events.predictionMarkets.soldCompleteSet.v34.decode(event);
   } else {
     [marketId, amount, accountId] = event.args;

@@ -5,6 +5,7 @@ import * as v53 from '../v53'
 import * as v54 from '../v54'
 import * as v55 from '../v55'
 import * as v56 from '../v56'
+import * as v60 from '../v60'
 
 export const orderFilled =  {
     name: 'Orderbook.OrderFilled',
@@ -81,6 +82,13 @@ export const orderPlaced =  {
         sts.struct({
             orderId: sts.bigint(),
             order: v56.Order,
+        })
+    ),
+    v60: new EventType(
+        'Orderbook.OrderPlaced',
+        sts.struct({
+            orderId: sts.bigint(),
+            order: v60.Order,
         })
     ),
 }

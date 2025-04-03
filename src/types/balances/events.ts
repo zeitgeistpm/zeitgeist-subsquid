@@ -1,5 +1,5 @@
 import {sts, Block, Bytes, Option, Result, EventType, RuntimeCtx} from '../support'
-import * as v23 from '../v23'
+import * as v26 from '../v26'
 import * as v33 from '../v33'
 import * as v34 from '../v34'
 import * as v56 from '../v56'
@@ -10,9 +10,9 @@ export const dustLost =  {
      *  An account was removed whose balance was non-zero but below ExistentialDeposit,
      *  resulting in an outright loss. \[account, balance\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'Balances.DustLost',
-        sts.tuple([v23.AccountId, v23.Balance])
+        sts.tuple([v26.AccountId, v26.Balance])
     ),
     /**
      * An account was removed whose balance was non-zero but below ExistentialDeposit,
@@ -32,9 +32,9 @@ export const transfer =  {
     /**
      *  Transfer succeeded. \[from, to, value\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'Balances.Transfer',
-        sts.tuple([v23.AccountId, v23.AccountId, v23.Balance])
+        sts.tuple([v26.AccountId, v26.AccountId, v26.Balance])
     ),
     /**
      * Transfer succeeded.
@@ -54,9 +54,9 @@ export const balanceSet =  {
     /**
      *  A balance was set by root. \[who, free, reserved\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'Balances.BalanceSet',
-        sts.tuple([v23.AccountId, v23.Balance, v23.Balance])
+        sts.tuple([v26.AccountId, v26.Balance, v26.Balance])
     ),
     /**
      * A balance was set by root.
@@ -86,9 +86,9 @@ export const deposit =  {
     /**
      *  Some amount was deposited (e.g. for transaction fees). \[who, deposit\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'Balances.Deposit',
-        sts.tuple([v23.AccountId, v23.Balance])
+        sts.tuple([v26.AccountId, v26.Balance])
     ),
     /**
      * Some amount was deposited (e.g. for transaction fees).
@@ -107,9 +107,9 @@ export const reserved =  {
     /**
      *  Some balance was reserved (moved from free to reserved). \[who, value\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'Balances.Reserved',
-        sts.tuple([v23.AccountId, v23.Balance])
+        sts.tuple([v26.AccountId, v26.Balance])
     ),
     /**
      * Some balance was reserved (moved from free to reserved).
@@ -128,9 +128,9 @@ export const unreserved =  {
     /**
      *  Some balance was unreserved (moved from reserved to free). \[who, value\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'Balances.Unreserved',
-        sts.tuple([v23.AccountId, v23.Balance])
+        sts.tuple([v26.AccountId, v26.Balance])
     ),
     /**
      * Some balance was unreserved (moved from reserved to free).
@@ -151,9 +151,9 @@ export const reserveRepatriated =  {
      *  Final argument indicates the destination balance type.
      *  \[from, to, balance, destination_status\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'Balances.ReserveRepatriated',
-        sts.tuple([v23.AccountId, v23.AccountId, v23.Balance, v23.BalanceStatus])
+        sts.tuple([v26.AccountId, v26.AccountId, v26.Balance, v26.BalanceStatus])
     ),
     /**
      * Some balance was moved from the reserve of the first account to the second account.

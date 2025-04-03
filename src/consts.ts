@@ -8,6 +8,8 @@ export const TREASURY_ACCOUNT = 'dE1VdxVn8xy7HFQG5y5px7T2W1TDpRq1QXHH2ozfZLhBMYi
 export enum _Asset {
   CampaignAsset = 'CampaignAsset',
   CategoricalOutcome = 'CategoricalOutcome',
+  CombinatorialOutcomeLegacy = 'CombinatorialOutcomeLegacy',
+  CombinatorialToken = 'CombinatorialToken',
   CustomAsset = 'CustomAsset',
   ForeignAsset = 'ForeignAsset',
   ParimutuelShare = 'ParimutuelShare',

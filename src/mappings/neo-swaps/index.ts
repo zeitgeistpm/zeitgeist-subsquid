@@ -30,11 +30,11 @@ export const buyExecuted = async (
   | { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalMarket: HistoricalMarket }
   | undefined
 > => {
-  const { who, marketId, assetExecuted, amountIn, amountOut, swapFeeAmount, externalFeeAmount } =
+  const { who, poolId, marketId, assetExecuted, amountIn, amountOut, swapFeeAmount, externalFeeAmount } =
     decodeBuyExecutedEvent(event);
 
   const market = await store.get(Market, {
-    where: { marketId },
+    where: { marketId: marketId ?? poolId },
     relations: { neoPool: { account: { balances: true }, liquiditySharesManager: true } },
   });
   if (!market || !market.neoPool) return;
@@ -126,10 +126,10 @@ export const exitExecuted = async (
   store: Store,
   event: Event
 ): Promise<{ historicalAssets: HistoricalAsset[]; historicalMarket: HistoricalMarket } | undefined> => {
-  const { who, marketId, poolSharesAmount, newLiquidityParameter } = decodeExitExecutedEvent(event);
+  const { who, poolId, marketId, poolSharesAmount, newLiquidityParameter } = decodeExitExecutedEvent(event);
 
   const market = await store.get(Market, {
-    where: { marketId },
+    where: { marketId: marketId ?? poolId },
     relations: { neoPool: { account: { balances: true } } },
   });
   if (!market || !market.neoPool) return;
@@ -207,10 +207,10 @@ export const exitExecuted = async (
 };
 
 export const feesWithdrawn = async (store: Store, event: Event) => {
-  const { who, marketId, amount } = decodeFeesWithdrawnEvent(event);
+  const { who, poolId, marketId, amount } = decodeFeesWithdrawnEvent(event);
 
   const liquiditySharesManager = await store.get(LiquiditySharesManager, {
-    where: { account: who, neoPool: { marketId } },
+    where: { account: who, neoPool: { marketId: marketId ?? poolId } },
   });
   if (!liquiditySharesManager) return;
 
@@ -223,10 +223,10 @@ export const joinExecuted = async (
   store: Store,
   event: Event
 ): Promise<{ historicalAssets: HistoricalAsset[]; historicalMarket: HistoricalMarket } | undefined> => {
-  const { who, marketId, poolSharesAmount, newLiquidityParameter } = decodeJoinExecutedEvent(event);
+  const { who, poolId, marketId, poolSharesAmount, newLiquidityParameter } = decodeJoinExecutedEvent(event);
 
   const market = await store.get(Market, {
-    where: { marketId },
+    where: { marketId: marketId ?? poolId },
     relations: { neoPool: { account: { balances: true } } },
   });
   if (!market || !market.neoPool) return;
@@ -424,11 +424,11 @@ export const sellExecuted = async (
   | { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalMarket: HistoricalMarket }
   | undefined
 > => {
-  const { who, marketId, assetExecuted, amountIn, amountOut, swapFeeAmount, externalFeeAmount } =
+  const { who, poolId, marketId, assetExecuted, amountIn, amountOut, swapFeeAmount, externalFeeAmount } =
     decodeSellExecutedEvent(event);
 
   const market = await store.get(Market, {
-    where: { marketId },
+    where: { marketId: marketId ?? poolId },
     relations: { neoPool: { account: { balances: true }, liquiditySharesManager: true } },
   });
   if (!market || !market.neoPool) return;

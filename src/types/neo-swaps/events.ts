@@ -3,6 +3,7 @@ import * as v50 from '../v50'
 import * as v51 from '../v51'
 import * as v54 from '../v54'
 import * as v56 from '../v56'
+import * as v60 from '../v60'
 
 export const buyExecuted =  {
     name: 'NeoSwaps.BuyExecuted',
@@ -63,6 +64,22 @@ export const buyExecuted =  {
             who: v56.AccountId32,
             marketId: sts.bigint(),
             assetOut: v56.Asset,
+            amountIn: sts.bigint(),
+            amountOut: sts.bigint(),
+            swapFeeAmount: sts.bigint(),
+            externalFeeAmount: sts.bigint(),
+        })
+    ),
+    /**
+     * Informant bought a position. `amount_in` is the amount of collateral paid by `who`,
+     * including swap and external fees.
+     */
+    v60: new EventType(
+        'NeoSwaps.BuyExecuted',
+        sts.struct({
+            who: v60.AccountId32,
+            poolId: sts.bigint(),
+            assetOut: v60.Asset,
             amountIn: sts.bigint(),
             amountOut: sts.bigint(),
             swapFeeAmount: sts.bigint(),
@@ -137,6 +154,22 @@ export const sellExecuted =  {
             externalFeeAmount: sts.bigint(),
         })
     ),
+    /**
+     * Informant sold a position. `amount_out` is the amount of collateral received by `who`,
+     * with swap and external fees already deducted.
+     */
+    v60: new EventType(
+        'NeoSwaps.SellExecuted',
+        sts.struct({
+            who: v60.AccountId32,
+            poolId: sts.bigint(),
+            assetIn: v60.Asset,
+            amountIn: sts.bigint(),
+            amountOut: sts.bigint(),
+            swapFeeAmount: sts.bigint(),
+            externalFeeAmount: sts.bigint(),
+        })
+    ),
 }
 
 export const feesWithdrawn =  {
@@ -149,6 +182,17 @@ export const feesWithdrawn =  {
         sts.struct({
             who: v50.AccountId32,
             marketId: sts.bigint(),
+            amount: sts.bigint(),
+        })
+    ),
+    /**
+     * Liquidity provider withdrew fees.
+     */
+    v60: new EventType(
+        'NeoSwaps.FeesWithdrawn',
+        sts.struct({
+            who: v60.AccountId32,
+            poolId: sts.bigint(),
             amount: sts.bigint(),
         })
     ),
@@ -169,6 +213,19 @@ export const joinExecuted =  {
             newLiquidityParameter: sts.bigint(),
         })
     ),
+    /**
+     * Liquidity provider joined the pool.
+     */
+    v60: new EventType(
+        'NeoSwaps.JoinExecuted',
+        sts.struct({
+            who: v60.AccountId32,
+            poolId: sts.bigint(),
+            poolSharesAmount: sts.bigint(),
+            amountsIn: sts.array(() => sts.bigint()),
+            newLiquidityParameter: sts.bigint(),
+        })
+    ),
 }
 
 export const exitExecuted =  {
@@ -181,6 +238,19 @@ export const exitExecuted =  {
         sts.struct({
             who: v50.AccountId32,
             marketId: sts.bigint(),
+            poolSharesAmount: sts.bigint(),
+            amountsOut: sts.array(() => sts.bigint()),
+            newLiquidityParameter: sts.bigint(),
+        })
+    ),
+    /**
+     * Liquidity provider left the pool.
+     */
+    v60: new EventType(
+        'NeoSwaps.ExitExecuted',
+        sts.struct({
+            who: v60.AccountId32,
+            poolId: sts.bigint(),
             poolSharesAmount: sts.bigint(),
             amountsOut: sts.array(() => sts.bigint()),
             newLiquidityParameter: sts.bigint(),
@@ -246,6 +316,23 @@ export const poolDeployed =  {
             accountId: v56.AccountId32,
             reserves: sts.array(() => sts.tuple(() => [v56.Asset, sts.bigint()])),
             collateral: v56.Asset,
+            liquidityParameter: sts.bigint(),
+            poolSharesAmount: sts.bigint(),
+            swapFee: sts.bigint(),
+        })
+    ),
+    /**
+     * Pool was createed.
+     */
+    v60: new EventType(
+        'NeoSwaps.PoolDeployed',
+        sts.struct({
+            who: v60.AccountId32,
+            marketId: sts.bigint(),
+            poolId: sts.bigint(),
+            accountId: v60.AccountId32,
+            reserves: sts.array(() => sts.tuple(() => [v60.Asset, sts.bigint()])),
+            collateral: v60.Asset,
             liquidityParameter: sts.bigint(),
             poolSharesAmount: sts.bigint(),
             swapFee: sts.bigint(),

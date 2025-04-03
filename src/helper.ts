@@ -12,6 +12,7 @@ import {
 } from './types/v51';
 import { Asset as Asset_v54 } from './types/v54';
 import { MarketStatus as MarketStatus_v55, ScoringRule as ScoringRule_v55 } from './types/v55';
+import { Asset as Asset_v60 } from './types/v60';
 import { CacheHint, _Asset } from './consts';
 import { Block, Extrinsic as _Extrinsic } from './processor';
 import { Cache, Tools } from './util';
@@ -91,7 +92,7 @@ const fetchFromIPFS = async (metadata: string): Promise<string | undefined> => {
   return status === 200 ? JSON.stringify(data) : undefined;
 };
 
-export const formatAssetId = (assetId: Asset_v51 | Asset_v54): string => {
+export const formatAssetId = (assetId: Asset_v51 | Asset_v54 | Asset_v60): string => {
   switch (assetId.__kind) {
     case _Asset.CampaignAsset:
       return JSON.stringify({ campaignAsset: Number(assetId.value) });
@@ -99,6 +100,10 @@ export const formatAssetId = (assetId: Asset_v51 | Asset_v54): string => {
       if (typeof assetId.value === 'string')
         return JSON.stringify({ categoricalOutcome: (assetId.value as any as string).split(',').map(Number) });
       return JSON.stringify({ categoricalOutcome: assetId.value.map(Number) });
+    case _Asset.CombinatorialOutcomeLegacy:
+      return _Asset.CombinatorialOutcomeLegacy;
+    case _Asset.CombinatorialToken:
+      return JSON.stringify({ combinatorialToken: assetId.value.toString() });
     case _Asset.CustomAsset:
       return JSON.stringify({ customAsset: Number(assetId.value) });
     case _Asset.ForeignAsset:

@@ -1,5 +1,5 @@
 import {sts, Block, Bytes, Option, Result, EventType, RuntimeCtx} from '../support'
-import * as v23 from '../v23'
+import * as v26 from '../v26'
 import * as v32 from '../v32'
 import * as v34 from '../v34'
 import * as v36 from '../v36'
@@ -7,15 +7,16 @@ import * as v41 from '../v41'
 import * as v51 from '../v51'
 import * as v54 from '../v54'
 import * as v56 from '../v56'
+import * as v60 from '../v60'
 
 export const transfer =  {
     name: 'Tokens.Transfer',
     /**
      *  Transfer succeeded. \[currency_id, from, to, value\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'Tokens.Transfer',
-        sts.tuple([v23.CurrencyId, v23.AccountId, v23.AccountId, v23.Balance])
+        sts.tuple([v26.CurrencyId, v26.AccountId, v26.AccountId, v26.Balance])
     ),
     /**
      * Transfer succeeded. \[currency_id, from, to, value\]
@@ -84,6 +85,18 @@ export const transfer =  {
             amount: sts.bigint(),
         })
     ),
+    /**
+     * Transfer succeeded.
+     */
+    v60: new EventType(
+        'Tokens.Transfer',
+        sts.struct({
+            currencyId: v60.Asset,
+            from: v60.AccountId32,
+            to: v60.AccountId32,
+            amount: sts.bigint(),
+        })
+    ),
 }
 
 export const reserved =  {
@@ -92,9 +105,9 @@ export const reserved =  {
      *  Some balance was reserved (moved from free to reserved).
      *  \[currency_id, who, value\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'Tokens.Reserved',
-        sts.tuple([v23.CurrencyId, v23.AccountId, v23.Balance])
+        sts.tuple([v26.CurrencyId, v26.AccountId, v26.Balance])
     ),
     /**
      * Some balance was reserved (moved from free to reserved).
@@ -156,6 +169,17 @@ export const reserved =  {
         sts.struct({
             currencyId: v56.Asset,
             who: v56.AccountId32,
+            amount: sts.bigint(),
+        })
+    ),
+    /**
+     * Some balance was reserved (moved from free to reserved).
+     */
+    v60: new EventType(
+        'Tokens.Reserved',
+        sts.struct({
+            currencyId: v60.Asset,
+            who: v60.AccountId32,
             amount: sts.bigint(),
         })
     ),
@@ -167,9 +191,9 @@ export const unreserved =  {
      *  Some balance was unreserved (moved from reserved to free).
      *  \[currency_id, who, value\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'Tokens.Unreserved',
-        sts.tuple([v23.CurrencyId, v23.AccountId, v23.Balance])
+        sts.tuple([v26.CurrencyId, v26.AccountId, v26.Balance])
     ),
     /**
      * Some balance was unreserved (moved from reserved to free).
@@ -234,6 +258,17 @@ export const unreserved =  {
             amount: sts.bigint(),
         })
     ),
+    /**
+     * Some balance was unreserved (moved from reserved to free).
+     */
+    v60: new EventType(
+        'Tokens.Unreserved',
+        sts.struct({
+            currencyId: v60.Asset,
+            who: v60.AccountId32,
+            amount: sts.bigint(),
+        })
+    ),
 }
 
 export const balanceSet =  {
@@ -241,9 +276,9 @@ export const balanceSet =  {
     /**
      *  A balance was set by root. \[who, free, reserved\]
      */
-    v23: new EventType(
+    v26: new EventType(
         'Tokens.BalanceSet',
-        sts.tuple([v23.CurrencyId, v23.AccountId, v23.Balance, v23.Balance])
+        sts.tuple([v26.CurrencyId, v26.AccountId, v26.Balance, v26.Balance])
     ),
     /**
      * A balance was set by root. \[who, free, reserved\]
@@ -312,6 +347,18 @@ export const balanceSet =  {
             reserved: sts.bigint(),
         })
     ),
+    /**
+     * A balance was set by root.
+     */
+    v60: new EventType(
+        'Tokens.BalanceSet',
+        sts.struct({
+            currencyId: v60.Asset,
+            who: v60.AccountId32,
+            free: sts.bigint(),
+            reserved: sts.bigint(),
+        })
+    ),
 }
 
 export const withdrawn =  {
@@ -371,6 +418,17 @@ export const withdrawn =  {
             amount: sts.bigint(),
         })
     ),
+    /**
+     * Some balances were withdrawn (e.g. pay for transaction fee)
+     */
+    v60: new EventType(
+        'Tokens.Withdrawn',
+        sts.struct({
+            currencyId: v60.Asset,
+            who: v60.AccountId32,
+            amount: sts.bigint(),
+        })
+    ),
 }
 
 export const deposited =  {
@@ -427,6 +485,17 @@ export const deposited =  {
         sts.struct({
             currencyId: v56.Asset,
             who: v56.AccountId32,
+            amount: sts.bigint(),
+        })
+    ),
+    /**
+     * Deposited some balance into an account
+     */
+    v60: new EventType(
+        'Tokens.Deposited',
+        sts.struct({
+            currencyId: v60.Asset,
+            who: v60.AccountId32,
             amount: sts.bigint(),
         })
     ),
