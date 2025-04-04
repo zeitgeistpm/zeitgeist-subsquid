@@ -27,6 +27,9 @@
     "CampaignAssets": {
       "events": ["Burned", "Issued", "Transferred"]
     },
+    "CombinatorialTokens": {
+      "events": ["TokenMerged", "TokenRedeemed", "TokenSplit"]
+    },
     "Court": {
       "calls": ["reassign_court_stakes"],
       "events": ["CourtOpened", "JurorRevealedVote", "JurorVoted", "MintedInCourt"],
