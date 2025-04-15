@@ -12,7 +12,7 @@ import {
 } from './types/v51';
 import { Asset as Asset_v54 } from './types/v54';
 import { MarketStatus as MarketStatus_v55, ScoringRule as ScoringRule_v55 } from './types/v55';
-import { Asset as Asset_v60 } from './types/v60';
+import { Asset as Asset_v60, V3MultiLocation } from './types/v60';
 import { CacheHint, _Asset } from './consts';
 import { Block, Extrinsic as _Extrinsic } from './processor';
 import { Cache, Tools } from './util';
@@ -92,32 +92,48 @@ const fetchFromIPFS = async (metadata: string): Promise<string | undefined> => {
   return status === 200 ? JSON.stringify(data) : undefined;
 };
 
-export const formatAssetId = (assetId: Asset_v51 | Asset_v54 | Asset_v60): string => {
-  switch (assetId.__kind) {
-    case _Asset.CampaignAsset:
-      return JSON.stringify({ campaignAsset: Number(assetId.value) });
-    case _Asset.CategoricalOutcome:
+export const formatAssetId = (assetId: Asset_v51 | Asset_v54 | Asset_v60 | V3MultiLocation): string => {
+  if ('__kind' in assetId) {
+    switch (assetId.__kind) {
+      case _Asset.CampaignAsset:
+        return JSON.stringify({ campaignAsset: Number(assetId.value) });
+      case _Asset.CategoricalOutcome:
       if (typeof assetId.value === 'string')
         return JSON.stringify({ categoricalOutcome: (assetId.value as any as string).split(',').map(Number) });
       return JSON.stringify({ categoricalOutcome: assetId.value.map(Number) });
-    case _Asset.CombinatorialOutcomeLegacy:
-      return _Asset.CombinatorialOutcomeLegacy;
-    case _Asset.CombinatorialToken:
-      return JSON.stringify({ combinatorialToken: assetId.value.toString() });
-    case _Asset.CustomAsset:
-      return JSON.stringify({ customAsset: Number(assetId.value) });
-    case _Asset.ForeignAsset:
-      return JSON.stringify({ foreignAsset: Number(assetId.value) });
-    case _Asset.ParimutuelShare:
-      return JSON.stringify({ parimutuelShare: assetId.value.map(Number) });
-    case _Asset.PoolShare:
-      return JSON.stringify({ poolShare: Number(assetId.value) });
-    case _Asset.ScalarOutcome:
-      return JSON.stringify({ scalarOutcome: [Number(assetId.value[0]), assetId.value[1].__kind] });
-    case _Asset.Ztg:
-      return _Asset.Ztg;
-    default:
-      return assetId.__kind;
+      case _Asset.CombinatorialOutcomeLegacy:
+        return _Asset.CombinatorialOutcomeLegacy;
+      case _Asset.CombinatorialToken:
+        return JSON.stringify({ combinatorialToken: assetId.value.toString() });
+      case _Asset.CustomAsset:
+        return JSON.stringify({ customAsset: Number(assetId.value) });
+      case _Asset.ForeignAsset:
+        return JSON.stringify({ foreignAsset: Number(assetId.value) });
+      case _Asset.ParimutuelShare:
+        return JSON.stringify({ parimutuelShare: assetId.value.map(Number) });
+      case _Asset.PoolShare:
+        return JSON.stringify({ poolShare: Number(assetId.value) });
+      case _Asset.ScalarOutcome:
+        return JSON.stringify({ scalarOutcome: [Number(assetId.value[0]), assetId.value[1].__kind] });
+      case _Asset.Ztg:
+        return _Asset.Ztg;
+      default:
+        return JSON.stringify({ assetId: assetId });
+    }
+  } else if ('parents' in assetId) {
+    if (assetId.interior.__kind === 'X3') {
+      if (assetId.interior.value[0].__kind === 'Parachain' && 
+          assetId.interior.value[0].value === 1000 && 
+          assetId.interior.value[2].__kind === 'GeneralIndex' && 
+          assetId.interior.value[2].value === BigInt(1337)) {
+        return JSON.stringify({ polkadotAssetHub: "USDC" });
+      }
+      return JSON.stringify({ v3MultiLocation: assetId });
+    } else {
+      return JSON.stringify({ v3MultiLocation: assetId });
+    }
+  } else {
+    return JSON.stringify({ assetId: assetId });
   }
 };
 
