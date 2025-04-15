@@ -121,16 +121,21 @@ export const formatAssetId = (assetId: Asset_v51 | Asset_v54 | Asset_v60 | V3Mul
         return JSON.stringify({ assetId: assetId });
     }
   } else if ('parents' in assetId) {
-    if (assetId.interior.__kind === 'X3') {
-      if (assetId.interior.value[0].__kind === 'Parachain' && 
-          assetId.interior.value[0].value === 1000 && 
-          assetId.interior.value[2].__kind === 'GeneralIndex' && 
-          assetId.interior.value[2].value === BigInt(1337)) {
+    switch (true) {
+      case assetId.interior.__kind === 'X3' && 
+           assetId.interior.value[0].__kind === 'Parachain' && 
+           assetId.interior.value[0].value === 1000 && 
+           assetId.interior.value[2].__kind === 'GeneralIndex' && 
+           assetId.interior.value[2].value === BigInt(1337):
         return JSON.stringify({ polkadotAssetHub: "USDC" });
-      }
-      return JSON.stringify({ v3MultiLocation: assetId });
-    } else {
-      return JSON.stringify({ v3MultiLocation: assetId });
+      case assetId.interior.__kind === 'X3' && 
+           assetId.interior.value[0].__kind === 'Parachain' && 
+           assetId.interior.value[0].value === 2004 && 
+           assetId.interior.value[2].__kind === 'AccountKey20' && 
+           assetId.interior.value[2].key === "0x931715fee2d06333043d11f658c8ce934ac61d0c":
+        return JSON.stringify({ moonbeamWormhole: "USDC" });
+      default:
+        return JSON.stringify({ v3MultiLocation: assetId });
     }
   } else {
     return JSON.stringify({ assetId: assetId });
