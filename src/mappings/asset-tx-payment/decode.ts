@@ -1,5 +1,6 @@
 import * as ss58 from '@subsquid/ss58';
 import { Asset } from '../../types/v54';
+import { V3MultiLocation } from '../../types/v60';
 import { events } from '../../types';
 import { _Asset } from '../../consts';
 import { Event } from '../../processor';
@@ -13,6 +14,8 @@ export const decodeAssetTxFeePaidEvent = (event: Event): AssetTxFeePaidEvent => 
     decoded.assetId = { __kind: _Asset.ForeignAsset, value: decoded.assetId };
   } else if (events.assetTxPayment.assetTxFeePaid.v54.is(event)) {
     decoded = events.assetTxPayment.assetTxFeePaid.v54.decode(event);
+  } else if (events.assetTxPayment.assetTxFeePaid.v60.is(event)) {
+    decoded = events.assetTxPayment.assetTxFeePaid.v60.decode(event);
   } else {
     decoded = event.args;
   }
@@ -25,6 +28,6 @@ export const decodeAssetTxFeePaidEvent = (event: Event): AssetTxFeePaidEvent => 
 
 interface AssetTxFeePaidEvent {
   accountId: string;
-  assetId?: Asset;
+  assetId?: Asset | V3MultiLocation;
   actualFee: bigint;
 }

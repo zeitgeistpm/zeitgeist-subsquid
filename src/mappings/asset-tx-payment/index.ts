@@ -11,8 +11,8 @@ export const assetTxFeePaid = async (event: Event): Promise<HistoricalAccountBal
   if (!assetId) return;
 
   let amount = Number(actualFee);
-  if (assetId.__kind === _Asset.ForeignAsset) {
-    const onChainAsset = await decodeMetadataStorage(event.block, assetId);
+  if ('__kind' in assetId && assetId.__kind === _Asset.ForeignAsset) {
+    const onChainAsset = await decodeMetadataStorage(event.block, assetId as Asset_ForeignAsset);
     if (!onChainAsset || !onChainAsset.additional.xcm.feeFactor) return;
     amount = Math.round((Number(actualFee) * Number(onChainAsset.additional.xcm.feeFactor)) / 10 ** 10);
   }
