@@ -1,36 +1,34 @@
-FROM node:20-alpine AS node
+FROM node:20-alpine AS base
 
-FROM node AS node-with-gyp
+# Stage for packages requiring build tools
+FROM base AS node-with-gyp
 RUN apk add g++ make python3
 
+# Build stage
 FROM node-with-gyp AS builder
-WORKDIR /home/zeitgeist-squid
-ADD package.json .
-ADD yarn.lock .
+WORKDIR /indexer
+COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
-ADD tsconfig.json .
-ADD src src
+COPY tsconfig.json ./
+COPY src ./src
 RUN yarn build
 
+# Dependencies stage
 FROM node-with-gyp AS deps
-WORKDIR /home/zeitgeist-squid
-ADD package.json .
-ADD yarn.lock .
+WORKDIR /indexer
+COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 
-FROM node AS squid
-WORKDIR /home/zeitgeist-squid
-COPY --from=deps /home/zeitgeist-squid/package.json .
-COPY --from=deps /home/zeitgeist-squid/yarn.lock .
-COPY --from=deps /home/zeitgeist-squid/node_modules node_modules
-COPY --from=builder /home/zeitgeist-squid/lib lib
-ADD db db
-ADD schema.graphql .
+# Main application stage
+FROM base AS indexer
+WORKDIR /indexer
+COPY --from=deps /indexer/package.json /indexer/yarn.lock ./
+COPY --from=deps /indexer/node_modules ./node_modules
+COPY --from=builder /indexer/lib ./lib
+COPY db ./db
+COPY schema.graphql ./
+CMD ["yarn", "indexer:up"]
 
-
-FROM squid AS processor
-CMD ["yarn", "processor:start"]
-
-
-FROM squid AS query-node
+# API application stage
+FROM indexer AS api
 CMD ["yarn", "api:start"]

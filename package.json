@@ -16,8 +16,9 @@
     "migration:apply": "squid-typeorm-migration apply",
     "migration:generate": "squid-typeorm-migration generate",
     "migration:revert": "npx squid-typeorm-migration revert",
-    "processor:start": "yarn migration:apply && node lib/main.js",
-    "processor:stop": "sh scripts/deploy/processor.sh stop",
+    "indexer:up": "yarn migration:apply && node lib/main.js",
+    "indexer:start:main": "NODE_ENV=main docker-compose up -d indexer",
+    "indexer:stop": "sh scripts/deploy/indexer.sh stop",
     "spin": "yarn db:restart && yarn build && yarn migration:apply && NODE_ENV=local node lib/main.js",
     "typegen": "squid-substrate-typegen typegen.json"
   },
