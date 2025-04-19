@@ -5,15 +5,12 @@ services:
     image: postgres:14
     container_name: db
     environment:
-      - NODE_ENV=${NODE_ENV:-local}
       - POSTGRES_DB=postgres
       - POSTGRES_PASSWORD=postgres
-    env_file:
-      - .env.${NODE_ENV:-local}
     ports:
       - "${DB_PORT}:5432"
     volumes:
-      - indexer-data:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql/data
     # command: ["postgres", "-c", "log_statement=all"]
 
   cache:
@@ -23,7 +20,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - ${DB_PATH:-/indexer/cache}:/data
+      - cache-data:/data
     environment:
       REDIS_PASS: ${REDIS_PASS}
     command: sh -c "redis-server --appendonly yes --requirepass ${REDIS_PASS}"
@@ -50,9 +47,15 @@ services:
       - default
 
 volumes:
-  indexer-data:
+  db-data:
     driver: local
     driver_opts:
       type: none
       o: bind
       device: ${DB_PATH}
+  cache-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${CACHE_PATH}
