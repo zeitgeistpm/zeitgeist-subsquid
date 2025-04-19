@@ -5,8 +5,9 @@ services:
     image: postgres:14
     container_name: db
     environment:
-      POSTGRES_DB: postgres
-      POSTGRES_PASSWORD: postgres
+      - NODE_ENV=${NODE_ENV:-local}
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=postgres
     env_file:
       - .env.${NODE_ENV:-local}
     ports:
@@ -37,6 +38,7 @@ services:
       - db
       - cache
     environment:
+      - NODE_ENV=${NODE_ENV:-local}
       - DB_HOST=db
       - DB_PORT=5432
       - REDIS_HOST=cache
