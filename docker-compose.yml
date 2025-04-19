@@ -36,9 +36,9 @@ services:
       - cache
     environment:
       - NODE_ENV=${NODE_ENV:-local}
-      - DB_HOST=postgres
+      - DB_HOST=db
       - DB_PORT=5432
-      - REDIS_HOST=redis
+      - REDIS_HOST=cache
       - REDIS_PORT=6379
       - REDIS_PASS=${REDIS_PASS}
     env_file:
