@@ -13,7 +13,7 @@ services:
     ports:
       - "${DB_PORT}:5432"
     volumes:
-      - ${DB_PATH:-/indexer/db}:/var/lib/postgresql/data
+      - indexer-data:/var/lib/postgresql/data
     # command: ["postgres", "-c", "log_statement=all"]
 
   cache:
@@ -48,3 +48,11 @@ services:
       - .env.${NODE_ENV:-local}
     networks:
       - default
+
+volumes:
+  indexer-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DB_PATH}
