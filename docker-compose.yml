@@ -32,8 +32,8 @@ services:
     container_name: indexer
     restart: always
     depends_on:
-      - postgres
-      - redis
+      - db
+      - cache
     environment:
       - NODE_ENV=${NODE_ENV:-local}
       - DB_HOST=postgres
