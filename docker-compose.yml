@@ -35,7 +35,6 @@ services:
       - db
       - cache
     environment:
-      - NODE_ENV=${NODE_ENV:-local}
       - DB_HOST=db
       - DB_PORT=5432
       - REDIS_HOST=cache
