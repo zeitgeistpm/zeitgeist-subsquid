@@ -51,11 +51,13 @@ DB_PORT=5432
 ```text:.env.test
 # Testnet deployment variables
 DB_PORT=5432
+DB_PATH=/mnt/ztg-indexer-*
 ```
 
 ```text:.env.main
 # Mainnet deployment variables 
 DB_PORT=5432
+DB_PATH=/mnt/ztg-indexer-*
 ```
 
 ### Docker Compose Configuration
@@ -145,6 +147,8 @@ cat backup_file.sql | docker exec -i db psql -U postgres postgres
 1. **Prepare the server**:
    ```bash
    # Create data directory
+   sudo mkdir -p /mnt/ztg-indexer-*
+   sudo chmod 777 /mnt/ztg-indexer-*
    ```
 
 2. **Clone and set up the repository**:
@@ -247,6 +251,8 @@ yarn indexer:start:main    # For mainnet deployment
 
 # Rebuild and restart services
 yarn indexer:rebuild:local # Rebuild for local environment
+yarn indexer:rebuild:test  # Rebuild for testnet environment
+yarn indexer:rebuild:main  # Rebuild for mainnet environment
 
 # Generate types for events defined at typegen.json
 yarn typegen
