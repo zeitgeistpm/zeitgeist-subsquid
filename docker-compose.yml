@@ -1,24 +1,61 @@
 version: "3.4"
 
 services:
-  postgres:
+  db:
     image: postgres:14
-    container_name: processor-db
+    container_name: db
     environment:
-      POSTGRES_DB: postgres
-      POSTGRES_PASSWORD: postgres
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=postgres
     ports:
       - "${DB_PORT}:5432"
-      # command: ["postgres", "-c", "log_statement=all"]
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    # command: ["postgres", "-c", "log_statement=all"]
 
-  redis:
+  cache:
     image: redis:6.0-alpine
-    container_name: processor-redis
+    container_name: cache
     restart: always
     ports:
       - "6379:6379"
     volumes:
-      - ./db/cache:/data
+      - cache-data:/data
     environment:
       REDIS_PASS: ${REDIS_PASS}
     command: sh -c "redis-server --appendonly yes --requirepass ${REDIS_PASS}"
+
+  indexer:
+    build:
+      context: .
+      target: indexer
+    container_name: indexer
+    restart: always
+    depends_on:
+      - db
+      - cache
+    environment:
+      - NODE_ENV=${NODE_ENV:-local}
+      - DB_HOST=db
+      - DB_PORT=5432
+      - REDIS_HOST=cache
+      - REDIS_PORT=6379
+      - REDIS_PASS=${REDIS_PASS}
+    env_file:
+      - .env.${NODE_ENV:-local}
+    networks:
+      - default
+
+volumes:
+  db-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DB_PATH}
+  cache-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${CACHE_PATH}
