@@ -19,16 +19,11 @@ WORKDIR /indexer
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 
-# Main application stage
-FROM base AS indexer
+# Final application stage
+FROM base AS application
 WORKDIR /indexer
 COPY --from=deps /indexer/package.json /indexer/yarn.lock ./
 COPY --from=deps /indexer/node_modules ./node_modules
 COPY --from=builder /indexer/lib ./lib
 COPY db ./db
 COPY schema.graphql ./
-CMD ["yarn", "indexer:up"]
-
-# API application stage
-FROM indexer AS api
-CMD ["yarn", "api:start"]
