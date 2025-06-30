@@ -27,21 +27,24 @@ export const decodedAssetId = (assetId: string): string => {
       // a valid combinatorial token JSON structure. We can't recover the full hash,
       // but we can create a consistent format that downstream processes can handle.
       
-      // Try to reconstruct as a proper combinatorial token JSON
-      // Note: The hash is truncated, so we indicate this in the structure
+      // Log for debugging purposes but provide clean hex format to consumers
+      console.debug(`Reconstructing combinatorial token from truncated hash: ${truncatedHash}`);
+      
+      // Return standard hex format without suffixes for consumer compatibility
       const reconstructedToken = {
-        combinatorialToken: `0x${truncatedHash}_truncated`
+        combinatorialToken: `0x${truncatedHash}`
       };
       
       return JSON.stringify(reconstructedToken);
       
     } catch (error) {
       console.warn(`Failed to reconstruct combinatorial token from ${assetId}:`, error);
+      console.debug(`Using fallback hash reconstruction for: ${assetId}`);
       
-      // Fallback: create a minimal valid JSON structure
+      // Fallback: create a minimal valid JSON structure with clean hex format
       const fallbackHash = assetId.replace('combo_', '');
       return JSON.stringify({
-        combinatorialToken: `0x${fallbackHash}_fallback`
+        combinatorialToken: `0x${fallbackHash}`
       });
     }
   }
@@ -92,7 +95,7 @@ export const encodedAssetId = (assetId: string) => {
   if (assetId.includes('combinatorialToken')) {
     // Extract the hex hash from the combinatorial token
     const hashMatch = assetId.match(/"0x([a-f0-9]+)"/);
-    return hashMatch ? `combo_${hashMatch[1].substring(0, 12)}` : assetId.replaceAll('"', '#');
+    return hashMatch ? `combo_${hashMatch[1].substring(0, 16)}` : assetId.replaceAll('"', '#');
   }
   // Handle categorical outcomes (bracket format)
   if (assetId.includes('[') && assetId.includes(']')) {

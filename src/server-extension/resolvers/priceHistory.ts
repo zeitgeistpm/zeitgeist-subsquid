@@ -115,8 +115,16 @@ export class PriceHistoryResolver {
               try {
                 // More precise matching - look for the exact hash in combinatorial token format
                 const parsed = JSON.parse(asset);
-                return parsed.combinatorialToken && 
-                       parsed.combinatorialToken.toString().includes(extractedHash);
+                if (!parsed?.combinatorialToken) {
+                  return false;
+                }
+                
+                // Extract hash from the combinatorial token (remove "0x" prefix if present)
+                const tokenValue = parsed.combinatorialToken.toString();
+                const tokenHash = tokenValue.startsWith('0x') ? tokenValue.slice(2) : tokenValue;
+                
+                // Exact match comparison - check if the extracted hash matches the beginning of the token hash
+                return tokenHash.startsWith(extractedHash);
               } catch {
                 // Fallback to string matching for non-JSON formatted assets
                 return asset.includes('combinatorialToken') && asset.includes(extractedHash);
