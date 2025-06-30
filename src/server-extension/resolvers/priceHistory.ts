@@ -92,12 +92,16 @@ export class PriceHistoryResolver {
       delete merged[i].timestamp;
       let prices = [];
       for (const [key, value] of Object.entries(merged[i])) {
-        // Handle combinatorial tokens - they're already in the correct JSON format
+        // Handle combinatorial tokens - they come back as combo_<hash> from the SQL query
         if (key.startsWith('combo_')) {
-          // Find the original asset ID from the market's outcome assets
+          // Extract the hash from the encoded key (e.g., "combo_84b256ac4ba7" -> "84b256ac4ba7")
+          const extractedHash = key.substring(6); // Remove "combo_" prefix
+          
+          // Find the original asset ID from market outcome_assets that contains this hash
           const originalAssetId = market[0].outcome_assets.find((asset: string) => 
-            asset.includes('combinatorialToken') && key.includes(asset.match(/"0x([a-f0-9]+)"/)?.[1]?.substring(0, 12) || '')
+            asset.includes('combinatorialToken') && asset.includes(extractedHash)
           );
+          
           prices.push({
             assetId: originalAssetId || decodedAssetId(key),
             price: value,
