@@ -92,10 +92,71 @@ export class PriceHistoryResolver {
       delete merged[i].timestamp;
       let prices = [];
       for (const [key, value] of Object.entries(merged[i])) {
-        prices.push({
-          assetId: JSON.stringify(util.AssetIdFromString(decodedAssetId(key))),
-          price: value,
-        });
+        // Handle combinatorial tokens - they come back as combo_<hash> from the SQL query
+        if (key.startsWith('combo_')) {
+          let finalAssetId: string;
+          
+          try {
+            // More robust hash extraction from combo key format
+            const hashMatch = key.match(/^combo_([a-fA-F0-9]+)$/);
+            if (!hashMatch || !hashMatch[1]) {
+              throw new Error(`Invalid combo key format: ${key}`);
+            }
+            
+            const extractedHash = hashMatch[1];
+            
+            // Validate hash format (should be hexadecimal and reasonable length)
+            if (!/^[a-fA-F0-9]{8,}$/.test(extractedHash)) {
+              throw new Error(`Invalid hash format: ${extractedHash}`);
+            }
+            
+            // Find the original asset ID from market outcome_assets that contains this hash
+            const matchingAsset = market[0].outcome_assets.find((asset: string) => {
+              try {
+                // More precise matching - look for the exact hash in combinatorial token format
+                const parsed = JSON.parse(asset);
+                return parsed.combinatorialToken && 
+                       parsed.combinatorialToken.toString().includes(extractedHash);
+              } catch {
+                // Fallback to string matching for non-JSON formatted assets
+                return asset.includes('combinatorialToken') && asset.includes(extractedHash);
+              }
+            });
+            
+            if (!matchingAsset) {
+              throw new Error(`No matching asset found for hash: ${extractedHash}`);
+            }
+            
+            finalAssetId = matchingAsset;
+          } catch (error) {
+            // Error handling - log the issue and provide consistent fallback
+            console.warn(`Failed to process combinatorial token ${key}:`, error);
+            
+            // Ensure fallback provides consistent JSON format
+            const fallbackDecoded = decodedAssetId(key);
+            try {
+              // Try to parse and re-stringify to ensure valid JSON format
+              const parsed = JSON.parse(fallbackDecoded);
+              finalAssetId = JSON.stringify(parsed);
+            } catch {
+              // If decodedAssetId doesn't return valid JSON, create a consistent format
+              finalAssetId = JSON.stringify({ 
+                combinatorialToken: key.replace('combo_', '') 
+              });
+            }
+          }
+          
+          prices.push({
+            assetId: finalAssetId,
+            price: value,
+          });
+        } else {
+          // Handle categorical outcomes using the SDK
+          prices.push({
+            assetId: JSON.stringify(util.AssetIdFromString(decodedAssetId(key))),
+            price: value,
+          });
+        }
       }
       obj.prices = prices;
       result.push(obj);

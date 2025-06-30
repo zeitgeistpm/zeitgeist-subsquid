@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 import { Store } from '@subsquid/typeorm-store';
 import {
   Account,
@@ -25,6 +26,43 @@ import {
   decodePoolDeployedEvent,
   decodeSellExecutedEvent,
 } from './decode';
+
+/**
+ * Helper function to create an Asset instance for combinatorial tokens
+ * Encapsulates the unique ID generation logic and Asset creation
+ */
+const createAssetForCombinatorialToken = async (
+  store: Store,
+  eventId: string,
+  assetId: string,
+  market: Market
+): Promise<Asset> => {
+  // Try to find existing asset first
+  let asset = await store.get(Asset, {
+    where: { assetId },
+  });
+  
+  if (!asset) {
+    // Generate collision-resistant unique ID using cryptographic hash
+    // Hash the entire assetId string to ensure consistency regardless of format
+    const hash = createHash('sha256').update(assetId).digest('hex');
+    
+    // Take first 16 characters for reasonable length while maintaining very low collision probability
+    // SHA-256 provides 2^64 collision resistance for 16 hex characters
+    const uniqueId = hash.substring(0, 16);
+    
+    asset = new Asset({
+      id: eventId + '-' + uniqueId,
+      assetId,
+      amountInPool: BigInt(0),
+      price: 0,
+      market,
+      pool: null,
+    });
+  }
+  
+  return asset;
+};
 
 export const buyExecuted = async (
   store: Store,
@@ -56,7 +94,7 @@ export const buyExecuted = async (
   await Promise.all(
     market.neoPool.account.balances.map(async (ab) => {
       if (isBaseAsset(ab.assetId)) return;
-      const asset = await store.get(Asset, {
+      let asset = await store.get(Asset, {
         where: { assetId: ab.assetId },
       });
       if (!asset) return;
@@ -179,10 +217,7 @@ export const combinatorialPoolDeployed = async (
   await Promise.all(
     neoPool.account.balances.map(async (ab, i) => {
       if (isBaseAsset(ab.assetId)) return;
-      const asset = await store.get(Asset, {
-        where: { assetId: ab.assetId },
-      });
-      if (!asset) return;
+      const asset = await createAssetForCombinatorialToken(store, event.id, ab.assetId, market);
       asset.amountInPool = ab.balance;
       asset.price = computeNeoSwapSpotPrice(ab.balance, neoPool.liquidityParameter);
       assets.push(asset);
@@ -209,6 +244,13 @@ export const combinatorialPoolDeployed = async (
 
   market.liquidity = newLiquidity;
   market.neoPool = neoPool;
+  
+  // Update outcomeAssets to include combinatorial tokens for priceHistory resolver
+  const combinatorialAssets = neoPool.account.balances
+    .filter(ab => !isBaseAsset(ab.assetId))
+    .map(ab => ab.assetId);
+  market.outcomeAssets = combinatorialAssets;
+  
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await store.save<Market>(market);
 
@@ -234,29 +276,93 @@ export const combinatorialPoolDeployed = async (
 export const comboBuyExecuted = async (
   store: Store,
   event: Event
-): Promise<HistoricalSwap | undefined> => {
+): Promise<
+  | { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalMarket: HistoricalMarket }
+  | undefined
+> => {
   const { who, poolId, assetExecuted, amountIn, amountOut, swapFeeAmount, externalFeeAmount } =
     decodeComboBuyExecuted(event);
 
+  // First find the neo pool by poolId to get the correct marketId
   const neoPool = await store.get(NeoPool, {
     where: { poolId },
     relations: { account: { balances: true }, liquiditySharesManager: true },
   });
   if (!neoPool) return;
 
+  // Then get the market using the correct marketId from the neo pool
+  const market = await store.get(Market, {
+    where: { marketId: neoPool.marketId },
+    relations: { neoPool: { account: { balances: true }, liquiditySharesManager: true } },
+  });
+  if (!market || !market.neoPool) return;
+
   await Promise.all(
-    neoPool.liquiditySharesManager.map(async (lsm) => {
-      lsm.fees += (lsm.stake / neoPool!.totalStake) * swapFeeAmount;
+    market.neoPool.liquiditySharesManager.map(async (lsm) => {
+      lsm.fees += (lsm.stake / market.neoPool!.totalStake) * swapFeeAmount;
       console.log(`[${event.name}] Saving liquidity-shares-manager: ${JSON.stringify(lsm, null, 2)}`);
       await store.save<LiquiditySharesManager>(lsm);
     })
   );
 
+  const oldLiquidity = market.liquidity;
+  let newLiquidity = BigInt(0);
+  const historicalAssets: HistoricalAsset[] = [];
+  await Promise.all(
+    market.neoPool.account.balances.map(async (ab) => {
+      if (isBaseAsset(ab.assetId)) return;
+      const asset = await createAssetForCombinatorialToken(store, event.id, ab.assetId, market);
+      const oldPrice = asset.price;
+      const oldAmountInPool = asset.amountInPool;
+      asset.amountInPool = ab.balance;
+      asset.price = computeNeoSwapSpotPrice(ab.balance, market.neoPool!.liquidityParameter);
+      console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
+      await store.save<Asset>(asset);
+
+      newLiquidity += BigInt(Math.round(asset.price * +ab.balance.toString()));
+
+      const ha = new HistoricalAsset({
+        accountId: asset.assetId === assetExecuted ? who : null,
+        assetId: asset.assetId,
+        blockNumber: event.block.height,
+        dAmountInPool: asset.amountInPool - oldAmountInPool,
+        dPrice: asset.price - oldPrice,
+        event: event.name.split('.')[1],
+        id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+        newAmountInPool: asset.amountInPool,
+        newPrice: asset.price,
+        timestamp: new Date(event.block.timestamp!),
+      });
+      historicalAssets.push(ha);
+    })
+  );
+
+  market.liquidity = newLiquidity;
+  market.volume += amountIn;
+  console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
+  await store.save<Market>(market);
+
+  const historicalMarket = new HistoricalMarket({
+    blockNumber: event.block.height,
+    by: who,
+    dLiquidity: market.liquidity - oldLiquidity,
+    dVolume: amountIn,
+    event: MarketEvent.ComboBuyExecuted,
+    id: event.id + '-' + market.marketId,
+    liquidity: market.liquidity,
+    market,
+    outcome: null,
+    resolvedOutcome: null,
+    status: market.status,
+    timestamp: new Date(event.block.timestamp!),
+    volume: market.volume,
+  });
+
   const historicalSwap = new HistoricalSwap({
     accountId: who,
     assetAmountIn: amountIn,
     assetAmountOut: amountOut,
-    assetIn: neoPool.collateral,
+    assetIn: market.baseAsset,
     assetOut: assetExecuted,
     blockNumber: event.block.height,
     event: SwapEvent.ComboBuyExecuted,
@@ -267,36 +373,100 @@ export const comboBuyExecuted = async (
     timestamp: new Date(event.block.timestamp!),
   });
 
-  return historicalSwap;
+  return { historicalAssets, historicalSwap, historicalMarket };
 };
 
 export const comboSellExecuted = async (
   store: Store,
   event: Event
-): Promise<HistoricalSwap | undefined> => {
+): Promise<
+  | { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalMarket: HistoricalMarket }
+  | undefined
+> => {
   const { who, poolId, assetExecuted, amountIn, amountOut, swapFeeAmount, externalFeeAmount } =
     decodeComboSellExecuted(event);
 
+  // First find the neo pool by poolId to get the correct marketId
   const neoPool = await store.get(NeoPool, {
     where: { poolId },
     relations: { account: { balances: true }, liquiditySharesManager: true },
   });
   if (!neoPool) return;
 
+  // Then get the market using the correct marketId from the neo pool
+  const market = await store.get(Market, {
+    where: { marketId: neoPool.marketId },
+    relations: { neoPool: { account: { balances: true }, liquiditySharesManager: true } },
+  });
+  if (!market || !market.neoPool) return;
+
   await Promise.all(
-    neoPool.liquiditySharesManager.map(async (lsm) => {
-      lsm.fees += (lsm.stake / neoPool!.totalStake) * swapFeeAmount;
+    market.neoPool.liquiditySharesManager.map(async (lsm) => {
+      lsm.fees += (lsm.stake / market.neoPool!.totalStake) * swapFeeAmount;
       console.log(`[${event.name}] Saving liquidity-shares-manager: ${JSON.stringify(lsm, null, 2)}`);
       await store.save<LiquiditySharesManager>(lsm);
     })
   );
+
+  const oldLiquidity = market.liquidity;
+  let newLiquidity = BigInt(0);
+  const historicalAssets: HistoricalAsset[] = [];
+  await Promise.all(
+    market.neoPool.account.balances.map(async (ab) => {
+      if (isBaseAsset(ab.assetId)) return;
+      const asset = await createAssetForCombinatorialToken(store, event.id, ab.assetId, market);
+      const oldPrice = asset.price;
+      const oldAmountInPool = asset.amountInPool;
+      asset.amountInPool = ab.balance;
+      asset.price = computeNeoSwapSpotPrice(ab.balance, market.neoPool!.liquidityParameter);
+      console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
+      await store.save<Asset>(asset);
+
+      newLiquidity += BigInt(Math.round(asset.price * +ab.balance.toString()));
+
+      const ha = new HistoricalAsset({
+        accountId: asset.assetId === assetExecuted ? who : null,
+        assetId: asset.assetId,
+        blockNumber: event.block.height,
+        dAmountInPool: asset.amountInPool - oldAmountInPool,
+        dPrice: asset.price - oldPrice,
+        event: event.name.split('.')[1],
+        id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+        newAmountInPool: asset.amountInPool,
+        newPrice: asset.price,
+        timestamp: new Date(event.block.timestamp!),
+      });
+      historicalAssets.push(ha);
+    })
+  );
+
+  market.liquidity = newLiquidity;
+  market.volume += amountOut;
+  console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
+  await store.save<Market>(market);
+
+  const historicalMarket = new HistoricalMarket({
+    blockNumber: event.block.height,
+    by: who,
+    dLiquidity: market.liquidity - oldLiquidity,
+    dVolume: amountOut,
+    event: MarketEvent.ComboSellExecuted,
+    id: event.id + '-' + market.marketId,
+    liquidity: market.liquidity,
+    market,
+    outcome: null,
+    resolvedOutcome: null,
+    status: market.status,
+    timestamp: new Date(event.block.timestamp!),
+    volume: market.volume,
+  });
 
   const historicalSwap = new HistoricalSwap({
     accountId: who,
     assetAmountIn: amountIn,
     assetAmountOut: amountOut,
     assetIn: assetExecuted,
-    assetOut: neoPool.collateral,
+    assetOut: market.baseAsset,
     blockNumber: event.block.height,
     event: SwapEvent.ComboSellExecuted,
     externalFeeAmount,
@@ -306,7 +476,7 @@ export const comboSellExecuted = async (
     timestamp: new Date(event.block.timestamp!),
   });
 
-  return historicalSwap;
+  return { historicalAssets, historicalSwap, historicalMarket };
 };
 
 export const exitExecuted = async (
@@ -341,7 +511,7 @@ export const exitExecuted = async (
   await Promise.all(
     neoPool.account.balances.map(async (ab) => {
       if (isBaseAsset(ab.assetId)) return;
-      const asset = await store.get(Asset, {
+      let asset = await store.get(Asset, {
         where: { assetId: ab.assetId },
       });
       if (!asset) return;
@@ -446,7 +616,7 @@ export const joinExecuted = async (
   await Promise.all(
     neoPool.account.balances.map(async (ab) => {
       if (isBaseAsset(ab.assetId)) return;
-      const asset = await store.get(Asset, {
+      let asset = await store.get(Asset, {
         where: { assetId: ab.assetId },
       });
       if (!asset) return;
@@ -552,7 +722,7 @@ export const poolDeployed = async (
   await Promise.all(
     neoPool.account.balances.map(async (ab, i) => {
       if (isBaseAsset(ab.assetId)) return;
-      const asset = await store.get(Asset, {
+      let asset = await store.get(Asset, {
         where: { assetId: ab.assetId },
       });
       if (!asset) return;
@@ -582,6 +752,13 @@ export const poolDeployed = async (
 
   market.liquidity = newLiquidity;
   market.neoPool = neoPool;
+  
+  // Update outcomeAssets to include combinatorial tokens for priceHistory resolver
+  const combinatorialAssets = neoPool.account.balances
+    .filter(ab => !isBaseAsset(ab.assetId))
+    .map(ab => ab.assetId);
+  market.outcomeAssets = combinatorialAssets;
+  
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await store.save<Market>(market);
 
@@ -634,7 +811,7 @@ export const sellExecuted = async (
   await Promise.all(
     market.neoPool.account.balances.map(async (ab) => {
       if (isBaseAsset(ab.assetId)) return;
-      const asset = await store.get(Asset, {
+      let asset = await store.get(Asset, {
         where: { assetId: ab.assetId },
       });
       if (!asset) return;
