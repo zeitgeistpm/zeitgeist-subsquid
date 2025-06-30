@@ -136,7 +136,7 @@ if (isMainnet()) {
 if (!isLocalEnv()) {
   processor.setGateway(process.env.ARCHIVE_GATEWAY_URL!);
 } else {
-  processor.setBlockRange({ from: 1 });
+  processor.setBlockRange({ from: 1816852 });
 }
 
 type Fields = SubstrateBatchProcessorFields<typeof processor>;

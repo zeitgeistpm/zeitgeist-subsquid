@@ -92,10 +92,23 @@ export class PriceHistoryResolver {
       delete merged[i].timestamp;
       let prices = [];
       for (const [key, value] of Object.entries(merged[i])) {
-        prices.push({
-          assetId: JSON.stringify(util.AssetIdFromString(decodedAssetId(key))),
-          price: value,
-        });
+        // Handle combinatorial tokens - they're already in the correct JSON format
+        if (key.startsWith('combo_')) {
+          // Find the original asset ID from the market's outcome assets
+          const originalAssetId = market[0].outcome_assets.find((asset: string) => 
+            asset.includes('combinatorialToken') && key.includes(asset.match(/"0x([a-f0-9]+)"/)?.[1]?.substring(0, 12) || '')
+          );
+          prices.push({
+            assetId: originalAssetId || decodedAssetId(key),
+            price: value,
+          });
+        } else {
+          // Handle categorical outcomes using the SDK
+          prices.push({
+            assetId: JSON.stringify(util.AssetIdFromString(decodedAssetId(key))),
+            price: value,
+          });
+        }
       }
       obj.prices = prices;
       result.push(obj);

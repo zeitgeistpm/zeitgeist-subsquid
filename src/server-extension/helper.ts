@@ -7,11 +7,29 @@ import { Cache } from '../util';
 import { AssetPriceResolver } from './resolvers/assetPrice';
 
 export const decodedAssetId = (assetId: string) => {
+  // Handle encoded combinatorial tokens
+  if (assetId.startsWith('combo_')) {
+    // This is a simplified approach - we can't fully reconstruct the original hash
+    // from the truncated version, so we'll need a different strategy
+    return assetId.replaceAll('#', '"');
+  }
+  // Handle categorical outcomes (bracket format)
   return assetId.replaceAll('#', '"');
 };
 
 export const encodedAssetId = (assetId: string) => {
-  return assetId.substring(assetId.indexOf('['), assetId.indexOf(']') + 1).replaceAll('"', '#');
+  // Handle combinatorial tokens (JSON format)
+  if (assetId.includes('combinatorialToken')) {
+    // Extract the hex hash from the combinatorial token
+    const hashMatch = assetId.match(/"0x([a-f0-9]+)"/);
+    return hashMatch ? `combo_${hashMatch[1].substring(0, 12)}` : assetId.replaceAll('"', '#');
+  }
+  // Handle categorical outcomes (bracket format)
+  if (assetId.includes('[') && assetId.includes(']')) {
+    return assetId.substring(assetId.indexOf('['), assetId.indexOf(']') + 1).replaceAll('"', '#');
+  }
+  // Fallback for other formats
+  return assetId.replaceAll('"', '#');
 };
 
 // Fetch price from redis db.. Returns null in case of failure

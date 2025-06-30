@@ -1,9 +1,11 @@
 /node_modules
 /lib
 /db/cache
+/data
 
 .env.test
 .env.main
+.env
 
 .vscode
 .yarn
