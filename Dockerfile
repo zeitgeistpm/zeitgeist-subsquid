@@ -8,7 +8,7 @@ RUN apk add g++ make python3
 FROM node-with-gyp AS builder
 WORKDIR /indexer
 COPY package.json yarn.lock ./
-RUN yarn install
+RUN yarn install --frozen-lockfile
 COPY tsconfig.json ./
 COPY src ./src
 RUN yarn build
@@ -17,7 +17,7 @@ RUN yarn build
 FROM node-with-gyp AS deps
 WORKDIR /indexer
 COPY package.json yarn.lock ./
-RUN yarn install
+RUN yarn install --frozen-lockfile
 
 # Main application stage
 FROM base AS indexer

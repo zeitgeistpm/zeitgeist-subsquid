@@ -6,6 +6,7 @@
   "author": "",
   "license": "ISC",
   "scripts": {
+    "install:ci": "yarn install --frozen-lockfile",
     "api:start": "squid-graphql-server --subscriptions",
     "api:stop": "./scripts/deploy/api.sh stop",
     "build": "rm -rf lib && tsc",
