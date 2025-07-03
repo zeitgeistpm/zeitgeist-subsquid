@@ -5,102 +5,76 @@ import { BaseAsset, CacheHint, TargetAsset, _Asset } from '../consts';
 import { formatAssetId, isBatteryStation, isLocalEnv } from '../helper';
 import { Cache } from '../util';
 import { AssetPriceResolver } from './resolvers/assetPrice';
+import { isHexadecimal } from 'is-hexadecimal';
+
+// Optimized helper for combinatorial token validation
+const isCombinatorialToken = (str: string): boolean => {
+  return (str.length === 63 || str.length === 64) && isHexadecimal(str);
+};
+
+// Simplified extraction function
+const extractCombinatorialHash = (assetId: string): string | null => {
+  try {
+    const parsed = JSON.parse(assetId);
+    if (!parsed?.combinatorialToken) return null;
+    
+    const tokenValue = parsed.combinatorialToken.toString();
+    return tokenValue.startsWith('0x') ? tokenValue.slice(2) : tokenValue;
+  } catch {
+    return null;
+  }
+};
 
 export const decodedAssetId = (assetId: string): string => {
-  // Handle encoded combinatorial tokens
-  if (assetId.startsWith('combo_')) {
-    try {
-      // Extract the truncated hash from the combo key
-      const hashMatch = assetId.match(/^combo_([a-fA-F0-9]+)$/);
-      if (!hashMatch || !hashMatch[1]) {
-        throw new Error(`Invalid combo format: ${assetId}`);
-      }
-      
-      const truncatedHash = hashMatch[1];
-      
-      // Validate the extracted hash format
-      if (!/^[a-fA-F0-9]{8,}$/.test(truncatedHash)) {
-        throw new Error(`Invalid hash format in combo: ${truncatedHash}`);
-      }
-      
-      // Since the original hash was truncated during encoding, we need to reconstruct
-      // a valid combinatorial token JSON structure. We can't recover the full hash,
-      // but we can create a consistent format that downstream processes can handle.
-      
-      // Log for debugging purposes but provide clean hex format to consumers
-      console.debug(`Reconstructing combinatorial token from truncated hash: ${truncatedHash}`);
-      
-      // Return standard hex format without suffixes for consumer compatibility
-      const reconstructedToken = {
-        combinatorialToken: `0x${truncatedHash}`
-      };
-      
-      return JSON.stringify(reconstructedToken);
-      
-    } catch (error) {
-      console.warn(`Failed to reconstruct combinatorial token from ${assetId}:`, error);
-      console.debug(`Using fallback hash reconstruction for: ${assetId}`);
-      
-      // Fallback: create a minimal valid JSON structure with clean hex format
-      const fallbackHash = assetId.replace('combo_', '');
+  // Handle raw combinatorial token hashes
+  if (isCombinatorialToken(assetId)) {
+    return JSON.stringify({
+      combinatorialToken: `0x${assetId}`
+    });
+  }
+  
+  // Handle categorical outcomes: [885,0] -> {"categoricalOutcome":[885,0]}
+  const arrayMatch = assetId.match(/^\[(\d+),(\d+)\]$/);
+  if (arrayMatch) {
+    return JSON.stringify({
+      categoricalOutcome: [parseInt(arrayMatch[1]), parseInt(arrayMatch[2])]
+    });
+  }
+  
+  // Handle encoded categorical outcomes with #: [885#0] -> {"categoricalOutcome":[885,0]}
+  if (assetId.includes('#')) {
+    const restored = assetId.replaceAll('#', ',');
+    const arrayMatch2 = restored.match(/^\[(\d+),(\d+)\]$/);
+    if (arrayMatch2) {
       return JSON.stringify({
-        combinatorialToken: `0x${fallbackHash}`
+        categoricalOutcome: [parseInt(arrayMatch2[1]), parseInt(arrayMatch2[2])]
       });
     }
+    // Fallback for other # encoded formats
+    return assetId.replaceAll('#', '"');
   }
   
-  // Handle categorical outcomes and other encoded formats
-  if (assetId.includes('#')) {
-    // Replace # with " to restore JSON structure
-    const restored = assetId.replaceAll('#', '"');
-    
-    // Validate that the restored string is valid JSON
-    try {
-      JSON.parse(restored);
-      return restored;
-    } catch {
-      // If not valid JSON, try to construct a proper structure
-      console.warn(`Invalid JSON structure after decoding: ${restored}`);
-      
-      // For categorical outcomes, try to extract array format
-      const arrayMatch = restored.match(/\[([^\]]+)\]/);
-      if (arrayMatch) {
-        try {
-          const numbers = arrayMatch[1].split(',').map(s => parseInt(s.trim()));
-          return JSON.stringify({ categoricalOutcome: numbers });
-        } catch {
-          // Fallback to raw format
-          return JSON.stringify({ rawAssetId: assetId });
-        }
-      }
-      
-      // General fallback
-      return JSON.stringify({ rawAssetId: assetId });
-    }
-  }
-  
-  // For unencoded assets, ensure they're in proper JSON format
+  // Return valid JSON as-is, or simple strings like "Ztg"
   try {
-    // If it's already valid JSON, return as-is
     JSON.parse(assetId);
     return assetId;
   } catch {
-    // If not JSON, wrap it in a consistent structure
-    return JSON.stringify({ rawAssetId: assetId });
+    return assetId;
   }
 };
 
 export const encodedAssetId = (assetId: string) => {
-  // Handle combinatorial tokens (JSON format)
+  // Handle combinatorial tokens
   if (assetId.includes('combinatorialToken')) {
-    // Extract the hex hash from the combinatorial token
-    const hashMatch = assetId.match(/"0x([a-f0-9]+)"/);
-    return hashMatch ? `combo_${hashMatch[1].substring(0, 16)}` : assetId.replaceAll('"', '#');
+    const hash = extractCombinatorialHash(assetId);
+    return hash || assetId.replaceAll('"', '#');
   }
+  
   // Handle categorical outcomes (bracket format)
   if (assetId.includes('[') && assetId.includes(']')) {
     return assetId.substring(assetId.indexOf('['), assetId.indexOf(']') + 1).replaceAll('"', '#');
   }
+  
   // Fallback for other formats
   return assetId.replaceAll('"', '#');
 };
@@ -121,7 +95,6 @@ export const getAssetUsdPrices = async (): Promise<Map<BaseAsset, number>> => {
   if (isLocalEnv() || isBatteryStation()) {
     prices = new Map([
       [BaseAsset.DOT, 1],
-      [BaseAsset.WSX, 1],
       [BaseAsset.ZTG, 1],
     ]);
   } else {
@@ -129,7 +102,6 @@ export const getAssetUsdPrices = async (): Promise<Map<BaseAsset, number>> => {
     if (new Date().getTime() - AssetPriceResolver.cachedAt.getTime() > 60 * 60 * 1000) refreshPrices();
     prices = new Map([
       [BaseAsset.DOT, (await fetchFromCache(BaseAsset.DOT, TargetAsset.USD)).price],
-      [BaseAsset.WSX, 0],
       [BaseAsset.ZTG, (await fetchFromCache(BaseAsset.ZTG, TargetAsset.USD)).price],
     ]);
   }

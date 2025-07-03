@@ -6,11 +6,13 @@
 .env.test
 .env.main
 .env.local
-.env.*
 
 .vscode
 .yarn
 
 *.db
+
+.DS_Store
+.cursorignore
 
 docker-compose.override.yml

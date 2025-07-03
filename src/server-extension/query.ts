@@ -109,9 +109,10 @@ export const marketLiquidity = (ids: number[]) => `
     SELECT t0.market_id, COALESCE(ROUND(SUM(a.price * ab.balance), 0), 0) AS liquidity
     FROM t0
     LEFT JOIN neo_pool np ON np.id = t0.neo_pool_id
+    LEFT JOIN market m ON m.id = t0.id
     LEFT JOIN asset a ON a.market_id = t0.id
     LEFT JOIN account_balance ab ON ab.account_id = np.account_id AND ab.asset_id = a.asset_id
-    WHERE np.id IS NOT NULL AND a.asset_id ILIKE '%OUTCOME%'
+    WHERE np.id IS NOT NULL AND a.asset_id = ANY(m.outcome_assets)
     GROUP BY t0.market_id
   ),
   t3 AS (
@@ -195,8 +196,8 @@ export const marketTraders = (ids: number[]) => `
     market m
   LEFT JOIN
     historical_swap hs ON
-    hs.asset_in LIKE '%'||'['||(m.market_id)::text||','||'%' OR
-    hs.asset_out LIKE '%'||'['||(m.market_id)::text||','||'%'
+    hs.asset_in = ANY(m.outcome_assets) OR
+    hs.asset_out = ANY(m.outcome_assets)
   WHERE
     m.market_id IN (${ids})
   GROUP BY
@@ -274,7 +275,6 @@ export const volumeHistory = (prices: Map<BaseAsset, number>) => `
       CASE 
         WHEN base_asset = 'Ztg' THEN ROUND(gross_volume * ${prices.get(BaseAsset.ZTG)}, 0) 
         WHEN base_asset = '{"foreignAsset":0}' THEN ROUND(gross_volume * ${prices.get(BaseAsset.DOT)}, 0) 
-        WHEN base_asset = '{"foreignAsset":2}' THEN ROUND(gross_volume * ${prices.get(BaseAsset.WSX)}, 0) 
         ELSE gross_volume 
       END
     ) AS volume

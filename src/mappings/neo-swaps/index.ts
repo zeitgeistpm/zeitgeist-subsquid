@@ -28,37 +28,20 @@ import {
 } from './decode';
 
 /**
- * Helper function to create an Asset instance for combinatorial tokens
- * Encapsulates the unique ID generation logic and Asset creation
+ * Helper function to safely get an Asset instance for combinatorial tokens
+ * Returns null if asset doesn't exist to maintain data integrity
  */
-const createAssetForCombinatorialToken = async (
+const getAssetOrSkip = async (
   store: Store,
-  eventId: string,
-  assetId: string,
-  market: Market
-): Promise<Asset> => {
-  // Try to find existing asset first
-  let asset = await store.get(Asset, {
+  assetId: string
+): Promise<Asset | null> => {
+  const asset = await store.get(Asset, {
     where: { assetId },
   });
   
   if (!asset) {
-    // Generate collision-resistant unique ID using cryptographic hash
-    // Hash the entire assetId string to ensure consistency regardless of format
-    const hash = createHash('sha256').update(assetId).digest('hex');
-    
-    // Take first 16 characters for reasonable length while maintaining very low collision probability
-    // SHA-256 provides 2^64 collision resistance for 16 hex characters
-    const uniqueId = hash.substring(0, 16);
-    
-    asset = new Asset({
-      id: eventId + '-' + uniqueId,
-      assetId,
-      amountInPool: BigInt(0),
-      price: 0,
-      market,
-      pool: null,
-    });
+    console.warn(`Asset ${assetId} not found - potential indexing gap or missing pool deployment`);
+    return null;
   }
   
   return asset;
@@ -217,9 +200,19 @@ export const combinatorialPoolDeployed = async (
   await Promise.all(
     neoPool.account.balances.map(async (ab, i) => {
       if (isBaseAsset(ab.assetId)) return;
-      const asset = await createAssetForCombinatorialToken(store, event.id, ab.assetId, market);
-      asset.amountInPool = ab.balance;
-      asset.price = computeNeoSwapSpotPrice(ab.balance, neoPool.liquidityParameter);
+      
+      // For pool deployment, we create new Asset records since this is when they first exist on-chain
+      const hash = createHash('sha256').update(ab.assetId).digest('hex');
+      const uniqueId = hash.substring(0, 16);
+      
+      const asset = new Asset({
+        id: event.id + '-' + uniqueId,
+        assetId: ab.assetId,
+        amountInPool: ab.balance,
+        price: computeNeoSwapSpotPrice(ab.balance, neoPool.liquidityParameter),
+        market,
+        pool: null,
+      });
       assets.push(asset);
 
       const ha = new HistoricalAsset({
@@ -311,7 +304,13 @@ export const comboBuyExecuted = async (
   await Promise.all(
     market.neoPool.account.balances.map(async (ab) => {
       if (isBaseAsset(ab.assetId)) return;
-      const asset = await createAssetForCombinatorialToken(store, event.id, ab.assetId, market);
+      
+      const asset = await getAssetOrSkip(store, ab.assetId);
+      if (!asset) {
+        console.warn(`Skipping processing for missing asset ${ab.assetId} in comboBuyExecuted`);
+        return;
+      }
+      
       const oldPrice = asset.price;
       const oldAmountInPool = asset.amountInPool;
       asset.amountInPool = ab.balance;
@@ -414,7 +413,13 @@ export const comboSellExecuted = async (
   await Promise.all(
     market.neoPool.account.balances.map(async (ab) => {
       if (isBaseAsset(ab.assetId)) return;
-      const asset = await createAssetForCombinatorialToken(store, event.id, ab.assetId, market);
+      
+      const asset = await getAssetOrSkip(store, ab.assetId);
+      if (!asset) {
+        console.warn(`Skipping processing for missing asset ${ab.assetId} in comboSellExecuted`);
+        return;
+      }
+      
       const oldPrice = asset.price;
       const oldAmountInPool = asset.amountInPool;
       asset.amountInPool = ab.balance;
