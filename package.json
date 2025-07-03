@@ -26,7 +26,7 @@
   "dependencies": {
     "@subsquid/archive-registry": "^3.3.0",
     "@subsquid/big-decimal": "^1.0.0",
-    "@subsquid/graphql-server": "^4.3.1",
+    "@subsquid/graphql-server": "^4.11.0",
     "@subsquid/ss58": "^2.0.1",
     "@subsquid/substrate-processor": "^8.1.1",
     "@subsquid/substrate-runtime": "^2.0.1",
@@ -37,7 +37,7 @@
     "axios": "^1.2.5",
     "class-validator": "^0.14.0",
     "dotenv": "^16.3.1",
-    "graphql": "^15.0.0",
+    "graphql": "^15.10.1",
     "ipfs-http-client": "^49.0.4",
     "is-hexadecimal": "^2.0.1",
     "it-all": "^1.0.4",
@@ -48,7 +48,7 @@
     "redis": "^3.0.2",
     "reflect-metadata": "^0.2.2",
     "tslib": "^2.0.0",
-    "type-graphql": "^1.1.1",
+    "type-graphql": "^1.2.0-rc.1",
     "typeorm": "^0.3.17",
     "uint8arrays": "^2.1.4"
   },

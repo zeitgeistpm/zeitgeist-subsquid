@@ -1006,7 +1006,7 @@
   resolved "https://registry.yarnpkg.com/@subsquid/graphiql-console/-/graphiql-console-0.3.0.tgz#415d305f1b7df7f737c788a3311cfa3179b6dbd1"
   integrity sha512-C89mus6IXnNi0xMQrZqUFBZwLj8tbuq9lye8Gq/lHmmERAUpi6UsWEyLdJLx2mneZzF3JtY8eNiiZ16jmjtvfw==
 
-"@subsquid/graphql-server@^4.3.1":
+"@subsquid/graphql-server@^4.11.0":
   version "4.11.0"
   resolved "https://registry.yarnpkg.com/@subsquid/graphql-server/-/graphql-server-4.11.0.tgz#d6cb9b01e9f3e46827344c324f7d436826a20419"
   integrity sha512-QXQxT1zP2optQKaJU53Y4XxNEhrFO3F2KPPN6ZN/0C/hYui50wdtMAS6HTzeCKvlUTvqRio0fzzSEtFmNpjg/A==
@@ -1587,7 +1587,7 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.17.60.tgz#35f3d6213daed95da7f0f73e75bcc6980e90597b"
   integrity sha512-F0KIgDJfy2nA3zMLmWGKxcH2ZVEtCZXHHdOQs2gSaQ27+lNeEfGxzkIw90aXswATX7AZ33tahPbzy6KAfUreVw==
 
-"@types/node@^14.11.2":
+"@types/node@^14.14.31":
   version "14.18.63"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-14.18.63.tgz#1788fa8da838dbb5f9ea994b834278205db6ca2b"
   integrity sha512-fAtCfv4jJg+ExtXhvCkCqUKZ+4ok/JQk01qDKhL5BDDoS3AxKXhV5/MAVUZyQnSEd2GT92fkgZl0pz0Q0AzcIQ==
@@ -1616,7 +1616,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/semver@^7.3.3":
+"@types/semver@^7.3.4":
   version "7.7.0"
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.7.0.tgz#64c441bdae033b378b6eef7d0c3d77c329b9378e"
   integrity sha512-k107IF4+Xr7UHjwDc7Cfd6PRQfbdkiRabXGRjo07b4WyPahFBZCZ1sE+BNxYIJPPg73UkfOsVOLwqVc/6ETrIA==
@@ -3416,7 +3416,7 @@ graphql-parse-resolve-info@^4.14.0:
     debug "^4.1.1"
     tslib "^2.0.1"
 
-graphql-query-complexity@^0.7.0:
+graphql-query-complexity@^0.7.2:
   version "0.7.2"
   resolved "https://registry.yarnpkg.com/graphql-query-complexity/-/graphql-query-complexity-0.7.2.tgz#7fc6bb20930ab1b666ecf3bbfb24b65b6f08ecc4"
   integrity sha512-+VgmrfxGEjHI3zuojWOR8bsz7Ycz/BZjNjxnlUieTz5DsB92WoIrYCSZdWG7UWZ3rfcA1Gb2Nf+wB80GsaZWuQ==
@@ -3432,7 +3432,7 @@ graphql-request@^3.6.1:
     extract-files "^9.0.0"
     form-data "^3.0.0"
 
-graphql-subscriptions@^1.1.0:
+graphql-subscriptions@^1.2.0:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/graphql-subscriptions/-/graphql-subscriptions-1.2.1.tgz#2142b2d729661ddf967b7388f7cf1dd4cf2e061d"
   integrity sha512-95yD/tKi24q8xYa7Q9rhQN16AYj5wPbrb8tmHGM3WRc9EBmWrG/0kkMl+tQG8wcEuE9ibR4zyOM31p5Sdr2v4g==
@@ -3451,7 +3451,7 @@ graphql-ws@^5.14.2:
   resolved "https://registry.yarnpkg.com/graphql-ws/-/graphql-ws-5.16.2.tgz#7b0306c1bdb0e97a05e800ccd523f46fb212e37c"
   integrity sha512-E1uccsZxt/96jH/OwmLPuXMACILs76pKF2i3W861LpKBCYtGIyPQGtWLuBLkND4ox1KHns70e83PS4te50nvPQ==
 
-graphql@15.x, graphql@^15.0.0, graphql@^15.8.0:
+graphql@15.x, graphql@^15.10.1, graphql@^15.8.0:
   version "15.10.1"
   resolved "https://registry.yarnpkg.com/graphql/-/graphql-15.10.1.tgz#e9ff3bb928749275477f748b14aa5c30dcad6f2f"
   integrity sha512-BL/Xd/T9baO6NFzoMpiMD7YUZ62R6viR5tp/MULVEnbYJXZA//kRNW7J0j1w/wXArgL0sCxhDfK5dczSKn3+cg==
@@ -5415,7 +5415,7 @@ secp256k1@^4.0.0:
     node-addon-api "^5.0.0"
     node-gyp-build "^4.2.0"
 
-semver@^7.3.2, semver@^7.6.3:
+semver@^7.3.4, semver@^7.6.3:
   version "7.7.2"
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.7.2.tgz#67d99fdcd35cec21e6f8b87a7fd515a33f982b58"
   integrity sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA==
@@ -5935,19 +5935,19 @@ type-fest@^0.21.3:
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.21.3.tgz#d260a24b0198436e133fa26a524a6d65fa3b2e37"
   integrity sha512-t0rzBq87m3fVcduHDUFhKmyyX+9eo6WQjZvf51Ea/M0Q7+T374Jp1aUiyUl0GKxp8M/OETVHSDvmkyPgvX+X2w==
 
-type-graphql@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/type-graphql/-/type-graphql-1.1.1.tgz#dc0710d961713b92d3fee927981fa43bf71667a4"
-  integrity sha512-iOOWVn0ehCYMukmnXStbkRwFE9dcjt7/oDcBS1JyQZo9CbhlIll4lHHps54HMEk4A4c8bUPd+DjK8w1/ZrxB4A==
+type-graphql@^1.2.0-rc.1:
+  version "1.2.0-rc.1"
+  resolved "https://registry.yarnpkg.com/type-graphql/-/type-graphql-1.2.0-rc.1.tgz#01f658063a07e4ed90191a8b8f71d824478dd532"
+  integrity sha512-W1p51DN+n/zX4ilunMC6/FcyGlx/ND3hreQ0ARDhfhyR9oGtfKzQNnkHhk8uXlYm2zzyTEd1LkRHJr8bbnRlIA==
   dependencies:
     "@types/glob" "^7.1.3"
-    "@types/node" "^14.11.2"
-    "@types/semver" "^7.3.3"
+    "@types/node" "^14.14.31"
+    "@types/semver" "^7.3.4"
     glob "^7.1.6"
-    graphql-query-complexity "^0.7.0"
-    graphql-subscriptions "^1.1.0"
-    semver "^7.3.2"
-    tslib "^2.0.1"
+    graphql-query-complexity "^0.7.2"
+    graphql-subscriptions "^1.2.0"
+    semver "^7.3.4"
+    tslib "^2.1.0"
 
 type-is@~1.6.18:
   version "1.6.18"
