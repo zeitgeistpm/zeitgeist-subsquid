@@ -33,14 +33,22 @@ import {
  */
 const getAssetOrSkip = async (
   store: Store,
-  assetId: string
+  assetId: string,
+  expectedMarketId?: number
 ): Promise<Asset | null> => {
   const asset = await store.get(Asset, {
     where: { assetId },
+    relations: { market: true },
   });
   
   if (!asset) {
     console.warn(`Asset ${assetId} not found - potential indexing gap or missing pool deployment`);
+    return null;
+  }
+  
+  // Verify market ownership if expectedMarketId is provided
+  if (expectedMarketId !== undefined && asset.market.marketId !== expectedMarketId) {
+    console.warn(`Asset ${assetId} belongs to market ${asset.market.marketId}, not expected market ${expectedMarketId} - skipping to prevent cross-market corruption`);
     return null;
   }
   
@@ -173,7 +181,6 @@ export const combinatorialPoolDeployed = async (
     swapFee,
     totalStake: poolSharesAmount,
   });
-  console.log(`[${event.name}] Saving neo pool: ${JSON.stringify(neoPool, null, 2)}`);
   await store.save<NeoPool>(neoPool);
 
   const liquiditySharesManager = new LiquiditySharesManager({
@@ -183,7 +190,6 @@ export const combinatorialPoolDeployed = async (
     neoPool,
     stake: poolSharesAmount,
   });
-  console.log(`[${event.name}] Saving liquidity-shares-manager: ${JSON.stringify(liquiditySharesManager, null, 2)}`);
   await store.save<LiquiditySharesManager>(liquiditySharesManager);
 
   const market = await store.get(Market, {
@@ -201,18 +207,35 @@ export const combinatorialPoolDeployed = async (
     neoPool.account.balances.map(async (ab, i) => {
       if (isBaseAsset(ab.assetId)) return;
       
-      // For pool deployment, we create new Asset records since this is when they first exist on-chain
-      const hash = createHash('sha256').update(ab.assetId).digest('hex');
-      const uniqueId = hash.substring(0, 16);
-      
-      const asset = new Asset({
-        id: event.id + '-' + uniqueId,
-        assetId: ab.assetId,
-        amountInPool: ab.balance,
-        price: computeNeoSwapSpotPrice(ab.balance, neoPool.liquidityParameter),
-        market,
-        pool: null,
+      // Check if asset already exists to avoid creating duplicates
+      let asset = await store.get(Asset, { 
+        where: { assetId: ab.assetId },
+        relations: { market: true }
       });
+      
+      if (!asset) {
+        // Only create new asset if it doesn't exist (for new combinatorial tokens)
+        const hash = createHash('sha256').update(ab.assetId).digest('hex');
+        const uniqueId = hash.substring(0, 16);
+        
+        asset = new Asset({
+          id: event.id + '-' + uniqueId,
+          assetId: ab.assetId,
+          amountInPool: ab.balance,
+          price: computeNeoSwapSpotPrice(ab.balance, neoPool.liquidityParameter),
+          market,
+          pool: null,
+        });
+        console.log(`[${event.name}] Creating new asset: ${JSON.stringify(asset, null, 2)}`);
+      } else {
+        if (asset.market.marketId !== market.marketId) {
+          return;
+        }
+        // Update existing asset properties (verified to be from same market)
+        asset.amountInPool = ab.balance;
+        asset.price = computeNeoSwapSpotPrice(ab.balance, neoPool.liquidityParameter);
+      }
+      
       assets.push(asset);
 
       const ha = new HistoricalAsset({
@@ -232,19 +255,36 @@ export const combinatorialPoolDeployed = async (
       newLiquidity += BigInt(Math.round(asset.price * +ab.balance.toString()));
     })
   );
-  console.log(`[${event.name}] Saving assets: ${JSON.stringify(assets, null, 2)}`);
+    
+  // Store reference to old assets for safe removal
+  const oldAssetsToRemove = market.assets.length > 0 ? [...market.assets] : [];
+  
+  // Preserve ticker/name from existing categorical assets. 
+  // TODO: Remove this once we have a way to handle this correctly.
+  // market creation should automatically deploy comboTokens
+  if (market.assets.length > 0) {
+    assets.forEach((newAsset, i) => {
+      if (i < market.assets.length) {
+        const existingAsset = market.assets[i];
+        newAsset.ticker = existingAsset.ticker;
+        newAsset.name = existingAsset.name;
+      }
+    });
+  }
+  
+  // Save new combinatorial assets FIRST to ensure no data loss
   await store.save<Asset>(assets);
+  
+  // Only remove old categorical assets AFTER successful save of new assets
+  if (oldAssetsToRemove.length > 0) {
+    await store.remove(oldAssetsToRemove);
+  }
 
   market.liquidity = newLiquidity;
   market.neoPool = neoPool;
   
-  // Update outcomeAssets to include combinatorial tokens for priceHistory resolver
-  const combinatorialAssets = neoPool.account.balances
-    .filter(ab => !isBaseAsset(ab.assetId))
-    .map(ab => ab.assetId);
-  market.outcomeAssets = combinatorialAssets;
+  market.outcomeAssets = assets.map(asset => asset.assetId);
   
-  console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await store.save<Market>(market);
 
   const historicalMarket = new HistoricalMarket({
@@ -758,10 +798,13 @@ export const poolDeployed = async (
   market.liquidity = newLiquidity;
   market.neoPool = neoPool;
   
-  // Update outcomeAssets to include combinatorial tokens for priceHistory resolver
+  // Replace outcomeAssets with all non-base assets from the pool
+  // This ensures outcomeAssets reflects what's actually tradeable in the pool
   const combinatorialAssets = neoPool.account.balances
     .filter(ab => !isBaseAsset(ab.assetId))
     .map(ab => ab.assetId);
+  
+  // Completely replace outcomeAssets once pool is deployed
   market.outcomeAssets = combinatorialAssets;
   
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
