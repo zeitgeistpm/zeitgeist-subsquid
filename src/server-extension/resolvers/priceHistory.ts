@@ -1,9 +1,37 @@
 import { util } from '@zeitgeistpm/sdk';
 import { Field, Int, ObjectType, Query, Resolver, InputType, Arg } from 'type-graphql';
 import { EntityManager } from 'typeorm';
+import { isHexadecimal } from 'is-hexadecimal';
 import { Unit } from '../../consts';
 import { decodedAssetId, mergeByField } from '../helper';
 import { assetPriceHistory, marketInfo } from '../query';
+
+const isCombinatorialHash = (key: string): boolean => {
+  return (key.length === 63 || key.length === 64) && isHexadecimal(key);
+};
+
+const extractHashFromAsset = (asset: string): string | null => {
+  try {
+    const parsed = JSON.parse(asset);
+    if (!parsed?.combinatorialToken) return null;
+    
+    const tokenValue = parsed.combinatorialToken.toString();
+    const hash = tokenValue.startsWith('0x') ? tokenValue.slice(2) : tokenValue;
+    
+    // Return truncated to 63 chars to match PostgreSQL column names
+    return hash.slice(0, 63);
+  } catch {
+    return null;
+  }
+};
+
+const findMatchingAsset = (hash: string, outcomeAssets: string[]): string | null => {
+  return outcomeAssets.find(asset => extractHashFromAsset(asset) === hash) || null;
+};
+
+const createFallbackAsset = (hash: string): string => {
+  return JSON.stringify({ combinatorialToken: `0x${hash}` });
+};
 
 @ObjectType()
 export class PriceHistory {
@@ -73,33 +101,30 @@ export class PriceHistoryResolver {
     startTime = startTime ?? market[0].timestamp.toISOString();
     interval = interval ?? new IntervalArgs({ unit: Unit.Day, value: 1 });
 
-    let merged = [];
+    // Build price history data by merging all assets
     let priceHistory = await manager.query(
       assetPriceHistory(market[0].outcome_assets[0], startTime, endTime, interval.toString())
     );
+
     for (let i = 1; i < market[0].outcome_assets.length; i++) {
-      let priceHistory2 = await manager.query(
+      const nextAssetHistory = await manager.query(
         assetPriceHistory(market[0].outcome_assets[i], startTime, endTime, interval.toString())
       );
-      merged = mergeByField(priceHistory, priceHistory2, 'timestamp');
-      priceHistory = merged;
+      priceHistory = mergeByField(priceHistory, nextAssetHistory, 'timestamp');
     }
 
-    let result: any[] = [];
-    for (let i = 0; i < merged.length; i++) {
-      let obj: any = {};
-      obj.timestamp = merged[i].timestamp;
-      delete merged[i].timestamp;
-      let prices = [];
-      for (const [key, value] of Object.entries(merged[i])) {
-        prices.push({
-          assetId: JSON.stringify(util.AssetIdFromString(decodedAssetId(key))),
-          price: value,
-        });
-      }
-      obj.prices = prices;
-      result.push(obj);
-    }
-    return result;
+    // Transform the merged data into the response format
+    return priceHistory.map((entry: any) => {
+      const { timestamp, ...priceData } = entry;
+      
+      const prices = Object.entries(priceData).map(([key, value]) => ({
+        assetId: isCombinatorialHash(key) 
+          ? findMatchingAsset(key, market[0].outcome_assets) || createFallbackAsset(key)
+          : JSON.stringify(util.AssetIdFromString(decodedAssetId(key))),
+        price: value,
+      }));
+
+      return { timestamp, prices };
+    });
   }
 }

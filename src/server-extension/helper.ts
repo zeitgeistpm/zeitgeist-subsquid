@@ -5,13 +5,78 @@ import { BaseAsset, CacheHint, TargetAsset, _Asset } from '../consts';
 import { formatAssetId, isBatteryStation, isLocalEnv } from '../helper';
 import { Cache } from '../util';
 import { AssetPriceResolver } from './resolvers/assetPrice';
+import { isHexadecimal } from 'is-hexadecimal';
 
-export const decodedAssetId = (assetId: string) => {
-  return assetId.replaceAll('#', '"');
+// Optimized helper for combinatorial token validation
+const isCombinatorialToken = (str: string): boolean => {
+  return (str.length === 63 || str.length === 64) && isHexadecimal(str);
+};
+
+// Simplified extraction function
+const extractCombinatorialHash = (assetId: string): string | null => {
+  try {
+    const parsed = JSON.parse(assetId);
+    if (!parsed?.combinatorialToken) return null;
+    
+    const tokenValue = parsed.combinatorialToken.toString();
+    return tokenValue.startsWith('0x') ? tokenValue.slice(2) : tokenValue;
+  } catch {
+    return null;
+  }
+};
+
+export const decodedAssetId = (assetId: string): string => {
+  // Handle raw combinatorial token hashes
+  if (isCombinatorialToken(assetId)) {
+    return JSON.stringify({
+      combinatorialToken: `0x${assetId}`
+    });
+  }
+  
+  // Handle categorical outcomes: [885,0] -> {"categoricalOutcome":[885,0]}
+  const arrayMatch = assetId.match(/^\[(\d+),(\d+)\]$/);
+  if (arrayMatch) {
+    return JSON.stringify({
+      categoricalOutcome: [parseInt(arrayMatch[1]), parseInt(arrayMatch[2])]
+    });
+  }
+  
+  // Handle encoded categorical outcomes with #: [885#0] -> {"categoricalOutcome":[885,0]}
+  if (assetId.includes('#')) {
+    const restored = assetId.replaceAll('#', ',');
+    const arrayMatch2 = restored.match(/^\[(\d+),(\d+)\]$/);
+    if (arrayMatch2) {
+      return JSON.stringify({
+        categoricalOutcome: [parseInt(arrayMatch2[1]), parseInt(arrayMatch2[2])]
+      });
+    }
+    // Fallback for other # encoded formats
+    return assetId.replaceAll('#', '"');
+  }
+  
+  // Return valid JSON as-is, or simple strings like "Ztg"
+  try {
+    JSON.parse(assetId);
+    return assetId;
+  } catch {
+    return assetId;
+  }
 };
 
 export const encodedAssetId = (assetId: string) => {
-  return assetId.substring(assetId.indexOf('['), assetId.indexOf(']') + 1).replaceAll('"', '#');
+  // Handle combinatorial tokens
+  if (assetId.includes('combinatorialToken')) {
+    const hash = extractCombinatorialHash(assetId);
+    return hash || assetId.replaceAll('"', '#');
+  }
+  
+  // Handle categorical outcomes (bracket format)
+  if (assetId.includes('[') && assetId.includes(']')) {
+    return assetId.substring(assetId.indexOf('['), assetId.indexOf(']') + 1).replaceAll('"', '#');
+  }
+  
+  // Fallback for other formats
+  return assetId.replaceAll('"', '#');
 };
 
 // Fetch price from redis db.. Returns null in case of failure
@@ -30,7 +95,6 @@ export const getAssetUsdPrices = async (): Promise<Map<BaseAsset, number>> => {
   if (isLocalEnv() || isBatteryStation()) {
     prices = new Map([
       [BaseAsset.DOT, 1],
-      [BaseAsset.WSX, 1],
       [BaseAsset.ZTG, 1],
     ]);
   } else {
@@ -38,7 +102,6 @@ export const getAssetUsdPrices = async (): Promise<Map<BaseAsset, number>> => {
     if (new Date().getTime() - AssetPriceResolver.cachedAt.getTime() > 60 * 60 * 1000) refreshPrices();
     prices = new Map([
       [BaseAsset.DOT, (await fetchFromCache(BaseAsset.DOT, TargetAsset.USD)).price],
-      [BaseAsset.WSX, 0],
       [BaseAsset.ZTG, (await fetchFromCache(BaseAsset.ZTG, TargetAsset.USD)).price],
     ]);
   }

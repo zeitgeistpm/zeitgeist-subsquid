@@ -1,13 +1,18 @@
 /node_modules
 /lib
 /db/cache
+/data
 
 .env.test
 .env.main
+.env.local
 
 .vscode
 .yarn
 
 *.db
+
+.DS_Store
+.cursorignore
 
 docker-compose.override.yml
