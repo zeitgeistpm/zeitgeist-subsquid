@@ -150,6 +150,7 @@ export const combinatorialPoolDeployed = async (
   store: Store,
   event: Event
 ): Promise<{ historicalAssets: HistoricalAsset[]; historicalMarket: HistoricalMarket } | undefined> => {
+  console.log(`[${event.name}] 🚀 COMBINATORIAL POOL DEPLOYED FUNCTION CALLED! 🚀`);
   const { who, marketId, poolId, accountId, collateral, liquidityParameter, poolSharesAmount, swapFee } =
     decodeCombinatorialPoolDeployed(event);
 
@@ -201,18 +202,30 @@ export const combinatorialPoolDeployed = async (
     neoPool.account.balances.map(async (ab, i) => {
       if (isBaseAsset(ab.assetId)) return;
       
-      // For pool deployment, we create new Asset records since this is when they first exist on-chain
-      const hash = createHash('sha256').update(ab.assetId).digest('hex');
-      const uniqueId = hash.substring(0, 16);
+      // Check if asset already exists to avoid creating duplicates
+      let asset = await store.get(Asset, { where: { assetId: ab.assetId } });
       
-      const asset = new Asset({
-        id: event.id + '-' + uniqueId,
-        assetId: ab.assetId,
-        amountInPool: ab.balance,
-        price: computeNeoSwapSpotPrice(ab.balance, neoPool.liquidityParameter),
-        market,
-        pool: null,
-      });
+      if (!asset) {
+        // Only create new asset if it doesn't exist (for new combinatorial tokens)
+        const hash = createHash('sha256').update(ab.assetId).digest('hex');
+        const uniqueId = hash.substring(0, 16);
+        
+        asset = new Asset({
+          id: event.id + '-' + uniqueId,
+          assetId: ab.assetId,
+          amountInPool: ab.balance,
+          price: computeNeoSwapSpotPrice(ab.balance, neoPool.liquidityParameter),
+          market,
+          pool: null,
+        });
+        console.log(`[${event.name}] Creating new asset: ${JSON.stringify(asset, null, 2)}`);
+      } else {
+        // Update existing asset properties (legacy assets from other markets)
+        asset.amountInPool = ab.balance;
+        asset.price = computeNeoSwapSpotPrice(ab.balance, neoPool.liquidityParameter);
+        console.log(`[${event.name}] Updating existing asset: ${JSON.stringify(asset, null, 2)}`);
+      }
+      
       assets.push(asset);
 
       const ha = new HistoricalAsset({
@@ -232,19 +245,29 @@ export const combinatorialPoolDeployed = async (
       newLiquidity += BigInt(Math.round(asset.price * +ab.balance.toString()));
     })
   );
-  console.log(`[${event.name}] Saving assets: ${JSON.stringify(assets, null, 2)}`);
+    
+  // Preserve ticker/name from existing categorical assets
+  if (market.assets.length > 0) {
+    assets.forEach((newAsset, i) => {
+      if (i < market.assets.length) {
+        const existingAsset = market.assets[i];
+        newAsset.ticker = existingAsset.ticker;
+        newAsset.name = existingAsset.name;
+      }
+    });
+    
+    // Remove old categorical assets
+    await store.remove(market.assets);
+  }
+  
+  // Save the new combinatorial assets  
   await store.save<Asset>(assets);
 
   market.liquidity = newLiquidity;
   market.neoPool = neoPool;
   
-  // Update outcomeAssets to include combinatorial tokens for priceHistory resolver
-  const combinatorialAssets = neoPool.account.balances
-    .filter(ab => !isBaseAsset(ab.assetId))
-    .map(ab => ab.assetId);
-  market.outcomeAssets = combinatorialAssets;
+  market.outcomeAssets = assets.map(asset => asset.assetId);
   
-  console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
   await store.save<Market>(market);
 
   const historicalMarket = new HistoricalMarket({
@@ -758,10 +781,13 @@ export const poolDeployed = async (
   market.liquidity = newLiquidity;
   market.neoPool = neoPool;
   
-  // Update outcomeAssets to include combinatorial tokens for priceHistory resolver
+  // Replace outcomeAssets with all non-base assets from the pool
+  // This ensures outcomeAssets reflects what's actually tradeable in the pool
   const combinatorialAssets = neoPool.account.balances
     .filter(ab => !isBaseAsset(ab.assetId))
     .map(ab => ab.assetId);
+  
+  // Completely replace outcomeAssets once pool is deployed
   market.outcomeAssets = combinatorialAssets;
   
   console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
