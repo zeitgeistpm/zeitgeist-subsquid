@@ -6,7 +6,7 @@
   "author": "",
   "license": "ISC",
   "scripts": {
-    "api:start": "squid-graphql-server --subscriptions",
+    "api:start": "squid-graphql-server --subscriptions --max-root-fields 10 --max-response-size 1000 --max-request-size 512 --log-level warn 2>/var/log/subsquid-security.log",
     "api:stop": "./scripts/deploy/api.sh stop",
     "build": "rm -rf lib && tsc",
     "codegen": "npx squid-typeorm-codegen",
