@@ -18,6 +18,7 @@ The substrate events are processed in a multi-step pipeline:
 
 * Node 20.x
 * Docker
+* Docker Compose
 
 ## Quick Run
 
@@ -41,24 +42,45 @@ The indexer supports three environments:
 - **main**: For mainnet deployment with persistent storage
 
 ### Required Environment Variables
-Create the following `.env` files:
+Create the following `.env` files with **all required variables**:
 
 ```text:.env.local
 # Local development variables
 DB_PORT=5432
+REDIS_PASS=redis
 ```
 
 ```text:.env.test
 # Testnet deployment variables
 DB_PORT=5432
-DB_PATH=/mnt/ztg-indexer-*
+DB_PATH=/mnt/ztg-indexer-test
+CACHE_PATH=/mnt/ztg-cache-test
+REDIS_PASS=redis
+BATCH_SIZE=100
+BLOCK_WINDOW=100000
+GRAPHQL_SERVER_PORT=4000
+GRAPHQL_SERVER_HOST=localhost
+WARTHOG_SUBSCRIPTIONS=true
+GQL_PORT=4350
+NODE_ENV=test
 ```
 
 ```text:.env.main
 # Mainnet deployment variables 
 DB_PORT=5432
-DB_PATH=/mnt/ztg-indexer-*
+DB_PATH=/mnt/ztg-indexer-main
+CACHE_PATH=/mnt/ztg-cache-main
+REDIS_PASS=redis
+BATCH_SIZE=100
+BLOCK_WINDOW=100000
+GRAPHQL_SERVER_PORT=4000
+GRAPHQL_SERVER_HOST=localhost
+WARTHOG_SUBSCRIPTIONS=true
+GQL_PORT=4350
+NODE_ENV=main
 ```
+
+**⚠️ Important**: Make sure all environment variables are set in your `.env` files. Missing variables like `REDIS_PASS`, `DB_PATH`, or `CACHE_PATH` will cause containers to fail.
 
 ### Docker Compose Configuration
 We use environment-specific Docker Compose files:
@@ -73,19 +95,22 @@ We use environment-specific Docker Compose files:
 # 1. Install dependencies
 yarn install --frozen-lockfile
 
-# 2. Start local environment (non-persistent database)
+# 2. Create .env.local file (see Environment Variables section above)
+# Make sure to include REDIS_PASS
+
+# 3. Start local environment (non-persistent database)
 yarn indexer:start:local
 
-# 3. Apply migrations
+# 4. Apply migrations
 yarn migration:apply
 
-# 4. Generate code from schema
+# 5. Generate code from schema
 yarn codegen
 
-# 5. Build the processor
+# 6. Build the processor
 yarn build
 
-# 6. Start the API server
+# 7. Start the API server
 yarn api:start
 ```
 
@@ -146,9 +171,12 @@ cat backup_file.sql | docker exec -i db psql -U postgres postgres
 
 1. **Prepare the server**:
    ```bash
-   # Create data directory
+   # Create data directories
+   # Replace * with main on mainnet or test on testnet
    sudo mkdir -p /mnt/ztg-indexer-*
+   sudo mkdir -p /mnt/ztg-cache-*
    sudo chmod 777 /mnt/ztg-indexer-*
+   sudo chmod 777 /mnt/ztg-cache-*
    ```
 
 2. **Clone and set up the repository**:
@@ -158,20 +186,66 @@ cat backup_file.sql | docker exec -i db psql -U postgres postgres
    yarn install --frozen-lockfile
    ```
 
-3. **Start the production environment**:
+3. **Create environment file**:
    ```bash
-   # For mainnet
-   yarn indexer:start:main
-   
-   # For testnet
-   yarn indexer:start:test
+   # Create .env.main with all required variables (see Environment Variables section)
+   # Ensure DB_PATH, CACHE_PATH, REDIS_PASS, and other variables are set
    ```
 
-4. **Apply migrations and start services**:
+4. **Start the production environment**:
    ```bash
-   yarn migration:apply
-   yarn api:start
+   # For mainnet - use explicit env file to ensure variables are loaded
+   docker-compose --env-file .env.main up -d
+   
+   # For testnet
+   docker-compose --env-file .env.test up -d
+   
+   # Alternative: Create symlink for automatic loading
+   ln -sf .env.main .env
+   docker-compose up -d
    ```
+
+5. **Apply migrations and start services**:
+   ```bash
+   # Wait for database to initialize, then apply migrations
+   yarn migration:apply
+   yarn codegen
+   yarn build
+   
+   # Start API services
+   ./scripts/deploy/api.sh main start  # for mainnet
+   # or
+   ./scripts/deploy/api.sh test start  # for testnet
+   ```
+
+### Troubleshooting Deployment
+
+**If containers fail to start:**
+
+1. **Check environment variables are loaded**:
+   ```bash
+   # Verify configuration is correct
+   docker-compose --env-file .env.main config
+   ```
+
+2. **Check container logs**:
+   ```bash
+   # Check all container logs
+   docker-compose logs
+   
+   # Check specific container
+   docker logs db
+   docker logs indexer
+   ```
+
+3. **Common issues**:
+   - **Database fails with "directory not empty"**: Clear the database directory
+     ```bash
+     sudo rm -rf /mnt/ztg-indexer-main/*
+     docker-compose down && docker-compose --env-file .env.main up -d
+     ```
+   - **Missing environment variables**: Ensure all variables are set in `.env` file
+   - **Permission issues**: Ensure data directories have correct permissions (`chmod 777`)
 
 ### Updating Deployed Services
 ```bash
@@ -180,6 +254,10 @@ git pull
 
 # Rebuild and restart services
 yarn build
+docker-compose --env-file .env.main down
+docker-compose --env-file .env.main up -d --build
+
+# Or using yarn scripts
 yarn indexer:rebuild:main  # or indexer:rebuild:test for testnet
 ```
 
@@ -191,14 +269,21 @@ yarn indexer:rebuild:main  # or indexer:rebuild:test for testnet
 docker ps
 
 # Check application logs
-docker logs processor
+docker logs indexer
 docker logs api
+docker logs db
 
-# Test GraphQL endpoint
+# Test GraphQL endpoint (note: API typically runs on port 4350)
 curl -X POST -H "Content-Type: application/json" \
-  --data '{"query": "{_metadata{lastProcessedHeight}}"}' \
-  http://localhost:4000/graphql
+  --data '{"query": "{ __schema { types { name } } }"}' \
+  http://localhost:4350/graphql
 ```
+
+### API Endpoints
+After successful deployment, your APIs will be available at:
+- **Main GraphQL API**: `http://localhost:4350/graphql`
+- **Subscription API**: `http://localhost:4000/graphql`
+- **GraphQL Playground**: `http://localhost:4350/graphql` (interactive browser interface)
 
 ### Volume Management
 ```bash
@@ -244,12 +329,12 @@ yarn migration:generate
 # Revert the last performed migration
 yarn migration:revert
 
-# Start indexer services
+# Start indexer service
 yarn indexer:start:local   # For local development (ephemeral DB)
 yarn indexer:start:test    # For testnet deployment
 yarn indexer:start:main    # For mainnet deployment
 
-# Rebuild and restart services
+# Rebuild and restart service
 yarn indexer:rebuild:local # Rebuild for local environment
 yarn indexer:rebuild:test  # Rebuild for testnet environment
 yarn indexer:rebuild:main  # Rebuild for mainnet environment
