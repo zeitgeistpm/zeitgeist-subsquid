@@ -172,10 +172,11 @@ cat backup_file.sql | docker exec -i db psql -U postgres postgres
 1. **Prepare the server**:
    ```bash
    # Create data directories
-   sudo mkdir -p /mnt/ztg-indexer-main
-   sudo mkdir -p /mnt/ztg-cache-main
-   sudo chmod 777 /mnt/ztg-indexer-main
-   sudo chmod 777 /mnt/ztg-cache-main
+   # Replace * with main on mainnet or test on testnet
+   sudo mkdir -p /mnt/ztg-indexer-*
+   sudo mkdir -p /mnt/ztg-cache-*
+   sudo chmod 777 /mnt/ztg-indexer-*
+   sudo chmod 777 /mnt/ztg-cache-*
    ```
 
 2. **Clone and set up the repository**:
