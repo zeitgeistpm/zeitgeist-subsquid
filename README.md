@@ -328,12 +328,12 @@ yarn migration:generate
 # Revert the last performed migration
 yarn migration:revert
 
-# Start indexer services
+# Start indexer service
 yarn indexer:start:local   # For local development (ephemeral DB)
 yarn indexer:start:test    # For testnet deployment
 yarn indexer:start:main    # For mainnet deployment
 
-# Rebuild and restart services
+# Rebuild and restart service
 yarn indexer:rebuild:local # Rebuild for local environment
 yarn indexer:rebuild:test  # Rebuild for testnet environment
 yarn indexer:rebuild:main  # Rebuild for mainnet environment
