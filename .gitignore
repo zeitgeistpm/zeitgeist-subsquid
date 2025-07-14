@@ -1,7 +1,9 @@
 /node_modules
 /lib
 /db/cache
+/db/data
 /data
+
 
 .env.test
 .env.main

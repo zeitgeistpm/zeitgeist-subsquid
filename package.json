@@ -6,7 +6,7 @@
   "author": "",
   "license": "ISC",
   "scripts": {
-    "api:start": "squid-graphql-server --subscriptions --max-root-fields 5 --max-response-size 50000 --max-request-size 4096",
+    "api:start": "squid-graphql-server --subscriptions",
     "api:stop": "./scripts/deploy/api.sh stop",
     "build": "rm -rf lib && tsc",
     "codegen": "npx squid-typeorm-codegen",
@@ -38,6 +38,7 @@
     "class-validator": "^0.14.0",
     "dotenv": "^16.3.1",
     "graphql": "^15.10.1",
+    "graphql-depth-limit": "^1.1.0",
     "ipfs-http-client": "^49.0.4",
     "is-hexadecimal": "^2.0.1",
     "it-all": "^1.0.4",
