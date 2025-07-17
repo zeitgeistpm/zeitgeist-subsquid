@@ -1,18 +1,18 @@
 version: "3.4"
-
+    
 services:
-  db:
+  db: 
     image: postgres:14
     container_name: db
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=${POSTGRES_DB:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
       - "${DB_PORT}:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
     # command: ["postgres", "-c", "log_statement=all"]
-
+  
   cache:
     image: redis:6.0-alpine
     container_name: cache
@@ -24,7 +24,7 @@ services:
     environment:
       REDIS_PASS: ${REDIS_PASS}
     command: sh -c "redis-server --appendonly yes --requirepass ${REDIS_PASS}"
-
+  
   indexer:
     build:
       context: .
