@@ -22,6 +22,14 @@ else
 fi
 
 if [ "$1" = "test" ] || [ "$1" = "main" ]; then
+  # Auto-load environment variables
+  if [ -f ".env.$1" ]; then
+    set -a
+    source .env.$1
+    set +a
+    echo "✅ Loaded environment from .env.$1"
+  fi
+
   # Use dynamic network name based on environment
   NETWORK_NAME="zeitgeist-subsquid-$1"
   
@@ -32,12 +40,13 @@ if [ "$1" = "test" ] || [ "$1" = "main" ]; then
     -p 4350:4350 \
     -e NODE_ENV=$1 \
     -e REDIS_HOST=cache \
+    -e REDIS_PORT=6379 \
     -e REDIS_PASS=${REDIS_PASS} \
     -e DB_HOST=db \
     -e DB_PORT=5432 \
-    -e DB_NAME=${DB_NAME} \
-    -e DB_USER=${DB_USER} \
-    -e DB_PASS=${DB_PASS} \
+    -e DB_NAME=${POSTGRES_DB} \
+    -e DB_USER=${POSTGRES_USER} \
+    -e DB_PASS=${POSTGRES_PASSWORD} \
     -e GQL_PORT=4350 \
     --env-file=.env.$1 \
     --name=api api
@@ -47,12 +56,13 @@ if [ "$1" = "test" ] || [ "$1" = "main" ]; then
     -p 4000:4000 \
     -e NODE_ENV=$1 \
     -e REDIS_HOST=cache \
+    -e REDIS_PORT=6379 \
     -e REDIS_PASS=${REDIS_PASS} \
     -e DB_HOST=db \
     -e DB_PORT=5432 \
-    -e DB_NAME=${DB_NAME} \
-    -e DB_USER=${DB_USER} \
-    -e DB_PASS=${DB_PASS} \
+    -e DB_NAME=${POSTGRES_DB} \
+    -e DB_USER=${POSTGRES_USER} \
+    -e DB_PASS=${POSTGRES_PASSWORD} \
     -e GQL_PORT=4000 \
     --env-file=.env.$1 \
     --name=sub-api api

@@ -22,7 +22,7 @@ const SECURITY_ARGS = [
   '--validation-max-errors', '5',
   '--max-request-size', '75',
   // '--max-root-fields', '20',
-  '--max-response-size', '10000',
+  // '--max-response-size', '100000',
   '--subscription-max-response-size', '8000',
   '--subscription-poll-interval', '5000'
 ]
@@ -38,7 +38,7 @@ function logSecurityConfig(): void {
   console.log('- Max request size: 75KB (BACKEND)')
   console.log(`- Query depth limit: ${MAX_QUERY_DEPTH} levels (ENFORCED)`)
   // console.log('- Max root fields: 20 per query (BACKEND)')
-  console.log('- Max response size: 10,000 nodes (BACKEND)')
+  // console.log('- Max response size: 10,000 nodes (BACKEND)')
   console.log('- Subscription poll interval: 5 seconds')
   console.log('- Backend health check: 30 attempts, 1s intervals (ACTIVE)')
 }

@@ -1,7 +1,5 @@
-version: "3.4"
-    
 services:
-  db: 
+  db:
     image: postgres:14
     container_name: db
     environment:
@@ -13,9 +11,9 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
     networks:
-      - zeitgeist-subsquid-${NODE_ENV:-local}
+      - default
     # command: ["postgres", "-c", "log_statement=all"]
-  
+
   cache:
     image: redis:6.0-alpine
     container_name: cache
@@ -28,8 +26,8 @@ services:
       REDIS_PASS: ${REDIS_PASS}
     command: sh -c "redis-server --appendonly yes --requirepass ${REDIS_PASS}"
     networks:
-      - zeitgeist-subsquid-${NODE_ENV:-local}
-  
+      - default
+
   indexer:
     build:
       context: .
@@ -52,14 +50,11 @@ services:
     env_file:
       - .env.${NODE_ENV:-local}
     networks:
-      - zeitgeist-subsquid-${NODE_ENV:-local}
+      - default
 
 networks:
-  zeitgeist-subsquid-local:
-    driver: bridge
-  zeitgeist-subsquid-test:
-    driver: bridge
-  zeitgeist-subsquid-main:
+  default:
+    name: zeitgeist-subsquid-${NODE_ENV:-local}
     driver: bridge
 
 volumes:
