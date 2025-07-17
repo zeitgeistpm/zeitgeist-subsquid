@@ -329,19 +329,38 @@ async function waitForBackendReady(): Promise<void> {
 
 function startBackendServer(): void {
   // Production-ready environment variables with Docker defaults
+  // Validate required environment variables
+  const requiredEnvVars = [
+    'DB_HOST', 'DB_PORT', 'DB_NAME', 'DB_USER', 'DB_PASS',
+    'REDIS_HOST', 'REDIS_PORT'
+  ]
+  
+  const missingVars = requiredEnvVars.filter(varName => {
+    const value = process.env[varName]
+    return !value || value.trim() === ''
+  })
+  
+  if (missingVars.length > 0) {
+    console.error('❌ Missing required environment variables:')
+    missingVars.forEach(varName => {
+      console.error(`   - ${varName}`)
+    })
+    console.error('\n💡 Please set these variables in your .env file')
+    process.exit(1)
+  }
+
   const serverEnv = { 
     ...process.env, 
     PORT: BACKEND_PORT.toString(),
     GQL_PORT: BACKEND_PORT.toString(),
     GRAPHQL_SERVER_PORT: BACKEND_PORT.toString(),
-    // Docker container defaults for production
-    DB_HOST: process.env.DB_HOST || '',
-    DB_PORT: process.env.DB_PORT || '5432',
-    DB_NAME: process.env.DB_NAME || 'postgres',
-    DB_USER: process.env.DB_USER || '',
-    DB_PASS: process.env.DB_PASS || '',
-    REDIS_HOST: process.env.REDIS_HOST || 'cache',
-    REDIS_PORT: process.env.REDIS_PORT || '6379'
+    DB_HOST: process.env.DB_HOST!,
+    DB_PORT: process.env.DB_PORT!,
+    DB_NAME: process.env.DB_NAME!,
+    DB_USER: process.env.DB_USER!,
+    DB_PASS: process.env.DB_PASS!,
+    REDIS_HOST: process.env.REDIS_HOST!,
+    REDIS_PORT: process.env.REDIS_PORT!
   }
 
   console.log(`🔧 Starting backend GraphQL server on port ${BACKEND_PORT}...`)
