@@ -22,8 +22,13 @@ else
 fi
 
 if [ "$1" = "test" ] || [ "$1" = "main" ]; then
+  # Use dynamic network name based on environment
+  NETWORK_NAME="zeitgeist-subsquid-$1"
+  
+  echo "Using network: $NETWORK_NAME"
+  
   docker run -d --restart=always \
-    --network=zeitgeist-subsquid_default \
+    --network=$NETWORK_NAME \
     -p 4350:4350 \
     -e NODE_ENV=$1 \
     -e REDIS_HOST=cache \
@@ -38,7 +43,7 @@ if [ "$1" = "test" ] || [ "$1" = "main" ]; then
     --name=api api
 
   docker run -d --restart=always \
-    --network=zeitgeist-subsquid_default \
+    --network=$NETWORK_NAME \
     -p 4000:4000 \
     -e NODE_ENV=$1 \
     -e REDIS_HOST=cache \

@@ -11,6 +11,8 @@ services:
       - "${DB_PORT}:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
+    networks:
+      - zeitgeist-subsquid-${NODE_ENV:-local}
     # command: ["postgres", "-c", "log_statement=all"]
   
   cache:
@@ -24,6 +26,8 @@ services:
     environment:
       REDIS_PASS: ${REDIS_PASS}
     command: sh -c "redis-server --appendonly yes --requirepass ${REDIS_PASS}"
+    networks:
+      - zeitgeist-subsquid-${NODE_ENV:-local}
   
   indexer:
     build:
@@ -44,7 +48,15 @@ services:
     env_file:
       - .env.${NODE_ENV:-local}
     networks:
-      - default
+      - zeitgeist-subsquid-${NODE_ENV:-local}
+
+networks:
+  zeitgeist-subsquid-local:
+    driver: bridge
+  zeitgeist-subsquid-test:
+    driver: bridge
+  zeitgeist-subsquid-main:
+    driver: bridge
 
 volumes:
   db-data:
