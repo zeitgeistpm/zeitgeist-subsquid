@@ -348,3 +348,5 @@ yarn typegen
 For more details, please check out:
 - [Zeitgeist Documentation](https://docs.zeitgeist.pm)
 - [Subsquid Documentation](https://docs.subsquid.io)
+
++![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/zeitgeistpm/zeitgeist-subsquid?utm_source=oss&utm_medium=github&utm_campaign=zeitgeistpm%2Fzeitgeist-subsquid&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
