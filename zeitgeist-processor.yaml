@@ -1,0 +1,498 @@
+# Zeitgeist Subsquid Processor - Complete Kubernetes Manifests
+# Final Corrected Version - Production Ready
+# 
+# Changes Made During Deployment:
+# 1. Fixed indexer command: yarn run indexer:up
+# 2. Fixed API commands: yarn run api:start
+# 3. Fixed PostgreSQL PGDATA for Linode block storage
+# 4. Fixed NetworkPolicy to allow LoadBalancer access
+# 5. Changed service to LoadBalancer type for direct external access
+# 6. Removed ServiceMonitor (requires Prometheus Operator)
+# 7. Standardized resources for consistency across environments
+
+---
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: zeitgeist-processor
+  labels:
+    app: zeitgeist-processor
+
+---
+# ConfigMap for environment variables
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: processor-config
+  namespace: zeitgeist-processor
+data:
+  PROJECT_NAME: "zeitgeist-indexer"
+  WS_NODE_URL: "wss://zeitgeist.api.onfinality.io/ws?apikey=2baabba6-0f1d-450d-bbad-eb28634043aa"
+  DB_NAME: "postgres"
+  DB_PORT: "5432"
+  DB_USER: "postgres"
+  DB_HOST: "processor-postgres"
+  POSTGRES_DB: "postgres"
+  POSTGRES_USER: "postgres"
+  REDIS_HOST: "processor-redis"
+  REDIS_PORT: "6379"
+  ARCHIVE_GATEWAY_URL: "https://v2.archive.subsquid.io/network/zeitgeist"
+  PROCESSOR_PROMETHEUS_PORT: "9090"
+  BATCH_SIZE: "100"
+  BLOCK_WINDOW: "100000"
+  GRAPHQL_SERVER_PORT: "4000"
+  GRAPHQL_SERVER_HOST: "localhost"
+  WARTHOG_SUBSCRIPTIONS: "true"
+  GQL_PORT: "4350"
+  NODE_ENV: "main"
+
+---
+# Secret for sensitive data
+apiVersion: v1
+kind: Secret
+metadata:
+  name: processor-secrets
+  namespace: zeitgeist-processor
+type: Opaque
+stringData:
+  DB_PASS: "postgres"
+  POSTGRES_PASSWORD: "postgres"
+  REDIS_PASS: "redis"
+  ONFINALITY_API_KEY: "2baabba6-0f1d-450d-bbad-eb28634043aa"
+
+---
+# PostgreSQL StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: processor-postgres
+  namespace: zeitgeist-processor
+spec:
+  serviceName: processor-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: processor-postgres
+  template:
+    metadata:
+      labels:
+        app: processor-postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:14
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: processor-config
+              key: POSTGRES_DB
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: processor-config
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: processor-secrets
+              key: POSTGRES_PASSWORD
+        - name: PGDATA
+          value: "/var/lib/postgresql/data/pgdata"  # CRITICAL: Avoids lost+found issue
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "500m"
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+          initialDelaySeconds: 30
+          periodSeconds: 10
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-storage
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 50Gi
+      storageClassName: linode-block-storage-retain
+
+---
+# PostgreSQL Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: processor-postgres
+  namespace: zeitgeist-processor
+spec:
+  selector:
+    app: processor-postgres
+  ports:
+  - port: 5432
+    targetPort: 5432
+  clusterIP: None
+
+---
+# Redis StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: processor-redis
+  namespace: zeitgeist-processor
+spec:
+  serviceName: processor-redis
+  replicas: 1
+  selector:
+    matchLabels:
+      app: processor-redis
+  template:
+    metadata:
+      labels:
+        app: processor-redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:6.0-alpine
+        ports:
+        - containerPort: 6379
+        env:
+        - name: REDIS_PASS
+          valueFrom:
+            secretKeyRef:
+              name: processor-secrets
+              key: REDIS_PASS
+        command:
+        - sh
+        - -c
+        - "redis-server --appendonly yes --requirepass ${REDIS_PASS}"
+        volumeMounts:
+        - name: redis-storage
+          mountPath: /data
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+        readinessProbe:
+          exec:
+            command:
+            - redis-cli
+            - -a
+            - $(REDIS_PASS)
+            - ping
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          exec:
+            command:
+            - redis-cli
+            - -a
+            - $(REDIS_PASS)
+            - ping
+          initialDelaySeconds: 30
+          periodSeconds: 10
+  volumeClaimTemplates:
+  - metadata:
+      name: redis-storage
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 10Gi
+      storageClassName: linode-block-storage-retain
+
+---
+# Redis Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: processor-redis
+  namespace: zeitgeist-processor
+spec:
+  selector:
+    app: processor-redis
+  ports:
+  - port: 6379
+    targetPort: 6379
+  clusterIP: None
+
+---
+# Indexer Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: processor-indexer
+  namespace: zeitgeist-processor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: processor-indexer
+  template:
+    metadata:
+      labels:
+        app: processor-indexer
+    spec:
+      containers:
+      - name: indexer
+        image: zeitgeistpm/squid-processor:unified
+        command: ["yarn", "run", "indexer:up"]  # CORRECTED: Uses command that exists in the image
+        imagePullPolicy: Always  # Ensures latest image is pulled
+        envFrom:
+        - configMapRef:
+            name: processor-config
+        - secretRef:
+            name: processor-secrets
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - "ps aux | grep -v grep | grep node"
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - "ps aux | grep -v grep | grep node"
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+# API Deployment (GraphQL Server)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: processor-api
+  namespace: zeitgeist-processor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: processor-api
+  template:
+    metadata:
+      labels:
+        app: processor-api
+    spec:
+      containers:
+      - name: api-main
+        image: zeitgeistpm/squid-processor:unified
+        command: ["yarn", "run", "api:start"]  # CORRECTED: Uses command that exists in the image
+        imagePullPolicy: Always  # Ensures latest image is pulled
+        ports:
+        - containerPort: 4350
+          name: graphql-main
+        env:
+        - name: GQL_PORT
+          value: "4350"
+        envFrom:
+        - configMapRef:
+            name: processor-config
+        - secretRef:
+            name: processor-secrets
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+          limits:
+            memory: "8Gi"
+            cpu: "4000m"
+        readinessProbe:
+          httpGet:
+            path: /graphql
+            port: 4350
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /graphql
+            port: 4350
+          initialDelaySeconds: 60
+          periodSeconds: 30
+      - name: api-subscriptions
+        image: zeitgeistpm/squid-processor:unified
+        command: ["yarn", "run", "api:start"]  # CORRECTED: Uses command that exists in the image
+        imagePullPolicy: Always  # Ensures latest image is pulled
+        ports:
+        - containerPort: 4000
+          name: graphql-subs
+        env:
+        - name: GQL_PORT
+          value: "4000"
+        envFrom:
+        - configMapRef:
+            name: processor-config
+        - secretRef:
+            name: processor-secrets
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        readinessProbe:
+          httpGet:
+            path: /graphql
+            port: 4000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /graphql
+            port: 4000
+          initialDelaySeconds: 60
+          periodSeconds: 30
+
+---
+# API Service - LoadBalancer for Direct External Access
+apiVersion: v1
+kind: Service
+metadata:
+  name: processor-api
+  namespace: zeitgeist-processor
+spec:
+  type: LoadBalancer  # CHANGED: From ClusterIP to LoadBalancer for external access
+  selector:
+    app: processor-api
+  ports:
+  - name: graphql-main
+    port: 4350
+    targetPort: 4350
+  - name: graphql-subs
+    port: 4000
+    targetPort: 4000
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+
+---
+# HorizontalPodAutoscaler for API
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: processor-api-hpa
+  namespace: zeitgeist-processor
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: processor-api
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+# NetworkPolicy - CORRECTED: Allows LoadBalancer access while maintaining security
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: processor-network-policy
+  namespace: zeitgeist-processor
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow LoadBalancer traffic to API pods
+  - from: []  # Allow from anywhere (LoadBalancer needs this)
+    ports:
+    - protocol: TCP
+      port: 4350  # Main GraphQL API
+    - protocol: TCP
+      port: 4000  # Subscriptions API
+    - protocol: TCP
+      port: 9090  # Metrics
+  # Allow internal pod-to-pod communication
+  - from:
+    - podSelector: {}
+    ports:
+    - protocol: TCP
+      port: 5432  # PostgreSQL
+    - protocol: TCP
+      port: 6379  # Redis
+  egress:
+  # Allow all egress (for external API calls to Zeitgeist, OnFinality, Archive, etc.)
+  - {}
+
+---
+# OPTIONAL: Ingress (if you want to fix the webhook issue later and use nginx ingress)
+# Currently commented out due to webhook validation issues
+# Uncomment and fix webhook if you want SSL and centralized ingress
+#
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: processor-ingress
+#   namespace: zeitgeist-processor
+#   annotations:
+#     cert-manager.io/cluster-issuer: "letsencrypt-prod"
+#     nginx.ingress.kubernetes.io/rate-limit: "100"
+#     nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+#     nginx.ingress.kubernetes.io/limit-connections: "10"
+#     nginx.ingress.kubernetes.io/proxy-body-size: "75k"
+#     nginx.ingress.kubernetes.io/proxy-read-timeout: "30"
+#     nginx.ingress.kubernetes.io/proxy-connect-timeout: "10"
+# spec:
+#   ingressClassName: nginx-bs
+#   tls:
+#   - hosts:
+#     - processor.rpc-0.zeitgeist.pm
+#     secretName: processor-tls-secret
+#   rules:
+#   - host: processor.rpc-0.zeitgeist.pm
+#     http:
+#       paths:
+#       - path: /
+#         pathType: Prefix
+#         backend:
+#           service:
+#             name: processor-api
+#             port:
+#               number: 4350
