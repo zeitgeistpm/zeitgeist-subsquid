@@ -101,7 +101,9 @@ export const decodeComboSellExecuted = (event: Event): BuySellExecutedEvent => {
   let decoded: {
     who: string;
     poolId?: bigint;
+    buy: Asset_v60[];
     sell: Asset_v60[];
+    amountBuy: bigint;
     amountKeep: bigint;
     amountOut: bigint;
     swapFeeAmount: bigint;
@@ -115,9 +117,11 @@ export const decodeComboSellExecuted = (event: Event): BuySellExecutedEvent => {
   return {
     who: ss58.encode({ prefix: 73, bytes: decoded.who }),
     poolId: decoded.poolId ? Number(decoded.poolId) : undefined,
-    assetExecuted: formatAssetId(decoded.sell[0]),
-    amountIn: BigInt(decoded.amountKeep),
-    amountOut: BigInt(decoded.amountOut),
+    // For ComboSellExecuted: 'buy' contains the assets being sold back (e.g., "Yes" tokens)
+    // 'sell' contains the assets originally not wanted (e.g., "No" tokens)
+    assetExecuted: formatAssetId(decoded.buy[0]),  // The asset being sold (from 'buy' array)
+    amountIn: BigInt(decoded.amountBuy),  // Amount of the asset being sold
+    amountOut: BigInt(decoded.amountOut),  // Amount of ZTG received
     swapFeeAmount: BigInt(decoded.swapFeeAmount),
     externalFeeAmount: BigInt(decoded.externalFeeAmount),
   };
