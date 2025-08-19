@@ -31,7 +31,7 @@ services:
   indexer:
     build:
       context: .
-      target: indexer
+      target: unified
     container_name: indexer
     restart: always
     depends_on:

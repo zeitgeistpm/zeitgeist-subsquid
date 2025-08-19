@@ -31,10 +31,25 @@ export const decodeBuyExecutedEvent = (event: Event): BuySellExecutedEvent => {
   } else {
     decoded = event.args;
   }
+  
+  // Extract marketId from assetOut if it's a CategoricalOutcome
+  let extractedMarketId = decoded.marketId ? Number(decoded.marketId) : undefined;
+  if (!extractedMarketId && decoded.assetOut && '__kind' in decoded.assetOut && decoded.assetOut.__kind === 'CategoricalOutcome') {
+    const outcomeValue = decoded.assetOut.value as any;
+    if (Array.isArray(outcomeValue) && outcomeValue.length > 0) {
+      extractedMarketId = Number(outcomeValue[0]);
+    } else if (typeof outcomeValue === 'string') {
+      const parts = (outcomeValue as string).split(',');
+      if (parts.length > 0) {
+        extractedMarketId = Number(parts[0]);
+      }
+    }
+  }
+  
   return {
     who: ss58.encode({ prefix: 73, bytes: decoded.who }),
     poolId: decoded.poolId ? Number(decoded.poolId) : undefined,
-    marketId: decoded.marketId ? Number(decoded.marketId) : undefined,
+    marketId: extractedMarketId,
     assetExecuted: formatAssetId(decoded.assetOut),
     amountIn: BigInt(decoded.amountIn),
     amountOut: BigInt(decoded.amountOut),
@@ -254,10 +269,25 @@ export const decodeSellExecutedEvent = (event: Event): BuySellExecutedEvent => {
   } else {
     decoded = event.args;
   }
+  
+  // Extract marketId from assetIn if it's a CategoricalOutcome
+  let extractedMarketId = decoded.marketId ? Number(decoded.marketId) : undefined;
+  if (!extractedMarketId && decoded.assetIn && '__kind' in decoded.assetIn && decoded.assetIn.__kind === 'CategoricalOutcome') {
+    const outcomeValue = decoded.assetIn.value as any;
+    if (Array.isArray(outcomeValue) && outcomeValue.length > 0) {
+      extractedMarketId = Number(outcomeValue[0]);
+    } else if (typeof outcomeValue === 'string') {
+      const parts = (outcomeValue as string).split(',');
+      if (parts.length > 0) {
+        extractedMarketId = Number(parts[0]);
+      }
+    }
+  }
+  
   return {
     who: ss58.encode({ prefix: 73, bytes: decoded.who }),
     poolId: decoded.poolId ? Number(decoded.poolId) : undefined,
-    marketId: decoded.marketId ? Number(decoded.marketId) : undefined,
+    marketId: extractedMarketId,
     assetExecuted: formatAssetId(decoded.assetIn),
     amountIn: BigInt(decoded.amountIn),
     amountOut: BigInt(decoded.amountOut),
