@@ -1,37 +1,8 @@
-import { util } from '@zeitgeistpm/sdk';
 import { Field, Int, ObjectType, Query, Resolver, InputType, Arg } from 'type-graphql';
 import { EntityManager } from 'typeorm';
-import { isHexadecimal } from 'is-hexadecimal';
 import { Unit } from '../../consts';
-import { decodedAssetId, mergeByField } from '../helper';
 import { assetPriceHistory, marketInfo } from '../query';
 
-const isCombinatorialHash = (key: string): boolean => {
-  return (key.length === 63 || key.length === 64) && isHexadecimal(key);
-};
-
-const extractHashFromAsset = (asset: string): string | null => {
-  try {
-    const parsed = JSON.parse(asset);
-    if (!parsed?.combinatorialToken) return null;
-    
-    const tokenValue = parsed.combinatorialToken.toString();
-    const hash = tokenValue.startsWith('0x') ? tokenValue.slice(2) : tokenValue;
-    
-    // Return truncated to 63 chars to match PostgreSQL column names
-    return hash.slice(0, 63);
-  } catch {
-    return null;
-  }
-};
-
-const findMatchingAsset = (hash: string, outcomeAssets: string[]): string | null => {
-  return outcomeAssets.find(asset => extractHashFromAsset(asset) === hash) || null;
-};
-
-const createFallbackAsset = (hash: string): string => {
-  return JSON.stringify({ combinatorialToken: `0x${hash}` });
-};
 
 @ObjectType()
 export class PriceHistory {
@@ -101,30 +72,32 @@ export class PriceHistoryResolver {
     startTime = startTime ?? market[0].timestamp.toISOString();
     interval = interval ?? new IntervalArgs({ unit: Unit.Day, value: 1 });
 
-    // Build price history data by merging all assets
-    let priceHistory = await manager.query(
-      assetPriceHistory(market[0].outcome_assets[0], startTime, endTime, interval.toString())
+    // Get normalized price history for all assets at once
+    const priceHistoryRows = await manager.query(
+      assetPriceHistory(market[0].outcome_assets, startTime, endTime, interval.toString())
     );
 
-    for (let i = 1; i < market[0].outcome_assets.length; i++) {
-      const nextAssetHistory = await manager.query(
-        assetPriceHistory(market[0].outcome_assets[i], startTime, endTime, interval.toString())
-      );
-      priceHistory = mergeByField(priceHistory, nextAssetHistory, 'timestamp');
-    }
-
-    // Transform the merged data into the response format
-    return priceHistory.map((entry: any) => {
-      const { timestamp, ...priceData } = entry;
+    // Group by timestamp and build response format
+    const timestampGroups = new Map<string, any[]>();
+    
+    priceHistoryRows.forEach((row: any) => {
+      const timestamp = row.timestamp.toISOString();
+      if (!timestampGroups.has(timestamp)) {
+        timestampGroups.set(timestamp, []);
+      }
       
-      const prices = Object.entries(priceData).map(([key, value]) => ({
-        assetId: isCombinatorialHash(key) 
-          ? findMatchingAsset(key, market[0].outcome_assets) || createFallbackAsset(key)
-          : JSON.stringify(util.AssetIdFromString(decodedAssetId(key))),
-        price: value,
-      }));
-
-      return { timestamp, prices };
+      if (row.asset_id && row.new_price !== null) {
+        timestampGroups.get(timestamp)!.push({
+          assetId: row.asset_id,
+          price: row.new_price,
+        });
+      }
     });
+
+    // Transform to expected response format
+    return Array.from(timestampGroups.entries()).map(([timestamp, prices]) => ({
+      timestamp: new Date(timestamp),
+      prices,
+    }));
   }
 }
