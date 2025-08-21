@@ -4,7 +4,6 @@
 /db/data
 /data
 
-
 .env.test
 .env.main
 .env.local

@@ -97,7 +97,7 @@ export const buyExecuted = async (
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
       await store.save<Asset>(asset);
 
-      newLiquidity += BigInt(Math.round(asset.price * +ab.balance.toString()));
+      newLiquidity += BigInt(Math.round(asset.price)) * ab.balance;
 
       const ha = new HistoricalAsset({
         accountId: asset.assetId === assetExecuted ? who : null,
@@ -252,7 +252,7 @@ export const combinatorialPoolDeployed = async (
       });
       historicalAssets.push(ha);
 
-      newLiquidity += BigInt(Math.round(asset.price * +ab.balance.toString()));
+      newLiquidity += BigInt(Math.round(asset.price)) * ab.balance;
     })
   );
     
@@ -316,12 +316,15 @@ export const comboBuyExecuted = async (
   const { who, poolId, assetExecuted, amountIn, amountOut, swapFeeAmount, externalFeeAmount } =
     decodeComboBuyExecuted(event);
 
-  // First find the neo pool by poolId to get the correct marketId
-  const neoPool = await store.get(NeoPool, {
+  // Find the neo pool with this poolId
+  const neoPool = await store.findOne(NeoPool, {
     where: { poolId },
     relations: { account: { balances: true }, liquiditySharesManager: true },
   });
-  if (!neoPool) return;
+  if (!neoPool) {
+    console.warn(`[${event.name}] No neo pool found with poolId ${poolId}`);
+    return;
+  }
 
   // Then get the market using the correct marketId from the neo pool
   const market = await store.get(Market, {
@@ -341,13 +344,14 @@ export const comboBuyExecuted = async (
   const oldLiquidity = market.liquidity;
   let newLiquidity = BigInt(0);
   const historicalAssets: HistoricalAsset[] = [];
+  
   await Promise.all(
     market.neoPool.account.balances.map(async (ab) => {
       if (isBaseAsset(ab.assetId)) return;
       
-      const asset = await getAssetOrSkip(store, ab.assetId);
+      let asset = await getAssetOrSkip(store, ab.assetId);
       if (!asset) {
-        console.warn(`Skipping processing for missing asset ${ab.assetId} in comboBuyExecuted`);
+        console.error(`[${event.name}] Asset ${ab.assetId} not found - this should have been created during pool deployment`);
         return;
       }
       
@@ -355,17 +359,18 @@ export const comboBuyExecuted = async (
       const oldAmountInPool = asset.amountInPool;
       asset.amountInPool = ab.balance;
       asset.price = computeNeoSwapSpotPrice(ab.balance, market.neoPool!.liquidityParameter);
+      
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
       await store.save<Asset>(asset);
 
-      newLiquidity += BigInt(Math.round(asset.price * +ab.balance.toString()));
+      newLiquidity += BigInt(Math.round(asset.price)) * asset.amountInPool;
 
       const ha = new HistoricalAsset({
         accountId: asset.assetId === assetExecuted ? who : null,
         assetId: asset.assetId,
         blockNumber: event.block.height,
-        dAmountInPool: asset.amountInPool - oldAmountInPool,
-        dPrice: asset.price - oldPrice,
+        dAmountInPool: asset.amountInPool - (oldAmountInPool || BigInt(0)),
+        dPrice: asset.price - (oldPrice || 0),
         event: event.name.split('.')[1],
         id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
         newAmountInPool: asset.amountInPool,
@@ -375,6 +380,7 @@ export const comboBuyExecuted = async (
       historicalAssets.push(ha);
     })
   );
+
 
   market.liquidity = newLiquidity;
   market.volume += amountIn;
@@ -413,7 +419,7 @@ export const comboBuyExecuted = async (
   });
 
   return { historicalAssets, historicalSwap, historicalMarket };
-};
+};;;;
 
 export const comboSellExecuted = async (
   store: Store,
@@ -467,7 +473,7 @@ export const comboSellExecuted = async (
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
       await store.save<Asset>(asset);
 
-      newLiquidity += BigInt(Math.round(asset.price * +ab.balance.toString()));
+      newLiquidity += BigInt(Math.round(asset.price)) * asset.amountInPool;
 
       const ha = new HistoricalAsset({
         accountId: asset.assetId === assetExecuted ? who : null,
@@ -522,7 +528,7 @@ export const comboSellExecuted = async (
   });
 
   return { historicalAssets, historicalSwap, historicalMarket };
-};
+};;
 
 export const exitExecuted = async (
   store: Store,
@@ -568,7 +574,7 @@ export const exitExecuted = async (
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
       await store.save<Asset>(asset);
 
-      newLiquidity += BigInt(Math.round(asset.price * +ab.balance.toString()));
+      newLiquidity += BigInt(Math.round(asset.price)) * ab.balance;
 
       const ha = new HistoricalAsset({
         accountId: who,
@@ -673,7 +679,7 @@ export const joinExecuted = async (
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
       await store.save<Asset>(asset);
 
-      newLiquidity += BigInt(Math.round(asset.price * +ab.balance.toString()));
+      newLiquidity += BigInt(Math.round(asset.price)) * ab.balance;
 
       const ha = new HistoricalAsset({
         accountId: who,
@@ -717,8 +723,16 @@ export const poolDeployed = async (
   store: Store,
   event: Event
 ): Promise<{ historicalAssets: HistoricalAsset[]; historicalMarket: HistoricalMarket } | undefined> => {
-  const { who, marketId, accountId, collateral, liquidityParameter, poolSharesAmount, swapFee } =
+  const { who, marketId, poolId, accountId, collateral, liquidityParameter, poolSharesAmount, swapFee } =
     decodePoolDeployedEvent(event);
+
+  // IMPORTANT: For v50-v54 events, poolId is not available in the event data
+  // We need to use a unique identifier to avoid collisions
+  // Using the event block height as a pseudo-poolId for these legacy events
+  // This ensures each pool gets a unique ID even if we don't know the actual blockchain poolId
+  const actualPoolId = poolId ?? event.block.height;
+  
+  console.log(`[${event.name}] Pool deployment for market ${marketId} with poolId ${actualPoolId} (poolId from event: ${poolId})`);
 
   const account = await store.get(Account, {
     where: { accountId },
@@ -733,10 +747,10 @@ export const poolDeployed = async (
     account,
     collateral,
     createdAt: new Date(event.block.timestamp!),
-    id: event.id + '-' + marketId,
+    id: event.id + '-' + actualPoolId,
     liquidityParameter,
     marketId,
-    poolId: marketId,
+    poolId: actualPoolId,  // Using block height as poolId for v50-v54 to ensure uniqueness
     swapFee,
     totalStake: poolSharesAmount,
   });
@@ -746,7 +760,7 @@ export const poolDeployed = async (
   const liquiditySharesManager = new LiquiditySharesManager({
     account: who,
     fees: BigInt(0),
-    id: marketId + '-' + who,
+    id: actualPoolId + '-' + who,
     neoPool,
     stake: poolSharesAmount,
   });
@@ -789,7 +803,7 @@ export const poolDeployed = async (
       });
       historicalAssets.push(ha);
 
-      newLiquidity += BigInt(Math.round(asset.price * +ab.balance.toString()));
+      newLiquidity += BigInt(Math.round(asset.price)) * asset.amountInPool;
     })
   );
   console.log(`[${event.name}] Saving assets: ${JSON.stringify(assets, null, 2)}`);
@@ -827,7 +841,7 @@ export const poolDeployed = async (
   });
 
   return { historicalAssets, historicalMarket };
-};
+};;;;;
 
 export const sellExecuted = async (
   store: Store,
@@ -871,7 +885,7 @@ export const sellExecuted = async (
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
       await store.save<Asset>(asset);
 
-      newLiquidity += BigInt(Math.round(asset.price * +ab.balance.toString()));
+      newLiquidity += BigInt(Math.round(asset.price)) * ab.balance;
 
       const ha = new HistoricalAsset({
         accountId: asset.assetId === assetExecuted ? who : null,

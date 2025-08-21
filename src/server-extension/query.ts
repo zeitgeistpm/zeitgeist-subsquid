@@ -1,7 +1,7 @@
 import { BaseAsset } from '../consts';
 import { encodedAssetId } from './helper';
 
-export const assetPriceHistory = (assetId: string, startTime: string, endTime: string, interval: string) => `
+export const assetPriceHistory = (assetIds: string[], startTime: string, endTime: string, interval: string) => `
   WITH t0 AS (
     SELECT
       GENERATE_SERIES (
@@ -11,25 +11,28 @@ export const assetPriceHistory = (assetId: string, startTime: string, endTime: s
       ) AS timestamp_t0
   )
   SELECT
-    timestamp_t0 AS timestamp,
-    new_price AS "${encodedAssetId(assetId)}"
+    t0.timestamp_t0 AS timestamp,
+    ha.asset_id,
+    ha.new_price
   FROM
     t0
+  CROSS JOIN UNNEST(ARRAY[${assetIds.map(id => `'${id}'`).join(', ')}]) AS asset_list(asset_id)
   LEFT JOIN LATERAL (
     SELECT
-      timestamp,
+      asset_id,
       new_price
     FROM
-      historical_asset
+      historical_asset ha
     WHERE
-      asset_id LIKE '%${assetId}%'
-      AND timestamp <= timestamp_t0
+      ha.asset_id = asset_list.asset_id
+      AND ha.timestamp <= t0.timestamp_t0
     ORDER BY
-      id DESC
+      ha.timestamp DESC
     LIMIT 1
-  ) a
-  ON 1 = 1;
-`;
+  ) ha ON true
+  ORDER BY
+    t0.timestamp_t0, asset_list.asset_id;
+`;;
 
 export const balanceInfo = (accountId: string, assetId: string, conditions: string) => `
   SELECT
@@ -97,21 +100,19 @@ export const marketLiquidity = (ids: number[]) => `
     WHERE market_id IN (${ids})
   ),
   t1 AS (
-    SELECT t0.market_id, COALESCE(ROUND(SUM(COALESCE(a.price,1) * ab.balance), 0), 0) AS liquidity
+    SELECT t0.market_id, COALESCE(ROUND(SUM(COALESCE(a.price,1) * a.amount_in_pool), 0), 0) AS liquidity
     FROM t0
     LEFT JOIN pool p ON p.id = t0.pool_id
-    LEFT JOIN account_balance ab ON ab.account_id = p.account_id
-    LEFT JOIN asset a ON a.market_id = t0.id AND a.asset_id = ab.asset_id
+    LEFT JOIN asset a ON a.market_id = t0.id
     WHERE p.id IS NOT NULL
     GROUP BY t0.market_id
   ),
   t2 AS (
-    SELECT t0.market_id, COALESCE(ROUND(SUM(a.price * ab.balance), 0), 0) AS liquidity
+    SELECT t0.market_id, COALESCE(ROUND(SUM(a.price * a.amount_in_pool), 0), 0) AS liquidity
     FROM t0
     LEFT JOIN neo_pool np ON np.id = t0.neo_pool_id
     LEFT JOIN market m ON m.id = t0.id
     LEFT JOIN asset a ON a.market_id = t0.id
-    LEFT JOIN account_balance ab ON ab.account_id = np.account_id AND ab.asset_id = a.asset_id
     WHERE np.id IS NOT NULL AND a.asset_id = ANY(m.outcome_assets)
     GROUP BY t0.market_id
   ),
@@ -124,7 +125,7 @@ export const marketLiquidity = (ids: number[]) => `
     SELECT * FROM t1 UNION SELECT * FROM t2 UNION SELECT * FROM t3
   )
   SELECT * FROM t4;
-`;
+`;;
 
 export const marketMetadata = (ids: number[]) => `
   SELECT
@@ -159,7 +160,7 @@ export const marketStatsWithOrder = (
 ) => `
   SELECT
     m.market_id,
-    COALESCE(ROUND(SUM(COALESCE(a.price,1) * ab.balance), 0), 0) AS liquidity,
+    COALESCE(ROUND(SUM(COALESCE(a.price,1) * a.amount_in_pool), 0), 0) AS liquidity,
     COALESCE(COUNT(DISTINCT ha.account_id), 0) AS participants,
     CASE
       WHEN p.base_asset = 'Ztg' THEN COALESCE(ROUND(p.volume * ${prices.get(BaseAsset.ZTG)}, 0), 0)
@@ -170,9 +171,7 @@ export const marketStatsWithOrder = (
   LEFT JOIN
     pool p ON p.id = m.pool_id
   LEFT JOIN
-    account_balance ab ON ab.account_id = p.account_id
-  LEFT JOIN
-    asset a ON a.pool_id = p.id AND a.asset_id = ab.asset_id
+    asset a ON a.pool_id = p.id
   LEFT JOIN
     historical_asset ha ON ha.asset_id = a.asset_id
   ${where}
@@ -186,7 +185,7 @@ export const marketStatsWithOrder = (
     ${limit}
   OFFSET 
     ${offset};
-`;
+`;;
 
 export const marketTraders = (ids: number[]) => `
   SELECT

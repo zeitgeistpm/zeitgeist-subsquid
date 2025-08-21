@@ -177,6 +177,7 @@ cat backup_file.sql | docker exec -i db psql -U postgres postgres
    sudo mkdir -p /mnt/ztg-cache-*
    sudo chmod 777 /mnt/ztg-indexer-*
    sudo chmod 777 /mnt/ztg-cache-*
+   chmod +x ./scripts/deploy/api.sh
    ```
 
 2. **Clone and set up the repository**:
@@ -190,6 +191,7 @@ cat backup_file.sql | docker exec -i db psql -U postgres postgres
    ```bash
    # Create .env.main with all required variables (see Environment Variables section)
    # Ensure DB_PATH, CACHE_PATH, REDIS_PASS, and other variables are set
+   # Set envs in prod: set -a, source .env.test, set +a
    ```
 
 4. **Start the production environment**:
