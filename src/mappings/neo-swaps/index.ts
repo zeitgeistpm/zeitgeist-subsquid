@@ -316,32 +316,15 @@ export const comboBuyExecuted = async (
   const { who, poolId, assetExecuted, amountIn, amountOut, swapFeeAmount, externalFeeAmount } =
     decodeComboBuyExecuted(event);
 
-  // Find all neo pools with this poolId (there might be duplicates due to legacy data)
-  const neoPools = await store.find(NeoPool, {
+  // Find the neo pool with this poolId
+  const neoPool = await store.findOne(NeoPool, {
     where: { poolId },
     relations: { account: { balances: true }, liquiditySharesManager: true },
   });
-  if (!neoPools || neoPools.length === 0) return;
-
-  // Find the correct neo pool by checking which one has the asset being traded
-  let correctNeoPool: NeoPool | undefined;
-  for (const neoPool of neoPools) {
-    const hasAsset = neoPool.account.balances.some(ab => ab.assetId === assetExecuted);
-    if (hasAsset) {
-      correctNeoPool = neoPool;
-      break;
-    }
+  if (!neoPool) {
+    console.warn(`[${event.name}] No neo pool found with poolId ${poolId}`);
+    return;
   }
-
-  // If no pool has the asset, use the most recent one (highest ID)
-  if (!correctNeoPool) {
-    correctNeoPool = neoPools.sort((a, b) => b.id.localeCompare(a.id))[0];
-    console.warn(`[${event.name}] Asset ${assetExecuted} not found in any pool with poolId ${poolId}, using most recent pool: market ${correctNeoPool.marketId}`);
-  } else {
-    console.log(`[${event.name}] Found asset ${assetExecuted} in pool for market ${correctNeoPool.marketId}`);
-  }
-
-  const neoPool = correctNeoPool;
 
   // Then get the market using the correct marketId from the neo pool
   const market = await store.get(Market, {
@@ -361,7 +344,6 @@ export const comboBuyExecuted = async (
   const oldLiquidity = market.liquidity;
   let newLiquidity = BigInt(0);
   const historicalAssets: HistoricalAsset[] = [];
-  const newAssets: Asset[] = [];
   
   await Promise.all(
     market.neoPool.account.balances.map(async (ab) => {
@@ -369,26 +351,14 @@ export const comboBuyExecuted = async (
       
       let asset = await getAssetOrSkip(store, ab.assetId);
       if (!asset) {
-        // Create missing combinatorial asset dynamically
-        const hash = createHash('sha256').update(ab.assetId).digest('hex');
-        const uniqueId = hash.substring(0, 16);
-        
-        asset = new Asset({
-          id: event.id + '-' + uniqueId,
-          assetId: ab.assetId,
-          amountInPool: ab.balance,
-          price: computeNeoSwapSpotPrice(ab.balance, market.neoPool!.liquidityParameter),
-          market,
-          pool: null,
-        });
-        console.log(`[${event.name}] Creating new combinatorial asset: ${JSON.stringify(asset, null, 2)}`);
-        newAssets.push(asset);
-      } else {
-        const oldPrice = asset.price;
-        const oldAmountInPool = asset.amountInPool;
-        asset.amountInPool = ab.balance;
-        asset.price = computeNeoSwapSpotPrice(ab.balance, market.neoPool!.liquidityParameter);
+        console.error(`[${event.name}] Asset ${ab.assetId} not found - this should have been created during pool deployment`);
+        return;
       }
+      
+      const oldPrice = asset.price;
+      const oldAmountInPool = asset.amountInPool;
+      asset.amountInPool = ab.balance;
+      asset.price = computeNeoSwapSpotPrice(ab.balance, market.neoPool!.liquidityParameter);
       
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
       await store.save<Asset>(asset);
@@ -411,13 +381,6 @@ export const comboBuyExecuted = async (
     })
   );
 
-  // Update market outcomeAssets to include any new combinatorial assets
-  if (newAssets.length > 0) {
-    const allAssetIds = market.neoPool.account.balances
-      .filter(ab => !isBaseAsset(ab.assetId))
-      .map(ab => ab.assetId);
-    market.outcomeAssets = allAssetIds;
-  }
 
   market.liquidity = newLiquidity;
   market.volume += amountIn;
