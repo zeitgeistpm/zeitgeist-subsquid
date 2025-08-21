@@ -59,22 +59,30 @@ export class PriceHistoryResolver {
     @Arg('interval', () => IntervalArgs, { nullable: true }) interval: IntervalArgs
   ): Promise<PriceHistory[] | undefined> {
     const manager = await this.tx();
-    const market = await manager.query(marketInfo(marketId));
-    if (!market[0]) return;
+    
+    // Get market outcome assets directly from market table
+    const marketQuery = `SELECT outcome_assets FROM market WHERE market_id = ${marketId}`;
+    const marketResult = await manager.query(marketQuery);
+    if (!marketResult || marketResult.length === 0) return;
+    
+    const outcomeAssets = marketResult[0].outcome_assets;
+    if (!outcomeAssets || outcomeAssets.length === 0) return;
 
-    if (!endTime && market[1]) {
-      let marketResolvedTime = new Date(market[1].timestamp.toISOString());
-      marketResolvedTime.setDate(marketResolvedTime.getDate() + 1);
-      endTime = marketResolvedTime.toISOString();
-    } else {
+    // Set default time range if not provided
+    if (!endTime) {
       endTime = new Date().toISOString();
     }
-    startTime = startTime ?? market[0].timestamp.toISOString();
-    interval = interval ?? new IntervalArgs({ unit: Unit.Day, value: 1 });
+    if (!startTime) {
+      // Default to 24 hours ago
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      startTime = yesterday.toISOString();
+    }
+    interval = interval ?? new IntervalArgs({ unit: Unit.Hour, value: 1 });
 
     // Get normalized price history for all assets at once
     const priceHistoryRows = await manager.query(
-      assetPriceHistory(market[0].outcome_assets, startTime, endTime, interval.toString())
+      assetPriceHistory(outcomeAssets, startTime, endTime, interval.toString())
     );
 
     // Group by timestamp and build response format
