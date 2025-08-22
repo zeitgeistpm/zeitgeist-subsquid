@@ -221,6 +221,7 @@ export const decodePoolDeployedEvent = (event: Event): PoolDeployedEvent => {
     liquidityParameter: bigint;
     poolSharesAmount: bigint;
     swapFee: bigint;
+    poolId?: bigint;
   };
   if (events.neoSwaps.poolDeployed.v50.is(event)) {
     decoded = events.neoSwaps.poolDeployed.v50.decode(event) as any;
@@ -242,6 +243,7 @@ export const decodePoolDeployedEvent = (event: Event): PoolDeployedEvent => {
     liquidityParameter: BigInt(decoded.liquidityParameter),
     poolSharesAmount: BigInt(decoded.poolSharesAmount),
     swapFee: BigInt(decoded.swapFee),
+    poolId: decoded.poolId ? Number(decoded.poolId) : Number(decoded.marketId), // Using marketId as poolId for v50-v54 to ensure uniqueness
   };
 };
 
