@@ -725,15 +725,6 @@ export const poolDeployed = async (
 ): Promise<{ historicalAssets: HistoricalAsset[]; historicalMarket: HistoricalMarket } | undefined> => {
   const { who, marketId, poolId, accountId, collateral, liquidityParameter, poolSharesAmount, swapFee } =
     decodePoolDeployedEvent(event);
-
-  // IMPORTANT: For v50-v54 events, poolId is not available in the event data
-  // We need to use a unique identifier to avoid collisions
-  // Using the event block height as a pseudo-poolId for these legacy events
-  // This ensures each pool gets a unique ID even if we don't know the actual blockchain poolId
-  const actualPoolId = poolId ?? event.block.height;
-  
-  console.log(`[${event.name}] Pool deployment for market ${marketId} with poolId ${actualPoolId} (poolId from event: ${poolId})`);
-
   const account = await store.get(Account, {
     where: { accountId },
     relations: { balances: true },
@@ -747,10 +738,10 @@ export const poolDeployed = async (
     account,
     collateral,
     createdAt: new Date(event.block.timestamp!),
-    id: event.id + '-' + actualPoolId,
+    id: event.id + '-' + poolId,
     liquidityParameter,
     marketId,
-    poolId: actualPoolId,  // Using block height as poolId for v50-v54 to ensure uniqueness
+    poolId: poolId,  // Using block height as poolId for v50-v54 to ensure uniqueness
     swapFee,
     totalStake: poolSharesAmount,
   });
@@ -760,7 +751,7 @@ export const poolDeployed = async (
   const liquiditySharesManager = new LiquiditySharesManager({
     account: who,
     fees: BigInt(0),
-    id: actualPoolId + '-' + who,
+    id: poolId + '-' + who,
     neoPool,
     stake: poolSharesAmount,
   });
