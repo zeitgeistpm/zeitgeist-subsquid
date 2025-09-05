@@ -76,7 +76,8 @@ export const decodeCombinatorialPoolDeployed = (event: Event): PoolDeployedEvent
   }
   return {
     who: ss58.encode({ prefix: 73, bytes: decoded.who }),
-    marketId: Number(decoded.marketIds[0]),
+    marketId: Number(decoded.marketIds[0]), // Use first market ID for database compatibility
+    marketIds: decoded.marketIds.map(id => Number(id)), // Store all market IDs for reference
     poolId: Number(decoded.poolId),
     accountId: ss58.encode({ prefix: 73, bytes: decoded.accountId }),
     collateral: formatAssetId(decoded.collateral),
@@ -238,6 +239,7 @@ export const decodePoolDeployedEvent = (event: Event): PoolDeployedEvent => {
   return {
     who: ss58.encode({ prefix: 73, bytes: decoded.who }),
     marketId: Number(decoded.marketId),
+    marketIds: [Number(decoded.marketId)], // Single market ID as array for regular pools
     accountId: ss58.encode({ prefix: 73, bytes: decoded.accountId }),
     collateral: formatAssetId(decoded.collateral),
     liquidityParameter: BigInt(decoded.liquidityParameter),
@@ -334,7 +336,8 @@ interface JoinExitExecutedEvent {
 
 interface PoolDeployedEvent {
   who: string;
-  marketId: number;
+  marketId: number;        // First market ID for database compatibility
+  marketIds: number[];     // All market IDs for combo pools
   poolId?: number;
   accountId: string;
   collateral: string;

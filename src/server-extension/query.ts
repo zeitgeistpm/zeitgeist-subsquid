@@ -284,3 +284,126 @@ export const volumeHistory = (prices: Map<BaseAsset, number>) => `
   ORDER BY
     date ASC;
 `;
+
+export const comboPoolAssets = (poolId: number) => `
+  SELECT 
+    ARRAY(
+      SELECT ab.asset_id 
+      FROM neo_pool np
+      JOIN account_balance ab ON ab.account_id = np.account_id  
+      WHERE np.pool_id = ${poolId} 
+        AND ab.asset_id NOT LIKE '%Ztg%'
+        AND ab.asset_id NOT LIKE '%{"foreignAsset"%'
+        AND ab.balance > 0
+      ORDER BY ab.asset_id
+    ) as outcome_assets
+`;
+
+export const poolLiquidity = (poolIds: number[]) => `
+  WITH pool_assets AS (
+    SELECT 
+      np.pool_id,
+      ab.asset_id,
+      ab.balance
+    FROM neo_pool np
+    JOIN account_balance ab ON ab.account_id = np.account_id
+    WHERE 
+      np.pool_id IN (${poolIds.join(',')})
+      AND ab.asset_id NOT LIKE '%Ztg%'
+      AND ab.asset_id NOT LIKE '%{"foreignAsset"%'
+      AND ab.balance > 0
+  )
+  SELECT 
+    pa.pool_id,
+    COALESCE(ROUND(SUM(COALESCE(ha.new_price, 1) * pa.balance), 0), 0) AS liquidity
+  FROM 
+    pool_assets pa
+  LEFT JOIN LATERAL (
+    SELECT new_price
+    FROM historical_asset ha
+    WHERE ha.asset_id = pa.asset_id
+    ORDER BY ha.timestamp DESC
+    LIMIT 1
+  ) ha ON true
+  GROUP BY 
+    pa.pool_id
+`;
+
+export const poolParticipants = (poolIds: number[]) => `
+  SELECT 
+    np.pool_id,
+    COALESCE(COUNT(DISTINCT ha.account_id), 0) AS participants
+  FROM 
+    neo_pool np
+  JOIN account_balance ab ON ab.account_id = np.account_id
+  LEFT JOIN historical_asset ha ON ha.asset_id = ab.asset_id
+  WHERE 
+    np.pool_id IN (${poolIds.join(',')})
+    AND ab.asset_id NOT LIKE '%Ztg%'
+    AND ab.asset_id NOT LIKE '%{"foreignAsset"%'
+  GROUP BY 
+    np.pool_id
+`;
+
+export const poolTraders = (poolIds: number[]) => `
+  WITH pool_assets AS (
+    SELECT 
+      np.pool_id,
+      ab.asset_id
+    FROM neo_pool np
+    JOIN account_balance ab ON ab.account_id = np.account_id
+    WHERE 
+      np.pool_id IN (${poolIds.join(',')})
+      AND ab.asset_id NOT LIKE '%Ztg%'
+      AND ab.asset_id NOT LIKE '%{"foreignAsset"%'
+      AND ab.balance > 0
+  )
+  SELECT 
+    pa.pool_id,
+    COALESCE(COUNT(DISTINCT hs.account_id), 0) AS traders
+  FROM 
+    pool_assets pa
+  LEFT JOIN historical_swap hs ON 
+    hs.asset_in = pa.asset_id OR 
+    hs.asset_out = pa.asset_id
+  GROUP BY 
+    pa.pool_id
+`;
+
+export const poolVolume = (poolIds: number[], prices: Map<BaseAsset, number>) => `
+  WITH pool_assets AS (
+    SELECT 
+      np.pool_id,
+      ab.asset_id,
+      np.collateral
+    FROM neo_pool np
+    JOIN account_balance ab ON ab.account_id = np.account_id
+    WHERE 
+      np.pool_id IN (${poolIds.join(',')})
+      AND ab.asset_id NOT LIKE '%Ztg%'
+      AND ab.asset_id NOT LIKE '%{"foreignAsset"%'
+      AND ab.balance > 0
+  ),
+  pool_volumes AS (
+    SELECT 
+      pa.pool_id,
+      pa.collateral,
+      COALESCE(SUM(COALESCE(hs.asset_amount_in, 0) + COALESCE(hs.asset_amount_out, 0)), 0) AS raw_volume
+    FROM 
+      pool_assets pa
+    LEFT JOIN historical_swap hs ON 
+      hs.asset_in = pa.asset_id OR 
+      hs.asset_out = pa.asset_id
+    GROUP BY 
+      pa.pool_id, pa.collateral
+  )
+  SELECT 
+    pv.pool_id,
+    CASE
+      WHEN pv.collateral = 'Ztg' THEN COALESCE(ROUND(pv.raw_volume * ${prices.get(BaseAsset.ZTG)}, 0), 0)
+      WHEN pv.collateral = '{"foreignAsset":0}' THEN COALESCE(ROUND(pv.raw_volume * ${prices.get(BaseAsset.DOT)}, 0), 0)
+      ELSE COALESCE(pv.raw_volume, 0)
+    END AS volume
+  FROM 
+    pool_volumes pv
+`;
