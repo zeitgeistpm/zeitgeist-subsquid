@@ -7,6 +7,7 @@ import { LiquidityHistoryResolver } from './liquidityHistory';
 import { MarketMetadataResolver } from './marketMetadata';
 import { MarketStatsResolver } from './marketStats';
 import { MarketStatsWithOrderResolver } from './marketStatsWithOrder';
+import { PoolStatsResolver } from './poolStats';
 import { PriceHistoryResolver } from './priceHistory';
 import { StatsResolver } from './stats';
 import { VolumeHistoryResolver } from './volumeHistory';
@@ -47,6 +48,7 @@ export {
   MarketMetadataResolver,
   MarketStatsResolver,
   MarketStatsWithOrderResolver,
+  PoolStatsResolver,
   PriceHistoryResolver,
   StatsResolver,
   VolumeHistoryResolver,

@@ -34,6 +34,9 @@ export class NeoPool {
     @IntColumn_({nullable: false})
     marketId!: number
 
+    @IntColumn_({array: true, nullable: false})
+    marketIds!: (number)[]
+
     @Index_()
     @IntColumn_({nullable: false})
     poolId!: number

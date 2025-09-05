@@ -307,6 +307,7 @@ type NeoPool @entity {
   liquidityParameter: BigInt!
   liquiditySharesManager: [LiquiditySharesManager!]! @derivedFrom(field: "neoPool")
   marketId: Int! @index
+  marketIds: [Int!]!
   poolId: Int! @index
   swapFee: BigInt!
   totalStake: BigInt!
