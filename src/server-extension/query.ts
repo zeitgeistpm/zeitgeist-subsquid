@@ -341,6 +341,7 @@ export const poolParticipants = (poolIds: number[]) => `
     np.pool_id IN (${poolIds.join(',')})
     AND ab.asset_id NOT LIKE '%Ztg%'
     AND ab.asset_id NOT LIKE '%{"foreignAsset"%'
+    AND ab.balance > 0
   GROUP BY 
     np.pool_id
 `;
@@ -384,24 +385,44 @@ export const poolVolume = (poolIds: number[], prices: Map<BaseAsset, number>) =>
       AND ab.asset_id NOT LIKE '%{"foreignAsset"%'
       AND ab.balance > 0
   ),
-  pool_volumes AS (
+  pool_swaps AS (
     SELECT 
       pa.pool_id,
       pa.collateral,
-      COALESCE(SUM(COALESCE(hs.asset_amount_in, 0) + COALESCE(hs.asset_amount_out, 0)), 0) AS raw_volume
+      hs.id as swap_id,
+      hs.asset_amount_in,
+      hs.asset_amount_out
     FROM 
       pool_assets pa
     LEFT JOIN historical_swap hs ON 
       hs.asset_in = pa.asset_id OR 
       hs.asset_out = pa.asset_id
+  ),
+  dedup_swaps AS (
+    SELECT DISTINCT ON (ps.swap_id, ps.pool_id)
+      ps.pool_id,
+      ps.collateral,
+      GREATEST(COALESCE(ps.asset_amount_in, 0), COALESCE(ps.asset_amount_out, 0)) AS raw_amount
+    FROM 
+      pool_swaps ps
+    WHERE 
+      ps.swap_id IS NOT NULL
+  ),
+  pool_volumes AS (
+    SELECT 
+      ds.pool_id,
+      ds.collateral,
+      COALESCE(SUM(ds.raw_amount), 0) AS raw_volume
+    FROM 
+      dedup_swaps ds
     GROUP BY 
-      pa.pool_id, pa.collateral
+      ds.pool_id, ds.collateral
   )
   SELECT 
     pv.pool_id,
     CASE
-      WHEN pv.collateral = 'Ztg' THEN COALESCE(ROUND(pv.raw_volume * ${prices.get(BaseAsset.ZTG)}, 0), 0)
-      WHEN pv.collateral = '{"foreignAsset":0}' THEN COALESCE(ROUND(pv.raw_volume * ${prices.get(BaseAsset.DOT)}, 0), 0)
+      WHEN pv.collateral = 'Ztg' THEN COALESCE(ROUND(pv.raw_volume * ${prices.get(BaseAsset.ZTG) ?? 1}, 0), 0)
+      WHEN pv.collateral = '{"foreignAsset":0}' THEN COALESCE(ROUND(pv.raw_volume * ${prices.get(BaseAsset.DOT) ?? 1}, 0), 0)
       ELSE COALESCE(pv.raw_volume, 0)
     END AS volume
   FROM 

@@ -37,9 +37,51 @@ export class PoolStatsResolver {
     const traders = await manager.query(poolTraders(ids));
     const volume = await manager.query(poolVolume(ids, await getAssetUsdPrices()));
 
-    const merged1 = mergeByField(liquidity, volume, 'pool_id');
-    const merged2 = mergeByField(traders, participants, 'pool_id');
-    const result = mergeByField(merged1, merged2, 'pool_id');
-    return result;
+    // Initialize result entries for all requested pool IDs with default values
+    const results: PoolStats[] = ids.map(poolId => new PoolStats({
+      pool_id: poolId,
+      participants: 0,
+      liquidity: BigInt(0),
+      traders: 0,
+      volume: BigInt(0),
+    }));
+
+    // Create lookup maps for efficient population
+    const resultMap = new Map<number, PoolStats>();
+    results.forEach(result => resultMap.set(result.pool_id, result));
+
+    // Populate participants data
+    participants.forEach((row: any) => {
+      const result = resultMap.get(Number(row.pool_id));
+      if (result) {
+        result.participants = Number(row.participants || 0);
+      }
+    });
+
+    // Populate liquidity data
+    liquidity.forEach((row: any) => {
+      const result = resultMap.get(Number(row.pool_id));
+      if (result) {
+        result.liquidity = BigInt(row.liquidity || 0);
+      }
+    });
+
+    // Populate traders data
+    traders.forEach((row: any) => {
+      const result = resultMap.get(Number(row.pool_id));
+      if (result) {
+        result.traders = Number(row.traders || 0);
+      }
+    });
+
+    // Populate volume data
+    volume.forEach((row: any) => {
+      const result = resultMap.get(Number(row.pool_id));
+      if (result) {
+        result.volume = BigInt(row.volume || 0);
+      }
+    });
+
+    return results;
   }
 }
