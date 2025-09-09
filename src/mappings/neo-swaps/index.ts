@@ -158,7 +158,7 @@ export const combinatorialPoolDeployed = async (
   store: Store,
   event: Event
 ): Promise<{ historicalAssets: HistoricalAsset[]; historicalMarket: HistoricalMarket } | undefined> => {
-  const { who, marketId, poolId, accountId, collateral, liquidityParameter, poolSharesAmount, swapFee } =
+  const { who, marketId, marketIds, poolId, accountId, collateral, liquidityParameter, poolSharesAmount, swapFee } =
     decodeCombinatorialPoolDeployed(event);
 
   const account = await store.get(Account, {
@@ -177,6 +177,7 @@ export const combinatorialPoolDeployed = async (
     id: event.id + '-' + poolId,
     liquidityParameter,
     marketId,
+    marketIds,
     poolId,
     swapFee,
     totalStake: poolSharesAmount,
@@ -304,7 +305,7 @@ export const combinatorialPoolDeployed = async (
   });
 
   return { historicalAssets, historicalMarket };
-};
+};;
 
 export const comboBuyExecuted = async (
   store: Store,
