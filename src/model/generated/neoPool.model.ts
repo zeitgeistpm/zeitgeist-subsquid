@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_, StringColumn as StringColumn_, DateTimeColumn as DateTimeColumn_, BigIntColumn as BigIntColumn_, OneToMany as OneToMany_, IntColumn as IntColumn_} from "@subsquid/typeorm-store"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_, StringColumn as StringColumn_, DateTimeColumn as DateTimeColumn_, BigIntColumn as BigIntColumn_, OneToMany as OneToMany_, IntColumn as IntColumn_, BooleanColumn as BooleanColumn_} from "@subsquid/typeorm-store"
 import {Account} from "./account.model"
 import {LiquiditySharesManager} from "./liquiditySharesManager.model"
 
@@ -38,6 +38,10 @@ export class NeoPool {
     marketIds!: (number)[]
 
     @Index_()
+    @BooleanColumn_({nullable: false})
+    isMultiMarket!: boolean
+
+    @Index_()
     @IntColumn_({nullable: false})
     poolId!: number
 
@@ -46,4 +50,10 @@ export class NeoPool {
 
     @BigIntColumn_({nullable: false})
     totalStake!: bigint
+
+    /**
+     * Total volume traded in this pool (for multi-market pools, this is the only volume tracking)
+     */
+    @BigIntColumn_({nullable: false})
+    volume!: bigint
 }

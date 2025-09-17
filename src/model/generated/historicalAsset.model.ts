@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, Index as Index_, FloatColumn as FloatColumn_, BigIntColumn as BigIntColumn_, IntColumn as IntColumn_, DateTimeColumn as DateTimeColumn_} from "@subsquid/typeorm-store"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, Index as Index_, IntColumn as IntColumn_, FloatColumn as FloatColumn_, BigIntColumn as BigIntColumn_, DateTimeColumn as DateTimeColumn_} from "@subsquid/typeorm-store"
 
 /**
  * A type that records the price history of an outcome asset.
@@ -28,6 +28,19 @@ export class HistoricalAsset {
     @Index_()
     @StringColumn_({nullable: false})
     assetId!: string
+
+    /**
+     * All market IDs this asset is associated with (for multi-market pools)
+     */
+    @IntColumn_({array: true, nullable: true})
+    marketIds!: (number)[] | undefined | null
+
+    /**
+     * Connected neo pool ID
+     */
+    @Index_()
+    @IntColumn_({nullable: true})
+    poolId!: number | undefined | null
 
     /**
      * Price of the asset has decreased if -ve and +ve if increased

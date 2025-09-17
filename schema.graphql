@@ -63,12 +63,16 @@ type Asset @entity {
   color: String
   "Image identifier"
   img: String
-  "Connected market"
-  market: Market!
+  "Primary market (null for multi-market assets, set for single-market assets)"
+  market: Market
+  "All market IDs this asset is associated with (for multi-market pools)"
+  marketIds: [Int!]
   "Title ex. `Locomotiv will not be defeated`"
   name: String
   "Connected pool"
   pool: Pool
+  "Connected neo pool ID"
+  poolId: Int @index
   "Spot price of the asset in the pool"
   price: Float!
   "Short abbreviation ex. `LMDRAW`"
@@ -85,6 +89,10 @@ type HistoricalAsset @entity {
   accountId: String @index
   "Zeitgeist's identifier for asset"
   assetId: String! @index
+  "All market IDs this asset is associated with (for multi-market pools)"
+  marketIds: [Int!]
+  "Connected neo pool ID"
+  poolId: Int @index
   "Price of the asset has decreased if -ve and +ve if increased"
   dPrice: Float
   "Units of asset user bought (-ve) or sold (+ve)"
@@ -308,9 +316,12 @@ type NeoPool @entity {
   liquiditySharesManager: [LiquiditySharesManager!]! @derivedFrom(field: "neoPool")
   marketId: Int! @index
   marketIds: [Int!]!
+  isMultiMarket: Boolean! @index
   poolId: Int! @index
   swapFee: BigInt!
   totalStake: BigInt!
+  "Total volume traded in this pool (for multi-market pools, this is the only volume tracking)"
+  volume: BigInt!
 }
 
 type LiquiditySharesManager @entity {
