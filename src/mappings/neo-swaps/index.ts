@@ -47,8 +47,14 @@ const getAssetOrSkip = async (
   }
   
   // Verify market ownership if expectedMarketId is provided
-  if (expectedMarketId !== undefined && asset.market.marketId !== expectedMarketId) {
+  if (expectedMarketId !== undefined && asset.market && asset.market.marketId !== expectedMarketId) {
     console.warn(`Asset ${assetId} belongs to market ${asset.market.marketId}, not expected market ${expectedMarketId} - skipping to prevent cross-market corruption`);
+    return null;
+  }
+
+  // For multi-market assets (market is null), skip market verification
+  if (expectedMarketId !== undefined && !asset.market) {
+    console.warn(`Asset ${assetId} is a multi-market asset, cannot verify single market ownership`);
     return null;
   }
   
@@ -107,6 +113,8 @@ export const buyExecuted = async (
         dPrice: asset.price - oldPrice,
         event: event.name.split('.')[1],
         id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+        marketIds: market.neoPool?.marketIds || [market.marketId],
+        poolId: poolId,  // Use the actual poolId from the event
         newAmountInPool: asset.amountInPool,
         newPrice: asset.price,
         timestamp: new Date(event.block.timestamp!),
@@ -178,9 +186,11 @@ export const combinatorialPoolDeployed = async (
     liquidityParameter,
     marketId,
     marketIds,
+    isMultiMarket: marketIds.length > 1,
     poolId,
     swapFee,
     totalStake: poolSharesAmount,
+    volume: BigInt(0),
   });
   await store.save<NeoPool>(neoPool);
 
@@ -193,6 +203,78 @@ export const combinatorialPoolDeployed = async (
   });
   await store.save<LiquiditySharesManager>(liquiditySharesManager);
 
+  // Check if this is a multi-market pool
+  if (marketIds.length > 1) {
+    // Multi-market pool: Don't modify any markets, but still track assets
+    console.log(`[${event.name}] Multi-market combinatorial pool ${poolId} created for markets ${marketIds.join(', ')}`);
+    
+    // Process assets for historical tracking without modifying markets
+    const historicalAssets: HistoricalAsset[] = [];
+    
+    await Promise.all(
+      neoPool.account.balances.map(async (ab) => {
+        if (isBaseAsset(ab.assetId)) return;
+        
+        // Check if asset already exists
+        let asset = await store.get(Asset, { 
+          where: { assetId: ab.assetId },
+          relations: { market: true }
+        });
+        
+        if (asset) {
+          // Update existing asset with pool information
+          asset.poolId = poolId;
+          asset.marketIds = marketIds;
+          asset.amountInPool = ab.balance;
+          asset.price = computeNeoSwapSpotPrice(ab.balance, neoPool.liquidityParameter);
+          await store.save<Asset>(asset);
+        } else {
+          // Create new asset for multi-market pool (combinatorial tokens)
+          const hash = createHash('sha256').update(ab.assetId).digest('hex');
+          const uniqueId = hash.substring(0, 16);
+
+          asset = new Asset({
+            id: event.id + '-' + uniqueId,
+            assetId: ab.assetId,
+            amountInPool: ab.balance,
+            price: computeNeoSwapSpotPrice(ab.balance, neoPool.liquidityParameter),
+            market: null,  // Multi-market asset has no single primary market
+            marketIds: marketIds,
+            poolId: poolId,
+            pool: null,
+          });
+          console.log(`[${event.name}] Creating new multi-market asset: ${JSON.stringify(asset, null, 2)}`);
+          await store.save<Asset>(asset);
+        }
+        
+        if (asset) {
+          // Create historical record
+          const ha = new HistoricalAsset({
+            accountId: who,
+            assetId: asset.assetId,
+            blockNumber: event.block.height,
+            dAmountInPool: asset.amountInPool,
+            dPrice: asset.price,
+            event: event.name.split('.')[1],
+            id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+            marketIds: marketIds,
+            poolId: poolId,
+            newAmountInPool: asset.amountInPool,
+            newPrice: asset.price,
+            timestamp: new Date(event.block.timestamp!),
+          });
+          historicalAssets.push(ha);
+        }
+      })
+    );
+    
+    await store.save<HistoricalAsset>(historicalAssets);
+    
+    // Return empty for historical market since no market was modified
+    return { historicalAssets, historicalMarket: undefined as any };
+  }
+
+  // Single-market pool: Continue with existing logic
   const market = await store.get(Market, {
     where: { marketId },
     relations: { assets: true },
@@ -205,7 +287,7 @@ export const combinatorialPoolDeployed = async (
   let newLiquidity = BigInt(0);
 
   await Promise.all(
-    neoPool.account.balances.map(async (ab, i) => {
+    neoPool.account.balances.map(async (ab) => {
       if (isBaseAsset(ab.assetId)) return;
       
       // Check if asset already exists to avoid creating duplicates
@@ -225,16 +307,20 @@ export const combinatorialPoolDeployed = async (
           amountInPool: ab.balance,
           price: computeNeoSwapSpotPrice(ab.balance, neoPool.liquidityParameter),
           market,
+          marketIds: marketIds,
+          poolId: poolId,
           pool: null,
         });
         console.log(`[${event.name}] Creating new asset: ${JSON.stringify(asset, null, 2)}`);
       } else {
-        if (asset.market.marketId !== market.marketId) {
+        if (asset.market && asset.market.marketId !== market.marketId) {
           return;
         }
         // Update existing asset properties (verified to be from same market)
         asset.amountInPool = ab.balance;
         asset.price = computeNeoSwapSpotPrice(ab.balance, neoPool.liquidityParameter);
+        asset.poolId = poolId;
+        asset.marketIds = marketIds;
       }
       
       assets.push(asset);
@@ -247,6 +333,8 @@ export const combinatorialPoolDeployed = async (
         dPrice: asset.price,
         event: event.name.split('.')[1],
         id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+        marketIds: marketIds,
+        poolId: poolId,
         newAmountInPool: asset.amountInPool,
         newPrice: asset.price,
         timestamp: new Date(event.block.timestamp!),
@@ -374,6 +462,8 @@ export const comboBuyExecuted = async (
         dPrice: asset.price - (oldPrice || 0),
         event: event.name.split('.')[1],
         id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+        marketIds: market.neoPool?.marketIds || [market.marketId],
+        poolId: poolId,  // Use the actual poolId from the event
         newAmountInPool: asset.amountInPool,
         newPrice: asset.price,
         timestamp: new Date(event.block.timestamp!),
@@ -383,26 +473,9 @@ export const comboBuyExecuted = async (
   );
 
 
-  market.liquidity = newLiquidity;
-  market.volume += amountIn;
-  console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
-  await store.save<Market>(market);
-
-  const historicalMarket = new HistoricalMarket({
-    blockNumber: event.block.height,
-    by: who,
-    dLiquidity: market.liquidity - oldLiquidity,
-    dVolume: amountIn,
-    event: MarketEvent.ComboBuyExecuted,
-    id: event.id + '-' + market.marketId,
-    liquidity: market.liquidity,
-    market,
-    outcome: null,
-    resolvedOutcome: null,
-    status: market.status,
-    timestamp: new Date(event.block.timestamp!),
-    volume: market.volume,
-  });
+  // Update pool volume
+  neoPool.volume = (neoPool.volume || BigInt(0)) + amountIn;
+  await store.save<NeoPool>(neoPool);
 
   const historicalSwap = new HistoricalSwap({
     accountId: who,
@@ -419,7 +492,35 @@ export const comboBuyExecuted = async (
     timestamp: new Date(event.block.timestamp!),
   });
 
-  return { historicalAssets, historicalSwap, historicalMarket };
+  // Only update market stats for single-market pools (backward compatibility)
+  if (!neoPool.isMultiMarket) {
+    market.liquidity = newLiquidity;
+    market.volume += amountIn;
+    console.log(`[${event.name}] Saving market (single-market pool): ${JSON.stringify(market, null, 2)}`);
+    await store.save<Market>(market);
+
+    const historicalMarket = new HistoricalMarket({
+      blockNumber: event.block.height,
+      by: who,
+      dLiquidity: market.liquidity - oldLiquidity,
+      dVolume: amountIn,
+      event: MarketEvent.ComboBuyExecuted,
+      id: event.id + '-' + market.marketId,
+      liquidity: market.liquidity,
+      market,
+      outcome: null,
+      resolvedOutcome: null,
+      status: market.status,
+      timestamp: new Date(event.block.timestamp!),
+      volume: market.volume,
+    });
+
+    return { historicalAssets, historicalSwap, historicalMarket };
+  } else {
+    console.log(`[${event.name}] Skipping market update for multi-market pool ${poolId}`);
+    // For multi-market pools, don't create historical market records to avoid false data
+    return { historicalAssets, historicalSwap, historicalMarket: undefined as any };
+  }
 };;;;
 
 export const comboSellExecuted = async (
@@ -484,6 +585,8 @@ export const comboSellExecuted = async (
         dPrice: asset.price - oldPrice,
         event: event.name.split('.')[1],
         id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+        marketIds: market.neoPool?.marketIds || [market.marketId],
+        poolId: poolId,  // Use the actual poolId from the event
         newAmountInPool: asset.amountInPool,
         newPrice: asset.price,
         timestamp: new Date(event.block.timestamp!),
@@ -492,26 +595,9 @@ export const comboSellExecuted = async (
     })
   );
 
-  market.liquidity = newLiquidity;
-  market.volume += amountOut;
-  console.log(`[${event.name}] Saving market: ${JSON.stringify(market, null, 2)}`);
-  await store.save<Market>(market);
-
-  const historicalMarket = new HistoricalMarket({
-    blockNumber: event.block.height,
-    by: who,
-    dLiquidity: market.liquidity - oldLiquidity,
-    dVolume: amountOut,
-    event: MarketEvent.ComboSellExecuted,
-    id: event.id + '-' + market.marketId,
-    liquidity: market.liquidity,
-    market,
-    outcome: null,
-    resolvedOutcome: null,
-    status: market.status,
-    timestamp: new Date(event.block.timestamp!),
-    volume: market.volume,
-  });
+  // Update pool volume
+  neoPool.volume = (neoPool.volume || BigInt(0)) + amountOut;
+  await store.save<NeoPool>(neoPool);
 
   const historicalSwap = new HistoricalSwap({
     accountId: who,
@@ -528,7 +614,35 @@ export const comboSellExecuted = async (
     timestamp: new Date(event.block.timestamp!),
   });
 
-  return { historicalAssets, historicalSwap, historicalMarket };
+  // Only update market stats for single-market pools (backward compatibility)
+  if (!neoPool.isMultiMarket) {
+    market.liquidity = newLiquidity;
+    market.volume += amountOut;
+    console.log(`[${event.name}] Saving market (single-market pool): ${JSON.stringify(market, null, 2)}`);
+    await store.save<Market>(market);
+
+    const historicalMarket = new HistoricalMarket({
+      blockNumber: event.block.height,
+      by: who,
+      dLiquidity: market.liquidity - oldLiquidity,
+      dVolume: amountOut,
+      event: MarketEvent.ComboSellExecuted,
+      id: event.id + '-' + market.marketId,
+      liquidity: market.liquidity,
+      market,
+      outcome: null,
+      resolvedOutcome: null,
+      status: market.status,
+      timestamp: new Date(event.block.timestamp!),
+      volume: market.volume,
+    });
+
+    return { historicalAssets, historicalSwap, historicalMarket };
+  } else {
+    console.log(`[${event.name}] Skipping market update for multi-market pool ${poolId}`);
+    // For multi-market pools, don't create historical market records to avoid false data
+    return { historicalAssets, historicalSwap, historicalMarket: undefined as any };
+  }
 };;
 
 export const exitExecuted = async (
@@ -585,6 +699,8 @@ export const exitExecuted = async (
         dPrice: asset.price - oldPrice,
         event: event.name.split('.')[1],
         id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+        marketIds: market.neoPool?.marketIds || [market.marketId],
+        poolId: poolId,  // Use the actual poolId from the event
         newAmountInPool: asset.amountInPool,
         newPrice: asset.price,
         timestamp: new Date(event.block.timestamp!),
@@ -616,7 +732,7 @@ export const exitExecuted = async (
 };
 
 export const feesWithdrawn = async (store: Store, event: Event) => {
-  const { who, poolId, marketId, amount } = decodeFeesWithdrawnEvent(event);
+  const { who, poolId, marketId } = decodeFeesWithdrawnEvent(event);
 
   const liquiditySharesManager = await store.get(LiquiditySharesManager, {
     where: { account: who, neoPool: { marketId: marketId ?? poolId } },
@@ -690,6 +806,8 @@ export const joinExecuted = async (
         dPrice: asset.price - oldPrice,
         event: event.name.split('.')[1],
         id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+        marketIds: market.neoPool?.marketIds || [market.marketId],
+        poolId: poolId,  // Use the actual poolId from the event
         newAmountInPool: asset.amountInPool,
         newPrice: asset.price,
         timestamp: new Date(event.block.timestamp!),
@@ -742,9 +860,12 @@ export const poolDeployed = async (
     id: event.id + '-' + poolId,
     liquidityParameter,
     marketId,
+    marketIds: [marketId],  // Single market as array for consistency
+    isMultiMarket: false,  // Always false for regular poolDeployed
     poolId: poolId,  // Using block height as poolId for v50-v54 to ensure uniqueness
     swapFee,
     totalStake: poolSharesAmount,
+    volume: BigInt(0),
   });
   console.log(`[${event.name}] Saving neo pool: ${JSON.stringify(neoPool, null, 2)}`);
   await store.save<NeoPool>(neoPool);
@@ -771,7 +892,7 @@ export const poolDeployed = async (
   let newLiquidity = BigInt(0);
 
   await Promise.all(
-    neoPool.account.balances.map(async (ab, i) => {
+    neoPool.account.balances.map(async (ab) => {
       if (isBaseAsset(ab.assetId)) return;
       let asset = await store.get(Asset, {
         where: { assetId: ab.assetId },
@@ -789,6 +910,8 @@ export const poolDeployed = async (
         dPrice: asset.price,
         event: event.name.split('.')[1],
         id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+        marketIds: market.neoPool?.marketIds || [market.marketId],
+        poolId: poolId,  // Use the actual poolId from the event
         newAmountInPool: asset.amountInPool,
         newPrice: asset.price,
         timestamp: new Date(event.block.timestamp!),
@@ -887,6 +1010,8 @@ export const sellExecuted = async (
         dPrice: asset.price - oldPrice,
         event: event.name.split('.')[1],
         id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
+        marketIds: market.neoPool?.marketIds || [market.marketId],
+        poolId: poolId,  // Use the actual poolId from the event
         newAmountInPool: asset.amountInPool,
         newPrice: asset.price,
         timestamp: new Date(event.block.timestamp!),
