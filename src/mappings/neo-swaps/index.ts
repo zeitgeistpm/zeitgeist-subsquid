@@ -65,7 +65,7 @@ export const buyExecuted = async (
   store: Store,
   event: Event
 ): Promise<
-  | { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalMarket: HistoricalMarket }
+  | { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalMarket?: HistoricalMarket }
   | undefined
 > => {
   const { who, poolId, marketId, assetExecuted, amountIn, amountOut, swapFeeAmount, externalFeeAmount } =
@@ -399,7 +399,7 @@ export const comboBuyExecuted = async (
   store: Store,
   event: Event
 ): Promise<
-  | { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalMarket: HistoricalMarket }
+  | { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalMarket?: HistoricalMarket }
   | undefined
 > => {
   const { who, poolId, assetExecuted, amountIn, amountOut, swapFeeAmount, externalFeeAmount } =
@@ -519,7 +519,7 @@ export const comboBuyExecuted = async (
   } else {
     console.log(`[${event.name}] Skipping market update for multi-market pool ${poolId}`);
     // For multi-market pools, don't create historical market records to avoid false data
-    return { historicalAssets, historicalSwap, historicalMarket: undefined as any };
+    return { historicalAssets, historicalSwap };
   }
 };;;;
 
@@ -527,7 +527,7 @@ export const comboSellExecuted = async (
   store: Store,
   event: Event
 ): Promise<
-  | { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalMarket: HistoricalMarket }
+  | { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalMarket?: HistoricalMarket }
   | undefined
 > => {
   const { who, poolId, assetExecuted, amountIn, amountOut, swapFeeAmount, externalFeeAmount } =
@@ -641,7 +641,7 @@ export const comboSellExecuted = async (
   } else {
     console.log(`[${event.name}] Skipping market update for multi-market pool ${poolId}`);
     // For multi-market pools, don't create historical market records to avoid false data
-    return { historicalAssets, historicalSwap, historicalMarket: undefined as any };
+    return { historicalAssets, historicalSwap };
   }
 };;
 
@@ -962,7 +962,7 @@ export const sellExecuted = async (
   store: Store,
   event: Event
 ): Promise<
-  | { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalMarket: HistoricalMarket }
+  | { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalMarket?: HistoricalMarket }
   | undefined
 > => {
   const { who, poolId, marketId, assetExecuted, amountIn, amountOut, swapFeeAmount, externalFeeAmount } =

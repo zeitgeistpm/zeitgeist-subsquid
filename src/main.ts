@@ -326,7 +326,9 @@ const mapNeoSwaps = async (store: Store, event: Event) => {
       if (!res) break;
       assetHistory.push(...res.historicalAssets);
       swapHistory.push(res.historicalSwap);
-      marketHistory.push(res.historicalMarket);
+      if (res.historicalMarket) {
+        marketHistory.push(res.historicalMarket);
+      }
       break;
     }
     case events.neoSwaps.comboSellExecuted.name: {
@@ -335,7 +337,9 @@ const mapNeoSwaps = async (store: Store, event: Event) => {
       if (!res) break;
       assetHistory.push(...res.historicalAssets);
       swapHistory.push(res.historicalSwap);
-      marketHistory.push(res.historicalMarket);
+      if (res.historicalMarket) {
+        marketHistory.push(res.historicalMarket);
+      }
       break;
     }
     case events.neoSwaps.exitExecuted.name: {
