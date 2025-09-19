@@ -65,7 +65,7 @@ export const buyExecuted = async (
   store: Store,
   event: Event
 ): Promise<
-  | { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalMarket?: HistoricalMarket }
+  | { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalMarket: HistoricalMarket }
   | undefined
 > => {
   const { who, poolId, marketId, assetExecuted, amountIn, amountOut, swapFeeAmount, externalFeeAmount } =
@@ -962,7 +962,7 @@ export const sellExecuted = async (
   store: Store,
   event: Event
 ): Promise<
-  | { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalMarket?: HistoricalMarket }
+  | { historicalAssets: HistoricalAsset[]; historicalSwap: HistoricalSwap; historicalMarket: HistoricalMarket }
   | undefined
 > => {
   const { who, poolId, marketId, assetExecuted, amountIn, amountOut, swapFeeAmount, externalFeeAmount } =
