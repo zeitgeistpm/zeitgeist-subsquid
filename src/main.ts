@@ -317,7 +317,9 @@ const mapNeoSwaps = async (store: Store, event: Event) => {
       const res = await mappings.neoSwaps.combinatorialPoolDeployed(store, event);
       if (!res) break;
       assetHistory.push(...res.historicalAssets);
-      marketHistory.push(res.historicalMarket);
+      if (res.historicalMarket) {
+        marketHistory.push(res.historicalMarket);
+      }
       break;
     }
     case events.neoSwaps.comboBuyExecuted.name: {
