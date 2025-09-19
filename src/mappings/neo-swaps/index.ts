@@ -165,7 +165,7 @@ export const buyExecuted = async (
 export const combinatorialPoolDeployed = async (
   store: Store,
   event: Event
-): Promise<{ historicalAssets: HistoricalAsset[]; historicalMarket: HistoricalMarket } | undefined> => {
+): Promise<{ historicalAssets: HistoricalAsset[]; historicalMarket?: HistoricalMarket } | undefined> => {
   const { who, marketId, marketIds, poolId, accountId, collateral, liquidityParameter, poolSharesAmount, swapFee } =
     decodeCombinatorialPoolDeployed(event);
 
@@ -269,9 +269,9 @@ export const combinatorialPoolDeployed = async (
     );
     
     await store.save<HistoricalAsset>(historicalAssets);
-    
-    // Return empty for historical market since no market was modified
-    return { historicalAssets, historicalMarket: undefined as any };
+
+    // Return without historical market since no market was modified
+    return { historicalAssets };
   }
 
   // Single-market pool: Continue with existing logic
