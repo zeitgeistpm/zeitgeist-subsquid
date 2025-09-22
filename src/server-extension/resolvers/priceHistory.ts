@@ -137,9 +137,9 @@ export class PriceHistoryResolver {
     }
     interval = interval ?? new IntervalArgs({ unit: Unit.Hour, value: 1 });
 
-    // Get normalized price history for all combinatorial assets at once
+    // Get normalized price history for all combinatorial assets at once, filtered by poolId
     const priceHistoryRows = await manager.query(
-      assetPriceHistory(outcomeAssets, startTime, endTime, interval.toString())
+      assetPriceHistory(outcomeAssets, startTime, endTime, interval.toString(), poolId)
     );
 
     // Group by timestamp and build response format

@@ -1,7 +1,7 @@
 import { BaseAsset } from '../consts';
 import { encodedAssetId } from './helper';
 
-export const assetPriceHistory = (assetIds: string[], startTime: string, endTime: string, interval: string) => `
+export const assetPriceHistory = (assetIds: string[], startTime: string, endTime: string, interval: string, poolId?: number) => `
   WITH t0 AS (
     SELECT
       GENERATE_SERIES (
@@ -26,6 +26,7 @@ export const assetPriceHistory = (assetIds: string[], startTime: string, endTime
     WHERE
       ha.asset_id = asset_list.asset_id
       AND ha.timestamp <= t0.timestamp_t0
+      ${poolId !== undefined ? `AND ha.pool_id = ${poolId}` : ''}
     ORDER BY
       ha.timestamp DESC
     LIMIT 1
