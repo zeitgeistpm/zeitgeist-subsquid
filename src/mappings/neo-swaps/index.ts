@@ -52,10 +52,12 @@ const getAssetOrSkip = async (
     return null;
   }
 
-  // For multi-market assets (market is null), skip market verification
-  if (expectedMarketId !== undefined && !asset.market) {
-    console.warn(`Asset ${assetId} is a multi-market asset, cannot verify single market ownership`);
-    return null;
+  // For pool-specific combinatorial assets (market is null), they are valid and should be processed
+  // These assets only belong to a specific pool and don't have a market association
+  if (!asset.market) {
+    console.log(`Asset ${assetId} is a pool-specific combinatorial asset (no market association)`);
+    // Pool-specific assets are valid and should be processed
+    return asset;
   }
   
   return asset;
