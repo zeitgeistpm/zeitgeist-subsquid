@@ -82,7 +82,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           await mapMarketAssets(event);
           break;
         case Pallet.NeoSwaps:
-          await mapNeoSwaps(ctx.store, event);
+          await mapNeoSwaps(ctx.store, event, block.events);
           break;
         case Pallet.Orderbook:
           await mapOrderbook(ctx.store, event);
@@ -301,7 +301,7 @@ const mapMarketAssets = async (event: Event) => {
   }
 };
 
-const mapNeoSwaps = async (store: Store, event: Event) => {
+const mapNeoSwaps = async (store: Store, event: Event, blockEvents: Event[]) => {
   switch (event.name) {
     case events.neoSwaps.buyExecuted.name: {
       await saveAccounts(store);
@@ -314,7 +314,7 @@ const mapNeoSwaps = async (store: Store, event: Event) => {
     }
     case events.neoSwaps.combinatorialPoolDeployed.name: {
       await saveAccounts(store);
-      const res = await mappings.neoSwaps.combinatorialPoolDeployed(store, event);
+      const res = await mappings.neoSwaps.combinatorialPoolDeployed(store, event, blockEvents);
       if (!res) break;
       assetHistory.push(...res.historicalAssets);
       if (res.historicalMarket) {

@@ -15,6 +15,7 @@ import {
 import { SwapEvent } from '../../consts';
 import { computeNeoSwapSpotPrice, extrinsicFromEvent, isBaseAsset, pad } from '../../helper';
 import { Event } from '../../processor';
+import { events } from '../../types';
 import {
   decodeBuyExecutedEvent,
   decodeCombinatorialPoolDeployed,
@@ -166,7 +167,8 @@ export const buyExecuted = async (
 
 export const combinatorialPoolDeployed = async (
   store: Store,
-  event: Event
+  event: Event,
+  blockEvents: Event[]
 ): Promise<{ historicalAssets: HistoricalAsset[]; historicalMarket?: HistoricalMarket } | undefined> => {
   const { who, marketId, marketIds, poolId, accountId, collateral, liquidityParameter, poolSharesAmount, swapFee } =
     decodeCombinatorialPoolDeployed(event);
@@ -178,6 +180,22 @@ export const combinatorialPoolDeployed = async (
   if (!account) {
     console.error(`Coudn't find pool account with accountId ${accountId}`);
     return;
+  }
+
+  // Extract parentCollectionIds from TokenSplit events in the same extrinsic (transaction)
+  const parentCollectionIds: string[] = [];
+  for (const blockEvent of blockEvents) {
+    if (
+      blockEvent.name === 'CombinatorialTokens.TokenSplit' &&
+      blockEvent.extrinsic?.id === event.extrinsic?.id
+    ) {
+      const decoded = events.combinatorialTokens.tokenSplit.v60.decode(blockEvent);
+      if (decoded.parentCollectionId) {
+        // Convert bytes to UTF-8 string (bytes represent a hex string like "0x4831...")
+        const hexId = Buffer.from(decoded.parentCollectionId).toString('utf8');
+        parentCollectionIds.push(hexId);
+      }
+    }
   }
 
   const neoPool = new NeoPool({
@@ -193,7 +211,9 @@ export const combinatorialPoolDeployed = async (
     swapFee,
     totalStake: poolSharesAmount,
     volume: BigInt(0),
+    parentCollectionIds: parentCollectionIds.length > 0 ? parentCollectionIds : null,
   });
+  console.log(`[${event.name}] Saving neo pool with parentCollectionIds: ${JSON.stringify(parentCollectionIds.length > 0 ? parentCollectionIds : null)}`);
   await store.save<NeoPool>(neoPool);
 
   const liquiditySharesManager = new LiquiditySharesManager({
@@ -395,7 +415,7 @@ export const combinatorialPoolDeployed = async (
   });
 
   return { historicalAssets, historicalMarket };
-};;
+};
 
 export const comboBuyExecuted = async (
   store: Store,
@@ -523,7 +543,7 @@ export const comboBuyExecuted = async (
     // For multi-market pools, don't create historical market records to avoid false data
     return { historicalAssets, historicalSwap };
   }
-};;;;
+};
 
 export const comboSellExecuted = async (
   store: Store,
@@ -645,7 +665,7 @@ export const comboSellExecuted = async (
     // For multi-market pools, don't create historical market records to avoid false data
     return { historicalAssets, historicalSwap };
   }
-};;
+};
 
 export const exitExecuted = async (
   store: Store,
@@ -868,6 +888,7 @@ export const poolDeployed = async (
     swapFee,
     totalStake: poolSharesAmount,
     volume: BigInt(0),
+    parentCollectionIds: null,
   });
   console.log(`[${event.name}] Saving neo pool: ${JSON.stringify(neoPool, null, 2)}`);
   await store.save<NeoPool>(neoPool);
@@ -958,7 +979,7 @@ export const poolDeployed = async (
   });
 
   return { historicalAssets, historicalMarket };
-};;;;;
+};
 
 export const sellExecuted = async (
   store: Store,
