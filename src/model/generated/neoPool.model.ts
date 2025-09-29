@@ -56,4 +56,10 @@ export class NeoPool {
      */
     @BigIntColumn_({nullable: false})
     volume!: bigint
+
+    /**
+     * Parent collection IDs from TokenSplit events during pool deployment
+     */
+    @StringColumn_({array: true, nullable: true})
+    parentCollectionIds!: (string)[] | undefined | null
 }

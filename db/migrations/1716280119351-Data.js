@@ -51,7 +51,8 @@ module.exports = class Data1716280119351 {
         await db.query(`ALTER TABLE "market" ADD CONSTRAINT "FK_190888a8e7a706187b12093c29d" FOREIGN KEY ("pool_id") REFERENCES "pool"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "market" ADD CONSTRAINT "FK_923b7aeab33f803bc47adddeb69" FOREIGN KEY ("neo_pool_id") REFERENCES "neo_pool"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "asset" ADD CONSTRAINT "FK_60ff504d704f76c316cb474189b" FOREIGN KEY ("market_id") REFERENCES "market"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
-        await db.query(`ALTER TABLE "asset" ADD CONSTRAINT "FK_55d87b88a0e01b25819b9d4d5aa" FOREIGN KEY ("pool_id") REFERENCES "pool"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
+        // Removed FK_55d87b88a0e01b25819b9d4d5aa: asset.poolId is just an integer reference, not a foreign key
+        // await db.query(`ALTER TABLE "asset" ADD CONSTRAINT "FK_55d87b88a0e01b25819b9d4d5aa" FOREIGN KEY ("pool_id") REFERENCES "pool"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "historical_market" ADD CONSTRAINT "FK_37393fa690692f119c5473d5152" FOREIGN KEY ("market_id") REFERENCES "market"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     }
 
@@ -105,7 +106,8 @@ module.exports = class Data1716280119351 {
         await db.query(`ALTER TABLE "market" DROP CONSTRAINT "FK_190888a8e7a706187b12093c29d"`)
         await db.query(`ALTER TABLE "market" DROP CONSTRAINT "FK_923b7aeab33f803bc47adddeb69"`)
         await db.query(`ALTER TABLE "asset" DROP CONSTRAINT "FK_60ff504d704f76c316cb474189b"`)
-        await db.query(`ALTER TABLE "asset" DROP CONSTRAINT "FK_55d87b88a0e01b25819b9d4d5aa"`)
+        // Removed FK_55d87b88a0e01b25819b9d4d5aa: constraint was never created
+        // await db.query(`ALTER TABLE "asset" DROP CONSTRAINT "FK_55d87b88a0e01b25819b9d4d5aa"`)
         await db.query(`ALTER TABLE "historical_market" DROP CONSTRAINT "FK_37393fa690692f119c5473d5152"`)
     }
 }

@@ -322,6 +322,8 @@ type NeoPool @entity {
   totalStake: BigInt!
   "Total volume traded in this pool (for multi-market pools, this is the only volume tracking)"
   volume: BigInt!
+  "Parent collection IDs from TokenSplit events during pool deployment"
+  parentCollectionIds: [String!]
 }
 
 type LiquiditySharesManager @entity {
