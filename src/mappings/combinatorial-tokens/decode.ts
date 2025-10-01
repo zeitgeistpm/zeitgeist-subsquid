@@ -30,13 +30,14 @@ export const tokenMerged = (event: Event): TokenEvent => {
 };
 
 
-export const tokenRedeemed = (event: Event): TokenEvent => {
+export const tokenRedeemed = (event: Event): TokenRedeemedEvent => {
   let decoded: {
     who: string;
     marketId: bigint;
     assetIn: Asset_v60;
     assetOut: Asset_v60;
     amountIn: bigint;
+    amountOut: bigint;
   };
   if (events.combinatorialTokens.tokenRedeemed.v60.is(event)) {
     decoded = events.combinatorialTokens.tokenRedeemed.v60.decode(event);
@@ -49,7 +50,8 @@ export const tokenRedeemed = (event: Event): TokenEvent => {
     marketId: Number(decoded.marketId),
     assetIn: [formatAssetId(decoded.assetIn)],
     assetOut: [formatAssetId(decoded.assetOut)],
-    amount: BigInt(decoded.amountIn),
+    amountIn: BigInt(decoded.amountIn),
+    amountOut: BigInt(decoded.amountOut),
   };
 };
 
@@ -82,4 +84,13 @@ interface TokenEvent {
   assetIn: string[];
   assetOut: string[];
   amount: bigint;
+}
+
+interface TokenRedeemedEvent {
+  accountId: string;
+  marketId: number;
+  assetIn: string[];
+  assetOut: string[];
+  amountIn: bigint;
+  amountOut: bigint;
 }

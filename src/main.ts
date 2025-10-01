@@ -222,8 +222,9 @@ const mapCombinatorialTokens = async (event: Event) => {
       break;
     }
     case events.combinatorialTokens.tokenRedeemed.name: {
-      const ht = await mappings.combinatorialTokens.tokenRedeemed(event);
-      tokenHistory.push(ht);
+      const { historicalToken, historicalAccountBalances } = await mappings.combinatorialTokens.tokenRedeemed(event);
+      tokenHistory.push(historicalToken);
+      await storeBalanceChanges(historicalAccountBalances);
       break;
     }
     case events.combinatorialTokens.tokenSplit.name: {
