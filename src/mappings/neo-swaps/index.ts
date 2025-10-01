@@ -437,40 +437,47 @@ export const comboBuyExecuted = async (
     return;
   }
 
-  // Then get the market using the correct marketId from the neo pool
-  const market = await store.get(Market, {
-    where: { marketId: neoPool.marketId },
-    relations: { neoPool: { account: { balances: true }, liquiditySharesManager: true } },
-  });
-  if (!market || !market.neoPool) return;
-
+  // Update liquidity shares manager fees
   await Promise.all(
-    market.neoPool.liquiditySharesManager.map(async (lsm) => {
-      lsm.fees += (lsm.stake / market.neoPool!.totalStake) * swapFeeAmount;
+    neoPool.liquiditySharesManager.map(async (lsm) => {
+      lsm.fees += (lsm.stake / neoPool.totalStake) * swapFeeAmount;
       console.log(`[${event.name}] Saving liquidity-shares-manager: ${JSON.stringify(lsm, null, 2)}`);
       await store.save<LiquiditySharesManager>(lsm);
     })
   );
 
-  const oldLiquidity = market.liquidity;
+  // For multi-market pools, we don't need to load a specific market
+  let market: Market | undefined;
+  let oldLiquidity = BigInt(0);
+
+  if (!neoPool.isMultiMarket) {
+    // Single-market pool: load the market for liquidity tracking
+    market = await store.get(Market, {
+      where: { marketId: neoPool.marketId },
+    });
+    if (market) {
+      oldLiquidity = market.liquidity;
+    }
+  }
+
   let newLiquidity = BigInt(0);
   const historicalAssets: HistoricalAsset[] = [];
-  
+
   await Promise.all(
-    market.neoPool.account.balances.map(async (ab) => {
+    neoPool.account.balances.map(async (ab) => {
       if (isBaseAsset(ab.assetId)) return;
-      
+
       let asset = await getAssetOrSkip(store, ab.assetId);
       if (!asset) {
         console.error(`[${event.name}] Asset ${ab.assetId} not found - this should have been created during pool deployment`);
         return;
       }
-      
+
       const oldPrice = asset.price;
       const oldAmountInPool = asset.amountInPool;
       asset.amountInPool = ab.balance;
-      asset.price = computeNeoSwapSpotPrice(ab.balance, market.neoPool!.liquidityParameter);
-      
+      asset.price = computeNeoSwapSpotPrice(ab.balance, neoPool.liquidityParameter);
+
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
       await store.save<Asset>(asset);
 
@@ -484,8 +491,8 @@ export const comboBuyExecuted = async (
         dPrice: asset.price - (oldPrice || 0),
         event: event.name.split('.')[1],
         id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
-        marketIds: market.neoPool?.marketIds || [market.marketId],
-        poolId: poolId,  // Use the actual poolId from the event
+        marketIds: neoPool.marketIds || [neoPool.marketId],
+        poolId: poolId,
         newAmountInPool: asset.amountInPool,
         newPrice: asset.price,
         timestamp: new Date(event.block.timestamp!),
@@ -503,7 +510,7 @@ export const comboBuyExecuted = async (
     accountId: who,
     assetAmountIn: amountIn,
     assetAmountOut: amountOut,
-    assetIn: market.baseAsset,
+    assetIn: neoPool.collateral,
     assetOut: assetExecuted,
     blockNumber: event.block.height,
     event: SwapEvent.ComboBuyExecuted,
@@ -515,7 +522,7 @@ export const comboBuyExecuted = async (
   });
 
   // Only update market stats for single-market pools (backward compatibility)
-  if (!neoPool.isMultiMarket) {
+  if (!neoPool.isMultiMarket && market) {
     market.liquidity = newLiquidity;
     market.volume += amountIn;
     console.log(`[${event.name}] Saving market (single-market pool): ${JSON.stringify(market, null, 2)}`);
@@ -555,45 +562,52 @@ export const comboSellExecuted = async (
   const { who, poolId, assetExecuted, amountIn, amountOut, swapFeeAmount, externalFeeAmount } =
     decodeComboSellExecuted(event);
 
-  // First find the neo pool by poolId to get the correct marketId
+  // Find the neo pool by poolId
   const neoPool = await store.get(NeoPool, {
     where: { poolId },
     relations: { account: { balances: true }, liquiditySharesManager: true },
   });
   if (!neoPool) return;
 
-  // Then get the market using the correct marketId from the neo pool
-  const market = await store.get(Market, {
-    where: { marketId: neoPool.marketId },
-    relations: { neoPool: { account: { balances: true }, liquiditySharesManager: true } },
-  });
-  if (!market || !market.neoPool) return;
-
+  // Update liquidity shares manager fees
   await Promise.all(
-    market.neoPool.liquiditySharesManager.map(async (lsm) => {
-      lsm.fees += (lsm.stake / market.neoPool!.totalStake) * swapFeeAmount;
+    neoPool.liquiditySharesManager.map(async (lsm) => {
+      lsm.fees += (lsm.stake / neoPool.totalStake) * swapFeeAmount;
       console.log(`[${event.name}] Saving liquidity-shares-manager: ${JSON.stringify(lsm, null, 2)}`);
       await store.save<LiquiditySharesManager>(lsm);
     })
   );
 
-  const oldLiquidity = market.liquidity;
+  // For multi-market pools, we don't need to load a specific market
+  let market: Market | undefined;
+  let oldLiquidity = BigInt(0);
+
+  if (!neoPool.isMultiMarket) {
+    // Single-market pool: load the market for liquidity tracking
+    market = await store.get(Market, {
+      where: { marketId: neoPool.marketId },
+    });
+    if (market) {
+      oldLiquidity = market.liquidity;
+    }
+  }
+
   let newLiquidity = BigInt(0);
   const historicalAssets: HistoricalAsset[] = [];
   await Promise.all(
-    market.neoPool.account.balances.map(async (ab) => {
+    neoPool.account.balances.map(async (ab) => {
       if (isBaseAsset(ab.assetId)) return;
-      
+
       const asset = await getAssetOrSkip(store, ab.assetId);
       if (!asset) {
         console.warn(`Skipping processing for missing asset ${ab.assetId} in comboSellExecuted`);
         return;
       }
-      
+
       const oldPrice = asset.price;
       const oldAmountInPool = asset.amountInPool;
       asset.amountInPool = ab.balance;
-      asset.price = computeNeoSwapSpotPrice(ab.balance, market.neoPool!.liquidityParameter);
+      asset.price = computeNeoSwapSpotPrice(ab.balance, neoPool.liquidityParameter);
       console.log(`[${event.name}] Saving asset: ${JSON.stringify(asset, null, 2)}`);
       await store.save<Asset>(asset);
 
@@ -607,8 +621,8 @@ export const comboSellExecuted = async (
         dPrice: asset.price - oldPrice,
         event: event.name.split('.')[1],
         id: event.id + '-' + asset.id.substring(asset.id.lastIndexOf('-') + 1),
-        marketIds: market.neoPool?.marketIds || [market.marketId],
-        poolId: poolId,  // Use the actual poolId from the event
+        marketIds: neoPool.marketIds || [neoPool.marketId],
+        poolId: poolId,
         newAmountInPool: asset.amountInPool,
         newPrice: asset.price,
         timestamp: new Date(event.block.timestamp!),
@@ -626,7 +640,7 @@ export const comboSellExecuted = async (
     assetAmountIn: amountIn,
     assetAmountOut: amountOut,
     assetIn: assetExecuted,
-    assetOut: market.baseAsset,
+    assetOut: neoPool.collateral,
     blockNumber: event.block.height,
     event: SwapEvent.ComboSellExecuted,
     externalFeeAmount,
@@ -637,7 +651,7 @@ export const comboSellExecuted = async (
   });
 
   // Only update market stats for single-market pools (backward compatibility)
-  if (!neoPool.isMultiMarket) {
+  if (!neoPool.isMultiMarket && market) {
     market.liquidity = newLiquidity;
     market.volume += amountOut;
     console.log(`[${event.name}] Saving market (single-market pool): ${JSON.stringify(market, null, 2)}`);
